@@ -1,69 +1,74 @@
-From: "Alexey Zaytsev" <alexey.zaytsev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: James Chapman <jchapman-Bm0nJX+W7e9BDgjK7y7TUQ@public.gmane.org>
 Subject: Re: YAFFS in the kernel tree?
-Date: Thu, 29 May 2008 02:15:27 +0400
-Message-ID: <f19298770805281515u1602e18enbad78fccfda24b02@mail.gmail.com>
-References: <200805290859.54396.manningc2@actrix.gen.nz>
+Date: Wed, 28 May 2008 23:40:08 +0100
+Message-ID: <483DDF48.7070106@katalix.com>
+References: <200805290859.54396.manningc2@actrix.gen.nz> <8bd0f97a0805281424g2ceae455x774e8d66aba4ec2b@mail.gmail.com> <200805290934.28232.manningc2@actrix.gen.nz>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to:subject:cc:in-reply-to:mime-version:content-type:content-transfer-encoding:content-disposition:references;
-        bh=5+1uJcbPPxrtgkfTOsxwD9dmHYNtHTnNgZyzead/f2M=;
-        b=u64HV62azgXXT99l7K+h7RQ9oIX/FxMIy4fw9jjpM306CsKS2AFC9ZQ8uUjsJ+lwk8m5ORc4+LLfG4CNZJV3Y6aD7XK7g99YHAfzzlsDcsaCGwIWZ2Ov09dNj89IIPixWGrLDPYmE+Mz+Ri+o19xa53DroJhPdb70e72q7nqOEo=
-In-Reply-To: <200805290859.54396.manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <200805290934.28232.manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
 Sender: linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: Charles Manning <manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
-Cc: linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Mike Frysinger <vapier.adi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-On Thu, May 29, 2008 at 12:59 AM, Charles Manning
-<manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org> wrote:
-> Hi
->
-> I'm the author of YAFFS. This is not in the kernel tree, but is fairly easy to
-> integrate by just pulling a tarball and running  patch-in script.
->
-> I am curious as to whether people consider the current mechanism "good enough"
-> or whether it is worth the effort trying to get YAFFS into the kernel tree.
->
-> Pros I can see:
-> * In tree means better testing (maybe).
-> * Keeping current with kernel API changes.
->
-> Cons:
-> * More effort for YAFFS maintainers (me mostly).
-> * Effort getting code into kernel coding style (unless I can get a waiver on
-> this).
->
-> Thoughts??
+Charles Manning wrote:
+> On Thursday 29 May 2008 09:24:14 Mike Frysinger wrote:
+>> On Wed, May 28, 2008 at 4:59 PM, Charles Manning wrote:
+>>> I'm the author of YAFFS. This is not in the kernel tree, but is fairly
+>>> easy to integrate by just pulling a tarball and running  patch-in script.
+>>>
+>>> I am curious as to whether people consider the current mechanism "good
+>>> enough" or whether it is worth the effort trying to get YAFFS into the
+>>> kernel tree.
+>>>
+>>> Pros I can see:
+>>> * In tree means better testing (maybe).
+>>> * Keeping current with kernel API changes.
+>>>
+>>> Cons:
+>>> * More effort for YAFFS maintainers (me mostly).
+>>> * Effort getting code into kernel coding style (unless I can get a waiver
+>>> on this).
+>> i'm pretty sure you're going to have to cull all of the
+>> LINUX_VERSION_CODE checks.  that means the in tree yaffs code is only
+>> going to track mainline kernel versions.  i dont know whether you
+>> consider that a pro or con (i say it's a pro), but if you want/need
+>> those checks, you're basically going to have to maintain two forked
+>> versions ...
+>> -mike
+> 
+> The main reason for those version checks is that YAFFS tries to acknowledge 
+> that not everyone just uses the latest kernel. Many embedded developers are 
+> using older kernels (for various valid reasons) (though this practice is 
+> probably on the decline) and I would like to continue supporting that.
+> 
+> I would expect that this would make for two versions of yaffs_fs.c: the CVS 
+> one for all comers and the in-tree version which is cleaned.
 
-We at protei (protei.ru) are using yaffs for over a year now, switched from
-jffs2, mostly because of the huge mount time difference. Have yet to
-see any serious problems.
+Submitting code into the kernel doesn't mean you have to maintain both 
+in-tree and out-of-tree versions. Once the code is accepted into the 
+tree, I suggest that all subsequent development is done on the in-tree 
+version. Leave the CVS version for people who run older kernels - don't 
+try to keep the two in step. If users of older kernels want a new 
+feature or bugfix from the in-tree version, let them backport it; they 
+probably do so routinely already for other kernel components anyway.
 
-The process of patching the kernel with yaffs is quite smooth, but you
-loose the ability to track the changes made in yaffs. We've got a git
-kernel tree, to which we add our stuff, and also periodically repatch it
-with a fresh yaffs. The problem is, all you can see later is a commit
-labelled "A Yaffs update", revealing little details on the contents. Not cool.
+I maintained some kernel code out of tree for a while. In my experience, 
+once code is accepted in the mainline kernel tree, the effort in 
+supporting and maintaining it dropped dramatically. It can take a lot of 
+work to get it accepted but the effort is well worth it if you're 
+successful.
 
-If anything, I'd ask for merging this files sytem rather sooner than later,
-as it should be useful for many embedded developers and touches
-nothing outside the fs/yaffs2 directory.
+I say yes, work on submitting yaffs. :)
 
-The only thing that bothers me, is the licensing. Currently is seems
-like Apleph1 is selling license exceptions for yaffs. Either this should
-become impossible after yaffs gets any commits from the community,
-or you will have to maintain a separate version without such commits.
+-- 
+James Chapman
+Katalix Systems Ltd
+http://www.katalix.com
+Catalysts for your Embedded Linux software development
 
-> -- CHarles
-> --
-
-And thank you for working on yaffs and being positive about merging it
-into the mainline kernel.
 --
 To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
