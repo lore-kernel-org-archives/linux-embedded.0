@@ -1,50 +1,37 @@
-From: Charles Manning <manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
+From: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 Subject: Re: YAFFS in the kernel tree?
-Date: Thu, 29 May 2008 09:14:51 +1200
-Message-ID: <200805290914.51814.manningc2@actrix.gen.nz>
-References: <200805290859.54396.manningc2@actrix.gen.nz> <alpine.LFD.1.10.0805281711370.3803@localhost.localdomain>
+Date: Thu, 29 May 2008 00:15:38 +0300
+Message-ID: <1212009338.2236.30.camel@shinybook.infradead.org>
+References: <200805290859.54396.manningc2@actrix.gen.nz>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.LFD.1.10.0805281711370.3803-bi+AKbBUZKY6gyzm1THtWbp2dZbC/Bob@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <200805290859.54396.manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
 Sender: linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "Robert P. J. Day" <rpjday-L09J2beyid0N/H6P543EQg@public.gmane.org>
+To: Charles Manning <manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
 Cc: linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-On Thursday 29 May 2008 09:12:40 Robert P. J. Day wrote:
-> On Thu, 29 May 2008, Charles Manning wrote:
-> > Hi
-> >
-> > I'm the author of YAFFS. This is not in the kernel tree, but is fairly
-> > easy to integrate by just pulling a tarball and running  patch-in script.
-> >
-> > I am curious as to whether people consider the current mechanism "good
-> > enough" or whether it is worth the effort trying to get YAFFS into the
-> > kernel tree.
-> >
-> > Pros I can see:
-> > * In tree means better testing (maybe).
-> > * Keeping current with kernel API changes.
-> >
-> > Cons:
-> > * More effort for YAFFS maintainers (me mostly).
-> > * Effort getting code into kernel coding style (unless I can get a waiver
-> > on this).
-> >
-> > Thoughts??
->
-> perhaps a dumb question, but does this include YAFFS2 as well?
->
+On Thu, 2008-05-29 at 08:59 +1200, Charles Manning wrote:
+> I'm the author of YAFFS. This is not in the kernel tree, but is fairly easy to 
+> integrate by just pulling a tarball and running  patch-in script. 
+> 
+> I am curious as to whether people consider the current mechanism "good enough" 
+> or whether it is worth the effort trying to get YAFFS into the kernel tree.
 
-> p.s.  and, no, you don't get a pass on coding style, but others will
-> almost certainly help you out there. :-)
+I've never paid close attention to YAFFS, and part of the reason for
+that is that it's never been considered good enough to be merged into
+the kernel tree. If it isn't even being posted for _review_, then it
+might as well not exist.
 
-That would only be yaffs2 which has yaffs1 backward compatibility built in.
+There's a lot more to code review than the cosmetics of 'coding style'.
 
--- CHarles
+I would definitely encourage you to get the code into a shape where we
+can consider merging it.
+
+-- 
+dwmw2
 
 --
 To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
