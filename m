@@ -1,48 +1,51 @@
-From: Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Wed, 28 May 2008 16:52:47 -0500
-Message-ID: <200805281652.47558.rob@landley.net>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <87bq3rgq40.fsf@basil.nowhere.org> <1209582709.25560.441.camel@pmac.infradead.org>
+From: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Subject: Re: YAFFS in the kernel tree?
+Date: Thu, 29 May 2008 01:00:31 +0300
+Message-ID: <1212012031.2236.43.camel@shinybook.infradead.org>
+References: <200805290859.54396.manningc2@actrix.gen.nz>
+	 <8bd0f97a0805281424g2ceae455x774e8d66aba4ec2b@mail.gmail.com>
+	 <200805290934.28232.manningc2@actrix.gen.nz>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1209582709.25560.441.camel-ZP4jZrcIevRpWr+L1FloEB2eb7JE58TQ@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <200805290934.28232.manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
 Sender: linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Charles Manning <manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
+Cc: Mike Frysinger <vapier.adi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-On Wednesday 30 April 2008 14:11:49 David Woodhouse wrote:
-> > There are simply already far too many of them and they make the
-> > kernel harder and harder to change.
->
-> I agree. And if we do want to pay attention to pure code size, there are
-> other approaches -- like --gc-sections and/or building with '--combine
-> -fwhole-program' which I was playing with for OLPC a while back. I must
-> dust that off now that the GCC fixes should mostly have made it into
-> current distributions.
+On Thu, 2008-05-29 at 09:34 +1200, Charles Manning wrote:
+> The main reason for those version checks is that YAFFS tries to acknowledge 
+> that not everyone just uses the latest kernel. Many embedded developers are 
+> using older kernels (for various valid reasons) 
 
-I like simplicity.  I like _simple_.  Half my attraction to embedded systems 
-is that they're simpler than big desktop systems where you have to figure out 
-how udev interacts with dbus to figure out why knetworkmanager convinced 
-Konqueror that your network doesn't exist when you can wget from the command 
-line just fine...
+The only vaguely valid reason I've ever heard is that they've already
+been through QA and are shipping a product based on the old kernel, and
+now they need some minor bug fixes. Even for a more serious product
+update adding new features, it should be able to switch to a newer
+kernel unless you've made some horrendous mistakes in the original
+deployment, like not getting everything you use merged upstream.
 
-I submitted a patch to remove the use of perl to build the linux kernel (which 
-HPA added in 2.6.25) not because it affected the result, but because it 
-unnecessarily complicates the build system.  (And perl tends to metasticize.  
-Nothing says "maintainability" like perl...)
+And still -- if they choose to use an ancient and known-broken version
+of the rest of the kernel, why would they want to combine that with the
+newest, shiniest version of YAFFS? It just doesn't make sense.
 
-Yes, Perl was used for some debugging tools before, things like the 
-check-patch script.  But until 2.6.25 you never needed Perl to configure and 
-build a kernel...
+I used to keep JFFS2 building for older kernels; I don't for a moment
+regret abandoning that effort. Far from being helpful, I actually think
+it was counter-productive, because it made people think that was a
+_sane_ thing for them to be doing. It just isn't.
 
-Rob
+> I would expect that this would make for two versions of yaffs_fs.c:
+> the CVS one for all comers and the in-tree version which is cleaned.
+
+It's not even that hard to maintain those in parallel with a modern
+version control system like git, pulling changes from one tree to the
+other. We export JFFS2 for use in eCos that way.
+
 -- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+dwmw2
+
 --
 To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
