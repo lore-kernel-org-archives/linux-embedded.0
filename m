@@ -1,51 +1,69 @@
-From: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+From: "Alexey Zaytsev" <alexey.zaytsev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: YAFFS in the kernel tree?
-Date: Thu, 29 May 2008 01:00:31 +0300
-Message-ID: <1212012031.2236.43.camel@shinybook.infradead.org>
+Date: Thu, 29 May 2008 02:15:27 +0400
+Message-ID: <f19298770805281515u1602e18enbad78fccfda24b02@mail.gmail.com>
 References: <200805290859.54396.manningc2@actrix.gen.nz>
-	 <8bd0f97a0805281424g2ceae455x774e8d66aba4ec2b@mail.gmail.com>
-	 <200805290934.28232.manningc2@actrix.gen.nz>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <200805290934.28232.manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to:subject:cc:in-reply-to:mime-version:content-type:content-transfer-encoding:content-disposition:references;
+        bh=5+1uJcbPPxrtgkfTOsxwD9dmHYNtHTnNgZyzead/f2M=;
+        b=u64HV62azgXXT99l7K+h7RQ9oIX/FxMIy4fw9jjpM306CsKS2AFC9ZQ8uUjsJ+lwk8m5ORc4+LLfG4CNZJV3Y6aD7XK7g99YHAfzzlsDcsaCGwIWZ2Ov09dNj89IIPixWGrLDPYmE+Mz+Ri+o19xa53DroJhPdb70e72q7nqOEo=
+In-Reply-To: <200805290859.54396.manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Charles Manning <manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org>
-Cc: Mike Frysinger <vapier.adi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-On Thu, 2008-05-29 at 09:34 +1200, Charles Manning wrote:
-> The main reason for those version checks is that YAFFS tries to acknowledge 
-> that not everyone just uses the latest kernel. Many embedded developers are 
-> using older kernels (for various valid reasons) 
+On Thu, May 29, 2008 at 12:59 AM, Charles Manning
+<manningc2-jEEI2ySEPisjAXWc8ALWsQ@public.gmane.org> wrote:
+> Hi
+>
+> I'm the author of YAFFS. This is not in the kernel tree, but is fairly easy to
+> integrate by just pulling a tarball and running  patch-in script.
+>
+> I am curious as to whether people consider the current mechanism "good enough"
+> or whether it is worth the effort trying to get YAFFS into the kernel tree.
+>
+> Pros I can see:
+> * In tree means better testing (maybe).
+> * Keeping current with kernel API changes.
+>
+> Cons:
+> * More effort for YAFFS maintainers (me mostly).
+> * Effort getting code into kernel coding style (unless I can get a waiver on
+> this).
+>
+> Thoughts??
 
-The only vaguely valid reason I've ever heard is that they've already
-been through QA and are shipping a product based on the old kernel, and
-now they need some minor bug fixes. Even for a more serious product
-update adding new features, it should be able to switch to a newer
-kernel unless you've made some horrendous mistakes in the original
-deployment, like not getting everything you use merged upstream.
+We at protei (protei.ru) are using yaffs for over a year now, switched from
+jffs2, mostly because of the huge mount time difference. Have yet to
+see any serious problems.
 
-And still -- if they choose to use an ancient and known-broken version
-of the rest of the kernel, why would they want to combine that with the
-newest, shiniest version of YAFFS? It just doesn't make sense.
+The process of patching the kernel with yaffs is quite smooth, but you
+loose the ability to track the changes made in yaffs. We've got a git
+kernel tree, to which we add our stuff, and also periodically repatch it
+with a fresh yaffs. The problem is, all you can see later is a commit
+labelled "A Yaffs update", revealing little details on the contents. Not cool.
 
-I used to keep JFFS2 building for older kernels; I don't for a moment
-regret abandoning that effort. Far from being helpful, I actually think
-it was counter-productive, because it made people think that was a
-_sane_ thing for them to be doing. It just isn't.
+If anything, I'd ask for merging this files sytem rather sooner than later,
+as it should be useful for many embedded developers and touches
+nothing outside the fs/yaffs2 directory.
 
-> I would expect that this would make for two versions of yaffs_fs.c:
-> the CVS one for all comers and the in-tree version which is cleaned.
+The only thing that bothers me, is the licensing. Currently is seems
+like Apleph1 is selling license exceptions for yaffs. Either this should
+become impossible after yaffs gets any commits from the community,
+or you will have to maintain a separate version without such commits.
 
-It's not even that hard to maintain those in parallel with a modern
-version control system like git, pulling changes from one tree to the
-other. We export JFFS2 for use in eCos that way.
+> -- CHarles
+> --
 
--- 
-dwmw2
-
+And thank you for working on yaffs and being positive about merging it
+into the mainline kernel.
 --
 To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
