@@ -1,36 +1,42 @@
 From: Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>
-Subject: Re: Some embedded topics
-Date: Wed, 28 May 2008 22:01:48 -0500
-Message-ID: <200805282201.48746.rob@landley.net>
-References: <483C83DE.3040604@cisco.com> <8bd0f97a0805271527i622a31b8t68ba24c80a2e034a@mail.gmail.com> <20080527223142.GU26837@email.mot.com>
+Subject: Re: problems bringing up CF based file system (2.6.25)
+Date: Wed, 28 May 2008 22:17:48 -0500
+Message-ID: <200805282217.49143.rob@landley.net>
+References: <f608b67d0805221022n18199654n457c47459375213c@mail.gmail.com> <f608b67d0805271547t4469fe39xab541cdbd995dc65@mail.gmail.com> <20080527230457.GH11310@cs181133002.pp.htv.fi>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20080527223142.GU26837-qbu1+ugcRq/by3iVrkZq2A@public.gmane.org>
+In-Reply-To: <20080527230457.GH11310-Aar9JVdAhcRoA3hw4S0G5QR5/fbUUdgG@public.gmane.org>
 Content-Disposition: inline
 Sender: linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: T Ziomek <ctz001-qbu1+ugcRq/by3iVrkZq2A@public.gmane.org>
-Cc: Mike Frysinger <vapier.adi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Bunk <bunk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: vb <vb-gSajP0OrAZc@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-On Tuesday 27 May 2008 17:31:42 T Ziomek wrote:
-> If I understand correctly David is talking about logging some trace-like
-> info (so it exists before a HW watchdog expires), and having it somewhere
-> "safe" from being disturbed by a HW reset.
+On Tuesday 27 May 2008 18:04:57 Adrian Bunk wrote:
+> > I am not really worried about saving memory, I just am trying to
+> > understand the reason the SCSI driver is included in the first place -
+> > SCSI is a much heavier protocol than what is needed here - isn't it?
+> >...
+>
+> ATAPI uses the SCSI command set, so using parts of the SCSI layer for
+> implementing ATA support is not unreasonable.
 
-The standard way of doing this is to use the mem= kernel command line 
-parameter to tell the system it has less memory than it does, and using 
-what's left as a ramdisk.  Years ago I saw some userspace thing running as 
-root mmap() /dev/mem (or whatever they're calling it these days) and log to 
-it.  In theory you could even set the dmesg buffer up at the end of physical 
-memory with a smallish kernel patch, make it big, and set the kernel to doing 
-verbose printks.
+The SCSI layer is actually _three_ layers (upper, mid, and lower).  It's a 
+large and heavyweight solution that (last I checked) reimplements lots of 
+stuff in the kernel's block layer.  It unnecessarily mixes together different 
+types of transports so that plugging in a USB device can move where the 
+kernel decides to put your compact flash device on the next boot, and then 
+passes responsibility to udev to untangle the mess the kernel made by 
+commingling different transport types in the first place.
 
-The trick is A) knowing the absolute physical address at which your debug 
-buffer lives so you can find it after the reboot, B) convincing the system to 
-do something useful with it on reboot rather than just overwriting it with 
-fresh log data.
+Is it even possible to use just _parts_ of the SCSI layer, without sucking in 
+the whole thing?
+
+I think the fact it's called a "layer" is a bit of a hint, actually.  Don't 
+embedded folks generally try to _avoid_ unnecessary layering, and pulling in 
+large code libraries to perform a small task?
 
 Rob
 -- 
