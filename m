@@ -1,43 +1,63 @@
-From: Wolfgang Denk <wd-ynQEQJNshbs@public.gmane.org>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
 Subject: Re: Some embedded topics
-Date: Thu, 29 May 2008 07:38:01 +0200
-Message-ID: <20080529053801.E633C247CC@gemini.denx.de>
-References: <8bd0f97a0805282121j10a99bb7ve92efc6a8dc8bbb1@mail.gmail.com>
+Date: Thu, 29 May 2008 11:31:45 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0805291130580.16206@vixen.sonytel.be>
+References: <483C83DE.3040604@cisco.com> <8bd0f97a0805271527i622a31b8t68ba24c80a2e034a@mail.gmail.com>
+ <20080527223142.GU26837@email.mot.com> <200805282201.48746.rob@landley.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: Your message of "Thu, 29 May 2008 00:21:52 EDT."
-             <8bd0f97a0805282121j10a99bb7ve92efc6a8dc8bbb1-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-embedded-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1922630110-1212053505=:16206"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <200805282201.48746.rob@landley.net>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, T Ziomek <ctz001-qbu1+ugcRq/by3iVrkZq2A@public.gmane.org>, David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Landley <rob@landley.net>
+Cc: T Ziomek <ctz001@email.mot.com>, Mike Frysinger <vapier.adi@gmail.com>, David VomLehn <dvomlehn@cisco.com>, linux-embedded@vger.kernel.org
 
-In message <8bd0f97a0805282121j10a99bb7ve92efc6a8dc8bbb1-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org> you wrote:
->
-> how about the fact that when the core resets, the memory controller is
-> often reset as well ?  that external memory is going to degrade.  or
-> do we just bite our thumb and weather the few random bit errors ?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-It depends. In all cases we tested  so  far  we  have  never  seen  a
-corrupton because the hardware and U-Boot were quick enough to get at
-least refresh running again in time.
+---584349381-1922630110-1212053505=:16206
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-If you are really concerned, there are other options. For example  on
-systems  that  have  OCM or SRAM you can put the log buffer there. We
-did this in a project on 440EPx.
+On Wed, 28 May 2008, Rob Landley wrote:
+> On Tuesday 27 May 2008 17:31:42 T Ziomek wrote:
+> > If I understand correctly David is talking about logging some trace-like
+> > info (so it exists before a HW watchdog expires), and having it somewhere
+> > "safe" from being disturbed by a HW reset.
+> 
+> The standard way of doing this is to use the mem= kernel command line 
+> parameter to tell the system it has less memory than it does, and using 
+> what's left as a ramdisk.  Years ago I saw some userspace thing running as 
+> root mmap() /dev/mem (or whatever they're calling it these days) and log to 
+> it.  In theory you could even set the dmesg buffer up at the end of physical 
+> memory with a smallish kernel patch, make it big, and set the kernel to doing 
+> verbose printks.
+> 
+> The trick is A) knowing the absolute physical address at which your debug 
+> buffer lives so you can find it after the reboot, B) convincing the system to 
+> do something useful with it on reboot rather than just overwriting it with 
+> fresh log data.
 
-Best regards,
+Yep, we've been doing this on Amiga for more than a decade, when `debug=mem' is
+passed. Cfr. arch/m68k/tools/amiga/dmesg.c.
 
-Wolfgang Denk
+With kind regards,
 
--- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd-ynQEQJNshbs@public.gmane.org
-To be awake is to be alive.        - Henry David Thoreau, in "Walden"
---
-To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Geert Uytterhoeven
+Software Architect
+
+Sony Network and Software Technology Center Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+Sony Network and Software Technology Center Europe
+A division of Sony Service Centre (Europe) N.V.
+Registered office: Technologielaan 7 · B-1840 Londerzeel · Belgium
+VAT BE 0413.825.160 · RPR Brussels
+Fortis Bank Zaventem · BIC GEBABEBB08A · IBAN BE39001382358619
+---584349381-1922630110-1212053505=:16206--
