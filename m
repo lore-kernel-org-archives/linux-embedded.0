@@ -1,77 +1,65 @@
-From: Glenn Henshaw <thraxisp@logicaloutcome.ca>
-Subject: Possible NetFilter Bug (2.4.27 and 2.6.20 kernel)
-Date: Fri, 30 May 2008 13:52:01 -0400
-Message-ID: <57E51BB8-B076-4225-B0F7-4653421D9B8A@logicaloutcome.ca>
-Mime-Version: 1.0 (Apple Message framework v924)
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: Embedded Linux power management
+Date: Fri, 30 May 2008 15:05:01 -0700
+Message-ID: <48407A0D.3050802@am.sony.com>
+References: <483B5F0D.9060302@cs.drexel.edu>
+Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-net-owner@vger.kernel.org>
-Sender: linux-net-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <483B5F0D.9060302@cs.drexel.edu>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
-To: linux-net@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: J Sevy <jsevy@cs.drexel.edu>
+Cc: linux-embedded@vger.kernel.org
 
-   I'm running into a problem with uCLinux 3.2 (2.4.17 kernel) router.  
-I can also reproduce the problem on 2.6.20 kernel (Debian 4.0). I  
-suspect that it still exists in more recent versions, but can't create  
-the environment to test this easily.
+J Sevy wrote:
+> Hi,
+> kind of a general question for the list concerning the current "state of 
+> the art" in power management for handheld embedded Linux devices. In 
+> particular:
+> - What are the standards in common use for power management on 
+> handhelds? APM, ACPI, or something else?
+> - Is there a general consensus on the "best" approach for power management?
+> - Is Dynamic Power Management (i.e., "speed-stepping") widely used?
+> Thanks for any input.
 
-   The router is running a NAT (MASQUERADE) firewall. After a few days  
-of operation with a number of clients , the ip_dst_cache fills and  
-overflows, stopping the router.  This is most noticeable with a large  
-number of hosts behind the router doing UDP transactions (although it  
-appears that ICMP and TCP connections produce the same effect).
+In general, PM on handhelds is heavily dependent on chip features.
+Many SOCs used in these devices have elaborate clock hardware,
+allowing you to adjust the voltage and frequency of various parts
+of the chip (or chipsets) dynamically.
 
-   The culprit seems to be traffic passing through the NAT connections  
-in the router. Each new packet creates a new entry in the rt_cache, or  
-increases the ref count. These entries are never cleared away.  
-Eventually, no more entries can be allocated as the entries in the  
-cache are locked (refcount>0). I traced the issue back to the packets  
-returning to the router from the outside host, where the destination  
-of the packet is changed. This appears to be a netfilter bug?
+For some good overviews of different PM features relevant to embedded,
+you may want to look at the following papers:
 
-   Reproducing the problem is simple. Given a host (192.168.4.2)  
-behind the router (192.168.4.3 to 192.168.1.161) and a host on the  
-other side of the router, ping between the hosts. The (edited) results  
-of the  route -Cn command on the router are shown below.
+Every Microamp is Sacred - A Dynamic Voltage and Current Control
+Interface for the Linux Kernel - Liam Girdwood
+http://www.celinux.org/elc08_presentations/regulator-api-celf.pdf
 
-### starting state
-# route -Cn
-Kernel IP routing cache
-Source          Destination     Gateway         Flags Metric Ref     
-Use Iface
-192.168.4.3     192.168.4.2     192.168.4.2           0      1         
-0 eth0
-192.168.1.161   206.191.32.163  192.168.1.2           0      0         
-0 eth1
-# route -Cn
+Power Management Quality of Service and How You Could Use it in
+Your Embedded Application - Mark Gross
+http://www.celinux.org/elc08_presentations/elc2008_pm_qos_slides.pdf
 
-### ping 25x
+Building Blocks for Embedded Power Management - Kevin Hilman
+http://www.celinux.org/elc08_presentations/PM_Building_Blocks1.pdf
 
-# route -Cn
-Kernel IP routing cache
-Source          Destination     Gateway         Flags Metric Ref     
-Use Iface
-192.168.1.161   192.168.1.1     192.168.1.1           0      0        
-24 eth1
-192.168.4.2     192.168.1.1     192.168.1.1     i     0      25       
-24 eth1
-192.168.1.1     192.168.4.2     192.168.4.2     i     0      25       
-24 eth0
-192.168.4.3     192.168.4.2     192.168.4.2           0      1         
-0 eth0
-#
+Linux Suspend-to-Disk Objectives for Consumer Electronic Devices -
+Vitaly Wool
+http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2007Presentations?action=AttachFile&do=view&target=std.pdf
 
-   I've searched most of the lists, and added some patches (which  
-corrected lost ip_dst_cache entries). I'm looking for pointers on how  
-to resolve this. I must fix this in the 2.4 stream as this is an  
-embedded application and a kernel upgrade means recertifying with al  
-of our customers. Is there a better list to post to? Is there a bug  
-tracker somewhere to log this into?
+Linux Clock Management Framework - Siarhei Yermalayeu
+http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2007Presentations?action=AttachFile&do=view&target=ELC_2007_Linux_clock_fmw.pdf
 
 
--- 
-Glenn Henshaw                     Logical Outcome Ltd.
-e: thraxisp@logicaloutcome.ca     w: www.logicaloutcome.ca
+These links should probably be added to the Power Management
+page on the elinux wiki (http://elinux.org/Power_Management),
+which at the moment is fairly light on content.
+  -- Tim
 
 
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
 
