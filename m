@@ -1,45 +1,32 @@
 From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: Fwd: Some embedded topics
-Date: Fri, 30 May 2008 15:21:25 -0700
-Message-ID: <48407DE5.3000208@am.sony.com>
-References: <483C83DE.3040604@cisco.com>	 <8bd0f97a0805271527i622a31b8t68ba24c80a2e034a@mail.gmail.com>	 <20080527223142.GU26837@email.mot.com>	 <8bd0f97a0805271535w267be51fq669def9aa424e4e7@mail.gmail.com>	 <840404080805280740q4486f377x49c106e20d9f5dc2@mail.gmail.com> <840404080805280744t351da73fk885fa7b29c05659c@mail.gmail.com> <483D7355.5050803@coritel.it>
+Subject: Re: Some embedded topics
+Date: Fri, 30 May 2008 15:36:14 -0700
+Message-ID: <4840815E.9020002@am.sony.com>
+References: <483C83DE.3040604@cisco.com>	<20080527173118.12ec691b@vader.jdub.homelinux.org>	<f608b67d0805271537m1b07e08y5dd84f7bbd8918cf@mail.gmail.com> <20080527180200.56ffc588@vader.jdub.homelinux.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <483D7355.5050803@coritel.it>
+In-Reply-To: <20080527180200.56ffc588@vader.jdub.homelinux.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Marco Stornelli <marco.stornelli@coritel.it>
-Cc: Joe MacDonald <joe.macdonald@gmail.com>, linux-embedded@vger.kernel.org
+To: Josh Boyer <jwboyer@gmail.com>
+Cc: vb <vb@vsbe.com>, David VomLehn <dvomlehn@cisco.com>, linux-embedded@vger.kernel.org
 
-Marco Stornelli wrote:
-> There's a MontaVista patent on PRAMFS and I think that most of times 
-> when a company hears this thing it skips quickly this solution.
+Josh Boyer wrote:
+> lttng can trace quite a few events.  Interrupts, system calls, etc.
+> Might be worth a look, and it's quite well maintained against various
+> kernel versions.
 
-Hmmm.  I don't recall anything about a patent on PRAMFS.
+It's pretty heavyweight, but you could use filters to cut down on
+the events traced.  By default output goes to the file system, which
+could be on pramfs.  (Or NFS - I'm sorry I lost track of the original
+request - don't know if this is an option or not.)
 
-There are lots of issues here, but I think it's OK to use.
-At a minimum,  MontaVista's PRAMFS was submitted to the CE Linux Forum
-in an older kernel (2.4.20-based).  MontaVista was well-aware
-of this submission (although it did not come directly from them).
-MV was under an IP agreement with CELF which required them to
-disclose such patents to the forum, and none was received.
-
-In any event (and without wanting to start a large off-topic legal
-thread here), some lawyers would interpret the knowing publication
-of an implementation embodying a patent under the GPL to be an
-implicit license of use for the patent.
-
-YMMV. IANAL.  Seek your own counsel on this.
-
-> Sometimes ago I sent a porting to 2.6.24, but I didn't receive any 
-> response.
-
-I'd love to see this.  Did this go to LKML?  If so, about when?
-(Alternatively, could you make it available somewhere?)
-
-Thanks,
+I'm not sure, however, that the buffers are pushed to user-space,
+through the daemon, and back to the file system in an expedient manner.
+I agree it might be worth a look for this use case.  We use it at
+Sony quite a bit and it's valuable.
   -- Tim
 
 =============================
