@@ -1,61 +1,46 @@
 From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: Embedded Linux power management
-Date: Fri, 30 May 2008 15:05:01 -0700
-Message-ID: <48407A0D.3050802@am.sony.com>
-References: <483B5F0D.9060302@cs.drexel.edu>
+Subject: Re: Fwd: Some embedded topics
+Date: Fri, 30 May 2008 15:21:25 -0700
+Message-ID: <48407DE5.3000208@am.sony.com>
+References: <483C83DE.3040604@cisco.com>	 <8bd0f97a0805271527i622a31b8t68ba24c80a2e034a@mail.gmail.com>	 <20080527223142.GU26837@email.mot.com>	 <8bd0f97a0805271535w267be51fq669def9aa424e4e7@mail.gmail.com>	 <840404080805280740q4486f377x49c106e20d9f5dc2@mail.gmail.com> <840404080805280744t351da73fk885fa7b29c05659c@mail.gmail.com> <483D7355.5050803@coritel.it>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <483B5F0D.9060302@cs.drexel.edu>
+In-Reply-To: <483D7355.5050803@coritel.it>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: J Sevy <jsevy@cs.drexel.edu>
-Cc: linux-embedded@vger.kernel.org
+To: Marco Stornelli <marco.stornelli@coritel.it>
+Cc: Joe MacDonald <joe.macdonald@gmail.com>, linux-embedded@vger.kernel.org
 
-J Sevy wrote:
-> Hi,
-> kind of a general question for the list concerning the current "state of 
-> the art" in power management for handheld embedded Linux devices. In 
-> particular:
-> - What are the standards in common use for power management on 
-> handhelds? APM, ACPI, or something else?
-> - Is there a general consensus on the "best" approach for power management?
-> - Is Dynamic Power Management (i.e., "speed-stepping") widely used?
-> Thanks for any input.
+Marco Stornelli wrote:
+> There's a MontaVista patent on PRAMFS and I think that most of times 
+> when a company hears this thing it skips quickly this solution.
 
-In general, PM on handhelds is heavily dependent on chip features.
-Many SOCs used in these devices have elaborate clock hardware,
-allowing you to adjust the voltage and frequency of various parts
-of the chip (or chipsets) dynamically.
+Hmmm.  I don't recall anything about a patent on PRAMFS.
 
-For some good overviews of different PM features relevant to embedded,
-you may want to look at the following papers:
+There are lots of issues here, but I think it's OK to use.
+At a minimum,  MontaVista's PRAMFS was submitted to the CE Linux Forum
+in an older kernel (2.4.20-based).  MontaVista was well-aware
+of this submission (although it did not come directly from them).
+MV was under an IP agreement with CELF which required them to
+disclose such patents to the forum, and none was received.
 
-Every Microamp is Sacred - A Dynamic Voltage and Current Control
-Interface for the Linux Kernel - Liam Girdwood
-http://www.celinux.org/elc08_presentations/regulator-api-celf.pdf
+In any event (and without wanting to start a large off-topic legal
+thread here), some lawyers would interpret the knowing publication
+of an implementation embodying a patent under the GPL to be an
+implicit license of use for the patent.
 
-Power Management Quality of Service and How You Could Use it in
-Your Embedded Application - Mark Gross
-http://www.celinux.org/elc08_presentations/elc2008_pm_qos_slides.pdf
+YMMV. IANAL.  Seek your own counsel on this.
 
-Building Blocks for Embedded Power Management - Kevin Hilman
-http://www.celinux.org/elc08_presentations/PM_Building_Blocks1.pdf
+> Sometimes ago I sent a porting to 2.6.24, but I didn't receive any 
+> response.
 
-Linux Suspend-to-Disk Objectives for Consumer Electronic Devices -
-Vitaly Wool
-http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2007Presentations?action=AttachFile&do=view&target=std.pdf
+I'd love to see this.  Did this go to LKML?  If so, about when?
+(Alternatively, could you make it available somewhere?)
 
-Linux Clock Management Framework - Siarhei Yermalayeu
-http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2007Presentations?action=AttachFile&do=view&target=ELC_2007_Linux_clock_fmw.pdf
-
-
-These links should probably be added to the Power Management
-page on the elinux wiki (http://elinux.org/Power_Management),
-which at the moment is fairly light on content.
+Thanks,
   -- Tim
-
 
 =============================
 Tim Bird
