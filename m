@@ -1,60 +1,152 @@
-From: "Bryan Wu" <cooloney@kernel.org>
-Subject: Re: initramfs size limitation
-Date: Mon, 2 Jun 2008 08:42:25 +0800
-Message-ID: <386072610806011742i5a460377m9416dbea89ced166@mail.gmail.com>
-References: <4841481E.8090406@cox.net> <200806011903.47135.rob@landley.net>
-	 <8bd0f97a0806011725u3dc70e2cy1b317b2b6564f5c8@mail.gmail.com>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: [PATCH] console - Add configurable support for console charset translation
+Date: Mon, 2 Jun 2008 15:37:09 -0700
+Message-ID: <48447615.5050806@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:sender:to:subject:cc:in-reply-to:mime-version:content-type:content-transfer-encoding:content-disposition:references:x-google-sender-auth;
-        bh=LtbbdiNxizg6lsGnhoCcjqcVHlfwtvbm3McgmU+5ctc=;
-        b=QQGhFuApYbvLcm3gDImkXexw3zjjdrD9fGAPZj60zqd9c+rMGiZcZzJw36UvJTSVRrU63Bby3cJwht8yg83+WUCsq43yCt17nM9Iq94h1EKObCRNCcfIpMhLASgFPbgK51Wf89bpQIqibiePjoqwsbCJ3ykfZ+obogCBqeHQ0po=
-In-Reply-To: <8bd0f97a0806011725u3dc70e2cy1b317b2b6564f5c8@mail.gmail.com>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Rob Landley <rob@landley.net>, pwilshire@cox.net, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Mon, Jun 2, 2008 at 8:25 AM, Mike Frysinger <vapier.adi@gmail.com> wrote:
-> On Sun, Jun 1, 2008 at 8:03 PM, Rob Landley wrote:
->> On Saturday 31 May 2008 07:44:14 Phil Wilshire wrote:
->>> I hope this is the right place and the right sort of question.
->>>
->>> I work closely with the Blackfin systems and they have now integrated
->>> the initramfs generation into their system build. The result is great
->>> the root fs is ready to run from the page cache.
->>
->> Is it possible to get blackfin working with a vanilla gcc release yet, or do
->> you still need out-of-tree patches?  (I have a blackfin board I got at OLS,
->> but it needs a toolchain I can't reproduce.)
->
-> there's plenty of usable binaries available
->
->> fact it would be really nice if qemu grew blackfin support because messing
->
-> i imagine it would be ... too bad qemu lacks real documentation
->
->>> There is one problem that I can see that may be more serious for
->>> embedded users.
->>> As far as I can tell the initramfs filesystem is not restricted in size.
->>> You can keep writing files until it uses all available memory.
->>
->> Yup.  There have intermittently been patches to make rootfs be tmpfs instead
->> of ramfs, the most recent of which I remember was:
->> http://lkml.org/lkml/2007/7/13/354
->
-> it wouldnt matter.  tmpfs on NOMMU doesnt support any of the options
-> like MMU.  look at mm/tiny-shmem.c and init/Kconfig.
-> -mike
-> --
+With CONSOLE_TRANSLATIONS turned off, this saves about 6K
+on my kernel configured for an ARM development board (OMAP
+5912 OSK).  In embedded products I'm familiar with,
+console translations are not needed.
 
-Right, I still got one bug related to tmpfs/ramfs on NOMMU. That is
-the fcntl/cease problem.
-Some LTP testcases still fail because of this.
+This was taken from the Linux-tiny project and updated slightly
+for 2.6.25.
 
--Bryan
+  drivers/char/consolemap.c |   81 ++++++++++++++++++++++++++++++++++++++++++++++
+  drivers/char/vt.c         |    4 ++
+  init/Kconfig              |    7 +++
+  3 files changed, 92 insertions(+)
+
+Signed-off-by: Tim Bird <tim.bird@am.sony.com>
+
+--- a/drivers/char/consolemap.c
++++ b/drivers/char/consolemap.c
+@@ -22,6 +22,8 @@
+  #include <linux/consolemap.h>
+  #include <linux/vt_kern.h>
+
++#ifdef CONFIG_CONSOLE_TRANSLATIONS
++
+  static unsigned short translations[][256] = {
+    /* 8-bit Latin-1 mapped to Unicode -- trivial mapping */
+    {
+@@ -742,3 +744,82 @@ console_map_init(void)
+  }
+
+  EXPORT_SYMBOL(con_copy_unimap);
++
++#else
++
++u16 inverse_translate(struct vc_data *conp, int glyph, int use_unicode)
++{
++	return glyph;
++}
++
++unsigned short *set_translate(int m, struct vc_data *vc)
++{
++	return NULL;
++}
++
++int con_set_trans_old(unsigned char *arg)
++{
++	return 0;
++}
++
++int con_get_trans_old(unsigned char *arg)
++{
++	return -EINVAL;
++}
++
++int con_set_trans_new(ushort *arg)
++{
++	return 0;
++}
++
++int con_get_trans_new(ushort *arg)
++{
++	return -EINVAL;
++}
++
++int con_clear_unimap(struct vc_data *vc, struct unimapinit *ui)
++{
++	return 0;
++}
++
++int con_set_unimap(struct vc_data *vc, ushort ct, struct unipair *list)
++{
++	return 0;
++}
++
++int con_set_default_unimap(struct vc_data *vc)
++{
++	return 0;
++}
++
++int con_copy_unimap(struct vc_data *d, struct vc_data *s)
++{
++	return 0;
++}
++
++int con_get_unimap(struct vc_data *vc, ushort ct, ushort *uct,
++		   struct unipair *list)
++{
++	return -EINVAL;
++}
++
++void con_free_unimap(struct vc_data *vc) { }
++
++int conv_uni_to_pc(struct vc_data *conp, long ucs)
++{
++	return ucs > 0xff ? -1: ucs;
++}
++
++void __init console_map_init(void) { }
++
++u32 conv_8bit_to_uni(unsigned char c)
++{
++	return c;
++}
++
++int conv_uni_to_8bit(u32 uni)
++{
++	return (int)uni & 0xff;
++}
++
++#endif
+--- a/drivers/char/vt.c
++++ b/drivers/char/vt.c
+@@ -2198,7 +2198,11 @@ rescan_last_byte:
+  			c = 0xfffd;
+  		    tc = c;
+  		} else {	/* no utf or alternate charset mode */
++#ifdef CONFIG_CONSOLE_TRANSLATIONS
+  		    tc = vc->vc_translate[vc->vc_toggle_meta ? (c | 0x80) : c];
++#else
++		    tc = c;
++#endif
+  		}
+
+                  /* If the original code was a control character we
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -758,6 +758,13 @@ config PROC_PAGE_MONITOR
+  	  /proc/kpagecount, and /proc/kpageflags. Disabling these
+            interfaces will reduce the size of the kernel by approximately 4kb.
+
++config CONSOLE_TRANSLATIONS
++	default y
++	bool "Enable character translations in console" if EMBEDDED
++	help
++	  This enables support for font mapping and Unicode translation
++          on virtual consoles.
++
+  endmenu		# General setup
+
+  config SLABINFO
+
