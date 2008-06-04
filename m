@@ -1,37 +1,26 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: [PATCH] console - Add configurable support for console charset
-	translation
-Date: Wed, 04 Jun 2008 02:05:40 +0100
-Message-ID: <1212541541.4042.41.camel@shinybook.infradead.org>
-References: <48447615.5050806@am.sony.com>
-	 <1212500751.16924.322.camel@pmac.infradead.org>
-	 <4845DB46.3020308@am.sony.com>
-	 <1212538597.4042.29.camel@shinybook.infradead.org>
-	 <20080603200349.3b1957e1@vader.jdub.homelinux.org>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH] console - Add configurable support for console charset translation
+Date: Wed, 4 Jun 2008 11:56:48 +0900
+Message-ID: <20080604025648.GA17524@linux-sh.org>
+References: <48447615.5050806@am.sony.com> <48449FAE.70404@zytor.com> <1212507964.3953.67.camel@calx> <200806031631.09104.rob@landley.net> <4845C7A3.1020607@zytor.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080603200349.3b1957e1@vader.jdub.homelinux.org>
+Content-Disposition: inline
+In-Reply-To: <4845C7A3.1020607@zytor.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Josh Boyer <jwboyer@gmail.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Rob Landley <rob@landley.net>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Tue, 2008-06-03 at 20:03 -0500, Josh Boyer wrote:
-> On Wed, 04 Jun 2008 01:16:37 +0100
-> David Woodhouse <dwmw2@infradead.org> wrote:
+On Tue, Jun 03, 2008 at 03:37:23PM -0700, H. Peter Anvin wrote:
+> Rob Landley wrote:
+> >>Actually, lots have frame buffers these days.
+> >
+> >Cell phones, for instance.
 > 
-> > On Tue, 2008-06-03 at 17:01 -0700, Tim Bird wrote:
-> > > This is clearly an improvement. But it is missing this part of the
-> > > original patch:
-> > 
-> > Oops, well spotted. I've updated the patch in the git tree; thanks.
+> Sure, but do you want to use them as consoles?
 > 
-> What git tree?
-
- git.infradead.org/embedded-2.6.git
-
--- 
-dwmw2
-
+Unless your name is Pavel, no one actually wants a console on their
+phone. So no, just framebuffers, as is to be expected :-)
