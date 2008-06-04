@@ -1,37 +1,34 @@
 From: Rob Landley <rob@landley.net>
 Subject: Re: [PATCH] console - Add configurable support for console charset translation
-Date: Wed, 4 Jun 2008 12:34:50 -0500
-Message-ID: <200806041234.51352.rob@landley.net>
-References: <48447615.5050806@am.sony.com> <200806031631.09104.rob@landley.net> <4845C7A3.1020607@zytor.com>
+Date: Wed, 4 Jun 2008 12:36:11 -0500
+Message-ID: <200806041236.12349.rob@landley.net>
+References: <48447615.5050806@am.sony.com> <4845C7A3.1020607@zytor.com> <20080604025648.GA17524@linux-sh.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4845C7A3.1020607@zytor.com>
+In-Reply-To: <20080604025648.GA17524@linux-sh.org>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Mackall <mpm@selenic.com>, Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Tuesday 03 June 2008 17:37:23 H. Peter Anvin wrote:
-> Rob Landley wrote:
-> >> Actually, lots have frame buffers these days.
+On Tuesday 03 June 2008 21:56:48 Paul Mundt wrote:
+> On Tue, Jun 03, 2008 at 03:37:23PM -0700, H. Peter Anvin wrote:
+> > Rob Landley wrote:
+> > >>Actually, lots have frame buffers these days.
+> > >
+> > >Cell phones, for instance.
 > >
-> > Cell phones, for instance.
+> > Sure, but do you want to use them as consoles?
 >
-> Sure, but do you want to use them as consoles?
+> Unless your name is Pavel, no one actually wants a console on their
+> phone. So no, just framebuffers, as is to be expected :-)
 
-A friend of mine hacked his iPhone and got shell prompt on it, and it's quite 
-usable with the touchscreen keyboard.  (I very much want a linux box with 
-that form factor, battery life, connectivity, at least that much memory...)
-
-And hooking a set top box up to an HDTV gives you better potential resolution 
-than my laptop currently has, on a biiiiiig screen.  They already display 
-text for program listings and recorded program menus and such, plus you can 
-add a mouse and keyboard via bluetooth or usb if you like...
-
-> 	-hpa
+Actually if you ever need to diagnose early boot stuff on _any_ platform, you 
+do need a console.  But it can be serial or netconsole, as long as that 
+works...
 
 Rob
 -- 
