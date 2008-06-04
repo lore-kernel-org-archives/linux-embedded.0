@@ -1,53 +1,48 @@
-From: Bernhard Fischer <rep.dot.nop@gmail.com>
+From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: [PATCH] console - Add configurable support for console charset
-	translation
-Date: Wed, 4 Jun 2008 21:21:37 +0200
-Message-ID: <20080604192137.GD27768@mx.loc>
-References: <48447615.5050806@am.sony.com> <20080604103353.GC27335@cs181133002.pp.htv.fi> <20080604183432.GC27768@mx.loc> <20080604190146.GE4189@cs181133002.pp.htv.fi>
+ translation
+Date: Wed, 4 Jun 2008 12:23:26 -0700
+Message-ID: <4846EBAE.2000604@am.sony.com>
+References: <48447615.5050806@am.sony.com> <20080604103353.GC27335@cs181133002.pp.htv.fi> <4846E44A.1010601@am.sony.com> <20080604191522.GA18873@uranus.ravnborg.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:received:date:from:to:cc
-         :subject:message-id:references:mime-version:content-type
-         :content-disposition:in-reply-to:user-agent;
-        bh=dUVvMBHgID9yOVgqCNdxeP9HtAusQdgW3GM/rhtPDJo=;
-        b=snbEYyg6VAfN5YxdFj/7yq9qm49KeJ2M+miP/UDC3oqo/Ktv0AoLZGSXPY5ygwvpbO
-         hZsp9SJlifGx/zHZjPhW0tVSgEvRwfzAa0SSPkrWJ6Fee6mVFjtY8bzYlLIa8cERxWYw
-         RXHUn/vtLxGL5w+2qFXSeu4t5R+hCM8QO6H3U=
-Content-Disposition: inline
-In-Reply-To: <20080604190146.GE4189@cs181133002.pp.htv.fi>
+In-Reply-To: <20080604191522.GA18873@uranus.ravnborg.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Adrian Bunk <bunk@kernel.org>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Adrian Bunk <adrian.bunk@movial.fi>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Wed, Jun 04, 2008 at 10:01:46PM +0300, Adrian Bunk wrote:
->On Wed, Jun 04, 2008 at 08:34:32PM +0200, Bernhard Fischer wrote:
- 
->> Current kernels are too big, they tend to be about 1MB (ignoring lzma or
->> gz compression), a couple of years back an ide- and network-enabled
->> kernel with 8139too (or whatever -nic you use in qemu nowadays) was at
->> least 30% smaller.
->
->No disagreement that the kernel could (and should) become smaller for
->situations where the kernel size matters.
->
->My question is only about whether *this kind of patches* is the correct 
->approach.
+Sam Ravnborg wrote:
+>> I can do a more controlled comparison if you're interested.
+> 
+> What would be really useful would be to do some king of automated
+> monitoring of the size of individual parts of the kernel in
+> a few controlled configs.
+> And then as son as somethings grows with > 1% for example then to
+> bring this to lkml.
+> Doing this based on linux-next would allow us to catch the bloaters
+> while they are still or just have been doing certain changes.
+> 
+> It would be nice to tell someone that just enabled som new gcc option
+> that this had a cost of 163.432 bytes with a certain config.
+> This would get attraction and be dealt with.
 
-Every dozend of bytes less helps to some degree. I can boot a smallish
-testsystem in qemu with 4MB ram and have a useable userspace in 120k or
-up to 1.2MB diskspace to play with.
+This is something I've wanted to get done for the last few
+years.  We've crept towards it slowly with things like bloatwatch
+and some of the automated testing CELF did for it's (currently
+temporarily defunct) test lab.
 
-The kernel ultimately needs the vast majority of resources in such a
-system; most of the RAM and most of the diskspace (assuming a
-comfortable userspace with 500k). Booting with 2MB didn't work last time
-i tried. This imbalance is something we should fix.
+But we've never gotten to the last bit, which is to fully automate
+the testing at the top of tree, and send notifications.  I won't
+make any promises, but this is something CELF is very interested in,
+and we have parts of the required software already written.
+ -- Tim
 
-So yes, 5k help, several 5k help more. I can see how it's problematic to
-represent that in menuconfig without adding too much clutter but still
-letting the user decide whether or not to include certain families of
-features, but that should not turn out to be a real problem.
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
+
