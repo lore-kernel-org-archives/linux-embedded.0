@@ -1,66 +1,52 @@
-From: Adrian Bunk <adrian.bunk@movial.fi>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH] console - Add configurable support for console charset
-	translation
-Date: Wed, 4 Jun 2008 13:33:53 +0300
-Message-ID: <20080604103353.GC27335@cs181133002.pp.htv.fi>
+ translation
+Date: Wed, 4 Jun 2008 12:55:00 +0100
+Message-ID: <20080604125500.0fce2ea4@core>
 References: <48447615.5050806@am.sony.com>
+	<1212500751.16924.322.camel@pmac.infradead.org>
+	<4845DB46.3020308@am.sony.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <48447615.5050806@am.sony.com>
+In-Reply-To: <4845DB46.3020308@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Tim Bird <tim.bird@am.sony.com>
-Cc: linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Cc: David Woodhouse <dwmw2@infradead.org>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Mon, Jun 02, 2008 at 03:37:09PM -0700, Tim Bird wrote:
-> With CONSOLE_TRANSLATIONS turned off, this saves about 6K
-> on my kernel configured for an ARM development board (OMAP
-> 5912 OSK).  In embedded products I'm familiar with,
-> console translations are not needed.
->
-> This was taken from the Linux-tiny project and updated slightly
-> for 2.6.25.
->...
+> This is clearly an improvement. But it is missing this part of the
+> original patch:
+> 
+> --- a/drivers/char/vt.c
+> +++ b/drivers/char/vt.c
+> @@ -2198,7 +2198,11 @@ rescan_last_byte:
+>  			c = 0xfffd;
+>  		    tc = c;
+>  		} else {	/* no utf or alternate charset mode */
+> +#ifdef CONFIG_CONSOLE_TRANSLATIONS
+>  		    tc = vc->vc_translate[vc->vc_toggle_meta ? (c | 0x80) : c];
+> +#else
+> +		    tc = c;
+> +#endif
 
-It seems to be always me who asks the controversial questions...:
+Can we please get the ifdefs tided up before this goes in.
 
-Does the linux-tiny approach of adding a kconfig variable for each 5kB 
-of code actually make sense? I'm asking since an exploding amount of 
-kconfig variables and their interdependencies have a not so small 
-maintainance impact in the long term.
+For the moment this has a NAK from the tty maintainer but if the ifdefs
+turned went into headers where they belong and the code looked like say
 
-And I'm wondering whether it's the best approach for reaching 
-measurable results. E.g. my small patch that removed 
--maccumulate-outgoing-args on 32-bit x86 reduced the kernel size
-there for the CONFIG_CC_OPTIMIZE_FOR_SIZE=y case by at about 2.5% (sic)
-without adding any kconfig variables or #ifdef's.
+		tc = vc_translate(vc, c);
 
-Can you take a reasonable (best-case) .config for an existing device and 
-get the following numbers:
-- Ignoring patches that came from linux-tiny, by how many percent did 
-  the size of the kernel increase or decrease between 2.6.16 and 2.6.26?
-- By how many percent did the kernel size decrease due to patches from
-  the linux-tiny project that added such kconfig options for a few kB 
-  of code in the same timeframe?
+with two versions of vc_translate (one being vc_translate(x) (x)) it
+might be more reasonable.
 
-My gut feeling is that the influence of this kind of linux-tiny patches 
-is hardly noticably compared to the overall code size development, but 
-if you have numbers that prove me wrong just point me to them and I'll 
-stand corrected.
+We can't stick random ifdefs in bits of code for arbitary 6K savings or
+the entire kernel would be ifdefs.
 
-cu
-Adrian
 
-BTW: I'm not insisting on "between 2.6.16 and 2.6.26", that's just some
-     timeframe big enough for showing general trends.
+Sor for the moment
 
--- 
+Nacked-by: Alan Cox <alan@redhat.com>
 
-       "Is there not promise of rain?" Ling Tan asked suddenly out
-        of the darkness. There had been need of rain for many days.
-       "Only a promise," Lao Er said.
-                                       Pearl S. Buck - Dragon Seed
-
+but scope for change
