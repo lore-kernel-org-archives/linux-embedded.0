@@ -1,38 +1,39 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH] console - Add configurable support for console charset
- translation
-Date: Wed, 4 Jun 2008 08:35:50 -0700
-Message-ID: <4846B656.6030707@am.sony.com>
-References: <48447615.5050806@am.sony.com>	 <1212500751.16924.322.camel@pmac.infradead.org>	 <4845DB46.3020308@am.sony.com> <1212538597.4042.29.camel@shinybook.infradead.org>
+From: Rob Landley <rob@landley.net>
+Subject: Re: [PATCH] console - Add configurable support for console charset translation
+Date: Wed, 4 Jun 2008 12:19:53 -0500
+Message-ID: <200806041219.54775.rob@landley.net>
+References: <48447615.5050806@am.sony.com> <1212528641.3953.70.camel@calx> <200806040904.13483.hs4233@mail.mn-solutions.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1212538597.4042.29.camel@shinybook.infradead.org>
+In-Reply-To: <200806040904.13483.hs4233@mail.mn-solutions.de>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: Holger Schurig <hs4233@mail.mn-solutions.de>
+Cc: linux-tiny@selenic.com, Matt Mackall <mpm@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-David Woodhouse wrote:
-> On Tue, 2008-06-03 at 17:01 -0700, Tim Bird wrote:
->> This is clearly an improvement. But it is missing this part of the
->> original patch:
-> 
-> Oops, well spotted. I've updated the patch in the git tree; thanks.
-> 
-> (that's what comes of applying patches by hand -- I _knew_ I had to do
-> that hunk, but managed to forget about it within the space of about 30
-> seconds when I was doing the other parts. I plead stupidity)
+On Wednesday 04 June 2008 02:04:13 Holger Schurig wrote:
+> > Linux-embedded is the place to be, folks.
+>
+> Another thing that I just noticed: According to
+>
+> http://vger.kernel.org/vger-lists.html#linux-embedded
+>
+> there is no mailing list archive for this list.
 
-We can chalk it up to my stupidity for sending a patch
-that couldn't be applied automatically...
-Thanks very much for the improvements!
- -- Tim
+Yes, but according to the comments on http://lwn.net/Articles/283749/ there 
+is.  Unfortunately, there seems to be no way to beat a threaded user 
+interface out of it.
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+I have a complete mbox going back to the beginning (thanks Randy!) and am 
+pondering putting up an archive in the format I like (threaded index, grouped 
+monthly) this weekend.  Depends on whether or not I can convince mailman to 
+archive a list it isn't hosting, or if I get bored enough to write my own 
+indexer in python...
 
+Rob
+-- 
+"One of my most productive days was throwing away 1000 lines of code."
+  - Ken Thompson.
