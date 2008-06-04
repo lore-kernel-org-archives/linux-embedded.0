@@ -1,102 +1,66 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH] console - Add configurable support for console charset
- translation
-Date: Wed, 4 Jun 2008 11:51:54 -0700
-Message-ID: <4846E44A.1010601@am.sony.com>
-References: <48447615.5050806@am.sony.com> <20080604103353.GC27335@cs181133002.pp.htv.fi>
+From: Rob Landley <rob@landley.net>
+Subject: Re: [PATCH] console - Add configurable support for console charset translation
+Date: Wed, 4 Jun 2008 13:55:37 -0500
+Message-ID: <200806041355.38322.rob@landley.net>
+References: <48447615.5050806@am.sony.com> <200806041236.12349.rob@landley.net> <4846D3EE.1070802@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1761923AbYFDSwz@vger.kernel.org>
-In-Reply-To: <20080604103353.GC27335@cs181133002.pp.htv.fi>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4846D3EE.1070802@billgatliff.com>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Adrian Bunk <adrian.bunk@movial.fi>
-Cc: linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Paul Mundt <lethal@linux-sh.org>, "H. Peter Anvin" <hpa@zytor.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Adrian Bunk wrote:
-> It seems to be always me who asks the controversial questions...:
-> 
-> Does the linux-tiny approach of adding a kconfig variable for each 5kB 
-> of code actually make sense? I'm asking since an exploding amount of 
-> kconfig variables and their interdependencies have a not so small 
-> maintainance impact in the long term.
+On Wednesday 04 June 2008 12:42:06 Bill Gatliff wrote:
+> Rob Landley wrote:
+> > On Tuesday 03 June 2008 21:56:48 Paul Mundt wrote:
+> >> On Tue, Jun 03, 2008 at 03:37:23PM -0700, H. Peter Anvin wrote:
+> >>> Rob Landley wrote:
+> >>>>> Actually, lots have frame buffers these days.
+> >>>>
+> >>>> Cell phones, for instance.
+> >>>
+> >>> Sure, but do you want to use them as consoles?
+> >>
+> >> Unless your name is Pavel, no one actually wants a console on their
+> >> phone. So no, just framebuffers, as is to be expected :-)
+> >
+> > Actually if you ever need to diagnose early boot stuff on _any_ platform,
+> > you do need a console.  But it can be serial or netconsole, as long as
+> > that works...
+>
+> ... who says I _always_ want it to look and feel like a "cell phone"?
 
-Others have expressed similar concerns.  Andi Kleen has brought this
-up in the past, and highlighted another aspect of this that I think
-is important - fragmenting the configuration space for testing.
+With the little bluetooth earpieces, cellphone "look and feel" is decidedly 
+mutable these days.
 
-That is, if different combinations of options are used, then the
-testing results from different users may not be directly comparable.
-This makes it harder to track down bugs.
+(Ok, cell phones started out with the star-tac flip open phone, a fairly 
+obvious rip-off from Star Trek TOS.  We now have the banana in Uhura's ear, 
+running off of bluetooth.  Now I'm waiting for the communicator badges.  It's 
+only a matter of time...)
 
-In practice, I think these types of switches tend to get turned
-on/off together.  This tends to ameliorate the testing and maintenance
-issues. It might be worthwhile to coalesce these into fewer
-options.  I'd be fine with overloading this particular
-onto CONFIG_BASE_FULL, but I don't know what other people think.
-Keeping the option separate means you have more flexibility - so
-that you can, for example, turn off all but one feature that's
-important to you.  (This seems like a pretty common
+That said, the cell phone and PDA spaces are converging, and thingies like the 
+iPhone and Nokia 810 are the next logical step beyond laptops.  (If you want 
+to hook them up to a big screen and keyboard, your "docking station" can just 
+be USB.  If it wasn't for the need to provide power to the suckers, it could 
+be bluetooth.)
 
-> And I'm wondering whether it's the best approach for reaching 
-> measurable results. E.g. my small patch that removed 
-> -maccumulate-outgoing-args on 32-bit x86 reduced the kernel size
-> there for the CONFIG_CC_OPTIMIZE_FOR_SIZE=y case by at about 2.5% (sic)
-> without adding any kconfig variables or #ifdef's.
+You only need to carry around one pack of electronics with you, and everybody 
+has a cell phone these days.  The rest is a question of user interface and 
+letting Moore's Law crank long enough...
 
-These are certainly nice, but there's a limited number of whole-kernel
-reduction options.  Kernel size accumulates by both wasteful
-compiler output, and by the introduction or preservation of individual
-features that are useless for embedded devices.  I think it's worthwhile
-to attack both problems.
+Rob
 
-> Can you take a reasonable (best-case) .config for an existing device and 
-> get the following numbers:
-> - Ignoring patches that came from linux-tiny, by how many percent did 
->   the size of the kernel increase or decrease between 2.6.16 and 2.6.26?
-
-Well, an initial comparison is at:
-http://www.selenic.com/bloatwatch/?cmd=compare&part=%2F&v1=2.6.16&v2=2.6.25-rc2
-
-This shows a size difference of 1.8 meg, but I'm pretty sure this
-is with a default config (not optimized) and is not controlled very well
-for changes in the config.
-
-I can do a more controlled comparison if you're interested.
-
-> - By how many percent did the kernel size decrease due to patches from
->   the linux-tiny project that added such kconfig options for a few kB 
->   of code in the same timeframe?
-
-I'm not sure that's a good comparison, since Linux-tiny hasn't been
-very active in that time period.  I would guess only about 3 or 4
-Linux-tiny patches have made it into the kernel since 2.6.16.
-The big wins for Linux-tiny were in the 2.6.10/11 kernels, where
-most of the low-hanging fruit (size-wise) was gleaned.
-
-But to address your point, you're right that no existing Linux-tiny
-patch gets 2.5% reduction for the kernel.
-In my own testing at Sony, the 30 or so Linux-tiny patches that
-I use get me about 110k of reductions.  For me, this is about 5% of
-my kernel size.   Note that my choice of options to achieve
-reductions is pretty conservative.
-
-There are diminishing returns here, and at some point it doesn't make
-sense to continue.  I have a nagging feeling, though, that there
-are a few more things where the bloat is pronounced (glances at
-procfs and sysfs).
-
-> My gut feeling is that the influence of this kind of linux-tiny patches 
-> is hardly noticably compared to the overall code size development, but 
-> if you have numbers that prove me wrong just point me to them and I'll 
-> stand corrected.
-
-It *does* feel a bit like fighting the tide with a teaspoon.
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+P.S. I agree with what Peter seems to be saying, that the old "vga console" 
+code is a side issue.  /dev/console doesn't even provide a controlling tty, 
+and the PTY code shouldn't really have anything in commonwith the old virtual 
+console stuff except an API.  (Honestly it just attaches a cursor position, 
+screen size, and some signals to a pipe.  The rest of the stuff it does like 
+setting serial port hardware rates and beeping the speaker probably should 
+have been done via ioctl on /dev nodes or something.)
+-- 
+"One of my most productive days was throwing away 1000 lines of code."
+  - Ken Thompson.
