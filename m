@@ -1,48 +1,31 @@
-From: Tim Bird <tim.bird@am.sony.com>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH] console - Add configurable support for console charset
  translation
-Date: Wed, 4 Jun 2008 12:23:26 -0700
-Message-ID: <4846EBAE.2000604@am.sony.com>
-References: <48447615.5050806@am.sony.com> <20080604103353.GC27335@cs181133002.pp.htv.fi> <4846E44A.1010601@am.sony.com> <20080604191522.GA18873@uranus.ravnborg.org>
+Date: Wed, 4 Jun 2008 20:20:16 +0100
+Message-ID: <20080604202016.1422ec09@core>
+References: <48447615.5050806@am.sony.com>
+	<20080604103353.GC27335@cs181133002.pp.htv.fi>
+	<20080604183432.GC27768@mx.loc>
+	<20080604190146.GE4189@cs181133002.pp.htv.fi>
+	<20080604192137.GD27768@mx.loc>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080604191522.GA18873@uranus.ravnborg.org>
+In-Reply-To: <20080604192137.GD27768@mx.loc>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Adrian Bunk <adrian.bunk@movial.fi>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: Bernhard Fischer <rep.dot.nop@gmail.com>
+Cc: Adrian Bunk <bunk@kernel.org>, Tim Bird <tim.bird@am.sony.com>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Sam Ravnborg wrote:
->> I can do a more controlled comparison if you're interested.
-> 
-> What would be really useful would be to do some king of automated
-> monitoring of the size of individual parts of the kernel in
-> a few controlled configs.
-> And then as son as somethings grows with > 1% for example then to
-> bring this to lkml.
-> Doing this based on linux-next would allow us to catch the bloaters
-> while they are still or just have been doing certain changes.
-> 
-> It would be nice to tell someone that just enabled som new gcc option
-> that this had a cost of 163.432 bytes with a certain config.
-> This would get attraction and be dealt with.
+> So yes, 5k help, several 5k help more. I can see how it's problematic to
+> represent that in menuconfig without adding too much clutter but still
+> letting the user decide whether or not to include certain families of
+> features, but that should not turn out to be a real problem.
 
-This is something I've wanted to get done for the last few
-years.  We've crept towards it slowly with things like bloatwatch
-and some of the automated testing CELF did for it's (currently
-temporarily defunct) test lab.
+Combinatorial explosions, ugly messes, maintenance.
 
-But we've never gotten to the last bit, which is to fully automate
-the testing at the top of tree, and send notifications.  I won't
-make any promises, but this is something CELF is very interested in,
-and we have parts of the required software already written.
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+Far better would be target the actual sizes and get stuff down in size
+without removing feaures. There is some obvious 'easy reward' stuff here
+- such as being able to build an output only console.
 
