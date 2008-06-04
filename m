@@ -1,44 +1,44 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PATCH] console - Add configurable support for console charset
- translation
-Date: Wed, 04 Jun 2008 12:42:06 -0500
-Message-ID: <4846D3EE.1070802@billgatliff.com>
-References: <48447615.5050806@am.sony.com> <4845C7A3.1020607@zytor.com> <20080604025648.GA17524@linux-sh.org> <200806041236.12349.rob@landley.net>
+From: Rob Landley <rob@landley.net>
+Subject: Re: linux-embedded archives  [was Re: [PATCH] console - Add configurable support for console charset translation]
+Date: Wed, 4 Jun 2008 13:08:32 -0500
+Message-ID: <200806041308.32738.rob@landley.net>
+References: <48447615.5050806@am.sony.com> <200806041219.54775.rob@landley.net> <20080604172617.GD26333@email.mot.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200806041236.12349.rob@landley.net>
+In-Reply-To: <20080604172617.GD26333@email.mot.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Rob Landley <rob@landley.net>
-Cc: Paul Mundt <lethal@linux-sh.org>, "H. Peter Anvin" <hpa@zytor.com>, linux-embedded <linux-embedded@vger.kernel.org>
+To: T Ziomek <ctz001@email.mot.com>
+Cc: Holger Schurig <hs4233@mail.mn-solutions.de>, linux-tiny@selenic.com, Matt Mackall <mpm@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Rob Landley wrote:
-> On Tuesday 03 June 2008 21:56:48 Paul Mundt wrote:
->> On Tue, Jun 03, 2008 at 03:37:23PM -0700, H. Peter Anvin wrote:
->>> Rob Landley wrote:
->>>>> Actually, lots have frame buffers these days.
->>>> Cell phones, for instance.
->>> Sure, but do you want to use them as consoles?
->> Unless your name is Pavel, no one actually wants a console on their
->> phone. So no, just framebuffers, as is to be expected :-)
-> 
-> Actually if you ever need to diagnose early boot stuff on _any_ platform, you 
-> do need a console.  But it can be serial or netconsole, as long as that 
-> works...
+On Wednesday 04 June 2008 12:26:17 T Ziomek wrote:
+> On Wed, Jun 04, 2008 at 12:19:53PM -0500, Rob Landley wrote:
+> > On Wednesday 04 June 2008 02:04:13 Holger Schurig wrote:
+> > > > Linux-embedded is the place to be, folks.
+> > >
+> > > Another thing that I just noticed: According to
+> > >
+> > > http://vger.kernel.org/vger-lists.html#linux-embedded
+> > >
+> > > there is no mailing list archive for this list.
+> >
+> > Yes, but according to the comments on http://lwn.net/Articles/283749/
+> > there is.  Unfortunately, there seems to be no way to beat a threaded
+> > user interface out of it.
+>
+> Somebody updated the http://vger.kernel.org/ today; it now lists 3 archives
+> (mail-archive.com, gmane.org and marc.info).
 
-... who says I _always_ want it to look and feel like a "cell phone"?
+So mail-archive.com has no obvious way to browse historical messages by date, 
+gmane's interface is a mix of frames and javascript, and marc can't show an 
+index with nested replies to threads. 
 
-Some days, I'd prefer that my cell phone look like something else.  Anything
-else.  Especially something that will actually work _for_ me instead of the
-other way around.
+Well, at least they're broken in different ways...
 
-But barring that, something throw-able.  Like a chair.  :)
-
-
-
-b.g.
+Rob
 -- 
-Bill Gatliff
-bgat@billgatliff.com
+"One of my most productive days was throwing away 1000 lines of code."
+  - Ken Thompson.
