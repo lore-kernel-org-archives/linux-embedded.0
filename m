@@ -1,37 +1,29 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH] console - Add configurable support for console charset
- translation
-Date: Wed, 4 Jun 2008 13:42:38 -0700
-Message-ID: <4846FE3E.4020508@am.sony.com>
-References: <48447615.5050806@am.sony.com> <20080604103353.GC27335@cs181133002.pp.htv.fi> <4846E44A.1010601@am.sony.com> <20080604191522.GA18873@uranus.ravnborg.org> <4846EBAE.2000604@am.sony.com> <20080604202314.GG4189@cs181133002.pp.htv.fi>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH] console - Add configurable support for console charset translation
+Date: Thu, 5 Jun 2008 09:46:30 +0900
+Message-ID: <20080605004630.GA26259@linux-sh.org>
+References: <48447615.5050806@am.sony.com> <4845C7A3.1020607@zytor.com> <20080604025648.GA17524@linux-sh.org> <200806041236.12349.rob@landley.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080604202314.GG4189@cs181133002.pp.htv.fi>
+Content-Disposition: inline
+In-Reply-To: <200806041236.12349.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Adrian Bunk <bunk@kernel.org>
-Cc: Sam Ravnborg <sam@ravnborg.org>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Rob Landley <rob@landley.net>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Adrian Bunk wrote:
-> I might be wrong, but although monitoring the size makes a lot of sense
-> I don't believe "fully automate the testing ... and send notifications" 
-> will work.
+On Wed, Jun 04, 2008 at 12:36:11PM -0500, Rob Landley wrote:
+> Actually if you ever need to diagnose early boot stuff on _any_ platform, you 
+> do need a console.  But it can be serial or netconsole, as long as that 
+> works...
+> 
+Except for the minor fact that most early boot debugging happens long
+before the console subsystem is even available..
 
-"fully automate" was sloppy wording on my part.  "automate enough
-to not be a burden to maintain" is what I should have said.
-
-> But if CELF has resources then doing this kind of stuff IMHO makes
-> more sense than adding a config option for each 5kB of code
-> (and also has better long-term effects).
-
-Good point about the better long-term effects.
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
-
+At the risk of perpetuating the stupidity of this thread.. If you ship a
+device to a customer expecting them to debug it for you, you are likewise
+not likely to be very commercially successful, either. Devices are not
+shipping with consoles, period. If you disagree with this, you've
+obviously never shipped a device.
