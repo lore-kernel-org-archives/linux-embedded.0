@@ -1,50 +1,39 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [PATCH] console - Add configurable support for console charset translation
-Date: Fri, 6 Jun 2008 23:29:53 -0500
-Message-ID: <200806062329.54019.rob@landley.net>
-References: <48447615.5050806@am.sony.com> <20080604194002.GF4189@cs181133002.pp.htv.fi> <4849CCA3.7040102@am.sony.com>
+From: "mohammed shareef" <mdshareef@gmail.com>
+Subject: x11 fails with floating point exception
+Date: Sun, 8 Jun 2008 15:37:00 +0530
+Message-ID: <a1d91fa0806080307l64175a61i14cfb205081dd878@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4849CCA3.7040102@am.sony.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:mime-version:content-type:content-transfer-encoding
+         :content-disposition;
+        bh=va5EisDpGaYf5aOLoefDH0ZnuGLKFJWUBPYlurreOJ0=;
+        b=XzEL9PLXGUjC8WmzStZ8nL4NcQClJnDjhhZ+Dcg1mNwL4fmNIYoMIMRuWYMlFIBKSw
+         0LvqRHX5f9B6OnnnldMVVGklokFWKcPenBsDQ/M5yWl4itSU9q7qX97He2pcrOeZbTAx
+         /9rNVLQZpThQEkG3IIfWuxOhY2u8/V2UOhzAM=
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Adrian Bunk <adrian.bunk@movial.fi>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-On Friday 06 June 2008 18:47:47 Tim Bird wrote:
-> At a minimum, it would be nice to have a few nice examples
-> of really, really small configs for things like qemus for different
-> architectures (just to give embedded developers who are working
-> on size a starting point).
+Hi,
 
-That's more or less what I'm trying to do with my Firmware Linux project: 
-creating cross compilers and minimal native build environments for every qemu 
-target.
+i am new to linux.
 
-http://landley.net/code/firmware
-http://landley.net/hg/firmware
+when i compile x-windows, the xlib--X11 fails with a floating point exception.
 
-I currently have variants of arm, powerpc, mips, x86, and x86-64 working, and 
-several others (sh4, sparc, m68k) in various stages of development.  (I think 
-sparc just needs one minor bug fixed, I just can't bring myself to _care_ 
-about sparc.  m68k is hitting an internal compiler error in gcc.  sh4 isn't 
-properly supported by qemu yet: no boards with a hard drive.)
+../src/util/makekeys < /usr/include/X11/keysymdef.h > ks_tables_h
+/bin/sh: line 1: 12048 Floating point exception../src/util/makekeys <
+/usr/include/X11/keysymdef.h > ks_tables_h
+make[1]: *** [ks_tables.h] Error 136
+make[1]: Leaving directory `/root/omap5912/xwin_snapshot/xlibs/X11/src'
+make: *** [install-recursive] Error 1
 
-I just did a new release, which finally has the distcc trick implemented.  
-(Not _quite_ useful yet because the build environment is missing seven 
-important commands I hope to add next release.)
+could someone please tell me how to solve this
 
-Feel free to ask me any questions about it...
-
-Rob
-
-P.S.  The mips kernel config recently changed because the qemu mips platform 
-went away in 2.6.25, and the new one is malta_defconfig with some of the 
-obvious options removed.  I'm working on a more stripped-down one as we 
-speak, but I didn't hold up the release for it...
--- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+thank you,
+Shareef
