@@ -1,39 +1,31 @@
-From: "mohammed shareef" <mdshareef@gmail.com>
-Subject: x11 fails with floating point exception
-Date: Sun, 8 Jun 2008 15:37:00 +0530
-Message-ID: <a1d91fa0806080307l64175a61i14cfb205081dd878@mail.gmail.com>
+From: Ben Nizette <bn@niasdigital.com>
+Subject: Re: x11 fails with floating point exception
+Date: Sun, 08 Jun 2008 20:27:57 +1000
+Message-ID: <1212920877.4089.22.camel@moss.renham>
+References: <a1d91fa0806080307l64175a61i14cfb205081dd878@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:mime-version:content-type:content-transfer-encoding
-         :content-disposition;
-        bh=va5EisDpGaYf5aOLoefDH0ZnuGLKFJWUBPYlurreOJ0=;
-        b=XzEL9PLXGUjC8WmzStZ8nL4NcQClJnDjhhZ+Dcg1mNwL4fmNIYoMIMRuWYMlFIBKSw
-         0LvqRHX5f9B6OnnnldMVVGklokFWKcPenBsDQ/M5yWl4itSU9q7qX97He2pcrOeZbTAx
-         /9rNVLQZpThQEkG3IIfWuxOhY2u8/V2UOhzAM=
-Content-Disposition: inline
+In-Reply-To: <a1d91fa0806080307l64175a61i14cfb205081dd878@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+To: mohammed shareef <mdshareef@gmail.com>
+Cc: linux-embedded@vger.kernel.org
 
-Hi,
 
-i am new to linux.
+On Sun, 2008-06-08 at 15:37 +0530, mohammed shareef wrote:
+> Hi,
+> 
+> i am new to linux.
+> 
+> when i compile x-windows, the xlib--X11 fails with a floating point exception.
 
-when i compile x-windows, the xlib--X11 fails with a floating point exception.
+These are generally things like divide-by-zero.  It is a problem with
+the makekeys script there, nothing to do with the linux kernel or
+embedded space in general so this isn't the right list :-)
 
-../src/util/makekeys < /usr/include/X11/keysymdef.h > ks_tables_h
-/bin/sh: line 1: 12048 Floating point exception../src/util/makekeys <
-/usr/include/X11/keysymdef.h > ks_tables_h
-make[1]: *** [ks_tables.h] Error 136
-make[1]: Leaving directory `/root/omap5912/xwin_snapshot/xlibs/X11/src'
-make: *** [install-recursive] Error 1
+Try an X11 mailing list.
 
-could someone please tell me how to solve this
+--Ben.
 
-thank you,
-Shareef
