@@ -1,67 +1,44 @@
-From: Detlev Zundel <dzu@denx.de>
+From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
 Subject: Re: YAFFS in the kernel tree?
-Date: Sun, 08 Jun 2008 13:45:18 +0200
-Message-ID: <m2zlpw2lrl.fsf@ohwell.denx.de>
-References: <200805290859.54396.manningc2@actrix.gen.nz>
-	<f19298770805281515u1602e18enbad78fccfda24b02@mail.gmail.com>
+Date: Sun, 8 Jun 2008 14:16:27 +0200
+Message-ID: <20080608121626.GC13200@logfs.org>
+References: <200805290859.54396.manningc2@actrix.gen.nz> <f19298770805281515u1602e18enbad78fccfda24b02@mail.gmail.com> <m2zlpw2lrl.fsf@ohwell.denx.de>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <f19298770805281515u1602e18enbad78fccfda24b02@mail.gmail.com>
-	(Alexey Zaytsev's message of "Thu, 29 May 2008 02:15:27 +0400")
+Content-Disposition: inline
+In-Reply-To: <m2zlpw2lrl.fsf@ohwell.denx.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Alexey Zaytsev <alexey.zaytsev@gmail.com>
-Cc: Charles Manning <manningc2@actrix.gen.nz>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Detlev Zundel <dzu@denx.de>
+Cc: Alexey Zaytsev <alexey.zaytsev@gmail.com>, Charles Manning <manningc2@actrix.gen.nz>, linux-embedded@vger.kernel.org
 
-"Alexey Zaytsev" <alexey.zaytsev@gmail.com> writes:
+On Sun, 8 June 2008 13:45:18 +0200, Detlev Zundel wrote:
+>=20
+> Sorry for jumping in here late, but git should be pretty good about
+> finding differences itself.  If you can revers-apply the previous
+> version patch, then apply the current version and git commit, it shou=
+ld
+> yield much more useful information.
 
-> On Thu, May 29, 2008 at 12:59 AM, Charles Manning
-> <manningc2@actrix.gen.nz> wrote:
->> Hi
->>
->> I'm the author of YAFFS. This is not in the kernel tree, but is fairly easy to
->> integrate by just pulling a tarball and running  patch-in script.
->>
->> I am curious as to whether people consider the current mechanism "good enough"
->> or whether it is worth the effort trying to get YAFFS into the kernel tree.
->>
->> Pros I can see:
->> * In tree means better testing (maybe).
->> * Keeping current with kernel API changes.
->>
->> Cons:
->> * More effort for YAFFS maintainers (me mostly).
->> * Effort getting code into kernel coding style (unless I can get a waiver on
->> this).
->>
->> Thoughts??
->
-> We at protei (protei.ru) are using yaffs for over a year now, switched from
-> jffs2, mostly because of the huge mount time difference. Have yet to
-> see any serious problems.
->
-> The process of patching the kernel with yaffs is quite smooth, but you
-> loose the ability to track the changes made in yaffs. We've got a git
-> kernel tree, to which we add our stuff, and also periodically repatch it
-> with a fresh yaffs. The problem is, all you can see later is a commit
-> labelled "A Yaffs update", revealing little details on the contents. Not cool.
+Doesn't work too well, if the git version is different from the
+out-of-tree version, because of something like version checks.
 
-Sorry for jumping in here late, but git should be pretty good about
-finding differences itself.  If you can revers-apply the previous
-version patch, then apply the current version and git commit, it should
-yield much more useful information.
+What might work is to keep developing the git tree, extract a patch fro=
+m
+that, have a second patch with version checks, etc. and combinediff
+those two.
 
-Cheers
-  Detlev
+J=C3=B6rn
 
--- 
-The proprietary-Unix players proved so ponderous, so blind, and so inept at
-marketing that Microsoft was able to grab away a large part of their market
-with the shockingly inferior technology of its Windows operating system.
-                   -- "A Brief History of Hackerdom" by Eric Steven Raymond
+--=20
+=46ancy algorithms are slow when n is small, and n is usually small.
+=46ancy algorithms have big constants. Until you know that n is
+frequently going to be big, don't get fancy.
+-- Rob Pike
 --
-DENX Software Engineering GmbH,      MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich,  Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-40 Fax: (+49)-8142-66989-80 Email: dzu@denx.de
+To unsubscribe from this list: send the line "unsubscribe linux-embedde=
+d" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
