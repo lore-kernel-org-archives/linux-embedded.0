@@ -1,62 +1,59 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: [PATCH] console - Add configurable support for console charset
- translation
-Date: Mon, 9 Jun 2008 13:51:16 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0806091349370.17741@vixen.sonytel.be>
-References: <48447615.5050806@am.sony.com> <200806041236.12349.rob@landley.net>
- <20080605004630.GA26259@linux-sh.org> <200806051835.57140.rob@landley.net>
- <484A0207.4000405@zytor.com> <20080609113856.GD25541@shareable.org>
+From: "Leon Woestenberg" <leon.woestenberg@gmail.com>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Mon, 9 Jun 2008 23:27:29 +0200
+Message-ID: <c384c5ea0806091427k3bd29168wbe55f6920054d44a@mail.gmail.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org>
+	 <87bq3rgq40.fsf@basil.nowhere.org>
+	 <1209582709.25560.441.camel@pmac.infradead.org>
+	 <200805281652.47558.rob@landley.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-990899504-1213012276=:17741"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080609113856.GD25541@shareable.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=AwFnjGJUBVm7FxvjOvfWBnnDeO3tlzNa5OletLtJgoI=;
+        b=VH4WvLoBUcVyT+zX4tR6dsIyka+xDr9GqAVVxJNm+xfzSv90zerwqMJOJ1JG/kylte
+         oIYgnlZQGj6kYFuX3mG4btVDkoUcb2vHslQrQJ+qWWThVOyOXSXvwcKhPHgxmzni+58a
+         l+q04zCqPiDL4pBk8bAzAACRd1mMFSDtpFuu4=
+In-Reply-To: <200805281652.47558.rob@landley.net>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Jamie Lokier <jamie@shareable.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Rob Landley <rob@landley.net>, Paul Mundt <lethal@linux-sh.org>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Rob Landley <rob@landley.net>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hello,
 
----584349381-990899504-1213012276=:17741
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+On Wed, May 28, 2008 at 11:52 PM, Rob Landley <rob@landley.net> wrote:
+> On Wednesday 30 April 2008 14:11:49 David Woodhouse wrote:
+>> I agree. And if we do want to pay attention to pure code size, there are
+>> other approaches -- like --gc-sections and/or building with '--combine
+>> -fwhole-program' which I was playing with for OLPC a while back. I must
+>> dust that off now that the GCC fixes should mostly have made it into
+>> current distributions.
+>
+> I like simplicity.  I like _simple_.  Half my attraction to embedded systems
+>
+Same here.
 
-On Mon, 9 Jun 2008, Jamie Lokier wrote:
-> The uClinux devices I ship do have that.  System console is the serial
-> port on a board header.  But field engineers are instructed to plug in
-> a USB keyboard and Alt-F2 to get a diagnostic screen (we call it a
-> "shell" ;-).  Occasionally even customers with specific requirements
-> get to use that.
-> 
-> We had to patch the kernel to get the combination of virtual terminal
-> capability on a framebuffer, but system console messages not to the
-> framebuffer.  The uClinux (2.4.x) disables system console on a virtual
-> terminal, but due to some confusion(*), it has the side effect that
-> you can't attach a VT to a framebuffer at all.  Several howtos provide
-> a "con2fb" program which didn't work with uClinux.  We had to fix that.
+> I submitted a patch to remove the use of perl to build the linux kernel (which
+> HPA added in 2.6.25) not because it affected the result, but because it
+> unnecessarily complicates the build system.  (And perl tends to metasticize.
 
-I think this is due to using 2.4.
+Thanks, I hope it is or gets accepted.
 
-In 2.6, al you have to do is pass `console=ttyS0' (replace `ttyS0' by your
-serial port device) to the kernel, and system console messages will no longer
-appear on the frame buffer (unless you add an explicit `console=tty0').
-With kind regards,
+In general I think one of the aspects of embedded Linux is about
+minimizing the amount of bloat dependencies. Especially, when each
+dependency can explode in a hurd of new dependencies.
 
-Geert Uytterhoeven
-Software Architect
+> "One of my most productive days was throwing away 1000 lines of code."
+>  - Ken Thompson.
+>
+How appropriate.
 
-Sony Techsoft Centre
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
-
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
-
-Sony Technology and Software Centre Europe
-A division of Sony Service Centre (Europe) N.V.
-Registered office: Technologielaan 7 · B-1840 Londerzeel · Belgium
-VAT BE 0413.825.160 · RPR Brussels
-Fortis 293-0376800-10 GEBA-BE-BB
----584349381-990899504-1213012276=:17741--
+Regards,
+-- 
+Leon
