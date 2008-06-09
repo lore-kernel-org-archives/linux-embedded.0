@@ -1,44 +1,55 @@
-From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
-Subject: Re: YAFFS in the kernel tree?
-Date: Sun, 8 Jun 2008 14:16:27 +0200
-Message-ID: <20080608121626.GC13200@logfs.org>
-References: <200805290859.54396.manningc2@actrix.gen.nz> <f19298770805281515u1602e18enbad78fccfda24b02@mail.gmail.com> <m2zlpw2lrl.fsf@ohwell.denx.de>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: [PATCH] console - Add configurable support for console charset translation
+Date: Mon, 9 Jun 2008 12:38:56 +0100
+Message-ID: <20080609113856.GD25541@shareable.org>
+References: <48447615.5050806@am.sony.com> <200806041236.12349.rob@landley.net> <20080605004630.GA26259@linux-sh.org> <200806051835.57140.rob@landley.net> <484A0207.4000405@zytor.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <m2zlpw2lrl.fsf@ohwell.denx.de>
+In-Reply-To: <484A0207.4000405@zytor.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Detlev Zundel <dzu@denx.de>
-Cc: Alexey Zaytsev <alexey.zaytsev@gmail.com>, Charles Manning <manningc2@actrix.gen.nz>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Rob Landley <rob@landley.net>, Paul Mundt <lethal@linux-sh.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Sun, 8 June 2008 13:45:18 +0200, Detlev Zundel wrote:
->=20
-> Sorry for jumping in here late, but git should be pretty good about
-> finding differences itself.  If you can revers-apply the previous
-> version patch, then apply the current version and git commit, it shou=
-ld
-> yield much more useful information.
+H. Peter Anvin wrote:
+> >When you imply it's stupid to think anyone will ever have a console on an 
+> >embedded system (because we all know the embedded world is far more 
+> >uniform than crazy diverse things like the desktop space), which of these 
+> >are _you_ referring to?
+> 
+> I'm talking about the virtual console stuff, which is *not* inherently 
+> tied to VGA.
+> 
+> The issue is whether it makes sense to have virtual console capability 
+> on a device which is so constrained that you want a *subset* of the 
+> functionality in place.
 
-Doesn't work too well, if the git version is different from the
-out-of-tree version, because of something like version checks.
+The uClinux devices I ship do have that.  System console is the serial
+port on a board header.  But field engineers are instructed to plug in
+a USB keyboard and Alt-F2 to get a diagnostic screen (we call it a
+"shell" ;-).  Occasionally even customers with specific requirements
+get to use that.
 
-What might work is to keep developing the git tree, extract a patch fro=
-m
-that, have a second patch with version checks, etc. and combinediff
-those two.
+We had to patch the kernel to get the combination of virtual terminal
+capability on a framebuffer, but system console messages not to the
+framebuffer.  The uClinux (2.4.x) disables system console on a virtual
+terminal, but due to some confusion(*), it has the side effect that
+you can't attach a VT to a framebuffer at all.  Several howtos provide
+a "con2fb" program which didn't work with uClinux.  We had to fix that.
 
-J=C3=B6rn
+(*) - the word "console" is used for four different concepts in the
+kernel, sometimes in the same code, and it seems to have confused
+someone.(**)  In the following, CONFIG_VT_CONSOLE should not control
+take_over_console(); the two "console" are not the same concept:
 
---=20
-=46ancy algorithms are slow when n is small, and n is usually small.
-=46ancy algorithms have big constants. Until you know that n is
-frequently going to be big, don't get fancy.
--- Rob Pike
---
-To unsubscribe from this list: send the line "unsubscribe linux-embedde=
-d" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+#ifdef CONFIG_VT_CONSOLE
+    take_over_console(&fb_con, first_fb_vc, last_fb_vc, fbcon_is_default);
+#endif
+
+(**) So I suggest using "virtual terminal" consistently in the code,
+and when talking about them, would be an improvement.
+
+-- Jamie
