@@ -1,59 +1,38 @@
-From: "Leon Woestenberg" <leon.woestenberg@gmail.com>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Mon, 9 Jun 2008 23:27:29 +0200
-Message-ID: <c384c5ea0806091427k3bd29168wbe55f6920054d44a@mail.gmail.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org>
-	 <87bq3rgq40.fsf@basil.nowhere.org>
-	 <1209582709.25560.441.camel@pmac.infradead.org>
-	 <200805281652.47558.rob@landley.net>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: mainlining min-configs...
+Date: Mon, 9 Jun 2008 18:37:29 -0700
+Message-ID: <484DDAD9.2000306@am.sony.com>
+References: <48447615.5050806@am.sony.com> <20080604194002.GF4189@cs181133002.pp.htv.fi> <4849CCA3.7040102@am.sony.com> <200806062329.54019.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=AwFnjGJUBVm7FxvjOvfWBnnDeO3tlzNa5OletLtJgoI=;
-        b=VH4WvLoBUcVyT+zX4tR6dsIyka+xDr9GqAVVxJNm+xfzSv90zerwqMJOJ1JG/kylte
-         oIYgnlZQGj6kYFuX3mG4btVDkoUcb2vHslQrQJ+qWWThVOyOXSXvwcKhPHgxmzni+58a
-         l+q04zCqPiDL4pBk8bAzAACRd1mMFSDtpFuu4=
-In-Reply-To: <200805281652.47558.rob@landley.net>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755543AbYFJBjc@vger.kernel.org>
+In-Reply-To: <200806062329.54019.rob@landley.net>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Rob Landley <rob@landley.net>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
+To: Rob Landley <rob@landley.net>
+Cc: Adrian Bunk <adrian.bunk@movial.fi>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Hello,
+Rob Landley wrote:
+> On Friday 06 June 2008 18:47:47 Tim Bird wrote:
+>> At a minimum, it would be nice to have a few nice examples
+>> of really, really small configs for things like qemus for different
+>> architectures (just to give embedded developers who are working
+>> on size a starting point).
+> 
+> That's more or less what I'm trying to do with my Firmware Linux project: 
+> creating cross compilers and minimal native build environments for every qemu 
+> target.
 
-On Wed, May 28, 2008 at 11:52 PM, Rob Landley <rob@landley.net> wrote:
-> On Wednesday 30 April 2008 14:11:49 David Woodhouse wrote:
->> I agree. And if we do want to pay attention to pure code size, there are
->> other approaches -- like --gc-sections and/or building with '--combine
->> -fwhole-program' which I was playing with for OLPC a while back. I must
->> dust that off now that the GCC fixes should mostly have made it into
->> current distributions.
->
-> I like simplicity.  I like _simple_.  Half my attraction to embedded systems
->
-Same here.
+Any chance of getting your minimal configs from Firmware Linux mainlined?
 
-> I submitted a patch to remove the use of perl to build the linux kernel (which
-> HPA added in 2.6.25) not because it affected the result, but because it
-> unnecessarily complicates the build system.  (And perl tends to metasticize.
+Does anyone else think this would be valuable?  If not in mainline, it
+would be nice to collect them somewhere, to compare what options different
+developers decide turn on or off.
+ -- Tim
 
-Thanks, I hope it is or gets accepted.
-
-In general I think one of the aspects of embedded Linux is about
-minimizing the amount of bloat dependencies. Especially, when each
-dependency can explode in a hurd of new dependencies.
-
-> "One of my most productive days was throwing away 1000 lines of code."
->  - Ken Thompson.
->
-How appropriate.
-
-Regards,
--- 
-Leon
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
