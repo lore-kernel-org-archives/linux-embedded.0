@@ -1,38 +1,47 @@
-From: Wolfgang Denk <wd@denx.de>
+From: David Woodhouse <dwmw2@infradead.org>
 Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Tue, 10 Jun 2008 15:49:32 +0200
-Message-ID: <20080610134932.B27D62430C@gemini.denx.de>
-References: <87a5b0800806100625m5a6d20dao47b884bff663c24c@mail.gmail.com>
+Date: Tue, 10 Jun 2008 14:53:28 +0100
+Message-ID: <1213106008.32207.784.camel@pmac.infradead.org>
+References: <20080610075432.GB776@uranus.ravnborg.org>
+	 <20080610090924.150D9248AC@gemini.denx.de>
+	 <20080610131236.GC28565@shareable.org>
+	 <87a5b0800806100625m5a6d20dao47b884bff663c24c@mail.gmail.com>
+	 <1213104800.32207.778.camel@pmac.infradead.org>
+	 <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: Your message of "Tue, 10 Jun 2008 14:25:27 BST."
-             <87a5b0800806100625m5a6d20dao47b884bff663c24c@mail.gmail.com>
+In-Reply-To: <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Will Newton <will.newton@gmail.com>
-Cc: Jamie Lokier <jamie@shareable.org>, Sam Ravnborg <sam@ravnborg.org>, Rob Landley <rob@landley.net>, Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
+Cc: Jamie Lokier <jamie@shareable.org>, Wolfgang Denk <wd@denx.de>, Sam Ravnborg <sam@ravnborg.org>, Rob Landley <rob@landley.net>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
 
-In message <87a5b0800806100625m5a6d20dao47b884bff663c24c@mail.gmail.com> you wrote:
->
-> I'm not convinced it matters at all. Self hosting on an embedded
-> architecture is, as has been mentioned, pretty pointless.
+On Tue, 2008-06-10 at 14:47 +0100, Will Newton wrote:
+> On Tue, Jun 10, 2008 at 2:33 PM, David Woodhouse <dwmw2@infradead.org> wrote:
+> > On Tue, 2008-06-10 at 14:25 +0100, Will Newton wrote:
+> >> Using a kernel compile as a test isn't such a great idea. Stress tests
+> >> of that kind are not particularly useful for pinning down bugs - so
+> >> your kernel compile failed, what now? Far better to use LTP tests or
+> >> similar that are designed to be reproduceable and tunable for your
+> >> system. For example I don't think I'll ever be able to self host a
+> >> kernel build on a board with only 32Mb of on-board RAM.
+> >
+> > Actually, cross-building on NFS does tend to find a _lot_ of issues
+> > which crop up with board ports; especially PCI arbitration, DMA
+> > coherency, cache and MMU issues. LTP often doesn't catch the same
+> > problems.
+> 
+> It may trigger a number of bugs, I don't disagree, but as a test it is
+> a blunt instrument.
 
-YMMV...
+Yes, it's a blunt instrument, but blunt instruments are often effective.
 
-> system. For example I don't think I'll ever be able to self host a
-> kernel build on a board with only 32Mb of on-board RAM.
-
-It depends. We've done this on board with as little as 16 MB RAM.
-
-Best regards,
-
-Wolfgang Denk
+I disagree with your claim that using it as a test isn't a good idea.
+I would, however, grant you that using it as your _only_ test is a bad
+idea :)
 
 -- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-"Confound these ancestors.... They've stolen our best ideas!"
-- Ben Jonson
+dwmw2
+
