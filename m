@@ -1,29 +1,34 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Tue, 10 Jun 2008 09:54:32 +0200
-Message-ID: <20080610075432.GB776@uranus.ravnborg.org>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806092253.11897.rob@landley.net> <20080610043020.GA31765@uranus.ravnborg.org> <200806100155.31904.rob@landley.net>
+From: Tom Cooksey <thomas.cooksey@trolltech.com>
+Subject: Re: GUI on omap-osk
+Date: Tue, 10 Jun 2008 10:16:32 +0200
+Message-ID: <200806101016.33489.thomas.cooksey@trolltech.com>
+References: <a1d91fa0806100031v2c0557afmd2d47a46d32ab3d@mail.gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <a1d91fa0806100031v2c0557afmd2d47a46d32ab3d@mail.gmail.com>
 Content-Disposition: inline
-In-Reply-To: <200806100155.31904.rob@landley.net>
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Rob Landley <rob@landley.net>
-Cc: Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
+To: mohammed shareef <mdshareef@gmail.com>
+Cc: omap <linux-omap@vger.kernel.org>, linux-newbie@vger.kernel.org, linux-embedded@vger.kernel.org
 
-> (Maybe I _am_ the only person who still cares about 
-> building on a host without perl.  If I wasn't, somebody else would have acked 
-> the patch...)
+On Tuesday 10 June 2008 09:31:18 mohammed shareef wrote:
+> Dear All,
+> 
+> Could some one tell me how to install Qtopia/OPIE/QTEmbedded on omap5912 -osk?
+> 
 
-perl is pretty standard and I fail to see the benefits of avoiding it.
-For embedded development I see even less benefits as I assume
-any sane embedded development environment are based on a
-cross-toolchain so you do the build on a high perfomance box.
 
-Building everything for my arm board on the arm board would be a disater
-for example.
+That's probably a bit off-topic for this list. Try the Qtopia-Interest mailing list we run:
 
-	Sam
+http://lists.trolltech.com/qtopia-interest/
+
+I'll try to help you on there.
+
+
+
+Cheers,
+
+Tom
