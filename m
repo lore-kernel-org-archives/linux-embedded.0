@@ -1,48 +1,79 @@
-From: Ben Nizette <bn@niasdigital.com>
-Subject: Re: mainlining min-configs...
-Date: Tue, 10 Jun 2008 13:14:36 +1000
-Message-ID: <1213067676.3213.27.camel@moss.renham>
-References: <48447615.5050806@am.sony.com>
-	 <20080604194002.GF4189@cs181133002.pp.htv.fi>
-	 <4849CCA3.7040102@am.sony.com> <200806062329.54019.rob@landley.net>
-	 <484DDAD9.2000306@am.sony.com>
+From: Rob Landley <rob@landley.net>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Mon, 9 Jun 2008 22:53:11 -0500
+Message-ID: <200806092253.11897.rob@landley.net>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200805281652.47558.rob@landley.net> <c384c5ea0806091427k3bd29168wbe55f6920054d44a@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <484DDAD9.2000306@am.sony.com>
+In-Reply-To: <c384c5ea0806091427k3bd29168wbe55f6920054d44a@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Rob Landley <rob@landley.net>, Adrian Bunk <adrian.bunk@movial.fi>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: Leon Woestenberg <leon.woestenberg@gmail.com>
+Cc: David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
+On Monday 09 June 2008 16:27:29 Leon Woestenberg wrote:
+> > I submitted a patch to remove the use of perl to build the linux kernel
+> > (which HPA added in 2.6.25) not because it affected the result, but
+> > because it unnecessarily complicates the build system.  (And perl tends
+> > to metasticize.
+>
+> Thanks, I hope it is or gets accepted.
 
-On Mon, 2008-06-09 at 18:37 -0700, Tim Bird wrote:
-> Rob Landley wrote:
-> > On Friday 06 June 2008 18:47:47 Tim Bird wrote:
-> >> At a minimum, it would be nice to have a few nice examples
-> >> of really, really small configs for things like qemus for different
-> >> architectures (just to give embedded developers who are working
-> >> on size a starting point).
-> > 
-> > That's more or less what I'm trying to do with my Firmware Linux project: 
-> > creating cross compilers and minimal native build environments for every qemu 
-> > target.
-> 
-> Any chance of getting your minimal configs from Firmware Linux mainlined?
+Nope, Peter Anvin shot it down (saying what I was doing was a strange, purely 
+academic exercise), and Sam Ravnborg announced his vague intention to rewrite 
+large chunks of kbuild in perl in the future.  (Because nothing 
+says "maintainability" like perl...)
 
-allnoconfig? ;-)
+For some reason they wanted to mail me about it off-list rather than cc:ing 
+the list about this plan.
 
-> 
-> Does anyone else think this would be valuable?  If not in mainline, it
-> would be nice to collect them somewhere, to compare what options different
-> developers decide turn on or off.
+A number of embedded people emailed me about it off list, but nobody ever 
+replied to my post _on_ the list to say I wasn't alone in this, or acked the 
+patch to say it worked for them, or anything like that.  So there was a 
+perception of zero support, and I gave up trying to follow up on it for 
+2.6.25.  I've got it working for me, and if more perl shows up I'll come up 
+with more patches to remove it for my own personal build environment.
 
-Seriously though I maintain a bunch of AVR32 minimal configs.  I keep
-them as a smallest-working-config baseline to build on; I'm sure others
-would get value from having easy access to that kind of thing.
+I might try to submit again in a few months, but in the meantime my patches 
+are at
+http://landley.net/hg/firmware/file/tip/sources/patches/ (see the 
+linux-*noperl*.patch one).
 
-IMO It'd be nice to wire them to an automagic bloat-o-meter as well, but
-I suspect no-one would really take notice anyway.
+Maybe I'll try linux-kernel again.  I submitted my miniconfig patches 
+something like three times.  But if the guys on the list didn't want it, and 
+the guys in the embedded world poking me to do something about it weren't 
+willing to even ack the darn patch on the list, and the people who want 
+changes made to it aren't willing to change it from what I'm happy with to 
+what they want and expect me to do it for them when I'm already happy with 
+it...
 
-	--Ben.
+My todo list is long.  This goes somewhere after resorting the contents of my 
+bookshelves.
+
+I've found that posting to linux-kernel tends to attract "belling the cat" 
+ideas.  For example, I use kconfig in toybox and I posted patches to make it 
+easier to use kconfig in other, non-kernel projects.  The resulting thread 
+turned into a grandiose plan about a separate kconfig that would be 
+maintained as a spearate project and get installed on your system ala make, 
+for use by any source package that wants that functionality.  To which my 
+response was "feel free, I have no interest in doing that, did you want my 
+patches or not?"  Improvements in the UI to use miniconfigs were held up by 
+people objecting to how they were generated, which is separate from how 
+they're used.  And one of peter's objections to the perl removal patch (which 
+basically checked the precalculated header file into the tree) was that some 
+out of tree mips patch that never got merged might want to let you enter the 
+clock speed as an input field, so you can't possibly just rely on 
+precalculated values and people who want to check in code using a new value 
+checking in an updated header with that value.  (Even though that makes every 
+existing architecture happy, last I checked.)
+
+I'm a hobbyist.  I made it work for me.  If nobody else is interested in what 
+I did, I'm ok with that...
+
+Rob
+-- 
+"One of my most productive days was throwing away 1000 lines of code."
+  - Ken Thompson.
