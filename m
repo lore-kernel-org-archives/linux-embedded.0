@@ -1,65 +1,124 @@
-From: Adrian Bunk <bunk@kernel.org>
-Subject: Re: mainlining min-configs...
-Date: Tue, 10 Jun 2008 22:05:30 +0300
-Message-ID: <20080610190530.GH11685@cs181133002.pp.htv.fi>
-References: <48447615.5050806@am.sony.com> <20080604194002.GF4189@cs181133002.pp.htv.fi> <4849CCA3.7040102@am.sony.com> <200806062329.54019.rob@landley.net> <484DDAD9.2000306@am.sony.com> <20080610083610.GC1987@cs181133002.pp.htv.fi> <484EC576.5080302@am.sony.com> <20080610183004.GG11685@cs181133002.pp.htv.fi> <20080610185123.GA15838@uranus.ravnborg.org>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: [PATCH] add diffconfig utility
+Date: Tue, 10 Jun 2008 12:41:54 -0700
+Message-ID: <484ED902.9040000@am.sony.com>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1758121AbYFJTGn@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080610185123.GA15838@uranus.ravnborg.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Tim Bird <tim.bird@am.sony.com>, Rob Landley <rob@landley.net>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: linux-embedded <linux-embedded@vger.kernel.org>
+Cc: linux kernel <linux-kernel@vger.kernel.org>
 
-On Tue, Jun 10, 2008 at 08:51:23PM +0200, Sam Ravnborg wrote:
-> On Tue, Jun 10, 2008 at 09:30:04PM +0300, Adrian Bunk wrote:
-> > On Tue, Jun 10, 2008 at 11:18:30AM -0700, Tim Bird wrote:
-> > > Adrian Bunk wrote:
-> > >...
-> > > > You need both, and ideally constantly done by the same person against 
-> > > > Linus' tree, -next and -mm.
-> > > > 
-> > > > Where to get your minimal configs from at the start is just a small 
-> > > > thing at the beginning - don't underestimate the required manual work 
-> > > > that will have to be done each week.
-> > > 
-> > > This is probably why I haven't signed up for this myself previously.
-> > > I'd be interested in finding out the rate at which defconfigs
-> > > bitrot in mainline.  My experience is that usually a 'make oldconfig'
-> > > will produce something usable.  But maybe that wouldn't be as
-> > > effective with a minconfig?
-> > >...
-> > 
-> > Someone has to run the 'make oldconfig' for all configs...
-> > 
-> > And no, you cannot get that completely automated.
-> 
-> When I get my kconfig patchset polished you will be able to do:
-> 
-> make K=my_mini_config allnoconfig
+diffconfig is a simple utility for comparing two .config files.
+Using standard diff to compare .config files often includes
+extraneous and distracting information.  This utility produces
+sorted output with only the changes in configuration values
+between the two files.
 
-  make KCONFIG_ALLCONFIG=my_mini_config allnoconfig
+I have found this handy for use in testing to
+detect when option dependencies unexpectedly affect
+other options.
 
-already does the same.
+To use, apply the patch and 'chmod a+x scripts/diffconfig'
 
-> Thus selecting 'no' for all new symbols in an automated fashion.
-> I know that in a few cases 'no' is the wrong answer but in the
-> 99% of the cases 'no' is perfectly valid.
+Signed-off-by: Tim Bird <tim.bird@am.sony.com>
 
-The 1% contain cases like e.g. a kconfig variable you need getting
-a new dependency.
+ diffconfig |   90 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 90 insertions(+)
 
-> 	Sam
+--- linux-2.6.24.orig/scripts/diffconfig	1969-12-31 16:00:00.000000000 -0800
++++ test-linux/scripts/diffconfig	2008-06-10 12:11:14.000000000 -0700
+@@ -0,0 +1,90 @@
++#!/usr/bin/python
++#
++# diffconfig - a tool to compare .config files.
++#
++# originally written in 2006 by Matt Mackall
++#  (at least, this was in his bloatwatch source code)
++#
++# diffconfig is a simple utility for comparing two .config files.
++# Using standard diff to compare .config files often includes
++# extraneous and distracting information.  This utility produces
++# sorted output with only the changes in configuration values
++# between the two files.
++#
++# Added and removed items are shown with a leading plus or minus,
++# respectively.  Changed items show the old and new values on a
++# single line.
++#
++# Example usage:
++# $ diffconfig .config config-test-nfs-off
++# -LOCKD  y
++# -LOCKD_V4  y
++# -NFS_COMMON  y
++# -NFS_DIRECTIO  n
++# -NFS_V3  y
++# -NFS_V3_ACL  n
++# -NFS_V4  n
++# -ROOT_NFS  y
++# -RPCSEC_GSS_KRB5  n
++# -RPCSEC_GSS_SPKM3  n
++# -SUNRPC  y
++# -SUNRPC_BIND34  n
++#  NFS_FS  y -> n
++
++import sys, os
++
++if len(sys.argv) < 3:
++	print "Usage: diffconfig <config1> <config2>"
++	sys.exit(0)
++
++# returns a dictionary of name/value pairs for config items in the file
++def readconfig(config_file):
++    d = {}
++    for line in config_file:
++        line = line[:-1]
++        if line[:7] == "CONFIG_":
++            name, val = line[7:].split("=", 1)
++            d[name] = val
++        if line[-11:] == " is not set":
++            d[line[9:-11]] = "n"
++    return d
++
++a = readconfig(file(sys.argv[1]))
++b = readconfig(file(sys.argv[2]))
++
++# print items in a but not b (accumulate, sort and print)
++old = []
++for config in a:
++    if config not in b:
++        old.append(config)
++
++old.sort()
++
++for config in old:
++    print "-%s  %s" % (config, a[config])
++    del a[config]
++
++# print items that changed (accumulate, sort, and print)
++changed = []
++for config in a:
++    if a[config] != b[config]:
++        changed.append(config)
++    else:
++        del b[config]
++
++changed.sort()
++
++for config in changed:
++    print " %s  %s -> %s" % (config, a[config], b[config])
++    del b[config]
++
++# now print items in b but not in a
++
++# the items from b that were in a (either the same or that changed) were removed
++# the only items left were not in a
++new = b.keys()
++
++new.sort()
++
++for config in new:
++    print "+%s  %s" % (config, b[config])
 
-cu
-Adrian
-
--- 
-
-       "Is there not promise of rain?" Ling Tan asked suddenly out
-        of the darkness. There had been need of rain for many days.
-       "Only a promise," Lao Er said.
-                                       Pearl S. Buck - Dragon Seed
