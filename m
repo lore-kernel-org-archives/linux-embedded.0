@@ -1,42 +1,26 @@
-From: Arjan van de Ven <arjan@infradead.org>
+From: David Woodhouse <dwmw2@infradead.org>
 Subject: Re: [PATCH] add diffconfig utility
-Date: Tue, 10 Jun 2008 16:02:02 -0700
-Message-ID: <20080610160202.3bb9d07f@infradead.org>
+Date: Wed, 11 Jun 2008 00:10:29 +0100
+Message-ID: <1213139429.2534.102.camel@shinybook.infradead.org>
 References: <484ED902.9040000@am.sony.com>
-	<1213135624.2534.99.camel@shinybook.infradead.org>
+	 <1213135624.2534.99.camel@shinybook.infradead.org>
+	 <20080610160202.3bb9d07f@infradead.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1760251AbYFJXCW@vger.kernel.org>
-In-Reply-To: <1213135624.2534.99.camel@shinybook.infradead.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20080610160202.3bb9d07f@infradead.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Woodhouse <dwmw2@infradead.org>
+To: Arjan van de Ven <arjan@infradead.org>
 Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Tue, 10 Jun 2008 23:07:04 +0100
-David Woodhouse <dwmw2@infradead.org> wrote:
+On Tue, 2008-06-10 at 16:02 -0700, Arjan van de Ven wrote:
+> the person who wrote that tool also wrote a similar diff tool ;)
+> but it's horrible perl I suspect.
 
-> On Tue, 2008-06-10 at 12:41 -0700, Tim Bird wrote:
-> > +# Added and removed items are shown with a leading plus or minus,
-> > +# respectively.  Changed items show the old and new values on a
-> > +# single line.
-> 
-> It'd be really nice if it could give its output in the same form as
-> the .config file itself -- so it'd look something like:
-> 
-> # CONFIG_FOO is not set
-> CONFIG_BAR=y
-> 
-> That can be used with this kind of tool too...
-> 
-
-the person who wrote that tool also wrote a similar diff tool ;)
-but it's horrible perl I suspect.
-
-
+Yeah, but I can't find it in CVS right now for some reason.
 
 -- 
-If you want to reach me at my work email, use arjan@linux.intel.com
-For development, discussion and tips for power savings, 
-visit http://www.lesswatts.org
+dwmw2
+
