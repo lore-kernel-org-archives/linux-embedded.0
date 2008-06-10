@@ -1,57 +1,40 @@
-From: "Grant Likely" <grant.likely@secretlab.ca>
+From: Wolfgang Denk <wd@denx.de>
 Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Tue, 10 Jun 2008 08:00:40 -0600
-Message-ID: <fa686aa40806100700q55b24087mfbf8243133b23830@mail.gmail.com>
-References: <20080610075432.GB776@uranus.ravnborg.org>
-	 <20080610090924.150D9248AC@gemini.denx.de>
-	 <20080610131236.GC28565@shareable.org>
-	 <87a5b0800806100625m5a6d20dao47b884bff663c24c@mail.gmail.com>
-	 <1213104800.32207.778.camel@pmac.infradead.org>
-	 <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com>
-	 <1213106008.32207.784.camel@pmac.infradead.org>
+Date: Tue, 10 Jun 2008 16:01:39 +0200
+Message-ID: <20080610140139.9817F2430C@gemini.denx.de>
+References: <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1213106008.32207.784.camel@pmac.infradead.org>
-Content-Disposition: inline
+In-reply-to: Your message of "Tue, 10 Jun 2008 14:47:20 BST."
+             <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: Will Newton <will.newton@gmail.com>, Jamie Lokier <jamie@shareable.org>, Wolfgang Denk <wd@denx.de>, Sam Ravnborg <sam@ravnborg.org>, Rob Landley <rob@landley.net>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: David Woodhouse <dwmw2@infradead.org>, Jamie Lokier <jamie@shareable.org>, Sam Ravnborg <sam@ravnborg.org>, Rob Landley <rob@landley.net>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
 
-On Tue, Jun 10, 2008 at 7:53 AM, David Woodhouse <dwmw2@infradead.org> wrote:
-> On Tue, 2008-06-10 at 14:47 +0100, Will Newton wrote:
->> On Tue, Jun 10, 2008 at 2:33 PM, David Woodhouse <dwmw2@infradead.org> wrote:
->> > On Tue, 2008-06-10 at 14:25 +0100, Will Newton wrote:
->> >> Using a kernel compile as a test isn't such a great idea. Stress tests
->> >> of that kind are not particularly useful for pinning down bugs - so
->> >> your kernel compile failed, what now? Far better to use LTP tests or
->> >> similar that are designed to be reproduceable and tunable for your
->> >> system. For example I don't think I'll ever be able to self host a
->> >> kernel build on a board with only 32Mb of on-board RAM.
->> >
->> > Actually, cross-building on NFS does tend to find a _lot_ of issues
->> > which crop up with board ports; especially PCI arbitration, DMA
->> > coherency, cache and MMU issues. LTP often doesn't catch the same
->> > problems.
->>
->> It may trigger a number of bugs, I don't disagree, but as a test it is
->> a blunt instrument.
+In message <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com> you wrote:
 >
-> Yes, it's a blunt instrument, but blunt instruments are often effective.
->
-> I disagree with your claim that using it as a test isn't a good idea.
-> I would, however, grant you that using it as your _only_ test is a bad
-> idea :)
+> I would be surprised if it was possible to compile Linux with gcc 4.2
+> with 32MiB of total system memory.
 
-Just to add my voice to the chorus; I fully agree.  Brute force
-testing is useful.  It can expose corner cases that haven't been
-considered in formal test suites.
+Hint: if memory really gets tight, you can use swap space. Either  to
+a  local  drive  (either through PCI or PCMCIA/PCCard or USB or FW or
+...), or over the network. This just adds  another  level  of  stress
+testing  to  areas in the kernel that are not so well covered by some
+other tests.
 
-Cheers,
-g.
+Guess who found out that swap on MPC8xx was broken for  a  long,  long
+time, and how it was detected?
+
+Best regards,
+
+Wolfgang Denk
 
 -- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+You Don't Have To Be 'Damned' To Work Here, But It Helps!!!
+                                             - Terry Pratchett, _Eric_
