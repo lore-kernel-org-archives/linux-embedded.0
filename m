@@ -1,64 +1,49 @@
 From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Tue, 10 Jun 2008 10:36:07 -0700
-Message-ID: <484EBB87.8070009@am.sony.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806092253.11897.rob@landley.net> <20080610043020.GA31765@uranus.ravnborg.org> <200806100155.31904.rob@landley.net> <20080610075432.GB776@uranus.ravnborg.org>
+Subject: Re: mainlining min-configs...
+Date: Tue, 10 Jun 2008 11:18:30 -0700
+Message-ID: <484EC576.5080302@am.sony.com>
+References: <48447615.5050806@am.sony.com> <20080604194002.GF4189@cs181133002.pp.htv.fi> <4849CCA3.7040102@am.sony.com> <200806062329.54019.rob@landley.net> <484DDAD9.2000306@am.sony.com> <20080610083610.GC1987@cs181133002.pp.htv.fi>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080610075432.GB776@uranus.ravnborg.org>
+In-Reply-To: <20080610083610.GC1987@cs181133002.pp.htv.fi>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Rob Landley <rob@landley.net>, Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
+To: Adrian Bunk <bunk@kernel.org>
+Cc: Rob Landley <rob@landley.net>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Sam Ravnborg wrote:
->> (Maybe I _am_ the only person who still cares about 
->> building on a host without perl.  If I wasn't, somebody else would have acked 
->> the patch...)
+Adrian Bunk wrote:
+> But if you want to discover size change with minimal configs early you 
+> anyway have to both:
+> - constantly keep your configs in shape so that they are both minimal
+>   for some set of hardware support and features and
+> - investigate for any size changes what caused them
+>   (experience has shown that putting information on a webpage doesn't
+>    fix problems - even for compile errors).
+Amen to that last point!
+
 > 
-> perl is pretty standard and I fail to see the benefits of avoiding it.
-> For embedded development I see even less benefits as I assume
-> any sane embedded development environment are based on a
-> cross-toolchain so you do the build on a high perfomance box.
+> You need both, and ideally constantly done by the same person against 
+> Linus' tree, -next and -mm.
 > 
-> Building everything for my arm board on the arm board would be a disater
-> for example.
+> Where to get your minimal configs from at the start is just a small 
+> thing at the beginning - don't underestimate the required manual work 
+> that will have to be done each week.
 
-It is true that perl is pervasive and standard, in most scenarios.
-However, it is not uncommon in the embedded world for people
-to strive to containerize the build process for a whole distro (kernel
-included) in order to reduce problems with configure scripts that
-(incorrectly) probe the host environment.  I know of at least 3 distros
-or distro-building methods that do this.  Working to reduce the
-complexity of these constrained environments is a valid goal.
+This is probably why I haven't signed up for this myself previously.
+I'd be interested in finding out the rate at which defconfigs
+bitrot in mainline.  My experience is that usually a 'make oldconfig'
+will produce something usable.  But maybe that wouldn't be as
+effective with a minconfig?
 
-My own reasons for wanting to avoid using perl, however, aren't
-based on its availability.
-
-I don't want to start a language war, but in general I think adding
-"knowledge of perl" to the list of things someone needs to understand
-in order to understand how to build the kernel, would be a bad thing.
-There's already a huge mountain to climb for someone trying to learn
-enough to modify the kernel (or it's build system).  Adding perl
-doesn't IMHO contribute enough value to warrant this extension in
-required knowledge.
-
-Also (again IMHO), perl is harder to maintain than other alternatives,
-if a full-service scripting language is really needed.
-
-I don't care so much if perl is used in some non-essential role,
-like python is used for bloat-o-meter, for example.  But it would
-be nice, IMHO, to minimize the external dependencies for required
-kernel build infrastructure.
-
-Having said all this, I can't object too strenuously, since I
-have some code, out of tree, that uses perl as a pre-processor.
-One of the reasons I haven't submitted it is that I find its
-use of perl somewhat distasteful, for the reasons mentioned
-above.
+Maybe I'll collect some minconfigs, and try maintaining them
+in my own tree for a few releases to see how onerous it is...
+The problem is that I can only reasonably do this for boards
+I have, so there'd only be a few.  But maybe that'd be enough.
+They would really only be meant as examples.
  -- Tim
+
 
 =============================
 Tim Bird
