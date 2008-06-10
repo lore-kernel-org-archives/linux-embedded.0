@@ -1,124 +1,49 @@
 From: Tim Bird <tim.bird@am.sony.com>
-Subject: [PATCH] add diffconfig utility
-Date: Tue, 10 Jun 2008 12:41:54 -0700
-Message-ID: <484ED902.9040000@am.sony.com>
+Subject: Re: minimum config for an ARM qemu target
+Date: Tue, 10 Jun 2008 13:43:57 -0700
+Message-ID: <484EE78D.8090500@am.sony.com>
+References: <484EC6B7.7050503@am.sony.com> <484EDFBD.2080307@free-electrons.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <484EDFBD.2080307@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
-Cc: linux kernel <linux-kernel@vger.kernel.org>
+To: Michael Opdenacker <michael@free-electrons.com>
+Cc: linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-diffconfig is a simple utility for comparing two .config files.
-Using standard diff to compare .config files often includes
-extraneous and distracting information.  This utility produces
-sorted output with only the changes in configuration values
-between the two files.
+Michael Opdenacker wrote:
+> Here's one such configuration:
+> http://free-electrons.com/tmp/versatile_qemu_defconfig
+>...
+> Or would you prefer to have the exact configuration I used last year? In
+> this case, the configuration is in
+> http://free-electrons.com/pub/qemu/demos/arm/directfb/1.0/
 
-I have found this handy for use in testing to
-detect when option dependencies unexpectedly affect
-other options.
+Thanks - this is just what I'm interested in.
 
-To use, apply the patch and 'chmod a+x scripts/diffconfig'
+I downloaded both, and it turns out that they're very similar:
 
-Signed-off-by: Tim Bird <tim.bird@am.sony.com>
+diffconfig versatile_qemu_defconfig config-qemu-arm-2.6.20
+-PRINTK_TIME  n
+ INITRAMFS_SOURCE  "" -> "../rootfs"
+ PRINTK  y -> n
++INITRAMFS_ROOT_GID  0
++INITRAMFS_ROOT_UID  0
 
- diffconfig |   90 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 90 insertions(+)
+Only PRINTK and PRINTK_TIME are different (from a size-affecting
+perspective).
 
---- linux-2.6.24.orig/scripts/diffconfig	1969-12-31 16:00:00.000000000 -0800
-+++ test-linux/scripts/diffconfig	2008-06-10 12:11:14.000000000 -0700
-@@ -0,0 +1,90 @@
-+#!/usr/bin/python
-+#
-+# diffconfig - a tool to compare .config files.
-+#
-+# originally written in 2006 by Matt Mackall
-+#  (at least, this was in his bloatwatch source code)
-+#
-+# diffconfig is a simple utility for comparing two .config files.
-+# Using standard diff to compare .config files often includes
-+# extraneous and distracting information.  This utility produces
-+# sorted output with only the changes in configuration values
-+# between the two files.
-+#
-+# Added and removed items are shown with a leading plus or minus,
-+# respectively.  Changed items show the old and new values on a
-+# single line.
-+#
-+# Example usage:
-+# $ diffconfig .config config-test-nfs-off
-+# -LOCKD  y
-+# -LOCKD_V4  y
-+# -NFS_COMMON  y
-+# -NFS_DIRECTIO  n
-+# -NFS_V3  y
-+# -NFS_V3_ACL  n
-+# -NFS_V4  n
-+# -ROOT_NFS  y
-+# -RPCSEC_GSS_KRB5  n
-+# -RPCSEC_GSS_SPKM3  n
-+# -SUNRPC  y
-+# -SUNRPC_BIND34  n
-+#  NFS_FS  y -> n
-+
-+import sys, os
-+
-+if len(sys.argv) < 3:
-+	print "Usage: diffconfig <config1> <config2>"
-+	sys.exit(0)
-+
-+# returns a dictionary of name/value pairs for config items in the file
-+def readconfig(config_file):
-+    d = {}
-+    for line in config_file:
-+        line = line[:-1]
-+        if line[:7] == "CONFIG_":
-+            name, val = line[7:].split("=", 1)
-+            d[name] = val
-+        if line[-11:] == " is not set":
-+            d[line[9:-11]] = "n"
-+    return d
-+
-+a = readconfig(file(sys.argv[1]))
-+b = readconfig(file(sys.argv[2]))
-+
-+# print items in a but not b (accumulate, sort and print)
-+old = []
-+for config in a:
-+    if config not in b:
-+        old.append(config)
-+
-+old.sort()
-+
-+for config in old:
-+    print "-%s  %s" % (config, a[config])
-+    del a[config]
-+
-+# print items that changed (accumulate, sort, and print)
-+changed = []
-+for config in a:
-+    if a[config] != b[config]:
-+        changed.append(config)
-+    else:
-+        del b[config]
-+
-+changed.sort()
-+
-+for config in changed:
-+    print " %s  %s -> %s" % (config, a[config], b[config])
-+    del b[config]
-+
-+# now print items in b but not in a
-+
-+# the items from b that were in a (either the same or that changed) were removed
-+# the only items left were not in a
-+new = b.keys()
-+
-+new.sort()
-+
-+for config in new:
-+    print "+%s  %s" % (config, b[config])
+Thanks a bunch!
+ -- Tim
+
+P.S. I remember Matt saying that the linux-tiny list is deprecated, so
+I'm copying (after the fact) linux-embedded on this thread.
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
 
