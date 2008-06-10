@@ -1,34 +1,70 @@
-From: Tom Cooksey <thomas.cooksey@trolltech.com>
-Subject: Re: GUI on omap-osk
-Date: Tue, 10 Jun 2008 10:16:32 +0200
-Message-ID: <200806101016.33489.thomas.cooksey@trolltech.com>
-References: <a1d91fa0806100031v2c0557afmd2d47a46d32ab3d@mail.gmail.com>
+From: Adrian Bunk <bunk@kernel.org>
+Subject: Re: mainlining min-configs...
+Date: Tue, 10 Jun 2008 11:36:10 +0300
+Message-ID: <20080610083610.GC1987@cs181133002.pp.htv.fi>
+References: <48447615.5050806@am.sony.com> <20080604194002.GF4189@cs181133002.pp.htv.fi> <4849CCA3.7040102@am.sony.com> <200806062329.54019.rob@landley.net> <484DDAD9.2000306@am.sony.com>
 Mime-Version: 1.0
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <a1d91fa0806100031v2c0557afmd2d47a46d32ab3d@mail.gmail.com>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-omap-owner@vger.kernel.org
+In-Reply-To: <484DDAD9.2000306@am.sony.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: mohammed shareef <mdshareef@gmail.com>
-Cc: omap <linux-omap@vger.kernel.org>, linux-newbie@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Rob Landley <rob@landley.net>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Tuesday 10 June 2008 09:31:18 mohammed shareef wrote:
-> Dear All,
+On Mon, Jun 09, 2008 at 06:37:29PM -0700, Tim Bird wrote:
+> Rob Landley wrote:
+> > On Friday 06 June 2008 18:47:47 Tim Bird wrote:
+> >> At a minimum, it would be nice to have a few nice examples
+> >> of really, really small configs for things like qemus for different
+> >> architectures (just to give embedded developers who are working
+> >> on size a starting point).
+> > 
+> > That's more or less what I'm trying to do with my Firmware Linux project: 
+> > creating cross compilers and minimal native build environments for every qemu 
+> > target.
 > 
-> Could some one tell me how to install Qtopia/OPIE/QTEmbedded on omap5912 -osk?
-> 
+> Any chance of getting your minimal configs from Firmware Linux mainlined?
 
+It could help finding compile errors in some more "exotic" configurations
+early (but I'd question whether the Rob's current configs are really 
+both minimal and typical for embedded usage - e.g the i686 one having 
+both ext2 and ext3 enabled but no JFFS2; and enabling all IO schedulers 
+in the kernel as well as ACPI is also not a typical embedded setup).
 
-That's probably a bit off-topic for this list. Try the Qtopia-Interest mailing list we run:
+But if you want to discover size change with minimal configs early you 
+anyway have to both:
+- constantly keep your configs in shape so that they are both minimal
+  for some set of hardware support and features and
+- investigate for any size changes what caused them
+  (experience has shown that putting information on a webpage doesn't
+   fix problems - even for compile errors).
 
-http://lists.trolltech.com/qtopia-interest/
+You need both, and ideally constantly done by the same person against 
+Linus' tree, -next and -mm.
 
-I'll try to help you on there.
+Where to get your minimal configs from at the start is just a small 
+thing at the beginning - don't underestimate the required manual work 
+that will have to be done each week.
 
+> Does anyone else think this would be valuable?  If not in mainline, it
+> would be nice to collect them somewhere, to compare what options different
+> developers decide turn on or off.
 
+You already have this when you look at e.g. the ARM defconfigs in the 
+kernel
 
-Cheers,
+>  -- Tim
 
-Tom
+cu
+Adrian
+
+-- 
+
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
+
