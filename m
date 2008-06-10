@@ -1,49 +1,31 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: minimum config for an ARM qemu target
-Date: Tue, 10 Jun 2008 13:43:57 -0700
-Message-ID: <484EE78D.8090500@am.sony.com>
-References: <484EC6B7.7050503@am.sony.com> <484EDFBD.2080307@free-electrons.com>
+From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
+Subject: Re: [PATCH] add diffconfig utility
+Date: Tue, 10 Jun 2008 23:02:18 +0200
+Message-ID: <20080610210217.GA2432@logfs.org>
+References: <484ED902.9040000@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <484EDFBD.2080307@free-electrons.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1758268AbYFJVCo@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <484ED902.9040000@am.sony.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Michael Opdenacker <michael@free-electrons.com>
-Cc: linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Michael Opdenacker wrote:
-> Here's one such configuration:
-> http://free-electrons.com/tmp/versatile_qemu_defconfig
->...
-> Or would you prefer to have the exact configuration I used last year? In
-> this case, the configuration is in
-> http://free-electrons.com/pub/qemu/demos/arm/directfb/1.0/
+On Tue, 10 June 2008 12:41:54 -0700, Tim Bird wrote:
+> Delivery-date: Tue, 10 Jun 2008 21:44:08 +0200
+> From: Tim Bird <tim.bird@am.sony.com>
+> To: linux-embedded <linux-embedded@vger.kernel.org>
+> CC: linux kernel <linux-kernel@vger.kernel.org>
+> Subject: [PATCH] add diffconfig utility
 
-Thanks - this is just what I'm interested in.
+Neat.  But I have one nagging question: who do you expect to merge this
+patch? ;)
 
-I downloaded both, and it turns out that they're very similar:
+J=C3=B6rn
 
-diffconfig versatile_qemu_defconfig config-qemu-arm-2.6.20
--PRINTK_TIME  n
- INITRAMFS_SOURCE  "" -> "../rootfs"
- PRINTK  y -> n
-+INITRAMFS_ROOT_GID  0
-+INITRAMFS_ROOT_UID  0
-
-Only PRINTK and PRINTK_TIME are different (from a size-affecting
-perspective).
-
-Thanks a bunch!
- -- Tim
-
-P.S. I remember Matt saying that the linux-tiny list is deprecated, so
-I'm copying (after the fact) linux-embedded on this thread.
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
-
+--=20
+Premature optimization is the root of all evil.
+-- Donald Knuth
