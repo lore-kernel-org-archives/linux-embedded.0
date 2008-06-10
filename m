@@ -1,38 +1,137 @@
 From: Sam Ravnborg <sam@ravnborg.org>
 Subject: Re: [PATCH] add diffconfig utility
-Date: Tue, 10 Jun 2008 23:18:41 +0200
-Message-ID: <20080610211841.GA23855@uranus.ravnborg.org>
-References: <484ED902.9040000@am.sony.com> <20080610210217.GA2432@logfs.org>
+Date: Tue, 10 Jun 2008 23:21:58 +0200
+Message-ID: <20080610212158.GB23855@uranus.ravnborg.org>
+References: <484ED902.9040000@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20080610210217.GA2432@logfs.org>
+In-Reply-To: <484ED902.9040000@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: =?iso-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Tue, Jun 10, 2008 at 11:02:18PM +0200, J=F6rn Engel wrote:
-> On Tue, 10 June 2008 12:41:54 -0700, Tim Bird wrote:
-> > Delivery-date: Tue, 10 Jun 2008 21:44:08 +0200
-> > From: Tim Bird <tim.bird@am.sony.com>
-> > To: linux-embedded <linux-embedded@vger.kernel.org>
-> > CC: linux kernel <linux-kernel@vger.kernel.org>
-> > Subject: [PATCH] add diffconfig utility
->=20
-> Neat.  But I have one nagging question: who do you expect to merge th=
-is
-> patch? ;)
-I will merge it if the feedabck is positive and eventual feedback
-is dealt with. (And Tim reminds me to do so in a week or so).
+On Tue, Jun 10, 2008 at 12:41:54PM -0700, Tim Bird wrote:
+> diffconfig is a simple utility for comparing two .config files.
+> Using standard diff to compare .config files often includes
+> extraneous and distracting information.  This utility produces
+> sorted output with only the changes in configuration values
+> between the two files.
+> 
+> I have found this handy for use in testing to
+> detect when option dependencies unexpectedly affect
+> other options.
+> 
+> To use, apply the patch and 'chmod a+x scripts/diffconfig'
+> 
+> Signed-off-by: Tim Bird <tim.bird@am.sony.com>
+> 
+>  diffconfig |   90 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 files changed, 90 insertions(+)
+> 
+> --- linux-2.6.24.orig/scripts/diffconfig	1969-12-31 16:00:00.000000000 -0800
+> +++ test-linux/scripts/diffconfig	2008-06-10 12:11:14.000000000 -0700
+> @@ -0,0 +1,90 @@
+> +#!/usr/bin/python
+> +#
+> +# diffconfig - a tool to compare .config files.
+> +#
+> +# originally written in 2006 by Matt Mackall
+> +#  (at least, this was in his bloatwatch source code)
+> +#
+> +# diffconfig is a simple utility for comparing two .config files.
+> +# Using standard diff to compare .config files often includes
+> +# extraneous and distracting information.  This utility produces
+> +# sorted output with only the changes in configuration values
+> +# between the two files.
+> +#
+> +# Added and removed items are shown with a leading plus or minus,
+> +# respectively.  Changed items show the old and new values on a
+> +# single line.
+> +#
+> +# Example usage:
+> +# $ diffconfig .config config-test-nfs-off
+> +# -LOCKD  y
+> +# -LOCKD_V4  y
+> +# -NFS_COMMON  y
+> +# -NFS_DIRECTIO  n
+> +# -NFS_V3  y
+> +# -NFS_V3_ACL  n
+> +# -NFS_V4  n
+> +# -ROOT_NFS  y
+> +# -RPCSEC_GSS_KRB5  n
+> +# -RPCSEC_GSS_SPKM3  n
+> +# -SUNRPC  y
+> +# -SUNRPC_BIND34  n
+> +#  NFS_FS  y -> n
+> +
+> +import sys, os
+> +
+> +if len(sys.argv) < 3:
+> +	print "Usage: diffconfig <config1> <config2>"
+> +	sys.exit(0)
 
-I take most of the random scripts in scripts/ via kbuild.git.
+I know this is unix style to be very short in usage - but then they 
+have man pages.
+Could we add a bit more from the nice description above to usage?
+
+
+> +
+> +# returns a dictionary of name/value pairs for config items in the file
+> +def readconfig(config_file):
+> +    d = {}
+> +    for line in config_file:
+> +        line = line[:-1]
+> +        if line[:7] == "CONFIG_":
+> +            name, val = line[7:].split("=", 1)
+> +            d[name] = val
+> +        if line[-11:] == " is not set":
+> +            d[line[9:-11]] = "n"
+> +    return d
+> +
+> +a = readconfig(file(sys.argv[1]))
+> +b = readconfig(file(sys.argv[2]))
+> +
+> +# print items in a but not b (accumulate, sort and print)
+> +old = []
+> +for config in a:
+> +    if config not in b:
+> +        old.append(config)
+> +
+> +old.sort()
+> +
+> +for config in old:
+> +    print "-%s  %s" % (config, a[config])
+> +    del a[config]
+> +
+> +# print items that changed (accumulate, sort, and print)
+> +changed = []
+> +for config in a:
+> +    if a[config] != b[config]:
+> +        changed.append(config)
+> +    else:
+> +        del b[config]
+> +
+> +changed.sort()
+> +
+> +for config in changed:
+> +    print " %s  %s -> %s" % (config, a[config], b[config])
+> +    del b[config]
+> +
+> +# now print items in b but not in a
+> +
+> +# the items from b that were in a (either the same or that changed) were removed
+> +# the only items left were not in a
+> +new = b.keys()
+> +
+> +new.sort()
+> +
+> +for config in new:
+> +    print "+%s  %s" % (config, b[config])
+
+No feedback on the implmentation - I do not speak phython.
 
 	Sam
---
-To unsubscribe from this list: send the line "unsubscribe linux-embedde=
-d" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
