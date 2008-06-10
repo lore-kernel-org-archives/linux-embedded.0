@@ -1,31 +1,42 @@
-From: Jan Engelhardt <jengelh@medozas.de>
-Subject: Re: execute bit on scripts (was Re: [PATCH] add diffconfig
- utility)
-Date: Wed, 11 Jun 2008 00:26:13 +0200 (CEST)
-Message-ID: <alpine.LNX.1.10.0806110025220.20733@fbirervta.pbzchgretzou.qr>
-References: <484ED902.9040000@am.sony.com> <20080610210217.GA2432@logfs.org> <20080610211841.GA23855@uranus.ravnborg.org> <484EF323.7000809@am.sony.com>
+From: Arjan van de Ven <arjan@infradead.org>
+Subject: Re: [PATCH] add diffconfig utility
+Date: Tue, 10 Jun 2008 16:02:02 -0700
+Message-ID: <20080610160202.3bb9d07f@infradead.org>
+References: <484ED902.9040000@am.sony.com>
+	<1213135624.2534.99.camel@shinybook.infradead.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <484EF323.7000809@am.sony.com>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Sam Ravnborg <sam@ravnborg.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1760251AbYFJXCW@vger.kernel.org>
+In-Reply-To: <1213135624.2534.99.camel@shinybook.infradead.org>
+Sender: linux-kernel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+
+On Tue, 10 Jun 2008 23:07:04 +0100
+David Woodhouse <dwmw2@infradead.org> wrote:
+
+> On Tue, 2008-06-10 at 12:41 -0700, Tim Bird wrote:
+> > +# Added and removed items are shown with a leading plus or minus,
+> > +# respectively.  Changed items show the old and new values on a
+> > +# single line.
+> 
+> It'd be really nice if it could give its output in the same form as
+> the .config file itself -- so it'd look something like:
+> 
+> # CONFIG_FOO is not set
+> CONFIG_BAR=y
+> 
+> That can be used with this kind of tool too...
+> 
+
+the person who wrote that tool also wrote a similar diff tool ;)
+but it's horrible perl I suspect.
 
 
-On Tuesday 2008-06-10 23:33, Tim Bird wrote:
->
->> I take most of the random scripts in scripts/ via kbuild.git.
->
->OK - sounds like you're the right person to ask a question
->that has been nagging me.
->
->Is there a proper way to get the execute bit set in the git tree
->on  patches that contain scripts?  I think patches
->produced by git have something that sets the file permissions?
 
-If the patch was produced with git it should have a line like
-	new file mode 100755
-
+-- 
+If you want to reach me at my work email, use arjan@linux.intel.com
+For development, discussion and tips for power savings, 
+visit http://www.lesswatts.org
