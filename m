@@ -1,73 +1,96 @@
-From: Rob Landley <rob@landley.net>
+From: Greg Ungerer <gerg@snapgear.com>
 Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Wed, 11 Jun 2008 00:34:31 -0500
-Message-ID: <200806110034.33111.rob@landley.net>
-References: <20080610075432.GB776@uranus.ravnborg.org> <1213104800.32207.778.camel@pmac.infradead.org> <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com>
+Date: Wed, 11 Jun 2008 15:47:36 +1000
+Message-ID: <484F66F8.4020409@snapgear.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806100155.31904.rob@landley.net> <20080610075432.GB776@uranus.ravnborg.org> <200806102235.09598.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <87a5b0800806100647r178e54c0qd34cbf26f6ce24d@mail.gmail.com>
-Content-Disposition: inline
+In-Reply-To: <200806102235.09598.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Will Newton <will.newton@gmail.com>
-Cc: David Woodhouse <dwmw2@infradead.org>, Jamie Lokier <jamie@shareable.org>, Wolfgang Denk <wd@denx.de>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Rob Landley <rob@landley.net>
+Cc: Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-On Tuesday 10 June 2008 08:47:20 Will Newton wrote:
-> On Tue, Jun 10, 2008 at 2:33 PM, David Woodhouse <dwmw2@infradead.org> 
-wrote:
-> > On Tue, 2008-06-10 at 14:25 +0100, Will Newton wrote:
-> >> On Tue, Jun 10, 2008 at 2:12 PM, Jamie Lokier <jamie@shareable.org> 
-wrote:
-> >> > Wolfgang Denk wrote:
-> >> >> Being unable to do this just because we now also would need a  native
-> >> >> Perl is indeed a PITA...
-> >> >
-> >> > You can run the Perl bit with "ssh remote perl", and still do the rest
-> >> > of the compile natively.  It's not pretty, but workable.
-> >>
-> >> I'm not convinced it matters at all. Self hosting on an embedded
-> >> architecture is, as has been mentioned, pretty pointless.
-> >>
-> >> Using a kernel compile as a test isn't such a great idea. Stress tests
-> >> of that kind are not particularly useful for pinning down bugs - so
-> >> your kernel compile failed, what now? Far better to use LTP tests or
-> >> similar that are designed to be reproduceable and tunable for your
-> >> system. For example I don't think I'll ever be able to self host a
-> >> kernel build on a board with only 32Mb of on-board RAM.
-> >
-> > Actually, cross-building on NFS does tend to find a _lot_ of issues
-> > which crop up with board ports; especially PCI arbitration, DMA
-> > coherency, cache and MMU issues. LTP often doesn't catch the same
-> > problems.
->
-> It may trigger a number of bugs, I don't disagree, but as a test it is
-> a blunt instrument. It's likely to be hard to reproduce and have an
-> inconsistent failure mode. If you're really serious about testing it's
-> not the best solution. It's like using gcc instead of memtest86 to
-> test your memory. Eventually it might go wrong but you won't be much
-> the wiser about why, or have any way to trim your testcase down so you
-> can run it on an in-circuit emulator or pass it to your silicon
-> vendor.
->
-> > I agree that it's not so easy on a board with 32Mb of RAM, since that's
-> > only 4,000,000 bytes -- but 32MiB ought to be _perfectly_ sufficient :)
->
-> I would be surprised if it was possible to compile Linux with gcc 4.2
-> with 32MiB of total system memory.
+Hi Rob,
 
-Haven't tried, but I generally run emulated builds in 128 megs of ram (on 32 
-bit hosts), and I use this:
+Rob Landley wrote:
+> On Tuesday 10 June 2008 02:54:32 Sam Ravnborg wrote:
+>>> (Maybe I _am_ the only person who still cares about
+>>> building on a host without perl.  If I wasn't, somebody else would have
+>>> acked the patch...)
+>> perl is pretty standard
+> 
+> An implementation is not the same thing as a standard.  If you mean "there is 
+> one implementation everybody uses, ala excel and Word, and even the Perl guys 
+> can't reproduce it from scratch as parrot showed", then you're using a 
+> different definition of the word "standard" than I am.
+> 
+> Or do you mean it comes preinstalled on most modern systems, the way Windows 
+> does, and who could object to that?
+> 
+> I know from experience that it's an _amazing_ pain to try to cross compile the 
+> sucker...
 
-# This tells gcc to aggressively garbage collect its internal data
-# structures.  Without this, gcc triggers the OOM killer trying to rebuild
-# itself in 128 megs of ram, which is the QEMU default size.
-export CFLAGS="--param ggc-min-expand=0 --param ggc-min-heapsize=8192"
+Ain't that the truth!
 
-Don't do that on a 64 bit host or your build will slow to a crawl, of course.
 
-Rob
+>> and I fail to see the benefits of avoiding it. 
+>> For embedded development I see even less benefits as I assume
+>> any sane embedded development environment are based on a
+>> cross-toolchain so you do the build on a high perfomance box.
+>>
+>> Building everything for my arm board on the arm board would be a disater
+>> for example.
+> 
+> I build everything for my arm board natively, on an arm system running under 
+> qemu, calling out to the cross compiler via distcc to accelerate the limited 
+> parts of the process that cross compiling doesn't actually break.  To get to 
+> that point, I cross compile just enough to get a native development 
+> environment, and then I avoid cross compiling from then on because it's an 
+> enormous source of complexity and random breakage.
+
+Random breakage?
+
+
+> I did this because throwing hardware at the problem is cheaper than throwing 
+> engineering time at the problem, because Moore's Law is on my side, and 
+
+Are you sure about that?
+How well does qemu do SMP?  At all?
+
+Modern x86 and friends are getting most new performance from
+more cores. A cross compile today can take advantage of those
+for the most part. Your emulated system probably can't.
+
+An order of magnitude compile time (or more) for a native build
+is quite a high price to pay :-)
+
+Regards
+Greg
+
+
+
+> because I find native compiling (where possible) more straightforward and 
+> conceptually cleaner.
+> 
+> Before 2.6.25, I had a complete self-bootstrapping environment with seven 
+> packages (busybox, uClibc, make, gcc, binutils, bash, and linux).  Building 
+> glibc needs perl, if you're using a uClibc based system you may _never_ need 
+> Perl, and could go up through Linux From Scratch and beyond to a fairly 
+> powerful system.
+> 
+> I can probably natively build perl under the mini-native environment running 
+> inside qemu, but it wasn't needed before and there really wasn't a good 
+> reason to add it.  The task being performed and the build dependency brought 
+> in to perform it are hugely disproportionate.
+> 
+> Rob
+
 -- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+------------------------------------------------------------------------
+Greg Ungerer  --  Chief Software Dude       EMAIL:     gerg@snapgear.com
+Secure Computing Corporation                PHONE:       +61 7 3435 2888
+825 Stanley St,                             FAX:         +61 7 3891 3630
+Woolloongabba, QLD, 4102, Australia         WEB: http://www.SnapGear.com
