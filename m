@@ -1,162 +1,69 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH] add diffconfig utility
-Date: Tue, 10 Jun 2008 17:25:51 -0700
-Message-ID: <484F1B8F.9000804@am.sony.com>
-References: <484ED902.9040000@am.sony.com> <20080610212158.GB23855@uranus.ravnborg.org>
+From: Rob Landley <rob@landley.net>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Tue, 10 Jun 2008 22:35:09 -0500
+Message-ID: <200806102235.09598.rob@landley.net>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806100155.31904.rob@landley.net> <20080610075432.GB776@uranus.ravnborg.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080610212158.GB23855@uranus.ravnborg.org>
+In-Reply-To: <20080610075432.GB776@uranus.ravnborg.org>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Sam Ravnborg <sam@ravnborg.org>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, David Woodhouse <dwmw2@infradead.org>
+Cc: Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-Sam Ravnborg wrote:
-> I know this is unix style to be very short in usage - but then they 
-> have man pages.
-> Could we add a bit more from the nice description above to usage?
-Good idea.  Might as well make it visible.
+On Tuesday 10 June 2008 02:54:32 Sam Ravnborg wrote:
+> > (Maybe I _am_ the only person who still cares about
+> > building on a host without perl.  If I wasn't, somebody else would have
+> > acked the patch...)
+>
+> perl is pretty standard
 
-David Woodhouse wrote:
-> It'd be really nice if it could give its output in the same form as
-> the .config file itself -- so it'd look something like:
-> 
-> # CONFIG_FOO is not set
-> CONFIG_BAR=y
+An implementation is not the same thing as a standard.  If you mean "there is 
+one implementation everybody uses, ala excel and Word, and even the Perl guys 
+can't reproduce it from scratch as parrot showed", then you're using a 
+different definition of the word "standard" than I am.
 
-OK, a new version is below.  Right now, when printing in "merge" style,
-the code omits items that are absent in the new config.  These should get set
-correctly (removed) if you do a 'make oldconfig'.  It would be trivial
-to have them output as well, if you think that would be better.
+Or do you mean it comes preinstalled on most modern systems, the way Windows 
+does, and who could object to that?
 
-I am experimentally trying to attach a git-style file mode
-to this patch.  I did this by hand, so it might not work.
-(The index line is totally made up). Let me know if there are problems.
+I know from experience that it's an _amazing_ pain to try to cross compile the 
+sucker...
 
-Diffconfig is a simple utility for comparing two .config files.
-See usage in the script for more info.
+> and I fail to see the benefits of avoiding it. 
+> For embedded development I see even less benefits as I assume
+> any sane embedded development environment are based on a
+> cross-toolchain so you do the build on a high perfomance box.
+>
+> Building everything for my arm board on the arm board would be a disater
+> for example.
 
-Signed-off-by: Tim Bird <tim.bird@am.sony.com>
+I build everything for my arm board natively, on an arm system running under 
+qemu, calling out to the cross compiler via distcc to accelerate the limited 
+parts of the process that cross compiling doesn't actually break.  To get to 
+that point, I cross compile just enough to get a native development 
+environment, and then I avoid cross compiling from then on because it's an 
+enormous source of complexity and random breakage.
 
- scripts/diffconfig |  108 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 108 insertions(+)
- create mode 100755 scripts/diffconfig
+I did this because throwing hardware at the problem is cheaper than throwing 
+engineering time at the problem, because Moore's Law is on my side, and 
+because I find native compiling (where possible) more straightforward and 
+conceptually cleaner.
 
-diff --git a/scripts/diffconfig b/scripts/diffconfig
-new file mode 100755
-index 0000000..aa6cfe1
---- /dev/null
-+++ b/scripts/diffconfig
-@@ -0,0 +1,108 @@
-+#!/usr/bin/python
-+#
-+# diffconfig - a tool to compare .config files.
-+#
-+# originally written in 2006 by Matt Mackall
-+#  (at least, this was in his bloatwatch source code)
-+# last worked on 2008 by Tim Bird
-+#
-+
-+import sys, os
-+
-+merge_style = 0
-+if "-m" in sys.argv:
-+    merge_style = 1
-+    sys.argv.remove("-m")
-+
-+if "-h" in sys.argv or len(sys.argv) < 3:
-+    print "Usage: diffconfig [-h] [-m] <config1> <config2>\n"
-+    print """Diffconfig is a simple utility for comparing two .config files.
-+Using standard diff to compare .config files often includes
-+extraneous and distracting information.  This utility produces
-+sorted output with only the changes in configuration values
-+between the two files.
-+
-+Added and removed items are shown with a leading plus or minus,
-+respectively.  Changed items show the old and new values on a
-+single line.
-+
-+If -m is specified, then output will be in "merge" style,
-+which has the changed and new values in kernel config option format.
-+
-+Example usage:
-+ $ diffconfig .config config-with-some-changes
-+-EXT2_FS_XATTR  n
-+-EXT2_FS_XIP  n
-+ CRAMFS  n -> y
-+ EXT2_FS  y -> n
-+ LOG_BUF_SHIFT  14 -> 16
-+ PRINTK_TIME  n -> y
-+"""
-+    sys.exit(0)
-+
-+# returns a dictionary of name/value pairs for config items in the file
-+def readconfig(config_file):
-+    d = {}
-+    for line in config_file:
-+        line = line[:-1]
-+        if line[:7] == "CONFIG_":
-+            name, val = line[7:].split("=", 1)
-+            d[name] = val
-+        if line[-11:] == " is not set":
-+            d[line[9:-11]] = "n"
-+    return d
-+
-+a = readconfig(file(sys.argv[1]))
-+b = readconfig(file(sys.argv[2]))
-+
-+def print_config(op, config, value, new_value):
-+    if merge_style:
-+        if new_value:
-+            if new_value=="n":
-+                print "# CONFIG_%s is not set" % config
-+            else:
-+                print "CONFIG_%s=%s" % (config, new_value)
-+    else:
-+        if op=="-":
-+            print "-%s %s" % (config, value)
-+        elif op=="+":
-+            print "+%s %s" % (config, new_value)
-+        else:
-+            print " %s %s -> %s" % (config, value, new_value)
-+
-+# print items in a but not b (accumulate, sort and print)
-+old = []
-+for config in a:
-+    if config not in b:
-+        old.append(config)
-+
-+old.sort()
-+
-+for config in old:
-+    print_config("-", config, a[config], None)
-+    del a[config]
-+
-+# print items that changed (accumulate, sort, and print)
-+changed = []
-+for config in a:
-+    if a[config] != b[config]:
-+        changed.append(config)
-+    else:
-+        del b[config]
-+
-+changed.sort()
-+
-+for config in changed:
-+    print_config("->", config, a[config], b[config])
-+    del b[config]
-+
-+# now print items in b but not in a
-+
-+# the items from b that were in a (either the same or that changed) were removed
-+# the only items left were not in a
-+new = b.keys()
-+
-+new.sort()
-+
-+for config in new:
-+    print_config("+", config, None, b[config])
+Before 2.6.25, I had a complete self-bootstrapping environment with seven 
+packages (busybox, uClibc, make, gcc, binutils, bash, and linux).  Building 
+glibc needs perl, if you're using a uClibc based system you may _never_ need 
+Perl, and could go up through Linux From Scratch and beyond to a fairly 
+powerful system.
 
+I can probably natively build perl under the mini-native environment running 
+inside qemu, but it wasn't needed before and there really wasn't a good 
+reason to add it.  The task being performed and the build dependency brought 
+in to perform it are hugely disproportionate.
 
+Rob
+-- 
+"One of my most productive days was throwing away 1000 lines of code."
+  - Ken Thompson.
