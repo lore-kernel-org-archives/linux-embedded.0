@@ -1,48 +1,51 @@
-From: "Christian MICHON" <christian.michon@gmail.com>
-Subject: Re: mainlining min-configs...
-Date: Wed, 11 Jun 2008 10:59:11 +0200
-Message-ID: <46d6db660806110159k284b2ee9s62e118b8d09258bb@mail.gmail.com>
-References: <48447615.5050806@am.sony.com>
-	 <20080604194002.GF4189@cs181133002.pp.htv.fi>
-	 <4849CCA3.7040102@am.sony.com> <200806062329.54019.rob@landley.net>
-	 <484DDAD9.2000306@am.sony.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: [PATCH] add diffconfig utility
+Date: Wed, 11 Jun 2008 13:28:38 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0806111328150.13310@vixen.sonytel.be>
+References: <484ED902.9040000@am.sony.com> <20080610212158.GB23855@uranus.ravnborg.org>
+ <484F1B8F.9000804@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-2076112589-1213183718=:13310"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=Jpduso2HETfa8IOGuXJj1THpBZMgqpha9pKSLWO+/ws=;
-        b=bXy+I5eLZDYMxHWVlJ4rcT7Ni3QArO0BNy4LJbEOl4Mf3VQJPyKTmkYnYgxRfbH6vB
-         w0vQ/sgm1xRq0liwAA9pDjdoiclk+bhfxZp7BXh2luE6iyi7mazvdEHmNniVGfpilYJl
-         kdu21UDy8joyVGfzawR2m4ASclTliR8/qtQq0=
-In-Reply-To: <484DDAD9.2000306@am.sony.com>
-Content-Disposition: inline
+In-Reply-To: <484F1B8F.9000804@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
 To: Tim Bird <tim.bird@am.sony.com>
-Cc: Rob Landley <rob@landley.net>, linux-tiny <Linux-tiny@selenic.com>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>, Adrian Bunk <adrian.bunk@movial.fi>
+Cc: Sam Ravnborg <sam@ravnborg.org>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, David Woodhouse <dwmw2@infradead.org>
 
-On Tue, Jun 10, 2008 at 3:37 AM, Tim Bird <tim.bird@am.sony.com> wrote:
-> Any chance of getting your minimal configs from Firmware Linux mainlined?
->
-> Does anyone else think this would be valuable?  If not in mainline, it
-> would be nice to collect them somewhere, to compare what options different
-> developers decide turn on or off.
->  -- Tim
->
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-this is very valuable. DetaolB uses this concept. Download the latest
-iso of DetaolB, boot it and look for /proc/miniconfig.gz.
-you'll see an example for 2.6.23 there.
+---584349381-2076112589-1213183718=:13310
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-you can find old patches there:
-http://downloads.sourceforge.net/detaolb/detaolb_v03-linux-2.6.21.patch
+On Tue, 10 Jun 2008, Tim Bird wrote:
+> +merge_style = 0
+> +if "-m" in sys.argv:
+> +    merge_style = 1
+> +    sys.argv.remove("-m")
+> +
+> +if "-h" in sys.argv or len(sys.argv) < 3:
+                                        ^^^
+No checking for excess arguments?
 
--- 
-Christian
---
-http://detaolb.sourceforge.net/, a linux distribution for Qemu with Git inside !
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+Sony Technology and Software Centre Europe
+A division of Sony Service Centre (Europe) N.V.
+Registered office: Technologielaan 7 · B-1840 Londerzeel · Belgium
+VAT BE 0413.825.160 · RPR Brussels
+Fortis 293-0376800-10 GEBA-BE-BB
+---584349381-2076112589-1213183718=:13310--
