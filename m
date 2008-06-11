@@ -1,96 +1,46 @@
-From: Greg Ungerer <gerg@snapgear.com>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Wed, 11 Jun 2008 15:47:36 +1000
-Message-ID: <484F66F8.4020409@snapgear.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806100155.31904.rob@landley.net> <20080610075432.GB776@uranus.ravnborg.org> <200806102235.09598.rob@landley.net>
+From: Rob Landley <rob@landley.net>
+Subject: Re: mainlining min-configs...
+Date: Wed, 11 Jun 2008 00:51:34 -0500
+Message-ID: <200806110051.34919.rob@landley.net>
+References: <48447615.5050806@am.sony.com> <20080610083610.GC1987@cs181133002.pp.htv.fi> <484EC576.5080302@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200806102235.09598.rob@landley.net>
+In-Reply-To: <484EC576.5080302@am.sony.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Rob Landley <rob@landley.net>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Adrian Bunk <bunk@kernel.org>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Hi Rob,
+On Tuesday 10 June 2008 13:18:30 Tim Bird wrote:
+> bitrot in mainline.  My experience is that usually a 'make oldconfig'
+> will produce something usable.  But maybe that wouldn't be as
+> effective with a minconfig?
 
-Rob Landley wrote:
-> On Tuesday 10 June 2008 02:54:32 Sam Ravnborg wrote:
->>> (Maybe I _am_ the only person who still cares about
->>> building on a host without perl.  If I wasn't, somebody else would have
->>> acked the patch...)
->> perl is pretty standard
-> 
-> An implementation is not the same thing as a standard.  If you mean "there is 
-> one implementation everybody uses, ala excel and Word, and even the Perl guys 
-> can't reproduce it from scratch as parrot showed", then you're using a 
-> different definition of the word "standard" than I am.
-> 
-> Or do you mean it comes preinstalled on most modern systems, the way Windows 
-> does, and who could object to that?
-> 
-> I know from experience that it's an _amazing_ pain to try to cross compile the 
-> sucker...
+I'm probably going to have to start breaking down and patching the kconfig 
+infrastructure.  (Today, I drove allnoconfig into an endless loop.  Go me.)
 
-Ain't that the truth!
+So far the only "gotcha" I've found is added guard symbols, and it's 
+semantically pretty clear what a miniconfig should do there: force open the 
+menu that contains a symbol you're setting, rather than _ignore_ that symbol.
 
+> Maybe I'll collect some minconfigs, and try maintaining them
+> in my own tree for a few releases to see how onerous it is...
 
->> and I fail to see the benefits of avoiding it. 
->> For embedded development I see even less benefits as I assume
->> any sane embedded development environment are based on a
->> cross-toolchain so you do the build on a high perfomance box.
->>
->> Building everything for my arm board on the arm board would be a disater
->> for example.
-> 
-> I build everything for my arm board natively, on an arm system running under 
-> qemu, calling out to the cross compiler via distcc to accelerate the limited 
-> parts of the process that cross compiling doesn't actually break.  To get to 
-> that point, I cross compile just enough to get a native development 
-> environment, and then I avoid cross compiling from then on because it's an 
-> enormous source of complexity and random breakage.
+The thing about my .configs is that I boot test them each new kernel release, 
+using qemu.  This is 100% scriptable, actually, which you can seldom say 
+about real hardware.
 
-Random breakage?
+> The problem is that I can only reasonably do this for boards
+> I have, so there'd only be a few.  But maybe that'd be enough.
+> They would really only be meant as examples.
 
+Start with qemu and work your way out?  That's what I'm doing.  (Any platform 
+that isn't emulated by qemu is almost by definition not very interesting...)
 
-> I did this because throwing hardware at the problem is cheaper than throwing 
-> engineering time at the problem, because Moore's Law is on my side, and 
-
-Are you sure about that?
-How well does qemu do SMP?  At all?
-
-Modern x86 and friends are getting most new performance from
-more cores. A cross compile today can take advantage of those
-for the most part. Your emulated system probably can't.
-
-An order of magnitude compile time (or more) for a native build
-is quite a high price to pay :-)
-
-Regards
-Greg
-
-
-
-> because I find native compiling (where possible) more straightforward and 
-> conceptually cleaner.
-> 
-> Before 2.6.25, I had a complete self-bootstrapping environment with seven 
-> packages (busybox, uClibc, make, gcc, binutils, bash, and linux).  Building 
-> glibc needs perl, if you're using a uClibc based system you may _never_ need 
-> Perl, and could go up through Linux From Scratch and beyond to a fairly 
-> powerful system.
-> 
-> I can probably natively build perl under the mini-native environment running 
-> inside qemu, but it wasn't needed before and there really wasn't a good 
-> reason to add it.  The task being performed and the build dependency brought 
-> in to perform it are hugely disproportionate.
-> 
-> Rob
-
+Rob
 -- 
-------------------------------------------------------------------------
-Greg Ungerer  --  Chief Software Dude       EMAIL:     gerg@snapgear.com
-Secure Computing Corporation                PHONE:       +61 7 3435 2888
-825 Stanley St,                             FAX:         +61 7 3891 3630
-Woolloongabba, QLD, 4102, Australia         WEB: http://www.SnapGear.com
+"One of my most productive days was throwing away 1000 lines of code."
+  - Ken Thompson.
