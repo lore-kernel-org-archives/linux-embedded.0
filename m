@@ -1,46 +1,43 @@
-From: Rob Landley <rob@landley.net>
+From: Sam Ravnborg <sam@ravnborg.org>
 Subject: Re: mainlining min-configs...
-Date: Wed, 11 Jun 2008 00:51:34 -0500
-Message-ID: <200806110051.34919.rob@landley.net>
-References: <48447615.5050806@am.sony.com> <20080610083610.GC1987@cs181133002.pp.htv.fi> <484EC576.5080302@am.sony.com>
+Date: Wed, 11 Jun 2008 08:39:21 +0200
+Message-ID: <20080611063921.GA27978@uranus.ravnborg.org>
+References: <48447615.5050806@am.sony.com> <20080610183004.GG11685@cs181133002.pp.htv.fi> <20080610185123.GA15838@uranus.ravnborg.org> <200806110009.22542.rob@landley.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <484EC576.5080302@am.sony.com>
 Content-Disposition: inline
+In-Reply-To: <200806110009.22542.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Adrian Bunk <bunk@kernel.org>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Rob Landley <rob@landley.net>
+Cc: Adrian Bunk <bunk@kernel.org>, Tim Bird <tim.bird@am.sony.com>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Tuesday 10 June 2008 13:18:30 Tim Bird wrote:
-> bitrot in mainline.  My experience is that usually a 'make oldconfig'
-> will produce something usable.  But maybe that wouldn't be as
-> effective with a minconfig?
+> >
+> > When I get my kconfig patchset polished you will be able to do:
+> >
+> > make K=my_mini_config allnoconfig
+> 
+> So you're renaming KCONFIG_ALLNOCONFIG then?
 
-I'm probably going to have to start breaking down and patching the kconfig 
-infrastructure.  (Today, I drove allnoconfig into an endless loop.  Go me.)
+Somehow yes. The K= notation I hope will see more use. Only very few
+people know the KCONFIG_ALL*CONFIG= trick.
 
-So far the only "gotcha" I've found is added guard symbols, and it's 
-semantically pretty clear what a miniconfig should do there: force open the 
-menu that contains a symbol you're setting, rather than _ignore_ that symbol.
+> 
+> > Thus selecting 'no' for all new symbols in an automated fashion.
+> > I know that in a few cases 'no' is the wrong answer but in the
+> > 99% of the cases 'no' is perfectly valid.
+> 
+> For a "make miniconfig", warnings should be errors.  (Attempts to set unknown 
+> symbols are an error with a miniconfig, the operation should exit with a 
+> nonzero error code.)  Also, all the stuff allnoconfig puts to stdout 
+> shouldn't be there for miniconfig, only the stuff it writes to stderr right 
+> now should show up.
 
-> Maybe I'll collect some minconfigs, and try maintaining them
-> in my own tree for a few releases to see how onerous it is...
+My reference was to a minimal config of a system - not to a miniconfig
+as your patcset produces. Just to make it clear.
 
-The thing about my .configs is that I boot test them each new kernel release, 
-using qemu.  This is 100% scriptable, actually, which you can seldom say 
-about real hardware.
+The patchset I refer will also reduce the nosie generated during make *config.
 
-> The problem is that I can only reasonably do this for boards
-> I have, so there'd only be a few.  But maybe that'd be enough.
-> They would really only be meant as examples.
-
-Start with qemu and work your way out?  That's what I'm doing.  (Any platform 
-that isn't emulated by qemu is almost by definition not very interesting...)
-
-Rob
--- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+	Sam
