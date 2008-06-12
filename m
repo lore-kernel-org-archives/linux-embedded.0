@@ -1,10 +1,13 @@
-From: Shaz <shazalive@gmail.com>
-Subject: Re: Cross Compiler and loads of issues
-Date: Fri, 13 Jun 2008 00:02:06 +0500
-Message-ID: <7b740b700806121202w73c7f442k1bf8625e375b83df@mail.gmail.com>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
-	 <402b1f4b315f572ac6459f78fa8b5ee4.squirrel@www.geekisp.com>
-	 <20080612184927.GA8363@nibiru.local>
+From: "Mike Frysinger" <vapier.adi@gmail.com>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Thu, 12 Jun 2008 15:02:13 -0400
+Message-ID: <8bd0f97a0806121202t4b61bbd9x843cf9427318e9fd@mail.gmail.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org>
+	 <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com>
+	 <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com>
+	 <1213285831.26255.152.camel@pmac.infradead.org>
+	 <8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com>
+	 <625fc13d0806121129h23eb919dt3661016f82aad266@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -13,60 +16,51 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from:to
          :subject:cc:in-reply-to:mime-version:content-type
          :content-transfer-encoding:content-disposition:references;
-        bh=6aKS8UVqw00rFmZ7rc/Zno6sq7FgEY+Yb0nptDHr+ok=;
-        b=RiatQvHm8J6ZIFSYTiM5/x4GbeKckHQqToKSxdmeUxzQlD0YNHjXg5/vYLQKams86B
-         TzwoCWm7i+KLMi5E6rn87hG5f5Jz1kXGLbg5ti+PdLKEzfqBtrgZb8KDjmaCDUJvPdK6
-         590SNXfEuRNkYH3KuX/1Tv91K9iB9gi1aC61w=
-In-Reply-To: <20080612184927.GA8363@nibiru.local>
+        bh=iA5+U8QlH6Lpr+EznxZ2iYeDE1scrPKGT4IKSy7XJM8=;
+        b=h66hZf+DchQuycwnKQ1GObu+gcUOX+ReJ2czLSVlC+z/M9Fe66PQDtPA74A/W6IQVL
+         LNiYkcFuXVVkadpXEpnAMJKSmPLr0tq0BdMyPWJWNVDL0FCeByI+pHvnRQXubX2Mcp68
+         k/gTF1EdmF1AlP9FnuRvFYS8vICUzD9VjlDso=
+In-Reply-To: <625fc13d0806121129h23eb919dt3661016f82aad266@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: weigelt@metux.de
-Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Josh Boyer <jwboyer@gmail.com>
+Cc: David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, Rob Landley <rob@landley.net>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
 
-On Thu, Jun 12, 2008 at 11:49 PM, Enrico Weigelt <weigelt@metux.de> wrote:
-> * Bill Traynor <wmat@naoi.ca> schrieb:
+On Thu, Jun 12, 2008 at 2:29 PM, Josh Boyer wrote:
+> On Thu, Jun 12, 2008 at 12:05 PM, Mike Frysinger wrote:
+>> On Thu, Jun 12, 2008 at 11:50 AM, David Woodhouse wrote:
+>>> On Thu, 2008-06-12 at 08:23 -0700, Tim Bird wrote:
+>>>> Rob Landley wrote:
+>>>> > However, having one or more full-time engineers devoted to debugging
+>>>> > cross-compile issues is quite a high price to pay too.  Moore's law really
+>>>> > doesn't help that one.
+>>>> >
+>>>> > I'm not saying either solution is perfect, I'm just saying the "build under
+>>>> > emulation" approach is a viable alternative that gets more attractive as time
+>>>> > passes, both because of ongoing development on emulators and because of
+>>>> > Moore's law on the hardware.
+>>>>
+>>>> I agree with much that you have said, Rob, and I understand the argument
+>>>> for getting the most gain from the least resources, but I have a philosophical
+>>>> problem with working around the cross-compilation problems instead of fixing
+>>>> them in the upstream packages (or in the autoconf system itself).
+>>>>
+>>>> Once someone fixes the cross-compilation issues for a package, they usually
+>>>> stay fixed, if the fixes are mainlined.
+>>>
+>>> I don't think that's true, unfortunately. Autoconf makes it _easy_ to do
+>>> the wrong thing, and people will often introduce new problems.
+>>>
+>>> If we just made people write portable code and proper Makefiles, it
+>>> would be less of an issue :)
+>>
+>> people cant even write proper *native* makefiles.  mtd-utils for example ;).
 >
->> There is no "one good way".  I've had decent success building Dan Kegel's
->> "crosstool" in the past: http://www.kegel.com/crosstool/
->
-> I'd also like to mention Yann's crosstool-ng :)
-I guess I have to reconsider cross-tool because earlier I visited this
-http://www.kegel.com/crosstool/crosstool-0.43/buildlogs/ and I want to
-get the latest kernel up and running on OSK OMAP5912, arm9. The board
-is in process of shipment but I started out with a qemu
-(arm-generic/versatilepb) based test run.
+> What's wrong with it?  I'll fix it.
 
-I am in the middle of a confused experience :-)
->
->
-> cu
-> --
-> ---------------------------------------------------------------------
->  Enrico Weigelt    ==   metux IT service - http://www.metux.de/
-> ---------------------------------------------------------------------
->  Please visit the OpenSource QM Taskforce:
->        http://wiki.metux.de/public/OpenSource_QM_Taskforce
->  Patches / Fixes for a lot dozens of packages in dozens of versions:
->        http://patches.metux.de/
-> ---------------------------------------------------------------------
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
-
--- 
-Shaz
-
-Security Engineering Research Group,
-Institute of Management Sciences,
-Peshawar, Pakistan
-
-Group: http://serg.imsciences.edu.pk
-
-Email: shazalive@gmail.com
-cell: +92 300 5944647
+is linux-mtd@lists.infradead.org not the place to post ?  that's where
+i sent the first fix yesterday ... not that i'm subscribed since i
+dont have a direct interest in mtd development ...
+-mike
