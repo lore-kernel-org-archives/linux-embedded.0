@@ -1,38 +1,41 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: [ANNOUNCE] ELCE 2008 Call for Presentations
-Date: Thu, 12 Jun 2008 10:47:17 -0700
-Message-ID: <48516125.7020708@am.sony.com>
+From: Shaz <shazalive@gmail.com>
+Subject: Cross Compiler and loads of issues
+Date: Thu, 12 Jun 2008 22:52:44 +0500
+Message-ID: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:mime-version:content-type:content-transfer-encoding
+         :content-disposition;
+        bh=SNEJgnl3QwnLLZ3z8SmLtT9JmuQMq/fn24D9n4v8TxU=;
+        b=Wbx6/PXH2AzxibD1EBHiWczymJo2xEpQYwfVzQaXEmbEHWcC+EvRx/L6rC1He9+5cX
+         mDS/oQGtgstpr0LejEzwD/OQiG/+XAbcbQ6BLX/0Ge7ylJETrJexiOT7ciWsE9sGn8Mn
+         kK8otafQHVgbWnPbb5WPGYEb6W99wLxASyFBY=
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: linux-embedded <linux-embedded@vger.kernel.org>
 
-OK - at the extreme risk of burning up whatever karma I have on
-this list, I'm posting this notice.  I promise not to do this very often.
-(maybe two or three times a year, and only for events I help run.)
---------------
-EMBEDDED LINUX CONFERENCE EUROPE - November 6,7 2008, EDE, THE NETHERLANDS
+Hi,
 
-I would like to invite you to make a presentation at CELF's
-upcoming Embedded Linux Conference - Europe.
+I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
+felt like asking that is there one good way to get a cross compiler
+work. I tried buildroot, scratchbox and even openMoko with
+openEmbedded but all of them had lots of issues and don't know which
+will be the best alternative.
 
-The conference will be held November 6 and 7 in Ede, The Netherlands, in
-conjunction with the NLUUG Autumn Conference on Mobile Computing.
+I also went through the material provided freely by Free Electron but
+still I am not successful to build a custom kernel. Next I am trying
+MontaVista's kit. I just wish I don't get lost.
 
-See http://www.embeddedlinuxconference.com/elc_europe08/ for general
-information on the ELC-E event.
+Anyways, I liked the idea of Qemu based cross compiler. Is it possible
+for the inexperienced to get it working and emulate the exact model
+and devices.
 
-Details on the NLUUG conference, including the CfP will be availalable at
-http://www.nluug.nl/events/nj08/
+--
 
-For details on submitting a proposal, please have a look at
-http://tree.celinuxforum.org/CelfPubWiki/ELCE2008CallForPresentations
---------------
-
-I'll be there, probably talking (program committee willing) about some
-boot-up time improvements I hope to try and mainline before then.
- -- Tim
-
+Shaz
