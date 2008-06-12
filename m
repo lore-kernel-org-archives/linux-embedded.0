@@ -1,44 +1,29 @@
 From: Enrico Weigelt <weigelt@metux.de>
 Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Thu, 12 Jun 2008 20:30:58 +0200
-Message-ID: <20080612183057.GC7423@nibiru.local>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com> <1213285831.26255.152.camel@pmac.infradead.org> <20080612160845.GB9327@linux-sh.org>
+Date: Thu, 12 Jun 2008 20:34:21 +0200
+Message-ID: <20080612183421.GD7423@nibiru.local>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com> <1213285831.26255.152.camel@pmac.infradead.org> <20080612160845.GB9327@linux-sh.org> <48514E9A.3080901@billgatliff.com>
 Reply-To: weigelt@metux.de
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20080612160845.GB9327@linux-sh.org>
+In-Reply-To: <48514E9A.3080901@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-* Paul Mundt <lethal@linux-sh.org> schrieb:
+* Bill Gatliff <bgat@billgatliff.com> schrieb:
 
-> The other issue is that people that are working in this space tend to do
-> very little beyond solving their immediate troubles. 
+> If the build system derives from autoconf, then a hacked-up 
+> config.cache (or equivalent command-line args) often solves 
+> problems for me. 
 
-Sad but true :(
-
-> Since perl was mentioned, it also makes a good example. Embedded distros 
-> have been cross-compiling perl for pretty much the last decade, yet even 
-
-Now I'm curious: where can I find a patch ?
-
-Upstream's build scripts are really far from being cross'able.
-
-> You can either try to fix the packages in question, convince the package
-> developers to rip out the parts that cause trouble for your environment,
-> fix your own build environment to meet the needs of the packages, or
-> whine about it on a mailing list. Empirically we already know which one
-> of those options is going to win out. ;-)
-
-I, personally, prefer to *solve* problems instead of trying to work 
-around somehow. In longer terms, this worked quite good for me.
-
-Of course, fixing requires that you find out what's the problem
-really is before ;-P
+Only if you're working on *one specific* target for a long time.
+I, for example, have to support lots of different targets, so your
+approach does not work for me. Ah, and it's not *solving* any problem,
+just deferring it to some other day.
 
 
 cu
