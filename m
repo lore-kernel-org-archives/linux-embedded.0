@@ -1,41 +1,48 @@
-From: Enrico Weigelt <weigelt@metux.de>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded	Maintainer(s)...)
-Date: Thu, 12 Jun 2008 20:37:35 +0200
-Message-ID: <20080612183735.GE7423@nibiru.local>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com> <1213285831.26255.152.camel@pmac.infradead.org> <48514D77.4060007@am.sony.com>
-Reply-To: weigelt@metux.de
+From: "Bill Traynor" <wmat@naoi.ca>
+Subject: Re: Cross Compiler and loads of issues
+Date: Thu, 12 Jun 2008 14:39:59 -0400 (EDT)
+Message-ID: <402b1f4b315f572ac6459f78fa8b5ee4.squirrel@www.geekisp.com>
+References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <48514D77.4060007@am.sony.com>
+In-Reply-To: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Shaz <shazalive@gmail.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-* Tim Bird <tim.bird@am.sony.com> schrieb:
+> Hi,
+>
+> I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
+> felt like asking that is there one good way to get a cross compiler
+> work. I tried buildroot, scratchbox and even openMoko with
+> openEmbedded but all of them had lots of issues and don't know which
+> will be the best alternative.
 
-> If autoconf is the problem (and I think it is), then that's what
-> should be fixed (see my original post).  
+There is no "one good way".  I've had decent success building Dan Kegel's
+"crosstool" in the past: http://www.kegel.com/crosstool/
+>
+> I also went through the material provided freely by Free Electron but
+> still I am not successful to build a custom kernel. Next I am trying
+> MontaVista's kit. I just wish I don't get lost.
 
-ACK. One of the first things I did was replacing libtool and
-kicked off broken-by-design macros like AC_TRY_RUN. This solved
-at >80% of the problems for me.
+I'd continue the search for prebuilt toolchains.  CodeSourcery has a Lite
+version of it's ARM, Coldfire, MIPS, and Power toolchains.
 
-> At a minimum, it would be nice if it had more built-in detection 
-> and warning of techniques that were dangerous for cross-compilation.
+>
+> Anyways, I liked the idea of Qemu based cross compiler. Is it possible
+> for the inexperienced to get it working and emulate the exact model
+> and devices.
+>
+> --
+>
+> Shaz
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded"
+> in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Meanwhile, autoconf warns on some broken macros like AC_TRY_RUN.
-
-
-cu
--- 
----------------------------------------------------------------------
- Enrico Weigelt    ==   metux IT service - http://www.metux.de/
----------------------------------------------------------------------
- Please visit the OpenSource QM Taskforce:
- 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
- Patches / Fixes for a lot dozens of packages in dozens of versions:
-	http://patches.metux.de/
----------------------------------------------------------------------
