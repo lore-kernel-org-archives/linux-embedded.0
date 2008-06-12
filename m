@@ -1,31 +1,38 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: Cross Compiler and loads of issues
-Date: Thu, 12 Jun 2008 13:56:36 -0500
-Message-ID: <48517164.80907@billgatliff.com>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
+From: Wolfgang Denk <wd@denx.de>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Thu, 12 Jun 2008 20:57:59 +0200
+Message-ID: <20080612185759.A11E224035@gemini.denx.de>
+References: <20080612183057.GC7423@nibiru.local>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
+In-reply-to: Your message of "Thu, 12 Jun 2008 20:30:58 +0200."
+             <20080612183057.GC7423@nibiru.local>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Shaz <shazalive@gmail.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+To: weigelt@metux.de
+Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-Shaz wrote:
-> Hi,
+In message <20080612183057.GC7423@nibiru.local> you wrote:
 > 
-> I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
-> felt like asking that is there one good way to get a cross compiler
-> work. I tried buildroot, scratchbox and even openMoko with
-> openEmbedded but all of them had lots of issues and don't know which
-> will be the best alternative.
+> > Since perl was mentioned, it also makes a good example. Embedded distros 
+> > have been cross-compiling perl for pretty much the last decade, yet even 
+> 
+> Now I'm curious: where can I find a patch ?
 
-I like running emdebian's toolchains on a Debian box, myself.
+See for example:
+
+http://git.denx.de/?p=eldk/build.git;a=tree;f=target_rpms/perl;h=fd830dd2e6bf86703fab84b83922eea8c10f0310;hb=3e5c010c91e17e819048937eb4105d762c7e1497
 
 
-b.g.
+Best regards,
+
+Wolfgang Denk
+
 -- 
-Bill Gatliff
-bgat@billgatliff.com
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+Nothing is easier than to denounce  the  evildoer;  nothing  is  more
+difficult than to understand him.                 - Fyodor Dostoevski
