@@ -1,121 +1,49 @@
 From: Rob Landley <rob@landley.net>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Wed, 11 Jun 2008 19:41:50 -0500
-Message-ID: <200806111941.51221.rob@landley.net>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com>
+Subject: Re: mainlining min-configs...
+Date: Wed, 11 Jun 2008 20:42:49 -0500
+Message-ID: <200806112042.50852.rob@landley.net>
+References: <48447615.5050806@am.sony.com> <20080611193639.GB2958@cs181133002.pp.htv.fi> <48502BAF.7060209@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <484F66F8.4020409@snapgear.com>
+In-Reply-To: <48502BAF.7060209@am.sony.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Greg Ungerer <gerg@snapgear.com>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Adrian Bunk <bunk@kernel.org>, Sam Ravnborg <sam@ravnborg.org>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Wednesday 11 June 2008 00:47:36 Greg Ungerer wrote:
-> Hi Rob,
+On Wednesday 11 June 2008 14:46:55 Tim Bird wrote:
+> Adrian Bunk wrote:
+> > Randy's patch that documents KCONFIG_ALLCONFIG is in Linus' tree since
+> > April 2006.
 >
-> Rob Landley wrote:
-> > On Tuesday 10 June 2008 02:54:32 Sam Ravnborg wrote:
-> >>> (Maybe I _am_ the only person who still cares about
-> >>> building on a host without perl.  If I wasn't, somebody else would have
-> >>> acked the patch...)
-> >>
-> >> perl is pretty standard
-> >
-> > An implementation is not the same thing as a standard.  If you mean
-> > "there is one implementation everybody uses, ala excel and Word, and even
-> > the Perl guys can't reproduce it from scratch as parrot showed", then
-> > you're using a different definition of the word "standard" than I am.
-> >
-> > Or do you mean it comes preinstalled on most modern systems, the way
-> > Windows does, and who could object to that?
-> >
-> > I know from experience that it's an _amazing_ pain to try to cross
-> > compile the sucker...
+> Well, dangit there it is!
 >
-> Ain't that the truth!
->
-> >> and I fail to see the benefits of avoiding it.
-> >> For embedded development I see even less benefits as I assume
-> >> any sane embedded development environment are based on a
-> >> cross-toolchain so you do the build on a high perfomance box.
-> >>
-> >> Building everything for my arm board on the arm board would be a disater
-> >> for example.
-> >
-> > I build everything for my arm board natively, on an arm system running
-> > under qemu, calling out to the cross compiler via distcc to accelerate
-> > the limited parts of the process that cross compiling doesn't actually
-> > break.  To get to that point, I cross compile just enough to get a native
-> > development environment, and then I avoid cross compiling from then on
-> > because it's an enormous source of complexity and random breakage.
->
-> Random breakage?
+> The patch I googled had it going into Documentation/kbuild.  It
+> somehow escaped my attention in the README.
 
-Cross compiling breaks stuff, yes.
+Mine as well.  (I grepped for KCONFIG_ALLCONFIG in Documentation, not in the 
+rest of the tree.  I of all people should know better...)
 
-Most packages don't cross compile at all.  Debian has somewhere north of 
-30,000 packages.  Every project that does large scale cross compiling 
-(buildroot, gentoo embedded, timesys making fedora cross compile, etc) tends 
-to have about 200 packages that cross compile more or less easily, another 
-400 or so that can be made to cross compile with _lot_ of effort and a large 
-enough rock, and then the project stalls at about that size.
+> If I was 
+> a little more skilled with my grep-ing I would have found it.
+> Sorry for the bother!
 
-> > I did this because throwing hardware at the problem is cheaper than
-> > throwing engineering time at the problem, because Moore's Law is on my
-> > side, and
->
-> Are you sure about that?
-> How well does qemu do SMP?  At all?
+The linux kernel has documentation in Documentation, in the "make htmldocs" 
+output, in the Kconfig help entries, in README files, in the output of "make 
+help", and several other places.  (And then there's all the stuff that's not 
+_in_ the kernel tarball...)
 
-QEMU does not currently do SMP at all.  There are proposals to make qemu 
-multi-threaded and handle SMP that way, but they're at least a year away from 
-anybody actually trying to implement them.  (The big destabilization right 
-now is the new code generator, and that's plenty for the moment.  Anybody who 
-wanted to wave money at codesourcery could probably get it implemented on a 
-deadline for their platforms of interest, but in the absence of that it's not 
-really a priority right now.)
-
-Distcc can take advantage of smp, but that won't help the ./configure stage 
-and I need to do some work on distcc to teach it to understand more gcc 
-command lines.  (For one thing, distcc can't break "compile and link" 
-commands ala "gcc hello.c" into separate "compile" and "link" stages, this it 
-can't distribute those.  This takes out pretty much the entire uClibc build, 
-for example.  But the gcc build parallelizes quite well.)
-
-> Modern x86 and friends are getting most new performance from
-> more cores. A cross compile today can take advantage of those
-> for the most part. Your emulated system probably can't.
-
-It can if you're using distcc to call out to the cross compiler, which my 
-scripts do (./emulator-build.sh does it with the build/* stuff 
-and ./run-with-distcc.sh does it for the shipped system-image tarballs).
-
-Some of the other build systems out there hook qemu application emulation up 
-to the kernel's misc binary support so a ./configure that builds arm 
-executables can run them.  (Openembedded, was it?  Open moko?  Something like 
-that.)  But this only solves one of about a dozen major problems cross 
-compiling is prone to.  Building natively solves all of 'em, except for 
-speed.
-
-> An order of magnitude compile time (or more) for a native build
-> is quite a high price to pay :-)
-
-Yup.  Agreed.  No argument there.
-
-However, having one or more full-time engineers devoted to debugging 
-cross-compile issues is quite a high price to pay too.  Moore's law really 
-doesn't help that one.
-
-I'm not saying either solution is perfect, I'm just saying the "build under 
-emulation" approach is a viable alternative that gets more attractive as time 
-passes, both because of ongoing development on emulators and because of 
-Moore's law on the hardware.
+It's easy to miss.
 
 Rob
+
+P.S: yes, README files plural.
+  find . -name "*[Rr][Ee][Aa][Dd][Mm][Ee]*" | grep -v Documentation | wc
+  69	69	2315
+
 -- 
 "One of my most productive days was throwing away 1000 lines of code."
   - Ken Thompson.
