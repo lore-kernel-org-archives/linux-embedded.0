@@ -1,44 +1,59 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: Kernel boot problem on IXP422 Rev. A
-Date: Thu, 12 Jun 2008 23:15:43 +0100
-Message-ID: <1213308943.26255.212.camel@pmac.infradead.org>
-References: <1522484831@web.de>
-	 <8bd0f97a0806121304m7d00fb6dq27fa7aa37cbeb828@mail.gmail.com>
-	 <17882748-2E1B-4DB4-82FD-C5D5C4E62CC8@logicaloutcome.ca>
+From: Jim Freeman <jfree@sovereign.org>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Thu, 12 Jun 2008 16:02:46 -0600
+Message-ID: <20080612220246.GB27513@sovereign.org>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net> <20080612182529.GB7423@nibiru.local> <485190E8.80705@cisco.com> <48519837.1090902@katalix.com> <8bd0f97a0806121446i68af3b96sbe51cc510f7d4fb6@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <17882748-2E1B-4DB4-82FD-C5D5C4E62CC8@logicaloutcome.ca>
+Content-Disposition: inline
+In-Reply-To: <8bd0f97a0806121446i68af3b96sbe51cc510f7d4fb6@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Glenn Henshaw <thraxisp@logicaloutcome.ca>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Mike Frysinger <vapier.adi@gmail.com>
+Cc: James Chapman <jchapman@katalix.com>, David VomLehn <dvomlehn@cisco.com>, weigelt@metux.de, Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-On Thu, 2008-06-12 at 17:28 -0400, Glenn Henshaw wrote:
-> > On Thu, Jun 12, 2008 at 3:35 PM, Marcus Tangermann wrote:
-> >> we currently try to boot a 2.6.21 kernel
+On Thu, Jun 12, 2008 at 05:46:42PM -0400, Mike Frysinger wrote:
+> On Thu, Jun 12, 2008 at 5:42 PM, James Chapman wrote:
+> > David VomLehn wrote:
+> >> Amen, brother. I'm fortunate in that I work for an organization that is
+> >> quite good about enforcing code reviews, specifically, the QA organization
+> >> is empowered to reject changes that do not have code review notes. I also
+> >> have a fairly broad scope, so I'm in on code reviews for a number of open
+> >> source components. At each such review, one of my criteria is whether the
+> >> change is suitable for pushing back to the appropriate community. This is
+> >> not necessarily a short-term way to make friends, but the long-term effects
+> >> will be good both for the company and for the open source community in
+> >> general.
+> >>
+> >> Now, if we can only get the time to actually push all the backlogged fixes
+> >> out...
 > >
-> > time to upgrade
+> > Er, is that GPL or LGPL code that you're modifying? If so, you *have* to
+> > push those code changes out (make them available to others), whether you
+> > think people will be interested or not!
 > 
->    Wrong answer!!!
-> 
->    Many embedded devices can't upgrade kernels easily because of  
-> customer requirements and certifications. For example, I have worked  
-> on Linux based applications in the financial industry. A kernel  
-> upgrade here is viewed as equivalent to switching from Windows XP to  
-> Vista, and requires significant effort in certification testing from  
-> the customer's perspective. This doesn't make economic sense for  
-> either party.
+> umm, not really.  only if (1) he gives a binary to someone and (2)
+> they ask him for the source.  if he doesnt distribute or no one asks,
+> he doesnt have to do squat.
+> -mike
 
-If this certification was granted despite Marcus' admission that the
-kernel doesn't even boot -- it dies between gunzip and start_kernel --
-then I suspect it wasn't the kind of certification which takes 4 years
-to achieve.
+And I'm just betting that when he said "push ... fixes ... out"
+he meant "work to get them incorporated back upstream", not just
+make them available to requesters.
 
-_Most_ people who are having trouble with old kernels have extremely
-_bad_ reasons for not updating.
+Most vendors these days have finally gotten the clue that sources/changes
+have to be made available to downstream requesters, but far fewer
+are sufficiently self-enlightened to figure out that changes need to
+be accepted upstream for them to keep flowing back.  And to make that
+happen, vendors have to take on substantially higher overhead to win
+acceptance of patches/changes upstream, an undertaking often sadly
+fraught with hassle, uncertainty, and even peril.  So they mostly
+don't bother.  To their (and their customers, and our) long-term
+detriment.
 
--- 
-dwmw2
+And Cisco has probably learned by now (and by sad experience) to do
+the Right (tm) thing.
 
+...jfree
