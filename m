@@ -1,46 +1,72 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Thu, 12 Jun 2008 14:00:10 -0500
-Message-ID: <4851723A.2050703@billgatliff.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com> <1213285831.26255.152.camel@pmac.infradead.org> <20080612160845.GB9327@linux-sh.org> <48514E9A.3080901@billgatliff.com> <20080612183421.GD7423@nibiru.local>
+From: Shaz <shazalive@gmail.com>
+Subject: Re: Cross Compiler and loads of issues
+Date: Fri, 13 Jun 2008 00:02:06 +0500
+Message-ID: <7b740b700806121202w73c7f442k1bf8625e375b83df@mail.gmail.com>
+References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
+	 <402b1f4b315f572ac6459f78fa8b5ee4.squirrel@www.geekisp.com>
+	 <20080612184927.GA8363@nibiru.local>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080612183421.GD7423@nibiru.local>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=6aKS8UVqw00rFmZ7rc/Zno6sq7FgEY+Yb0nptDHr+ok=;
+        b=RiatQvHm8J6ZIFSYTiM5/x4GbeKckHQqToKSxdmeUxzQlD0YNHjXg5/vYLQKams86B
+         TzwoCWm7i+KLMi5E6rn87hG5f5Jz1kXGLbg5ti+PdLKEzfqBtrgZb8KDjmaCDUJvPdK6
+         590SNXfEuRNkYH3KuX/1Tv91K9iB9gi1aC61w=
+In-Reply-To: <20080612184927.GA8363@nibiru.local>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: weigelt@metux.de
 Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-Enrico Weigelt wrote:
-> * Bill Gatliff <bgat@billgatliff.com> schrieb:
-> 
->> If the build system derives from autoconf, then a hacked-up 
->> config.cache (or equivalent command-line args) often solves 
->> problems for me. 
-> 
-> Only if you're working on *one specific* target for a long time.
-> I, for example, have to support lots of different targets, so your
-> approach does not work for me.
+On Thu, Jun 12, 2008 at 11:49 PM, Enrico Weigelt <weigelt@metux.de> wrote:
+> * Bill Traynor <wmat@naoi.ca> schrieb:
+>
+>> There is no "one good way".  I've had decent success building Dan Kegel's
+>> "crosstool" in the past: http://www.kegel.com/crosstool/
+>
+> I'd also like to mention Yann's crosstool-ng :)
+I guess I have to reconsider cross-tool because earlier I visited this
+http://www.kegel.com/crosstool/crosstool-0.43/buildlogs/ and I want to
+get the latest kernel up and running on OSK OMAP5912, arm9. The board
+is in process of shipment but I started out with a qemu
+(arm-generic/versatilepb) based test run.
 
-I'm not exactly a one-specific-target kinda guy, either.  I routinely move
-between MIPS, ARM, PPC and x86.
+I am in the middle of a confused experience :-)
+>
+>
+> cu
+> --
+> ---------------------------------------------------------------------
+>  Enrico Weigelt    ==   metux IT service - http://www.metux.de/
+> ---------------------------------------------------------------------
+>  Please visit the OpenSource QM Taskforce:
+>        http://wiki.metux.de/public/OpenSource_QM_Taskforce
+>  Patches / Fixes for a lot dozens of packages in dozens of versions:
+>        http://patches.metux.de/
+> ---------------------------------------------------------------------
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Yea, that means target-specific config.cache files.  But that works for me.
-
-> Ah, and it's not *solving* any problem,
-> just deferring it to some other day.
-
-If "solving" means helping the tool get the answer it needs, even when running
-in an environment/configuration it wasn't intended for, without breaking
-compatibility with everyone else out there still using the same tool, then I
-disagree.
-
-But hey, I never said you had to do it my way.  :)
 
 
-b.g.
 -- 
-Bill Gatliff
-bgat@billgatliff.com
+Shaz
+
+Security Engineering Research Group,
+Institute of Management Sciences,
+Peshawar, Pakistan
+
+Group: http://serg.imsciences.edu.pk
+
+Email: shazalive@gmail.com
+cell: +92 300 5944647
