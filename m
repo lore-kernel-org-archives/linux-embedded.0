@@ -1,58 +1,41 @@
-From: Enrico Weigelt <weigelt@metux.de>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Thu, 12 Jun 2008 20:18:07 +0200
-Message-ID: <20080612181806.GA7423@nibiru.local>
-References: <20080610134932.B27D62430C@gemini.denx.de> <200806110025.27575.rob@landley.net>
-Reply-To: weigelt@metux.de
+From: Wolfgang Denk <wd@denx.de>
+Subject: Re: Cross Compiler and loads of issues
+Date: Thu, 12 Jun 2008 20:19:02 +0200
+Message-ID: <20080612181902.ACEBF240E8@gemini.denx.de>
+References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <200806110025.27575.rob@landley.net>
+In-reply-to: Your message of "Thu, 12 Jun 2008 22:52:44 +0500."
+             <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Shaz <shazalive@gmail.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-* Rob Landley <rob@landley.net> schrieb:
+In message <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com> you wrote:
+> 
+> I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
+> felt like asking that is there one good way to get a cross compiler
+> work. I tried buildroot, scratchbox and even openMoko with
+> openEmbedded but all of them had lots of issues and don't know which
+> will be the best alternative.
+> 
+> I also went through the material provided freely by Free Electron but
+> still I am not successful to build a custom kernel. Next I am trying
+> MontaVista's kit. I just wish I don't get lost.
 
-Hi,
+For completeness, there is also the (free) ELDK. Some people are using it.
 
+[And yes, I'm obviously biased :-) ]
 
-> There's also qemu.  You can native build under emulation.
+Best regards,
 
-did you ever consider that crosscompiling is not only good for 
-some other arch, but a few more things ?
- 
-> In addition, if you have a cross compiler but don't want to spend all your 
-> time lying to ./configure, preventing gcc from linking against the host's 
-> zlib or grabbing stuff out of /usr/include that your target hasn't got, or 
+Wolfgang Denk
 
-#1: use a proper (sysroot'ed) toolchain
-#2: fix broken configure.in's (and feed back to upstream or OSS-QM)
-#3: replace libtool by unitool
-
-> trying to figure out why on EARTH the perl build decided to use x86 signal 
-
-Perl never was crosscompile-capable.
-I've rewrote much of the buildscripts, but not finished yet.
-
-Just in case that anyone's interested in it, let me know.
-
-> libraries are linked inside the emulator, anything that wants to look 
-> at /proc or sysinfo does it natively inside the emulator...)
-
-Only crap sw looks at /proc at build time.
-Yes, there's *much* crap sw out there :(
-
-
-cu
 -- 
----------------------------------------------------------------------
- Enrico Weigelt    ==   metux IT service - http://www.metux.de/
----------------------------------------------------------------------
- Please visit the OpenSource QM Taskforce:
- 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
- Patches / Fixes for a lot dozens of packages in dozens of versions:
-	http://patches.metux.de/
----------------------------------------------------------------------
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+A list is only as strong as its weakest link.            -- Don Knuth
