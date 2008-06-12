@@ -1,41 +1,35 @@
-From: "George G. Davis" <gdavis@mvista.com>
-Subject: Re: Cross Compiler and loads of issues
-Date: Thu, 12 Jun 2008 15:54:54 -0400
-Message-ID: <20080612195454.GE2735@mvista.com>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com> <402b1f4b315f572ac6459f78fa8b5ee4.squirrel@www.geekisp.com> <20080612184927.GA8363@nibiru.local> <7b740b700806121202w73c7f442k1bf8625e375b83df@mail.gmail.com>
+From: "Mike Frysinger" <vapier.adi@gmail.com>
+Subject: Re: Kernel boot problem on IXP422 Rev. A
+Date: Thu, 12 Jun 2008 16:04:41 -0400
+Message-ID: <8bd0f97a0806121304m7d00fb6dq27fa7aa37cbeb828@mail.gmail.com>
+References: <1522484831@web.de>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=OBLDvwcK18LE4Ppj44UwE62ABeo6BVznE5Noe/gTpa8=;
+        b=oyDJUycnfL+Zv6B6755d1rp2nK03y8vyARS1B6VETB+0+WOqc0x4Lvrn17SswJUSFP
+         nfzMPvn4EmgYzVXU9aq/a7J0R2OHlbepzPM9KUy/i1d3nIpq0u8piWPpRQUoYC1AOWsT
+         6esU+BYHKwLKxLD9OxPqD3L6s+9x+R1bgKu6o=
+In-Reply-To: <1522484831@web.de>
 Content-Disposition: inline
-In-Reply-To: <7b740b700806121202w73c7f442k1bf8625e375b83df@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Shaz <shazalive@gmail.com>
-Cc: weigelt@metux.de, Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Marcus Tangermann <Marcus.Tangermann@web.de>
+Cc: linux-embedded@vger.kernel.org
 
-On Fri, Jun 13, 2008 at 12:02:06AM +0500, Shaz wrote:
-> On Thu, Jun 12, 2008 at 11:49 PM, Enrico Weigelt <weigelt@metux.de> wrote:
-> > * Bill Traynor <wmat@naoi.ca> schrieb:
-> >
-> >> There is no "one good way".  I've had decent success building Dan Kegel's
-> >> "crosstool" in the past: http://www.kegel.com/crosstool/
-> >
-> > I'd also like to mention Yann's crosstool-ng :)
-> I guess I have to reconsider cross-tool because earlier I visited this
-> http://www.kegel.com/crosstool/crosstool-0.43/buildlogs/ and I want to
-> get the latest kernel up and running on OSK OMAP5912, arm9. The board
-> is in process of shipment but I started out with a qemu
-> (arm-generic/versatilepb) based test run.
-> 
-> I am in the middle of a confused experience :-)
+On Thu, Jun 12, 2008 at 3:35 PM, Marcus Tangermann wrote:
+> we currently try to boot a 2.6.21 kernel
 
-I've used this to build cross compilers (which worked ok for me : ):
+time to upgrade
 
-http://code.google.com/p/jicknan/source/browse/trunk/bin/toolchain-eglibc.sh
+> on a custom IXP422 based board.
 
-As usual, YMMV, good luck, HTH!
-
---
-Regards,
-George
+you'll have better luck asking on the arm kernel mailing lists.  they
+process this stuff every day.
+-mike
