@@ -1,38 +1,46 @@
-From: Wolfgang Denk <wd@denx.de>
+From: Bill Gatliff <bgat@billgatliff.com>
 Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Thu, 12 Jun 2008 20:57:59 +0200
-Message-ID: <20080612185759.A11E224035@gemini.denx.de>
-References: <20080612183057.GC7423@nibiru.local>
+Date: Thu, 12 Jun 2008 14:00:10 -0500
+Message-ID: <4851723A.2050703@billgatliff.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com> <1213285831.26255.152.camel@pmac.infradead.org> <20080612160845.GB9327@linux-sh.org> <48514E9A.3080901@billgatliff.com> <20080612183421.GD7423@nibiru.local>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: Your message of "Thu, 12 Jun 2008 20:30:58 +0200."
-             <20080612183057.GC7423@nibiru.local>
+In-Reply-To: <20080612183421.GD7423@nibiru.local>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: weigelt@metux.de
 Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-In message <20080612183057.GC7423@nibiru.local> you wrote:
+Enrico Weigelt wrote:
+> * Bill Gatliff <bgat@billgatliff.com> schrieb:
 > 
-> > Since perl was mentioned, it also makes a good example. Embedded distros 
-> > have been cross-compiling perl for pretty much the last decade, yet even 
+>> If the build system derives from autoconf, then a hacked-up 
+>> config.cache (or equivalent command-line args) often solves 
+>> problems for me. 
 > 
-> Now I'm curious: where can I find a patch ?
+> Only if you're working on *one specific* target for a long time.
+> I, for example, have to support lots of different targets, so your
+> approach does not work for me.
 
-See for example:
+I'm not exactly a one-specific-target kinda guy, either.  I routinely move
+between MIPS, ARM, PPC and x86.
 
-http://git.denx.de/?p=eldk/build.git;a=tree;f=target_rpms/perl;h=fd830dd2e6bf86703fab84b83922eea8c10f0310;hb=3e5c010c91e17e819048937eb4105d762c7e1497
+Yea, that means target-specific config.cache files.  But that works for me.
+
+> Ah, and it's not *solving* any problem,
+> just deferring it to some other day.
+
+If "solving" means helping the tool get the answer it needs, even when running
+in an environment/configuration it wasn't intended for, without breaking
+compatibility with everyone else out there still using the same tool, then I
+disagree.
+
+But hey, I never said you had to do it my way.  :)
 
 
-Best regards,
-
-Wolfgang Denk
-
+b.g.
 -- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-Nothing is easier than to denounce  the  evildoer;  nothing  is  more
-difficult than to understand him.                 - Fyodor Dostoevski
+Bill Gatliff
+bgat@billgatliff.com
