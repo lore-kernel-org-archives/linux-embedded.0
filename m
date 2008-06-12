@@ -1,49 +1,50 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: mainlining min-configs...
-Date: Wed, 11 Jun 2008 20:42:49 -0500
-Message-ID: <200806112042.50852.rob@landley.net>
-References: <48447615.5050806@am.sony.com> <20080611193639.GB2958@cs181133002.pp.htv.fi> <48502BAF.7060209@am.sony.com>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Thu, 12 Jun 2008 08:55:52 +0100
+Message-ID: <20080612075551.GA17891@shareable.org>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48502BAF.7060209@am.sony.com>
 Content-Disposition: inline
+In-Reply-To: <200806111941.51221.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Adrian Bunk <bunk@kernel.org>, Sam Ravnborg <sam@ravnborg.org>, linux-tiny <Linux-tiny@selenic.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Rob Landley <rob@landley.net>
+Cc: Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-On Wednesday 11 June 2008 14:46:55 Tim Bird wrote:
-> Adrian Bunk wrote:
-> > Randy's patch that documents KCONFIG_ALLCONFIG is in Linus' tree since
-> > April 2006.
->
-> Well, dangit there it is!
->
-> The patch I googled had it going into Documentation/kbuild.  It
-> somehow escaped my attention in the README.
+Rob Landley wrote:
+> Most packages don't cross compile at all.  Debian has somewhere north of 
+> 30,000 packages.  Every project that does large scale cross compiling 
+> (buildroot, gentoo embedded, timesys making fedora cross compile, etc) tends 
+> to have about 200 packages that cross compile more or less easily, another 
+> 400 or so that can be made to cross compile with _lot_ of effort and a large 
+> enough rock, and then the project stalls at about that size.
 
-Mine as well.  (I grepped for KCONFIG_ALLCONFIG in Documentation, not in the 
-rest of the tree.  I of all people should know better...)
++1.
 
-> If I was 
-> a little more skilled with my grep-ing I would have found it.
-> Sorry for the bother!
+I spent several months fixing up cross-compile issues on Gentoo
+Embedded a few years ago, for a specific application - only a small
+subset of packages needed.  The majority of packages I needed failed
+to compile out of the box, one way or another - Glibc dependencies,
+arch dependencies, scripts which depend on the host environment, or
+invoke the host compiler, or the host Perl (and then depend on it's
+byte order). etc.
 
-The linux kernel has documentation in Documentation, in the "make htmldocs" 
-output, in the Kconfig help entries, in README files, in the output of "make 
-help", and several other places.  (And then there's all the stuff that's not 
-_in_ the kernel tarball...)
+More recently, I've been compiling a build which is _intended_ for
+cross-compilation - it's an old uClinux kit, patched by a third party.
+Even that fails to build on newer GNU/Linuxes, as the syntax of GNU
+Make has changed, and Bash has changed.  Also GCC 2.old doesn't
+compile on current GNU/Linux with GCC 4.new.
 
-It's easy to miss.
+Fortunately the latter were a few small, easy to fix issues.  But I
+understand now why some find it important to have a replicatable build
+environment when you need to get an old distribution out of the closet
+to update firmware for some 5 year old device.
 
-Rob
+Virtual machines ought to be great for that.  They are.  But even
+those are surprisingly changable - images that worked on a VM a few
+years ago no longer work on the current version of the VM host.
 
-P.S: yes, README files plural.
-  find . -name "*[Rr][Ee][Aa][Dd][Mm][Ee]*" | grep -v Documentation | wc
-  69	69	2315
-
--- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+-- Jamie
