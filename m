@@ -1,40 +1,34 @@
-From: Enrico Weigelt <weigelt@metux.de>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Fri, 13 Jun 2008 17:28:54 +0200
-Message-ID: <20080613152854.GM11760@nibiru.local>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806131106.18487.neundorf@eit.uni-kl.de> <1213348320.26255.231.camel@pmac.infradead.org> <200806131132.55543.neundorf@eit.uni-kl.de>
-Reply-To: weigelt@metux.de
+From: David Woodhouse <dwmw2@infradead.org>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
+	Maintainer(s)...)
+Date: Fri, 13 Jun 2008 18:00:57 +0100
+Message-ID: <1213376457.26255.281.camel@pmac.infradead.org>
+References: <1209577322.25560.402.camel@pmac.infradead.org>
+	 <8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com>
+	 <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain>
+	 <200806121925.35883.rob@landley.net>
+	 <1213340652.26255.224.camel@pmac.infradead.org>
+	 <20080613100231.btmn0xgmqog884cs@localhost>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <200806131132.55543.neundorf@eit.uni-kl.de>
+In-Reply-To: <20080613100231.btmn0xgmqog884cs@localhost>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: linux-embedded-owner@reliableembeddedsystems.com
+Cc: Rob Landley <rob@landley.net>, "Robert P. J. Day" <rpjday@crashcourse.ca>, Mike Frysinger <vapier.adi@gmail.com>, Tim Bird <tim.bird@am.sony.com>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
 
-* Alexander Neundorf <neundorf@eit.uni-kl.de> schrieb:
+On Fri, 2008-06-13 at 10:02 -0500,
+linux-embedded-owner@reliableembeddedsystems.com wrote:
+> Do you wanna set some breakpoints and inspect variables in makefiles?
+> Have a look at a simple makefile debugger (written in make):
+> http://newsletter.embedded.com/shared/printableArticle.jhtml?articleID=197003517
 
-> E.g. in python there are tests which call functions and check 
-> their result to see if we are currently on a platform where 
-> that function is broken (I think there was such a test for 
-> poll() and some other functions).
+404.
 
-IMHO, that's broken sw engineering from ground up.
+You got me all excited there...
 
-BTW: python is one of the packages didn't pass a single one of 
-my QM constraints (hey, not completely corrent, IMHO, install
-prefix was passed ;-O)
-
-
-cu
 -- 
----------------------------------------------------------------------
- Enrico Weigelt    ==   metux IT service - http://www.metux.de/
----------------------------------------------------------------------
- Please visit the OpenSource QM Taskforce:
- 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
- Patches / Fixes for a lot dozens of packages in dozens of versions:
-	http://patches.metux.de/
----------------------------------------------------------------------
+dwmw2
+
