@@ -1,48 +1,60 @@
-From: Enrico Weigelt <weigelt@metux.de>
-Subject: Re: Cross Compiler and loads of issues
-Date: Fri, 13 Jun 2008 17:19:43 +0200
-Message-ID: <20080613151942.GK11760@nibiru.local>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com> <20080613092449.GO27937@knossos.aleph1.co.uk> <7b740b700806130500u17bf3adel3b2139e50d7b029f@mail.gmail.com> <0af6abe442d0b93a10a96b27153f04e9.squirrel@www.geekisp.com> <20080613144658.GA21071@shareable.org>
-Reply-To: weigelt@metux.de
+From: linux-embedded-owner@reliableembeddedsystems.com
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
+	Maintainer(s)...)
+Date: Fri, 13 Jun 2008 10:02:31 -0500
+Message-ID: <20080613100231.btmn0xgmqog884cs@localhost>
+References: <1209577322.25560.402.camel@pmac.infradead.org>
+	<8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com>
+	<alpine.LFD.1.10.0806121208320.22877@localhost.localdomain>
+	<200806121925.35883.rob@landley.net>
+	<1213340652.26255.224.camel@pmac.infradead.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <1213340652.26255.224.camel@pmac.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20080613144658.GA21071@shareable.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; delsp="Yes"; format="flowed"
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: Rob Landley <rob@landley.net>, "Robert P. J. Day" <rpjday@crashcourse.ca>, Mike Frysinger <vapier.adi@gmail.com>, Tim Bird <tim.bird@am.sony.com>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
 
-* Jamie Lokier <jamie@shareable.org> schrieb:
+Hi David,
 
-> For some reason, that stopped a while ago, and you had to go to
-> different places to get working basic tools.  And often, the place to
-> go wasn't clear.  Different people advertised their "ARM toolchain",
-> "m68k toolchain" etc.  and they were slightly different sets of
-> patches on top of mainline tools.  Central authorities you might
-> believe in existed, but they were always a few patches behind what you
-> actually needed.
+Do you wanna set some breakpoints and inspect variables in makefiles?
+Have a look at a simple makefile debugger (written in make):
+http://newsletter.embedded.com/shared/printableArticle.jhtml?articleID=197003517
 
-That's because many embedded build their toolchains completely on
-their own, instead of just using an generic toolkit like ct.
+Regards,
 
-> Contrast with kernel.org: everyone knows where to get a good working
-> Linux kernel for the mainstream architectures, and the quality work
-> tends to be quite good at reaching mainline there nowadays.
+Robert
 
-ACK. But you perhaps remember the discussions on LKML where some
-folks wanted to stop this and leave all the QM works to individual
-distros. I'm glad this plan was dropped.
+---
+Robert Berger
+Embedded Software Specialist
+
+Reliable Embedded Systems
+Consulting Training Engineering
+Tel.: (+30) 697 593 3428
+Fax.:(+30 210) 684 7881
+URL: www.reliableembeddedsystems.com
 
 
-cu
--- 
----------------------------------------------------------------------
- Enrico Weigelt    ==   metux IT service - http://www.metux.de/
----------------------------------------------------------------------
- Please visit the OpenSource QM Taskforce:
- 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
- Patches / Fixes for a lot dozens of packages in dozens of versions:
-	http://patches.metux.de/
----------------------------------------------------------------------
+Quoting David Woodhouse <dwmw2@infradead.org>:
+
+> On Thu, 2008-06-12 at 19:25 -0500, Rob Landley wrote:
+>> Make doesn't scale.
+>
+> Make scales just fine. The only real problem with make is that it's a
+> complete pain to debug.
+>
+> --
+> dwmw2
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
