@@ -1,76 +1,43 @@
-From: "Wang, Baojun" <wangbj@dslab.lzu.edu.cn>
-Subject: override an interrupt handler?
-Date: Fri, 13 Jun 2008 12:03:50 +0800
-Message-ID: <1213329830.17351.13.camel@localhost.dslab>
-Reply-To: wangbj@dslab.lzu.edu.cn
+From: Robert Schwebel <r.schwebel@pengutronix.de>
+Subject: Re: Cross Compiler and loads of issues
+Date: Fri, 13 Jun 2008 06:34:31 +0200
+Message-ID: <20080613043431.GP13599@pengutronix.de>
+References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-7VEOa+qCJfEaXkYRwcXc"
 Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Shaz <shazalive@gmail.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
+On Thu, Jun 12, 2008 at 10:52:44PM +0500, Shaz wrote:
+> I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
+> felt like asking that is there one good way to get a cross compiler
+> work. I tried buildroot, scratchbox and even openMoko with
+> openEmbedded but all of them had lots of issues and don't know which
+> will be the best alternative.
 
---=-7VEOa+qCJfEaXkYRwcXc
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+There's also OSELAS.Toolchain:
+http://www.pengutronix.de/oselas/toolchain/index_en.html
 
-hi,=20
+We try to be as close to mainline gcc/binutils as possible, and if there
+are issues, please report or send patches :-)
 
-  In my application I want to override the timer interrupt, and I'm
-doing in this manner:
+> Anyways, I liked the idea of Qemu based cross compiler. Is it possible
+> for the inexperienced to get it working and emulate the exact model
+> and devices.
 
-	disable_irq(0);		/* disable timer irq first */
-	free_irq(0, NULL);	/* free the old irq */
-	setup_irq(0, new_irq0);
+No.
 
-setup_irq() return with 0, however I got the following OOPs message:
-
-Bad page state in process 'swapper'
-page:81003e20 flags:0x00000400 mapping:00000000 mapcount:0 count:0
-Trying to fix it up, but a reboot is needed
-Backtrace:
-Call Trace:
-[<8001819c>] dump_stack+0x8/0x34
-[<8005ddc8>] bad_page+0x6c/0xa4
-[<8005e600>] free_hot_cold_page+0x98/0x1e8
-[<802074a8>] xm_init_clockevents+0x90/0xbc
-[<80215998>] xm_init+0x208/0x240
-[<80206680>] kernel_init+0xec/0x310
-[<800149e0>] kernel_thread_helper+0x10/0x18
-
-
-So, is it possible to override the timer interrupt handler? Any hints is
-greatly appreciated.
-
-  Regards,
-
---=20
-Wang, Baojun                                                Lanzhou Univers=
-ity
-Distributed & Embedded System Lab                      http://dslab.lzu.edu=
-.cn
-School of Information Science and Engeneering          wangbj@dslab.lzu.edu=
-.cn
-Tianshui South Road 222. Lanzhou 730000                             .P.R.Ch=
-ina
-Tel: +86-931-8912025                                      Fax: +86-931-8912=
-022
-
-
---=-7VEOa+qCJfEaXkYRwcXc
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: 
-	=?gb2312?Q?=D5=E2=CA=C7=D0=C5=BC=FE=B5=C4=CA=FD=D7=D6=C7=A9?=
-	=?gb2312?Q?=C3=FB=B2=BF=B7=D6?=
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.9 (GNU/Linux)
-
-iEYEABECAAYFAkhR8aYACgkQIuIOr7tpgg0cdwCgiFoNV028t1u3jPzD4DzVvs0w
-yZ0AnjiDSf+mojscTPwc7IU5Wp+v1a0d
-=xaUM
------END PGP SIGNATURE-----
-
---=-7VEOa+qCJfEaXkYRwcXc--
+rsc
+-- 
+ Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
+ Pengutronix - Linux Solutions for Science and Industry
+   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
+     Hannoversche Str. 2, 31134 Hildesheim, Germany
+   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
 
