@@ -1,42 +1,51 @@
-From: Marcus Tangermann <marcus.tangermann@web.de>
-Subject: Re: Kernel boot problem on IXP422 Rev. A
-Date: Fri, 13 Jun 2008 21:07:46 +0200
-Message-ID: <4852C582.9000508@web.de>
-References: <1522484831@web.de> <4851BC65.4030501@snapgear.com>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
+Subject: Re: cross-compiling alternatives
+Date: Fri, 13 Jun 2008 21:10:37 +0200
+Message-ID: <20080613191037.GU13599@pengutronix.de>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806130843.05704.neundorf@eit.uni-kl.de> <1213346316.17853.28.camel@tara.firmix.at> <200806131106.18487.neundorf@eit.uni-kl.de> <1213351433.17853.61.camel@tara.firmix.at> <20080613151634.GJ11760@nibiru.local> <1213382709.17853.79.camel@tara.firmix.at>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4851BC65.4030501@snapgear.com>
+Content-Disposition: inline
+In-Reply-To: <1213382709.17853.79.camel@tara.firmix.at>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Bernd Petrovitsch <bernd@firmix.at>
+Cc: weigelt@metux.de, Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-Hi Greg,
+On Fri, Jun 13, 2008 at 08:45:09PM +0200, Bernd Petrovitsch wrote:
+> > Recent pkg-config supports sysroot.
+> 
+> FC-6 has "only" 0.21.
 
-first, thanks for the hints.
->
-> The most common problem like this I have seen are that the
-> ARM machine type set by the boot loader does not match those
-> compiled into the kernel. Also make sure that the RAM
-> size being passed to the kernel is correct too.
->
-This seems to be set correctly.
+Solved in ptxdist by building the "right" pkgconfig as a host tool.
 
-> Enable the kernels CONFIG_DEBUG_LL and it may give you some
-> early debug output (like an id not supported message). That
-> assumes a serial console...
-Will try that,
-Today I downloaded the snapgear distribution and tried whether i can 
-generate a kernel image that works with it...and it boots (2.4 and 2.6)  
-:-) Then I downloaded a fresh 2.6.25 kernel and compiled it with 
-toolchain from the snapgear homepage...and it does not boot. Are there 
-any special patches in the 2.6.19-uc1 from the snapgear distribution 
-that might have influence on a IXP422 based board?
-Additionally, it seems that we may have a little problem in the 
-bootloader (uboot) when passing kernel parameters (e.g."setenv bootargs 
-console=ttyS0,115200"). Setting such a paramter causes the same problem 
-with a dying kernel. Maybe there is a relation.
+> > So you simply build your .pc files as usual (w/o sysroot prefix) and
+> > set the sysroot prefix via env on the pkg-config call.
 
-Regards
-Marcus
+Ah, great, must be a new feature. Will have to integrate that into
+ptxdist... at the moment we fix it with a wrapper script.
+
+> The problem is that the build-time (cross-)linker needs to find the
+> (cross-compiled) lib under
+> /my/build/host/target/environment/opt/foo/lib at link time and the
+> shared linker under /opt/foo/lib at run-time.
+
+pkg-config is fixable (our wrapper in PTXdist does the right thing wrt.
+buildtime vs. runtime paths).
+
+> Hmm, after digging into that old project, it seems that libtool and
+> the .la files were the problem.
+
+Right, libtool's paths are critical: libtools isn't sysroot aware, and
+it seems to be not easily fixable.
+
+rsc
+-- 
+ Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
+ Pengutronix - Linux Solutions for Science and Industry
+   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
+     Hannoversche Str. 2, 31134 Hildesheim, Germany
+   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
+
