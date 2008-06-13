@@ -1,31 +1,39 @@
 From: Robert Schwebel <r.schwebel@pengutronix.de>
 Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
 	Maintainer(s)...)
-Date: Fri, 13 Jun 2008 20:47:15 +0200
-Message-ID: <20080613184715.GS13599@pengutronix.de>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <1213285831.26255.152.camel@pmac.infradead.org> <48514D77.4060007@am.sony.com> <200806122025.54791.rob@landley.net> <20080613031104.GA29667@uranus.ravnborg.org>
+Date: Fri, 13 Jun 2008 20:51:57 +0200
+Message-ID: <20080613185157.GT13599@pengutronix.de>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806122025.54791.rob@landley.net> <8bd0f97a0806121829o6138cb30se025fa3c29cdd1a8@mail.gmail.com> <200806130830.52734.neundorf@eit.uni-kl.de>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20080613031104.GA29667@uranus.ravnborg.org>
+In-Reply-To: <200806130830.52734.neundorf@eit.uni-kl.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Rob Landley <rob@landley.net>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>, Greg Ungerer <gerg@snapgear.com>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
+To: Alexander Neundorf <neundorf@eit.uni-kl.de>
+Cc: linux-embedded@vger.kernel.org
 
-On Fri, Jun 13, 2008 at 05:11:04AM +0200, Sam Ravnborg wrote:
-> Tom has started a nice project which he named: quagmire.
-> See: http://code.google.com/p/quagmire/
-> 
-> From the website:
-> quagmire is intended to replace automake and libtool. Unlike these tools 
-> it requires GNU make and is written solely using GNU make
-> features -- no preprocessing is required.
+On Fri, Jun 13, 2008 at 08:30:52AM +0200, Alexander Neundorf wrote:
+> Battle of Wesnoth is currently converted to both Scons and CMake, and
+> in the end they will decide about the winner. (since Eric is good at
+> arguing I guess it will be scons).
 
-Last time I looked it had *at least* 0.1% of the autotools features
-supported :-)
+The thing is that 'configure && make && make install' plus the usuall
+--enable-foo / --disable-foo / --with-bla=blub semantics is simply *the*
+standard way of configuring stuff for unix systems. You don't need fancy
+tools, you get cross compiling almost for free and unix people simply
+know how to use it.
+
+All the cool kids out there who think they know everything better
+usually start with "I hate autotools", then invent something which
+solves 0.1% of the problems (including their very special problem) and
+tell the rest of the world that their shiny new tools is *soooo cooool*.
+
+Been there, seen that. I maintain > 500 packets in PTXdist and guess
+which ones make 90% of the problems. Hint: they are not related to
+autotools ...
 
 rsc
 -- 
