@@ -1,43 +1,85 @@
-From: "Josh Boyer" <jwboyer@gmail.com>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Fri, 13 Jun 2008 09:59:52 -0400
-Message-ID: <625fc13d0806130659j4f2765e6m9f5d844f2d00669@mail.gmail.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org>
-	 <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com>
-	 <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com>
-	 <1213285831.26255.152.camel@pmac.infradead.org>
-	 <8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com>
-	 <625fc13d0806121129h23eb919dt3661016f82aad266@mail.gmail.com>
-	 <8bd0f97a0806121202t4b61bbd9x843cf9427318e9fd@mail.gmail.com>
+From: "Bill Traynor" <wmat@naoi.ca>
+Subject: Re: Cross Compiler and loads of issues
+Date: Fri, 13 Jun 2008 10:13:44 -0400 (EDT)
+Message-ID: <0af6abe442d0b93a10a96b27153f04e9.squirrel@www.geekisp.com>
+References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
+    <20080613092449.GO27937@knossos.aleph1.co.uk>
+    <7b740b700806130500u17bf3adel3b2139e50d7b029f@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=vQpbQ963N9DCILFISCEeui0D69+dvHPfgkg0tUfMP4w=;
-        b=V5qJJAgfagTgAAMjiS98kcYSRNpnuWIdHVlY+Jbplng68woWEHR+/6H01n6HjzEOjr
-         +IJj9tI/iOiaz4iAxGnbBtxCGP0Wm3dFirJJt+K/oB3kRSxq87BUN6d6kizLp/Rzwp1W
-         4OzVJuxPER8cVWaba/c2efqOPOM97S9sMxLr8=
-In-Reply-To: <8bd0f97a0806121202t4b61bbd9x843cf9427318e9fd@mail.gmail.com>
-Content-Disposition: inline
+In-Reply-To: <7b740b700806130500u17bf3adel3b2139e50d7b029f@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, Rob Landley <rob@landley.net>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
+To: Shaz <shazalive@gmail.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Thu, Jun 12, 2008 at 3:02 PM, Mike Frysinger <vapier.adi@gmail.com> wrote:
->>> people cant even write proper *native* makefiles.  mtd-utils for example ;).
->>
->> What's wrong with it?  I'll fix it.
+> It's nice to see we have so many options and related people and pros
+> to it are available around.
 >
-> is linux-mtd@lists.infradead.org not the place to post ?  that's where
-> i sent the first fix yesterday ... not that i'm subscribed since i
-> dont have a direct interest in mtd development ...
+> IMO there should be some sort of effort to standardize the tool-chains
+> and build environments coherently with the kernel. I think its a prime
+> time to work around all the possibilities and standardize so that a
+> collaborative effort similar to Linux kernel can be set ahead. I think
+> thats the objective of this list too. Any plans yet sorted out?
 
-It is.  I just missed it.  I'll look closer today.  Thanks.
+I don't understand what you mean by "standardize the tool-chains and build
+environments", can you provide specifics?  Similarly, what does "work
+around all the possibilities and standardize" mean?
 
-josh
+Maybe I'm being dense, but what's specifically wrong with the current
+toolchain universe?
+>
+> On Fri, Jun 13, 2008 at 2:24 PM, Wookey <wookey@wookware.org> wrote:
+>>
+>> On 2008-06-12 22:52 +0500, Shaz wrote:
+>> > Hi,
+>> >
+>> > I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
+>> > felt like asking that is there one good way to get a cross compiler
+>> > work. I tried buildroot, scratchbox and even openMoko with
+>> > openEmbedded but all of them had lots of issues and don't know which
+>> > will be the best alternative.
+>>
+>> 'issues' are generally par for the course. It's a difficult problem.
+>> I've generally found buildroot the least-painful of the above, largely
+>> because it targets a relatively small section of the problem-space.
+>>
+>> For completeness I should also mention that Embedded Debian provides
+>> yet another option. I will not claim that it will have fewer issues
+>> than the above. http://www.emdebian.org/emdebian/intro.html
+>>
+>> I'm not sure if you are really asking about toolchains or build-systems?
+>> The former is fairly reliably solved. For a debian-based box just
+>> install pre-built cross toolchians from emdebian:
+>> http://www.emdebian.org/tools/crosstools.html
+>> (from i386, amd64, powerpc; to: nearly all debian-supported
+>> architectures, gcc3.3, 3.4, 4.1, 4.2, 4.3)
+>> http://www.emdebian.org/toolchains/search.php?section=devel gives more
+>> details.
+>>
+>> emdebian-tools also provides the debian equivalent of crosstool
+>> ('emchain' to build your own version of current current toolchain,
+>> should a suitable pre-built one not exist.
+>>
+>> For non-debian boxes other people seem to have listed the options so I
+>> won't repeat (and it's not my area of expertise).
+>>
+>> Wookey (Emdebian 'Chief bullshitter' - bias alert. The toolchains are
+>> great though, really.)
+>> --
+>> Principal hats:  Balloonz - Toby Churchill - Aleph One - Debian
+>> http://wookware.org/
+>
+>
+>
+> --
+> Shaz
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded"
+> in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
