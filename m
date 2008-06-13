@@ -1,44 +1,72 @@
-From: "Bart Van Assche" <bart.vanassche@gmail.com>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Fri, 13 Jun 2008 13:22:25 +0200
-Message-ID: <e2e108260806130422n28a1445y4d35ba22a2ec8577@mail.gmail.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org>
-	 <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com>
-	 <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com>
-	 <1213285831.26255.152.camel@pmac.infradead.org>
-	 <8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com>
-	 <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain>
+From: James Chapman <jchapman@katalix.com>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Fri, 13 Jun 2008 12:28:10 +0100
+Message-ID: <485259CA.8050601@katalix.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org>	 <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com>	 <200806111941.51221.rob@landley.net>	 <20080612182529.GB7423@nibiru.local> <485190E8.80705@cisco.com>	 <48519837.1090902@katalix.com>	 <8bd0f97a0806121446i68af3b96sbe51cc510f7d4fb6@mail.gmail.com>	 <48519AD1.7020503@am.sony.com> <8bd0f97a0806121456y7a79649bp41d02fee6ae89b@mail.gmail.com> <48523254.2070507@katalix.com> <485237BF.3030204@st.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=WO8KHUHtcEyrzTQYS6u/VSnIBr1cO45Utd6puWWZHCc=;
-        b=rihUiNH6Q1WRluJPY9l8zHPUmxXqtJWl1Cnf+K0MXg3qZQkzvFcZpHHsBPdXYnIQz8
-         lrCGE2OGZvGGLJGhtQAyQUdeouiWbHp5DPe14JDCT4OO7kTJStx/p7xo8szvmQ8qZ8cR
-         GQudg2N2RPvWbI+fLYGYnfZWuPQTcE/JoV1CM=
-In-Reply-To: <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain>
-Content-Disposition: inline
+In-Reply-To: <485237BF.3030204@st.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Cc: Mike Frysinger <vapier.adi@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, Rob Landley <rob@landley.net>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Daniel THOMPSON <daniel.thompson@st.com>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, Tim Bird <tim.bird@am.sony.com>, David VomLehn <dvomlehn@cisco.com>, weigelt@metux.de, Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-On Thu, Jun 12, 2008 at 6:12 PM, Robert P. J. Day <rpjday@crashcourse.ca> wrote:
-...
-> meooowww!  :-)  but at the risk of dragging this even further
-> off-topic, i am *constantly* asked by people how to set up makefiles
-> for their software project, and what would be nice is a small
-> collection of examples of a makefile (or makefiles) done *right*.  as
-> in, properly recursive, supports cross-compiling without having to
-> remove your left nad, etc, etc.
-...
+Daniel THOMPSON wrote:
+> James Chapman wrote:
+>> Mike Frysinger wrote:
+>>> On Thu, Jun 12, 2008 at 5:53 PM, Tim Bird wrote:
+>>>> Mike Frysinger wrote:
+>>>>>> Er, is that GPL or LGPL code that you're modifying? If so, you
+>>>>>> *have* to
+>>>>>> push those code changes out (make them available to others),
+>>>>>> whether you
+>>>>>> think people will be interested or not!
+>>>>> umm, not really.  only if (1) he gives a binary to someone and (2)
+>>>>> they ask him for the source.  if he doesnt distribute or no one asks,
+>>>>> he doesnt have to do squat.
+>>>> This is closer to correct, but missing some important details.
+>>>>
+>>>> Start the GPL compliance tutorial/flameware in 3, 2, 1...
+>>> yeah, i really dont think licensing things belong here.  sorry for
+>>> following up.
+>>>
+>>> how about this policy: if you want to make a statement, go pay a
+>>> lawyer.  but that statement still shouldnt be made here ;).
+>>> -mike
+>> Sorry, I didn't mean to provoke a GPL flame war. The point I was trying
+>> to make (badly as it turns out) is that if a company really wants to see
+>> its changes taken upstream, it could simply publish the work on its
+>> website and let each relevant community know that it's there.
+> 
+> Isn't this a lot of the problem with the way embedded companies and
+> developers interact with upstream.
+> 
+> In some cases it is in the embedded developers interests to see their
+> code adopted upstream (i.e. so they don't have to maintain it).
 
-Please read the essay "Recursive Make Considered Harmful"
-(http://miller.emu.id.au/pmiller/books/rmch/).
+Totally agree! And the best chance of having code accepted upstream is 
+to work with the community _while_ developing it, i.e. discussing the 
+code during implementation, rather than presenting it to the community 
+when it's done. All too often, companies get frustrated by feedback from 
+the community because changes are requested to code that the original 
+authors have spent time testing etc. Had early versions been submitted 
+for feedback, changes could be made with less chance of wasted effort.
 
-Bart.
+> Just tossing some code over the wall will, in almost all circumstances,
+> result in the code being ignored.
+
+It depends. But it stands a better chance of being adopted than holding 
+on to the work until someone asks for it. There could be lots of 
+embedded developers out there who would be willing to take some code 
+from cisco, modify it and work with the community to have it adopted 
+upstream.
+
+
+-- 
+James Chapman
+Katalix Systems Ltd
+http://www.katalix.com
+Catalysts for your Embedded Linux software development
+
