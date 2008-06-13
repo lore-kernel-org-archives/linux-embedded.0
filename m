@@ -1,51 +1,42 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Not as much ccache win as I expected
-Date: Fri, 13 Jun 2008 12:06:05 -0700
-Message-ID: <4852C51D.30206@am.sony.com>
+From: Marcus Tangermann <marcus.tangermann@web.de>
+Subject: Re: Kernel boot problem on IXP422 Rev. A
+Date: Fri, 13 Jun 2008 21:07:46 +0200
+Message-ID: <4852C582.9000508@web.de>
+References: <1522484831@web.de> <4851BC65.4030501@snapgear.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4851BC65.4030501@snapgear.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
-Cc: linux-kbuild@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded@vger.kernel.org
 
-I'm running an automated test which does numerous compiles
-of the Linux kernel.  One of the things I do is create a localversion
-file at the root of the kernel source tree with a unique identifier
-that I use later on in testing.
+Hi Greg,
 
-I started using ccache to improve the performance of my builds,
-but found that the hit rate on the cache was not very good.
- $ ccache -s
-cache directory                     /home/tbird/.ccache
-cache hit                          74416
-cache miss                         59400
-called for link                    87252
-compile failed                        21
-not a C/C++ file                  143449
-no input file                      49336
-files in cache                     42844
-cache size                           1.8 Gbytes
-max cache size                       2.0 Gbytes
+first, thanks for the hints.
+>
+> The most common problem like this I have seen are that the
+> ARM machine type set by the boot loader does not match those
+> compiled into the kernel. Also make sure that the RAM
+> size being passed to the kernel is correct too.
+>
+This seems to be set correctly.
 
-Thinking that the problem might be having a unique version for
-every build (and that this change flowed to every file via the
-version.h file), I tried building without this change.  I saw
-an improvement, but not much.
+> Enable the kernels CONFIG_DEBUG_LL and it may give you some
+> early debug output (like an id not supported message). That
+> assumes a serial console...
+Will try that,
+Today I downloaded the snapgear distribution and tried whether i can 
+generate a kernel image that works with it...and it boots (2.4 and 2.6)  
+:-) Then I downloaded a fresh 2.6.25 kernel and compiled it with 
+toolchain from the snapgear homepage...and it does not boot. Are there 
+any special patches in the 2.6.19-uc1 from the snapgear distribution 
+that might have influence on a IXP422 based board?
+Additionally, it seems that we may have a little problem in the 
+bootloader (uboot) when passing kernel parameters (e.g."setenv bootargs 
+console=ttyS0,115200"). Setting such a paramter causes the same problem 
+with a dying kernel. Maybe there is a relation.
 
-Is there anything else obvious which is prevents ccache from
-working well with a kernel build (that is, anything else that
-would, for otherwise identical C files with a similar build,
-cause a difference?)
-
-Any tips would be appreciated.
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
-
+Regards
+Marcus
