@@ -1,65 +1,51 @@
-From: "Bill Traynor" <wmat@naoi.ca>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded     
-      Maintainer(s)...)
-Date: Fri, 13 Jun 2008 15:00:30 -0400 (EDT)
-Message-ID: <262ce99bad61a8ba889d5cc718c50b1a.squirrel@www.geekisp.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org>
-    <8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com>
-    <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain>
-    <200806121925.35883.rob@landley.net>
-    <1213340652.26255.224.camel@pmac.infradead.org>
-    <20080613100231.btmn0xgmqog884cs@localhost>
-    <1213376457.26255.281.camel@pmac.infradead.org>
-    <2a5b3cfbb9eccd7885735ea46b115541.squirrel@www.geekisp.com>
-    <4852C026.8060203@am.sony.com>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Not as much ccache win as I expected
+Date: Fri, 13 Jun 2008 12:06:05 -0700
+Message-ID: <4852C51D.30206@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4852C026.8060203@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Bill Traynor <wmat@naoi.ca>, David Woodhouse <dwmw2@infradead.org>, linux-embedded-owner@reliableembeddedsystems.com, Rob Landley <rob@landley.net>, "Robert P. J. Day" <rpjday@crashcourse.ca>, Mike Frysinger <vapier.adi@gmail.com>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
+To: linux-embedded <linux-embedded@vger.kernel.org>
+Cc: linux-kbuild@vger.kernel.org
 
-> Bill Traynor wrote:
->>>> Do you wanna set some breakpoints and inspect variables in makefiles?
->>>> Have a look at a simple makefile debugger (written in make):
->> http://www.embedded.com/columns/technicalinsights/197003517?printable=true
->
-> The article above shows some macros you can add to your Makefile to show
-> you the values of certain things.  It is helpful, but not an interactive
-> debugger.
->
-> However, the guy who wrote that article did indeed write a full
-> Makefile debugger.  I took it for a spin, and found that it worked as
-> advertised on a simple Makefile.  I tried it on the kernel Makefile, but
-> without success (but I didn't try very hard).
->
-> YMMV.  I put some of the resources and info I found at:
-> http://elinux.org/Debugging_Makefiles
->
-> The link from the package's README doesn't work, but here's a link
-> I found to an article about the debugger:
-> http://www.cmcrossroads.com/content/view/6479/120/
+I'm running an automated test which does numerous compiles
+of the Linux kernel.  One of the things I do is create a localversion
+file at the root of the kernel source tree with a unique identifier
+that I use later on in testing.
 
-The links in the README worked fine for me.  FWIW, the authors homepage is
-here: http://gmd.sf.net He's written a self-published book on GNU Make, it
-would seem.
+I started using ccache to improve the performance of my builds,
+but found that the hit rate on the cache was not very good.
+ $ ccache -s
+cache directory                     /home/tbird/.ccache
+cache hit                          74416
+cache miss                         59400
+called for link                    87252
+compile failed                        21
+not a C/C++ file                  143449
+no input file                      49336
+files in cache                     42844
+cache size                           1.8 Gbytes
+max cache size                       2.0 Gbytes
 
->
->  -- Tim
->
-> =============================
-> Tim Bird
-> Architecture Group Chair, CE Linux Forum
-> Senior Staff Engineer, Sony Corporation of America
-> =============================
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Thinking that the problem might be having a unique version for
+every build (and that this change flowed to every file via the
+version.h file), I tried building without this change.  I saw
+an improvement, but not much.
+
+Is there anything else obvious which is prevents ccache from
+working well with a kernel build (that is, anything else that
+would, for otherwise identical C files with a similar build,
+cause a difference?)
+
+Any tips would be appreciated.
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
 
