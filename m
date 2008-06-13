@@ -1,92 +1,71 @@
-From: Bernd Petrovitsch <bernd@firmix.at>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
 Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
-	Maintainer(s)...)
-Date: Fri, 13 Jun 2008 10:38:36 +0200
-Message-ID: <1213346316.17853.28.camel@tara.firmix.at>
+ Maintainer(s)...)
+Date: Fri, 13 Jun 2008 13:14:52 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0806131314270.2141@vixen.sonytel.be>
 References: <1209577322.25560.402.camel@pmac.infradead.org>
-	 <48513F5A.6010008@am.sony.com>
-	 <1213285831.26255.152.camel@pmac.infradead.org>
-	 <200806130843.05704.neundorf@eit.uni-kl.de>
+ <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com>
+ <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com>
+ <1213285831.26255.152.camel@pmac.infradead.org>
+ <8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com>
+ <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-497380002-1213355692=:2141"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200806130843.05704.neundorf@eit.uni-kl.de>
-Content-Disposition: inline
+In-Reply-To: <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Alexander Neundorf <neundorf@eit.uni-kl.de>
-Cc: linux-embedded@vger.kernel.org
+To: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, Rob Landley <rob@landley.net>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
 
-On Fre, 2008-06-13 at 08:43 +0200, Alexander Neundorf wrote:
-> On Thursday 12 June 2008 17:50:31 you wrote:
-> > On Thu, 2008-06-12 at 08:23 -0700, Tim Bird wrote:
-> > > Rob Landley wrote:
-> > > > However, having one or more full-time engineers devoted to debugging
-> > > > cross-compile issues is quite a high price to pay too.  Moore's law
-> > > > really doesn't help that one.
-> > > >
-> > > > I'm not saying either solution is perfect, I'm just saying the "build
-> > > > under emulation" approach is a viable alternative that gets more
-> > > > attractive as time passes, both because of ongoing development on
-> > > > emulators and because of Moore's law on the hardware.
-> > >
-> > > I agree with much that you have said, Rob, and I understand the argument
-> > > for getting the most gain from the least resources, but I have a
-> > > philosophical problem with working around the cross-compilation problems
-> > > instead of fixing them in the upstream packages (or in the autoconf
-> > > system itself).
-> > >
-> > > Once someone fixes the cross-compilation issues for a package, they
-> > > usually stay fixed, if the fixes are mainlined.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+---584349381-497380002-1213355692=:2141
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+On Thu, 12 Jun 2008, Robert P. J. Day wrote:
+> On Thu, 12 Jun 2008, Mike Frysinger wrote:
+> > On Thu, Jun 12, 2008 at 11:50 AM, David Woodhouse wrote:
+> > > If we just made people write portable code and proper Makefiles,
+> > > it would be less of an issue :)
 > >
-> > I don't think that's true, unfortunately. Autoconf makes it _easy_ to do
-> > the wrong thing, and people will often introduce new problems.
-> >
-> > If we just made people write portable code and proper Makefiles, it
-> > would be less of an issue :)
+> > people cant even write proper *native* makefiles.  mtd-utils for
+> > example ;).
+> 
+> meooowww!  :-)  but at the risk of dragging this even further
+> off-topic, i am *constantly* asked by people how to set up makefiles
+> for their software project, and what would be nice is a small
+> collection of examples of a makefile (or makefiles) done *right*.  as
+> in, properly recursive, supports cross-compiling without having to
+      ^^^^^^^^^^^^^^^^^^
+      Ugh?
 
-ACK. And proper build time tools.
+> remove your left nad, etc, etc.
+> 
+> so ... would anyone like to recommend a software package or two
+> somewhere whose makefile(s) is/are, ITHO, done well?  that i/we could
+> just point at and say, "do it like that!"  anyone?  anyone?  bueller?
 
-> Well, IMO this makes it sound too easy.
-> If you write portable software, you have to do platform checks.
-> Basically they can be done by
-> -checking for the existence of files
+The kernel, except that it's still recursive?
 
-That can be done as - sooner or later - one must install the compiled
-stuff anyway. So one has root directory somewhere and one can tell the
-tools.
+With kind regards,
 
-> -checking if something builds
-> -checking the output of running something you just built
+Geert Uytterhoeven
+Software Architect
 
-And the above are not really a big problem - embedded people usually
-know such details and can tell the autoconf tools.
-Even worse is (or at least were) tools like pkg_config and libtool,
-which generate directories to the build time library.
+Sony Techsoft Centre
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
 
-The only simple solution so far (without diving into the implementation
-and searching for root causes) were AFAICS:
-- do not use libtool for linking (as the link line as such without
-  libtool works as expected)
-- rewrite generated pkg_config files after generation.
-Yes, that's pretty ugly.
-But perhaps I was just too dumb to find the correct solutions.
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
 
-> The last one is the problem for cross compiling.
-> Example: detecting the size of ints
-
-Why on earth does someone need this explicitly during the build?
-If you have portable software, all of that should be hidden in the code
-and use "sizeof(int)".
-
-IMHO the code (or whatever piece uses it) should be fixed and the build
-time stuff removed.
-
-	Bernd
--- 
-Firmix Software GmbH                   http://www.firmix.at/
-mobil: +43 664 4416156                 fax: +43 1 7890849-55
-          Embedded Linux Development and Services
-
-
+Sony Technology and Software Centre Europe
+A division of Sony Service Centre (Europe) N.V.
+Registered office: Technologielaan 7 · B-1840 Londerzeel · Belgium
+VAT BE 0413.825.160 · RPR Brussels
+Fortis 293-0376800-10 GEBA-BE-BB
+---584349381-497380002-1213355692=:2141--
