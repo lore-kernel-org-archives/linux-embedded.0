@@ -1,28 +1,98 @@
-From: Johannes Stezenbach <js@linuxtv.org>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
-	Maintainer(s)...)
-Date: Fri, 13 Jun 2008 21:43:30 +0200
-Message-ID: <20080613194330.GA23209@linuxtv.org>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <8bd0f97a0806120905u532ce5f9sf231e185173de791@mail.gmail.com> <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain> <200806121925.35883.rob@landley.net> <1213340652.26255.224.camel@pmac.infradead.org> <20080613100231.btmn0xgmqog884cs@localhost> <1213376457.26255.281.camel@pmac.infradead.org> <2a5b3cfbb9eccd7885735ea46b115541.squirrel@www.geekisp.com> <4852C026.8060203@am.sony.com>
+From: "Oleg Verych" <olecom@gmail.com>
+Subject: Re: Not as much ccache win as I expected
+Date: Fri, 13 Jun 2008 21:54:11 +0100
+Message-ID: <8499950a0806131354u7d2431b2n2df50b7b6c98f18d@mail.gmail.com>
+References: <4852C51D.30206@am.sony.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=EdB48gF/H4pA4+Y9vV0uvIf0h8UdKNnR2nJ8wJzhFgI=;
+        b=I3WpWFAfZC7mwW3YIqH8dBVWdUal78KqADX64DCB+35AEUnyOgPg47fmw+daBIjKDJ
+         PQrDV6hJsfELYuUbqTkQ/NYFD8xkhBMWQLFLuUpb+ym+5U/GmEKzQwPXOdGG5bCYlOIz
+         URw0PUu5q34KOgrDoDT3T2PLIalK2vBz8z5yo=
+In-Reply-To: <4852C51D.30206@am.sony.com>
 Content-Disposition: inline
-In-Reply-To: <4852C026.8060203@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Tim Bird <tim.bird@am.sony.com>
-Cc: Bill Traynor <wmat@naoi.ca>, David Woodhouse <dwmw2@infradead.org>, linux-embedded-owner@reliableembeddedsystems.com, Rob Landley <rob@landley.net>, "Robert P. J. Day" <rpjday@crashcourse.ca>, Mike Frysinger <vapier.adi@gmail.com>, Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, Leon Woestenberg <leon.woestenberg@gmail.com>, linux-embedded@vger.kernel.org
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux-kbuild@vger.kernel.org
 
-On Fri, Jun 13, 2008, Tim Bird wrote:
-> 
-> YMMV.  I put some of the resources and info I found at:
-> http://elinux.org/Debugging_Makefiles
+Tim Bird @ Fri, 13 Jun 2008 12:06:05 -0700:
 
-There is also "remake", which is "A patched GNU make with a debuger,
-better tracing and error reporting" (based on GNU make 3.80).
-Development seems to have stopped, though.
-http://sourceforge.net/projects/bashdb/
+> I'm running an automated test which does numerous compiles
+> of the Linux kernel.  One of the things I do is create a localversion
+> file at the root of the kernel source tree with a unique identifier
+> that I use later on in testing.
 
-Johannes
+And what kinds of source/kconfig changes are made for every build?
+(any versions, e.g. localversion, .version, aren't important, they are for
+modules ko and vmlinux, afaik)
+
+[...]
+> Is there anything else obvious which is prevents ccache from
+> working well with a kernel build (that is, anything else that
+> would, for otherwise identical C files with a similar build,
+> cause a difference?)
+
+kbuild is `ccache` on itself. Every *.o.cmd is kind of info `ccache`
+hashes (except things like stderr, gcc version) to check repeated
+rebuilds. Also kconfig<->kbuild link via header magic may confuse
+general-purpose `ccache`.
+
+For rebuilds of the same codebase, it's better to use separate
+kbuild object output directories.
+
+> Any tips would be appreciated.
+
+Just my handwaving, but test with couple core config symbols
+toggling, shows only one `ccache` hit.
+
+olecom@flower:/mnt/zdev0/blinux$ CCACHE_DIR=_ccache/ ccache -s
+cache directory                     _ccache/
+cache hit                           1133
+cache miss                          1141
+called for link                       28
+not a C/C++ file                      64
+no input file                        282
+files in cache                      2282
+cache size                          15.7 Mbytes
+max cache size                     976.6 Mbytes
+olecom@flower:/mnt/zdev0/blinux$ make menuconfig # toggle
+olecom@flower:/mnt/zdev0/blinux$ diff -u1 .config.old .config
+--- .config.old 2008-06-13 22:52:37.000000000 +0200
++++ .config     2008-06-13 23:01:07.000000000 +0200
+@@ -3,3 +3,3 @@
+ # Linux kernel version: 2.6.24
+-# Fri Jun 13 22:52:37 2008
++# Fri Jun 13 23:01:07 2008
+ #
+@@ -67,3 +67,4 @@
+ CONFIG_POSIX_MQUEUE=y
+-# CONFIG_BSD_PROCESS_ACCT is not set
++CONFIG_BSD_PROCESS_ACCT=y
++CONFIG_BSD_PROCESS_ACCT_V3=y
+ # CONFIG_TASKSTATS is not set
+olecom@flower:/mnt/zdev0/blinux$
+olecom@flower:/mnt/zdev0/blinux$ CCACHE_DIR=_ccache/ ccache -s
+cache directory                     _ccache/
+cache hit                           1134
+cache miss                          1879
+called for link                       33
+not a C/C++ file                      79
+no input file                        401
+files in cache                      3758
+cache size                          28.1 Mbytes
+max cache size                     976.6 Mbytes
+olecom@flower:/mnt/zdev0/blinux$
+
+-- 
+sed 'sed && sh + olecom = love'  <<  ''
+-o--=O`C
+ #oo'L O
+<___=E M
