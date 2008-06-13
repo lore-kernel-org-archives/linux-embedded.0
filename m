@@ -1,28 +1,34 @@
-From: Alexander Neundorf <neundorf@eit.uni-kl.de>
-Subject: Re: cross-compiling alternatives
-Date: Fri, 13 Jun 2008 11:11:39 +0200
-Message-ID: <200806131111.39462.neundorf@eit.uni-kl.de>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806121925.35883.rob@landley.net> <1213347028.17853.40.camel@tara.firmix.at>
+From: David Woodhouse <dwmw2@infradead.org>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
+	Maintainer(s)...)
+Date: Fri, 13 Jun 2008 10:12:00 +0100
+Message-ID: <1213348320.26255.231.camel@pmac.infradead.org>
+References: <1209577322.25560.402.camel@pmac.infradead.org>
+	 <200806130843.05704.neundorf@eit.uni-kl.de>
+	 <1213346316.17853.28.camel@tara.firmix.at>
+	 <200806131106.18487.neundorf@eit.uni-kl.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1213347028.17853.40.camel@tara.firmix.at>
-Content-Disposition: inline
+In-Reply-To: <200806131106.18487.neundorf@eit.uni-kl.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+To: Alexander Neundorf <neundorf@eit.uni-kl.de>
+Cc: linux-embedded@vger.kernel.org
 
-On Friday 13 June 2008 10:50:28 you wrote:
-> On Don, 2008-06-12 at 19:25 -0500, Rob Landley wrote:
-...
-> > in C (anybody remember X11's imake?)  KDE switched to cmake:
->
-> That generated "only" a Makefile IIRC.
+On Fri, 2008-06-13 at 11:06 +0200, Alexander Neundorf wrote:
+> > Why on earth does someone need this explicitly during the build?
+> > If you have portable software, all of that should be hidden in the code
+> > and use "sizeof(int)".
+> 
+> From the "developer of a buildsystem" POV: there will be users who will need 
+> it. 
 
-Yes, cmake doesn't actually build the stuff itself, it generates input files 
-for the actual build tool you want to use.
-For KDE4 all buildtools supported by cmake are working: the various makes, 
-XCode, MSVC projects.
+I think that epitomises what's wrong with autoconf. Sometimes, the best
+thing to do is tell your users that they _don't_ need whatever it is
+they're asking you for.
 
-Alex
+-- 
+dwmw2
+
