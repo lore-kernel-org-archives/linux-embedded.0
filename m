@@ -1,128 +1,78 @@
 From: Rob Landley <rob@landley.net>
-Subject: Firmware Linux (was Re: Cross Compiler and loads of issues)
-Date: Fri, 13 Jun 2008 12:24:58 -0500
-Message-ID: <200806131224.58568.rob@landley.net>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
+Subject: Re: Kernel boot problem on IXP422 Rev. A
+Date: Fri, 13 Jun 2008 12:33:49 -0500
+Message-ID: <200806131233.50360.rob@landley.net>
+References: <1522484831@web.de> <8bd0f97a0806121304m7d00fb6dq27fa7aa37cbeb828@mail.gmail.com> <17882748-2E1B-4DB4-82FD-C5D5C4E62CC8@logicaloutcome.ca>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
+In-Reply-To: <17882748-2E1B-4DB4-82FD-C5D5C4E62CC8@logicaloutcome.ca>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Shaz <shazalive@gmail.com>
+To: Glenn Henshaw <thraxisp@logicaloutcome.ca>
 Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Thursday 12 June 2008 12:52:44 Shaz wrote:
-> Hi,
+On Thursday 12 June 2008 16:28:48 Glenn Henshaw wrote:
+> On 12-Jun-08, at 4:04 PM, Mike Frysinger wrote:
+> > On Thu, Jun 12, 2008 at 3:35 PM, Marcus Tangermann wrote:
+> >> we currently try to boot a 2.6.21 kernel
+> >
+> > time to upgrade
 >
-> I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
-> felt like asking that is there one good way to get a cross compiler
-> work. I tried buildroot, scratchbox and even openMoko with
-> openEmbedded but all of them had lots of issues and don't know which
-> will be the best alternative.
+>    Wrong answer!!!
 
-Did you try my FWL project? :)
+Fairly common answer actually.  It translates to:
 
-http://landley.net/code/firmware
+There's a decent chance whatever bug you're encountering is one we've already 
+fixed.  As volunteers, we're not really interested in reinventing the wheel.  
+We're trying to come up with a better kernel, and debugging old version may 
+help you but it doesn't help us.
 
-To build from source, go to http://landley.net/code/firmware/downloads and 
-grab the latest version (firmware-0.4.0.tar.bz2).  Extract it, cd into it, 
-and run "./build.sh".  That should list the available platforms, and then run 
-with the platform you like as an argument (ala "./build.sh powerpc").
+If you try the current version and the problem persists, we're happy to help 
+you debug it, because this makes the kernel better for all of us.  If you 
+have your own reason to want to stick with an old version, there are plenty 
+of vendors happy to take your money to make this work for you, but you've 
+sacrificed the support of the volunteer community in doing so.
 
-The build.sh wrapper runs the other scripts in sequence:
-  ./download.sh - downloads source code if you haven't already got it.
-  ./host-tools.sh - compiles stuff on the host platform, (mostly optional).
-  ./cross-compiler.sh - build a cross compiler toolchain for your target.
-  ./mini-native.sh - Compile a kernel and root filesystem for your target.
-  ./package-mini-native.sh - Create an ext2 image out of mini-native.
+>    Many embedded devices can't upgrade kernels easily because of
+> customer requirements and certifications.
 
-The other interesting scripts in the directory are:
-  ./forkbomb.sh - Build every target (--nofork in series, --fork in parallel).
-      Calling with --fork is faster, but needs about 4 gigabytes of ram.
-  ./run-emulator.sh - Boot one of the system images you just built under qemu.
-      Also sets up the distcc trick (see below).
+I'm aware of this.  That's what vendors are for.
 
-If you don't feel like compiling any of the above yourself, you can download 
-prebuilt binary images from the same downloads link.  The cross-compiler 
-directory has the prebuilt cross compilers for each target (for i686 and 
-x86_64 hosts).  The mini-native directory has the prebuilt root filesystem 
-images as tarballs.  And the system-image.sh directory has a tarball with 
-that same mini-native root filesystem as an ext2 image, a kernel for qemu, 
-and shell scripts to invoke qemu appropriately for each one:
+> For example, I have worked 
+> on Linux based applications in the financial industry. A kernel
+> upgrade here is viewed as equivalent to switching from Windows XP to
+> Vista, and requires significant effort in certification testing from
+> the customer's perspective. This doesn't make economic sense for
+> either party.
 
-  ./run-emulator.sh - Run qemu, booting to a shell prompt.
-  ./run-with-home.sh - Calls run-emulator with a second hard drive image
-      hooked up as /dev/hdb and mounted on /home.  (If you haven't got an
-      hdb.img in the directory it'll create an empty 2 gigabyte image and
-      format it ext3.)
-  ./run-with-distcc.sh - Calls run-with-home with the distcc trick set up.
+Making economic sense and making sense to open source volunteers are two 
+different sets of criteria.  Part of "making economic sense" is realizing 
+that you must replace volunteer effort with paid effort to do it that way.
 
-The reason "mini-native" is called that is because it's a minimal native 
-development environment.  It contains gcc, binutils, make, linux kernel 
-headers, uClibc for your C library, and standard susv3 command line tools 
-(provided by the busybox and toybox packages).  This is theoretically enough 
-to build the whole of Linux From Scratch (http://www.linuxfromscratch.org) or 
-bootstrap your way up to being able to natively build gentoo or debian using 
-their package management systems.  (If you don't _want_ development tools in 
-your root filesystem, set the environment variable "BUILD_SHORT=1" before 
-running ./mini-native.sh.  That'll also move it out of /tools and up to the 
-top level.)
+The procedure is:
 
-In practice, the environment is still missing seven commands (bzip2, find, 
-install, od, sort, diff, and wget) needed to rebuild itself under itself.  
-(The busybox versions were either missing or had a bug.)  I'm working on that 
-for the next release.
+1) Try to reproduce the bug under a current kernel.  (Set up a _test_ system.)
 
-The distcc trick is for speeding up native builds by using distcc to call out 
-to the cross compiler.  Running the cross compiler on the host system is 
-faster, but cross compiling is very brittle.  This approach does a native 
-build under the emulator, but escapes the emulator for the actual compiling 
-part.  I did a quick bench test compling make 3.81 (I had it lying around) 
-and it sped up the actual compile by a factor of 7.  (Alas, it didn't speed 
-up the "./configure" part at all, just the "make" part.)
+If you can't reproduce it:
+  Git bisect to find the fix, then backport it to your kernel if possible.
+If you can reproduce it:
+  Demonstrate the bug to the community in the current kernel, get help 
+debugging the problem, then backport the fix to your kernel if possible.
 
-The ./emulator-build.sh script sets up the distcc trick using the files left 
-in the "build" directory after you build it yourself.  (The cross compiler is 
-left in there, and the kernel and ext2 system images that got tarred up are 
-also left in there.)  The ./run-with-distcc.sh script does it for 
-cross-compiler and system-image tarballs.  (It needs one argument: You have 
-to tell it the path where you extracted the cross-compiler tarball.)
+>    Often developers not working in the embedded space don't understand
+> this reality.
 
-> I also went through the material provided freely by Free Electron but
-> still I am not successful to build a custom kernel. Next I am trying
-> MontaVista's kit. I just wish I don't get lost.
+Often developers who _are_ working in the embedded space don't understand how 
+and why volunteers collaborate through the internet in this thing 
+called "open source development".
 
-I'm happy to answer any questions about the stuff I did... :)
+>    Helpful responses on what does/does not work would be more
+> appreciated.
 
-> Anyways, I liked the idea of Qemu based cross compiler. Is it possible
-> for the inexperienced to get it working and emulate the exact model
-> and devices.
-
-That's what I'm trying to do.  I've got armv4l, armv5l, mips (big endian), 
-mipsel (little endian), powerpc (a prep variant), i586, i686, and x86_64 
-working.  They all work fine.  Run "./smoketest.sh $ARCH" on each $ARCH after 
-building it to see the sucker boot up and compile "hello world" using distcc.  
-That means qemu has bootable kernel, serial port, emulates a hard drive, 
-uClibc is configured right, there's a working native toolchain, working cross 
-toolchain, working virtual network...
-
-I've also got sh4 building (but qemu doesn't quite have enough support to boot 
-it yet: it can't emulate any boards with a hard drive attached).  And I've 
-got sparc building and mostly booting, but it hangs trying to read 
-from /dev/console for reasons I haven't been motivated to track down because 
-I don't really know anyone still using sparc.  And I've got most of an m68k 
-build config together but gcc is giving me an "internal compiler error" 
-trying to build uClibc.  I've also poked at Alpha and blackfin a bit, but 
-again lack of sufficient qemu support takes some of the fun out of it.
-
-Oh, and the powerpc emulated prep board/kernel don't agree how to shutdown the 
-power to the virtual board, so the qemu process doesn't exit.  You have to 
-kill it.  :P
-
-I can has TODO items...
+He did give a helpful response.  You didn't understand it.  I elaborated.
 
 Rob
 -- 
