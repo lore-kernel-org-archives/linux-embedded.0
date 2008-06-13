@@ -1,83 +1,65 @@
-From: "Wang, Baojun" <wangbj@dslab.lzu.edu.cn>
-Subject: Re: Cross Compiler and loads of issues
-Date: Fri, 13 Jun 2008 13:14:16 +0800
-Message-ID: <1213334056.17351.21.camel@localhost.dslab>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
-	 <20080613043431.GP13599@pengutronix.de>
-Reply-To: wangbj@dslab.lzu.edu.cn
+From: Alexander Neundorf <neundorf@eit.uni-kl.de>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Fri, 13 Jun 2008 08:43:05 +0200
+Message-ID: <200806130843.05704.neundorf@eit.uni-kl.de>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <48513F5A.6010008@am.sony.com> <1213285831.26255.152.camel@pmac.infradead.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-jM+pxJquyD4NnMmqxWqk"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080613043431.GP13599@pengutronix.de>
+In-Reply-To: <1213285831.26255.152.camel@pmac.infradead.org>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Shaz <shazalive@gmail.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: linux-embedded@vger.kernel.org
 
+On Thursday 12 June 2008 17:50:31 you wrote:
+> On Thu, 2008-06-12 at 08:23 -0700, Tim Bird wrote:
+> > Rob Landley wrote:
+> > > However, having one or more full-time engineers devoted to debugging
+> > > cross-compile issues is quite a high price to pay too.  Moore's law
+> > > really doesn't help that one.
+> > >
+> > > I'm not saying either solution is perfect, I'm just saying the "build
+> > > under emulation" approach is a viable alternative that gets more
+> > > attractive as time passes, both because of ongoing development on
+> > > emulators and because of Moore's law on the hardware.
+> >
+> > I agree with much that you have said, Rob, and I understand the argument
+> > for getting the most gain from the least resources, but I have a
+> > philosophical problem with working around the cross-compilation problems
+> > instead of fixing them in the upstream packages (or in the autoconf
+> > system itself).
+> >
+> > Once someone fixes the cross-compilation issues for a package, they
+> > usually stay fixed, if the fixes are mainlined.
+>
+> I don't think that's true, unfortunately. Autoconf makes it _easy_ to do
+> the wrong thing, and people will often introduce new problems.
+>
+> If we just made people write portable code and proper Makefiles, it
+> would be less of an issue :)
 
---=-jM+pxJquyD4NnMmqxWqk
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Well, IMO this makes it sound too easy.
+If you write portable software, you have to do platform checks.
+Basically they can be done by
+-checking for the existence of files
+-checking if something builds
+-checking the output of running something you just built
 
-=E5=9C=A8 2008-06-13=E4=BA=94=E7=9A=84 06:34 +0200=EF=BC=8CRobert Schwebel=
-=E5=86=99=E9=81=93=EF=BC=9A
-> On Thu, Jun 12, 2008 at 10:52:44PM +0500, Shaz wrote:
-> > I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
-> > felt like asking that is there one good way to get a cross compiler
-> > work. I tried buildroot, scratchbox and even openMoko with
-> > openEmbedded but all of them had lots of issues and don't know which
-> > will be the best alternative.
-If you only need to use the cross toolchain, I think ELDK is a good choice.=
- other alternatives would be gentoo cross toolchain (using crossdev ie cros=
-sdev -t powerpc64-unknownlinux-gnu) and emdebian/slind.
+The last one is the problem for cross compiling.
+Example: detecting the size of ints
 
-Gentoo cross toolchain is my favorite, it very simple to (e)merge (just
-crossdev -t arch-vendor-platform-libc) and the toolchain is managed by
-gentoo package manager (portage) so all packages in the toolchain is
-upgradable. I've installed about 12 different (gentoo) cross toolchain
-on one machine for cross compiling.
+Easy way:
 
-Personally I don't use emdebian/slind but still I think they're also a
-good choice.
+...
+printf("%d\n", sizeof(long));
+...
 
-> There's also OSELAS.Toolchain:
-> http://www.pengutronix.de/oselas/toolchain/index_en.html
->=20
-> We try to be as close to mainline gcc/binutils as possible, and if there
-> are issues, please report or send patches :-)
->=20
-> > Anyways, I liked the idea of Qemu based cross compiler. Is it possible
-> > for the inexperienced to get it working and emulate the exact model
-> > and devices.
->=20
-> No.
->=20
-> rsc
---=20
-Wang, Baojun                                                Lanzhou Univers=
-ity
-Distributed & Embedded System Lab                      http://dslab.lzu.edu=
-.cn
-School of Information Science and Engeneering          wangbj@dslab.lzu.edu=
-.cn
-Tianshui South Road 222. Lanzhou 730000                             .P.R.Ch=
-ina
-Tel: +86-931-8912025                                      Fax: +86-931-8912=
-022
+and then building and running that code and checking the output. Converting 
+checks like this, which seem perfectly fine for native builds, to something 
+which doesn't need to run an executable is not always trivial (but the way to 
+go if you want to make your package cross-compilable).
+(and yes, we converted this test in cmake 2.6 to a build-only test)
 
-
---=-jM+pxJquyD4NnMmqxWqk
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: 
-	=?gb2312?Q?=D5=E2=CA=C7=D0=C5=BC=FE=B5=C4=CA=FD=D7=D6=C7=A9?=
-	=?gb2312?Q?=C3=FB=B2=BF=B7=D6?=
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.9 (GNU/Linux)
-
-iEYEABECAAYFAkhSAigACgkQIuIOr7tpgg1KOACeIJs2LdoVMIitDfGssRqV8VCF
-d+kAn3RoMta7N5phWCsHdPJZ9RD10dkQ
-=rQJp
------END PGP SIGNATURE-----
-
---=-jM+pxJquyD4NnMmqxWqk--
-
+Alex
