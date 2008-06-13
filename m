@@ -1,79 +1,49 @@
-From: "Oleg Verych" <olecom@gmail.com>
-Subject: about size optimizations (Re: Not as much ccache win as I expected)
-Date: Fri, 13 Jun 2008 22:52:52 +0100
-Message-ID: <8499950a0806131452j5dc9574dk336e9e06ee9e1785@mail.gmail.com>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Fri, 13 Jun 2008 23:25:23 +0100
+Message-ID: <20080613222523.GA28805@shareable.org>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806122025.54791.rob@landley.net> <8bd0f97a0806121829o6138cb30se025fa3c29cdd1a8@mail.gmail.com> <200806130830.52734.neundorf@eit.uni-kl.de> <20080613185157.GT13599@pengutronix.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kbuild-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:mime-version:content-type:content-transfer-encoding
-         :content-disposition;
-        bh=UHnJMzKBsxqz5eKzmeZ/ES19hXl22QHeIjPZeUo4Ovw=;
-        b=T1idtgrbY8KQHUZmxbwkjA3epYcdWD8DHptjct9VPovOMVYqTHT/3JULby5VX/9a6h
-         +e/iOcrHHiCyC8KLq5371MqjLTo+VQkE9V9K1YfuchhUNoDsi46tWSYb7+ykPH4y4CsL
-         oZAPq6daQaeFkujVmNXj1TudkXIlZ2XNXv53c=
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-kbuild-owner@vger.kernel.org
+In-Reply-To: <20080613185157.GT13599@pengutronix.de>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>, linux-kbuild@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: Alexander Neundorf <neundorf@eit.uni-kl.de>, linux-embedded@vger.kernel.org
 
->> And what kinds of source/kconfig changes are made for every build?
->
-> I start with a baseline config for an embedded board, then
-> alter, one at a time, individual config items related to kernel size.
-> No source changes are made.
+Robert Schwebel wrote:
+> On Fri, Jun 13, 2008 at 08:30:52AM +0200, Alexander Neundorf wrote:
+> > Battle of Wesnoth is currently converted to both Scons and CMake, and
+> > in the end they will decide about the winner. (since Eric is good at
+> > arguing I guess it will be scons).
+> 
+> The thing is that 'configure && make && make install' plus the usuall
+> --enable-foo / --disable-foo / --with-bla=blub semantics is simply *the*
+> standard way of configuring stuff for unix systems. You don't need fancy
+> tools, you get cross compiling almost for free and unix people simply
+> know how to use it.
 
-Using same `gcc -E` principle, I once had a dream to create
-build with something like "whole-kernel-at-time" optimising
-compiler option:
+A trouble with that is some packages have hundreds of user-selectable
+options - or even thousands.  It is unfeasible to use --enable-foo
+options for all of those when configuring then.
 
-for file in $all_core_files
-do gcc $opt -E $file >>core_kernel.c
-done && gcc $opt code_kernel.c -o vmlinux.c.o
+Some other packages _should_ have more options, but don't because it's
+too unwieldy to make them highly configurable with Autoconf.  Imho,
+Kconfig would be good for more programs than it's currently used for,
+and could be made to work with those --enable/--with options: you'd be
+able to configure them entirely on the command line, or interactively
+with "./configure --menu" (runs menuconfig), or with a config file.
 
-# same for some special parts and asm
-do_foo
-# do final link
-do_vmlinux
+The "make" / "make install" part is easy to retain even with other
+build systems, using a trivial Makefile which calls the other tools.
+Lots of packages need special tools or other software installed to
+build them; this is no different.
 
-I've had something like that once for `dash` and had few
-percents of size reduction. It would be interesting to
-implement and check this in linux.
+Perhaps it might even be possible to write a very small, portable,
+specialised alternative to Make which is small enough to ship with
+packages that use it?
 
-Also i've many things to point-tune/point-remove based on
-usage patterns/source patterns, which can be easily removed by
-stream text editor from sources. These like     not needed
-* syscalls,sysctl, ioctls
-* fields in data structures/sources for handling them
-* code branches or code blocks which are known (in particular
-board / embedded case) to be useless etc. etc.
-
-But all this requires non trivial source text editor or visual tools
-for easy analysis, navigation, marking, RE generation and
-build + run testing.
-
-With mid-70 command line and `make` (even kbuild version)
-or 20++ years old technology of text editors, it's not that trivial
-to accomplish.
-
-Some kind of IDE for kernel development is needed. Here
-one will have all whitespace and code style policy, static
-checks for stupid security holes, C mis-use, kernel API
-mis-use, all those crutches in linux/scripts/* in one place
-and applied right away.
-
-Sorry, for this rant, but i see no developemnt here at all.
-New schedulers, slab allocators, file systems are great.
-But all this has nothing to do with fundamental developent
-of the tools. Hardware is quite fast and have pretty much
-of RAM/ROM/caches now, yet software just bloats.
-
-The streaming, pre-cc text editing is the key, fine GCC is not.
--- 
-sed 'sed && sh + olecom = love'  <<  ''
--o--=O`C
- #oo'L O
-<___=E M
+-- Jamie
