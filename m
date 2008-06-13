@@ -1,67 +1,112 @@
-From: Enrico Weigelt <weigelt@metux.de>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Fri, 13 Jun 2008 17:06:36 +0200
-Message-ID: <20080613150636.GI11760@nibiru.local>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <alpine.LFD.1.10.0806121208320.22877@localhost.localdomain> <200806121925.35883.rob@landley.net> <200806130855.19609.neundorf@eit.uni-kl.de>
-Reply-To: weigelt@metux.de
+From: Shaz <shazalive@gmail.com>
+Subject: Re: Cross Compiler and loads of issues
+Date: Fri, 13 Jun 2008 20:11:04 +0500
+Message-ID: <7b740b700806130811r18f93853k362fdba20454ec14@mail.gmail.com>
+References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
+	 <20080613092449.GO27937@knossos.aleph1.co.uk>
+	 <7b740b700806130500u17bf3adel3b2139e50d7b029f@mail.gmail.com>
+	 <0af6abe442d0b93a10a96b27153f04e9.squirrel@www.geekisp.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=xiK8Jf+7RAU46lvFW2DfwZXs6G+xQ95QjXWBU+4glo0=;
+        b=l88nJFf0gQWYqJTNJ59QLVyJ1H+Yh9QXJTYIh1XamjkOClY5z9lXFWEaFy23ZjtfvS
+         3m/hDf54y6J6/Hs28whOIafMG8+ZYakSP4TsbuSCJJS8hQjWufjDUbYORclGyyBupReO
+         mylP9987HJfQZgIT/6ksz5HVCuMboc44RTcrA=
+In-Reply-To: <0af6abe442d0b93a10a96b27153f04e9.squirrel@www.geekisp.com>
 Content-Disposition: inline
-In-Reply-To: <200806130855.19609.neundorf@eit.uni-kl.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Bill Traynor <wmat@naoi.ca>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-* Alexander Neundorf <neundorf@eit.uni-kl.de> schrieb:
+On Fri, Jun 13, 2008 at 7:13 PM, Bill Traynor <wmat@naoi.ca> wrote:
+>> It's nice to see we have so many options and related people and pros
+>> to it are available around.
+>>
+>> IMO there should be some sort of effort to standardize the tool-chains
+>> and build environments coherently with the kernel. I think its a prime
+>> time to work around all the possibilities and standardize so that a
+>> collaborative effort similar to Linux kernel can be set ahead. I think
+>> thats the objective of this list too. Any plans yet sorted out?
+>
+> I don't understand what you mean by "standardize the tool-chains and build
+> environments", can you provide specifics?  Similarly, what does "work
+> around all the possibilities and standardize" mean?
+>
+Well, to put it clearly, there are many solutions to toolchains and
+development kits but there must be work that can be stabilized by
+ streamlining and sorting out similarities, especially with the kernel
+ and libc. Simply, getting things done as smoothly as it would  have
+ been with building linux from scratch.
 
-> In general, cross compiling is not hard. You just have to call the cross 
-> toolchain, give it the correct parameters, search files in the right location 
-> and ... make sure you don't test stuff by running programs.
+ This might not make sense as I am a new comer to embedded world so
+ pardon for any waste of time and thought process.
 
-Same with carefully written makefiles ;-P
+>> Maybe I'm being dense, but what's specifically wrong with the current
+>>toolchain universe?
+>>
+>> On Fri, Jun 13, 2008 at 2:24 PM, Wookey <wookey@wookware.org> wrote:
+>>>
+>>> On 2008-06-12 22:52 +0500, Shaz wrote:
+>>> > Hi,
+>>> >
+>>> > I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
+>>> > felt like asking that is there one good way to get a cross compiler
+>>> > work. I tried buildroot, scratchbox and even openMoko with
+>>> > openEmbedded but all of them had lots of issues and don't know which
+>>> > will be the best alternative.
+>>>
+>>> 'issues' are generally par for the course. It's a difficult problem.
+>>> I've generally found buildroot the least-painful of the above, largely
+>>> because it targets a relatively small section of the problem-space.
+>>>
+>>> For completeness I should also mention that Embedded Debian provides
+>>> yet another option. I will not claim that it will have fewer issues
+>>> than the above. http://www.emdebian.org/emdebian/intro.html
+>>>
+>>> I'm not sure if you are really asking about toolchains or build-systems?
+>>> The former is fairly reliably solved. For a debian-based box just
+>>> install pre-built cross toolchians from emdebian:
+>>> http://www.emdebian.org/tools/crosstools.html
+>>> (from i386, amd64, powerpc; to: nearly all debian-supported
+>>> architectures, gcc3.3, 3.4, 4.1, 4.2, 4.3)
+>>> http://www.emdebian.org/toolchains/search.php?section=devel gives more
+>>> details.
+>>>
+>>> emdebian-tools also provides the debian equivalent of crosstool
+>>> ('emchain' to build your own version of current current toolchain,
+>>> should a suitable pre-built one not exist.
+>>>
+>>> For non-debian boxes other people seem to have listed the options so I
+>>> won't repeat (and it's not my area of expertise).
+>>>
+>>> Wookey (Emdebian 'Chief bullshitter' - bias alert. The toolchains are
+>>> great though, really.)
+>>> --
+>>> Principal hats:  Balloonz - Toby Churchill - Aleph One - Debian
+>>> http://wookware.org/
+>>
+>>
+>>
+>> --
+>> Shaz
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-embedded"
+>> in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+>
 
-> Basically only the last one is problematic (but IMO still less problematic 
-> than running a virtual system on the host just to build something).
-
-Yes, and that should be completely prohibited.
-
-> How does cmake support that for cross compiling ?
-> If it detects a try_run() (which is the command for building a test executable 
-> and then running it) in cross compiling mode (i.e. when it was told what the 
-> target platform is instead of just assuming it's the same as the build host), 
-> then it 
-> -issues a warning
-> -stores the created executable in a place so the developer can find it
-> -running some existing executable and checking its output
-> -creates a file where the developer can enter the results which running the 
-> executable on the target host would have brought (includes comments where 
-> that command was found, the arguments, etc.,). The developer can then run the 
-> test executable manually on the target and enter the results. This seems to 
-> be similar to the config.cache somebody mentioned for debian.
-
-Yes, introducing the problems as with autoconf. You'll have to maintain one 
-cachefile per package - there is *NO* standard on it's variables. And exactly 
-that's the key problem !
-
-Therefore unitool has an generic platform database, where such generic 
-platform parameters can be set. These fields have to be standardized,
-(adding new ones for some specific package is definitively the wrong way).
-
-> So really the hard part is getting rid of running stuff to check the platform. 
-
-Isnt that hard. In all these years I had no case where it couldn't be 
-circumvented.
 
 
-cu
 -- 
----------------------------------------------------------------------
- Enrico Weigelt    ==   metux IT service - http://www.metux.de/
----------------------------------------------------------------------
- Please visit the OpenSource QM Taskforce:
- 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
- Patches / Fixes for a lot dozens of packages in dozens of versions:
-	http://patches.metux.de/
----------------------------------------------------------------------
+Shaz
