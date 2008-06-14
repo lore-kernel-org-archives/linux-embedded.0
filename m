@@ -1,35 +1,45 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: about size optimizations (Re: Not as much ccache win as I
-	expected)
-Date: Sat, 14 Jun 2008 08:43:23 +0100
-Message-ID: <1213429403.26255.298.camel@pmac.infradead.org>
-References: <8499950a0806131452j5dc9574dk336e9e06ee9e1785@mail.gmail.com>
+From: Matthieu castet <castet.matthieu@free.fr>
+Subject: Re: modules.dep and depmod.pl
+Date: Sat, 14 Jun 2008 09:26:23 +0000 (UTC)
+Message-ID: <loom.20080614T092033-823@post.gmane.org>
+References: <63386a3d0806131611g61ad6ab1t16bc68ab6407a8dc@mail.gmail.com> <63386a3d0806131633g4721216al566c8b6959e4631@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kbuild-owner@vger.kernel.org>
-In-Reply-To: <8499950a0806131452j5dc9574dk336e9e06ee9e1785@mail.gmail.com>
-Sender: linux-kbuild-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Oleg Verych <olecom@gmail.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux-kbuild@vger.kernel.org, segher@kernel.crashing.org
+Content-Type: text/plain; charset="windows-1252"
+To: linux-embedded@vger.kernel.org
 
-On Fri, 2008-06-13 at 22:52 +0100, Oleg Verych wrote:
-> Using same `gcc -E` principle, I once had a dream to create
-> build with something like "whole-kernel-at-time" optimising
-> compiler option:
+Hi,
 
-Doing it for the whole kernel probably doesn't buy you a whole lot more
-than doing it a bit more selectively, which is what I was doing in
-http://lkml.org/lkml/2006/8/24/212
+Linus Walleij <linus.ml.walleij <at> gmail.com> writes:
 
-I think Segher has been playing with it a bit recently, and confirms my
-suspicion that combining kernel/ with arch/$ARCH/kernel, and mm/ with
-arch/$ARCH/mm, is also a big win.
+>=20
+> Hi,
+>=20
+> what are other embedded developers experience with using the
+> script "depmod.pl" from BusyBox to create
+> installdir/lib/modules/=E2=89=A4version>/modules.dep
+> during compile-time?
+> (It's this beast:
+>
+http://busybox.net/cgi-bin/viewcvs.cgi/trunk/busybox/examples/depmod.pl=
+?rev=3D20447&view=3Dmarkup
+>=20
+> I tried this thing to be able to modprobe off a read-only flash
+> rootfilesystem and it "sort of" works, actually.
+What's wrong with using your host depmod to build it.
+When I build a crosscompilation kernel, and I do make module_install,
+modules.dep are generated.
 
-The GCC problems should mostly be fixed now, I think -- we just need to
-have another go at doing the Kbuild side of it properly.
 
--- 
-dwmw2
 
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-embedde=
+d" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
