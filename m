@@ -1,63 +1,55 @@
-From: Shaz <shazalive@gmail.com>
-Subject: Re: Cross Compiler and loads of issues
-Date: Sat, 14 Jun 2008 14:44:35 +0500
-Message-ID: <7b740b700806140244n734335b7n3b5f64546186e23b@mail.gmail.com>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com>
-	 <20080612181902.ACEBF240E8@gemini.denx.de>
+From: Adrian Bunk <bunk@kernel.org>
+Subject: Re: about size optimizations (Re: Not as much ccache win as I
+	expected)
+Date: Sat, 14 Jun 2008 12:48:21 +0300
+Message-ID: <20080614094821.GE1716@cs181133002.pp.htv.fi>
+References: <8499950a0806131452j5dc9574dk336e9e06ee9e1785@mail.gmail.com> <1213429403.26255.298.camel@pmac.infradead.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=Bwimearg93Y1XcW3RcfRorFYTAk977fakj/SWYNNKdI=;
-        b=QRNeLxih/BEtdtXsKRhDrwuP9fV2Yz5gwWZiu3geGKq1ifuc9I+RS/mMVl37zu7ivX
-         MuPpHQxMM9t+zqXIyBUBveSxYAD0wBT+qjdV/mIL+QGHDHCl9dj8FkFLepv+V5fPqeqJ
-         EpUy4S8uWXSKY1SI+YdQuSmKtkde/1FhU57Uc=
-In-Reply-To: <20080612181902.ACEBF240E8@gemini.denx.de>
 Content-Disposition: inline
+In-Reply-To: <1213429403.26255.298.camel@pmac.infradead.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Wolfgang Denk <wd@denx.de>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: Oleg Verych <olecom@gmail.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux-kbuild@vger.kernel.org, segher@kernel.crashing.org
 
-On Thu, Jun 12, 2008 at 11:19 PM, Wolfgang Denk <wd@denx.de> wrote:
-> In message <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com> you wrote:
->>
->> I have been following "Re: [PATCH 0/1] Embedded Maintainer(s)" and
->> felt like asking that is there one good way to get a cross compiler
->> work. I tried buildroot, scratchbox and even openMoko with
->> openEmbedded but all of them had lots of issues and don't know which
->> will be the best alternative.
->>
->> I also went through the material provided freely by Free Electron but
->> still I am not successful to build a custom kernel. Next I am trying
->> MontaVista's kit. I just wish I don't get lost.
->
-> For completeness, there is also the (free) ELDK. Some people are using it.
->
+On Sat, Jun 14, 2008 at 08:43:23AM +0100, David Woodhouse wrote:
+> On Fri, 2008-06-13 at 22:52 +0100, Oleg Verych wrote:
+> > Using same `gcc -E` principle, I once had a dream to create
+> > build with something like "whole-kernel-at-time" optimising
+> > compiler option:
+> 
+> Doing it for the whole kernel probably doesn't buy you a whole lot more
+> than doing it a bit more selectively, which is what I was doing in
+> http://lkml.org/lkml/2006/8/24/212
 
-I got a toolchain giving an output. Going to test some stuff with
-Qemu. I hope it works. ELDK seems to be a smooth tool. Now got to get
-it working with my kernel, eclipse and target board :)
+For the interesting CONFIG_MODULES=n case it most likely can give you 
+much smaller code.
 
-> [And yes, I'm obviously biased :-) ]
->
-> Best regards,
->
-> Wolfgang Denk
->
-> --
-> DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-> HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-> Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-> A list is only as strong as its weakest link.            -- Don Knuth
->
+But Denys had section garbage collection patches, and combining the 
+per-module compilation with section garbage collection might get near
+at the results of compiling the whole kernel at once?
 
+> I think Segher has been playing with it a bit recently, and confirms my
+> suspicion that combining kernel/ with arch/$ARCH/kernel, and mm/ with
+> arch/$ARCH/mm, is also a big win.
+>...
 
+The big problem I see here is that we lose the link order.
+
+Not unfixable, but quite nasty to sort out.
+
+> dwmw2
+
+cu
+Adrian
 
 -- 
-Shaz
+
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
+
