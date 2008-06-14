@@ -1,81 +1,144 @@
-From: "Oleg Verych" <olecom@gmail.com>
-Subject: Re: about size optimizations (Re: Not as much ccache win as I expected)
-Date: Sat, 14 Jun 2008 11:27:02 +0100
-Message-ID: <8499950a0806140327l267186c5h621bec0ea3995842@mail.gmail.com>
-References: <8499950a0806131452j5dc9574dk336e9e06ee9e1785@mail.gmail.com>
-	 <1213429403.26255.298.camel@pmac.infradead.org>
-	 <8499950a0806140256o45d3696o505c02b2f34d90db@mail.gmail.com>
-	 <1213437917.26255.335.camel@pmac.infradead.org>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
+	Maintainer(s)...)
+Date: Sat, 14 Jun 2008 13:26:56 +0200
+Message-ID: <20080614112656.GX13599@pengutronix.de>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806122025.54791.rob@landley.net> <8bd0f97a0806121829o6138cb30se025fa3c29cdd1a8@mail.gmail.com> <200806130830.52734.neundorf@eit.uni-kl.de> <20080613185157.GT13599@pengutronix.de> <20080613222523.GA28805@shareable.org> <20080613231932.GW13599@pengutronix.de> <20080614000749.GA30652@shareable.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kbuild-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=GmcKLYDTg0dQ7fTIKV1RDe055W6Iwc432gfKQ5gYK6A=;
-        b=AKr94cIBX5Is47QH6Nb4nQWy0njc1tMzu1Jz3Y0eBjOjo8NgGPIZVHsAE7si/e9wB4
-         hQTuw8MQD2RzoeXCbQq/lptq5kT4J7vBEgF7SV66bowLyukEh76SMMv5a6TD4/Br9iO9
-         fYePv9Jng5JPhqINEyhUoyDW3PGqX0BokFczY=
-In-Reply-To: <1213437917.26255.335.camel@pmac.infradead.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-kbuild-owner@vger.kernel.org
+In-Reply-To: <20080614000749.GA30652@shareable.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux-kbuild@vger.kernel.org, segher@kernel.crashing.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Alexander Neundorf <neundorf@eit.uni-kl.de>, linux-embedded@vger.kernel.org
 
-> _Sometimes_ you can just append C files together and they happen to
-> work. But not always. A simple case where it fails would be when you
-> have a static variable with the same name in two different files.
+On Sat, Jun 14, 2008 at 01:07:49AM +0100, Jamie Lokier wrote:
+> Kernels, uclibc, busybox.  All combinations can't be tested.  But it's
+> still _very_ useful to compile in only those parts wanted.
 
-Afaik in the kernel global static variables are not appreciated much. I=
-n any
-case file scope can be easily added by s/// to its name in text compile
-stage.
+Kernel (and thus kconifg) is a critical mass project of it's own;
+however, kconfig does only solve the "configuration" problem. Autotools
+is much more. However, I was talking about userspace software. Core
+components have usually much different needs.
 
-There are much more problems with conditional includes and other source
-configuration crutches.
+> Media players with lots of optional formats and drivers are another.
+> (They also have considerable problems with their Autoconf in my
+> experience).
 
-> The compiler will do the right thing there., while na=EFve concatenat=
-ion
-> of C files will not.
+Send patches :-)
 
-That was an example, of course there must be pre-cc text processing sta=
-ge.
+> Generally, anything with lots of parts that different applications
+> might not use, and space or library dependencies are an issue.
 
-> Of course, it's _possible_ to have external text processing cope with
-> this case somehow -- you'd probably feed it through the preprocessor,
-> then look at the output of the preprocessor and make the variable nam=
-es
-> unique, perhaps?
+According to my experience, the configure part of autotools is not it's
+problem. Its more
 
-Even before cpp. But twisted includes/ifdef's cannot be handled without=
- it.
+- configure scripts are slow
+- libtool isn't sysroot/destdir aware
+- complex cross scenarios are not well supported (i.e. ace/tao, where
+  the IDL compiler needs most of libace and has to be compiled for both,
+  the "build" and "host" system)
 
-> And then move on to the next case which is already handled in gcc...
+> > That's exactly what ptxdist does: add a Kconfig frontend to the
+> > configurable switches. It does it for the user's convenience, although
+> > the currently implemented method is really developer-unfriendly (but we
+> > care about our users first).
+>
+> I agree. (And it proved about not being able to test more
+> combinations: last time I tried to build ptxdist, an up to date
+> version (at the time), it failed in several places.)
 
-To gain size reduction, some register-wide static variables (ints), whi=
-ch are
-usually for some state-handling, can be glued together, if whole pictur=
-e
-permits: all flags fit in limited bit range, needed shift is added text=
-ually.
+Did you tell the development team? We are known to fix 95% of the
+problems in this universe in less than 10 minutes :-)
 
-Again developer doing clear/documented semantics, text-based
-transformations is needed. Can it be done by GCC optimizing stages?
-(However Rusty may try to do that with cpp :)
+However, we have a stable policy in the meantime (1.0.x is in
+maintenance only mode, regularly tested and quickly fixed), and the team
+is really responsive. So it may be time to try it out again :-)
 
-> But really, I'd rather just leave it to the compiler. And it's not
-> because I have some masochistic fascination with makefiles :)
---=20
-sed 'sed && sh + olecom =3D love' << ''
--o--=3DO`C
- #oo'L O
-<___=3DE M
---
-To unsubscribe from this list: send the line "unsubscribe linux-kbuild"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > autotools need only a shell and make
+> 
+> No, that's true only for very simple packages.
+
+Ok, plus normal unix tools like sed and awk ...
+
+> Most packages need lots of additional libraries installed - and the
+> development versions of those libraries, for that matter.  Too often
+> the right development version - not too recent, not too old.  With the
+> wrong versions, there are surprises.
+
+Right. But this is the downside of being able to deal with all this
+complexity: every other build system would have the same problem.
+
+> You said about too many user-selectable options. Many large packages
+> _check_ for many installed libraries. Get them wrong, and you have the
+> same problems of untested combinations.
+
+Yup, auto-testing is usually a problem if you build cross stuff.
+
+> Sure, autotools by themselves don't need much.  But that's not
+> interesting: Autotools are not used only by themselves.
+
+They don't need a special runtime environment other than shell. Other
+systems like Perl, Python, Java or whatever has the problem that
+anything other than the very core is not very well defined and ends up
+in the version hell.
+
+We have once tried to write our automated test system for embedded
+boards with python and xml; the idea was to have something fancy, new
+and with good code-reuse. In the end it failed because the pexpect
+package we used to do the pattern matching bitrotted so quickly that
+four months later all the fancy tests didn't work any more, because it
+is not part of the python core.
+
+In the meantime we have migrated our automatic testing stuff to use
+shell, ssh/rsh and kermit. It is rock solid, and the code reuse factor
+is at least as good as with anything else.
+
+> Have you felt uncomfortable shipping a package that does use Autoconf,
+> Automake and Libtool, knowing that the scripts generated by those
+> tools are huge compared with the entire source of your package?
+
+No :-)
+
+> Have you _written_ Autoconf tests recently?
+
+Yea, all our packages are autotoolized.
+
+> Made any shell / shellutils non-portability mistakes in the tests?
+
+Yea, it happens in ptxdist all the time. People report about problems,
+we add new tests and the next revision works even on Ubuntu :)
+
+> Have you _read_ a portable Makefile lately? Have you tried writing
+> one for a complex package, confident that it's portable to different
+> quirky makes, quirky shells and quirky tools, outside the parts which
+> you might use Automake for?
+>
+> That's a rationale for the project which is rewriting Autotools in GNU
+> Make, assuming that to be ubiquitous now, imho.  (Not all interesting
+> systems have a shell either.)
+
+I have no problems with people writing fancy new things. It's just that
+most people who try to do something better than autotools have only a
+fraction of the features.
+
+Open Source is darwinism: if there is something better, let's use it.
+But compare apples with apples.
+
+> If you're going to rewrite Autotools using GNU Make, why not ask if
+> another tool would be better, perhaps a tool specially designed for
+> the job?
+
+Go ahead.
+
+rsc
+-- 
+ Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
+ Pengutronix - Linux Solutions for Science and Industry
+   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
+     Hannoversche Str. 2, 31134 Hildesheim, Germany
+   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
+
