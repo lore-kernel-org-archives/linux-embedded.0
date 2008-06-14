@@ -1,144 +1,40 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded
-	Maintainer(s)...)
-Date: Sat, 14 Jun 2008 13:26:56 +0200
-Message-ID: <20080614112656.GX13599@pengutronix.de>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806122025.54791.rob@landley.net> <8bd0f97a0806121829o6138cb30se025fa3c29cdd1a8@mail.gmail.com> <200806130830.52734.neundorf@eit.uni-kl.de> <20080613185157.GT13599@pengutronix.de> <20080613222523.GA28805@shareable.org> <20080613231932.GW13599@pengutronix.de> <20080614000749.GA30652@shareable.org>
+From: Bernhard Fischer <rep.dot.nop@gmail.com>
+Subject: Re: modules.dep and depmod.pl
+Date: Sat, 14 Jun 2008 19:00:07 +0200
+Message-ID: <20080614170006.GA10734@mx.loc>
+References: <63386a3d0806131611g61ad6ab1t16bc68ab6407a8dc@mail.gmail.com> <63386a3d0806131633g4721216al566c8b6959e4631@mail.gmail.com> <8bd0f97a0806131645l69d9c3c8x727c3edd0cad5975@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:received:date:from:to:cc
+         :subject:message-id:references:mime-version:content-type
+         :content-disposition:in-reply-to:user-agent;
+        bh=5TyBwGXYdGG6eHHp5RH0h/y3UuD2mxG4H82D5GF8qY0=;
+        b=tQoDpOYPXKeVVM7qih5/i5mTGH0NTzHzcUg9OfAMXRITFwX3MJmkN+xCr611HQ49xk
+         QHz9NPpPUIWqe+WUxnMGr7LPJHepTu2Pyw8sh/faD0xNQ4VykpHcZXNHAAxfXyrpDP3V
+         CRo3Ux5+QbdxGe4/QSp7MoYrnMBn8EVZZ3AJo=
 Content-Disposition: inline
-In-Reply-To: <20080614000749.GA30652@shareable.org>
+In-Reply-To: <8bd0f97a0806131645l69d9c3c8x727c3edd0cad5975@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Jamie Lokier <jamie@shareable.org>
-Cc: Alexander Neundorf <neundorf@eit.uni-kl.de>, linux-embedded@vger.kernel.org
+To: Mike Frysinger <vapier.adi@gmail.com>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, linux-embedded@vger.kernel.org
 
-On Sat, Jun 14, 2008 at 01:07:49AM +0100, Jamie Lokier wrote:
-> Kernels, uclibc, busybox.  All combinations can't be tested.  But it's
-> still _very_ useful to compile in only those parts wanted.
+On Fri, Jun 13, 2008 at 07:45:58PM -0400, Mike Frysinger wrote:
+>On Fri, Jun 13, 2008 at 7:33 PM, Linus Walleij wrote:
 
-Kernel (and thus kconifg) is a critical mass project of it's own;
-however, kconfig does only solve the "configuration" problem. Autotools
-is much more. However, I was talking about userspace software. Core
-components have usually much different needs.
-
-> Media players with lots of optional formats and drivers are another.
-> (They also have considerable problems with their Autoconf in my
-> experience).
-
-Send patches :-)
-
-> Generally, anything with lots of parts that different applications
-> might not use, and space or library dependencies are an issue.
-
-According to my experience, the configure part of autotools is not it's
-problem. Its more
-
-- configure scripts are slow
-- libtool isn't sysroot/destdir aware
-- complex cross scenarios are not well supported (i.e. ace/tao, where
-  the IDL compiler needs most of libace and has to be compiled for both,
-  the "build" and "host" system)
-
-> > That's exactly what ptxdist does: add a Kconfig frontend to the
-> > configurable switches. It does it for the user's convenience, although
-> > the currently implemented method is really developer-unfriendly (but we
-> > care about our users first).
+>> Is there anyone beside me who would like to see this integrated
+>> into scripts/ in the kernel to get some default modules.dep for
+>> a read-only rootfs also when doing cross compilation, or am I
+>> totally going down the wrong lane here?
 >
-> I agree. (And it proved about not being able to test more
-> combinations: last time I tried to build ptxdist, an up to date
-> version (at the time), it failed in several places.)
+>seems like a worthwhile step to me
 
-Did you tell the development team? We are known to fix 95% of the
-problems in this universe in less than 10 minutes :-)
-
-However, we have a stable policy in the meantime (1.0.x is in
-maintenance only mode, regularly tested and quickly fixed), and the team
-is really responsive. So it may be time to try it out again :-)
-
-> > autotools need only a shell and make
-> 
-> No, that's true only for very simple packages.
-
-Ok, plus normal unix tools like sed and awk ...
-
-> Most packages need lots of additional libraries installed - and the
-> development versions of those libraries, for that matter.  Too often
-> the right development version - not too recent, not too old.  With the
-> wrong versions, there are surprises.
-
-Right. But this is the downside of being able to deal with all this
-complexity: every other build system would have the same problem.
-
-> You said about too many user-selectable options. Many large packages
-> _check_ for many installed libraries. Get them wrong, and you have the
-> same problems of untested combinations.
-
-Yup, auto-testing is usually a problem if you build cross stuff.
-
-> Sure, autotools by themselves don't need much.  But that's not
-> interesting: Autotools are not used only by themselves.
-
-They don't need a special runtime environment other than shell. Other
-systems like Perl, Python, Java or whatever has the problem that
-anything other than the very core is not very well defined and ends up
-in the version hell.
-
-We have once tried to write our automated test system for embedded
-boards with python and xml; the idea was to have something fancy, new
-and with good code-reuse. In the end it failed because the pexpect
-package we used to do the pattern matching bitrotted so quickly that
-four months later all the fancy tests didn't work any more, because it
-is not part of the python core.
-
-In the meantime we have migrated our automatic testing stuff to use
-shell, ssh/rsh and kermit. It is rock solid, and the code reuse factor
-is at least as good as with anything else.
-
-> Have you felt uncomfortable shipping a package that does use Autoconf,
-> Automake and Libtool, knowing that the scripts generated by those
-> tools are huge compared with the entire source of your package?
-
-No :-)
-
-> Have you _written_ Autoconf tests recently?
-
-Yea, all our packages are autotoolized.
-
-> Made any shell / shellutils non-portability mistakes in the tests?
-
-Yea, it happens in ptxdist all the time. People report about problems,
-we add new tests and the next revision works even on Ubuntu :)
-
-> Have you _read_ a portable Makefile lately? Have you tried writing
-> one for a complex package, confident that it's portable to different
-> quirky makes, quirky shells and quirky tools, outside the parts which
-> you might use Automake for?
->
-> That's a rationale for the project which is rewriting Autotools in GNU
-> Make, assuming that to be ubiquitous now, imho.  (Not all interesting
-> systems have a shell either.)
-
-I have no problems with people writing fancy new things. It's just that
-most people who try to do something better than autotools have only a
-fraction of the features.
-
-Open Source is darwinism: if there is something better, let's use it.
-But compare apples with apples.
-
-> If you're going to rewrite Autotools using GNU Make, why not ask if
-> another tool would be better, perhaps a tool specially designed for
-> the job?
-
-Go ahead.
-
-rsc
--- 
- Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
- Pengutronix - Linux Solutions for Science and Industry
-   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
-     Hannoversche Str. 2, 31134 Hildesheim, Germany
-   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
-
+Using the perl-script to create a modules.dep is one option. If you do
+not have a perl interpreter on your host, then you can build busybox'
+recently added depmod for your host and use that to create a
+modules.dep. Alternatively you can create a modules.dep via busybox on
+the fly when booting.
