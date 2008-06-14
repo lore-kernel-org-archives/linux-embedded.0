@@ -1,40 +1,40 @@
-From: Bernhard Fischer <rep.dot.nop@gmail.com>
+From: "Linus Walleij" <linus.ml.walleij@gmail.com>
 Subject: Re: modules.dep and depmod.pl
-Date: Sat, 14 Jun 2008 19:00:07 +0200
-Message-ID: <20080614170006.GA10734@mx.loc>
-References: <63386a3d0806131611g61ad6ab1t16bc68ab6407a8dc@mail.gmail.com> <63386a3d0806131633g4721216al566c8b6959e4631@mail.gmail.com> <8bd0f97a0806131645l69d9c3c8x727c3edd0cad5975@mail.gmail.com>
+Date: Sat, 14 Jun 2008 21:23:30 +0200
+Message-ID: <63386a3d0806141223y2d3c3d0eq5a12f8fd5487e7d7@mail.gmail.com>
+References: <63386a3d0806131611g61ad6ab1t16bc68ab6407a8dc@mail.gmail.com>
+	 <63386a3d0806131633g4721216al566c8b6959e4631@mail.gmail.com>
+	 <c32efac40806132351t150259e3oc0214e3ccd5eb6c@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:received:date:from:to:cc
-         :subject:message-id:references:mime-version:content-type
-         :content-disposition:in-reply-to:user-agent;
-        bh=5TyBwGXYdGG6eHHp5RH0h/y3UuD2mxG4H82D5GF8qY0=;
-        b=tQoDpOYPXKeVVM7qih5/i5mTGH0NTzHzcUg9OfAMXRITFwX3MJmkN+xCr611HQ49xk
-         QHz9NPpPUIWqe+WUxnMGr7LPJHepTu2Pyw8sh/faD0xNQ4VykpHcZXNHAAxfXyrpDP3V
-         CRo3Ux5+QbdxGe4/QSp7MoYrnMBn8EVZZ3AJo=
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=IFlYRZDoFvC7HqEZgfeqN8LiEVItMDSsGB/eMDlnPhU=;
+        b=Ssd0z2KG+uyou10GXlIss947Lh4k13MQhX+XFfuKkP1a8eOeu97+7X5N0dmY4fT+UV
+         MekRHGBPp3wB27W7l5YMGeGXNzTLUVUm81vTIeZO0t3ECbAJ4vRQdShs4SU8iwl2F+EQ
+         v1Us1AIfUmNcT76hcQ2BTuzdS5KsL9JXNfl/A=
+In-Reply-To: <c32efac40806132351t150259e3oc0214e3ccd5eb6c@mail.gmail.com>
 Content-Disposition: inline
-In-Reply-To: <8bd0f97a0806131645l69d9c3c8x727c3edd0cad5975@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Linus Walleij <linus.ml.walleij@gmail.com>, linux-embedded@vger.kernel.org
+To: linux-embedded@vger.kernel.org
 
-On Fri, Jun 13, 2008 at 07:45:58PM -0400, Mike Frysinger wrote:
->On Fri, Jun 13, 2008 at 7:33 PM, Linus Walleij wrote:
+2008/6/14 Dave Hylands <dhylands@gmail.com>:
 
->> Is there anyone beside me who would like to see this integrated
->> into scripts/ in the kernel to get some default modules.dep for
->> a read-only rootfs also when doing cross compilation, or am I
->> totally going down the wrong lane here?
->
->seems like a worthwhile step to me
+> When we were using 1.01 I think I had to patch the kernel Makefile. I
+> think I had to undo my patch when we upgraded to the  1.10 version of
+> busybox.
 
-Using the perl-script to create a modules.dep is one option. If you do
-not have a perl interpreter on your host, then you can build busybox'
-recently added depmod for your host and use that to create a
-modules.dep. Alternatively you can create a modules.dep via busybox on
-the fly when booting.
+OK I'll see if there is a newer version which is good for this.
+
+> You can also run the busybox depmod.pl after you've built the kernel,
+> but before you make the file system.
+
+Yeah that's what I do currently....
+
+Linus Walleij
