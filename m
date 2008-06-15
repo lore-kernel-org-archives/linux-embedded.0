@@ -1,87 +1,49 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Sun, 15 Jun 2008 16:48:57 -0500
-Message-ID: <200806151648.57679.rob@landley.net>
-References: <20080610134932.B27D62430C@gemini.denx.de> <200806110025.27575.rob@landley.net> <20080612181806.GA7423@nibiru.local>
+From: Enrico Weigelt <weigelt@metux.de>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Mon, 16 Jun 2008 01:12:41 +0200
+Message-ID: <20080615231241.GA8899@nibiru.local>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com> <200806111941.51221.rob@landley.net> <48513F5A.6010008@am.sony.com> <1213285831.26255.152.camel@pmac.infradead.org> <48514D77.4060007@am.sony.com> <20080612183735.GE7423@nibiru.local> <20080613184555.GR13599@pengutronix.de>
+Reply-To: weigelt@metux.de
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080612181806.GA7423@nibiru.local>
 Content-Disposition: inline
+In-Reply-To: <20080613184555.GR13599@pengutronix.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: weigelt@metux.de
-Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
 
-On Thursday 12 June 2008 13:18:07 Enrico Weigelt wrote:
-> * Rob Landley <rob@landley.net> schrieb:
->
-> Hi,
->
-> > There's also qemu.  You can native build under emulation.
->
-> did you ever consider that crosscompiling is not only good for
-> some other arch, but a few more things ?
+* Robert Schwebel <r.schwebel@pengutronix.de> schrieb:
 
-Sure, such as building a uClibc system on a glibc host, which my _previous_ 
-firmware linux project (http://landley.net/code/firmware/old) was aimed at.
+Hi,
 
-That used User Mode Linux instead of qemu, because "fakeroot" wasn't good 
-enough and chroot A) requires the build to run as root, B) sometimes gets a 
-little segfaulty if you build uClibc with newer kernel headers than the 
-kernel in the system you're running on.
+> Instead of hacking around and inventing new things, you should have
+> spent your time for improving libtool ...
 
-You can't get away from cross compiling whenever you want to bootstrap a new 
-platform.  But cross compiling can be minimized and encapsulated.  It can be 
-a stage you pass through to get it over with and no longer have to deal with 
-it on the other side, which is the approach I take.
+No, not with libtool. 
+I do not want to support that insane approach of tweaking command
+lines in the middle - it's an Pandorra's Box. I've already spent 
+too much time on it and decided to completely drop it.
 
-> > In addition, if you have a cross compiler but don't want to spend all
-> > your time lying to ./configure, preventing gcc from linking against the
-> > host's zlib or grabbing stuff out of /usr/include that your target hasn't
-> > got, or
->
-> #1: use a proper (sysroot'ed) toolchain
+Instead I prefer *clean* lines.
 
-I break everything.  (I've broken native toolchains.  I just break them 
-_less_.)
+Unitool provides commands on an higher level than, gcc+co do.
+These commands are on an higher functional level, hiding the 
+individual platform's details. Also including things like importing
+.la-libs, sysroot, etc.
 
-By my count sysroot is the fifth layer of path logic the gcc guys have added 
-in an attempt to paint over the dry rot.
+Lt-unitool is a wrapper which parses the libtool commands and calls 
+Unitool to do the actual work.
 
-Personally I use a derivative of the old uClibc wrapper script that rewrites 
-the command line to start with "--nostdinc --nostdlib" and then builds it 
-back up again without having any paths in there it shouldn't.
 
-> #2: fix broken configure.in's (and feed back to upstream or OSS-QM)
-
-Whack-a-mole.  Fun for the whole family.  Only problem is, it never stops.
-
-> #3: replace libtool by unitool
-
-Uninstall libtool and don't replace it with anything, it's a NOP on Linux.
-
-> > libraries are linked inside the emulator, anything that wants to look
-> > at /proc or sysinfo does it natively inside the emulator...)
->
-> Only crap sw looks at /proc at build time.
-> Yes, there's *much* crap sw out there :(
-
-99% of all the developers out there don't really care about portability, and 
-never will.  Even if you eliminate the windows guys and the people who don't 
-do C, 90% of the people who are _left_ get to work on the PC first, get it to 
-work natively on other Linux platforms afterwards.
-
-Cross compiling is a step beyond "portability".  They'll _never_ care about 
-cross compiling.  If they get inspired to make it work on MacOS X, then 
-you'll have to extract the source and _build_ it on MacOS X to make that 
-work.  And 99% of all developers will nod their heads and go "quite right, as 
-it should be".
-
-This isn't going to change any time soon.
-
-Rob
+cu
 -- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+---------------------------------------------------------------------
+ Enrico Weigelt    ==   metux IT service - http://www.metux.de/
+---------------------------------------------------------------------
+ Please visit the OpenSource QM Taskforce:
+ 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
+ Patches / Fixes for a lot dozens of packages in dozens of versions:
+	http://patches.metux.de/
+---------------------------------------------------------------------
