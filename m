@@ -1,59 +1,82 @@
-From: "Linus Walleij" <linus.ml.walleij@gmail.com>
-Subject: Re: modules.dep and depmod.pl
-Date: Sat, 14 Jun 2008 21:38:56 +0200
-Message-ID: <63386a3d0806141238g1a0c5ef3oada7ae67461fb8d6@mail.gmail.com>
-References: <63386a3d0806131611g61ad6ab1t16bc68ab6407a8dc@mail.gmail.com>
-	 <63386a3d0806131633g4721216al566c8b6959e4631@mail.gmail.com>
-	 <loom.20080614T092033-823@post.gmane.org>
+From: "Leon Woestenberg" <leon.woestenberg@gmail.com>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Sun, 15 Jun 2008 17:39:43 +0200
+Message-ID: <c384c5ea0806150839l4b18b988pf69990bc87e52bcf@mail.gmail.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org>
+	 <200806102235.09598.rob@landley.net> <484F66F8.4020409@snapgear.com>
+	 <200806111941.51221.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:in-reply-to:mime-version:content-type
+         :subject:cc:in-reply-to:mime-version:content-type
          :content-transfer-encoding:content-disposition:references;
-        bh=QC5YYPDAPLR9nqud0yiSHl/b+aGSrSQV4RwfrSvsC+M=;
-        b=fyLjYsjL6xevnOUmircpyjXxMVNi6frFiJHcgx8Nrdf06G7AO5bmrWPbaHunz7dDik
-         GBS9gE0jlaUBpezyFcxAcCJQvcksSb4ymdVqU8ZfT692Qk+yfryllbRlN6rxLy3gQcOz
-         c4U2PJJDh1xn+idQoe6ntizdVuLjE/4AYb4kg=
-In-Reply-To: <loom.20080614T092033-823@post.gmane.org>
+        bh=XJ9AmW3kAAM13WZX5ebMtKS0poYvX7MP2WGoCQPpRUg=;
+        b=Vs7OVCiXM3HbFJj0q7mgBNn7LF0wsgguumjLmqXwgrPNew/ggHC1feuSLG1CdXxc7+
+         hHwJLVD0jUUP8kretQC+OPjceBPPU/6G+eAf1lHKXu8m/8+4hbEWEV+i2Dcyrhp5O7qs
+         W0i09r3Ng9NG7HfW6QP/pdvrKac3a+55p04wg=
+In-Reply-To: <200806111941.51221.rob@landley.net>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+To: Rob Landley <rob@landley.net>
+Cc: Greg Ungerer <gerg@snapgear.com>, Sam Ravnborg <sam@ravnborg.org>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-2008/6/14 Matthieu castet <castet.matthieu@free.fr>:
+Hello all,
 
-> What's wrong with using your host depmod to build it.
-> When I build a crosscompilation kernel, and I do make module_install,
-> modules.dep are generated.
+On Thu, Jun 12, 2008 at 2:41 AM, Rob Landley <rob@landley.net> wrote:
+>
+> Most packages don't cross compile at all.  Debian has somewhere north of
+> 30,000 packages.  Every project that does large scale cross compiling
+> (buildroot, gentoo embedded, timesys making fedora cross compile, etc) tends
+> to have about 200 packages that cross compile more or less easily, another
+> 400 or so that can be made to cross compile with _lot_ of effort and a large
+> enough rock, and then the project stalls at about that size.
+>
 
-Well I do believe that works for you because you're lucky to
-have a host with a recent kernel and module-init-tools.
+Agreed, OpenEmbedded has a few thousands, but your point is valid.
+However, fleeing to target-native compilation is not the way to
+improve the situation IMHO.
 
-However I believe that creates an unsound relation between the
-host depmod and any cross compilation.
+Moore's law on hardware also goes for the host, I think the progress
+is even bigger on big iron.
 
-Currently I try to cross-compile a 2.6.25 kernel on an old good
-workhorse with a 2.4.x kernel & likewise antique depmod. It
-just won't work.
+Also, how much of the 30000 packages are useful for something like
+your own firmware Linux?
 
-I tried to cross-compile all module-init-tools with --build=i386,
---host=i386, --target=arm-linux,
-but that still fails: it checks what version of the kernel it's working
-on, and determines that since that is a 2.4.x version it needs
-to execute depmod.old instead :-P (Perhaps this is bug?)
+> Distcc can take advantage of smp, but that won't help the ./configure stage
+> and I need to do some work on distcc to teach it to understand more gcc
+>
+If you want to build 1000+ packages, you don't need to run configure
+itself multithreaded. There are enough jobs available to keep 16/32
+processors busy (beyond that, you probably end up in
+inter-package-dependencies stalling the build). This is just a guess
+from what I see during a multi-threaded bake and multi-threaded make
+on OpenEmbedded.
 
-I'd _really_ prefer cross-compilation to use the cross compiler
-and in-kernel tools only, and currently I think it is actually
-only depmod that deviates from that. (OK some scripts may
-need a recent version of perl or so, that was just discussed in
-another thread.)
+> However, having one or more full-time engineers devoted to debugging
+> cross-compile issues is quite a high price to pay too.  Moore's law really
+> doesn't help that one.
+>
+How about 30+ volunteers.
 
-Do you think an attempt to patch busybox:s depmod.pl into
-scripts/ for the benefit of cross-compilation would be frowned
-upon?
+> I'm not saying either solution is perfect, I'm just saying the "build under
+> emulation" approach is a viable alternative that gets more attractive as time
+> passes, both because of ongoing development on emulators and because of
+> Moore's law on the hardware.
+>
+I cannot follow your reasoning - Moore's law will help you more on the
+big iron side of things.
 
-Linus Walleij
+That said, I welcome any effort (such as yours) to help improve the
+embedded Linux domain, I rather try to fix the cross-compile stuff of
+the few thousand packages I am interested in.
+
+Yes it hurts my brain.
+
+Regards,
+-- 
+Leon
