@@ -1,36 +1,80 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Sun, 15 Jun 2008 16:51:33 -0500
-Message-ID: <200806151651.33892.rob@landley.net>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <48514E9A.3080901@billgatliff.com> <20080612183421.GD7423@nibiru.local>
+From: Enrico Weigelt <weigelt@metux.de>
+Subject: Re: cross-compiling alternatives
+Date: Mon, 16 Jun 2008 06:08:54 +0200
+Message-ID: <20080616040854.GG12962@nibiru.local>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806130843.05704.neundorf@eit.uni-kl.de> <1213346316.17853.28.camel@tara.firmix.at> <200806131106.18487.neundorf@eit.uni-kl.de> <1213351433.17853.61.camel@tara.firmix.at> <20080613151634.GJ11760@nibiru.local> <1213382709.17853.79.camel@tara.firmix.at>
+Reply-To: weigelt@metux.de
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080612183421.GD7423@nibiru.local>
 Content-Disposition: inline
+In-Reply-To: <1213382709.17853.79.camel@tara.firmix.at>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: weigelt@metux.de
-Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-On Thursday 12 June 2008 13:34:21 Enrico Weigelt wrote:
-> * Bill Gatliff <bgat@billgatliff.com> schrieb:
-> > If the build system derives from autoconf, then a hacked-up
-> > config.cache (or equivalent command-line args) often solves
-> > problems for me.
->
-> Only if you're working on *one specific* target for a long time.
-> I, for example, have to support lots of different targets, so your
-> approach does not work for me. Ah, and it's not *solving* any problem,
-> just deferring it to some other day.
+* Bernd Petrovitsch <bernd@firmix.at> schrieb:
 
-It's not deferring it, it's ripping out the failed automation and configuring 
-it manually, answering each question by hand.  (That said, it's the approach 
-I took to get bash to cross-compile in FWL.  Sometimes it's all you can 
-do...)
+> > Recent pkg-config supports sysroot.
+> 
+> FC-6 has "only" 0.21.
 
-Rob
+Not sure when the sysroot stuff got into upstream releaes, but
+maybe you just should update ;-P
+
+> > So you simply build your .pc files as usual (w/o sysroot prefix) and
+> > set the sysroot prefix via env on the pkg-config call.
+> 
+> From a quick glance over the man page of 0.23, yes.
+
+Yep, it doesn't take $SYSROOT (as my original patch did), but with 
+some prefix ...
+
+> The problem is that the build-time (cross-)linker needs to find the
+> (cross-compiled) lib under /my/build/host/target/environment/opt/foo/lib
+> at link time and the shared linker under /opt/foo/lib at run-time.
+> Hmm, after digging into that old project, it seems that libtool and
+> the .la files were the problem.
+
+Yes, libtool doesn't understand anything like sysroot. It generates 
+broken pathnames in the .la files. You could use unitool and it's 
+libtool-replacement.
+
+> > > Yes. And even worse the compiled lib "foo" had explicit dependencies (on
+> > > lib "bar") on
+> > > "/my/build/host/target/environment/opt/bar/lib/libbar.so.1.2.3.4". 
+> > 
+> > And that's even more broken.
+> 
+> Yup. Maybe it was a result of my trial to make libtool work somehow ..
+
+Heh, I've given up trying to repair libtool for a long time ;-P
+
+> > > And BTW pkg-config didn't support the concept of a "DESTDIR" variable
+> > > (and I don't care about the name of that variable).
+> > 
+> > No, why should it ?! It does not install anything.
+> 
+> But it may "use" installed files.
+
+Yes, but they have to be strictly from sysroot. As said, recent 
+pkg-config can handle this properly.
+ 
+> > Probably you're looking for sysroot ?
+> 
+> Yes, very probably.
+
+:)
+
+
+cu
 -- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+---------------------------------------------------------------------
+ Enrico Weigelt    ==   metux IT service - http://www.metux.de/
+---------------------------------------------------------------------
+ Please visit the OpenSource QM Taskforce:
+ 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
+ Patches / Fixes for a lot dozens of packages in dozens of versions:
+	http://patches.metux.de/
+---------------------------------------------------------------------
