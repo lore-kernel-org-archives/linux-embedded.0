@@ -1,38 +1,40 @@
 From: Enrico Weigelt <weigelt@metux.de>
-Subject: Re: cross-compiling alternatives
-Date: Mon, 16 Jun 2008 16:33:15 +0200
-Message-ID: <20080616143315.GB9141@nibiru.local>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806130843.05704.neundorf@eit.uni-kl.de> <1213346316.17853.28.camel@tara.firmix.at> <200806131106.18487.neundorf@eit.uni-kl.de> <1213351433.17853.61.camel@tara.firmix.at> <20080613151634.GJ11760@nibiru.local> <1213382709.17853.79.camel@tara.firmix.at> <20080616040854.GG12962@nibiru.local> <87zlplj0ot.fsf@macbook.be.48ers.dk>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Mon, 16 Jun 2008 17:15:37 +0200
+Message-ID: <20080616151536.GC9141@nibiru.local>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <20080613222523.GA28805@shareable.org> <20080613231932.GW13599@pengutronix.de> <200806160955.12752.neundorf@eit.uni-kl.de>
 Reply-To: weigelt@metux.de
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <87zlplj0ot.fsf@macbook.be.48ers.dk>
+In-Reply-To: <200806160955.12752.neundorf@eit.uni-kl.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-* Peter Korsgaard <jacmet@sunsite.dk> schrieb:
+* Alexander Neundorf <neundorf@eit.uni-kl.de> schrieb:
 
-Hi,
+> CMake has a cache, where the values of variables are stored, e.g. if an option 
+> is enabled or not, or where a library has been found (e.g. 
+> JPEG_LIBRARY=/usr/local/lib/libjpeg.so).
+> The way to influence the behaviour of cmake is to change the value of these 
+> variables, this can be done either via a GUI (curses based or with cmake 2.6 
+> also a graphical one), or via the command line:
+> $ cmake -D<name_of_variable>=<new_value> ...more options
 
-> Notice that sysroot is broken in 0.23 (it removes everything else than
-> -I / -L words). Patches have been posted to the pkgconfig list several
-> times.
+Are these variables strictly specified or is all left to individual 
+author's decision ?
 
-ugh, why didn't they just apply my patch which only appends 
-$sysroot to the pathes ?  .... grmpf ...
-
-well, i'll stick w/ my 5-lines wrapper script ;-o
-
->  Enrico> Yep, it doesn't take $SYSROOT (as my original patch did), but with 
->  Enrico> some prefix ...
+> > autotools need only a shell and make
 > 
-> PKG_CONFIG_SYSROOT_DIR
+> Yes, and requiring a shell is a lot, in the case you want to port 
+> also to Windows.
 
-ack.
+hmm, why not just expecting an sane shell on the building system ?
+(as you already have to expect a sane compiler)
+
 
 cu
 -- 
