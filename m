@@ -1,38 +1,46 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Mon, 16 Jun 2008 14:32:01 +0100
-Message-ID: <20080616133201.GG18857@shareable.org>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <20080614112656.GX13599@pengutronix.de> <20080616113946.GD18857@shareable.org> <200806161406.40063.neundorf@eit.uni-kl.de>
+From: Enrico Weigelt <weigelt@metux.de>
+Subject: Re: cross-compiling alternatives
+Date: Mon, 16 Jun 2008 16:33:15 +0200
+Message-ID: <20080616143315.GB9141@nibiru.local>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806130843.05704.neundorf@eit.uni-kl.de> <1213346316.17853.28.camel@tara.firmix.at> <200806131106.18487.neundorf@eit.uni-kl.de> <1213351433.17853.61.camel@tara.firmix.at> <20080613151634.GJ11760@nibiru.local> <1213382709.17853.79.camel@tara.firmix.at> <20080616040854.GG12962@nibiru.local> <87zlplj0ot.fsf@macbook.be.48ers.dk>
+Reply-To: weigelt@metux.de
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <200806161406.40063.neundorf@eit.uni-kl.de>
+In-Reply-To: <87zlplj0ot.fsf@macbook.be.48ers.dk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Alexander Neundorf <neundorf@eit.uni-kl.de>
-Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-Alexander Neundorf wrote:
-> On Monday 16 June 2008 13:39:46 you wrote:
-> ...
-> > > > If you're going to rewrite Autotools using GNU Make, why not ask if
-> > > > another tool would be better, perhaps a tool specially designed for
-> > > > the job?
-> > >
-> > > Go ahead.
-> >
-> > The first part of going ahead is to brainstorm and find ideas and
-> > likely interest...  It's too big (as you rightly note) to simply sit
-> > down and do it by oneself in isolation.
+* Peter Korsgaard <jacmet@sunsite.dk> schrieb:
+
+Hi,
+
+> Notice that sysroot is broken in 0.23 (it removes everything else than
+> -I / -L words). Patches have been posted to the pkgconfig list several
+> times.
+
+ugh, why didn't they just apply my patch which only appends 
+$sysroot to the pathes ?  .... grmpf ...
+
+well, i'll stick w/ my 5-lines wrapper script ;-o
+
+>  Enrico> Yep, it doesn't take $SYSROOT (as my original patch did), but with 
+>  Enrico> some prefix ...
 > 
-> You are not seriously talking about writing yet another buildsystem?
-> With autotools, cmake, scons, ant, (b)jam, bitbake, makeng,
-> etc. there should be enough available.
+> PKG_CONFIG_SYSROOT_DIR
 
-No, I'm talking about improving Autotools to handle some things better
-than they do now.  Passing the high hurdles required to become part of
-Autotools - especially compatibility - is part of the goal.
+ack.
 
--- Jamie
+cu
+-- 
+---------------------------------------------------------------------
+ Enrico Weigelt    ==   metux IT service - http://www.metux.de/
+---------------------------------------------------------------------
+ Please visit the OpenSource QM Taskforce:
+ 	http://wiki.metux.de/public/OpenSource_QM_Taskforce
+ Patches / Fixes for a lot dozens of packages in dozens of versions:
+	http://patches.metux.de/
+---------------------------------------------------------------------
