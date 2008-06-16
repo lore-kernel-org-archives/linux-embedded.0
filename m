@@ -1,56 +1,46 @@
-From: Peter Korsgaard <jacmet@sunsite.dk>
-Subject: Re: cross-compiling alternatives
-Date: Mon, 16 Jun 2008 09:31:14 +0200
-Message-ID: <87zlplj0ot.fsf@macbook.be.48ers.dk>
-References: <1209577322.25560.402.camel@pmac.infradead.org>
-	<200806130843.05704.neundorf@eit.uni-kl.de>
-	<1213346316.17853.28.camel@tara.firmix.at>
-	<200806131106.18487.neundorf@eit.uni-kl.de>
-	<1213351433.17853.61.camel@tara.firmix.at>
-	<20080613151634.GJ11760@nibiru.local>
-	<1213382709.17853.79.camel@tara.firmix.at>
-	<20080616040854.GG12962@nibiru.local>
+From: Alexander Neundorf <neundorf@eit.uni-kl.de>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Mon, 16 Jun 2008 09:55:12 +0200
+Message-ID: <200806160955.12752.neundorf@eit.uni-kl.de>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <20080613222523.GA28805@shareable.org> <20080613231932.GW13599@pengutronix.de>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:received:to:cc:subject
-         :references:from:date:in-reply-to:message-id:user-agent:mime-version
-         :content-type:sender;
-        bh=EutCtyXtxyDVRov+UDsNKlmdFpddPShoyGmPh2MBX9M=;
-        b=jHjVrvsXa2GBjeOak8iw/GUKa+dhQW4aoJpE+jw1xqf23zj1B6ev89USHxWdovmnnG
-         1NWpew2ro7vUui1dU+Vuoho2t0ZCCsfkZiiL4RV1h6oZhHkqdRZYZTPtSjGk+/7+lSA3
-         dDQlMlu/xVaT3Ejj3Kzbbg+rUzmGwfxr7vuec=
-In-Reply-To: <20080616040854.GG12962@nibiru.local> (Enrico Weigelt's message of "Mon\, 16 Jun 2008 06\:08\:54 +0200")
+In-Reply-To: <20080613231932.GW13599@pengutronix.de>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: weigelt@metux.de
-Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
->>>>> "Enrico" == Enrico Weigelt <weigelt@metux.de> writes:
+On Saturday 14 June 2008 01:19:32 you wrote:
+...
+> I still don't understand why all the scons, cmakes and jams out there
+> don't even try to provide the *standard* user interface everyone is used
+> to on a unix system.
 
-Hi,
+For cmake:
+CMake has a cache, where the values of variables are stored, e.g. if an option 
+is enabled or not, or where a library has been found (e.g. 
+JPEG_LIBRARY=/usr/local/lib/libjpeg.so).
+The way to influence the behaviour of cmake is to change the value of these 
+variables, this can be done either via a GUI (curses based or with cmake 2.6 
+also a graphical one), or via the command line:
+$ cmake -D<name_of_variable>=<new_value> ...more options
 
- Enrico> * Bernd Petrovitsch <bernd@firmix.at> schrieb:
- >> > Recent pkg-config supports sysroot.
- >> 
- >> FC-6 has "only" 0.21.
+There is no simple automatic mapping from the variables to enabling features.
 
-Notice that sysroot is broken in 0.23 (it removes everything else than
--I / -L words). Patches have been posted to the pkgconfig list several
-times.
+Anyway, it is on the TODO for cmake to add some kind of support for 
+project-configurable command line options, so that configure-compatible 
+options could be provided.
 
- >> > So you simply build your .pc files as usual (w/o sysroot prefix) and
- >> > set the sysroot prefix via env on the pkg-config call.
- >> 
- >> From a quick glance over the man page of 0.23, yes.
+> > Lots of packages need special tools or other software installed to
+> > build them; this is no different.
+>
+> autotools need only a shell and make
 
- Enrico> Yep, it doesn't take $SYSROOT (as my original patch did), but with 
- Enrico> some prefix ...
+Yes, and requiring a shell is a lot, in the case you want to port also to 
+Windows.
 
-PKG_CONFIG_SYSROOT_DIR
 
--- 
-Bye, Peter Korsgaard
+Alex
