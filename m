@@ -1,71 +1,56 @@
 From: Enrico Weigelt <weigelt@metux.de>
-Subject: Re: cross-compiling alternatives
-Date: Mon, 16 Jun 2008 06:08:54 +0200
-Message-ID: <20080616040854.GG12962@nibiru.local>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806130843.05704.neundorf@eit.uni-kl.de> <1213346316.17853.28.camel@tara.firmix.at> <200806131106.18487.neundorf@eit.uni-kl.de> <1213351433.17853.61.camel@tara.firmix.at> <20080613151634.GJ11760@nibiru.local> <1213382709.17853.79.camel@tara.firmix.at>
+Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
+Date: Mon, 16 Jun 2008 06:23:11 +0200
+Message-ID: <20080616042310.GH12962@nibiru.local>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806131106.18487.neundorf@eit.uni-kl.de> <1213348320.26255.231.camel@pmac.infradead.org> <200806131132.55543.neundorf@eit.uni-kl.de> <20080613152854.GM11760@nibiru.local> <20080614003102.GB30652@shareable.org>
 Reply-To: weigelt@metux.de
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1213382709.17853.79.camel@tara.firmix.at>
+In-Reply-To: <20080614003102.GB30652@shareable.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-* Bernd Petrovitsch <bernd@firmix.at> schrieb:
+* Jamie Lokier <jamie@shareable.org> schrieb:
 
-> > Recent pkg-config supports sysroot.
-> 
-> FC-6 has "only" 0.21.
-
-Not sure when the sysroot stuff got into upstream releaes, but
-maybe you just should update ;-P
-
-> > So you simply build your .pc files as usual (w/o sysroot prefix) and
-> > set the sysroot prefix via env on the pkg-config call.
-> 
-> From a quick glance over the man page of 0.23, yes.
-
-Yep, it doesn't take $SYSROOT (as my original patch did), but with 
-some prefix ...
-
-> The problem is that the build-time (cross-)linker needs to find the
-> (cross-compiled) lib under /my/build/host/target/environment/opt/foo/lib
-> at link time and the shared linker under /opt/foo/lib at run-time.
-> Hmm, after digging into that old project, it seems that libtool and
-> the .la files were the problem.
-
-Yes, libtool doesn't understand anything like sysroot. It generates 
-broken pathnames in the .la files. You could use unitool and it's 
-libtool-replacement.
-
-> > > Yes. And even worse the compiled lib "foo" had explicit dependencies (on
-> > > lib "bar") on
-> > > "/my/build/host/target/environment/opt/bar/lib/libbar.so.1.2.3.4". 
+> > > E.g. in python there are tests which call functions and check 
+> > > their result to see if we are currently on a platform where 
+> > > that function is broken (I think there was such a test for 
+> > > poll() and some other functions).
 > > 
-> > And that's even more broken.
+> > IMHO, that's broken sw engineering from ground up.
 > 
-> Yup. Maybe it was a result of my trial to make libtool work somehow ..
+> Oh?  The alternative I see is to do the test at run-time.  But that
+> adds to executable size and run-time slowdown on most platforms.
 
-Heh, I've given up trying to repair libtool for a long time ;-P
+There's no generic answer to this, we have to look at the details
+carefully ;-P
 
-> > > And BTW pkg-config didn't support the concept of a "DESTDIR" variable
-> > > (and I don't care about the name of that variable).
-> > 
-> > No, why should it ?! It does not install anything.
-> 
-> But it may "use" installed files.
+Most times I've seen those checks, they silently enable some 
+features, eg. if it looks for certain kernel devices. Definitively
+the wrong way! It really should be in users/packagers control to
+explicitly enable features. Nevertheless, the existence of some
+file or device says nothing about whether it will be usable
+(or *should* be used) at runtime. I've seen packages silently
+enabling some feature and then failing at runtime since the 
+previously detected device is missing later. What a nightamare 
+for packagers.
 
-Yes, but they have to be strictly from sysroot. As said, recent 
-pkg-config can handle this properly.
- 
-> > Probably you're looking for sysroot ?
-> 
-> Yes, very probably.
+Another point are broken syscalls. Well, you *have* check at runtime 
+to be sure, or perhaps choose to ignore it and expect a sane system.
 
-:)
+*If* you really want to do constraint checks, you should do it 
+as an separate, optional step. Maybe issue a big-fat hint that 
+one really should run that test (and follow certain instructions)
+if he don't exactly know what he's doing.
+
+> Doing it at build time is an improvement, for those people who don't
+> care about cross-compilation.  (Not me, you understand.)
+
+IMHO, it's just lazyness, at least for about 99% of the cases ;-P
 
 
 cu
