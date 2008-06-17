@@ -1,40 +1,59 @@
-From: Alexander Neundorf <neundorf@eit.uni-kl.de>
-Subject: Re: cross-compiling alternatives (was Re: [PATCH 0/1] Embedded Maintainer(s)...)
-Date: Tue, 17 Jun 2008 16:22:55 +0200
-Message-ID: <200806171622.55901.neundorf@eit.uni-kl.de>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <200806170827.09103.neundorf@eit.uni-kl.de> <20080617134635.GE9141@nibiru.local>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Recommendation for activating a deferred module init in the kernel
+Date: Tue, 17 Jun 2008 11:23:18 -0700
+Message-ID: <48580116.9070504@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080617134635.GE9141@nibiru.local>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Tuesday 17 June 2008 15:46:36 Enrico Weigelt wrote:
-> * Alexander Neundorf <neundorf@eit.uni-kl.de> schrieb:
-> > On Monday 16 June 2008 17:15:37 Enrico Weigelt wrote:
-> > > * Alexander Neundorf <neundorf@eit.uni-kl.de> schrieb:
-> > > > CMake has a cache, where the values of variables are stored, e.g. if
-> > > > an option is enabled or not, or where a library has been found (e.g.
-> > > > JPEG_LIBRARY=/usr/local/lib/libjpeg.so).
-> > > > The way to influence the behaviour of cmake is to change the value of
-> > > > these variables, this can be done either via a GUI (curses based or
-> > > > with cmake 2.6 also a graphical one), or via the command line:
-> > > > $ cmake -D<name_of_variable>=<new_value> ...more options
-> > >
-> > > Are these variables strictly specified or is all left to individual
-> > > author's decision ?
-> >
-> > Authors decision.
->
-> Then you've got the same problem as w/ autoconf's config.status:
-> You have to tweak it for each individual package separately :(
+Hi all,
 
-Well, these are all more or less scripting languages, so people can create 
-whichever variables they like, no way to enforce something.
-Still one can suggest standards which should be followed.
+I am working with a product team on bootup time issues.  One technique
+that we are forward-porting from an old kernel (and that I thought I
+might work on mainlining) is to compile modules statically into the kernel,
+but defer their initialization until after boot time.
 
-Alex
+Normally, module init routines are declared with module_init(), which,
+when they are statically linked into the kernel, uses the macro
+__define_initcall() to add an entry to a special init segment.
+This is called during bootup by do_initcall() (in init/main.c),
+and the memory where the function resides is eventually freed.
+
+There are several phases of initcalls (see include/linux/init.h),
+including core, postcore, arch, subsys, fs, rootfs, device, and late.
+
+In our modification, we:
+ 1) add another phase for deferred initcalls
+ 2) modify the module_init macro definition to use that phase, for the
+ modules we wish to defer initialization of
+ 3) modify the free code to not free the memory until later
+ 4) add an ioctl to trigger the deferred initialization (and memory free)
+
+One of the main sub-systems that we defer initialization of this
+way is USB, and this saves quite a bit of time.  (Of course the
+same, or slightly more CPU cycles are eventually used during
+bootup time.  But this lets us get to user space quicker so we
+can start user-visible applications faster.)
+
+I'm not that happy using an ioctl for this trigger.  What is
+the preferred method of activating a kernel feature like this?
+I presume something in /proc or /sys, but I'm not sure.
+
+Also, is there something like this in the kernel now that I'm
+missing?
+
+Any advice or comments would be welcome.
+
+Thanks,
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
+
