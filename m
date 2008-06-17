@@ -1,33 +1,25 @@
 From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: Recommendation for activating a deferred module init in the kernel
-Date: Tue, 17 Jun 2008 12:55:31 -0700
-Message-ID: <485816B3.3080800@am.sony.com>
-References: <48580116.9070504@am.sony.com> <20080617190750.GA31224@logfs.org> <485815F6.20507@am.sony.com>
+Date: Tue, 17 Jun 2008 13:06:23 -0700
+Message-ID: <4858193F.6080607@am.sony.com>
+References: <48580116.9070504@am.sony.com> <20080617190750.GA31224@logfs.org> <20080617192248.GH11921@sovereign.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <485815F6.20507@am.sony.com>
+In-Reply-To: <20080617192248.GH11921@sovereign.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+To: Jim Freeman <jfree@sovereign.org>
+Cc: J??rn Engel <joern@logfs.org>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Tim Bird wrote:
->> If you want an explicit trigger, you could either hook into init_post()
->> or have hooks in the open functions of drivers with deferred
->> initialization.
-> 
-> This would presumably require multiple calls (one to the open of
-> each deferred module).  I would still need a trigger for the memory
-> free operation, unless I hardcode the order of the opening and just
-> "know" that the last one should free the memory.  I'll have to see
-> if all the modules being loaded like this have open()s.
+Jim Freeman wrote:
+> Run modprobe?  Have it do just the _init bits without a load/link
+> of the actual module text?
 
-Sorry - I responded too quickly.  I'm not sure I follow the
-original suggestion.  How would I call the open function of
-a module that is not initialized yet?
- -- Tim
+Interesting...  Maybe I could overload sys_init_module().  I'll take
+a look at this.
+  -- Tim
 
 =============================
 Tim Bird
