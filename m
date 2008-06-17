@@ -1,59 +1,76 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Recommendation for activating a deferred module init in the kernel
-Date: Tue, 17 Jun 2008 11:23:18 -0700
-Message-ID: <48580116.9070504@am.sony.com>
+From: David VomLehn <dvomlehn@cisco.com>
+Subject: Re: Recommendation for activating a deferred module init in the kernel
+Date: Tue, 17 Jun 2008 11:51:48 -0700
+Message-ID: <485807C4.6080609@cisco.com>
+References: <48580116.9070504@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <48580116.9070504@am.sony.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=2578; t=1213728713; x=1214592713;
+	c=relaxed/simple; s=rtpdkim2001;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=dvomlehn@cisco.com;
+	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	|Subject:=20Re=3A=20Recommendation=20for=20activating=20a=2
+	0deferred=20module=20init=20in=20the=20kernel
+	|Sender:=20
+	|To:=20Tim=20Bird=20<tim.bird@am.sony.com>;
+	bh=wTU/By2mFHChKr08fL7IjS4Yfj31btJlaLIylH+n6es=;
+	b=ia6E3sN1aaagowNvnVtE7rkQk5MpyloOMoBk8Vg1K8bGARvjR09p3XQelz
+	VaXZA8GnDm/zSDjorfmufU5K27IZpj3SNDWTiXiONDtfTf1Xot5GpqR/blAI
+	wriXcNTlT9;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-Hi all,
+Tim Bird wrote:
+> Hi all,
+> 
+> I am working with a product team on bootup time issues.  One technique that we
+> are forward-porting from an old kernel (and that I thought I might work on
+> mainlining) is to compile modules statically into the kernel, but defer their
+> initialization until after boot time.
+...
+> One of the main sub-systems that we defer initialization of this way is USB,
+> and this saves quite a bit of time.  (Of course the same, or slightly more CPU
+> cycles are eventually used during bootup time.  But this lets us get to user
+> space quicker so we can start user-visible applications faster.)
+> 
+> I'm not that happy using an ioctl for this trigger.  What is the preferred
+> method of activating a kernel feature like this? I presume something in /proc
+> or /sys, but I'm not sure.
 
-I am working with a product team on bootup time issues.  One technique
-that we are forward-porting from an old kernel (and that I thought I
-might work on mainlining) is to compile modules statically into the kernel,
-but defer their initialization until after boot time.
+ From your description, it seems as though you always want to do the
+initialization, you just may want to delay it until well after starting up user
+space. If something like this were performance-critical, an ioctl might be 
+justified, but this would be a one-time trigger. I think that making this as 
+closely analogous to loading a kernel module as possible is a good conceptual 
+approach. Since you might choose, at run time, whether or not to load a kernel 
+module, it makes sense to do this on a device-by-device basis. To me, that 
+suggests doing something in /sys.
 
-Normally, module init routines are declared with module_init(), which,
-when they are statically linked into the kernel, uses the macro
-__define_initcall() to add an entry to a special init segment.
-This is called during bootup by do_initcall() (in init/main.c),
-and the memory where the function resides is eventually freed.
+My first impression was that this was an awful kludge, but drawing the parallel 
+to loadable modules makes me not only happier, but also leads me into wondering 
+if there shouldn't be a generic framework for supporting this. So, instead of 
+using module_init, there might be some other macro that indicated that this 
+driver was to be initialized in a deferred, and optional, fashion.
 
-There are several phases of initcalls (see include/linux/init.h),
-including core, postcore, arch, subsys, fs, rootfs, device, and late.
+-- 
+David VomLehn, dvomlehn@cisco.com
+The opinions expressed herein are likely mine, but might not be my employer's...
 
-In our modification, we:
- 1) add another phase for deferred initcalls
- 2) modify the module_init macro definition to use that phase, for the
- modules we wish to defer initialization of
- 3) modify the free code to not free the memory until later
- 4) add an ioctl to trigger the deferred initialization (and memory free)
 
-One of the main sub-systems that we defer initialization of this
-way is USB, and this saves quite a bit of time.  (Of course the
-same, or slightly more CPU cycles are eventually used during
-bootup time.  But this lets us get to user space quicker so we
-can start user-visible applications faster.)
 
-I'm not that happy using an ioctl for this trigger.  What is
-the preferred method of activating a kernel feature like this?
-I presume something in /proc or /sys, but I'm not sure.
 
-Also, is there something like this in the kernel now that I'm
-missing?
-
-Any advice or comments would be welcome.
-
-Thanks,
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+     - - - - -                              Cisco                            - - - - -         
+This e-mail and any attachments may contain information which is confidential, 
+proprietary, privileged or otherwise protected by law. The information is solely 
+intended for the named addressee (or a person responsible for delivering it to 
+the addressee). If you are not the intended recipient of this message, you are 
+not authorized to read, print, retain, copy or disseminate this message or any 
+part of it. If you have received this e-mail in error, please notify the sender 
+immediately by return e-mail and delete it from your computer.
 
