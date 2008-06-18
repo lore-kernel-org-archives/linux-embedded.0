@@ -1,43 +1,56 @@
-From: David Woodhouse <dwmw2@infradead.org>
+From: Adrian Bunk <bunk@kernel.org>
 Subject: Re: Recommendation for activating a deferred module init in the
 	kernel
-Date: Wed, 18 Jun 2008 09:32:07 +0100
-Message-ID: <1213777927.26255.1168.camel@pmac.infradead.org>
-References: <4858AF6D.7040808@codefidence.com>
-	 <1213777222.26255.1161.camel@pmac.infradead.org>
+Date: Wed, 18 Jun 2008 11:52:34 +0300
+Message-ID: <20080618085233.GP25911@cs181133002.pp.htv.fi>
+References: <4858AF6D.7040808@codefidence.com> <1213777222.26255.1161.camel@pmac.infradead.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <1213777222.26255.1161.camel@pmac.infradead.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Gilad Ben-Yossef <gilad@codefidence.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: Gilad Ben-Yossef <gilad@codefidence.com>, Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Wed, 2008-06-18 at 09:20 +0100, David Woodhouse wrote:
+On Wed, Jun 18, 2008 at 09:20:22AM +0100, David Woodhouse wrote:
+> On Wed, 2008-06-18 at 09:47 +0300, Gilad Ben-Yossef wrote:
+> > This may sound like a stupid question, but why are you compiling the 
+> > modules statically?
+> 
+> I wondered that.
+> 
+> One potential reason to avoid modules is that they waste RAM -- you have
+> to allocate an integral number of pages for each one, which means an
+> average of 2KiB wasted for each module you load. Although that isn't
+> much, it's not zero either. It might be possible to optimise that by
+> 'packing' module allocations, if you're careful about it.
+>...
 > So the only real reason I can see to avoid modules in the _current_
 > kernel would be the wasted RAM, which should be something we can
-> address. Tim, have I missed something?=20
+> address.
+>...
 
-=2E.. like the time it takes to actually load modules and do the
-relocations, perhaps? You did say you were doing it to improve boot
-time. But this is the stuff you were happy to _defer_, so presumably no=
-t
-in your fast path?
+You miss the size increase imposed by CONFIG_MODULES=y.
 
-If that _is_ a real concern, then given the observation=C2=B9 that most
-systems load exactly the same modules in exactly the same order every
-time they boot... has anyone looked at doing 'prelink' for modules?=20
+E.g. setting CONFIG_MODULES=y in the arm collie_defconfig will
+increase the size of vmlinux by 14% (sic).
 
---=20
-dwmw2
+I haven't investigated why it takes that much space, but stuff like 
+kernel/module.o taking 23kB and each EXPORT_SYMBOL requiring a few
+bytes simply cannot be completely eliminated.
 
-=C2=B9 which I just pulled out of my arse, admittedly. But I think it's=
- true :)
+> dwmw2
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-embedde=
-d" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+cu
+Adrian
+
+-- 
+
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
+
