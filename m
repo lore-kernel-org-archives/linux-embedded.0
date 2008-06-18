@@ -1,70 +1,53 @@
-From: Nicolas Pitre <nico@cam.org>
+From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: Recommendation for activating a deferred module init in the kernel
-Date: Wed, 18 Jun 2008 10:56:40 -0400 (EDT)
-Message-ID: <alpine.LFD.1.10.0806181042320.2982@xanadu.home>
-References: <4858AF6D.7040808@codefidence.com>
- <1213777222.26255.1161.camel@pmac.infradead.org>
- <20080618085233.GP25911@cs181133002.pp.htv.fi>
- <Pine.LNX.4.64.0806181056300.13297@vixen.sonytel.be>
- <1213783190.26255.1188.camel@pmac.infradead.org>
- <20080618103302.GA16139@cs181133002.pp.htv.fi>
- <Pine.LNX.4.64.0806181336410.13297@vixen.sonytel.be>
+Date: Wed, 18 Jun 2008 09:08:16 -0700
+Message-ID: <485932F0.5050108@am.sony.com>
+References: <48580116.9070504@am.sony.com> <4858A659.8030502@codefidence.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: <Pine.LNX.4.64.0806181336410.13297@vixen.sonytel.be>
+In-Reply-To: <4858A659.8030502@codefidence.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: Adrian Bunk <bunk@kernel.org>, David Woodhouse <dwmw2@infradead.org>, Gilad Ben-Yossef <gilad@codefidence.com>, Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Gilad Ben-Yossef <gilad@codefidence.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Wed, 18 Jun 2008, Geert Uytterhoeven wrote:
-
-> On Wed, 18 Jun 2008, Adrian Bunk wrote:
-> > On Wed, Jun 18, 2008 at 10:59:50AM +0100, David Woodhouse wrote:
-> > > On Wed, 2008-06-18 at 10:57 +0200, Geert Uytterhoeven wrote:
-> > > > On Wed, 18 Jun 2008, Adrian Bunk wrote:
-> > > > > You miss the size increase imposed by CONFIG_MODULES=y.
-> > > > > 
-> > > > > E.g. setting CONFIG_MODULES=y in the arm collie_defconfig will
-> > > > > increase the size of vmlinux by 14% (sic).
-> > > > > 
-> > > > > I haven't investigated why it takes that much space, but stuff like 
-> > > > > kernel/module.o taking 23kB and each EXPORT_SYMBOL requiring a few
-> > > > > bytes simply cannot be completely eliminated.
-> > > > 
-> > > > Sounds like we need a tool that strips out the unneeded symbols, given a list
-> > > > of modules?
-> > > 
-> > > And do the --gc-sections step again after that... :)
-> > 
-> > But even after all optimizations CONFIG_MODULES=y will still cause a 
-> > significant additional cost [1] when thinking in the dimensions of 
-> > Tim's "the 30 or so Linux-tiny patches that I use get me about 110k of 
-> > reductions.  For me, this is about 5% of my kernel size" statement in 
-> > another thread.
-> > 
-> > [1] as I said, kernel/module.o alone takes 23kB
+Gilad Ben-Yossef wrote:
+> This may sound like a stupid question, but why are you compiling the
+> modules statically?
 > 
-> Which could be freed after the last module has been loaded?
+> I mean, it sounds to me like the perfect way to do what you want is to
+> compile the modules dynamically (you can store them in a an in kernel
+> initramfs if you want to keep them attached to the kernel binary for
+> ease of maintenance) and simply call a script that calls modprobe when
+> it's OK to load them?
 
-Even if you free the module loading infrastructure afterwards, you still 
-have to carry it in flash for both the kernel part and the user part.  
-And the whole process (having to sort out module loading in user space, 
-etc.) is still more complex than not having to load modules at all. Many 
-embedded designs have fixed hardware configuration and purpose which 
-makes dynamic module loading an unnecessary bloat.
+I'm not positive, but I think we link them statically for size and
+time reasons.  Statically linking the modules means we can eliminate
+the module load code from the kernel, and also save ourselves the ELF
+sections (in each module) which hold relocation information, etc.
+Also, insmod-ing (or modprobe-ing) the modules takes extra time
+overhead for the symbol relocation step.  Since this would be
+deferred in our case, this might not be a big deal, but it does
+add to the total length of time required to boot.
 
-Having the kernel span a parallel thread with a lower priority to 
-initialize drivers could be a much simpler solution in terms of size and 
-speed.  This way the init process could run early, and devices would 
-become available eventually just as if corresponding modules were 
-loaded.
+> Sounds a hell of lot simpler to me...
+Our patch isn't that big or complicated now.  I just didn't like
+the ioctl().  Replacing the ioctl with some other lightweight
+mechanism shouldn't complicate the code too much.
 
-The only difficulty is to properly determine how to distinguish between 
-drivers that have to be initialized early in order to mount the root fs 
-and the others that can wait.
+I'm not sure requiring a shell interpreter (to run the script)
+a script, a program (modprobe) and a whole new set of memory
+operations (to handle the initramfs), is simpler than a single
+ioctl. (It might be, in the non-embedded case, where the
+presence of these things is taken for granted.)
 
+ -- Tim
 
-Nicolas
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
+
