@@ -1,71 +1,47 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: Recommendation for activating a deferred module init in the
- kernel
-Date: Wed, 18 Jun 2008 13:37:56 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0806181336410.13297@vixen.sonytel.be>
-References: <4858AF6D.7040808@codefidence.com> <1213777222.26255.1161.camel@pmac.infradead.org>
- <20080618085233.GP25911@cs181133002.pp.htv.fi> <Pine.LNX.4.64.0806181056300.13297@vixen.sonytel.be>
- <1213783190.26255.1188.camel@pmac.infradead.org> <20080618103302.GA16139@cs181133002.pp.htv.fi>
+From: "Amol Lad" <amol.lad@gmail.com>
+Subject: Re: Recommendation for activating a deferred module init in the kernel
+Date: Wed, 18 Jun 2008 18:08:10 +0530
+Message-ID: <8c675e9b0806180538m1dc594b3h1db104ed1afaf65d@mail.gmail.com>
+References: <48580116.9070504@am.sony.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1262999723-1213789076=:13297"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080618103302.GA16139@cs181133002.pp.htv.fi>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=3/EMN6UrHflyGqEBlTr7X6LnYQlNJ94muUmwAPPHWWA=;
+        b=ftdiS0nirXhKv/uBtyaTG0e66xUMXjz5BVH4Pdz/lB8OLT9y+4sFMoo/q2RPi69rra
+         canyPMGP7qY+1Tjq6s+Q5v9w7/o9BmbkHaeQ9KMdMwaCX8lxox96zOEiquG3KZihTWNT
+         vfJDR12TZbu7dfzjPdnAj0GSWoIieK1kxpHhM=
+In-Reply-To: <48580116.9070504@am.sony.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Adrian Bunk <bunk@kernel.org>
-Cc: David Woodhouse <dwmw2@infradead.org>, Gilad Ben-Yossef <gilad@codefidence.com>, Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+>
+> I am working with a product team on bootup time issues.  One technique
+> that we are forward-porting from an old kernel (and that I thought I
+> might work on mainlining) is to compile modules statically into the kernel,
+> but defer their initialization until after boot time.
 
----584349381-1262999723-1213789076=:13297
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
 
-On Wed, 18 Jun 2008, Adrian Bunk wrote:
-> On Wed, Jun 18, 2008 at 10:59:50AM +0100, David Woodhouse wrote:
-> > On Wed, 2008-06-18 at 10:57 +0200, Geert Uytterhoeven wrote:
-> > > On Wed, 18 Jun 2008, Adrian Bunk wrote:
-> > > > You miss the size increase imposed by CONFIG_MODULES=y.
-> > > > 
-> > > > E.g. setting CONFIG_MODULES=y in the arm collie_defconfig will
-> > > > increase the size of vmlinux by 14% (sic).
-> > > > 
-> > > > I haven't investigated why it takes that much space, but stuff like 
-> > > > kernel/module.o taking 23kB and each EXPORT_SYMBOL requiring a few
-> > > > bytes simply cannot be completely eliminated.
-> > > 
-> > > Sounds like we need a tool that strips out the unneeded symbols, given a list
-> > > of modules?
-> > 
-> > And do the --gc-sections step again after that... :)
-> 
-> But even after all optimizations CONFIG_MODULES=y will still cause a 
-> significant additional cost [1] when thinking in the dimensions of 
-> Tim's "the 30 or so Linux-tiny patches that I use get me about 110k of 
-> reductions.  For me, this is about 5% of my kernel size" statement in 
-> another thread.
-> 
-> [1] as I said, kernel/module.o alone takes 23kB
+I landed in same problem sometime back with USB and tried two approaches
 
-Which could be freed after the last module has been loaded?
+1. Dirty approach of deferring loading of all usb modules till you see
+application startup "from user point of view" is done. I then just
+call into a script which loads all the usb modules "in parallel" with
+rest of app initialization
 
-With kind regards,
+2. The usb modules that I load are usbcore, host controller driver,
+scsi_mod, sd_mod and usb_storage. I noted that it's actually scsi
+enumeration that takes a long time; usb enumeration was much faster. I
+compiled usbcore and host controller driver statically in the kernel,
+enabled CONFIG_HOTPLUG and did rest of the module loading in a script
+invoked from /sbin/hotplug.
 
-Geert Uytterhoeven
-Software Architect
-
-Sony Techsoft Centre
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
-
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
-
-Sony Technology and Software Centre Europe
-A division of Sony Service Centre (Europe) N.V.
-Registered office: Technologielaan 7 · B-1840 Londerzeel · Belgium
-VAT BE 0413.825.160 · RPR Brussels
-Fortis 293-0376800-10 GEBA-BE-BB
----584349381-1262999723-1213789076=:13297--
+Amol
