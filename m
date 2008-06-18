@@ -1,57 +1,55 @@
-From: Gilad Ben-Yossef <gilad@codefidence.com>
-Subject: Re: Recommendation for activating a deferred module init in the kernel
-Date: Wed, 18 Jun 2008 09:47:09 +0300
-Message-ID: <4858AF6D.7040808@codefidence.com>
+From: David Woodhouse <dwmw2@infradead.org>
+Subject: Re: Recommendation for activating a deferred module init in the
+	kernel
+Date: Wed, 18 Jun 2008 09:20:22 +0100
+Message-ID: <1213777222.26255.1161.camel@pmac.infradead.org>
+References: <4858AF6D.7040808@codefidence.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4858AF6D.7040808@codefidence.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Gilad Ben-Yossef <gilad@codefidence.com>
+Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-[Resending due to reject from vger mail server. My apologies if you got 
-this twice ]
+On Wed, 2008-06-18 at 09:47 +0300, Gilad Ben-Yossef wrote:
+> This may sound like a stupid question, but why are you compiling the 
+> modules statically?
 
+I wondered that.
 
-Hi,
+One potential reason to avoid modules is that they waste RAM -- you have
+to allocate an integral number of pages for each one, which means an
+average of 2KiB wasted for each module you load. Although that isn't
+much, it's not zero either. It might be possible to optimise that by
+'packing' module allocations, if you're careful about it.
 
+Also, on some architectures modules have historically been less
+efficient because when kernel and module text are too far apart in the
+virtual address space, you have to insert trampolines for all calls
+between them. I believe this used to be the case on ARM, but it got
+fixed by moving stuff around? It's only v850 which still does this
+AFAICT.
 
-Tim Bird wrote:
+Do we actually manage to free inittext/initdata from modules on all
+architectures now? The comments in <linux/init.h> suggest not, but I
+think they lie -- it looks like like kernel/module.c will handle that
+entirely generically for sections named ".init*" -- it'll allocate space
+for those sections in a separate module_alloc() call, and free them
+itself. (Do bear this in mind, if you take the above suggestion about
+packing in module_alloc().)
 
-> I am working with a product team on bootup time issues.  One technique
-> that we are forward-porting from an old kernel (and that I thought I
-> might work on mainlining) is to compile modules statically into the kernel,
-> but defer their initialization until after boot time.
->   
-This may sound like a stupid question, but why are you compiling the 
-modules statically?
+So the only real reason I can see to avoid modules in the _current_
+kernel would be the wasted RAM, which should be something we can
+address. Tim, have I missed something? What _were_ your reasons for
+avoiding modules, and can we do something about those instead of trying
+to defer the initialisation of in-kernel code?
 
-I mean, it sounds to me like the perfect way to do what you want is to 
-compile the modules dynamically (you can store them in a an in kernel 
-initramfs if you want to keep them attached to the kernel binary for 
-ease of maintenance) and simply call a script that calls modprobe when 
-it's OK to load them?
-
-Sounds a hell of lot simpler to me...
-
-Gilad
+Delaying init of certain modules seems like a poor man's substitute for
+a properly multi-threaded startup....
 
 -- 
-Gilad Ben-Yossef 
-Chief Coffee Drinker
-
-Codefidence Ltd.
-The code is free, your time isn't.(TM)
-
-Web:    http://codefidence.com
-Email:  gilad@codefidence.com
-Office: +972-8-9316883 ext. 201
-Fax:    +972-8-9316885
-Mobile: +972-52-8260388
-
-	Q: How many NSA agents does it take to replace a lightbulb?
-	A: dSva7DrYiY24yeTItKyyogFXD5gRuoRqPNQ9v6WCLLywZPINlu!
-
+dwmw2
 
