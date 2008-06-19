@@ -1,27 +1,38 @@
-From: Marcus Tangermann <marcus.tangermann@web.de>
-Subject: Re: Kernel boot problem on IXP422 Rev. A
-Date: Thu, 19 Jun 2008 19:59:11 +0200
-Message-ID: <485A9E6F.6070006@web.de>
-References: <1522484831@web.de> <4851BC65.4030501@snapgear.com> <4852C582.9000508@web.de> <48537071.6060902@snapgear.com>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: Recommendation for activating a deferred module init in the kernel
+Date: Thu, 19 Jun 2008 10:58:57 -0700
+Message-ID: <485A9E61.6060707@am.sony.com>
+References: <48580116.9070504@am.sony.com> <4858A659.8030502@codefidence.com> <485932F0.5050108@am.sony.com> <4859ECF3.3000500@codefidence.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48537071.6060902@snapgear.com>
+In-Reply-To: <4859ECF3.3000500@codefidence.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Gilad Ben-Yossef <gilad@codefidence.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-Hello Greg,
+Gilad Ben-Yossef wrote:
+> Well, seeing as both modprobe and a minimal shell are part of busybox
+> which is included in over 90%+ of Linux based embedded systems and that
+> the script is trivial, not to mention that you can just have the
+> application call modprobe directly, just as it will be calling ioctl()
+> in your case, thereby negating the need for both script and shell at
+> all, I do believe that complexity wise my solution still has some merit.
 
-> Kernel dying, not just no console?
-To be honest I don't know ;-) Maybe it's only an issue with the console. 
-It should be ttyS0 as this works with 2.6.19-uc1. The snapgear kernel 
-works when I use the settings for the MonteJade board.
-Today I took a look at the sources of the snapgear kernel where the 
-CONFIG_MARCH_MONTEJADE is used, and there are some modifications within 
-the 8250 serial driver for this board.  I will take a closer look at it 
-tomorrow.
+I agree.  When you say "have the application call modprobe directly",
+I'm not sure I understand what you mean.  Are you talking about a call
+to the kernel (a syscall) or a library function?  The kernel has the
+syscall sys_init_module(), which I'm considering using.  Is there some
+mobprobe library call that might make sense to use?
 
-Best regards
-Marcus
+Thanks for the feedback.
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
+
