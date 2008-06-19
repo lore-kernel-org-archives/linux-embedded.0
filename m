@@ -1,30 +1,27 @@
-From: "mohammed shareef" <mdshareef@gmail.com>
-Subject: Video playback on osk with linux-2.6.18
-Date: Thu, 19 Jun 2008 00:54:21 +0530
-Message-ID: <a1d91fa0806181224m490ee0aetc0c0b700694e0967@mail.gmail.com>
+From: Marcus Tangermann <marcus.tangermann@web.de>
+Subject: Re: Kernel boot problem on IXP422 Rev. A
+Date: Thu, 19 Jun 2008 19:59:11 +0200
+Message-ID: <485A9E6F.6070006@web.de>
+References: <1522484831@web.de> <4851BC65.4030501@snapgear.com> <4852C582.9000508@web.de> <48537071.6060902@snapgear.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:mime-version:content-type:content-transfer-encoding
-         :content-disposition;
-        bh=7idsPUyoGkiFIKvWBNF5iEXaZzEIxffiNukh6omEsag=;
-        b=FSejAY6cW4Y3nq9z87Rd0KVZgSLBH4YgV5ET8p3hZ6Tr0Z8Wfl+6zkqEFei1ZOnk+P
-         uqJy9FEMvaaWmTU31d/AZ12wRGvJ1mhOeanLUADqg0HwQ6OVzKrnUxnlg/Q/wmzEqTYj
-         zVSr5ZQS2K9IpmPTb/l/IIkemiZbzgnTL2GhY=
-Content-Disposition: inline
+In-Reply-To: <48537071.6060902@snapgear.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: linux-embedded@vger.kernel.org
 
-Dear All,
+Hello Greg,
 
-I have an OSK-Omap5912 with linux-2.6.18 running on it. i want to add
-video playback support to it. Has someone done this before? could you
-suggest some ways to do it? thank you.
+> Kernel dying, not just no console?
+To be honest I don't know ;-) Maybe it's only an issue with the console. 
+It should be ttyS0 as this works with 2.6.19-uc1. The snapgear kernel 
+works when I use the settings for the MonteJade board.
+Today I took a look at the sources of the snapgear kernel where the 
+CONFIG_MARCH_MONTEJADE is used, and there are some modifications within 
+the 8250 serial driver for this board.  I will take a closer look at it 
+tomorrow.
 
-regards,
-Mohammed
+Best regards
+Marcus
