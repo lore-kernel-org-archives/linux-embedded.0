@@ -1,75 +1,55 @@
-From: Gilad Ben-Yossef <gilad@codefidence.com>
-Subject: Re: Recommendation for activating a deferred module init in the kernel
-Date: Sun, 22 Jun 2008 10:08:49 +0300
-Message-ID: <485DFA81.6010600@codefidence.com>
-References: <48580116.9070504@am.sony.com> <4858A659.8030502@codefidence.com> <485932F0.5050108@am.sony.com> <4859ECF3.3000500@codefidence.com> <485A9E61.6060707@am.sony.com>
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Mon, 23 Jun 2008 19:22:10 +0200
+Message-ID: <200806231922.10864.vda.linux@googlemail.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <87bq3rgq40.fsf@basil.nowhere.org> <1209582709.25560.441.camel@pmac.infradead.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <485A9E61.6060707@am.sony.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:subject:date
+         :user-agent:cc:references:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:message-id;
+        bh=lOEfB6cFafu3ujmMXW1JC3PKIfo+SXW0CkfD4dLxewI=;
+        b=d+SS0Mxm7IqZgiRs5x7qj6ncHh9xItKoQh5Ht4fdNoVBx+V/nCNln/t1l/D/7QsXNQ
+         k7d92hc3aEZzs9b6QPiyorFvLnuKYF/g2F5QifRcV04W+hkhaJgsXEAD3CBslsGuhOD7
+         J6SvB8XFWh/U/Yq9+rcpxNnrpYGH57cWkDuBs=
+In-Reply-To: <1209582709.25560.441.camel@pmac.infradead.org>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>
 
-Tim Bird wrote:
+On Wednesday 30 April 2008 21:11, David Woodhouse wrote:
+> On Wed, 2008-04-30 at 20:22 +0200, Andi Kleen wrote:
+> > David Woodhouse <dwmw2@infradead.org> writes:
+> > 
+> > > Andrew Morton has been saying recently that we need an 'embedded
+> > > maintainer', to take responsibility for 'embedded issues' in the core
+> > > kernel, as well as trying to improve our relationship with those using
+> > > the Linux kernel for 'embedded' devices -- who have a reputation of
+> > > not working with us very closely; to their detriment as well as our
+> > > own.
+> > 
+> > I hope your job description doesn't include adding more and more
+> > CONFIGs though.
+> > 
+> > I am sure there are lots of low hanging fruit where memory can be
+> > saved and it's a good thing someone cares about that, but please don't
+> > focus on the code size only. Or if you work on that don't do it 
+> > using CONFIG or when you really add a new one find some other 
+> > that is pointless and remove it first. 
+> > 
+> > There are simply already far too many of them and they make the 
+> > kernel harder and harder to change.
+> 
+> I agree. And if we do want to pay attention to pure code size, there are
+> other approaches -- like --gc-sections
 
-> Gilad Ben-Yossef wrote:
->   
->> Well, seeing as both modprobe and a minimal shell are part of busybox
->> which is included in over 90%+ of Linux based embedded systems and that
->> the script is trivial, not to mention that you can just have the
->> application call modprobe directly, just as it will be calling ioctl()
->> in your case, thereby negating the need for both script and shell at
->> all, I do believe that complexity wise my solution still has some merit.
->>     
->
-> I agree.  When you say "have the application call modprobe directly",
-> I'm not sure I understand what you mean.  Are you talking about a call
-> to the kernel (a syscall) or a library function?  The kernel has the
-> syscall sys_init_module(), which I'm considering using.  Is there some
-> mobprobe library call that might make sense to use?
->
->   
-I simply meant that you can fork and exec modprobe itself (or use 
-system() but that
-would require a working shell). This would "save" the need for a 
-separate script and a shell.
-
-I guess "invoking" would have been more suitable word then "calling".
-
-The only downside I see of calling the sys_init_module syscall directly 
-is that it
-doesn't do any of the dependency tracking that modprobe does, so it's more
-a insmod replacement then a modprobe one, but I doubt this matters at 
-all in an
-embedded system anyway.
-
-
-Do people here think a shared library implementing modprobe would be 
-useful?
-
-I ran into such a need a couple of times myself and does not look 
-difficult to do, but does
-anyone else here thinks it will be useful?
-
-Gilad
-
--- 
-Gilad Ben-Yossef 
-Chief Coffee Drinker
-
-Codefidence Ltd.
-The code is free, your time isn't.(TM)
-
-Web:    http://codefidence.com
-Email:  gilad@codefidence.com
-Office: +972-8-9316883 ext. 201
-Fax:    +972-8-9316885
-Mobile: +972-52-8260388
-
-	Q: How many NSA agents does it take to replace a lightbulb?
-	A: dSva7DrYiY24yeTItKyyogFXD5gRuoRqPNQ9v6WCLLywZPINlu!
-
-
+I have some patches in this area too. Were submitted to Sam
+but he was too busy it seems.
+--
+vda
