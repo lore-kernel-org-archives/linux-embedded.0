@@ -1,8 +1,8 @@
 From: Denys Vlasenko <vda.linux@googlemail.com>
 Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Mon, 23 Jun 2008 19:22:10 +0200
-Message-ID: <200806231922.10864.vda.linux@googlemail.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <87bq3rgq40.fsf@basil.nowhere.org> <1209582709.25560.441.camel@pmac.infradead.org>
+Date: Mon, 23 Jun 2008 19:28:09 +0200
+Message-ID: <200806231928.09458.vda.linux@googlemail.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <1209636171.25560.508.camel@pmac.infradead.org> <20080501104158.GM20451@one.firstfloor.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -11,45 +11,46 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:from:to:subject:date
          :user-agent:cc:references:in-reply-to:mime-version:content-type
          :content-transfer-encoding:content-disposition:message-id;
-        bh=lOEfB6cFafu3ujmMXW1JC3PKIfo+SXW0CkfD4dLxewI=;
-        b=d+SS0Mxm7IqZgiRs5x7qj6ncHh9xItKoQh5Ht4fdNoVBx+V/nCNln/t1l/D/7QsXNQ
-         k7d92hc3aEZzs9b6QPiyorFvLnuKYF/g2F5QifRcV04W+hkhaJgsXEAD3CBslsGuhOD7
-         J6SvB8XFWh/U/Yq9+rcpxNnrpYGH57cWkDuBs=
-In-Reply-To: <1209582709.25560.441.camel@pmac.infradead.org>
+        bh=AzT3tcM05CsDIN5XtFMvdDYFpLizw+V8XZrKZO2L+uw=;
+        b=ZkslH4XELwShKeKQZrhVpA/dOdfDZlLALjHXcNVvNrRJAZGyUGN9LY+WqQRJz6q6DR
+         jnwjMtY0nbRVZVVOklG373U9tKUDP1/ERr9sQD20C6oJDXCfUs6iGVogXqgxKDOjUSdI
+         5syKRPVMxVvWugHGXWH3Y9rdlhBJDdua+y3aE=
+In-Reply-To: <20080501104158.GM20451@one.firstfloor.org>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>
+To: Andi Kleen <andi@firstfloor.org>
+Cc: David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wednesday 30 April 2008 21:11, David Woodhouse wrote:
-> On Wed, 2008-04-30 at 20:22 +0200, Andi Kleen wrote:
-> > David Woodhouse <dwmw2@infradead.org> writes:
-> > 
-> > > Andrew Morton has been saying recently that we need an 'embedded
-> > > maintainer', to take responsibility for 'embedded issues' in the core
-> > > kernel, as well as trying to improve our relationship with those using
-> > > the Linux kernel for 'embedded' devices -- who have a reputation of
-> > > not working with us very closely; to their detriment as well as our
-> > > own.
-> > 
-> > I hope your job description doesn't include adding more and more
-> > CONFIGs though.
-> > 
-> > I am sure there are lots of low hanging fruit where memory can be
-> > saved and it's a good thing someone cares about that, but please don't
-> > focus on the code size only. Or if you work on that don't do it 
-> > using CONFIG or when you really add a new one find some other 
-> > that is pointless and remove it first. 
-> > 
-> > There are simply already far too many of them and they make the 
-> > kernel harder and harder to change.
+On Thursday 01 May 2008 12:41, Andi Kleen wrote:
+> > To a large extent, I agree. I certainly don't want to focus solely on
+> > code size; there's a lot more to embedded Linux than that. But it _is_
 > 
-> I agree. And if we do want to pay attention to pure code size, there are
-> other approaches -- like --gc-sections
+> Not only code size, far more important is dynamic memory consumption.
+> [admittedly we right now lack a good instrumentation framework for this]
+> 
+> > There are some cases where we really _do_ want to have CONFIG options,
+> > but I agree that we should keep them to a minimum. And when we _do_ have
+> > CONFIG options, they don't have to litter the actual code with ifdefs.
+> 
+> The problem I see is more that really nobody can even compile not 
+> alone test all these combinations anymore. Hidding the problem in inlines
+> does not solve that. And no randconfig is not the solution either.
 
-I have some patches in this area too. Were submitted to Sam
-but he was too busy it seems.
+Because we allowed kernel to be developed without the requirement that
+random config should be buildable for release kernels.
+
+Had it been a requirement, keeping it in shape wouldn't be
+too difficult.
+
+Sure enough, _now_ fixing kernel to pass such a test on i386
+would take several weeks of work at least. But it is doable.
+
+I would even volunteer to do it if there are some
+reasonable chances resulting patches would be viewed
+as worthwhile for inclusion. I am somewhat tired
+of killing weeks of my time only to find that my work
+is deemed "not important enough for inclusion".
 --
 vda
