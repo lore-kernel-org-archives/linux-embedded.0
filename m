@@ -1,56 +1,74 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: Recommendation for activating a deferred module init in the kernel
-Date: Mon, 23 Jun 2008 10:40:01 -0700
-Message-ID: <485FDFF1.7010408@am.sony.com>
-References: <48580116.9070504@am.sony.com> <4858A659.8030502@codefidence.com> <485932F0.5050108@am.sony.com> <4859ECF3.3000500@codefidence.com> <485A9E61.6060707@am.sony.com> <485DFA81.6010600@codefidence.com>
+From: Adrian Bunk <bunk@kernel.org>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Mon, 23 Jun 2008 20:45:37 +0300
+Message-ID: <20080623174537.GB4756@cs181140183.pp.htv.fi>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <1209636171.25560.508.camel@pmac.infradead.org> <20080501104158.GM20451@one.firstfloor.org> <200806231928.09458.vda.linux@googlemail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <485DFA81.6010600@codefidence.com>
+Content-Disposition: inline
+In-Reply-To: <200806231928.09458.vda.linux@googlemail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Gilad Ben-Yossef <gilad@codefidence.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Denys Vlasenko <vda.linux@googlemail.com>
+Cc: Andi Kleen <andi@firstfloor.org>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Gilad Ben-Yossef wrote:
-> Tim Bird wrote:
->> I agree.  When you say "have the application call modprobe directly",
->> I'm not sure I understand what you mean.
->
-> I simply meant that you can fork and exec modprobe itself (or use
-> system() but that
-> would require a working shell). This would "save" the need for a
-> separate script and a shell.
-
-Well, this would explain why I didn't follow your original
-point.  I thought you were using the word "modprobe" as a placeholder
-for some other module-installation-related concept.  In all
-my years of working with embedded Linux, I have never used
-modprobe in a target device.  (And I avoid insmod whenever I can).
-Sorry for my confusion.
-
-> The only downside I see of calling the sys_init_module syscall directly
-> is that it
-> doesn't do any of the dependency tracking that modprobe does, so it's more
-> a insmod replacement then a modprobe one, but I doubt this matters at
-> all in an
-> embedded system anyway.
-It may just be my own blind spot, but I can't think of a good
-reason to do such dependency tracking in an embedded device.
-It is a sad state of affairs if the product developers don't
-know the module dependencies for their own products.
-
+On Mon, Jun 23, 2008 at 07:28:09PM +0200, Denys Vlasenko wrote:
+> On Thursday 01 May 2008 12:41, Andi Kleen wrote:
+> > > To a large extent, I agree. I certainly don't want to focus solely on
+> > > code size; there's a lot more to embedded Linux than that. But it _is_
+> > 
+> > Not only code size, far more important is dynamic memory consumption.
+> > [admittedly we right now lack a good instrumentation framework for this]
+> > 
+> > > There are some cases where we really _do_ want to have CONFIG options,
+> > > but I agree that we should keep them to a minimum. And when we _do_ have
+> > > CONFIG options, they don't have to litter the actual code with ifdefs.
+> > 
+> > The problem I see is more that really nobody can even compile not 
+> > alone test all these combinations anymore. Hidding the problem in inlines
+> > does not solve that. And no randconfig is not the solution either.
 > 
-> Do people here think a shared library implementing modprobe would be
-> useful?
-Speaking from my own experience, not for embedded.
+> Because we allowed kernel to be developed without the requirement that
+> random config should be buildable for release kernels.
+> 
+> Had it been a requirement, keeping it in shape wouldn't be
+> too difficult.
+> 
+> Sure enough, _now_ fixing kernel to pass such a test on i386
+> would take several weeks of work at least. But it is doable.
+>...
 
- -- Tim
+On i386 it might even already work today.
 
+But guess how much time it costs to get at least all defconfigs 
+compiling on the other 22 architectures.
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+Even getting allmodconfig/allyesconfig compiling isn't trivial for all 
+architectures, and random configurations are _far_ from compiling.
+
+And we are not talking about something to be done once, as soon as you 
+leave x86 there are tons of regular breakages.
+
+Plus the fact that you often get into situations where more options
+mean complex and fragile stuff. Read the Kconfig files under 
+drivers/media/ and check in git all commits to them since 2.6.25 alone, 
+and you'll understand why "add an option for every bit" can result in
+very high ongoing maintainance work required.
+
+Not everything that is technically possible is also maintainable, and 
+maintainability is a very important point in a project with several 
+million lines changing each year.
+
+> vda
+
+cu
+Adrian
+
+-- 
+
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
