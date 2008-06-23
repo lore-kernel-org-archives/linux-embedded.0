@@ -1,61 +1,50 @@
-From: Tim Bird <tim.bird@am.sony.com>
+From: Denys Vlasenko <vda.linux@googlemail.com>
 Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Mon, 23 Jun 2008 12:05:44 -0700
-Message-ID: <485FF408.9030402@am.sony.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <1209636171.25560.508.camel@pmac.infradead.org> <20080501104158.GM20451@one.firstfloor.org> <200806231928.09458.vda.linux@googlemail.com> <20080623174537.GB4756@cs181140183.pp.htv.fi>
+Date: Mon, 23 Jun 2008 21:12:30 +0200
+Message-ID: <200806232112.30393.vda.linux@googlemail.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <200806231922.10864.vda.linux@googlemail.com> <20080623185728.GB30550@uranus.ravnborg.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080623174537.GB4756@cs181140183.pp.htv.fi>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:subject:date
+         :user-agent:cc:references:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:message-id;
+        bh=7edWihYmoQDHxfV4aK86nOO6PwKNet13uDTlHVOzc+M=;
+        b=TXqPFb3NaDO3nO81m2gffFXLJV3rjs6HklFLq8oHT0it7ZPa7rX2h27k1EBRKuZ7H0
+         nHXkVdb0nXSqWIAPGt1JV9q+SBns+zelpQAg2rjTxZJ4FC8sTZt7yw4uNMdCLamD8CI2
+         3mel07yLiy2IkLreI81XRIAlAhJRAOVyWFKRw=
+In-Reply-To: <20080623185728.GB30550@uranus.ravnborg.org>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Adrian Bunk <bunk@kernel.org>
-Cc: Denys Vlasenko <vda.linux@googlemail.com>, Andi Kleen <andi@firstfloor.org>, David Woodhouse <dwmw2@infradead.org>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: David Woodhouse <dwmw2@infradead.org>, Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>
 
-Adrian Bunk wrote:
-> On Mon, Jun 23, 2008 at 07:28:09PM +0200, Denys Vlasenko wrote:
->> Had it been a requirement, keeping it in shape wouldn't be
->> too difficult.
->>
->> Sure enough, _now_ fixing kernel to pass such a test on i386
->> would take several weeks of work at least. But it is doable.
->> ...
-> 
-> On i386 it might even already work today.
-> 
-> But guess how much time it costs to get at least all defconfigs 
-> compiling on the other 22 architectures.
-> 
-> Even getting allmodconfig/allyesconfig compiling isn't trivial for all 
-> architectures, and random configurations are _far_ from compiling.
-> 
-> And we are not talking about something to be done once, as soon as you 
-> leave x86 there are tons of regular breakages.
-> 
-> Plus the fact that you often get into situations where more options
-> mean complex and fragile stuff. Read the Kconfig files under 
-> drivers/media/ and check in git all commits to them since 2.6.25 alone, 
-> and you'll understand why "add an option for every bit" can result in
-> very high ongoing maintainance work required.
-> 
-> Not everything that is technically possible is also maintainable, and 
-> maintainability is a very important point in a project with several 
-> million lines changing each year.
+On Monday 23 June 2008 20:57, Sam Ravnborg wrote:
+> > > I agree. And if we do want to pay attention to pure code size, there are
+> > > other approaches -- like --gc-sections
+> > 
+> > I have some patches in this area too. Were submitted to Sam
+> > but he was too busy it seems.
+>
+> They were not trivial to apply and so went down on the TODO list.
 
-OK sure.  Nobody's going to disagree with that.  I would, however,
-disagree with a characterization of Linux-tiny as "adding an option
-for every bit".  Linux-tiny has been around about 5 years now, and
-if you added the whole thing right now you'd add about 30 config
-options.
+I realize that they were not trivial to review, but that
+was unavoidable. They were even more not trivial to create.
 
-If you're worried about this multiplying out of control, let me
-just say that having to curtail the rate of patch submission by
-embedded developers has not been our biggest problem.  :-)
- -- Tim
+> We could try to push the generic and x86 specific .lds stuff via
+> the arch maintainers?
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+IIRC I splitted the entire GC collection patch in a way
+that first patches were doing exactly this easier first part
+and I hoped that at least these first patches
+will be taken. They were big, but somewhat trivial,
+from "it's obviously safe" department.
+
+Had they been applied, now making --gc-sections to work
+would be easier.
+--
+vda
