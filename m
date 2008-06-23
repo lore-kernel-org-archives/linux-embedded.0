@@ -1,56 +1,56 @@
-From: Denys Vlasenko <vda.linux@googlemail.com>
-Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
-Date: Mon, 23 Jun 2008 19:28:09 +0200
-Message-ID: <200806231928.09458.vda.linux@googlemail.com>
-References: <1209577322.25560.402.camel@pmac.infradead.org> <1209636171.25560.508.camel@pmac.infradead.org> <20080501104158.GM20451@one.firstfloor.org>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: Recommendation for activating a deferred module init in the kernel
+Date: Mon, 23 Jun 2008 10:40:01 -0700
+Message-ID: <485FDFF1.7010408@am.sony.com>
+References: <48580116.9070504@am.sony.com> <4858A659.8030502@codefidence.com> <485932F0.5050108@am.sony.com> <4859ECF3.3000500@codefidence.com> <485A9E61.6060707@am.sony.com> <485DFA81.6010600@codefidence.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:received:received:from:to:subject:date
-         :user-agent:cc:references:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:message-id;
-        bh=AzT3tcM05CsDIN5XtFMvdDYFpLizw+V8XZrKZO2L+uw=;
-        b=ZkslH4XELwShKeKQZrhVpA/dOdfDZlLALjHXcNVvNrRJAZGyUGN9LY+WqQRJz6q6DR
-         jnwjMtY0nbRVZVVOklG373U9tKUDP1/ERr9sQD20C6oJDXCfUs6iGVogXqgxKDOjUSdI
-         5syKRPVMxVvWugHGXWH3Y9rdlhBJDdua+y3aE=
-In-Reply-To: <20080501104158.GM20451@one.firstfloor.org>
-Content-Disposition: inline
+In-Reply-To: <485DFA81.6010600@codefidence.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Andi Kleen <andi@firstfloor.org>
-Cc: David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Gilad Ben-Yossef <gilad@codefidence.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Thursday 01 May 2008 12:41, Andi Kleen wrote:
-> > To a large extent, I agree. I certainly don't want to focus solely on
-> > code size; there's a lot more to embedded Linux than that. But it _is_
+Gilad Ben-Yossef wrote:
+> Tim Bird wrote:
+>> I agree.  When you say "have the application call modprobe directly",
+>> I'm not sure I understand what you mean.
+>
+> I simply meant that you can fork and exec modprobe itself (or use
+> system() but that
+> would require a working shell). This would "save" the need for a
+> separate script and a shell.
+
+Well, this would explain why I didn't follow your original
+point.  I thought you were using the word "modprobe" as a placeholder
+for some other module-installation-related concept.  In all
+my years of working with embedded Linux, I have never used
+modprobe in a target device.  (And I avoid insmod whenever I can).
+Sorry for my confusion.
+
+> The only downside I see of calling the sys_init_module syscall directly
+> is that it
+> doesn't do any of the dependency tracking that modprobe does, so it's more
+> a insmod replacement then a modprobe one, but I doubt this matters at
+> all in an
+> embedded system anyway.
+It may just be my own blind spot, but I can't think of a good
+reason to do such dependency tracking in an embedded device.
+It is a sad state of affairs if the product developers don't
+know the module dependencies for their own products.
+
 > 
-> Not only code size, far more important is dynamic memory consumption.
-> [admittedly we right now lack a good instrumentation framework for this]
-> 
-> > There are some cases where we really _do_ want to have CONFIG options,
-> > but I agree that we should keep them to a minimum. And when we _do_ have
-> > CONFIG options, they don't have to litter the actual code with ifdefs.
-> 
-> The problem I see is more that really nobody can even compile not 
-> alone test all these combinations anymore. Hidding the problem in inlines
-> does not solve that. And no randconfig is not the solution either.
+> Do people here think a shared library implementing modprobe would be
+> useful?
+Speaking from my own experience, not for embedded.
 
-Because we allowed kernel to be developed without the requirement that
-random config should be buildable for release kernels.
+ -- Tim
 
-Had it been a requirement, keeping it in shape wouldn't be
-too difficult.
 
-Sure enough, _now_ fixing kernel to pass such a test on i386
-would take several weeks of work at least. But it is doable.
-
-I would even volunteer to do it if there are some
-reasonable chances resulting patches would be viewed
-as worthwhile for inclusion. I am somewhat tired
-of killing weeks of my time only to find that my work
-is deemed "not important enough for inclusion".
---
-vda
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
