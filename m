@@ -1,59 +1,86 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: Firmware Linux (was Re: Cross Compiler and loads of issues)
-Date: Tue, 24 Jun 2008 20:49:26 -0500
-Message-ID: <200806242049.27143.rob@landley.net>
-References: <7b740b700806121052n2f98dfa4hc96ebfc1be5b6bbf@mail.gmail.com> <200806131224.58568.rob@landley.net> <20080616043812.GB32139@nibiru.local>
+From: James Chapman <jchapman@katalix.com>
+Subject: Re: [PATCH 0/1] Embedded Maintainer(s), linux-embedded@vger list
+Date: Wed, 25 Jun 2008 10:50:43 +0100
+Message-ID: <486214F3.4070505@katalix.com>
+References: <1209577322.25560.402.camel@pmac.infradead.org> <1209636171.25560.508.camel@pmac.infradead.org> <20080501104158.GM20451@one.firstfloor.org> <200806231928.09458.vda.linux@googlemail.com> <20080623174537.GB4756@cs181140183.pp.htv.fi>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080616043812.GB32139@nibiru.local>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754678AbYFYJvw@vger.kernel.org>
+In-Reply-To: <20080623174537.GB4756@cs181140183.pp.htv.fi>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: weigelt@metux.de
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Adrian Bunk <bunk@kernel.org>
+Cc: Denys Vlasenko <vda.linux@googlemail.com>, Andi Kleen <andi@firstfloor.org>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Sunday 15 June 2008 23:38:12 Enrico Weigelt wrote:
-> * Rob Landley <rob@landley.net> schrieb:
-> > Did you try my FWL project? :)
-> >
-> > http://landley.net/code/firmware
->
-> hmm, doesnt look like supporting sysroot ...
+Adrian Bunk wrote:
+> On Mon, Jun 23, 2008 at 07:28:09PM +0200, Denys Vlasenko wrote:
+>> On Thursday 01 May 2008 12:41, Andi Kleen wrote:
+>>>> To a large extent, I agree. I certainly don't want to focus solely on
+>>>> code size; there's a lot more to embedded Linux than that. But it _is_
+>>> Not only code size, far more important is dynamic memory consumption.
+>>> [admittedly we right now lack a good instrumentation framework for this]
+>>>
+>>>> There are some cases where we really _do_ want to have CONFIG options,
+>>>> but I agree that we should keep them to a minimum. And when we _do_ have
+>>>> CONFIG options, they don't have to litter the actual code with ifdefs.
+>>> The problem I see is more that really nobody can even compile not 
+>>> alone test all these combinations anymore. Hidding the problem in inlines
+>>> does not solve that. And no randconfig is not the solution either.
+>> Because we allowed kernel to be developed without the requirement that
+>> random config should be buildable for release kernels.
+>>
+>> Had it been a requirement, keeping it in shape wouldn't be
+>> too difficult.
+>>
+>> Sure enough, _now_ fixing kernel to pass such a test on i386
+>> would take several weeks of work at least. But it is doable.
+>> ...
+> 
+> On i386 it might even already work today.
+> 
+> But guess how much time it costs to get at least all defconfigs 
+> compiling on the other 22 architectures.
+> 
+> Even getting allmodconfig/allyesconfig compiling isn't trivial for all 
+> architectures, and random configurations are _far_ from compiling.
+ >
+ > And we are not talking about something to be done once, as soon as you
+ > leave x86 there are tons of regular breakages.
 
-It doesn't use sysroot.  It makes the compiler relocatable using an updated 
-version of the old uClibc wrapper script, which rewrites each glibc command 
-line to start with --nostinc --nostdlib and then adds the correct paths back 
-in from the ground up.
+Could automated builds and build error reporting be used to help resolve 
+these problems?
 
-Have you ever run gcc under strace?  Or worse, looked at the gcc path logic 
-source code?  It's a mess.  It gets paths from ./configure options, it gets 
-paths from spec files, it adds hardwired paths in the C source code, it 
-checks enviroment variables to get more paths, and this isn't counting the 
-paths you tell it on the command line.  Every time they gave up on the 
-previous approach because it was obviously unworkable, they NEVER REMOVED 
-ANYTHING.  They just added yet another layer on top of it, falling back to 
-the previous one each time.  It never occurred to them that people would want 
-to make it NOT check paths like /usr/include.  They just keep piling on more 
-and more, appending to a big vararray and never removing anything.
+The good people at Simtec have an automated build report available as an 
+e-mail digest. I use it to watch for architecture build breakages in 
+subsystems or drivers that I use or touch. It covers defconfigs of ARM 
+and MIPS architectures and reports compile errors/warnings, module size, 
+kernel size etc. If this approach were extended/distributed to cover 
+more architectures and random config builds, developers could with 
+little effort spot problems and fix them. Hell, it might also encourage 
+new developers to get involved and contribute.
 
-Do you know how sysroot is implemented?  It still hardwires absolute paths 
-into the binary, but then it does a string compare with the start of the 
-hardwired path so it knows how much to trim off when substituting another 
-path instead.
+Here's a link to a recent report for ARM, fyi:-
 
-I once tried to work up a patch to remove the obsolete or clearly defective 
-parts of the gcc path logic, but when my patch got large than 10,000 lines I 
-gave up and went to a wrapper script.  The only way to make the gcc path 
-logic reliable is to NOT USE IT.  Hence the wrapper script to tell it to 
-ignore all the paths it _thinks_ it knows, and check in exactly these places 
-(and only those places) instead.  Then you can run the result under strace 
-without wanting to throw up quite so much.
+http://lists.simtec.co.uk/pipermail/kautobuild/2008-June/001299.html
 
+> Plus the fact that you often get into situations where more options
+> mean complex and fragile stuff. Read the Kconfig files under 
+> drivers/media/ and check in git all commits to them since 2.6.25 alone, 
+> and you'll understand why "add an option for every bit" can result in
+> very high ongoing maintainance work required.
+> 
+> Not everything that is technically possible is also maintainable, and 
+> maintainability is a very important point in a project with several 
+> million lines changing each year.
+> 
+>> vda
+> 
 > cu
+> Adrian
 
-Rob
 -- 
-"One of my most productive days was throwing away 1000 lines of code."
-  - Ken Thompson.
+James Chapman
+Katalix Systems Ltd
+http://www.katalix.com
+Catalysts for your Embedded Linux software development
