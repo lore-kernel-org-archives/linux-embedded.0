@@ -1,76 +1,82 @@
-From: David Brownell <david-b@pacbell.net>
-Subject: Re: [PATCH v4 4/6] dmaengine: Make DMA Engine menu visible for AVR32 users
-Date: Fri, 27 Jun 2008 09:37:21 -0700
-Message-ID: <200806270937.21850.david-b@pacbell.net>
-References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com> <20080626164601.712bf048@hskinnemo-gx745.norway.atmel.com> <1214528379.32709.51.camel@dwillia2-linux.ch.intel.com>
+From: Michelle Konzack <linux4michelle@tamay-dogan.net>
+Subject: Atmel AT91SAM7S and AT91SAM7A3
+Date: Wed, 25 Jun 2008 19:16:45 +0200
+Message-ID: <20080625171645.GN7064@freenet.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="citGix+cyBYE+lqp"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1214528379.32709.51.camel@dwillia2-linux.ch.intel.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>, Adrian Bunk <bunk@kernel.org>, Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, "Nelson, Shannon" <shannon.nelson@intel.com>
-
-On Thursday 26 June 2008, Dan Williams wrote:
-> I agree with removing the arch dependency, and I do not think we
-> necessarily need to add HAVE_DMA_ENGINE.
-
-I think a HAVE_DMA_ENGINE would be better than what you're doing
-below:  moving the arch dependency into the network code, and
-adding this !HIGHMEM64G thing (which is really just a more subtle
-arch dependency).
-
-Note that HAS_DMA is very different from having DMA engine support...
-one is a specific interface, the other is the generic mechanism with
-any of its numerous (and often peripheral-specific) interfaces.
+To: Embedded <linux-embedded@vger.kernel.org>
 
 
-> Taking an example from libata 
-> the SATA_FSL driver depends on FSL_SOC but the menuconfig for ATA does
-> not.  We can use "depends on HAS_DMA" to make the menu disappear on
-> archs that will never have a dmaegine.  So I propose the following:
-> 
-> diff --git a/drivers/dma/Kconfig b/drivers/dma/Kconfig
-> index 6239c3d..e4dd006 100644
-> --- a/drivers/dma/Kconfig
-> +++ b/drivers/dma/Kconfig
-> @@ -4,13 +4,14 @@
->  
->  menuconfig DMADEVICES
->  	bool "DMA Engine support"
-> -	depends on (PCI && X86) || ARCH_IOP32X || ARCH_IOP33X || ARCH_IOP13XX || PPC
-> -	depends on !HIGHMEM64G
-> +	depends on !HIGHMEM64G && HAS_DMA
->  	help
->  	  DMA engines can do asynchronous data transfers without
->  	  involving the host CPU.  Currently, this framework can be
->  	  used to offload memory copies in the network stack and
-> -	  RAID operations in the MD driver.
-> +	  RAID operations in the MD driver.  This menu only presents
-> +	  DMA Device drivers supported by the configured arch, it may
-> +	  be empty in some cases.
->  
->  if DMADEVICES
->  
-> @@ -55,10 +56,12 @@ comment "DMA Clients"
->  config NET_DMA
->  	bool "Network: TCP receive copy offload"
->  	depends on DMA_ENGINE && NET
-> +	default (INTEL_IOATDMA || FSL_DMA)
->  	help
->  	  This enables the use of DMA engines in the network stack to
->  	  offload receive copy-to-user operations, freeing CPU cycles.
-> -	  Since this is the main user of the DMA engine, it should be enabled;
-> -	  say Y here.
-> +
-> +	  Say Y here if you enabled INTEL_IOATDMA or FSL_DMA, otherwise
-> +	  say N.
->  
->  endif
-> 
-> 
-> 
+--citGix+cyBYE+lqp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+Hello,
+
+I have several projects where I have the need for a microcontroller  and
+I considered to use 8051 compatibles but not it  is  not  more  possible
+because I need an USBHID-PDU device interface,  which  can  only  solved
+using Linux.
+
+I like to use the AT91SAM7S and the AT91SAM7A3 (it has 16 AD-Converters)
+and want to know, whether there is support for accessing the  8  and  16
+AD-Converters directly via the Kernel.
+
+Also I like to know, which memory size for the AT91 you recommend.
+
+The current projects are:
+
+1)  Solar-Volatge regulator
+    (Uin <=3D68V, Uout=3D30V) with USB interface to PC or Master controller)
+
+2)  24V PbGel charger
+    (Uin=3D30V and nearly the same hardware as above)
+
+3)  24V DV modular ATX PSU
+    (special for solarsystems and must support minimal features of an
+    UPS to protect the computer)
+
+Q:  I have downloaded nearly all stuff about  specifications  to  USBHID
+    and like to know, whether someone can point me to sample  codes  HOW
+    to code the device stuff...  which seems currently not availlable in
+    the Kernel...  (It seems, I am the first one WHO  need  this  stuff,
+    but I am not a genie in C programming)
+
+Note: "eCosCentric" sell USB stacks,  but  for  an  inacceptable  price,=20
+      since I build only small quantities for my projects.
+
+Thanks, Greetings and nice Day/Evening
+    Michelle Konzack
+    Systemadministrator
+    24V Electronic Engineer
+    Tamay Dogan Network
+    Debian GNU/Linux Consultant
+
+
+--=20
+Linux-User #280138 with the Linux Counter, http://counter.li.org/
+##################### Debian GNU/Linux Consultant #####################
+Michelle Konzack   Apt. 917                  ICQ #328449886
++49/177/9351947    50, rue de Soultz         MSN LinuxMichi
++33/6/61925193     67100 Strasbourg/France   IRC #Debian (irc.icq.com)
+
+--citGix+cyBYE+lqp
+Content-Type: application/pgp-signature; name="signature.pgp"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFIYn19C0FPBMSS+BIRAsDgAKC6WN1uktkN5yl/gBLK23RxcjD7igCgmj8t
+gPjsbcCW4P1nxWJWpaqDbJ4=
+=CHkf
+-----END PGP SIGNATURE-----
+
+--citGix+cyBYE+lqp--
