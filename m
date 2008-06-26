@@ -1,45 +1,28 @@
-From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Subject: Re: [PATCH v4 4/6] dmaengine: Make DMA Engine menu visible for
- AVR32 users
-Date: Thu, 26 Jun 2008 16:46:01 +0200
-Message-ID: <20080626164601.712bf048@hskinnemo-gx745.norway.atmel.com>
-References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com>
-	<1214486603-23655-2-git-send-email-haavard.skinnemoen@atmel.com>
-	<1214486603-23655-3-git-send-email-haavard.skinnemoen@atmel.com>
-	<1214486603-23655-4-git-send-email-haavard.skinnemoen@atmel.com>
-	<1214486603-23655-5-git-send-email-haavard.skinnemoen@atmel.com>
-	<20080626141552.GB30954@cs181140183.pp.htv.fi>
+From: David Brownell <david-b@pacbell.net>
+Subject: Re: [PATCH v4 4/6] dmaengine: Make DMA Engine menu visible for AVR32 users
+Date: Thu, 26 Jun 2008 13:04:00 -0700
+Message-ID: <200806261304.00695.david-b@pacbell.net>
+References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com> <1214486603-23655-4-git-send-email-haavard.skinnemoen@atmel.com> <1214486603-23655-5-git-send-email-haavard.skinnemoen@atmel.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080626141552.GB30954@cs181140183.pp.htv.fi>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1758159AbYFZUEZ@vger.kernel.org>
+In-Reply-To: <1214486603-23655-5-git-send-email-haavard.skinnemoen@atmel.com>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Adrian Bunk <bunk@kernel.org>
-Cc: Dan Williams <dan.j.williams@intel.com>, Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, shannon.nelson@intel.com, David Brownell <david-b@pacbell.net>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Cc: Dan Williams <dan.j.williams@intel.com>, Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, shannon.nelson@intel.com, Adrian Bunk <bunk@stusta.de>
 
-Adrian Bunk <bunk@kernel.org> wrote:
-> That discussion is mixing two different things I suggested besides other 
-> things before the Kconfig file was added [1]:
-> - have DMA_ENGINE select'ed when a device gets enabled by the user,
->   and not be an independent option
-> - switch to menuconfig and don't offer an empty kconfig menu
-> 
-> There seems to be no disagreement about the former (which could 
-> otherwise easily lead to users mistakenly enabling NET_DMA).
-> 
-> The latter is more a cosmetical kconfig UI thing, and I already said
-> back then that it "could be dropped if it would become a problem" [2].
+On Thursday 26 June 2008, Haavard Skinnemoen wrote:
+> So, while this patch solves my immediate problem of making DMA Engine=
+s
+> available on AVR32, I'd much rather remove the whole arch dependency
+> list because I think it's bogus. Comments?
 
-Ok, thanks for explaining. The menu does appear empty if I remove the
-architecture dependency without adding the driver...if that's a problem
-maybe we should do the HAVE_DMA_DEVICE thing...
+Alternatively, "depends on HAVE_DMA_ENGINE" which arch code selects.
 
-> So if you want to remove the architecture dependency from the DMADEVICES 
-> menu that's OK with me.
-
-Ok, I'm gonna wait for Dan and others to respond. If it's fine with
-them, I'll post a patch removing the arch dependency.
-
-Haavard
+> -=A0=A0=A0=A0=A0=A0=A0depends on (PCI && X86) || ARCH_IOP32X || ARCH_=
+IOP33X || ARCH_IOP13XX || PPC
+> +=A0=A0=A0=A0=A0=A0=A0depends on (PCI && X86) || ARCH_IOP32X || ARCH_=
+IOP33X || ARCH_IOP13XX || PPC || AVR32
