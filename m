@@ -1,52 +1,49 @@
-From: "Dan Williams" <dan.j.williams@intel.com>
-Subject: Re: [PATCH v4 4/6] dmaengine: Make DMA Engine menu visible for AVR32 users
-Date: Fri, 27 Jun 2008 11:31:49 -0700
-Message-ID: <e9c3a7c20806271131i5a4f5afg94fd21a89923ffbb@mail.gmail.com>
+From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Subject: Re: [PATCH v4 6/6] Atmel MCI: Driver for Atmel on-chip MMC
+ controllers
+Date: Fri, 27 Jun 2008 21:10:14 +0200
+Message-ID: <20080627211014.0e80db04@siona.local>
 References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com>
-	 <200806270937.21850.david-b@pacbell.net>
-	 <20080627174441.GB4306@cs181140183.pp.htv.fi>
-	 <200806271124.42783.david-b@pacbell.net>
+	<1214486603-23655-2-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-3-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-4-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-5-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-6-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-7-git-send-email-haavard.skinnemoen@atmel.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:sender
-         :to:subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references
-         :x-google-sender-auth;
-        bh=JLdQEIcB7vIdRH8zDNe1zLmPoo9olCkFuUGMp7clxUA=;
-        b=ZoNVmWXHOMDgRN3Sb2sA2P9tHphL+qeUvl5+datQ+WC3CkkLHnQldT0LyWts7cJpym
-         ukGdnRGAVQe/7ZcrcxCIWsuZD1c7yyk++uV5R2Pk89N3pMgjSGPIxAGCuVozWnhksxZc
-         VBlGDCdJchBl7HT0MaqjdAxAlKtC/lmcfz9Ys=
-In-Reply-To: <200806271124.42783.david-b@pacbell.net>
-Content-Disposition: inline
+In-Reply-To: <1214486603-23655-7-git-send-email-haavard.skinnemoen@atmel.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Brownell <david-b@pacbell.net>
-Cc: Adrian Bunk <bunk@kernel.org>, Haavard Skinnemoen <haavard.skinnemoen@atmel.com>, Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, "Nelson, Shannon" <shannon.nelson@intel.com>
+To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Cc: Dan Williams <dan.j.williams@intel.com>, Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, shannon.nelson@intel.com, David Brownell <david-b@pacbell.net>
 
-On Fri, Jun 27, 2008 at 11:24 AM, David Brownell <david-b@pacbell.net> wrote:
-> On Friday 27 June 2008, Adrian Bunk wrote:
->> The only effect of the HAVE_DMA_ENGINE would be to not show an empty
->> kconfig menu.
->
-> Well, no.  It would also make the network layer memcpy "acceleration"
-> option unavailable when there was no underlying engine ... similarly
-> with other pointless "we don't have that subsystem here" options.
->
+On Thu, 26 Jun 2008 15:23:23 +0200
+Haavard Skinnemoen <haavard.skinnemoen@atmel.com> wrote:
 
-Take another look.  NET_DMA depends on DMA_ENGINE which only gets
-selected when a dma device driver is selected.  Each driver has its
-architecture specific dependency, so the DMADEVICES arch dependency
-was completely redundant.
+> This driver can also use PIO transfers when no DMA channels are
+> available, and for transfers where using DMA may be difficult or
+> impractical for some reason (e.g. the DMA setup overhead is usually
+> not worth it for very short transfers, and badly aligned buffers or
+> lengths are difficult to handle.)
 
-> Plus it would help ensure that the arch dependencies are comprehenible,
-> unlike that highmem thing.
+Btw, it's probably not that hard to rip the DMA bits out and post them
+as a separate patch. This would mean that:
+  * Pierre can merge the driver independently of the other 5 patches
+  * A separate patch adding DMA support would make it clearer how the
+    DMA slave interface is used.
+  * The chances of having MMC support out of the box on avr32 boards in
+    2.6.27 become greater, and many people have been asking about that
+    (including Pierre and David.)
 
-The highmem dependency can go away its only purpose is to prevent
-hitting the BUILD_BUG_ON in async_xor.c.
+The driver is surprisingly fast with DMA turned off (2-3 MiB/s), but
+the CPU usage is of course horrible.
 
---
-Dan
+If that sounds like a good plan to you, I'll split the driver tomorrow.
+
+This driver has been out of tree for way too long. I'm hoping we can
+get it in before 2.6.27.
+
+Haavard
