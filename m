@@ -1,82 +1,44 @@
-From: Michelle Konzack <linux4michelle@tamay-dogan.net>
-Subject: Atmel AT91SAM7S and AT91SAM7A3
-Date: Wed, 25 Jun 2008 19:16:45 +0200
-Message-ID: <20080625171645.GN7064@freenet.de>
+From: Adrian Bunk <bunk@kernel.org>
+Subject: Re: [PATCH v4 4/6] dmaengine: Make DMA Engine menu visible for
+	AVR32 users
+Date: Fri, 27 Jun 2008 20:44:41 +0300
+Message-ID: <20080627174441.GB4306@cs181140183.pp.htv.fi>
+References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com> <20080626164601.712bf048@hskinnemo-gx745.norway.atmel.com> <1214528379.32709.51.camel@dwillia2-linux.ch.intel.com> <200806270937.21850.david-b@pacbell.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="citGix+cyBYE+lqp"
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
+In-Reply-To: <200806270937.21850.david-b@pacbell.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: David Brownell <david-b@pacbell.net>
+Cc: Dan Williams <dan.j.williams@intel.com>, Haavard Skinnemoen <haavard.skinnemoen@atmel.com>, Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, "Nelson, Shannon" <shannon.nelson@intel.com>
 
+On Fri, Jun 27, 2008 at 09:37:21AM -0700, David Brownell wrote:
+> On Thursday 26 June 2008, Dan Williams wrote:
+> > I agree with removing the arch dependency, and I do not think we
+> > necessarily need to add HAVE_DMA_ENGINE.
+> 
+> I think a HAVE_DMA_ENGINE would be better than what you're doing
+> below:  moving the arch dependency into the network code, and
+> adding this !HIGHMEM64G thing (which is really just a more subtle
+> arch dependency).
+>...
 
---citGix+cyBYE+lqp
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The only effect of the HAVE_DMA_ENGINE would be to not show an empty 
+kconfig menu.
 
-Hello,
+That's IMHO too much effort for a purely cosmetical kconfig issue.
 
-I have several projects where I have the need for a microcontroller  and
-I considered to use 8051 compatibles but not it  is  not  more  possible
-because I need an USBHID-PDU device interface,  which  can  only  solved
-using Linux.
+And I speak as the one who originally added the arch dependency...
 
-I like to use the AT91SAM7S and the AT91SAM7A3 (it has 16 AD-Converters)
-and want to know, whether there is support for accessing the  8  and  16
-AD-Converters directly via the Kernel.
+cu
+Adrian
 
-Also I like to know, which memory size for the AT91 you recommend.
+-- 
 
-The current projects are:
-
-1)  Solar-Volatge regulator
-    (Uin <=3D68V, Uout=3D30V) with USB interface to PC or Master controller)
-
-2)  24V PbGel charger
-    (Uin=3D30V and nearly the same hardware as above)
-
-3)  24V DV modular ATX PSU
-    (special for solarsystems and must support minimal features of an
-    UPS to protect the computer)
-
-Q:  I have downloaded nearly all stuff about  specifications  to  USBHID
-    and like to know, whether someone can point me to sample  codes  HOW
-    to code the device stuff...  which seems currently not availlable in
-    the Kernel...  (It seems, I am the first one WHO  need  this  stuff,
-    but I am not a genie in C programming)
-
-Note: "eCosCentric" sell USB stacks,  but  for  an  inacceptable  price,=20
-      since I build only small quantities for my projects.
-
-Thanks, Greetings and nice Day/Evening
-    Michelle Konzack
-    Systemadministrator
-    24V Electronic Engineer
-    Tamay Dogan Network
-    Debian GNU/Linux Consultant
-
-
---=20
-Linux-User #280138 with the Linux Counter, http://counter.li.org/
-##################### Debian GNU/Linux Consultant #####################
-Michelle Konzack   Apt. 917                  ICQ #328449886
-+49/177/9351947    50, rue de Soultz         MSN LinuxMichi
-+33/6/61925193     67100 Strasbourg/France   IRC #Debian (irc.icq.com)
-
---citGix+cyBYE+lqp
-Content-Type: application/pgp-signature; name="signature.pgp"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (GNU/Linux)
-
-iD8DBQFIYn19C0FPBMSS+BIRAsDgAKC6WN1uktkN5yl/gBLK23RxcjD7igCgmj8t
-gPjsbcCW4P1nxWJWpaqDbJ4=
-=CHkf
------END PGP SIGNATURE-----
-
---citGix+cyBYE+lqp--
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
