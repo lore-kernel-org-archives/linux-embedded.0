@@ -1,64 +1,61 @@
-From: Ben Nizette <bn@niasdigital.com>
-Subject: Re: Atmel AT91SAM7S and AT91SAM7A3
-Date: Sat, 28 Jun 2008 18:36:24 +1000
-Message-ID: <1214642184.4265.9.camel@moss.renham>
-References: <20080625171645.GN7064@freenet.de>
+From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Subject: Re: [PATCH v4 3/6] dmaengine: Add slave DMA interface
+Date: Sat, 28 Jun 2008 14:29:10 +0200
+Message-ID: <20080628142910.320cea49@hskinnemo-gx745.norway.atmel.com>
+References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-2-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-3-git-send-email-haavard.skinnemoen@atmel.com>
+	<1214486603-23655-4-git-send-email-haavard.skinnemoen@atmel.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080625171645.GN7064@freenet.de>
+In-Reply-To: <1214486603-23655-4-git-send-email-haavard.skinnemoen@atmel.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Michelle Konzack <linux4michelle@tamay-dogan.net>
-Cc: Embedded <linux-embedded@vger.kernel.org>
+To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Cc: Dan Williams <dan.j.williams@intel.com>, Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, shannon.nelson@intel.com, David Brownell <david-b@pacbell.net>
 
+Haavard Skinnemoen <haavard.skinnemoen@atmel.com> wrote:
+> + * @dma_dev: required DMA master device. If non-NULL, the client can not be
+> + *	bound to other masters than this. The master driver may use
+> + *	this to determine whether it's safe to access 
 
-On Wed, 2008-06-25 at 19:16 +0200, Michelle Konzack wrote:
-> Hello,
-> 
-> I have several projects where I have the need for a microcontroller  and
-> I considered to use 8051 compatibles but not it  is  not  more  possible
-> because I need an USBHID-PDU device interface,  which  can  only  solved
-> using Linux.
-> 
-> I like to use the AT91SAM7S and the AT91SAM7A3 (it has 16 AD-Converters)
-> and want to know, whether there is support for accessing the  8  and  16
-> AD-Converters directly via the Kernel.
-> 
-> Also I like to know, which memory size for the AT91 you recommend.
-> 
+> +	struct dma_async_tx_descriptor *(*device_prep_slave_sg)(
+> +		struct dma_chan *chan, struct scatterlist *sgl, 
 
-I would recommend posting this to a forum at http://www.at91.com.  This
-is a list more for discussion of embedded issues in the kernel than SoC
-end-user support :-)
+Turns out I forgot to run checkpatch before posting. Here's a small
+fixup. I'll fold it into this patch if I end up doing a v5 of this
+series.
 
-> The current projects are:
-> 
-> 1)  Solar-Volatge regulator
->     (Uin <=68V, Uout=30V) with USB interface to PC or Master controller)
-> 
-> 2)  24V PbGel charger
->     (Uin=30V and nearly the same hardware as above)
-> 
-> 3)  24V DV modular ATX PSU
->     (special for solarsystems and must support minimal features of an
->     UPS to protect the computer)
-> 
-> Q:  I have downloaded nearly all stuff about  specifications  to  USBHID
->     and like to know, whether someone can point me to sample  codes  HOW
->     to code the device stuff...  which seems currently not availlable in
->     the Kernel...  (It seems, I am the first one WHO  need  this  stuff,
->     but I am not a genie in C programming)
-> 
-> Note: "eCosCentric" sell USB stacks,  but  for  an  inacceptable  price, 
->       since I build only small quantities for my projects.
-> 
-> Thanks, Greetings and nice Day/Evening
->     Michelle Konzack
->     Systemadministrator
->     24V Electronic Engineer
->     Tamay Dogan Network
->     Debian GNU/Linux Consultant
-> 
-> 
+The unfinished comment above was redundant anyway, so I just removed
+the last part.
+
+ include/linux/dmaengine.h |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+index 8ce03e8..3d57439 100644
+--- a/include/linux/dmaengine.h
++++ b/include/linux/dmaengine.h
+@@ -131,8 +131,7 @@ typedef struct { DECLARE_BITMAP(bits, DMA_TX_TYPE_END); } dma_cap_mask_t;
+  * struct dma_slave - Information about a DMA slave
+  * @dev: device acting as DMA slave
+  * @dma_dev: required DMA master device. If non-NULL, the client can not be
+- *	bound to other masters than this. The master driver may use
+- *	this to determine whether it's safe to access 
++ *	bound to other masters than this.
+  * @tx_reg: physical address of data register used for
+  *	memory-to-peripheral transfers
+  * @rx_reg: physical address of data register used for
+@@ -361,7 +360,7 @@ struct dma_device {
+ 		struct dma_chan *chan, unsigned long flags);
+ 
+ 	struct dma_async_tx_descriptor *(*device_prep_slave_sg)(
+-		struct dma_chan *chan, struct scatterlist *sgl, 
++		struct dma_chan *chan, struct scatterlist *sgl,
+ 		unsigned int sg_len, enum dma_data_direction direction,
+ 		unsigned long flags);
+ 	void (*device_terminate_all)(struct dma_chan *chan);
+-- 
+1.5.5.4
