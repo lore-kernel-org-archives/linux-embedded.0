@@ -1,62 +1,64 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH v4 6/6] Atmel MCI: Driver for Atmel on-chip MMC
-	controllers
-Date: Fri, 27 Jun 2008 14:31:13 -0700
-Message-ID: <1214602273.12666.7.camel@dwillia2-linux.ch.intel.com>
-References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-2-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-3-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-4-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-5-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-6-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-7-git-send-email-haavard.skinnemoen@atmel.com>
-	 <20080627211014.0e80db04@siona.local>
+From: Ben Nizette <bn@niasdigital.com>
+Subject: Re: Atmel AT91SAM7S and AT91SAM7A3
+Date: Sat, 28 Jun 2008 18:36:24 +1000
+Message-ID: <1214642184.4265.9.camel@moss.renham>
+References: <20080625171645.GN7064@freenet.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080627211014.0e80db04@siona.local>
+In-Reply-To: <20080625171645.GN7064@freenet.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Cc: Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, "Nelson, Shannon" <shannon.nelson@intel.com>, David Brownell <david-b@pacbell.net>
+To: Michelle Konzack <linux4michelle@tamay-dogan.net>
+Cc: Embedded <linux-embedded@vger.kernel.org>
 
 
-On Fri, 2008-06-27 at 12:10 -0700, Haavard Skinnemoen wrote:
-> On Thu, 26 Jun 2008 15:23:23 +0200
-> Haavard Skinnemoen <haavard.skinnemoen@atmel.com> wrote:
+On Wed, 2008-06-25 at 19:16 +0200, Michelle Konzack wrote:
+> Hello,
 > 
-> > This driver can also use PIO transfers when no DMA channels are
-> > available, and for transfers where using DMA may be difficult or
-> > impractical for some reason (e.g. the DMA setup overhead is usually
-> > not worth it for very short transfers, and badly aligned buffers or
-> > lengths are difficult to handle.)
+> I have several projects where I have the need for a microcontroller  and
+> I considered to use 8051 compatibles but not it  is  not  more  possible
+> because I need an USBHID-PDU device interface,  which  can  only  solved
+> using Linux.
 > 
-> Btw, it's probably not that hard to rip the DMA bits out and post them
-> as a separate patch. This would mean that:
->   * Pierre can merge the driver independently of the other 5 patches
->   * A separate patch adding DMA support would make it clearer how the
->     DMA slave interface is used.
->   * The chances of having MMC support out of the box on avr32 boards
-> in
->     2.6.27 become greater, and many people have been asking about that
->     (including Pierre and David.)
-
-> The driver is surprisingly fast with DMA turned off (2-3 MiB/s), but
-> the CPU usage is of course horrible.
+> I like to use the AT91SAM7S and the AT91SAM7A3 (it has 16 AD-Converters)
+> and want to know, whether there is support for accessing the  8  and  16
+> AD-Converters directly via the Kernel.
 > 
-> If that sounds like a good plan to you, I'll split the driver
-> tomorrow.
+> Also I like to know, which memory size for the AT91 you recommend.
 > 
-> This driver has been out of tree for way too long. I'm hoping we can
-> get it in before 2.6.27.
 
-I have high confidence that we can get the dma bits applied in time for
-2.6.27.  You seem to have addressed my previous concerns and there has
-been more than ample time for others with similar dma configurations to
-comment on the dma-slave framework.  I just want some more time to give
-it an honest review.
+I would recommend posting this to a forum at http://www.at91.com.  This
+is a list more for discussion of embedded issues in the kernel than SoC
+end-user support :-)
 
-Regards,
-Dan
-
+> The current projects are:
+> 
+> 1)  Solar-Volatge regulator
+>     (Uin <=68V, Uout=30V) with USB interface to PC or Master controller)
+> 
+> 2)  24V PbGel charger
+>     (Uin=30V and nearly the same hardware as above)
+> 
+> 3)  24V DV modular ATX PSU
+>     (special for solarsystems and must support minimal features of an
+>     UPS to protect the computer)
+> 
+> Q:  I have downloaded nearly all stuff about  specifications  to  USBHID
+>     and like to know, whether someone can point me to sample  codes  HOW
+>     to code the device stuff...  which seems currently not availlable in
+>     the Kernel...  (It seems, I am the first one WHO  need  this  stuff,
+>     but I am not a genie in C programming)
+> 
+> Note: "eCosCentric" sell USB stacks,  but  for  an  inacceptable  price, 
+>       since I build only small quantities for my projects.
+> 
+> Thanks, Greetings and nice Day/Evening
+>     Michelle Konzack
+>     Systemadministrator
+>     24V Electronic Engineer
+>     Tamay Dogan Network
+>     Debian GNU/Linux Consultant
+> 
+> 
