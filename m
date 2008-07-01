@@ -1,52 +1,52 @@
-From: Eduard - Gabriel Munteanu <eduard.munteanu@linux360.ro>
-Subject: Re: [PATCH 1/23] make section names compatible with
- -ffunction-sections -fdata-sections
-Date: Wed, 2 Jul 2008 04:28:06 +0300
-Message-ID: <20080702042806.4078bb09@linux360.ro>
-References: <200807020233.48646.vda.linux@googlemail.com>
+From: Rob Landley <rob@landley.net>
+Subject: Re: selecting initramfs support without initrd?
+Date: Mon, 30 Jun 2008 23:46:38 -0500
+Message-ID: <200806302346.38954.rob@landley.net>
+References: <alpine.LFD.1.10.0806241805390.5000@localhost.localdomain>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1759697AbYGBBi2@vger.kernel.org>
-In-Reply-To: <200807020233.48646.vda.linux@googlemail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <alpine.LFD.1.10.0806241805390.5000@localhost.localdomain>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Denys Vlasenko <vda.linux@googlemail.com>
-Cc: linux-arch@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ralf Baechle <ralf@linux-mips.org>, Lennert Buytenhek <kernel@wantstofly.org>, Josh Boyer <jwboyer@linux.vnet.ibm.com>, Paul Mackerras <paulus@samba.org>, David Woodhouse <dwmw2@infradead.org>, Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Dave Miller <davem@davemloft.net>
+To: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Cc: linux-embedded@vger.kernel.org
 
-On Wed, 2 Jul 2008 02:33:48 +0200
-Denys Vlasenko <vda.linux@googlemail.com> wrote:
+On Tuesday 24 June 2008 17:11:01 Robert P. J. Day wrote:
+>   i'm not sure if this is the proper forum for this, but while
+> perusing the early boot code, i noticed that selecting the config
+> variable BLK_DEV_INITRD gives you support for both initramfs, and an
+> initrd image.
 
-> Hi Andrew, folks,
-> 
-> I am unsure how to synchronize propagation of these patches
-> across all architectures.
-> 
-> Andrew, how this can be done without causing lots of pain
-> for arch maintainers? Please advise.
+It gives you support for an _external_ initramfs.  (I.E. the bootloader can 
+load an external blob into memory and feed the physical address into the 
+kernel via the ramdisk_start=12345 command line option.  If this blob gunzips 
+to a cpio image, it's extracted into rootfs.  If it gunzips to a recognized 
+filesystem type, it's used as an initrd.)
 
-Hi,
+The one built into the kernel is always used and can't be disabled, that I am 
+aware of.  If you have files in the static cpio archive and files in an 
+internally supplied cpio archive, the file in the external one replaces the 
+corresponding file in the internal one.
 
-AFAICS, there is a lot of code in .lds.S files which really is
-arch-independent, but still is duplicated in every arch. Kinda messy to
-change anything in there.
+>   based on a quick inspection of the source under init/, it would seem
+> that you could whack out sizable chunks of code if you had no need for
+> initrd, but i could be wrong.
 
-I noticed this while writing another patch, namely early (pre-SMP)
-initcall support. Fortunately, there was a generic header included by
-all .lds.S files and I could fit my modification in there.
+If you disable BLK_DEV_INITRD you'll still have a cpio image built into your 
+kernel:
 
-My suggestion is (for both you and arch maintainers)... why not make an
-effort to reduce code duplication in these files? Life would be so much
-easier. The idea is:
-- Write a macro to define all generic sections, possibly taking in
-alignment as an argument.
-- Have each arch's .lds.S file define arch-dependent stuff and use that
-macro for generic sections.
+make allnoconfig
+make -j 3
 
-This would surely be immediately useful, more readily accepted by
-maintainers and would open up the way for a lighter version of your
-patch, IMO.
+It's possible that inclusion of the external image loading logic should be 
+based on a symbol other than BLK_DEV_INITRD, since initramfs can use that 
+logic when you never use a ram disk block device.  It's a question of 
+untangling stuff and figuring out how much config granularity you want...
 
-
-	Cheers,
-	Eduard
+Rob
+-- 
+"One of my most productive days was throwing away 1000 lines of code."
+  - Ken Thompson.
