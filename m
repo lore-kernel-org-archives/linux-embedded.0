@@ -1,21 +1,21 @@
 From: Denys Vlasenko <vda.linux@googlemail.com>
-Subject: [PATCH 2/23] make section names compatible with -ffunction-sections -fdata-sections: alpha
-Date: Wed, 2 Jul 2008 02:34:09 +0200
-Message-ID: <200807020234.09577.vda.linux@googlemail.com>
+Subject: [PATCH 5/23] make section names compatible with -ffunction-sections -fdata-sections: blackfin
+Date: Wed, 2 Jul 2008 02:35:07 +0200
+Message-ID: <200807020235.08025.vda.linux@googlemail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-arch-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=googlemail.com; s=gamma;
         h=domainkey-signature:received:received:from:to:subject:date
          :user-agent:cc:mime-version:content-disposition:content-type
          :content-transfer-encoding:message-id;
-        bh=oPX6PxvMzCOFfGDj9Y08G3Iq5zdwp3SE0xqy5v7vA4M=;
-        b=ihqcPLUhvQcTNHjt+vFTeqaU24iOhypSu0yJVur9gnG399kR1NFj/hDPN0IxKp3lCW
-         p+dyUVMpabfsuziskKAEbgVaPrx8OqfFFyeXkR1tRLeIFKCoQvxOSVKZ5KYJQR+sPNs7
-         EpNW7vFdhpPcDuh8nss/yOmgItgdCebLNf5Jo=
+        bh=3sNp+LX13NDbZ7tEXYuWuTvu8Z9Gi9vNgijcTK0HcMI=;
+        b=EqxGhtLPxHRnMBgeWzwQWpHizmB6qchLXKkGPtvfcs0tSb/59pn2YYuUdAHX849qjy
+         DTiebGdShgO/TKppA2D44mSF3bcjVZ7Pni0xNabaIT1cKbYoqp6DKTtIgfJCqf4iPVmA
+         pSU4ilvHxtxUfjcz9iEHcT/Cn9NgVXDipHHAs=
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: linux-arch@vger.kernel.org
@@ -23,66 +23,21 @@ Cc: Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ra
 
 The purpose of this patch is to make kernel buildable
 with "gcc -ffunction-sections -fdata-sections".
-This patch fixes alpha architecture.
+This patch fixes blackfin architecture.
 
 Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
 --
 vda
 
 
---- 0.org/arch/alpha/kernel/head.S	Wed Jul  2 00:40:39 2008
-+++ 1.fixname/arch/alpha/kernel/head.S	Wed Jul  2 00:44:22 2008
-@@ -10,7 +10,7 @@
- #include <asm/system.h>
- #include <asm/asm-offsets.h>
- 
--.section .text.head, "ax"
-+.section .head.text, "ax"
- .globl swapper_pg_dir
- .globl _stext
- swapper_pg_dir=SWAPPER_PGD
---- 0.org/arch/alpha/kernel/init_task.c	Wed Jul  2 00:40:39 2008
-+++ 1.fixname/arch/alpha/kernel/init_task.c	Wed Jul  2 00:45:57 2008
-@@ -18,5 +18,5 @@
- EXPORT_SYMBOL(init_task);
- 
- union thread_union init_thread_union
--	__attribute__((section(".data.init_thread")))
-+	__attribute__((section(".init_thread.data")))
- 	= { INIT_THREAD_INFO(init_task) };
---- 0.org/arch/alpha/kernel/vmlinux.lds.S	Wed Jul  2 00:40:39 2008
-+++ 1.fixname/arch/alpha/kernel/vmlinux.lds.S	Wed Jul  2 00:46:09 2008
-@@ -16,7 +16,7 @@
- 
- 	_text = .;	/* Text and read-only data */
- 	.text : {
--	*(.text.head)
-+	*(.head.text)
- 		TEXT_TEXT
- 		SCHED_TEXT
- 		LOCK_TEXT
-@@ -93,18 +93,18 @@
- 	/* Freed after init ends here */
- 
- 	/* Note 2 page alignment above.  */
--	.data.init_thread : {
--		*(.data.init_thread)
-+	.init_thread.data : {
-+		*(.init_thread.data)
- 	}
- 
- 	. = ALIGN(PAGE_SIZE);
--	.data.page_aligned : {
--		*(.data.page_aligned)
-+	.page_aligned.data : {
-+		*(.page_aligned.data)
- 	}
- 
- 	. = ALIGN(64);
--	.data.cacheline_aligned : {
+--- 0.org/arch/blackfin/kernel/vmlinux.lds.S	Wed Jul  2 00:40:40 2008
++++ 1.fixname/arch/blackfin/kernel/vmlinux.lds.S	Wed Jul  2 00:45:51 2008
+@@ -91,7 +91,7 @@
+ 		__sdata = .;
+ 		/* This gets done first, so the glob doesn't suck it in */
+ 		. = ALIGN(32);
 -		*(.data.cacheline_aligned)
-+	.cacheline_aligned.data : {
 +		*(.cacheline_aligned.data)
- 	}
  
- 	_data = .;
+ #if !L1_DATA_A_LENGTH
+ 		. = ALIGN(32);
