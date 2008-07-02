@@ -1,7 +1,7 @@
 From: Denys Vlasenko <vda.linux@googlemail.com>
-Subject: [PATCH 4/23] make section names compatible with -ffunction-sections -fdata-sections: avr
-Date: Wed, 2 Jul 2008 02:34:38 +0200
-Message-ID: <200807020234.38078.vda.linux@googlemail.com>
+Subject: [PATCH 6/23] make section names compatible with -ffunction-sections -fdata-sections: cris
+Date: Wed, 2 Jul 2008 02:35:33 +0200
+Message-ID: <200807020235.33533.vda.linux@googlemail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arch-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:from:to:subject:date
          :user-agent:cc:mime-version:content-disposition:content-type
          :content-transfer-encoding:message-id;
-        bh=ld+qU/DsdPORFwjaCsLrqgPsfUu32LfIv4tKRY0hVVY=;
-        b=Rk0RLlw37LmNeb9F4crByL8n2jpldLjhl55dL+zwbvV8vWDNnpZf/89NpLTpc1QEau
-         a8kfV+WHh/i+eZmnUvVmVeb2FD8SjVuRucqZ6/voiBIprfFftPc2FQqI4+Ie3vr9ix28
-         bFO3D819DeP9J7gisnEdEbvLMhHV6EbNAbioI=
+        bh=JokZkMmab0AVbyp+U8berxC7jh+wqZcnljkjfdahRd0=;
+        b=cWnXJKJD01uMsm9YG7CBmS05nYSyyW4cruK+5B0VHqWNvWVXHjwNKo2nV68LrQi6+d
+         BLlbfHxaS1IufA4UisCOatMMdv38g6weeA06dkHzWBtl+k7hRozWTVG4dNoXSpV8oXhM
+         P7WDoYJvfwEaDU1pURNGKHcfAkjeXIBpRmJeA=
 Content-Disposition: inline
 Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -23,37 +23,43 @@ Cc: Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ra
 
 The purpose of this patch is to make kernel buildable
 with "gcc -ffunction-sections -fdata-sections".
-This patch fixes avr architecture.
+This patch fixes cris architecture.
 
 Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
 --
 vda
 
 
---- 0.org/arch/avr32/kernel/init_task.c	Wed Jul  2 00:40:40 2008
-+++ 1.fixname/arch/avr32/kernel/init_task.c	Wed Jul  2 00:45:57 2008
-@@ -24,7 +24,7 @@
-  * Initial thread structure. Must be aligned on an 8192-byte boundary.
+--- 0.org/arch/cris/arch-v10/vmlinux.lds.S	Wed Jul  2 00:40:40 2008
++++ 1.fixname/arch/cris/arch-v10/vmlinux.lds.S	Wed Jul  2 00:45:57 2008
+@@ -51,7 +51,7 @@
+ 	_edata = . ;
+ 
+ 	. = ALIGN(PAGE_SIZE);	/* init_task and stack, must be aligned */
+-  	.data.init_task : { *(.data.init_task) }
++  	.init_task.data : { *(.init_task.data) }
+ 
+ 	. = ALIGN(PAGE_SIZE);	/* Init code and data */
+   	__init_begin = .;
+--- 0.org/arch/cris/arch-v32/vmlinux.lds.S	Wed Jul  2 00:40:40 2008
++++ 1.fixname/arch/cris/arch-v32/vmlinux.lds.S	Wed Jul  2 00:45:57 2008
+@@ -63,7 +63,7 @@
+ 	_edata = . ;
+ 
+ 	. = ALIGN(PAGE_SIZE);	/* init_task and stack, must be aligned. */
+-	.data.init_task : { *(.data.init_task) }
++	.init_task.data : { *(.init_task.data) }
+ 
+ 	. = ALIGN(PAGE_SIZE);	/* Init code and data. */
+ 	__init_begin = .;
+--- 0.org/arch/cris/kernel/process.c	Wed Jul  2 00:40:40 2008
++++ 1.fixname/arch/cris/kernel/process.c	Wed Jul  2 00:45:57 2008
+@@ -52,7 +52,7 @@
+  * "init_task" linker map entry..
   */
- union thread_union init_thread_union
+ union thread_union init_thread_union 
 -	__attribute__((__section__(".data.init_task"))) =
 +	__attribute__((__section__(".init_task.data"))) =
  		{ INIT_THREAD_INFO(init_task) };
  
  /*
---- 0.org/arch/avr32/kernel/vmlinux.lds.S	Wed Jul  2 00:40:40 2008
-+++ 1.fixname/arch/avr32/kernel/vmlinux.lds.S	Wed Jul  2 00:45:57 2008
-@@ -105,11 +105,11 @@
- 		/*
- 		 * First, the init task union, aligned to an 8K boundary.
- 		 */
--		*(.data.init_task)
-+		*(.init_task.data)
- 
- 		/* Then, the cacheline aligned data */
- 		. = ALIGN(L1_CACHE_BYTES);
--		*(.data.cacheline_aligned)
-+		*(.cacheline_aligned.data)
- 
- 		/* And the rest... */
- 		*(.data.rel*)
