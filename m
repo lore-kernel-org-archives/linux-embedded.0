@@ -1,66 +1,244 @@
-From: Michelle Konzack <linux4michelle@tamay-dogan.net>
-Subject: Re: Atmel AT91SAM7S and AT91SAM7A3
-Date: Sun, 29 Jun 2008 04:37:21 +0200
-Message-ID: <20080629023721.GI12731@freenet.de>
-References: <20080625171645.GN7064@freenet.de> <1214642184.4265.9.camel@moss.renham>
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Subject: [PATCH 1/23] make section names compatible with -ffunction-sections -fdata-sections
+Date: Wed, 2 Jul 2008 02:33:48 +0200
+Message-ID: <200807020233.48646.vda.linux@googlemail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="G3juXO9GfR42w+sw"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:subject:date
+         :user-agent:cc:mime-version:content-disposition:content-type
+         :content-transfer-encoding:message-id;
+        bh=hDlnyaBi1e1N9VFUHeW34LGxZLs52VfOs13cEdp5waU=;
+        b=BVGMgq2OTbJ9nUvRHDZzoGkVtUBTBg0I7MkqXNM46lCou6sD2MQGGZWBTttnvOxQ9j
+         mF07MtpeymzEv5HhPvxTToA/uPXfJ0UaRTbXfSH3YSlwTOC5sRjj66ajUInq4zKe0QK3
+         5GqlZLUPbO+phncXxSVGdkbuhUWz4ThNCTwEY=
 Content-Disposition: inline
-In-Reply-To: <1214642184.4265.9.camel@moss.renham>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: linux-arch@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ralf Baechle <ralf@linux-mips.org>, Lennert Buytenhek <kernel@wantstofly.org>, Josh Boyer <jwboyer@linux.vnet.ibm.com>, Paul Mackerras <paulus@samba.org>, David Woodhouse <dwmw2@infradead.org>, Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Dave Miller <davem@davemloft.net>
+
+Hi Andrew, folks,
+
+I am unsure how to synchronize propagation of these patches
+across all architectures.
+
+Andrew, how this can be done without causing lots of pain
+for arch maintainers? Please advise.
+
+The purpose of these patches is to make kernel buildable
+with "gcc -ffunction-sections -fdata-sections".
+
+Newer gcc and binutils can do dead code and data removal
+at link time. It is achieved using combination of
+-ffunction-sections -fdata-sections options for gcc and
+--gc-sections for ld.
+
+Theory of operation:
+
+-ffunction-sections instructs gcc to place each function
+(including static ones) in it's own section named .text.function_name
+instead of placing all functions in one big .text section.
+
+At link time, ld normally coalesce all such sections into one
+output section .text again. It is achieved by having *(.text.*) spec
+along with *(.text) spec in built-in linker scripts.
+
+If ld is invoked with --gc-sections, it tracks references, starting
+from entry point and marks all input sections which are reachable
+from there. Then it discards all input sections which are not marked.
+
+This isn't buying much if you have one big .text section per .o module,
+because even one referenced function will pull in entire section.
+You need -ffunction-sections in order to split .text into per-function
+sections and make --gc-sections much more useful.
+
+-fdata-sections is analogous: it places each global or static variable
+into .data.variable_name, .rodata.variable_name or .bss.variable_name.
+
+If we ever want to use described mechanism, we need to adapt
+existing code for new section names. Basically, we need to stop using
+section names of the form
+.text.xxxx
+.data.xxxx
+.rodata.xxxx
+.bss.xxxx
+in the kernel - otherwise section placement done by kernel's
+custom linker scripts produces broken vmlinux and vdso images.
+
+The following patches fix section names, one per architecture.
+
+The patch in _this_ mail fixes generic part.
+
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+--
+vda
 
 
---G3juXO9GfR42w+sw
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hello Ben,
-
-Am 2008-06-28 18:36:24, schrieb Ben Nizette:
-> I would recommend posting this to a forum at http://www.at91.com.  This
-> is a list more for discussion of embedded issues in the kernel than SoC
-> end-user support :-)
-
-I was already on <http://www.at91.com/> but where  I  live,  I  can  not
-access the Web-Forum.  I need a mailinglist.
-
-Also I realy do not knoe whether accessing the AD-Converters in a Micro-
-controller is a user space issue or a Kernel one, since  I  need  Kernel
-modules or not?
-
-I realy do not know, how to begin this stuff...
-
-Thanks, Greetings and nice Day/Evening
-    Michelle Konzack
-    Systemadministrator
-    24V Electronic Engineer
-    Tamay Dogan Network
-    Debian GNU/Linux Consultant
-
-
---=20
-Linux-User #280138 with the Linux Counter, http://counter.li.org/
-##################### Debian GNU/Linux Consultant #####################
-Michelle Konzack   Apt. 917                  ICQ #328449886
-+49/177/9351947    50, rue de Soultz         MSN LinuxMichi
-+33/6/61925193     67100 Strasbourg/France   IRC #Debian (irc.icq.com)
-
---G3juXO9GfR42w+sw
-Content-Type: application/pgp-signature; name="signature.pgp"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (GNU/Linux)
-
-iD8DBQFIZvVhC0FPBMSS+BIRAjODAKDICJK7RH5yvSiPSh8n3+U+eS5XfQCbBUCw
-p+DyLeqE9IM8RQb5dVKK68Y=
-=33i5
------END PGP SIGNATURE-----
-
---G3juXO9GfR42w+sw--
+--- 0.org/Documentation/mutex-design.txt	Wed Jul  2 00:40:39 2008
++++ 1.fixname/Documentation/mutex-design.txt	Wed Jul  2 00:44:40 2008
+@@ -66,14 +66,14 @@
+ 
+     c0377ccb <mutex_lock>:
+     c0377ccb:       f0 ff 08                lock decl (%eax)
+-    c0377cce:       78 0e                   js     c0377cde <.text.lock.mutex>
++    c0377cce:       78 0e                   js     c0377cde <.lock.mutex.text>
+     c0377cd0:       c3                      ret
+ 
+    the unlocking fastpath is equally tight:
+ 
+     c0377cd1 <mutex_unlock>:
+     c0377cd1:       f0 ff 00                lock incl (%eax)
+-    c0377cd4:       7e 0f                   jle    c0377ce5 <.text.lock.mutex+0x7>
++    c0377cd4:       7e 0f                   jle    c0377ce5 <.lock.mutex.text+0x7>
+     c0377cd6:       c3                      ret
+ 
+  - 'struct mutex' semantics are well-defined and are enforced if
+--- 0.org/include/asm-generic/vmlinux.lds.h	Wed Jul  2 00:40:50 2008
++++ 1.fixname/include/asm-generic/vmlinux.lds.h	Wed Jul  2 00:54:09 2008
+@@ -41,7 +41,7 @@
+ /* .data section */
+ #define DATA_DATA							\
+ 	*(.data)							\
+-	*(.data.init.refok)						\
++	*(.init.refok.data)						\
+ 	*(.ref.data)							\
+ 	DEV_KEEP(init.data)						\
+ 	DEV_KEEP(exit.data)						\
+@@ -206,8 +206,8 @@
+ 		ALIGN_FUNCTION();					\
+ 		*(.text)						\
+ 		*(.ref.text)						\
+-		*(.text.init.refok)					\
+-		*(.exit.text.refok)					\
++		*(.init.refok.text)					\
++		*(.exit.refok.text)					\
+ 	DEV_KEEP(init.text)						\
+ 	DEV_KEEP(exit.text)						\
+ 	CPU_KEEP(init.text)						\
+@@ -347,8 +347,8 @@
+ #define PERCPU(align)							\
+ 	. = ALIGN(align);						\
+ 	__per_cpu_start = .;						\
+-	.data.percpu  : AT(ADDR(.data.percpu) - LOAD_OFFSET) {		\
+-		*(.data.percpu)						\
+-		*(.data.percpu.shared_aligned)				\
++	.percpu.data  : AT(ADDR(.percpu.data) - LOAD_OFFSET) {		\
++		*(.percpu.data)						\
++		*(.percpu.shared_aligned.data)				\
+ 	}								\
+ 	__per_cpu_end = .;
+--- 0.org/include/linux/cache.h	Wed Jul  2 00:40:51 2008
++++ 1.fixname/include/linux/cache.h	Wed Jul  2 00:45:51 2008
+@@ -31,7 +31,7 @@
+ #ifndef __cacheline_aligned
+ #define __cacheline_aligned					\
+   __attribute__((__aligned__(SMP_CACHE_BYTES),			\
+-		 __section__(".data.cacheline_aligned")))
++		 __section__(".cacheline_aligned.data")))
+ #endif /* __cacheline_aligned */
+ 
+ #ifndef __cacheline_aligned_in_smp
+--- 0.org/include/linux/init.h	Wed Jul  2 00:40:51 2008
++++ 1.fixname/include/linux/init.h	Wed Jul  2 00:54:13 2008
+@@ -62,9 +62,9 @@
+ 
+ /* backward compatibility note
+  *  A few places hardcode the old section names:
+- *  .text.init.refok
+- *  .data.init.refok
+- *  .exit.text.refok
++ *  .init.refok.text
++ *  .init.refok.data
++ *  .exit.refok.text
+  *  They should be converted to use the defines from this file
+  */
+ 
+@@ -299,7 +299,7 @@
+ #endif
+ 
+ /* Data marked not to be saved by software suspend */
+-#define __nosavedata __section(.data.nosave)
++#define __nosavedata __section(.nosave.data)
+ 
+ /* This means "can be init if no module support, otherwise module load
+    may call it." */
+--- 0.org/include/linux/percpu.h	Wed Jul  2 00:40:51 2008
++++ 1.fixname/include/linux/percpu.h	Wed Jul  2 00:45:39 2008
+@@ -10,13 +10,13 @@
+ 
+ #ifdef CONFIG_SMP
+ #define DEFINE_PER_CPU(type, name)					\
+-	__attribute__((__section__(".data.percpu")))			\
++	__attribute__((__section__(".percpu.data")))			\
+ 	PER_CPU_ATTRIBUTES __typeof__(type) per_cpu__##name
+ 
+ #ifdef MODULE
+-#define SHARED_ALIGNED_SECTION ".data.percpu"
++#define SHARED_ALIGNED_SECTION ".percpu.data"
+ #else
+-#define SHARED_ALIGNED_SECTION ".data.percpu.shared_aligned"
++#define SHARED_ALIGNED_SECTION ".percpu.shared_aligned.data"
+ #endif
+ 
+ #define DEFINE_PER_CPU_SHARED_ALIGNED(type, name)			\
+--- 0.org/include/linux/spinlock.h	Wed Jul  2 00:40:51 2008
++++ 1.fixname/include/linux/spinlock.h	Wed Jul  2 00:44:40 2008
+@@ -59,7 +59,7 @@
+ /*
+  * Must define these before including other files, inline functions need them
+  */
+-#define LOCK_SECTION_NAME ".text.lock."KBUILD_BASENAME
++#define LOCK_SECTION_NAME ".lock.text."KBUILD_BASENAME
+ 
+ #define LOCK_SECTION_START(extra)               \
+         ".subsection 1\n\t"                     \
+--- 0.org/kernel/module.c	Wed Jul  2 00:40:51 2008
++++ 1.fixname/kernel/module.c	Wed Jul  2 00:45:39 2008
+@@ -433,7 +433,7 @@
+ 				 Elf_Shdr *sechdrs,
+ 				 const char *secstrings)
+ {
+-	return find_sec(hdr, sechdrs, secstrings, ".data.percpu");
++	return find_sec(hdr, sechdrs, secstrings, ".percpu.data");
+ }
+ 
+ static void percpu_modcopy(void *pcpudest, const void *from, unsigned long size)
+--- 0.org/scripts/mod/modpost.c	Wed Jul  2 00:40:54 2008
++++ 1.fixname/scripts/mod/modpost.c	Wed Jul  2 00:54:21 2008
+@@ -794,9 +794,9 @@
+ /* sections that may refer to an init/exit section with no warning */
+ static const char *initref_sections[] =
+ {
+-	".text.init.refok*",
+-	".exit.text.refok*",
+-	".data.init.refok*",
++	".init.refok.text*",
++	".exit.refok.text*",
++	".init.refok.data*",
+ 	NULL
+ };
+ 
+@@ -915,7 +915,7 @@
+  * Pattern 0:
+  *   Do not warn if funtion/data are marked with __init_refok/__initdata_refok.
+  *   The pattern is identified by:
+- *   fromsec = .text.init.refok* | .data.init.refok*
++ *   fromsec = .init.refok.text* | .init.refok.data*
+  *
+  * Pattern 1:
+  *   If a module parameter is declared __initdata and permissions=0
+@@ -939,8 +939,8 @@
+  *           *probe_one, *_console, *_timer
+  *
+  * Pattern 3:
+- *   Whitelist all refereces from .text.head to .init.data
+- *   Whitelist all refereces from .text.head to .init.text
++ *   Whitelist all refereces from .head.text to .init.data
++ *   Whitelist all refereces from .head.text to .init.text
+  *
+  * Pattern 4:
+  *   Some symbols belong to init section but still it is ok to reference
