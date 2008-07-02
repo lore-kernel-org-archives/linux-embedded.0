@@ -1,7 +1,7 @@
 From: Denys Vlasenko <vda.linux@googlemail.com>
-Subject: [PATCH 10/23] make section names compatible with -ffunction-sections -fdata-sections: m32r
-Date: Wed, 2 Jul 2008 02:37:14 +0200
-Message-ID: <200807020237.14092.vda.linux@googlemail.com>
+Subject: [PATCH 11/23] make section names compatible with -ffunction-sections -fdata-sections: mips
+Date: Wed, 2 Jul 2008 02:37:36 +0200
+Message-ID: <200807020237.36623.vda.linux@googlemail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arch-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:from:to:subject:date
          :user-agent:cc:mime-version:content-disposition:content-type
          :content-transfer-encoding:message-id;
-        bh=GkgVGoevnJl/lu0Yv5FNSrX/KQ+Me4DulB78Ey+y9c4=;
-        b=FLW6eXFYbQCHVfaLfy1mMzoLeLHVMk0LVvcXjBjaLXjWB8ifHi/H21AbDF1RnKjbk/
-         lc4SEj66ECEz3nWVY3FCpQAmqDtTOSpaSVVy/+D461R6DpkFT9jfgz+H3XqpuAt4vthr
-         4VHUvUJnaTMg74vNXvu67dL9pBsS4mrFlvuB8=
+        bh=DVRzGnZ7DSEl1sJs/qt+9JNUKhoXU9DxVZ7gcqXI7+Y=;
+        b=mfsf5SYEG8fAzSjrWyYbLSdmVYCXFnznG3WbKNI0l0DaitvjoSDPyr8XzDBGHHIj99
+         x56npYiQHi/Wq7J3OwWdRbnP1CX+C09KgWRqnMwDc+gTv8Y1VTtcat7qqKQWTJ0/M5AT
+         cFs/79D0fqMRk0v26+TTGWRDFkBn/38OmCDWw=
 Content-Disposition: inline
 Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -23,44 +23,72 @@ Cc: Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ra
 
 The purpose of this patch is to make kernel buildable
 with "gcc -ffunction-sections -fdata-sections".
-This patch fixes m32r architecture.
+This patch fixes mips architecture.
 
 Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
 --
 vda
 
 
---- 0.org/arch/m32r/kernel/init_task.c	Wed Jul  2 00:40:40 2008
-+++ 1.fixname/arch/m32r/kernel/init_task.c	Wed Jul  2 00:45:57 2008
-@@ -26,7 +26,7 @@
-  * "init_task" linker map entry..
+--- 0.org/arch/mips/kernel/init_task.c	Wed Jul  2 00:40:40 2008
++++ 1.fixname/arch/mips/kernel/init_task.c	Wed Jul  2 00:45:57 2008
+@@ -27,7 +27,7 @@
+  * The things we do for performance..
   */
  union thread_union init_thread_union
--	__attribute__((__section__(".data.init_task"))) =
-+	__attribute__((__section__(".init_task.data"))) =
+-	__attribute__((__section__(".data.init_task"),
++	__attribute__((__section__(".init_task.data"),
+ 	               __aligned__(THREAD_SIZE))) =
  		{ INIT_THREAD_INFO(init_task) };
  
- /*
---- 0.org/arch/m32r/kernel/vmlinux.lds.S	Wed Jul  2 00:40:40 2008
-+++ 1.fixname/arch/m32r/kernel/vmlinux.lds.S	Wed Jul  2 00:46:03 2008
-@@ -56,17 +56,17 @@
+--- 0.org/arch/mips/kernel/vmlinux.lds.S	Wed Jul  2 00:40:41 2008
++++ 1.fixname/arch/mips/kernel/vmlinux.lds.S	Wed Jul  2 00:46:03 2008
+@@ -76,7 +76,7 @@
+ 		 * object file alignment.  Using 32768
+ 		 */
+ 		. = ALIGN(_PAGE_SIZE);
+-		*(.data.init_task)
++		*(.init_task.data)
  
-   . = ALIGN(4096);
-   __nosave_begin = .;
--  .data_nosave : { *(.data.nosave) }
-+  .data_nosave : { *(.nosave.data) }
-   . = ALIGN(4096);
-   __nosave_end = .;
+ 		DATA_DATA
+ 		CONSTRUCTORS
+@@ -98,14 +98,14 @@
+ 	. = ALIGN(_PAGE_SIZE);
+ 	.data_nosave : {
+ 		__nosave_begin = .;
+-		*(.data.nosave)
++		*(.nosave.data)
+ 	}
+ 	. = ALIGN(_PAGE_SIZE);
+ 	__nosave_end = .;
  
-   . = ALIGN(32);
--  .data.cacheline_aligned : { *(.data.cacheline_aligned) }
-+  .cacheline_aligned.data : { *(.cacheline_aligned.data) }
+ 	. = ALIGN(32);
+-	.data.cacheline_aligned : {
+-		*(.data.cacheline_aligned)
++	.cacheline_aligned.data : {
++		*(.cacheline_aligned.data)
+ 	}
+ 	_edata =  .;			/* End of data section */
  
-   _edata = .;			/* End of data section */
+--- 0.org/arch/mips/lasat/image/head.S	Wed Jul  2 00:40:41 2008
++++ 1.fixname/arch/mips/lasat/image/head.S	Wed Jul  2 00:44:34 2008
+@@ -1,7 +1,7 @@
+ #include <asm/lasat/head.h>
  
-   . = ALIGN(8192);		/* init_task */
--  .data.init_task : { *(.data.init_task) }
-+  .init_task.data : { *(.init_task.data) }
+ 	.text
+-	.section .text.start, "ax"
++	.section .start.text, "ax"
+ 	.set noreorder
+ 	.set mips3
  
-   /* will be freed after init */
-   . = ALIGN(4096);		/* Init code and data */
+--- 0.org/arch/mips/lasat/image/romscript.normal	Wed Jul  2 00:40:41 2008
++++ 1.fixname/arch/mips/lasat/image/romscript.normal	Wed Jul  2 00:44:34 2008
+@@ -4,7 +4,7 @@
+ {
+   .text :
+   {
+-    *(.text.start)
++    *(.start.text)
+   }
+ 
+   /* Data in ROM */
