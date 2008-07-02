@@ -1,7 +1,7 @@
 From: Denys Vlasenko <vda.linux@googlemail.com>
-Subject: [PATCH 5/23] make section names compatible with -ffunction-sections -fdata-sections: blackfin
-Date: Wed, 2 Jul 2008 02:35:07 +0200
-Message-ID: <200807020235.08025.vda.linux@googlemail.com>
+Subject: [PATCH 4/23] make section names compatible with -ffunction-sections -fdata-sections: avr
+Date: Wed, 2 Jul 2008 02:34:38 +0200
+Message-ID: <200807020234.38078.vda.linux@googlemail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arch-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:from:to:subject:date
          :user-agent:cc:mime-version:content-disposition:content-type
          :content-transfer-encoding:message-id;
-        bh=3sNp+LX13NDbZ7tEXYuWuTvu8Z9Gi9vNgijcTK0HcMI=;
-        b=EqxGhtLPxHRnMBgeWzwQWpHizmB6qchLXKkGPtvfcs0tSb/59pn2YYuUdAHX849qjy
-         DTiebGdShgO/TKppA2D44mSF3bcjVZ7Pni0xNabaIT1cKbYoqp6DKTtIgfJCqf4iPVmA
-         pSU4ilvHxtxUfjcz9iEHcT/Cn9NgVXDipHHAs=
+        bh=ld+qU/DsdPORFwjaCsLrqgPsfUu32LfIv4tKRY0hVVY=;
+        b=Rk0RLlw37LmNeb9F4crByL8n2jpldLjhl55dL+zwbvV8vWDNnpZf/89NpLTpc1QEau
+         a8kfV+WHh/i+eZmnUvVmVeb2FD8SjVuRucqZ6/voiBIprfFftPc2FQqI4+Ie3vr9ix28
+         bFO3D819DeP9J7gisnEdEbvLMhHV6EbNAbioI=
 Content-Disposition: inline
 Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -23,21 +23,37 @@ Cc: Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ra
 
 The purpose of this patch is to make kernel buildable
 with "gcc -ffunction-sections -fdata-sections".
-This patch fixes blackfin architecture.
+This patch fixes avr architecture.
 
 Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
 --
 vda
 
 
---- 0.org/arch/blackfin/kernel/vmlinux.lds.S	Wed Jul  2 00:40:40 2008
-+++ 1.fixname/arch/blackfin/kernel/vmlinux.lds.S	Wed Jul  2 00:45:51 2008
-@@ -91,7 +91,7 @@
- 		__sdata = .;
- 		/* This gets done first, so the glob doesn't suck it in */
- 		. = ALIGN(32);
+--- 0.org/arch/avr32/kernel/init_task.c	Wed Jul  2 00:40:40 2008
++++ 1.fixname/arch/avr32/kernel/init_task.c	Wed Jul  2 00:45:57 2008
+@@ -24,7 +24,7 @@
+  * Initial thread structure. Must be aligned on an 8192-byte boundary.
+  */
+ union thread_union init_thread_union
+-	__attribute__((__section__(".data.init_task"))) =
++	__attribute__((__section__(".init_task.data"))) =
+ 		{ INIT_THREAD_INFO(init_task) };
+ 
+ /*
+--- 0.org/arch/avr32/kernel/vmlinux.lds.S	Wed Jul  2 00:40:40 2008
++++ 1.fixname/arch/avr32/kernel/vmlinux.lds.S	Wed Jul  2 00:45:57 2008
+@@ -105,11 +105,11 @@
+ 		/*
+ 		 * First, the init task union, aligned to an 8K boundary.
+ 		 */
+-		*(.data.init_task)
++		*(.init_task.data)
+ 
+ 		/* Then, the cacheline aligned data */
+ 		. = ALIGN(L1_CACHE_BYTES);
 -		*(.data.cacheline_aligned)
 +		*(.cacheline_aligned.data)
  
- #if !L1_DATA_A_LENGTH
- 		. = ALIGN(32);
+ 		/* And the rest... */
+ 		*(.data.rel*)
