@@ -1,233 +1,87 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: dmaengine skip unmap (was: Re: [PATCH v4 5/6] dmaengine: Driver
-	for the Synopsys DesignWare DMA controller)
-Date: Thu, 03 Jul 2008 17:40:23 -0700
-Message-ID: <1215132023.23470.15.camel@dwillia2-linux.ch.intel.com>
+From: "Dan Williams" <dan.j.williams@intel.com>
+Subject: Re: [PATCH v4 0/6] dmaengine/mmc: DMA slave interface and two new drivers
+Date: Thu, 3 Jul 2008 18:06:27 -0700
+Message-ID: <e9c3a7c20807031806u23304279p33ed3467ba0e5a7f@mail.gmail.com>
 References: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-2-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-3-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-4-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-5-git-send-email-haavard.skinnemoen@atmel.com>
-	 <1214486603-23655-6-git-send-email-haavard.skinnemoen@atmel.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1214486603-23655-6-git-send-email-haavard.skinnemoen@atmel.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:sender
+         :to:subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references
+         :x-google-sender-auth;
+        bh=kbrOsduusSgW2xTjUEbsTA/SdtbMqhPGyvvZ9+4n2yo=;
+        b=nhNvaqKpRiA48bEmj978RQu6o5TbTzdbclVjqFjoxvWY8PtiKMfaQTtMP31lhG7Sve
+         BZ0G4tX8xwsM0PyVhzmo8XZQEpvGM22JO89vXl2hi8MlQP1ZWyf+OfFBphUD24NTefBQ
+         ZeA5Y9oP8G0tbvvsAQf9d6T3b/FMJl/upJvdE=
+In-Reply-To: <1214486603-23655-1-git-send-email-haavard.skinnemoen@atmel.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Cc: Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, "Nelson, Shannon" <shannon.nelson@intel.com>, David Brownell <david-b@pacbell.net>
+Cc: Pierre Ossman <drzeus-list@drzeus.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, kernel@avr32linux.org, shannon.nelson@intel.com, David Brownell <david-b@pacbell.net>
 
+On Thu, Jun 26, 2008 at 6:23 AM, Haavard Skinnemoen
+<haavard.skinnemoen@atmel.com> wrote:
+> First of all, I'm sorry it went so much time between v3 and v4 of this
+> patchset. I was hoping to finish this stuff up before all kinds of
+> other tasks started demanding my attention, but I didn't, so I had to
+> put it on hold for a while. Let's try again...
+>
+> This patchset extends the DMA engine API to allow drivers to offer DMA
+> to and from I/O registers with hardware handshaking, aka slave DMA.
+> Such functionality is very common in DMA controllers integrated on SoC
+> devices, and it's typically used to do DMA transfers to/from other
+> on-SoC peripherals, but it can often do DMA transfers to/from
+> externally connected devices as well (e.g. IDE hard drives).
+>
+> The main differences from v3 of this patchset are:
+>  * A DMA descriptor can hold a whole scatterlist. This means that
+>    clients using slave DMA can submit large requests in a single call
+>    to the driver, and they only need to keep track of a single
+>    descriptor.
+>  * The dma_slave_descriptor struct is gone since clients no longer
+>    need to keep track of multiple descriptors.
+>  * The drivers perform better and are more stable.
+>
+> The dw_dmac driver depends on this patch:
+>
+>        http://lkml.org/lkml/2008/6/25/148
+>
+> and the atmel-mci driver depends on this series:
+>
+>        http://lkml.org/lkml/2008/6/26/158
+>
+> as well as all preceding patches in this series, of course.
+>
+> Comments are welcome, as usual! Shortlog and diffstat follow.
+>
+> Haavard Skinnemoen (6):
+>      dmaengine: Add dma_client parameter to device_alloc_chan_resources
 
-On Thu, 2008-06-26 at 06:23 -0700, Haavard Skinnemoen wrote:
-> This adds a driver for the Synopsys DesignWare DMA controller (aka
-> DMACA on AVR32 systems.) This DMA controller can be found integrated
-> on the AT32AP7000 chip and is primarily meant for peripheral DMA
-> transfer, but can also be used for memory-to-memory transfers.
-> 
-> This patch is based on a driver from David Brownell which was based on
-> an older version of the DMA Engine framework. It also implements the
-> proposed extensions to the DMA Engine API for slave DMA operations.
-> 
-> The dmatest client shows no problems, but there may still be room for
-> improvement performance-wise. DMA slave transfer performance is
-> definitely "good enough"; reading 100 MiB from an SD card running at ~20
-> MHz yields ~7.2 MiB/s average transfer rate.
-> 
-> Full documentation for this controller can be found in the Synopsys
-> DW AHB DMAC Databook:
-> 
-> http://www.synopsys.com/designware/docs/iip/DW_ahb_dmac/latest/doc/dw_ahb_dmac_db.pdf
-> 
-> The controller has lots of implementation options, so it's usually a
-> good idea to check the data sheet of the chip it's intergrated on as
-> well. The AT32AP7000 data sheet can be found here:
-> 
-> http://www.atmel.com/dyn/products/datasheets.asp?family_id=682
-> 
-> Signed-off-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-> 
-[..]
+Applied.  I fixed it up for fsldma and mv_xor.
 
-> +static void
-> +dwc_descriptor_complete(struct dw_dma_chan *dwc, struct dw_desc *desc)
-> +{
-> +       dma_async_tx_callback           callback;
-> +       void                            *param;
-> +       struct dma_async_tx_descriptor  *txd = &desc->txd;
-> +
-> +       dev_vdbg(&dwc->chan.dev, "descriptor %u complete\n", txd->cookie);
-> +
-> +       dwc->completed = txd->cookie;
-> +       callback = txd->callback;
-> +       param = txd->callback_param;
-> +
-> +       dwc_sync_desc_for_cpu(dwc, desc);
-> +       list_splice_init(&txd->tx_list, &dwc->free_list);
-> +       list_move(&desc->desc_node, &dwc->free_list);
-> +
-> +       /*
-> +        * The API requires that no submissions are done from a
-> +        * callback, so we don't need to drop the lock here
-> +        */
-> +       if (callback)
-> +               callback(param);
-> +}
-> +
+>      dmaengine: Add dma_chan_is_in_use() function
 
-The one thing that stands out is that this driver does not unmap the
-source or destination buffers (and I now notice that fsldma is not doing
-this either, hmm...).  Yes, it is a no-op on avr32, for now, but the
-dma-mapping-api assumes that dma_map is always paired with dma_unmap.  I
-remember we discussed this earlier and that discussion inspired the
-patch below.  The end result is that dw_dmac can try to automatically
-dma_unmap the buffers unless an intelligent client, like the mmc driver,
-has disabled unmap.
+I applied the chan->client_count patch that we talked about.
 
-Thoughts?
+>      dmaengine: Add slave DMA interface
 
-----snip--->
-async_tx: add DMA_COMPL_SKIP_{SRC,DEST}_UNMAP flags to control dma unmap
+There were some comments to the change log and other fixes, so I'll
+wait for v5 of this patch.
 
-From: Dan Williams <dan.j.williams@intel.com>
+>      dmaengine: Make DMA Engine menu visible for AVR32 users
 
-In some cases client code may need the dma-driver to skip the unmap of source
-and/or destination buffers.  Setting these flags indicates to the driver to
-skip the unmap step.  In this regard async_xor is currently broken in that it
-allows the destination buffer to be unmapped while an operation is still in
-progress, i.e. when the number of sources exceeds the hardware channel's
-maximum (fixed in a subsequent patch).
+Applied the "remove arch dependency in drivers/dma/Kconfig" instead.
 
-Signed-off-by: Dan Williams <dan.j.williams@intel.com>
----
+>      dmaengine: Driver for the Synopsys DesignWare DMA controller
+>      Atmel MCI: Driver for Atmel on-chip MMC controllers
 
- drivers/dma/ioat_dma.c    |   48 ++++++++++++++++++++++-----------------------
- drivers/dma/iop-adma.c    |   17 ++++++++++++----
- include/linux/dmaengine.h |    4 ++++
- 3 files changed, 40 insertions(+), 29 deletions(-)
+I will wait for v5 on these as well for the chan->client_count fixups
+and a response to the dma_unmap situation.
 
-
-diff --git a/drivers/dma/ioat_dma.c b/drivers/dma/ioat_dma.c
-index 318e8a2..1be33ae 100644
---- a/drivers/dma/ioat_dma.c
-+++ b/drivers/dma/ioat_dma.c
-@@ -756,6 +756,27 @@ static void ioat_dma_cleanup_tasklet(unsigned long data)
- 	       chan->reg_base + IOAT_CHANCTRL_OFFSET);
- }
- 
-+static void
-+ioat_dma_unmap(struct ioat_dma_chan *ioat_chan, struct ioat_desc_sw *desc)
-+{
-+	/*
-+	 * yes we are unmapping both _page and _single
-+	 * alloc'd regions with unmap_page. Is this
-+	 * *really* that bad?
-+	 */
-+	if (!(desc->async_tx.flags & DMA_COMPL_SKIP_DEST_UNMAP))
-+		pci_unmap_page(ioat_chan->device->pdev,
-+				pci_unmap_addr(desc, dst),
-+				pci_unmap_len(desc, len),
-+				PCI_DMA_FROMDEVICE);
-+
-+	if (!(desc->async_tx.flags & DMA_COMPL_SKIP_SRC_UNMAP))
-+		pci_unmap_page(ioat_chan->device->pdev,
-+				pci_unmap_addr(desc, src),
-+				pci_unmap_len(desc, len),
-+				PCI_DMA_TODEVICE);
-+}
-+
- /**
-  * ioat_dma_memcpy_cleanup - cleanup up finished descriptors
-  * @chan: ioat channel to be cleaned up
-@@ -816,21 +837,7 @@ static void ioat_dma_memcpy_cleanup(struct ioat_dma_chan *ioat_chan)
- 			 */
- 			if (desc->async_tx.cookie) {
- 				cookie = desc->async_tx.cookie;
--
--				/*
--				 * yes we are unmapping both _page and _single
--				 * alloc'd regions with unmap_page. Is this
--				 * *really* that bad?
--				 */
--				pci_unmap_page(ioat_chan->device->pdev,
--						pci_unmap_addr(desc, dst),
--						pci_unmap_len(desc, len),
--						PCI_DMA_FROMDEVICE);
--				pci_unmap_page(ioat_chan->device->pdev,
--						pci_unmap_addr(desc, src),
--						pci_unmap_len(desc, len),
--						PCI_DMA_TODEVICE);
--
-+				ioat_dma_unmap(ioat_chan, desc);
- 				if (desc->async_tx.callback) {
- 					desc->async_tx.callback(desc->async_tx.callback_param);
- 					desc->async_tx.callback = NULL;
-@@ -889,16 +896,7 @@ static void ioat_dma_memcpy_cleanup(struct ioat_dma_chan *ioat_chan)
- 				if (desc->async_tx.cookie) {
- 					cookie = desc->async_tx.cookie;
- 					desc->async_tx.cookie = 0;
--
--					pci_unmap_page(ioat_chan->device->pdev,
--						      pci_unmap_addr(desc, dst),
--						      pci_unmap_len(desc, len),
--						      PCI_DMA_FROMDEVICE);
--					pci_unmap_page(ioat_chan->device->pdev,
--						      pci_unmap_addr(desc, src),
--						      pci_unmap_len(desc, len),
--						      PCI_DMA_TODEVICE);
--
-+					ioat_dma_unmap(ioat_chan, desc);
- 					if (desc->async_tx.callback) {
- 						desc->async_tx.callback(desc->async_tx.callback_param);
- 						desc->async_tx.callback = NULL;
-diff --git a/drivers/dma/iop-adma.c b/drivers/dma/iop-adma.c
-index 0ec0f43..0b2106e 100644
---- a/drivers/dma/iop-adma.c
-+++ b/drivers/dma/iop-adma.c
-@@ -82,11 +82,20 @@ iop_adma_run_tx_complete_actions(struct iop_adma_desc_slot *desc,
- 			struct device *dev =
- 				&iop_chan->device->pdev->dev;
- 			u32 len = unmap->unmap_len;
--			u32 src_cnt = unmap->unmap_src_cnt;
--			dma_addr_t addr = iop_desc_get_dest_addr(unmap,
--				iop_chan);
-+			enum dma_ctrl_flags flags = desc->async_tx.flags;
-+			u32 src_cnt;
-+			dma_addr_t addr;
-+
-+			if (!(flags & DMA_COMPL_SKIP_DEST_UNMAP)) {
-+				addr = iop_desc_get_dest_addr(unmap, iop_chan);
-+				dma_unmap_page(dev, addr, len, DMA_FROM_DEVICE);
-+			}
-+
-+			if (flags & DMA_COMPL_SKIP_SRC_UNMAP)
-+				src_cnt = 0;
-+			else
-+				src_cnt = unmap->unmap_src_cnt;
- 
--			dma_unmap_page(dev, addr, len, DMA_FROM_DEVICE);
- 			while (src_cnt--) {
- 				addr = iop_desc_get_src_addr(unmap,
- 							iop_chan,
-diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
-index d08a5c5..78da5c5 100644
---- a/include/linux/dmaengine.h
-+++ b/include/linux/dmaengine.h
-@@ -102,10 +102,14 @@ enum dma_transaction_type {
-  * @DMA_CTRL_ACK - the descriptor cannot be reused until the client
-  * 	acknowledges receipt, i.e. has has a chance to establish any
-  * 	dependency chains
-+ * @DMA_COMPL_SKIP_SRC_UNMAP - set to disable dma-unmapping the source buffer(s)
-+ * @DMA_COMPL_SKIP_DEST_UNMAP - set to disable dma-unmapping the destination(s)
-  */
- enum dma_ctrl_flags {
- 	DMA_PREP_INTERRUPT = (1 << 0),
- 	DMA_CTRL_ACK = (1 << 1),
-+	DMA_COMPL_SKIP_SRC_UNMAP = (1 << 2),
-+	DMA_COMPL_SKIP_DEST_UNMAP = (1 << 3),
- };
- 
- /**
-
-
+Thanks,
+Dan
