@@ -1,101 +1,57 @@
-From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Subject: Re: [PATCH v4 5/6] dmaengine: Driver for the Synopsys DesignWare
- DMA controller
-Date: Fri, 4 Jul 2008 18:10:40 +0200
-Message-ID: <20080704181040.27bb82b4@siona.local>
-References: <f12847240806270224h696e78a1v4a1aa6a87fb4a171@mail.gmail.com>
-	<7F38996F7185A24AB9071ED4950AD8C101C4D314@swsmsx413.ger.corp.intel.com>
+From: Shaz <shazalive@gmail.com>
+Subject: Incompatible CFLAGS for kernel module
+Date: Fri, 4 Jul 2008 22:34:56 +0500
+Message-ID: <7b740b700807041034m1df5ad54x4b1112d74905dc7c@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <7F38996F7185A24AB9071ED4950AD8C101C4D314@swsmsx413.ger.corp.intel.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:mime-version:content-type:content-transfer-encoding
+         :content-disposition;
+        bh=fsb48x/rhfQvaYlS8kh5QXIkuCeqcN5vYEaKB4/3M+g=;
+        b=k/fnnrYx+EAjh81KMsPPB9gonAotl3dS1o7jaBI7SP9cXNPeGRY3lRKFX25+nWo0b0
+         dQ53LX5MUpI03KORtQx26gcBnJoJqsCvHaW6ihlX7QN/W1VI7HGc/2V5u90BvO6z6Jn1
+         tWKLl3Yc4HgxmhVAAIpXLe1Ve803/ir3s1h84=
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "Sosnowski, Maciej" <maciej.sosnowski@intel.com>
-Cc: "Williams, Dan J" <dan.j.williams@intel.com>, drzeus-list@drzeus.cx, lkml <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, kernel@avr32linux.org, "Nelson, Shannon" <shannon.nelson@intel.com>, david-b@pacbell.net
+To: linux-embedded <linux-embedded@vger.kernel.org>
+Cc: ray.sunjae.lee@gmail.com, tpm-emulator-user@lists.berlios.de, tpm-emulator-devel@lists.berlios.de, Security Engineering Archive <groupsecurityengineering@gmail.com>
 
-On Fri, 4 Jul 2008 16:33:53 +0100
-"Sosnowski, Maciej" <maciej.sosnowski@intel.com> wrote:
-> Coulpe of questions and comments from my side below.
-> Apart from that the code looks fine to me.
-> 
-> Acked-by: Maciej Sosnowski <maciej.sosnowski@intel.com>
+Hi,
 
-Thanks a lot for reviewing!
+I am porting tpm emulator to versatilepb, which is an arm platform. I
+have some problem with CFLAGS from /arch/arm/Makefile when building
+the kernel module for this software. I cannot figure out what to do in
+this case. Following is the error:
 
-> > +/* Called with dwc->lock held and bh disabled */
-> > +static void dwc_dostart(struct dw_dma_chan *dwc, struct dw_desc
-> *first)
-> > +{
-> > +       struct dw_dma   *dw = to_dw_dma(dwc->chan.device);
-> > +
-> > +       /* ASSERT:  channel is idle */
-> > +       if (dma_readl(dw, CH_EN) & dwc->mask) {
-> > +               dev_err(&dwc->chan.dev,
-> > +                       "BUG: Attempted to start non-idle channel\n");
-> > +               dev_err(&dwc->chan.dev,
-> > +                       "  SAR: 0x%x DAR: 0x%x LLP: 0x%x CTL:
-> 0x%x:%08x\n",
-> > +                       channel_readl(dwc, SAR),
-> > +                       channel_readl(dwc, DAR),
-> > +                       channel_readl(dwc, LLP),
-> > +                       channel_readl(dwc, CTL_HI),
-> > +                       channel_readl(dwc, CTL_LO));
-> > +
-> > +               /* The tasklet will hopefully advance the queue... */
-> > +               return;
-> 
-> Should not at this point an error status be returned 
-> so that it can be handled accordingly by dwc_dostart() caller?
+[root@develbox tpm_emulator-0.5]# make
+Making all in tpmd
+make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd'
+make[1]: Nothing to be done for `all'.
+make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd'
+Making all in tpmd_dev
+make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd_dev'
+  CC [M]  /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o
+cc1: error: unrecognized command line option "-mlittle-endian"
+cc1: error: unrecognized command line option "-mapcs"
+cc1: error: unrecognized command line option "-mno-sched-prolog"
+cc1: error: unrecognized command line option "-mabi=aapcs-linux"
+cc1: error: unrecognized command line option "-mno-thumb-interwork"
+/embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
+(armv4t) for -march= switch
+/embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
+(arm9tdmi) for -mtune= switch
+make[3]: *** [/embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o] Error 1
+make[2]: *** [_module_/embedded/tpm_emulator-0.5/tpmd_dev] Error 2
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd_dev'
+make: *** [all-recursive] Error 255
 
-There's not a whole lot of meaningful things to do for the caller. It
-should never happen in the first place, but if the channel _is_ active
-at this point, we will eventually get an xfer complete interrupt when
-the currently pending transfers are done. The descriptors have already
-been added to the list, so the driver should recover from this kind of
-bug automatically.
+kindly help me understand the core issue here and point out some solutions.
 
-I've never actually triggered this code, so I can't really say for
-certain that it works, but at least in theory it makes much more sense
-to fix things up when the channel eventually becomes idle.
-
-> > +       ctllo = DWC_DEFAULT_CTLLO
-> > +                       | DWC_CTLL_DST_WIDTH(dst_width)
-> > +                       | DWC_CTLL_SRC_WIDTH(src_width)
-> > +                       | DWC_CTLL_DST_INC
-> > +                       | DWC_CTLL_SRC_INC
-> > +                       | DWC_CTLL_FC_M2M;
-> > +       prev = first = NULL;
-> > +
-> > +       for (offset = 0; offset < len; offset += xfer_count <<
-> src_width) {
-> > +               xfer_count = min_t(size_t, (len - offset) >>
-> src_width,
-> > +                               DWC_MAX_COUNT);
-> 
-> Here it looks like the maximum xfer_count value can change - it depends
-> on src_width, 
-> so it may be different for different transactions.
-> Is that ok?
-
-Yes, the maximum tranfer count is defined as the maximum number of
-source transactions on the bus. So if the controller is set up to do 32
-bits at a time on the source side, the maximum transfer _length_ is
-four times the maximum transfer _count_.
-
-The value written to the descriptor is also a transaction count, not a
-byte count.
-
-> This driver does not perform any self-test during initialization.
-> What about adding some initial HW checking?
-
-I'm not sure if it makes a lot of sense -- this device is typically
-integrated on the same silicon as the CPU, so if there are any issues
-with the DMA controller, they should be caught during production
-testing.
-
-I'm using the dmatest module for validating the driver, so I feel the
-self-test stuff becomes somewhat redundant.
-
-Haavard
+-- 
+Shaz
