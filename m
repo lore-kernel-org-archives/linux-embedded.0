@@ -1,263 +1,73 @@
-From: Shaz <shazalive@gmail.com>
+From: Sam Ravnborg <sam@ravnborg.org>
 Subject: Re: Incompatible CFLAGS for kernel module
-Date: Sat, 5 Jul 2008 10:33:28 +0500
-Message-ID: <7b740b700807042233q77336ba0taaae06f36e80f216@mail.gmail.com>
-References: <7b740b700807041034m1df5ad54x4b1112d74905dc7c@mail.gmail.com>
-	 <20080704203255.GB19110@uranus.ravnborg.org>
+Date: Sat, 5 Jul 2008 08:33:06 +0200
+Message-ID: <20080705063306.GB23124@uranus.ravnborg.org>
+References: <7b740b700807041034m1df5ad54x4b1112d74905dc7c@mail.gmail.com> <20080704203255.GB19110@uranus.ravnborg.org> <7b740b700807042233q77336ba0taaae06f36e80f216@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_18286_32552028.1215236008110"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type:references;
-        bh=H8OnTmA5tDBL+IzLFdNqdySxSk9V/v8p81bFTZmnakk=;
-        b=QVxLWOJJJr9TWkOSoxeYyLzJ02WlvMwKXDNv7iLHXyKzRsO39MZIEZwOkGmCgYlHvv
-         VmFA3T4LrL5rCs174i26funkgZlFZxSiImIs9slFgVikjC2tm0tKcDC5AatBE9DywJAI
-         bUqzO1q8ZkZ4FrGbE/zYNm0LumgCQQoN2HG0Q=
-In-Reply-To: <20080704203255.GB19110@uranus.ravnborg.org>
+Content-Disposition: inline
+In-Reply-To: <7b740b700807042233q77336ba0taaae06f36e80f216@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Sam Ravnborg <sam@ravnborg.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Shaz <shazalive@gmail.com>
 Cc: linux-embedded <linux-embedded@vger.kernel.org>, ray.sunjae.lee@gmail.com, tpm-emulator-user@lists.berlios.de, tpm-emulator-devel@lists.berlios.de, Security Engineering Archive <groupsecurityengineering@gmail.com>
 
-------=_Part_18286_32552028.1215236008110
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+On Sat, Jul 05, 2008 at 10:33:28AM +0500, Shaz wrote:
+> On Sat, Jul 5, 2008 at 1:32 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
+> > On Fri, Jul 04, 2008 at 10:34:56PM +0500, Shaz wrote:
+> >> Hi,
+> >>
+> >> I am porting tpm emulator to versatilepb, which is an arm platform. I
+> >> have some problem with CFLAGS from /arch/arm/Makefile when building
+> >> the kernel module for this software. I cannot figure out what to do in
+> >> this case. Following is the error:
+> >>
+> >> [root@develbox tpm_emulator-0.5]# make
+> >> Making all in tpmd
+> >> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd'
+> >> make[1]: Nothing to be done for `all'.
+> >> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd'
+> >> Making all in tpmd_dev
+> >> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd_dev'
+> >>   CC [M]  /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o
+> >> cc1: error: unrecognized command line option "-mlittle-endian"
+> >> cc1: error: unrecognized command line option "-mapcs"
+> >> cc1: error: unrecognized command line option "-mno-sched-prolog"
+> >> cc1: error: unrecognized command line option "-mabi=aapcs-linux"
+> >> cc1: error: unrecognized command line option "-mno-thumb-interwork"
+> >> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
+> >> (armv4t) for -march= switch
+> >> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
+> >> (arm9tdmi) for -mtune= switch
+> >> make[3]: *** [/embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o] Error 1
+> >> make[2]: *** [_module_/embedded/tpm_emulator-0.5/tpmd_dev] Error 2
+> >> make[1]: *** [all] Error 2
+> >> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd_dev'
+> >> make: *** [all-recursive] Error 255
+> >>
+> >> kindly help me understand the core issue here and point out some solutions.
+> >
+> > A quick guess is that you use your host gcc and not your target gcc.
+> > You most likely have to set CROSS_COMPILE=...
+> >
+> > Try with "make V=1" to see the exact gcc command line.
+> >
+> > If you continue to rn into trouble please post your Makefile.
+> I tried make V=1 but the loads of info was given for the things that
+> went right but nothing noticeable where the error is.
+What is interesting is the gcc commandline for a good case and
+a bad case. If they do not look the same we are on the right track.
 
-On Sat, Jul 5, 2008 at 1:32 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
-> On Fri, Jul 04, 2008 at 10:34:56PM +0500, Shaz wrote:
->> Hi,
->>
->> I am porting tpm emulator to versatilepb, which is an arm platform. I
->> have some problem with CFLAGS from /arch/arm/Makefile when building
->> the kernel module for this software. I cannot figure out what to do in
->> this case. Following is the error:
->>
->> [root@develbox tpm_emulator-0.5]# make
->> Making all in tpmd
->> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd'
->> make[1]: Nothing to be done for `all'.
->> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd'
->> Making all in tpmd_dev
->> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd_dev'
->>   CC [M]  /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o
->> cc1: error: unrecognized command line option "-mlittle-endian"
->> cc1: error: unrecognized command line option "-mapcs"
->> cc1: error: unrecognized command line option "-mno-sched-prolog"
->> cc1: error: unrecognized command line option "-mabi=aapcs-linux"
->> cc1: error: unrecognized command line option "-mno-thumb-interwork"
->> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
->> (armv4t) for -march= switch
->> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
->> (arm9tdmi) for -mtune= switch
->> make[3]: *** [/embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o] Error 1
->> make[2]: *** [_module_/embedded/tpm_emulator-0.5/tpmd_dev] Error 2
->> make[1]: *** [all] Error 2
->> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd_dev'
->> make: *** [all-recursive] Error 255
->>
->> kindly help me understand the core issue here and point out some solutions.
->
-> A quick guess is that you use your host gcc and not your target gcc.
-> You most likely have to set CROSS_COMPILE=...
->
-> Try with "make V=1" to see the exact gcc command line.
->
-> If you continue to rn into trouble please post your Makefile.
-I tried make V=1 but the loads of info was given for the things that
-went right but nothing noticeable where the error is.
-I've attached my arch/arm/Makefile. My build, host and target are on
-same system. i am emulating the board with Qemu. The process is very
-conventional. I've mounted my rootfs with -o loop and kernel and extra
-modules go there with INSTALL_MOD_PATH and INSTALL_MOD_DIR. ARCH=arm
-and CROSS_COMPILE=arm-linux-
->
->        Sam
->
+> I've attached my arch/arm/Makefile. My build, host and target are on
+> same system. i am emulating the board with Qemu. The process is very
+> conventional. I've mounted my rootfs with -o loop and kernel and extra
+> modules go there with INSTALL_MOD_PATH and INSTALL_MOD_DIR. ARCH=arm
+> and CROSS_COMPILE=arm-linux-
 
+But you do some kind of "external module" build judging from the output
+above. So the Makefile of interest is the one(s) that is special for
+your module. At lest the one you have in /embedded/tpm_emulator-0.5/tpmd_dev
 
-
--- 
-Shaz
-
-------=_Part_18286_32552028.1215236008110
-Content-Type: application/octet-stream; name=Makefile
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fi9rgs6w0
-Content-Disposition: attachment; filename=Makefile
-
-IwojIGFyY2gvYXJtL01ha2VmaWxlCiMKIyBUaGlzIGZpbGUgaXMgaW5jbHVkZWQgYnkgdGhlIGds
-b2JhbCBtYWtlZmlsZSBzbyB0aGF0IHlvdSBjYW4gYWRkIHlvdXIgb3duCiMgYXJjaGl0ZWN0dXJl
-LXNwZWNpZmljIGZsYWdzIGFuZCBkZXBlbmRlbmNpZXMuCiMKIyBUaGlzIGZpbGUgaXMgc3ViamVj
-dCB0byB0aGUgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhlIEdOVSBHZW5lcmFsIFB1YmxpYwoj
-IExpY2Vuc2UuICBTZWUgdGhlIGZpbGUgIkNPUFlJTkciIGluIHRoZSBtYWluIGRpcmVjdG9yeSBv
-ZiB0aGlzIGFyY2hpdmUKIyBmb3IgbW9yZSBkZXRhaWxzLgojCiMgQ29weXJpZ2h0IChDKSAxOTk1
-LTIwMDEgYnkgUnVzc2VsbCBLaW5nCgpMREZMQUdTX3ZtbGludXgJOj0tcCAtLW5vLXVuZGVmaW5l
-ZCAtWApDUFBGTEFHU192bWxpbnV4LmxkcyA9IC1EVEVYVF9PRkZTRVQ9JChURVhUX09GRlNFVCkK
-T0JKQ09QWUZMQUdTCTo9LU8gYmluYXJ5IC1SIC5ub3RlIC1SIC5ub3RlLmdudS5idWlsZC1pZCAt
-UiAuY29tbWVudCAtUwpHWkZMQUdTCQk6PS05CiNLQlVJTERfQ0ZMQUdTCSs9LXBpcGUKIyBFeHBs
-aWNpdGx5IHNwZWNpZml5IDMyLWJpdCBBUk0gSVNBIHNpbmNlIHRvb2xjaGFpbiBkZWZhdWx0IGNh
-biBiZSAtbXRodW1iOgpLQlVJTERfQ0ZMQUdTCSs9JChjYWxsIGNjLW9wdGlvbiwtbWFybSwpCgoj
-IERvIG5vdCB1c2UgYXJjaC9hcm0vZGVmY29uZmlnIC0gaXQncyBhbHdheXMgb3V0ZGF0ZWQuCiMg
-U2VsZWN0IGEgcGxhdGZvcm0gdGh0IGlzIGtlcHQgdXAtdG8tZGF0ZQpLQlVJTERfREVGQ09ORklH
-IDo9IHZlcnNhdGlsZV9kZWZjb25maWcKCiMgZGVmaW5lcyBmaWxlbmFtZSBleHRlbnNpb24gZGVw
-ZW5kaW5nIG1lbW9yeSBtYW5lbWVudCB0eXBlLgppZmVxICgkKENPTkZJR19NTVUpLCkKTU1VRVhU
-CQk6PSAtbm9tbXUKZW5kaWYKCmlmZXEgKCQoQ09ORklHX0ZSQU1FX1BPSU5URVIpLHkpCktCVUlM
-RF9DRkxBR1MJKz0tZm5vLW9taXQtZnJhbWUtcG9pbnRlciAtbWFwY3MgLW1uby1zY2hlZC1wcm9s
-b2cKZW5kaWYKCmlmZXEgKCQoQ09ORklHX0NQVV9CSUdfRU5ESUFOKSx5KQpLQlVJTERfQ1BQRkxB
-R1MJKz0gLW1iaWctZW5kaWFuCkFTCQkrPSAtRUIKTEQJCSs9IC1FQgplbHNlCktCVUlMRF9DUFBG
-TEFHUwkrPSAtbWxpdHRsZS1lbmRpYW4KQVMJCSs9IC1FTApMRAkJKz0gLUVMCmVuZGlmCgpjb21t
-YSA9ICwKCiMgVGhpcyBzZWxlY3RzIHdoaWNoIGluc3RydWN0aW9uIHNldCBpcyB1c2VkLgojIE5v
-dGUgdGhhdCBHQ0MgZG9lcyBub3QgbnVtZXJpY2FsbHkgZGVmaW5lIGFuIGFyY2hpdGVjdHVyZSB2
-ZXJzaW9uCiMgbWFjcm8sIGJ1dCBpbnN0ZWFkIGRlZmluZXMgYSB3aG9sZSBzZXJpZXMgb2YgbWFj
-cm9zIHdoaWNoIG1ha2VzCiMgdGVzdGluZyBmb3IgYSBzcGVjaWZpYyBhcmNoaXRlY3R1cmUgb3Ig
-bGF0ZXIgcmF0aGVyIGltcG9zc2libGUuCmFyY2gtJChDT05GSUdfQ1BVXzMydjcpCQk6PS1EX19M
-SU5VWF9BUk1fQVJDSF9fPTcgJChjYWxsIGNjLW9wdGlvbiwtbWFyY2g9YXJtdjdhLC1tYXJjaD1h
-cm12NXQgLVdhJChjb21tYSktbWFyY2g9YXJtdjdhKQphcmNoLSQoQ09ORklHX0NQVV8zMnY2KQkJ
-Oj0tRF9fTElOVVhfQVJNX0FSQ0hfXz02ICQoY2FsbCBjYy1vcHRpb24sLW1hcmNoPWFybXY2LC1t
-YXJjaD1hcm12NXQgLVdhJChjb21tYSktbWFyY2g9YXJtdjYpCiMgT25seSBvdmVycmlkZSB0aGUg
-Y29tcGlsZXIgb3B0aW9uIGlmIEFSTXY2LiBUaGUgQVJNdjZLIGV4dGVuc2lvbnMgYXJlCiMgYWx3
-YXlzIGF2YWlsYWJsZSBpbiBBUk12NwppZmVxICgkKENPTkZJR19DUFVfMzJ2NikseSkKYXJjaC0k
-KENPTkZJR19DUFVfMzJ2NkspCTo9LURfX0xJTlVYX0FSTV9BUkNIX189NiAkKGNhbGwgY2Mtb3B0
-aW9uLC1tYXJjaD1hcm12NmssLW1hcmNoPWFybXY1dCAtV2EkKGNvbW1hKS1tYXJjaD1hcm12Nmsp
-CmVuZGlmCmFyY2gtJChDT05GSUdfQ1BVXzMydjUpCQk6PS1EX19MSU5VWF9BUk1fQVJDSF9fPTUg
-JChjYWxsIGNjLW9wdGlvbiwtbWFyY2g9YXJtdjV0ZSwtbWFyY2g9YXJtdjR0KQphcmNoLSQoQ09O
-RklHX0NQVV8zMnY0VCkJOj0tRF9fTElOVVhfQVJNX0FSQ0hfXz00IC1tYXJjaD1hcm12NHQKYXJj
-aC0kKENPTkZJR19DUFVfMzJ2NCkJCTo9LURfX0xJTlVYX0FSTV9BUkNIX189NCAtbWFyY2g9YXJt
-djQKYXJjaC0kKENPTkZJR19DUFVfMzJ2MykJCTo9LURfX0xJTlVYX0FSTV9BUkNIX189MyAtbWFy
-Y2g9YXJtdjMKCiMgVGhpcyBzZWxlY3RzIGhvdyB3ZSBvcHRpbWlzZSBmb3IgdGhlIHByb2Nlc3Nv
-ci4KdHVuZS0kKENPTkZJR19DUFVfQVJNNjEwKQk6PS1tdHVuZT1hcm02MTAKdHVuZS0kKENPTkZJ
-R19DUFVfQVJNNzEwKQk6PS1tdHVuZT1hcm03MTAKdHVuZS0kKENPTkZJR19DUFVfQVJNN1RETUkp
-CTo9LW10dW5lPWFybTd0ZG1pCnR1bmUtJChDT05GSUdfQ1BVX0FSTTcyMFQpCTo9LW10dW5lPWFy
-bTd0ZG1pCnR1bmUtJChDT05GSUdfQ1BVX0FSTTc0MFQpCTo9LW10dW5lPWFybTd0ZG1pCnR1bmUt
-JChDT05GSUdfQ1BVX0FSTTlURE1JKQk6PS1tdHVuZT1hcm05dGRtaQp0dW5lLSQoQ09ORklHX0NQ
-VV9BUk05NDBUKQk6PS1tdHVuZT1hcm05dGRtaQp0dW5lLSQoQ09ORklHX0NQVV9BUk05NDZUKQk6
-PSQoY2FsbCBjYy1vcHRpb24sLW10dW5lPWFybTllLC1tdHVuZT1hcm05dGRtaSkKdHVuZS0kKENP
-TkZJR19DUFVfQVJNOTIwVCkJOj0tbXR1bmU9YXJtOXRkbWkKdHVuZS0kKENPTkZJR19DUFVfQVJN
-OTIyVCkJOj0tbXR1bmU9YXJtOXRkbWkKdHVuZS0kKENPTkZJR19DUFVfQVJNOTI1VCkJOj0tbXR1
-bmU9YXJtOXRkbWkKdHVuZS0kKENPTkZJR19DUFVfQVJNOTI2VCkJOj0tbXR1bmU9YXJtOXRkbWkK
-dHVuZS0kKENPTkZJR19DUFVfU0ExMTApCTo9LW10dW5lPXN0cm9uZ2FybTExMAp0dW5lLSQoQ09O
-RklHX0NQVV9TQTExMDApCTo9LW10dW5lPXN0cm9uZ2FybTExMDAKdHVuZS0kKENPTkZJR19DUFVf
-WFNDQUxFKQk6PSQoY2FsbCBjYy1vcHRpb24sLW10dW5lPXhzY2FsZSwtbXR1bmU9c3Ryb25nYXJt
-MTEwKSAtV2EsLW1jcHU9eHNjYWxlCnR1bmUtJChDT05GSUdfQ1BVX1hTQzMpCQk6PSQoY2FsbCBj
-Yy1vcHRpb24sLW10dW5lPXhzY2FsZSwtbXR1bmU9c3Ryb25nYXJtMTEwKSAtV2EsLW1jcHU9eHNj
-YWxlCnR1bmUtJChDT05GSUdfQ1BVX1Y2KQkJOj0kKGNhbGwgY2Mtb3B0aW9uLC1tdHVuZT1hcm0x
-MTM2ai1zLC1tdHVuZT1zdHJvbmdhcm0pCgppZmVxICgkKENPTkZJR19BRUFCSSkseSkKQ0ZMQUdT
-X0FCSQk6PS1tYWJpPWFhcGNzLWxpbnV4IC1tbm8tdGh1bWItaW50ZXJ3b3JrCmVsc2UKQ0ZMQUdT
-X0FCSQk6PSQoY2FsbCBjYy1vcHRpb24sLW1hcGNzLTMyLC1tYWJpPWFwY3MtZ251KSAkKGNhbGwg
-Y2Mtb3B0aW9uLC1tbm8tdGh1bWItaW50ZXJ3b3JrLCkKZW5kaWYKCiMgTmVlZCAtVWFybSBmb3Ig
-Z2NjIDwgMy54CktCVUlMRF9DRkxBR1MJKz0kKENGTEFHU19BQkkpICQoYXJjaC15KSAkKHR1bmUt
-eSkgJChjYWxsIGNjLW9wdGlvbiwtbXNob3J0LWxvYWQtYnl0ZXMsJChjYWxsIGNjLW9wdGlvbiwt
-bWFsaWdubWVudC10cmFwcywpKSAtbXNvZnQtZmxvYXQgLVVhcm0KS0JVSUxEX0FGTEFHUwkrPSQo
-Q0ZMQUdTX0FCSSkgJChhcmNoLXkpICQodHVuZS15KSAtbXNvZnQtZmxvYXQKCkNIRUNLRkxBR1MJ
-Kz0gLURfX2FybV9fCgojRGVmYXVsdCB2YWx1ZQpoZWFkLXkJCTo9IGFyY2gvYXJtL2tlcm5lbC9o
-ZWFkJChNTVVFWFQpLm8gYXJjaC9hcm0va2VybmVsL2luaXRfdGFzay5vCnRleHRvZnMteQk6PSAw
-eDAwMDA4MDAwCgogbWFjaGluZS0kKENPTkZJR19BUkNIX1JQQykJICAgOj0gcnBjCiBtYWNoaW5l
-LSQoQ09ORklHX0FSQ0hfRUJTQTExMCkJICAgOj0gZWJzYTExMAogbWFjaGluZS0kKENPTkZJR19B
-UkNIX0NMUFM3NTAwKSAgIDo9IGNscHM3NTAwCiAgaW5jZGlyLSQoQ09ORklHX0FSQ0hfQ0xQUzc1
-MDApICAgOj0gY2w3NTAwCiBtYWNoaW5lLSQoQ09ORklHX0ZPT1RCUklER0UpCSAgIDo9IGZvb3Ri
-cmlkZ2UKICBpbmNkaXItJChDT05GSUdfRk9PVEJSSURHRSkJICAgOj0gZWJzYTI4NQogbWFjaGlu
-ZS0kKENPTkZJR19BUkNIX0NPMjg1KQkgICA6PSBmb290YnJpZGdlCiAgaW5jZGlyLSQoQ09ORklH
-X0FSQ0hfQ08yODUpCSAgIDo9IGVic2EyODUKIG1hY2hpbmUtJChDT05GSUdfQVJDSF9TSEFSSykJ
-ICAgOj0gc2hhcmsKIG1hY2hpbmUtJChDT05GSUdfQVJDSF9TQTExMDApCSAgIDo9IHNhMTEwMApp
-ZmVxICgkKENPTkZJR19BUkNIX1NBMTEwMCkseSkKIyBTQTExMTEgRE1BIGJ1Zzogd2UgZG9uJ3Qg
-d2FudCB0aGUga2VybmVsIHRvIGxpdmUgaW4gcHJlY2lvdXMgRE1BLWFibGUgbWVtb3J5CiB0ZXh0
-b2ZzLSQoQ09ORklHX1NBMTExMSkJICAgOj0gMHgwMDIwODAwMAplbmRpZgogbWFjaGluZS0kKENP
-TkZJR19BUkNIX1BYQSkJICAgOj0gcHhhCiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfTDcyMDApCSAg
-IDo9IGw3MjAwCiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfSU5URUdSQVRPUikgOj0gaW50ZWdyYXRv
-cgogdGV4dG9mcy0kKENPTkZJR19BUkNIX0NMUFM3MTFYKSAgIDo9IDB4MDAwMjgwMDAKIG1hY2hp
-bmUtJChDT05GSUdfQVJDSF9DTFBTNzExWCkgICA6PSBjbHBzNzExeAogbWFjaGluZS0kKENPTkZJ
-R19BUkNIX0lPUDMyWCkJICAgOj0gaW9wMzJ4CiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfSU9QMzNY
-KQkgICA6PSBpb3AzM3gKIG1hY2hpbmUtJChDT05GSUdfQVJDSF9JT1AxM1hYKQkgICA6PSBpb3Ax
-M3h4CiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfSVhQNFhYKQkgICA6PSBpeHA0eHgKIG1hY2hpbmUt
-JChDT05GSUdfQVJDSF9JWFAyMDAwKSAgICA6PSBpeHAyMDAwCiBtYWNoaW5lLSQoQ09ORklHX0FS
-Q0hfSVhQMjNYWCkgICAgOj0gaXhwMjN4eAogbWFjaGluZS0kKENPTkZJR19BUkNIX09NQVAxKQkg
-ICA6PSBvbWFwMQogbWFjaGluZS0kKENPTkZJR19BUkNIX09NQVAyKQkgICA6PSBvbWFwMgogIGlu
-Y2Rpci0kKENPTkZJR19BUkNIX09NQVApCSAgIDo9IG9tYXAKIG1hY2hpbmUtJChDT05GSUdfQVJD
-SF9TM0MyNDEwKQkgICA6PSBzM2MyNDEwCiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfTEg3QTQwWCkJ
-ICAgOj0gbGg3YTQweAogbWFjaGluZS0kKENPTkZJR19BUkNIX1ZFUlNBVElMRSkgIDo9IHZlcnNh
-dGlsZQogbWFjaGluZS0kKENPTkZJR19BUkNIX0lNWCkJICAgOj0gaW14CiBtYWNoaW5lLSQoQ09O
-RklHX0FSQ0hfSDcyMFgpCSAgIDo9IGg3MjB4CiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfQUFFQzIw
-MDApICAgOj0gYWFlYzIwMDAKIG1hY2hpbmUtJChDT05GSUdfQVJDSF9SRUFMVklFVykgICA6PSBy
-ZWFsdmlldwogbWFjaGluZS0kKENPTkZJR19BUkNIX0FUOTEpCSAgIDo9IGF0OTEKIG1hY2hpbmUt
-JChDT05GSUdfQVJDSF9FUDkzWFgpCSAgIDo9IGVwOTN4eAogbWFjaGluZS0kKENPTkZJR19BUkNI
-X1BOWDQwMDgpCSAgIDo9IHBueDQwMDgKIG1hY2hpbmUtJChDT05GSUdfQVJDSF9ORVRYKQkgICA6
-PSBuZXR4CiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfTlM5WFhYKQkgICA6PSBuczl4eHgKIHRleHRv
-ZnMtJChDT05GSUdfQVJDSF9OUzlYWFgpCSAgIDo9IDB4MDAxMDgwMDAKIG1hY2hpbmUtJChDT05G
-SUdfQVJDSF9EQVZJTkNJKQkgICA6PSBkYXZpbmNpCiBtYWNoaW5lLSQoQ09ORklHX0FSQ0hfS1M4
-Njk1KSAgICAgOj0ga3M4Njk1CiAgaW5jZGlyLSQoQ09ORklHX0FSQ0hfTVhDKQkgICA6PSBteGMK
-IG1hY2hpbmUtJChDT05GSUdfQVJDSF9NWDMpCSAgIDo9IG14MwogbWFjaGluZS0kKENPTkZJR19B
-UkNIX09SSU9OKQkgICA6PSBvcmlvbgogbWFjaGluZS0kKENPTkZJR19BUkNIX01TTTdYMDBBKSAg
-IDo9IG1zbQoKaWZlcSAoJChDT05GSUdfQVJDSF9FQlNBMTEwKSx5KQojIFRoaXMgaXMgd2hhdCBo
-YXBwZW5zIGlmIHlvdSBmb3JnZXQgdGhlIElPQ1MxNiBsaW5lLgojIFBDTUNJQSBjYXJkcyBzdG9w
-IHdvcmtpbmcuCkNGTEFHU18zYzU4OV9jcy5vIDo9LURJU0FfU0lYVEVFTl9CSVRfUEVSSVBIRVJB
-TApleHBvcnQgQ0ZMQUdTXzNjNTg5X2NzLm8KZW5kaWYKCiMgVGhlIGJ5dGUgb2Zmc2V0IG9mIHRo
-ZSBrZXJuZWwgaW1hZ2UgaW4gUkFNIGZyb20gdGhlIHN0YXJ0IG9mIFJBTS4KVEVYVF9PRkZTRVQg
-Oj0gJCh0ZXh0b2ZzLXkpCgppZmVxICgkKGluY2Rpci15KSwpCmluY2Rpci15IDo9ICQobWFjaGlu
-ZS15KQplbmRpZgpJTkNESVIgICA6PSBhcmNoLSQoaW5jZGlyLXkpCgppZm5lcSAoJChtYWNoaW5l
-LXkpLCkKTUFDSElORSAgOj0gYXJjaC9hcm0vbWFjaC0kKG1hY2hpbmUteSkvCmVsc2UKTUFDSElO
-RSAgOj0KZW5kaWYKCmV4cG9ydAlURVhUX09GRlNFVCBHWkZMQUdTIE1NVUVYVAoKIyBEbyB3ZSBo
-YXZlIEZBU1RGUEU/CkZBU1RGUEUJCTo9YXJjaC9hcm0vZmFzdGZwZQppZmVxICgkKEZBU1RGUEUp
-LCQod2lsZGNhcmQgJChGQVNURlBFKSkpCkZBU1RGUEVfT0JKCTo9JChGQVNURlBFKS8KZW5kaWYK
-CiMgSWYgd2UgaGF2ZSBhIG1hY2hpbmUtc3BlY2lmaWMgZGlyZWN0b3J5LCB0aGVuIGluY2x1ZGUg
-aXQgaW4gdGhlIGJ1aWxkLgpjb3JlLXkJCQkJKz0gYXJjaC9hcm0va2VybmVsLyBhcmNoL2FybS9t
-bS8gYXJjaC9hcm0vY29tbW9uLwpjb3JlLXkJCQkJKz0gJChNQUNISU5FKQpjb3JlLSQoQ09ORklH
-X0FSQ0hfUzNDMjQxMCkJKz0gYXJjaC9hcm0vbWFjaC1zM2MyNDAwLwpjb3JlLSQoQ09ORklHX0FS
-Q0hfUzNDMjQxMCkJKz0gYXJjaC9hcm0vbWFjaC1zM2MyNDEyLwpjb3JlLSQoQ09ORklHX0FSQ0hf
-UzNDMjQxMCkJKz0gYXJjaC9hcm0vbWFjaC1zM2MyNDQwLwpjb3JlLSQoQ09ORklHX0FSQ0hfUzND
-MjQxMCkJKz0gYXJjaC9hcm0vbWFjaC1zM2MyNDQyLwpjb3JlLSQoQ09ORklHX0FSQ0hfUzNDMjQx
-MCkJKz0gYXJjaC9hcm0vbWFjaC1zM2MyNDQzLwpjb3JlLSQoQ09ORklHX0ZQRV9OV0ZQRSkJKz0g
-YXJjaC9hcm0vbndmcGUvCmNvcmUtJChDT05GSUdfRlBFX0ZBU1RGUEUpCSs9ICQoRkFTVEZQRV9P
-QkopCmNvcmUtJChDT05GSUdfVkZQKQkJKz0gYXJjaC9hcm0vdmZwLwoKIyBJZiB3ZSBoYXZlIGEg
-Y29tbW9uIHBsYXRmb3JtIGRpcmVjdG9yeSwgdGhlbiBpbmNsdWRlIGl0IGluIHRoZSBidWlsZC4K
-Y29yZS0kKENPTkZJR19QTEFUX0lPUCkJCSs9IGFyY2gvYXJtL3BsYXQtaW9wLwpjb3JlLSQoQ09O
-RklHX0FSQ0hfT01BUCkJKz0gYXJjaC9hcm0vcGxhdC1vbWFwLwpjb3JlLSQoQ09ORklHX1BMQVRf
-UzNDMjRYWCkJCSs9IGFyY2gvYXJtL3BsYXQtczNjMjR4eC8KY29yZS0kKENPTkZJR19BUkNIX01Y
-QykJCSs9IGFyY2gvYXJtL3BsYXQtbXhjLwoKZHJpdmVycy0kKENPTkZJR19PUFJPRklMRSkgICAg
-ICArPSBhcmNoL2FybS9vcHJvZmlsZS8KZHJpdmVycy0kKENPTkZJR19BUkNIX0NMUFM3NTAwKQkr
-PSBkcml2ZXJzL2Fjb3JuL2NoYXIvCmRyaXZlcnMtJChDT05GSUdfQVJDSF9MNzIwMCkJKz0gZHJp
-dmVycy9hY29ybi9jaGFyLwoKbGlicy15CQkJCTo9IGFyY2gvYXJtL2xpYi8gJChsaWJzLXkpCgoj
-IERlZmF1bHQgdGFyZ2V0IHdoZW4gZXhlY3V0aW5nIHBsYWluIG1ha2UKaWZlcSAoJChDT05GSUdf
-WElQX0tFUk5FTCkseSkKS0JVSUxEX0lNQUdFIDo9IHhpcEltYWdlCmVsc2UKS0JVSUxEX0lNQUdF
-IDo9IHpJbWFnZQplbmRpZgoKYWxsOgkkKEtCVUlMRF9JTUFHRSkKCmJvb3QgOj0gYXJjaC9hcm0v
-Ym9vdAoKIwlVcGRhdGUgbWFjaGluZSBhcmNoIGFuZCBwcm9jIHN5bWxpbmtzIGlmIHNvbWV0aGlu
-ZyB3aGljaCBhZmZlY3RzCiMJdGhlbSBjaGFuZ2VkLiAgV2UgdXNlIC5hcmNoIHRvIGluZGljYXRl
-IHdoZW4gdGhleSB3ZXJlIHVwZGF0ZWQKIwlsYXN0LCBvdGhlcndpc2UgbWFrZSB1c2VzIHRoZSB0
-YXJnZXQgZGlyZWN0b3J5IG10aW1lLgoKaW5jbHVkZS9hc20tYXJtLy5hcmNoOiAkKHdpbGRjYXJk
-IGluY2x1ZGUvY29uZmlnL2FyY2gvKi5oKSBpbmNsdWRlL2NvbmZpZy9hdXRvLmNvbmYKCUBlY2hv
-ICcgIFNZTUxJTksgaW5jbHVkZS9hc20tYXJtL2FyY2ggLT4gaW5jbHVkZS9hc20tYXJtLyQoSU5D
-RElSKScKaWZuZXEgKCQoS0JVSUxEX1NSQyksKQoJJChRKW1rZGlyIC1wIGluY2x1ZGUvYXNtLWFy
-bQoJJChRKWxuIC1mc24gJChzcmN0cmVlKS9pbmNsdWRlL2FzbS1hcm0vJChJTkNESVIpIGluY2x1
-ZGUvYXNtLWFybS9hcmNoCmVsc2UKCSQoUSlsbiAtZnNuICQoSU5DRElSKSBpbmNsdWRlL2FzbS1h
-cm0vYXJjaAplbmRpZgoJQHRvdWNoICRACgphcmNocHJlcGFyZTogbWFrZXRvb2xzCgpQSE9OWSAr
-PSBtYWtldG9vbHMgRk9SQ0UKbWFrZXRvb2xzOiBpbmNsdWRlL2xpbnV4L3ZlcnNpb24uaCBpbmNs
-dWRlL2FzbS1hcm0vLmFyY2ggRk9SQ0UKCSQoUSkkKE1BS0UpICQoYnVpbGQpPWFyY2gvYXJtL3Rv
-b2xzIGluY2x1ZGUvYXNtLWFybS9tYWNoLXR5cGVzLmgKCiMgQ29udmVydCBiekltYWdlIHRvIHpJ
-bWFnZQpiekltYWdlOiB6SW1hZ2UKCnpJbWFnZSBJbWFnZSB4aXBJbWFnZSBib290cEltYWdlIHVJ
-bWFnZTogdm1saW51eAoJJChRKSQoTUFLRSkgJChidWlsZCk9JChib290KSBNQUNISU5FPSQoTUFD
-SElORSkgJChib290KS8kQAoKemluc3RhbGwgaW5zdGFsbDogdm1saW51eAoJJChRKSQoTUFLRSkg
-JChidWlsZCk9JChib290KSBNQUNISU5FPSQoTUFDSElORSkgJEAKCkNMRUFOX0ZJTEVTICs9IGlu
-Y2x1ZGUvYXNtLWFybS9tYWNoLXR5cGVzLmggXAoJICAgICAgIGluY2x1ZGUvYXNtLWFybS9hcmNo
-IGluY2x1ZGUvYXNtLWFybS8uYXJjaAoKIyBXZSB1c2UgTVJQUk9QRVJfRklMRVMgYW5kIENMRUFO
-X0ZJTEVTIG5vdwphcmNoY2xlYW46CgkkKFEpJChNQUtFKSAkKGNsZWFuKT0kKGJvb3QpCgojIE15
-IHRlc3RpbmcgdGFyZ2V0cyAoYnlwYXNzZXMgZGVwZW5kZW5jaWVzKQpicDo7CSQoUSkkKE1BS0Up
-ICQoYnVpbGQpPSQoYm9vdCkgTUFDSElORT0kKE1BQ0hJTkUpICQoYm9vdCkvYm9vdHBJbWFnZQpp
-IHppOjsJJChRKSQoTUFLRSkgJChidWlsZCk9JChib290KSBNQUNISU5FPSQoTUFDSElORSkgJEAK
-CgpkZWZpbmUgYXJjaGhlbHAKICBlY2hvICAnKiB6SW1hZ2UgICAgICAgIC0gQ29tcHJlc3NlZCBr
-ZXJuZWwgaW1hZ2UgKGFyY2gvJChBUkNIKS9ib290L3pJbWFnZSknCiAgZWNobyAgJyAgSW1hZ2Ug
-ICAgICAgICAtIFVuY29tcHJlc3NlZCBrZXJuZWwgaW1hZ2UgKGFyY2gvJChBUkNIKS9ib290L0lt
-YWdlKScKICBlY2hvICAnKiB4aXBJbWFnZSAgICAgIC0gWElQIGtlcm5lbCBpbWFnZSwgaWYgY29u
-ZmlndXJlZCAoYXJjaC8kKEFSQ0gpL2Jvb3QveGlwSW1hZ2UpJwogIGVjaG8gICcgIHVJbWFnZSAg
-ICAgICAgLSBVLUJvb3Qgd3JhcHBlZCB6SW1hZ2UnCiAgZWNobyAgJyAgYm9vdHBJbWFnZSAgICAt
-IENvbWJpbmVkIHpJbWFnZSBhbmQgaW5pdGlhbCBSQU0gZGlzaycgCiAgZWNobyAgJyAgICAgICAg
-ICAgICAgICAgIChzdXBwbHkgaW5pdHJkIGltYWdlIHZpYSBtYWtlIHZhcmlhYmxlIElOSVRSRD08
-cGF0aD4pJwogIGVjaG8gICcgIGluc3RhbGwgICAgICAgLSBJbnN0YWxsIHVuY29tcHJlc3NlZCBr
-ZXJuZWwnCiAgZWNobyAgJyAgemluc3RhbGwgICAgICAtIEluc3RhbGwgY29tcHJlc3NlZCBrZXJu
-ZWwnCiAgZWNobyAgJyAgICAgICAgICAgICAgICAgIEluc3RhbGwgdXNpbmcgKHlvdXIpIH4vYmlu
-L2luc3RhbGxrZXJuZWwgb3InCiAgZWNobyAgJyAgICAgICAgICAgICAgICAgIChkaXN0cmlidXRp
-b24pIC9zYmluL2luc3RhbGxrZXJuZWwgb3InCiAgZWNobyAgJyAgICAgICAgICAgICAgICAgIGlu
-c3RhbGwgdG8gJCQoSU5TVEFMTF9QQVRIKSBhbmQgcnVuIGxpbG8nCmVuZGVmCg==
-------=_Part_18286_32552028.1215236008110--
+	Sam
