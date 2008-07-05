@@ -1,73 +1,153 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: Incompatible CFLAGS for kernel module
-Date: Sat, 5 Jul 2008 08:33:06 +0200
-Message-ID: <20080705063306.GB23124@uranus.ravnborg.org>
-References: <7b740b700807041034m1df5ad54x4b1112d74905dc7c@mail.gmail.com> <20080704203255.GB19110@uranus.ravnborg.org> <7b740b700807042233q77336ba0taaae06f36e80f216@mail.gmail.com>
+From: Stefan Schoenleitner <dev.c0debabe@gmail.com>
+Subject: optimal hardware design for an ARM9 based single board computer to
+ work with existing linux drivers
+Date: Sat, 05 Jul 2008 11:03:11 +0200
+Message-ID: <486F38CF.40803@gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <7b740b700807042233q77336ba0taaae06f36e80f216@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Shaz <shazalive@gmail.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, ray.sunjae.lee@gmail.com, tpm-emulator-user@lists.berlios.de, tpm-emulator-devel@lists.berlios.de, Security Engineering Archive <groupsecurityengineering@gmail.com>
+To: linux-embedded@vger.kernel.org
 
-On Sat, Jul 05, 2008 at 10:33:28AM +0500, Shaz wrote:
-> On Sat, Jul 5, 2008 at 1:32 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
-> > On Fri, Jul 04, 2008 at 10:34:56PM +0500, Shaz wrote:
-> >> Hi,
-> >>
-> >> I am porting tpm emulator to versatilepb, which is an arm platform. I
-> >> have some problem with CFLAGS from /arch/arm/Makefile when building
-> >> the kernel module for this software. I cannot figure out what to do in
-> >> this case. Following is the error:
-> >>
-> >> [root@develbox tpm_emulator-0.5]# make
-> >> Making all in tpmd
-> >> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd'
-> >> make[1]: Nothing to be done for `all'.
-> >> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd'
-> >> Making all in tpmd_dev
-> >> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd_dev'
-> >>   CC [M]  /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o
-> >> cc1: error: unrecognized command line option "-mlittle-endian"
-> >> cc1: error: unrecognized command line option "-mapcs"
-> >> cc1: error: unrecognized command line option "-mno-sched-prolog"
-> >> cc1: error: unrecognized command line option "-mabi=aapcs-linux"
-> >> cc1: error: unrecognized command line option "-mno-thumb-interwork"
-> >> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
-> >> (armv4t) for -march= switch
-> >> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
-> >> (arm9tdmi) for -mtune= switch
-> >> make[3]: *** [/embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o] Error 1
-> >> make[2]: *** [_module_/embedded/tpm_emulator-0.5/tpmd_dev] Error 2
-> >> make[1]: *** [all] Error 2
-> >> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd_dev'
-> >> make: *** [all-recursive] Error 255
-> >>
-> >> kindly help me understand the core issue here and point out some solutions.
-> >
-> > A quick guess is that you use your host gcc and not your target gcc.
-> > You most likely have to set CROSS_COMPILE=...
-> >
-> > Try with "make V=1" to see the exact gcc command line.
-> >
-> > If you continue to rn into trouble please post your Makefile.
-> I tried make V=1 but the loads of info was given for the things that
-> went right but nothing noticeable where the error is.
-What is interesting is the gcc commandline for a good case and
-a bad case. If they do not look the same we are on the right track.
+Hi,
 
-> I've attached my arch/arm/Makefile. My build, host and target are on
-> same system. i am emulating the board with Qemu. The process is very
-> conventional. I've mounted my rootfs with -o loop and kernel and extra
-> modules go there with INSTALL_MOD_PATH and INSTALL_MOD_DIR. ARCH=arm
-> and CROSS_COMPILE=arm-linux-
+for my project I would like to design an ARM9 based single board computer (SBC)
+using the cirrus logic EP9302 CPU:
 
-But you do some kind of "external module" build judging from the output
-above. So the Makefile of interest is the one(s) that is special for
-your module. At lest the one you have in /embedded/tpm_emulator-0.5/tpmd_dev
+http://www.cirrus.com/en/pubs/proDatasheet/EP9302_PP3.pdf
+http://www.cirrus.com/en/pubs/manual/EP93xx_Users_Guide_UM1.pdf
 
-	Sam
+
+My goal is to use existing linux drivers together with attached peripheral
+hardware without having to patch the driver code.
+For this reason I'm looking for the best way to hook up peripheral hardware to
+the CPU so that the linux kernel can handle it.
+
+
+Among other features the CPU has a SPI bus and a total of 27 GPIO pins.
+Using bit-banging on some of the available GPIO pins the CPU can also do I2C
+communication.
+(AFAIK bit-banging I2C on GPIO pins is already suppored by the linux kernel.)
+
+Peripheral hardware (e.g. some linux-supported bluetooth chipset) can be hooked
+up to the CPU in the following ways:
+
+	1) directly connect it to the CPU's GPIO pins
+	2) connect it to the CPU's GPIO pins in a multiplexed way using a bus
+	   switch
+	3) hook it up to some existing serial bus (SPI or I2C)
+	4) hook it up to some existing _external_ serial bus (USB, UART)
+	5) connect it to GPIO pins of a linux-supported GPIO expander that can
+	   be accessed over I2C
+
+
+Now I would like to review the mentioned approaches:
+
+
+1) directly connect it to the CPU's GPIO pins:
+
+The CPU has 18 standard GPIO pins (usable for I/O) and 19 enhanched GPIO pins
+which also have interrupt support.
+Obviously, I do not wan't to use all of the available GPIO pins for peripheral
+hardware.
+Also, if we consider chipset configuration pins, the number of available CPU
+GPIO pins would not suffice.
+For this reason, IMHO a direct connection of peripheral hardware to the CPU's
+GPIO pins is not a reasonable design decision.
+
+
+2) connect it to the CPU's GPIO pins in a multiplexed way using a bus switch
+
+This approach is similar to 1) except for the difference that the CPUs GPIO pins
+are multiplexed using a bus switch.
+Thus different peripheral chipsets could be accessed in the following way:
+
+	1. address the according bus switch so that the CPU's required GPIO are
+	   routed through to the chip we want to talk to
+	2. communicate with the chip
+
+Again to save GPIO pins, the various bus switches could be addressed over a
+serial bus like I2C.
+While this communication is certainly suitable for high-speed devices, it also
+has the drawback that the CPU's GPIO lines need to be routed all over the PCB
+(printed circuit board) to the different bus switches and from there to the
+chips we want to talk to.
+Since I plan to use low-speed devices only, I do not want to make the hardware
+design too complex.
+For this reason I'd rather not take this design decision.
+
+
+3) hook it up to some existing serial bus (SPI or I2C)
+
+If the peripheral hardware chipset has support for serial communication, this
+would be the easiest way to go.
+Since there's already linux support for SPI as well as for I2C I would like to
+use this way of talking to low-speed hardware whenever possible.
+
+
+4) hook it up to some existing _external_ serial bus (USB, UART)
+
+The single board computer should have external connections to the "outside world".
+One serial port should be used as serial console while the other one will be
+used for something else.
+The USB connectors should be usable to connect arbitrary devices which are
+supported by the linux kernel (e.g. external harddisk, webcam, whatever ...).
+Also, usually peripheral hardware chips do not support USB.
+For this reason this approach will not be taken for peripheral hardware access.
+
+
+5) connect it to GPIO pins of a linux-supported GPIO expander that can be
+accessed over I2C
+
+This is IMHO a very promising approach which also has been taken in various
+other (linux-compatible) designs I found on the internet
+(e.g. the "DaVinci prototyping board",
+http://www.linuxdevices.com/news/NS2209350555.html).
+
+The idea is to connect a GPIO expander to the CPU's I2C bus which provides a
+number (i.e. 8, 16, ..) of freely usable GPIO pins.
+These GPIO pins are then connected to the peripheral hardware.
+The linux kernel already has support for various GPIO expanders like the PCA9539
+(16 port) or the PCF8574 (8 port) chips.
+As far as I read in the kernel documentation, the drivers transparently map
+those GPIO pins to the GPIO interface of the linux kernel.
+Thus, from a device driver perspective, it makes no difference whether a device
+is connected to the CPU's "real" GPIO pins or to a GPIO expander chip which can
+be accessed over thr I2C bus.
+
+Another advantage is the simple circuit design: Instead of having to route a
+complete parallel bus over the PCB, only the serial I2C bus has to be routed
+from the CPU to the port expander.
+From the port expander a rather short bus then goes to the low-speed chip we
+want to talk to.
+
+In my oppinion, from a hardware as well as from a software perspective, this is
+the right way to go.
+
+
+
+
+
+As we saw, from a software perspective, it doesn't seem to make a big difference
+whether peripheral hardware is directly hooked up to the CPU's GPIO pins or
+it is hooked up to GPIO expanders.
+
+
+* However, if we look at existing device drivers, will it be possible to use
+them with this setup without modification ?
+
+* How will the kernel find devices attached to GPIO pins ?
+(There's no way to scan the bus since the kernel doesn't know what and where
+devices are attached to the GPIO pins, right ?)
+
+* What would be the best way to attach peripheral hardware from a linux-kernel
+perspective ?
+
+* Can you suggest any embedded hardware design documentation that considers
+linux compatibility ?
+
+
+sincerly,
+stefan
