@@ -1,109 +1,165 @@
-From: Shaz <shazalive@gmail.com>
-Subject: Re: Incompatible CFLAGS for kernel module
-Date: Sun, 6 Jul 2008 12:35:24 +0500
-Message-ID: <7b740b700807060035y66bdc54byc8a5ad87b6e3d50d@mail.gmail.com>
-References: <7b740b700807041034m1df5ad54x4b1112d74905dc7c@mail.gmail.com>
-	 <20080704203255.GB19110@uranus.ravnborg.org>
-	 <7b740b700807042233q77336ba0taaae06f36e80f216@mail.gmail.com>
-	 <20080705063306.GB23124@uranus.ravnborg.org>
-	 <7b740b700807052234p49a50c22g290d9a76e04d373f@mail.gmail.com>
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Subject: Re: [PATCH 14/23] make section names compatible with -ffunction-sections -fdata-sections: parisc
+Date: Sun, 6 Jul 2008 17:46:02 +0200
+Message-ID: <200807061746.02517.vda.linux@googlemail.com>
+References: <200807020239.11410.vda.linux@googlemail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-arch-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=vXUBjxgns/3AtOxnGZSqRXSmujwTyO4lFUzfgD9cBr0=;
-        b=cMe37UE4D0Qxf9bBl6ezSsFx7omNVKk9ctbBY2Acpi2Ae/Z8dkuZ3EzyjB9oL8QFr9
-         py/HnEE3/gwuxHZUCJuvYEmJAdAIpGPptUGfqcC7PwWhvdXnunAbceluwhKYEESmcwfJ
-         HgYWvFEGqNP7eHYJjTSfm0Kk8IRg4czTXW2Co=
-In-Reply-To: <7b740b700807052234p49a50c22g290d9a76e04d373f@mail.gmail.com>
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:subject:date
+         :user-agent:cc:references:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:message-id;
+        bh=wQZ1f8JNHHeMUngUBms6TJWA3J85/yFVVIZy4KkC2ss=;
+        b=aeMbRTYR4m/eZ7E58smV0hXWjBCpHmhsgQnJUNXbZn03ECp2Hw7Q/Vr60fe1E3PnVZ
+         gZEr1ItOR7bUn/MiLHZ0vM+4jCxBWRoOvCtUWYM1aZeT0oxF5/Wt4OrcLoMzr3M0TC64
+         PghUBFhmbWGEGPczT29BYy06XmI33Fe9WBRqY=
+In-Reply-To: <200807020239.11410.vda.linux@googlemail.com>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, ray.sunjae.lee@gmail.com, tpm-emulator-user@lists.berlios.de, tpm-emulator-devel@lists.berlios.de, Security Engineering Archive <groupsecurityengineering@gmail.com>
+To: linux-arch@vger.kernel.org, James Bottomley <James.Bottomley@hansenpartnership.com>
+Cc: Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ralf Baechle <ralf@linux-mips.org>, Lennert Buytenhek <kernel@wantstofly.org>, Josh Boyer <jwboyer@linux.vnet.ibm.com>, Paul Mackerras <paulus@samba.org>, David Woodhouse <dwmw2@infradead.org>, Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Dave Miller <davem@davemloft.net>
 
-On Sun, Jul 6, 2008 at 10:34 AM, Shaz <shazalive@gmail.com> wrote:
-> On Sat, Jul 5, 2008 at 11:33 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
->> On Sat, Jul 05, 2008 at 10:33:28AM +0500, Shaz wrote:
->>> On Sat, Jul 5, 2008 at 1:32 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
->>> > On Fri, Jul 04, 2008 at 10:34:56PM +0500, Shaz wrote:
->>> >> Hi,
->>> >>
->>> >> I am porting tpm emulator to versatilepb, which is an arm platform. I
->>> >> have some problem with CFLAGS from /arch/arm/Makefile when building
->>> >> the kernel module for this software. I cannot figure out what to do in
->>> >> this case. Following is the error:
->>> >>
->>> >> [root@develbox tpm_emulator-0.5]# make
->>> >> Making all in tpmd
->>> >> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd'
->>> >> make[1]: Nothing to be done for `all'.
->>> >> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd'
->>> >> Making all in tpmd_dev
->>> >> make[1]: Entering directory `/embedded/tpm_emulator-0.5/tpmd_dev'
->>> >>   CC [M]  /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o
->>> >> cc1: error: unrecognized command line option "-mlittle-endian"
->>> >> cc1: error: unrecognized command line option "-mapcs"
->>> >> cc1: error: unrecognized command line option "-mno-sched-prolog"
->>> >> cc1: error: unrecognized command line option "-mabi=aapcs-linux"
->>> >> cc1: error: unrecognized command line option "-mno-thumb-interwork"
->>> >> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
->>> >> (armv4t) for -march= switch
->>> >> /embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.c:1: error: bad value
->>> >> (arm9tdmi) for -mtune= switch
->>> >> make[3]: *** [/embedded/tpm_emulator-0.5/tpmd_dev/tpmd_dev.o] Error 1
->>> >> make[2]: *** [_module_/embedded/tpm_emulator-0.5/tpmd_dev] Error 2
->>> >> make[1]: *** [all] Error 2
->>> >> make[1]: Leaving directory `/embedded/tpm_emulator-0.5/tpmd_dev'
->>> >> make: *** [all-recursive] Error 255
->>> >>
->>> >> kindly help me understand the core issue here and point out some solutions.
->>> >
->>> > A quick guess is that you use your host gcc and not your target gcc.
->>> > You most likely have to set CROSS_COMPILE=...
->>> >
->>> > Try with "make V=1" to see the exact gcc command line.
->>> >
->>> > If you continue to rn into trouble please post your Makefile.
->>> I tried make V=1 but the loads of info was given for the things that
->>> went right but nothing noticeable where the error is.
->> What is interesting is the gcc commandline for a good case and
->> a bad case. If they do not look the same we are on the right track.
-I've noticed some issues in my rootfs and on to it but plz do look at
-the Makefile. i might be missing something there instead.
->>
->>> I've attached my arch/arm/Makefile. My build, host and target are on
->>> same system. i am emulating the board with Qemu. The process is very
->>> conventional. I've mounted my rootfs with -o loop and kernel and extra
->>> modules go there with INSTALL_MOD_PATH and INSTALL_MOD_DIR. ARCH=arm
->>> and CROSS_COMPILE=arm-linux-
->>
->> But you do some kind of "external module" build judging from the output
->> above. So the Makefile of interest is the one(s) that is special for
->> your module. At lest the one you have in /embedded/tpm_emulator-0.5/tpmd_dev
-> Yes am building tpm emulator. Its nature is generic but successfully
-> runs on PC and might have some porting issues which I am figuring out.
-> Thanx for sufficient attention. I am attaching the emulator's source
-> archive which I've altered. The main change that I've done is add
-> PREFIXDIR in all Makefiles. It includes the required Makefile in
-> tpmd_dev. I am separately also attaching the required makefile so to
-> make it easier.
->>
->>        Sam
->>
->
->
->
-> --
-> Shaz
->
+The purpose of this patch is to make kernel buildable
+with "gcc -ffunction-sections -fdata-sections".
+This patch fixes parisc architecture.
+
+Updated version - does not try to rename sections
+which really are expected to be produced by gcc - .text.sys_exit etc.
+
+James please ACK/NAK.
+
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+--
+vda
 
 
-
--- 
-Shaz
+--- 0.org/arch/parisc/kernel/head.S	Wed Jul  2 00:40:41 2008
++++ 1.fixname/arch/parisc/kernel/head.S	Wed Jul  2 00:45:45 2008
+@@ -345,7 +345,7 @@
+ ENDPROC(stext)
+ 
+ #ifndef CONFIG_64BIT
+-	.section .data.read_mostly
++	.section .read_mostly.data
+ 
+ 	.align	4
+ 	.export	$global$,data
+--- 0.org/arch/parisc/kernel/init_task.c	Wed Jul  2 00:40:41 2008
++++ 1.fixname/arch/parisc/kernel/init_task.c	Wed Jul  2 00:46:55 2008
+@@ -49,7 +49,7 @@
+  * "init_task" linker map entry..
+  */
+ union thread_union init_thread_union
+-	__attribute__((aligned(128))) __attribute__((__section__(".data.init_task"))) =
++	__attribute__((aligned(128))) __attribute__((__section__(".init_task.data"))) =
+ 		{ INIT_THREAD_INFO(init_task) };
+ 
+ #if PT_NLEVELS == 3
+@@ -58,11 +58,11 @@
+  * guarantee that global objects will be laid out in memory in the same order 
+  * as the order of declaration, so put these in different sections and use
+  * the linker script to order them. */
+-pmd_t pmd0[PTRS_PER_PMD] __attribute__ ((__section__ (".data.vm0.pmd"), aligned(PAGE_SIZE)));
++pmd_t pmd0[PTRS_PER_PMD] __attribute__ ((__section__ (".vm0.pmd.data"), aligned(PAGE_SIZE)));
+ #endif
+ 
+-pgd_t swapper_pg_dir[PTRS_PER_PGD] __attribute__ ((__section__ (".data.vm0.pgd"), aligned(PAGE_SIZE)));
+-pte_t pg0[PT_INITIAL * PTRS_PER_PTE] __attribute__ ((__section__ (".data.vm0.pte"), aligned(PAGE_SIZE)));
++pgd_t swapper_pg_dir[PTRS_PER_PGD] __attribute__ ((__section__ (".vm0.pgd.data"), aligned(PAGE_SIZE)));
++pte_t pg0[PT_INITIAL * PTRS_PER_PTE] __attribute__ ((__section__ (".vm0.pte.data"), aligned(PAGE_SIZE)));
+ 
+ /*
+  * Initial task structure.
+--- 0.org/arch/parisc/kernel/vmlinux.lds.S	Wed Jul  2 00:40:41 2008
++++ 1.fixname/arch/parisc/kernel/vmlinux.lds.S	Wed Jul  2 01:02:35 2008
+@@ -95,8 +95,8 @@
+ 
+ 	/* rarely changed data like cpu maps */
+ 	. = ALIGN(16);
+-	.data.read_mostly : {
+-		*(.data.read_mostly)
++	.read_mostly.data : {
++		*(.read_mostly.data)
+ 	}
+ 
+ 	. = ALIGN(L1_CACHE_BYTES);
+@@ -107,14 +107,14 @@
+ 	}
+ 
+ 	. = ALIGN(L1_CACHE_BYTES);
+-	.data.cacheline_aligned : {
+-		*(.data.cacheline_aligned)
++	.cacheline_aligned.data : {
++		*(.cacheline_aligned.data)
+ 	}
+ 
+ 	/* PA-RISC locks requires 16-byte alignment */
+ 	. = ALIGN(16);
+-	.data.lock_aligned : {
+-		*(.data.lock_aligned)
++	.lock_aligned.data : {
++		*(.lock_aligned.data)
+ 	}
+ 
+ 	/* nosave data is really only used for software suspend...it's here
+@@ -123,7 +123,7 @@
+ 	. = ALIGN(PAGE_SIZE);
+ 	__nosave_begin = .;
+ 	.data_nosave : {
+-		*(.data.nosave)
++		*(.nosave.data)
+ 	}
+ 	. = ALIGN(PAGE_SIZE);
+ 	__nosave_end = .;
+@@ -135,10 +135,10 @@
+ 	__bss_start = .;
+ 	/* page table entries need to be PAGE_SIZE aligned */
+ 	. = ALIGN(PAGE_SIZE);
+-	.data.vmpages : {
+-		*(.data.vm0.pmd)
+-		*(.data.vm0.pgd)
+-		*(.data.vm0.pte)
++	.data.vmpages : { /* TODO: rename .vmpages.data? */
++		*(.vm0.pmd.data)
++		*(.vm0.pgd.data)
++		*(.vm0.pte.data)
+ 	}
+ 	.bss : {
+ 		*(.bss)
+@@ -150,8 +150,8 @@
+ 	/* assembler code expects init_task to be 16k aligned */
+ 	. = ALIGN(16384);
+ 	/* init_task */
+-	.data.init_task : {
+-		*(.data.init_task)
++	.init_task.data : {
++		*(.init_task.data)
+ 	}
+ 
+ #ifdef CONFIG_64BIT
+--- 0.org/include/asm-parisc/cache.h	Wed Jul  2 00:40:50 2008
++++ 1.fixname/include/asm-parisc/cache.h	Wed Jul  2 00:45:45 2008
+@@ -28,7 +28,7 @@
+ 
+ #define SMP_CACHE_BYTES L1_CACHE_BYTES
+ 
+-#define __read_mostly __attribute__((__section__(".data.read_mostly")))
++#define __read_mostly __attribute__((__section__(".read_mostly.data")))
+ 
+ void parisc_cache_init(void);	/* initializes cache-flushing */
+ void disable_sr_hashing_asm(int); /* low level support for above */
+--- 0.org/include/asm-parisc/system.h	Wed Jul  2 00:40:50 2008
++++ 1.fixname/include/asm-parisc/system.h	Wed Jul  2 00:46:14 2008
+@@ -174,7 +174,7 @@
+ })
+ 
+ #ifdef CONFIG_SMP
+-# define __lock_aligned __attribute__((__section__(".data.lock_aligned")))
++# define __lock_aligned __attribute__((__section__(".lock_aligned.data")))
+ #endif
+ 
+ #define arch_align_stack(x) (x)
