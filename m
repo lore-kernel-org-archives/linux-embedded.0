@@ -1,165 +1,65 @@
-From: Denys Vlasenko <vda.linux@googlemail.com>
-Subject: Re: [PATCH 14/23] make section names compatible with -ffunction-sections -fdata-sections: parisc
-Date: Sun, 6 Jul 2008 17:46:02 +0200
-Message-ID: <200807061746.02517.vda.linux@googlemail.com>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: Re: [PATCH 14/23] make section names compatible with
+	-ffunction-sections -fdata-sections: parisc
+Date: Sun, 06 Jul 2008 11:19:32 -0500
+Message-ID: <1215361172.4197.21.camel@localhost.localdomain>
 References: <200807020239.11410.vda.linux@googlemail.com>
+	 <200807061746.02517.vda.linux@googlemail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arch-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:received:received:from:to:subject:date
-         :user-agent:cc:references:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:message-id;
-        bh=wQZ1f8JNHHeMUngUBms6TJWA3J85/yFVVIZy4KkC2ss=;
-        b=aeMbRTYR4m/eZ7E58smV0hXWjBCpHmhsgQnJUNXbZn03ECp2Hw7Q/Vr60fe1E3PnVZ
-         gZEr1ItOR7bUn/MiLHZ0vM+4jCxBWRoOvCtUWYM1aZeT0oxF5/Wt4OrcLoMzr3M0TC64
-         PghUBFhmbWGEGPczT29BYy06XmI33Fe9WBRqY=
-In-Reply-To: <200807020239.11410.vda.linux@googlemail.com>
-Content-Disposition: inline
-Sender: linux-arch-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=hansenpartnership.com;
+	s=2007; t=1215361175; bh=W5ddtkB1T4Pgscbdrl0Ws2weWu/nn4d7SMqqr3QYwg
+	w=; l=1277; h=Subject:From:To:Cc:In-Reply-To:References:
+	 Content-Type:Date:Message-Id:Mime-Version:
+	 Content-Transfer-Encoding; b=Qh3RpIiFiQKjTpmCCGhRyMe3+emGyCoHwOofT
+	T32r6w1n/oE9o/LECPaKahlSZLCkLOQW374j6K+hAuBPkXJJyU3ajrnjfQnoxi9R5Aq
+	9hraIrFwaJyyLNSn5ZbH1YgCAX/oqNyI3FhTrvoX8D41JTINVp7/RxPzlr0YTD4HGqI
+	=
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=hansenpartnership.com;
+	s=2007; t=1215361173; bh=W5ddtkB1T4Pgscbdrl0Ws2weWu/nn4d7SMqqr3QYwg
+	w=; l=1277; h=Subject:From:To:Cc:In-Reply-To:References:
+	 Content-Type:Date:Message-Id:Mime-Version:
+	 Content-Transfer-Encoding; b=JZCz+EiB4L8uEad78pxDJT+RUx/tuTvn5olXs
+	bvmRuTupTs7dgv0Lmjxd7gaSnxXV9iYj8gPLBlCVbC9akvdLOqlea8HK3BT9+ESSXVx
+	k+LTQHSWBP5Y5Z2+UzDAdMV6GHU1Am6DdTtWPe6Tkm1RJ6nDqdu4162j5qYysoJls1I
+	=
+In-Reply-To: <200807061746.02517.vda.linux@googlemail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-arch@vger.kernel.org, James Bottomley <James.Bottomley@hansenpartnership.com>
-Cc: Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ralf Baechle <ralf@linux-mips.org>, Lennert Buytenhek <kernel@wantstofly.org>, Josh Boyer <jwboyer@linux.vnet.ibm.com>, Paul Mackerras <paulus@samba.org>, David Woodhouse <dwmw2@infradead.org>, Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Dave Miller <davem@davemloft.net>
+To: Denys Vlasenko <vda.linux@googlemail.com>
+Cc: linux-arch@vger.kernel.org, Russell King <rmk@arm.linux.org.uk>, David Howells <dhowells@redhat.com>, Ralf Baechle <ralf@linux-mips.org>, Lennert Buytenhek <kernel@wantstofly.org>, Josh Boyer <jwboyer@linux.vnet.ibm.com>, Paul Mackerras <paulus@samba.org>, David Woodhouse <dwmw2@infradead.org>, Andi Kleen <andi@firstfloor.org>, torvalds@linux-foundation.org, akpm@linux-foundation.org, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Dave Miller <davem@davemloft.net>
 
-The purpose of this patch is to make kernel buildable
-with "gcc -ffunction-sections -fdata-sections".
-This patch fixes parisc architecture.
+On Sun, 2008-07-06 at 17:46 +0200, Denys Vlasenko wrote:
+> The purpose of this patch is to make kernel buildable
+> with "gcc -ffunction-sections -fdata-sections".
+> This patch fixes parisc architecture.
+> 
+> Updated version - does not try to rename sections
+> which really are expected to be produced by gcc - .text.sys_exit etc.
 
-Updated version - does not try to rename sections
-which really are expected to be produced by gcc - .text.sys_exit etc.
+Actually, I've thought about it some more and I don't think your
+approach is quite right.  The way gcc works with -ffunction-sections
+makes it clear that it expects the section namespace to be scoped left
+to right. However, by using *.text and *.data, your patch is following a
+reverse convention (putting your most global name to the right).  This
+is setting us up for a clash with future global section names that our
+toolchain might emit in future.
 
-James please ACK/NAK.
+Since we have to have special handling for your reversed sections in
+every vmlinux.lds, what about introducing our own namespace instead?  So
+we reserve the global section specifier linux and then make everything a
+namespace under this.  So our constructed text and data sections become
 
-Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
---
-vda
+linux.text.*
 
+and
 
---- 0.org/arch/parisc/kernel/head.S	Wed Jul  2 00:40:41 2008
-+++ 1.fixname/arch/parisc/kernel/head.S	Wed Jul  2 00:45:45 2008
-@@ -345,7 +345,7 @@
- ENDPROC(stext)
- 
- #ifndef CONFIG_64BIT
--	.section .data.read_mostly
-+	.section .read_mostly.data
- 
- 	.align	4
- 	.export	$global$,data
---- 0.org/arch/parisc/kernel/init_task.c	Wed Jul  2 00:40:41 2008
-+++ 1.fixname/arch/parisc/kernel/init_task.c	Wed Jul  2 00:46:55 2008
-@@ -49,7 +49,7 @@
-  * "init_task" linker map entry..
-  */
- union thread_union init_thread_union
--	__attribute__((aligned(128))) __attribute__((__section__(".data.init_task"))) =
-+	__attribute__((aligned(128))) __attribute__((__section__(".init_task.data"))) =
- 		{ INIT_THREAD_INFO(init_task) };
- 
- #if PT_NLEVELS == 3
-@@ -58,11 +58,11 @@
-  * guarantee that global objects will be laid out in memory in the same order 
-  * as the order of declaration, so put these in different sections and use
-  * the linker script to order them. */
--pmd_t pmd0[PTRS_PER_PMD] __attribute__ ((__section__ (".data.vm0.pmd"), aligned(PAGE_SIZE)));
-+pmd_t pmd0[PTRS_PER_PMD] __attribute__ ((__section__ (".vm0.pmd.data"), aligned(PAGE_SIZE)));
- #endif
- 
--pgd_t swapper_pg_dir[PTRS_PER_PGD] __attribute__ ((__section__ (".data.vm0.pgd"), aligned(PAGE_SIZE)));
--pte_t pg0[PT_INITIAL * PTRS_PER_PTE] __attribute__ ((__section__ (".data.vm0.pte"), aligned(PAGE_SIZE)));
-+pgd_t swapper_pg_dir[PTRS_PER_PGD] __attribute__ ((__section__ (".vm0.pgd.data"), aligned(PAGE_SIZE)));
-+pte_t pg0[PT_INITIAL * PTRS_PER_PTE] __attribute__ ((__section__ (".vm0.pte.data"), aligned(PAGE_SIZE)));
- 
- /*
-  * Initial task structure.
---- 0.org/arch/parisc/kernel/vmlinux.lds.S	Wed Jul  2 00:40:41 2008
-+++ 1.fixname/arch/parisc/kernel/vmlinux.lds.S	Wed Jul  2 01:02:35 2008
-@@ -95,8 +95,8 @@
- 
- 	/* rarely changed data like cpu maps */
- 	. = ALIGN(16);
--	.data.read_mostly : {
--		*(.data.read_mostly)
-+	.read_mostly.data : {
-+		*(.read_mostly.data)
- 	}
- 
- 	. = ALIGN(L1_CACHE_BYTES);
-@@ -107,14 +107,14 @@
- 	}
- 
- 	. = ALIGN(L1_CACHE_BYTES);
--	.data.cacheline_aligned : {
--		*(.data.cacheline_aligned)
-+	.cacheline_aligned.data : {
-+		*(.cacheline_aligned.data)
- 	}
- 
- 	/* PA-RISC locks requires 16-byte alignment */
- 	. = ALIGN(16);
--	.data.lock_aligned : {
--		*(.data.lock_aligned)
-+	.lock_aligned.data : {
-+		*(.lock_aligned.data)
- 	}
- 
- 	/* nosave data is really only used for software suspend...it's here
-@@ -123,7 +123,7 @@
- 	. = ALIGN(PAGE_SIZE);
- 	__nosave_begin = .;
- 	.data_nosave : {
--		*(.data.nosave)
-+		*(.nosave.data)
- 	}
- 	. = ALIGN(PAGE_SIZE);
- 	__nosave_end = .;
-@@ -135,10 +135,10 @@
- 	__bss_start = .;
- 	/* page table entries need to be PAGE_SIZE aligned */
- 	. = ALIGN(PAGE_SIZE);
--	.data.vmpages : {
--		*(.data.vm0.pmd)
--		*(.data.vm0.pgd)
--		*(.data.vm0.pte)
-+	.data.vmpages : { /* TODO: rename .vmpages.data? */
-+		*(.vm0.pmd.data)
-+		*(.vm0.pgd.data)
-+		*(.vm0.pte.data)
- 	}
- 	.bss : {
- 		*(.bss)
-@@ -150,8 +150,8 @@
- 	/* assembler code expects init_task to be 16k aligned */
- 	. = ALIGN(16384);
- 	/* init_task */
--	.data.init_task : {
--		*(.data.init_task)
-+	.init_task.data : {
-+		*(.init_task.data)
- 	}
- 
- #ifdef CONFIG_64BIT
---- 0.org/include/asm-parisc/cache.h	Wed Jul  2 00:40:50 2008
-+++ 1.fixname/include/asm-parisc/cache.h	Wed Jul  2 00:45:45 2008
-@@ -28,7 +28,7 @@
- 
- #define SMP_CACHE_BYTES L1_CACHE_BYTES
- 
--#define __read_mostly __attribute__((__section__(".data.read_mostly")))
-+#define __read_mostly __attribute__((__section__(".read_mostly.data")))
- 
- void parisc_cache_init(void);	/* initializes cache-flushing */
- void disable_sr_hashing_asm(int); /* low level support for above */
---- 0.org/include/asm-parisc/system.h	Wed Jul  2 00:40:50 2008
-+++ 1.fixname/include/asm-parisc/system.h	Wed Jul  2 00:46:14 2008
-@@ -174,7 +174,7 @@
- })
- 
- #ifdef CONFIG_SMP
--# define __lock_aligned __attribute__((__section__(".data.lock_aligned")))
-+# define __lock_aligned __attribute__((__section__(".lock_aligned.data")))
- #endif
- 
- #define arch_align_stack(x) (x)
+linux.data.*
+
+That way we could only ever get a clash if the toolchain decided to use
+a section global name linux (which we can beat them up over).
+
+James
+
