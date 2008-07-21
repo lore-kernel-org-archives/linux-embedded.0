@@ -1,43 +1,54 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <Uwe.Kleine-Koenig@digi.com>
-Subject: Re: prevent auto binding for some platform devices
-Date: Mon, 21 Jul 2008 09:33:55 +0200
-Message-ID: <20080721073355.GA29676@digi.com>
-References: <20080721064224.GA28238@digi.com> <B85A65D85D7EB246BE421B3FB0FBB5930111C4F31C@dbde02.ent.ti.com>
+From: "Alexey Zaytsev" <alexey.zaytsev@gmail.com>
+Subject: Re: RFC: prevent auto binding for some platform devices
+Date: Mon, 21 Jul 2008 11:38:10 +0400
+Message-ID: <f19298770807210038u76b62f28uea55a631f7e13834@mail.gmail.com>
+References: <20080721064224.GA28238@digi.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=fCdbCcWkOAYH0mtbj+kXNqSyAyLI6wQYr26LkbvqFfs=;
+        b=hd/TS9GxmwoNdm99gHZkDDx/nmljlSLMVGG/bI5oeWqLKnBY7LFm6KYhLxJjex4wKQ
+         wBxy8Cb5Jbek1+o8W9RDHxPwkj8zrTalKddun/+KlgiepsDix1kFtWZxhhkSA1xFuBso
+         eSw+NiKYnob8cyoOXaZAVziauj7b0rQLEeyh4=
+In-Reply-To: <20080721064224.GA28238@digi.com>
 Content-Disposition: inline
-In-Reply-To: <B85A65D85D7EB246BE421B3FB0FBB5930111C4F31C@dbde02.ent.ti.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: "Dasgupta, Romit" <romit@ti.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+To: =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <Uwe.Kleine-Koenig@digi.com>
+Cc: linux-embedded@vger.kernel.org
 
-Hello Romit,
-
-Dasgupta, Romit wrote:
->     I think with 2.6.18 or so onwards, there are two entries under /s=
-ys/bus/<bus_type>/
-> drivers_autoprobe, drivers_probe. (Here bus_type is platform, usb, pc=
-i, etc...)
-> By default drivers_autoprobe is 1. You need to disable autprobing of =
-the driver by writing a 0 to that entry.
-I saw that, too, but this fails in two ways:  First if the drivers are
-compiled in (as usual with an embedded machine) it's too late when
-userspace is able to do that because then the drivers are already bound=
-=2E
-(The underlain kernel data is currently not available to platform code.=
-)
-And I don't want to stop the whole bus from binding, only the
-conflicting devices.
-
-Thanks
-Uwe
-
---=20
-Uwe Kleine-K=F6nig, Software Engineer
-Digi International GmbH Branch Breisach, K=FCferstrasse 8, 79206 Breisa=
-ch, Germany
-Tax: 315/5781/0242 / VAT: DE153662976 / Reg. Amtsgericht Dortmund HRB 1=
-3962
+W1NvcnJ5LCBwcm9iYWJseSBhIGdtYWlsIHdlYi1pbnRlcmZhY2UgYnVnP10KCk9uIE1vbiwgSnVs
+IDIxLCAyMDA4IGF0IDEwOjQyIEFNLCBVd2UgS2xlaW5lLUvDtm5pZwo8VXdlLktsZWluZS1Lb2Vu
+aWdAZGlnaS5jb20+IHdyb3RlOgo+IEhlbGxvLAo+Cj4gSSBoYXZlIGFuIGVtZWRkZWQgbWFjaGlu
+ZSBoZXJlIG9uIG15IGRlc2sgYW5kIHdhbnQgdG8gc3RvcCBzb21lCj4gZHJpdmVyL2RldmljZSBw
+YWlycyBmcm9tIGJpbmRpbmcuICBUaGVyZSBhcmUgdHdvIHR5cGVzIG9mIHJlYXNvbiBmb3IgaXQ6
+Cj4KPiAgYSkgcGluIG11eGluZyBkb2Vzbid0IGFsbG93IGF0dGFjaGluZyBlLmcuIHNwaSBhbmQg
+c2VyaWFsIGF0IHRoZSBzYW1lCj4gICAgIHRpbWUuICBJbiB0aGlzIGNhc2UgSSB3YW50IGEgZGVm
+aW5lZCAid2lubmVyIiB0aGF0IGRvZXNuJ3QgZGVwZW5kCj4gICAgIG9uIGxpbmsgKG9yIG1vZHVs
+ZSBsb2FkKSBvcmRlci4KPgo+ICBiKSB0aGUgZGV2Ym9hcmQgaGFzIGF0dGFjaGVkIGFuIGxlZCBv
+biBhIGxpbmUgdGhhdCBpcyBhbHNvIGF2YWlsYWJsZQo+ICAgICBvbiBhIGhlYWRlci4gIFNvIEkg
+ZG9uJ3Qgd2FudCB0byBiaW5kIHRoZSBsZWQgZHJpdmVyIGJ5IGRlZmF1bHQKPiAgICAgYmVjYXVz
+ZSB0aGVyZSBtaWdodCBiZSBhbm90aGVyIGRldmljZSBjb25uZWN0ZWQgdG8gdGhlIGdwaW8gbGlu
+ZS4KPiAgICAgU3RpbGwgSSB3YW50IHRvIHByb3ZpZGUgdGhlIGxlZCBkZXZpY2UgYW5kIGRyaXZl
+ciBzdWNoIHRoYXQKPiAgICAgdXNlcnNwYWNlIGNhbiBiaW5kIHRoZXNlIHR3byB2aWEgc3lzZnMg
+YW5kIHVzZSBpdC4KPgo+IEkgdGhpbmsgYSBwYXRjaCB3b3VsZCBiZSBlYXN5Ogo+Cj4gIC0gYWRk
+IGEgZmxhZyB0byBzdHJ1Y3QgZGV2aWNlKD8pIHNldHRhYmxlIGJ5IHBsYXRmb3JtIGNvZGUgdGhh
+dCB3b3VsZAo+ICAgIGluZGljYXRlIHRoYXQgdGhlIGRldmljZSBzaG91bGQgbm90IGF1dG9wcm9i
+ZS4KPgo+ICAtIGNoYW5nZSBidXNfYXR0YWNoX2RldmljZSB0byBjaGVjayB0aGF0IGZsYWcgYW5k
+IG9ubHkgY2FsbAo+ICAgIGRldmljZV9hdHRhY2ggaWYgaXQncyBub3Qgc2V0Lgo+Cj4gV291bGQg
+dGhpcyBiZSBzZW5zaWJsZT8gIFdvdWxkIGl0IGhlbHAgYW55b25lIGVsc2U/CgpIb3cgYWJvdXQg
+c2ltcGx5IG5vdCByZWdpc3RlcmluZyB0aGUgbWlzc2luZyBkZXZpY2VzIGluIHlvdXIKYm9hcmQg
+c2V0dXAgY29kZT8KCj4KPiBCZXN0IHJlZ2FyZHMKPiBVd2UKPgo+IC0tCj4gVXdlIEtsZWluZS1L
+w7ZuaWcsIFNvZnR3YXJlIEVuZ2luZWVyCj4gRGlnaSBJbnRlcm5hdGlvbmFsIEdtYkggQnJhbmNo
+IEJyZWlzYWNoLCBLw7xmZXJzdHJhc3NlIDgsIDc5MjA2IEJyZWlzYWNoLCBHZXJtYW55Cj4gVGF4
+OiAzMTUvNTc4MS8wMjQyIC8gVkFUOiBERTE1MzY2Mjk3NiAvIFJlZy4gQW10c2dlcmljaHQgRG9y
+dG11bmQgSFJCIDEzOTYyCj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
+ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtZW1iZWRkZWQiIGluCj4gdGhlIGJvZHkgb2Yg
+YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1ham9yZG9tbyBp
+bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPgo=
