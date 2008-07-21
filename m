@@ -1,74 +1,213 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <Uwe.Kleine-Koenig@digi.com>
-Subject: Re: RFC: prevent auto binding for some platform devices
-Date: Mon, 21 Jul 2008 09:44:45 +0200
-Message-ID: <20080721074445.GA30156@digi.com>
-References: <20080721064224.GA28238@digi.com> <f19298770807210038u76b62f28uea55a631f7e13834@mail.gmail.com>
+From: Markus Brunner <super.firetwister@googlemail.com>
+Subject: UIO not working on ppc405 onchip registers
+Date: Mon, 21 Jul 2008 21:52:14 +0200
+Message-ID: <200807212152.16080.super.firetwister@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:to:subject:date:user-agent:cc
+         :mime-version:content-type:content-transfer-encoding
+         :content-disposition:message-id:from;
+        bh=of2Xiw5r3OCnurbeBmH2Z0R9IiS+DwB8Wa1Wbv3p/ko=;
+        b=okdtTxY0EzXkBUWEYgv8gVlmUchnjLWWuEa00Xw2rynHdQnsucLcpNoWbHEpj77KS1
+         96VZRc0T+EmOQYuPIXdOgiGb70Bw9XoT6D7ghaiuZuZfuRbZGhptAFv5UwC4xYNtdHA6
+         g1+JbY7pfqZkL82qBGFpZK5Zj61oMRIfyP3MY=
 Content-Disposition: inline
-In-Reply-To: <f19298770807210038u76b62f28uea55a631f7e13834@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Alexey Zaytsev <alexey.zaytsev@gmail.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: linuxppc-dev@ozlabs.org
+Cc: linux-embedded@vger.kernel.org
 
-Hello Alexey,
+Hi,
 
-Alexey Zaytsev wrote:
-> [Sorry, probably a gmail web-interface bug?]
->=20
-> On Mon, Jul 21, 2008 at 10:42 AM, Uwe Kleine-K=F6nig
-> <Uwe.Kleine-Koenig@digi.com> wrote:
-> > Hello,
-> >
-> > I have an emedded machine here on my desk and want to stop some
-> > driver/device pairs from binding.  There are two types of reason fo=
-r it:
-> >
-> >  a) pin muxing doesn't allow attaching e.g. spi and serial at the s=
-ame
-> >     time.  In this case I want a defined "winner" that doesn't depe=
-nd
-> >     on link (or module load) order.
-> >
-> >  b) the devboard has attached an led on a line that is also availab=
-le
-> >     on a header.  So I don't want to bind the led driver by default
-> >     because there might be another device connected to the gpio lin=
-e.
-> >     Still I want to provide the led device and driver such that
-> >     userspace can bind these two via sysfs and use it.
-> >
-> > I think a patch would be easy:
-> >
-> >  - add a flag to struct device(?) settable by platform code that wo=
-uld
-> >    indicate that the device should not autoprobe.
-> >
-> >  - change bus_attach_device to check that flag and only call
-> >    device_attach if it's not set.
-> >
-> > Would this be sensible?  Would it help anyone else?
->=20
-> How about simply not registering the missing devices in your
-> board setup code?
-They are not missing.  In the a) case above they just conflict and I
-want to provide a way to change the default from userspace.  E.g.
+I'm unable to get UIO working on the ppc405ep onchip registers (e.g. gpio/iic) 
+however it's working fine on peripherals.
+It seems to me to be a problem with UIO on powerpc, because if I change the 
+address (and nothing more) to point to a external FPGA it's working fine.
+I also tried the generic uio_pdrv which had the same problems.
+Sometimes I get a "bus error" sometimes it only produces wrong results. 
+The "bus error" occurred when not a full 32 bit register was read (e.g. only a 
+byte of it), but I'm not sure if it doesn't occur for other reasons as well.
 
-	echo "serialdevice.1" > /sys/bus/platform/drivers/serialdriver/unbind
-	echo "spidevice.1" > /sys/bus/platform/drivers/spidriver/bind
+Here is a simple example against 2.6.26. It should toggle the GPIO pin 0 on 
+ppc405ep, but can be changed easily to work on other ppc variants.
 
-and for b) I want to be able to enable the led if nothing else is
-connected to the line.
+Can anyone reproduce this problem, did anyone already succeed in writing a UIO 
+driver for the onchip registers? How can I fix this?
 
-Best regards
-Uwe
+Might this be something like commit c9698d6b1a90929e427a165bd8283f803f57d9bd which
+added pgprot_noncached() to UIO mmap code to get it work on ppc?
 
---=20
-Uwe Kleine-K=F6nig, Software Engineer
-Digi International GmbH Branch Breisach, K=FCferstrasse 8, 79206 Breisa=
-ch, Germany
-Tax: 315/5781/0242 / VAT: DE153662976 / Reg. Amtsgericht Dortmund HRB 1=
-3962
+Regards
+
+Markus
+
+
+diff -upNr linux-2.6.26/drivers/uio-orig/Kconfig linux-2.6.26/drivers/uio/Kconfig
+--- linux-2.6.26/drivers/uio-orig/Kconfig	2008-07-18 09:15:51.000000000 +0200
++++ linux-2.6.26/drivers/uio/Kconfig	2008-07-18 09:16:18.000000000 +0200
+@@ -39,4 +39,12 @@ config UIO_SMX
+ 
+ 	  If you compile this as a module, it will be called uio_smx.
+ 
++config UIO_GPIO
++	tristate "Driver for PPC_4xx GPIO"
++	depends on UIO
++	default n
++	help
++	  Driver for PPC_4xx GPIO Registers
++
+ endif
++
+diff -upNr linux-2.6.26/drivers/uio-orig/Makefile linux-2.6.26/drivers/uio/Makefile
+--- linux-2.6.26/drivers/uio-orig/Makefile	2008-07-18 09:27:18.000000000 +0200
++++ linux-2.6.26/drivers/uio/Makefile	2008-07-18 09:16:50.000000000 +0200
+@@ -1,3 +1,4 @@
+ obj-$(CONFIG_UIO)	+= uio.o
+ obj-$(CONFIG_UIO_CIF)	+= uio_cif.o
+ obj-$(CONFIG_UIO_SMX)	+= uio_smx.o
++obj-$(CONFIG_UIO_GPIO)	+= uio_ppc_4xx-gpio.o
+diff -upNr linux-2.6.26/drivers/uio-orig/uio-gpio.c linux-2.6.26/drivers/uio/uio-gpio.c
+--- linux-2.6.26/drivers/uio-orig/uio-gpio.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.26/drivers/uio/uio-gpio.c	2008-07-18 09:18:56.000000000 +0200
+@@ -0,0 +1,59 @@
++#include <sys/types.h>
++#include <sys/time.h>
++#include <sys/stat.h>
++#include <sys/mman.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <stdlib.h>
++
++const unsigned long pin_mask( unsigned int pin) { return (0x80000000 >> (pin));}
++
++const char UIO_DEV[]  = "/dev/uio0";
++const unsigned int UIO_SIZE =   0x1000;
++const unsigned int UIO_ADDR = 0xef600700;
++
++const int  or = 0;
++const int tcr = 1;
++
++const unsigned int gpio_pin = 0;        /* What gpio pin do you want to toggle? */
++
++volatile unsigned long *gpio_regs;
++
++int main(int argc, char *argv[])
++{
++	int uiofd = open(UIO_DEV,O_RDWR);
++	if (uiofd < 0)
++		return uiofd;
++
++	unsigned long* map_addr = mmap(NULL,
++				       UIO_SIZE,
++				       PROT_READ | PROT_WRITE,
++				       MAP_SHARED,
++				       uiofd,
++				       0);
++	if (map_addr == ((unsigned long*) -1))
++		return -1;
++        gpio_regs = (volatile unsigned long*) map_addr;
++	printf("Mapped %0lx bytes from %08lx to %08lx\n", UIO_SIZE, UIO_ADDR, (unsigned long)map_addr);
++
++        printf("TCR = %08lx\n", gpio_regs[tcr]);
++        printf("TCR = %08lx\n", gpio_regs[tcr]);
++        printf("setting TCR\n");
++        gpio_regs[tcr] = gpio_regs[tcr] | pin_mask( gpio_pin );     // set tcr for pin to 1
++        printf("TCR = %08lx\n", gpio_regs[tcr]);
++        printf("TCR = %08lx\n", gpio_regs[tcr]);
++
++        printf("OR = %08lx\n", gpio_regs[or]);
++        printf("OR = %08lx\n", gpio_regs[or]);
++        printf("setting OR\n");
++        gpio_regs[or] = gpio_regs[or] | pin_mask( gpio_pin );       // set tcr for pin to 1
++        printf("OR = %08lx\n", gpio_regs[or]);
++        printf("OR = %08lx\n", gpio_regs[or]);
++        sleep( 3 );
++        printf("setting OR\n");
++        gpio_regs[or] = gpio_regs[or] & ~pin_mask( gpio_pin );      // set tcr for pin to 0
++        printf("OR = %08lx\n", gpio_regs[or]);
++        printf("OR = %08lx\n", gpio_regs[or]);
++
++}
+diff -upNr linux-2.6.26/drivers/uio-orig/uio_ppc_4xx-gpio.c linux-2.6.26/drivers/uio/uio_ppc_4xx-gpio.c
+--- linux-2.6.26/drivers/uio-orig/uio_ppc_4xx-gpio.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.26/drivers/uio/uio_ppc_4xx-gpio.c	2008-07-18 09:23:32.000000000 +0200
+@@ -0,0 +1,74 @@
++/*
++ * simple UIO GPIO driver.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ */
++
++#include <linux/device.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/uio_driver.h>
++
++#include <asm/io.h>
++
++static struct uio_info info = {
++	.name = "uio_gpio",
++	.version = "0.0.0",
++	.irq = UIO_IRQ_NONE,
++	.irq_flags = 0,
++        .mem[0].addr = 0xef600700,
++        .mem[0].size = 0x1000,
++	.mem[0].memtype = UIO_MEM_PHYS,
++};
++
++static int __devinit uio_gpio_probe(struct device *dev)
++{
++	if (uio_register_device(dev, &info)){
++		printk(KERN_ERR "uio_gpio: uio_register_device failed\n");
++		return -ENODEV;
++	}
++	return 0;
++}
++
++static int uio_gpio_remove(struct device *dev)
++{
++	uio_unregister_device(&info);
++	info.mem[0].addr = 0;
++	info.mem[0].size = 0;
++	return 0;
++}
++
++static struct platform_device *uio_gpio_device;
++
++static struct device_driver uio_gpio_driver = {
++	.name		= "uio_gpio",
++	.bus		= &platform_bus_type,
++	.probe		= uio_gpio_probe,
++	.remove		= uio_gpio_remove,
++};
++
++
++static int __init uio_gpio_init(void)
++{
++	uio_gpio_device = platform_device_register_simple("uio_gpio", -1,
++							   NULL, 0);
++	if (IS_ERR(uio_gpio_device))
++		return PTR_ERR(uio_gpio_device);
++
++	return driver_register(&uio_gpio_driver);
++}
++
++static void __exit uio_gpio_exit(void)
++{
++	platform_device_unregister(uio_gpio_device);
++	driver_unregister(&uio_gpio_driver);
++}
++
++module_init(uio_gpio_init);
++module_exit(uio_gpio_exit);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Markus Brunner");
