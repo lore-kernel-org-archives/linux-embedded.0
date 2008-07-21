@@ -1,54 +1,93 @@
-From: "Alexey Zaytsev" <alexey.zaytsev@gmail.com>
+From: Ben Nizette <bn@niasdigital.com>
 Subject: Re: RFC: prevent auto binding for some platform devices
-Date: Mon, 21 Jul 2008 11:38:10 +0400
-Message-ID: <f19298770807210038u76b62f28uea55a631f7e13834@mail.gmail.com>
+Date: Mon, 21 Jul 2008 17:44:05 +1000
+Message-ID: <1216626245.4004.158.camel@moss.renham>
 References: <20080721064224.GA28238@digi.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=fCdbCcWkOAYH0mtbj+kXNqSyAyLI6wQYr26LkbvqFfs=;
-        b=hd/TS9GxmwoNdm99gHZkDDx/nmljlSLMVGG/bI5oeWqLKnBY7LFm6KYhLxJjex4wKQ
-         wBxy8Cb5Jbek1+o8W9RDHxPwkj8zrTalKddun/+KlgiepsDix1kFtWZxhhkSA1xFuBso
-         eSw+NiKYnob8cyoOXaZAVziauj7b0rQLEeyh4=
 In-Reply-To: <20080721064224.GA28238@digi.com>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <Uwe.Kleine-Koenig@digi.com>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <Uwe.Kleine-Koenig@digi.com>
 Cc: linux-embedded@vger.kernel.org
 
-W1NvcnJ5LCBwcm9iYWJseSBhIGdtYWlsIHdlYi1pbnRlcmZhY2UgYnVnP10KCk9uIE1vbiwgSnVs
-IDIxLCAyMDA4IGF0IDEwOjQyIEFNLCBVd2UgS2xlaW5lLUvDtm5pZwo8VXdlLktsZWluZS1Lb2Vu
-aWdAZGlnaS5jb20+IHdyb3RlOgo+IEhlbGxvLAo+Cj4gSSBoYXZlIGFuIGVtZWRkZWQgbWFjaGlu
-ZSBoZXJlIG9uIG15IGRlc2sgYW5kIHdhbnQgdG8gc3RvcCBzb21lCj4gZHJpdmVyL2RldmljZSBw
-YWlycyBmcm9tIGJpbmRpbmcuICBUaGVyZSBhcmUgdHdvIHR5cGVzIG9mIHJlYXNvbiBmb3IgaXQ6
-Cj4KPiAgYSkgcGluIG11eGluZyBkb2Vzbid0IGFsbG93IGF0dGFjaGluZyBlLmcuIHNwaSBhbmQg
-c2VyaWFsIGF0IHRoZSBzYW1lCj4gICAgIHRpbWUuICBJbiB0aGlzIGNhc2UgSSB3YW50IGEgZGVm
-aW5lZCAid2lubmVyIiB0aGF0IGRvZXNuJ3QgZGVwZW5kCj4gICAgIG9uIGxpbmsgKG9yIG1vZHVs
-ZSBsb2FkKSBvcmRlci4KPgo+ICBiKSB0aGUgZGV2Ym9hcmQgaGFzIGF0dGFjaGVkIGFuIGxlZCBv
-biBhIGxpbmUgdGhhdCBpcyBhbHNvIGF2YWlsYWJsZQo+ICAgICBvbiBhIGhlYWRlci4gIFNvIEkg
-ZG9uJ3Qgd2FudCB0byBiaW5kIHRoZSBsZWQgZHJpdmVyIGJ5IGRlZmF1bHQKPiAgICAgYmVjYXVz
-ZSB0aGVyZSBtaWdodCBiZSBhbm90aGVyIGRldmljZSBjb25uZWN0ZWQgdG8gdGhlIGdwaW8gbGlu
-ZS4KPiAgICAgU3RpbGwgSSB3YW50IHRvIHByb3ZpZGUgdGhlIGxlZCBkZXZpY2UgYW5kIGRyaXZl
-ciBzdWNoIHRoYXQKPiAgICAgdXNlcnNwYWNlIGNhbiBiaW5kIHRoZXNlIHR3byB2aWEgc3lzZnMg
-YW5kIHVzZSBpdC4KPgo+IEkgdGhpbmsgYSBwYXRjaCB3b3VsZCBiZSBlYXN5Ogo+Cj4gIC0gYWRk
-IGEgZmxhZyB0byBzdHJ1Y3QgZGV2aWNlKD8pIHNldHRhYmxlIGJ5IHBsYXRmb3JtIGNvZGUgdGhh
-dCB3b3VsZAo+ICAgIGluZGljYXRlIHRoYXQgdGhlIGRldmljZSBzaG91bGQgbm90IGF1dG9wcm9i
-ZS4KPgo+ICAtIGNoYW5nZSBidXNfYXR0YWNoX2RldmljZSB0byBjaGVjayB0aGF0IGZsYWcgYW5k
-IG9ubHkgY2FsbAo+ICAgIGRldmljZV9hdHRhY2ggaWYgaXQncyBub3Qgc2V0Lgo+Cj4gV291bGQg
-dGhpcyBiZSBzZW5zaWJsZT8gIFdvdWxkIGl0IGhlbHAgYW55b25lIGVsc2U/CgpIb3cgYWJvdXQg
-c2ltcGx5IG5vdCByZWdpc3RlcmluZyB0aGUgbWlzc2luZyBkZXZpY2VzIGluIHlvdXIKYm9hcmQg
-c2V0dXAgY29kZT8KCj4KPiBCZXN0IHJlZ2FyZHMKPiBVd2UKPgo+IC0tCj4gVXdlIEtsZWluZS1L
-w7ZuaWcsIFNvZnR3YXJlIEVuZ2luZWVyCj4gRGlnaSBJbnRlcm5hdGlvbmFsIEdtYkggQnJhbmNo
-IEJyZWlzYWNoLCBLw7xmZXJzdHJhc3NlIDgsIDc5MjA2IEJyZWlzYWNoLCBHZXJtYW55Cj4gVGF4
-OiAzMTUvNTc4MS8wMjQyIC8gVkFUOiBERTE1MzY2Mjk3NiAvIFJlZy4gQW10c2dlcmljaHQgRG9y
-dG11bmQgSFJCIDEzOTYyCj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
-ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtZW1iZWRkZWQiIGluCj4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1ham9yZG9tbyBp
-bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPgo=
+
+On Mon, 2008-07-21 at 08:42 +0200, Uwe Kleine-K=C3=B6nig wrote:
+> Hello,
+>=20
+> I have an emedded machine here on my desk and want to stop some
+> driver/device pairs from binding.  There are two types of reason for =
+it:
+>=20
+>   a) pin muxing doesn't allow attaching e.g. spi and serial at the sa=
+me
+>      time.  In this case I want a defined "winner" that doesn't depen=
+d
+>      on link (or module load) order.
+>=20
+>   b) the devboard has attached an led on a line that is also availabl=
+e
+>      on a header.  So I don't want to bind the led driver by default
+>      because there might be another device connected to the gpio line=
+=2E
+>      Still I want to provide the led device and driver such that
+>      userspace can bind these two via sysfs and use it.
+>=20
+
+While most boards probably have these decisions make in platform code
+and compiled in, I certainly see value in being able to keep dev-board
+owners out of the kernel source.
+
+> I think a patch would be easy:
+>=20
+>   - add a flag to struct device(?) settable by platform code that wou=
+ld
+>     indicate that the device should not autoprobe.
+>=20
+>   - change bus_attach_device to check that flag and only call
+>     device_attach if it's not set.
+>=20
+> Would this be sensible?  Would it help anyone else?
+
+This would be a good first step but it still requires a source change
+and recompile if you want to change any device in the boot branch.
+Anything not in the boot path can be probed later by sysfs interaction
+which I like.  This would solve (most of?) the "deferred module init"
+problems which have come across this list [1] as well as things like th=
+e
+recent mmc-over-spi-over-gpio-fake-hotplug thing [2].
+
+That said, I don't have any sensible comments on how to implement the
+below, but my $0.02 would be to go about things a bit differently.
+
+I reckon some arch-independent version of FDT kinda thing would be a
+good way to go.  That is, some easy way for the user to specify the
+whole hardware layout and tell the kernel about it without that tedious
+mucking about inside kernel source.
+
+If not the whole hardware layout (which I guess is quite arch-dependant=
+)
+then at least the list of devices to probe in a way which allows you to
+play with the boot devices too (and doesn't need an initramfs).
+
+So yes, I reckon it'd help others, certainly a worthy topic for
+discussion :-D
+
+>=20
+> Best regards
+> Uwe
+>=20
+
+Thanks,
+	--Ben.
+
+[1]
+http://www.mail-archive.com/linux-embedded@vger.kernel.org/msg00370.htm=
+l
+
+[2]
+http://groups.google.com/group/linux.kernel/browse_thread/thread/f57ac9=
+3bd37626eb/587d1302f0f497ad?lnk=3Draot
+
