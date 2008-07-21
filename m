@@ -1,25 +1,43 @@
-From: "Alexey Zaytsev" <alexey.zaytsev@gmail.com>
-Subject: Re: RFC: prevent auto binding for some platform devices
-Date: Mon, 21 Jul 2008 11:31:11 +0400
-Message-ID: <f19298770807210031xe2acc08i2447459a34379deb@mail.gmail.com>
-References: <20080721064224.GA28238@digi.com>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <Uwe.Kleine-Koenig@digi.com>
+Subject: Re: prevent auto binding for some platform devices
+Date: Mon, 21 Jul 2008 09:33:55 +0200
+Message-ID: <20080721073355.GA29676@digi.com>
+References: <20080721064224.GA28238@digi.com> <B85A65D85D7EB246BE421B3FB0FBB5930111C4F31C@dbde02.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=;
-        b=ihZVlwWyUlAj4VehOhT9JxHzjMdNWBdqdK6rzQinQ+MUNJ897C9nLtn5+wEulKnglN
-         zFZWsxMUAFPN34DfQF3wG9SWfqIyJXnSbSQQUDeA7K3Ya5hXIb4WUhInPRNVwaOV5OGd
-         nl8RwuZ9+DtAb21ng/Nji5iXsOWKi29++FMnk=
-In-Reply-To: <20080721064224.GA28238@digi.com>
 Content-Disposition: inline
+In-Reply-To: <B85A65D85D7EB246BE421B3FB0FBB5930111C4F31C@dbde02.ent.ti.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <Uwe.Kleine-Koenig@digi.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: "Dasgupta, Romit" <romit@ti.com>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
+Hello Romit,
+
+Dasgupta, Romit wrote:
+>     I think with 2.6.18 or so onwards, there are two entries under /s=
+ys/bus/<bus_type>/
+> drivers_autoprobe, drivers_probe. (Here bus_type is platform, usb, pc=
+i, etc...)
+> By default drivers_autoprobe is 1. You need to disable autprobing of =
+the driver by writing a 0 to that entry.
+I saw that, too, but this fails in two ways:  First if the drivers are
+compiled in (as usual with an embedded machine) it's too late when
+userspace is able to do that because then the drivers are already bound=
+=2E
+(The underlain kernel data is currently not available to platform code.=
+)
+And I don't want to stop the whole bus from binding, only the
+conflicting devices.
+
+Thanks
+Uwe
+
+--=20
+Uwe Kleine-K=F6nig, Software Engineer
+Digi International GmbH Branch Breisach, K=FCferstrasse 8, 79206 Breisa=
+ch, Germany
+Tax: 315/5781/0242 / VAT: DE153662976 / Reg. Amtsgericht Dortmund HRB 1=
+3962
