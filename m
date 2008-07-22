@@ -1,67 +1,46 @@
 From: super.firetwister@googlemail.com
 Subject: Re: UIO not working on ppc405 onchip registers
-Date: Tue, 22 Jul 2008 09:47:41 +0200
-Message-ID: <200807220947.43074.super.firetwister@gmail.com>
-References: <200807212152.16080.super.firetwister@gmail.com> <20080722061730.GB12576@digi.com>
+Date: Tue, 22 Jul 2008 09:48:49 +0200
+Message-ID: <200807220948.51053.super.firetwister@gmail.com>
+References: <200807212152.16080.super.firetwister@gmail.com> <20080722061730.GB12576@digi.com> <1216708967.4004.238.camel@moss.renham>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=googlemail.com; s=gamma;
         h=domainkey-signature:received:received:to:subject:date:user-agent:cc
          :references:in-reply-to:mime-version:content-type
          :content-transfer-encoding:content-disposition:message-id:from;
-        bh=vcDTLw0s87a4TqVQF0Rs1CrRDPnFcpgzSt82fCXSKu0=;
-        b=f4B5K86IxnJoiLwOiGW0/rDs4tWdyePUvJDFQTJJwT+fkSAodDlkseRzrBzAJpihtl
-         INLhnN1FbwxpL/Zvh5bbxD2dUIGMVZZj0fELEXak0indrBEZi9tgmvozT2J5O4MoKj0G
-         VEJU0TH2DuGlwomIgTL6JefsaIelHGD358BSs=
-In-Reply-To: <20080722061730.GB12576@digi.com>
+        bh=KXW8D1HYBiOIzfSUwZ6+lWk1RwEZOIt1C2WkQDESOBI=;
+        b=S41XaONnF8rJl/5QjLWALxDe6WJQ8OusSD7oet+PhGLMPyAZWYpcbkOlzgqXJz4eqI
+         QoYY4O3XPoLFr1sAiLFhEnwTMh/GAayyQUGpI/ZahbOv/+6zFdRkX4/3N8CDDOmaiYns
+         ZsIhtzrjpUDsuc0AnaD79UrKm3K2HOIa7QSwY=
+In-Reply-To: <1216708967.4004.238.camel@moss.renham>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Uwe =?iso-8859-1?q?Kleine-K=F6nig?= <Uwe.Kleine-Koenig@digi.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Ben Nizette <bn@niasdigital.com>
 Cc: "linuxppc-dev@ozlabs.org" <linuxppc-dev@ozlabs.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-Hello Uwe,
+On Tuesday 22 July 2008, Ben Nizette wrote:
 
-On Tuesday 22 July 2008, Uwe Kleine-K=F6nig wrote:
+> As an aside, you sure you want to do this anyway?  
 
-> I don't know powerpc in general nor ppc405ep in detail but IIRC arm h=
-as
-> problems if some memory is mapped twice.  Might this be the problem
-> here?
-
-Maybee, the emac0 (0xef600800) and emac1 (0xef600900) get mapped as wel=
-l,=20
-because AFAIK I have to map a whole pagesize (0x1000).
-
-> > +       int uiofd =3D open(UIO_DEV,O_RDWR);
->
-> For debugging this is OK, in the final application you should add som=
-e
-> tests.  Check the UIO documentation for the details.
-
-The whole example was meant to be short.
+No ;)
 
 
-> > +static int uio_gpio_remove(struct device *dev)
-> > +{
-> > +       uio_unregister_device(&info);
-> > +       info.mem[0].addr =3D 0;
-> > +       info.mem[0].size =3D 0;
-> > +       return 0;
-> > +}
->
-> Are you sure that overwriting info.mem[0].addr is a good idea?  Then
-> unbinding the platform device and rebinding it fails to do the right
-> thing for sure.
+> I'd suggest that you 
+> just do a gpio chip driver for this, tie it in to gpiolib and use the
+> gpiolib user interface (which IIRC has only made it as far as -mm but is
+> on the way up).  This gives kernel internals nice access to the pins as
+> well through the standard gpio framework.
 
-This was stolen from uio_dummy. So this might become a common error :(
+This was just an example to make it others easier to reproduce my problem. My 
+goal is to have a soft spi driver in userspace, which would probably be 
+slower if it uses gpiolib. This driver is integrated in the application I 
+want to port to Linux. 
 
-
-Thanks a lot for your comments, I will try to get an exclusive memory r=
-egion=20
-mapped.
+Thanks
 
 Markus
