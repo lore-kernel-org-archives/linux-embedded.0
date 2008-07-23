@@ -1,29 +1,33 @@
-From: Samuel Robb <sam@oneparticularharbor.net>
-Subject: Re: Useful IRC channels
-Date: Wed, 23 Jul 2008 10:59:35 -0400
-Message-ID: <1216825175.12161.18.camel@samuelr.hq.netapp.com>
-References: <7b740b700807230341x2cdb082dv58393187d64b0671@mail.gmail.com>
-	 <20080723110755.GI4319@pengutronix.de>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: optimal hardware design for an ARM9 based single board computer
+	to work with existing linux drivers
+Date: Wed, 23 Jul 2008 22:19:21 +0200
+Message-ID: <20080723201921.GB11708@game.jcrosoft.org>
+References: <486F38CF.40803@gmail.com> <20080705103509.GN4319@pengutronix.de> <486F557D.3090209@gmail.com> <20080705113255.GO4319@pengutronix.de> <486F6DA7.2050505@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080723110755.GI4319@pengutronix.de>
+Content-Disposition: inline
+In-Reply-To: <486F6DA7.2050505@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Robert Schwebel <r.schwebel@pengutronix.de>
-Cc: Shaz <shazalive@gmail.com>, linux-embedded <linux-embedded@vger.kernel.org>, Security Engineering Archive <groupsecurityengineering@gmail.com>
+Content-Transfer-Encoding: 7bit
+To: Stefan Schoenleitner <dev.c0debabe@gmail.com>
+Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded@vger.kernel.org
 
-On Wed, 2008-07-23 at 13:07 +0200, Robert Schwebel wrote:
-> On Wed, Jul 23, 2008 at 03:41:23PM +0500, Shaz wrote:
-> > Can anyone indicate some useful and active IRC channels on embedded
-> > Linux and cross compilations? I need to sort out some tit bits, which
-> > are not feasible and relevant for this list in some way :)
+On 14:48 Sat 05 Jul     , Stefan Schoenleitner wrote:
 > 
-> #ptxdist on freenode.net
 > 
-> rsc
+> Robert Schwebel wrote:
+> > 
+> > If you want to have something which has good community support, check
+> > what the mainline Linux kernel supports and base your stuff on that.
+> 
+> 
+> What do you think of this board ?
+> http://www.olimex.com/dev/sam9-L9260.html
+If you are looking for a mainline Linux kernel and U-Boot, you could
+take a look on the AT91SAM9260 or AT91SAM9263
 
-Also #edev on freenode.net
-
--Samrobb
+Best Regards,
+J.
