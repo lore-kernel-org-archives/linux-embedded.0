@@ -1,76 +1,158 @@
-From: "Richard Danter" <radanter@googlemail.com>
-Subject: Re: prevalence of C++ in embedded linux?
-Date: Tue, 29 Jul 2008 12:39:56 +0100
-Message-ID: <f75c52840807290439r5638f987yec53ba63817939e8@mail.gmail.com>
-References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain>
-	 <488EC964.2030400@coritel.it>
-	 <e2e108260807290150tabb95d8vd080c069aab5d24@mail.gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=sVI8SHJSAPGE6tcWva2WVJ9EL6o+xPnbxze1bP8v1Cg=;
-        b=ap+srTuqP0dPFS16YLs01QzMsMRMfF/syG70Vj2Gr8+H8gT+49fOqB6DI/HNjuzbqX
-         iEHHS+hznSkVjsgUkxGfvP3/QudIWxbI1d/tC9/Dc7vI5hg8It3do3SspEpvVGI1VzdF
-         RnsweQd6EOAlIx/BYgJPyGeAzkgg/H+sDUUpM=
-In-Reply-To: <e2e108260807290150tabb95d8vd080c069aab5d24@mail.gmail.com>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: [patch 1/4] Configure out AIO support
+Date: Tue, 29 Jul 2008 17:45:21 +0200
+Message-ID: <4225.81346142596$1217346620@news.gmane.org>
+References: <20080729154520.728594017@free-electrons.com>>
+Return-path: <owner-linux-aio@kvack.org>
+Content-Disposition: inline; filename=configure-out-aio-support
+Sender: owner-linux-aio@kvack.org
+List-Id: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-To: Bart Van Assche <bart.vanassche@gmail.com>
-Cc: Marco Stornelli <marco.stornelli@coritel.it>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: thomas.petazzoni@free-electrons.com, bcrl@kvack.org, linux-aio@kvack.org, mpm@selenic.com, akpm@linux-foundation.org
 
-2008/7/29 Bart Van Assche <bart.vanassche@gmail.com>:
-> On Tue, Jul 29, 2008 at 9:40 AM, Marco Stornelli
-> <marco.stornelli@coritel.it> wrote:
->> Like Linus Torvals said "...C++ is an horrible language" :)
->
-> Some C++ language features are indeed not very elegant from a
-> language-theoretic standpoint. But that doesn't matter when writing
-> embedded software -- what matters is that C++ allows to make source
-> code a lot more readable than the C programming language. And if you
-> don't like the overhead introduced by features like exceptions or
-> RTTI, you can still pass -fno-exceptions -fno-rtti to gcc.
+This patchs adds the CONFIG_AIO option which allows to remove support
+for asynchronous I/O operations, that are not necessarly used by
+applications, particularly on embedded devices. As this is a
+size-reduction option, it depends on CONFIG_EMBEDDED. It allows to
+save ~7 kilobytes of kernel code/data:
 
-IMHO choosing a language is like choosing any other tool to get a job
-done. I wouldn't use a screwdriver to bang in a nail (um, actually, I
-have and it ruined my screwdriver so I won't do it again) and same
-goes for programming languages.
+   text	   data	    bss	    dec	    hex	filename
+1115067	 119180	 217088	1451335	 162547	vmlinux
+1108025	 119048	 217088	1444161	 160941	vmlinux.new
+  -7042    -132       0   -7174   -1C06 +/-
 
-For low-level programming, such as kernels and device drivers, C and
-some assembly is probably the right choice in most cases. That is not
-to say that C++ or any other language could not be used. I know of at
-least one OS written almost entirely in C++ (drivers were objects that
-could be passed between devices to help them communicate with each
-other, very neat).
+This patch has been originally written by Matt Mackall
+<mpm@selenic.com>, and is part of the Linux Tiny project.
 
-Looking at something like graphics programming C++ makes a lot more
-sense. It is natural to think of a window inheriting properties from
-the widgets that implement it's functionality. Qt and wxWidgets are
-good examples, or Swing for Java. But of course Motif and GTK are
-written in C and work perfectly well too. I'm not sure how easy it is
-to "inherit" in GTK but vaguely remember it was not exactly trivial in
-Motif. To me at least C++ makes more sense here.
+Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: bcrl@kvack.org
+Cc: linux-aio@kvack.org
+Cc: mpm@selenic.com
+Cc: akpm@linux-foundation.org
 
-Scripts also have a very important role. I am probably in the minority
-when I say that I like Tcl, but used for it's original purpose it is a
-very useful language. There are many cases where I would chose to use
-Tcl or Perl or sh scripts rather than C, C++ or Java.
 
-The resources of the target system are also important. Many "embedded"
-systems these days are as powerful, if not more so, than my laptop.
-For these systems you have a lot of freedom. For others there may be
-limited RAM, disk space or other resources. I am often asked about
-removing Perl from the systems my customers use because of the large
-disk footprint.
+---
+ fs/Makefile         |    3 ++-
+ include/linux/aio.h |    9 +++++++++
+ init/Kconfig        |    8 ++++++++
+ kernel/sys_ni.c     |    5 +++++
+ kernel/sysctl.c     |    2 ++
+ 5 files changed, 26 insertions(+), 1 deletion(-)
 
-So let's not be too hasty to label any language as bad. Each was
-developed to address a need. Trying to use the wrong language for a
-particular purpose is the bad thing.
+Index: linuxdev/fs/Makefile
+===================================================================
+--- linuxdev.orig/fs/Makefile
++++ linuxdev/fs/Makefile
+@@ -8,7 +8,7 @@
+ obj-y :=	open.o read_write.o file_table.o super.o \
+ 		char_dev.o stat.o exec.o pipe.o namei.o fcntl.o \
+ 		ioctl.o readdir.o select.o fifo.o locks.o dcache.o inode.o \
+-		attr.o bad_inode.o file.o filesystems.o namespace.o aio.o \
++		attr.o bad_inode.o file.o filesystems.o namespace.o \
+ 		seq_file.o xattr.o libfs.o fs-writeback.o \
+ 		pnode.o drop_caches.o splice.o sync.o utimes.o \
+ 		stack.o
+@@ -27,6 +27,7 @@
+ obj-$(CONFIG_SIGNALFD)		+= signalfd.o
+ obj-$(CONFIG_TIMERFD)		+= timerfd.o
+ obj-$(CONFIG_EVENTFD)		+= eventfd.o
++obj-$(CONFIG_AIO)               += aio.o
+ obj-$(CONFIG_COMPAT)		+= compat.o compat_ioctl.o
+ 
+ nfsd-$(CONFIG_NFSD)		:= nfsctl.o
+Index: linuxdev/include/linux/aio.h
+===================================================================
+--- linuxdev.orig/include/linux/aio.h
++++ linuxdev/include/linux/aio.h
+@@ -204,12 +204,21 @@
+ /* prototypes */
+ extern unsigned aio_max_size;
+ 
++#ifdef CONFIG_AIO
+ extern ssize_t wait_on_sync_kiocb(struct kiocb *iocb);
+ extern int aio_put_req(struct kiocb *iocb);
+ extern void kick_iocb(struct kiocb *iocb);
+ extern int aio_complete(struct kiocb *iocb, long res, long res2);
+ struct mm_struct;
+ extern void exit_aio(struct mm_struct *mm);
++#else
++static inline ssize_t wait_on_sync_kiocb(struct kiocb *iocb) { return 0; }
++static inline int aio_put_req(struct kiocb *iocb) { return 0; }
++static inline void kick_iocb(struct kiocb *iocb) { }
++static inline int aio_complete(struct kiocb *iocb, long res, long res2) { return 0; }
++struct mm_struct;
++static inline void exit_aio(struct mm_struct *mm) { }
++#endif /* CONFIG_AIO */
+ 
+ #define io_wait_to_kiocb(wait) container_of(wait, struct kiocb, ki_wait)
+ 
+Index: linuxdev/init/Kconfig
+===================================================================
+--- linuxdev.orig/init/Kconfig
++++ linuxdev/init/Kconfig
+@@ -724,6 +724,14 @@
+ 	  option replaces shmem and tmpfs with the much simpler ramfs code,
+ 	  which may be appropriate on small systems without swap.
+ 
++config AIO
++	bool "Enable AIO support" if EMBEDDED
++	default y
++	help
++	  This option enables POSIX asynchronous I/O which may by used
++          by some high performance threaded applications. Disabling
++          this option saves about 7k.
++
+ config VM_EVENT_COUNTERS
+ 	default y
+ 	bool "Enable VM event counters for /proc/vmstat" if EMBEDDED
+Index: linuxdev/kernel/sys_ni.c
+===================================================================
+--- linuxdev.orig/kernel/sys_ni.c
++++ linuxdev/kernel/sys_ni.c
+@@ -125,6 +125,11 @@
+ cond_syscall(sys_vm86);
+ cond_syscall(compat_sys_ipc);
+ cond_syscall(compat_sys_sysctl);
++cond_syscall(sys_io_setup);
++cond_syscall(sys_io_destroy);
++cond_syscall(sys_io_submit);
++cond_syscall(sys_io_cancel);
++cond_syscall(sys_io_getevents);
+ 
+ /* arch-specific weak syscall entries */
+ cond_syscall(sys_pciconfig_read);
+Index: linuxdev/kernel/sysctl.c
+===================================================================
+--- linuxdev.orig/kernel/sysctl.c
++++ linuxdev/kernel/sysctl.c
+@@ -1290,6 +1290,7 @@
+ 		.extra1		= &zero,
+ 		.extra2		= &two,
+ 	},
++#ifdef CONFIG_AIO
+ 	{
+ 		.procname	= "aio-nr",
+ 		.data		= &aio_nr,
+@@ -1304,6 +1305,7 @@
+ 		.mode		= 0644,
+ 		.proc_handler	= &proc_doulongvec_minmax,
+ 	},
++#endif /* CONFIG_AIO */
+ #ifdef CONFIG_INOTIFY_USER
+ 	{
+ 		.ctl_name	= FS_INOTIFY,
 
-Rich
+-- 
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-aio' in
+the body to majordomo@kvack.org.  For more info on Linux AIO,
+see: http://www.kvack.org/aio/
+Don't email: <a href=mailto:"aart@kvack.org">aart@kvack.org</a>
