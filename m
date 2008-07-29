@@ -1,60 +1,51 @@
-From: md@Linux.IT (Marco d'Itri)
-Subject: Re: [ANNOUNCE] udev 125 release
-Date: Tue, 29 Jul 2008 04:10:53 +0200
-Message-ID: <20080729021053.GA5157@bongo.bofh.it>
-References: <488E515D.6000309@cisco.com> <20080728233224.GA27073@bongo.bofh.it> <488E7827.7010106@cisco.com>
+From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Subject: Re: prevalence of C++ in embedded linux?
+Date: Tue, 29 Jul 2008 07:42:18 +0200
+Message-ID: <e4c675870807282242y112a3477nab5ff520637f0485@mail.gmail.com>
+References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain>
+	 <1217281654.3546.16.camel@moss.renham>
 Mime-Version: 1.0
-Return-path: <linux-hotplug-owner@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=hozUUfObg2yXLCk7m8DgYaWgLrIJZ6nOQ3jY0b9wb6Q=;
+        b=AF3hfAeIPZMtj/d3aBqhu13OyRzFQDIsenHnbShDwWUwEuWeOWjR/ameTei//ooJGh
+         5RwdA1XGerFQ6ByoMpINy3+g8fSbnXrLLgzYIRx/iTED0hzegX434v6VCl0TzqIlkLOR
+         nmlpWo3RCVx5BuUdjbuW/4NsM+T+28c/N4RXM=
+In-Reply-To: <1217281654.3546.16.camel@moss.renham>
 Content-Disposition: inline
-In-Reply-To: <488E7827.7010106@cisco.com>
-Sender: linux-hotplug-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: David VomLehn <dvomlehn@cisco.com>
-Cc: linux-hotplug@vger.kernel.org, Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: Ben Nizette <bn@niasdigital.com>
+Cc: "Robert P. J. Day" <rpjday@crashcourse.ca>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-On Jul 29, David VomLehn <dvomlehn@cisco.com> wrote:
+2008/7/28 Ben Nizette <bn@niasdigital.com>:
+>
+> On Mon, 2008-07-28 at 11:43 -0400, Robert P. J. Day wrote:
+>> just curious -- how many folks are working in C++ in their embedded
+>> linux work?
+>
 
->> Also, they can be edited manually while /var data cannot.
-> I don't know of any problems with editing /var data manually, but your 
-It's one of the basic rules which have always defined /var. From FHS 2.3:
+ [cut]
 
-/var/lib : Variable state information
+> Of course a largish number don't really need to write any code at all.
+> They just need to wire up existing programs to do what they want then
+> maybe glue a bit of PHP between that and the user so it doesn't /look/
+> like Linux from the outside.
+>
 
-Purpose
+ Apart kernel space and its modules I use C and shell script for
+gluing all togheter!
+ In the last project I used 4423 lines of shell script as glue for C
+applications.
+ :-)
 
-This hierarchy holds state information pertaining to an application or the
-system. State information is data that programs modify while they run, and that
-pertains to one specific host. Users must never need to modify files in /var/
-lib to configure a package's operation.
-
-> Note that embedded systems are not the only case where read-only root 
-> filesystems may arise. They are also used when your root filesystem is on 
-> a CDROM or DVD, or when you have a read-only root filesystem so you can 
-> network-mount it on multiple nodes. These cases influenced the Filesystem 
-> Hierarchy Standard people to make /etc read-only. So, I think  that using 
-> /etc for "on-the-fly" generated udev rules is an issue in a number of 
-> situations.
-Live CDs do not really need persistent status and in my experience
-both these and embedded systems tend to use lots of special-purpose
-hacks anyway.
-The generated rules *are* a configuration file and there are endless
-generated configuration files in /etc (tipically they are generated
-once at install time, but on most systems the same applies to udev too).
-
-If you have a R/O /etc an no human administrator which can edit system
-files then just copy the rules files from /dev/.udev/rules.d/ to /var
-and restore them at the next boot before udevtrigger is run.
-
-> need for this feature, but is it possible that you wouldn't need to 
-> generate rules *on-the-fly* until after mounting /var? If that were the 
-> case, you could still put the generated rules there.
-It does not matter when they are generated but when they are used,
-e.g. they may be needed to NFS-mount /var.
-At least on Debian systems, networking is started before even local
-file systems are mounted.
-
+ Cheers,
 -- 
-ciao,
-Marco
+/roberto
+http://www.roberto.foglietta.name/work
