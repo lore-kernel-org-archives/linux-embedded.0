@@ -1,38 +1,36 @@
-From: "Bart Van Assche" <bart.vanassche@gmail.com>
+From: Alexander Neundorf <neundorf@eit.uni-kl.de>
 Subject: Re: prevalence of C++ in embedded linux?
-Date: Tue, 29 Jul 2008 10:50:46 +0200
-Message-ID: <e2e108260807290150tabb95d8vd080c069aab5d24@mail.gmail.com>
-References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain>
-	 <488EC964.2030400@coritel.it>
+Date: Tue, 29 Jul 2008 10:58:06 +0200
+Message-ID: <200807291058.06240.neundorf@eit.uni-kl.de>
+References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain> <200807290951.34563.neundorf@eit.uni-kl.de> <1217319612.24988.15.camel@spike.firmix.at>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=pliLQUdClA8lWtyyXjydoChQkEfFgrkdgRL+nmlmjRg=;
-        b=oFCG6VZ4NJkLd3+c4XhVFEaGtjxDQ87HMmWdDiS1hbW1N6fi4zn8+RR0tmI24ryQjT
-         MAlzBNyrDmK0ETxhC/ubiB4oR80hppKl6bEQ57X0wiLyT4bIg8z51RQc0pXCUT93D4OJ
-         EnjWT2A1sozw1B+ND2Ao71/Bfyd46lUE7TQqI=
-In-Reply-To: <488EC964.2030400@coritel.it>
+In-Reply-To: <1217319612.24988.15.camel@spike.firmix.at>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Marco Stornelli <marco.stornelli@coritel.it>
-Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-On Tue, Jul 29, 2008 at 9:40 AM, Marco Stornelli
-<marco.stornelli@coritel.it> wrote:
-> Like Linus Torvals said "...C++ is an horrible language" :)
+On Tuesday 29 July 2008 10:20:12 you wrote:
+> On Tue, 2008-07-29 at 09:51 +0200, Alexander Neundorf wrote:
+...
+> Yes, one *can* use the above features and get small features. But most
+> people simply can't - if only that they use some tool/lib written in C++
+> (and coming from the "normal" world) which simply uses them without
+> thinking about space and wonder why the device won't run with "only"
+> 128MB flash and run in 16MB RAM.
 
-Some C++ language features are indeed not very elegant from a
-language-theoretic standpoint. But that doesn't matter when writing
-embedded software -- what matters is that C++ allows to make source
-code a lot more readable than the C programming language. And if you
-don't like the overhead introduced by features like exceptions or
-RTTI, you can still pass -fno-exceptions -fno-rtti to gcc.
+Well, if somebody carelessly uses general purpose apps/libs in a tiny embedded 
+project he will have problems, no matter if it's C or C++.
 
-Bart.
+> BTW why should I use C++ if I don't use any "fancy features"?
+
+If you just skip RTTI and exceptions you have enough fancy features left :-)
+
+Just know what you're doing if you're using templates and multiple 
+inheritance, there is no problem with them. Templates are so much better than 
+macros, and if used carefully they don't bloat the code size.
+
+Alex
