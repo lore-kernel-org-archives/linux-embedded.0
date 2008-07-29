@@ -1,69 +1,33 @@
-From: Matt Mackall <mpm@selenic.com>
+From: Jamie Lokier <jamie@shareable.org>
 Subject: Re: [patch 2/4] Configure out file locking features
-Date: Tue, 29 Jul 2008 13:57:55 -0500
-Message-ID: <1217357875.15724.167.camel@calx>
-References: <20080729154520.728594017@free-electrons.com> >
-	 <20080729154747.872888047@free-electrons.com>
-	 <20080729181751.GA24924@parisc-linux.org>
+Date: Tue, 29 Jul 2008 21:00:08 +0100
+Message-ID: <20080729200006.GA25885@shareable.org>
+References: <20080729154520.728594017@free-electrons.com> <20080729154747.872888047@free-electrons.com> <20080729181751.GA24924@parisc-linux.org> <1217357875.15724.167.camel@calx>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20080729181751.GA24924@parisc-linux.org>
+Content-Disposition: inline
+In-Reply-To: <1217357875.15724.167.camel@calx>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Matthew Wilcox <matthew@wil.cx>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Content-Transfer-Encoding: 7bit
+To: Matt Mackall <mpm@selenic.com>
+Cc: Matthew Wilcox <matthew@wil.cx>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
 
+Matt Mackall wrote:
+> The typical embedded NFS-based devices are NAS servers and media players
+> and are going to be more concerned about things like page cache
+> balancing.
 
-On Tue, 2008-07-29 at 12:17 -0600, Matthew Wilcox wrote:
-> On Tue, Jul 29, 2008 at 05:45:22PM +0200, Thomas Petazzoni wrote:
-> > This patch adds the CONFIG_FILE_LOCKING option which allows to remove
-> > support for advisory locks. With this patch enabled, the flock()
-> > system call, the F_GETLK, F_SETLK and F_SETLKW operations of fcntl()
-> > and NFS support are disabled. These features are not necessarly needed
-> > on embedded systems. It allows to save ~11 Kb of kernel code and data:
-> > 
-> >    text	   data	    bss	    dec	    hex	filename
-> > 1125436	 118764	 212992	1457192	 163c28	vmlinux.old
-> > 1114299	 118564	 212992	1445855	 160fdf	vmlinux
-> >  -11137    -200       0  -11337   -2C49 +/-
-> > 
-> > This patch has originally been written by Matt Mackall
-> > <mpm@selenic.com>, and is part of the Linux Tiny project.
-> > 
-> > Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-> 
-> In principle, I think this is a great idea.
-> 
-> >  config NFS_FS
-> >  	tristate "NFS client support"
-> > -	depends on INET
-> > +	depends on INET && FILE_LOCKING
-> >  	select LOCKD
-> >  	select SUNRPC
-> >  	select NFS_ACL_SUPPORT if NFS_V3_ACL
-> 
-> I think this part is a little lazy.  It should be possible to support
-> NFS without file locking.  I suspect that's really not in-scope for the
-> linux-tiny tree as currently envisaged with the focus on embedded
-> devices that probably don't use NFS anyway.  Do we want to care about
-> the situation of a machine with fixed workload, that doesn't need file
-> locking, but does use NFS?
+Oh, those.
 
-I would lean towards no, but if someone comes along who cares, they're
-welcome to try it. This stuff all has to strike a balance between
-savings and effort/complexity/maintainability, so any time the submitter
-is too lazy to cover a less common use case, it's probably a good sign
-they're approaching that tipping point. 
+It would be really annoying to buy a home NAS and find it doesn't
+support NFS locks or SMB oplocks.  NASes are vaguely useful for more
+than one computer in the house at the same time.
 
-On the other hand, if you think it's trivial to do a locking-ectomy on
-NFS, I'd be happy to see it.
+That said, I bought a big, expensive one, found it far too slow for my
+needs, send it back for a refund and bought a portable cheap USB disk
+which had *so* much higher performance.  The convenience of serving
+multiple machines just wasn't worth the lousy performance.
 
-The typical embedded NFS-based devices are NAS servers and media players
-and are going to be more concerned about things like page cache
-balancing.
-
--- 
-Mathematics is the supreme nostalgia of our time.
-
+-- Jamie
