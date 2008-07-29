@@ -1,50 +1,98 @@
 From: Bernd Petrovitsch <bernd@firmix.at>
 Subject: Re: prevalence of C++ in embedded linux?
-Date: Tue, 29 Jul 2008 10:20:12 +0200
-Message-ID: <1217319612.24988.15.camel@spike.firmix.at>
+Date: Tue, 29 Jul 2008 11:47:18 +0200
+Message-ID: <1217324838.24988.41.camel@spike.firmix.at>
 References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain>
-	 <488EC964.2030400@coritel.it>  <200807290951.34563.neundorf@eit.uni-kl.de>
+	 <200807290951.34563.neundorf@eit.uni-kl.de>
+	 <1217319612.24988.15.camel@spike.firmix.at>
+	 <200807291058.06240.neundorf@eit.uni-kl.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200807290951.34563.neundorf@eit.uni-kl.de>
+In-Reply-To: <200807291058.06240.neundorf@eit.uni-kl.de>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Cc: Marco Stornelli <marco.stornelli@coritel.it>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Alexander Neundorf <neundorf@eit.uni-kl.de>
+To: Alexander Neundorf <neundorf@eit.uni-kl.de>
+Cc: linux-embedded@vger.kernel.org
 
-On Tue, 2008-07-29 at 09:51 +0200, Alexander Neundorf wrote:
-> On Tuesday 29 July 2008 09:40:20 Marco Stornelli wrote:
-> > Robert P. J. Day ha scritto:
-> > >   just curious -- how many folks are working in C++ in their embedded
-> > > linux work?
-
-Not if it's in anyway avoidable.
-
-[....]
-> > Like Linus Torvals said "...C++ is an horrible language" :)
+On Tue, 2008-07-29 at 10:58 +0200, Alexander Neundorf wrote:
+> On Tuesday 29 July 2008 10:20:12 you wrote:
+> > On Tue, 2008-07-29 at 09:51 +0200, Alexander Neundorf wrote:
+> ...
+> > Yes, one *can* use the above features and get small features. But most
+> > people simply can't - if only that they use some tool/lib written in C++
+> > (and coming from the "normal" world) which simply uses them without
+> > thinking about space and wonder why the device won't run with "only"
+> > 128MB flash and run in 16MB RAM.
 > 
-> If you avoid RTTI and exceptions and if you are handle templates and multiple 
-> inheritance carefully I see nothing which speaks against using it for 
-> embedded and real-time software.
+> Well, if somebody carelessly uses general purpose apps/libs in a tiny embedded 
+> project he will have problems, no matter if it's C or C++.
 
-That's the main reason for *not* using C++ in the embedded world in the
-first place.
-Tell people that they may use C++ and see them happy.
-Then tell them that you better not use templates, RTTI, exceptions and
-multiple inheritance if you want to boot from small space.
+Of course.
+But it is IMHO much more easier and seductive to use the code bloating
+features with C++ - especially if you don't know what to do and do not
+realize (until it's too late).
 
-Yes, one *can* use the above features and get small features. But most
-people simply can't - if only that they use some tool/lib written in C++
-(and coming from the "normal" world) which simply uses them without
-thinking about space and wonder why the device won't run with "only"
-128MB flash and run in 16MB RAM.
+Evey other potential customer asks about C++ on an embedded device. And
+if you say "yes" they *expect* to use all that g++ allows. Period.
 
-BTW why should I use C++ if I don't use any "fancy features"?
+Getting exceptions and restrictions to the use of C++ (including any 3rd
+party software - known and unknown) in an offer?
+Please be serious.
+
+Discussing afterwards that these templates are a very bad idea (and need
+to be converted to "a pure virtual class and lots of classes" to avoid
+code bloat and that it will cost a few man-weeks and calendar time)?
+I can hear it already: "But you said that C++ is OK and this is plain C
+++".
+
+> > BTW why should I use C++ if I don't use any "fancy features"?
+> 
+> If you just skip RTTI and exceptions you have enough fancy features left :-)
+
+Hmm, does g++ has options to completely disabled these (and other)
+"fancy features"? At least one could check 3rd party software more
+easily if they actually use that.
+
+Multiple inheritance[0] is in my experience not really necessary (if
+ever used).
+I already have "Safe C" with gcc anyways (if I want and enable some
+warnings;-).
+OO design is a question of design and not of the implementation
+language. I can't see much difference between
+- declaring a class and using a method or
+- declaring a struct and use a pointer to an instance as the first
+   parameter in several functions.
+Leaves operator/function overloading and default values for parameters.
+But it adds usually libstdc++.so ....
+
+> Just know what you're doing if you're using templates and multiple 
+
+ACK. But what is with the other 90%?
+
+> inheritance, there is no problem with them. Templates are so much better than 
+> macros, and if used carefully they don't bloat the code size.
+
+Don't get me wrong - I'm not religiously against C++ in anyway.
+It's just that you *really* need to know what you do and that implies
+IMHO for C++ that you must know how templates work/are implemented.
+Similar for exceptions (and no, using exceptions usually doesn't save
+space anywhere - at least not if your calling depth is < 100). if you
+use them (or use a library that uses them).
+And may need or may not need libstdc++.so - an additional piece of code
+using space.
+Of course, if you have 1GB of flash and 256M RAM, who cares. But most of
+the devices I see are not that "fat".
+
+In short: It is far from easy to *not* shoot yourself in the foot with
+C++. At least compared to plain C.
 
 	Bernd
+
+[0]: Yes, I know what's the difference between normal and virtual
+         inheritance.
 -- 
 Firmix Software GmbH                   http://www.firmix.at/
 mobil: +43 664 4416156                 fax: +43 1 7890849-55
