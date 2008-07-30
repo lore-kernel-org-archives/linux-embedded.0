@@ -1,46 +1,83 @@
-From: Behan Webster <behanw@websterwood.com>
-Subject: Re: embedded rootfs utility
-Date: Wed, 30 Jul 2008 11:40:25 -0400
-Message-ID: <48908B69.8070307@websterwood.com>
-References: <488FCF7D.5010005@websterwood.com> <20080730140925.GA21958@secretlab.ca> <489084CB.6080305@coritel.it>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: Re: [patch 2/4] Configure out file locking features
+Date: Wed, 30 Jul 2008 17:40:28 +0200
+Message-ID: <20080730174028.67184ea2@surf>
+References: <20080729154520.728594017@free-electrons.com>
+	<20080729154747.872888047@free-electrons.com>
+	<20080729181751.GA24924@parisc-linux.org>
+	<20080730142754.GD19966@cs181140183.pp.htv.fi>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <489084CB.6080305@coritel.it>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Type: multipart/signed; boundary="Sig_/KkKrxzsZy/AgKq_3jGyWbPG";
+ protocol="application/pgp-signature"; micalg=PGP-SHA1
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755611AbYG3Pkn@vger.kernel.org>
+In-Reply-To: <20080730142754.GD19966@cs181140183.pp.htv.fi>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Marco Stornelli <marco.stornelli@coritel.it>
-Cc: linux-embedded@vger.kernel.org
+To: Adrian Bunk <bunk@kernel.org>
+Cc: Matthew Wilcox <matthew@wil.cx>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, mpm@selenic.com, akpm@linux-foundation.org
 
-Marco Stornelli wrote:
->
->  On Tue, Jul 29, 2008 at 10:18:37PM -0400, Behan Webster wrote:
->> A quick announcement of the release of elbs, or the "Embedded Linux
->> Build System" (it seemed like a good name at the time I started writing
->> it...)  So far it's just a few utilities that I wrote to make a few of
->> my own projects easier.
->>
->> However, most notably it contains a utility called "elbs-rootfs" which
->> makes it easy to create an embedded rootfs for any architecture
->> supported by the Debian projecy (or Ubuntu Linux).  The idea is to get a
->> rootfs up and working quickly via nfs (or a flash drive) which allows
->> you to install any debian package and/or to do native development.  This
->> is (not yet) meant as a tool to make your final rootfs fit on a small
->> flash partition.
->>
->
-> Very interesting, where can I found it? Can you give me a site to
-> download it?
->
-It's listed near the bottom of the announcement.
+--Sig_/KkKrxzsZy/AgKq_3jGyWbPG
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-> You can find elbs at http://debian.websterwood.com/elbs/
+Le Wed, 30 Jul 2008 17:27:54 +0300,
+Adrian Bunk <bunk@kernel.org> a =C3=A9crit :
 
-Enjoy.
+> It seems the emails containing the patches never made it to the vger=20
+> lists, which makes it a bit hard to comment on them.
 
-Behan
+Yes, they didn't make it to the lists, for some reason. Maybe it's
+because I sent them using "quilt mail --send", which uses my local
+exim4 mail server, and for some reason, vger doesn't like that kind of
+e-mails. However, my exim4 is configured to sent the e-mails through by
+ISP SMTP. From my exim4 mainlog:
 
--- 
-Behan Webster
-behanw@websterwood.com
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg =3D> linux-kernel@vger.kernel.org R=3D=
+smarthost T=3Dremote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg -> linux-embedded@vger.kernel.org R=3D=
+smarthost T=3Dremote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg -> netdev@vger.kernel.org R=3Dsmarthos=
+t T=3Dremote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg -> davem@davemloft.net R=3Dsmarthost T=
+=3Dremote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg -> mpm@selenic.com R=3Dsmarthost T=3Dr=
+emote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg -> akpm@linux-foundation.org R=3Dsmart=
+host T=3Dremote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg -> thomas.petazzoni@free-electrons.com=
+ R=3Dsmarthost T=3Dremote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg -> michael@free-electrons.com R=3Dsmar=
+thost T=3Dremote_smtp_smarthost H=3Dsmtp.free.fr [212.27.48.4]*
+2008-07-29 17:47:57 1KNrQS-0007kt-Kg Completed
+
+So from my side, everything seemed to work well. Does anybody has a
+clue ?
+
+> Thomas, can you try to figure out what went wrong and resend them
+> then?
+
+I will send them again through my normal MUA, using quilt mail --mbox.
+Hopefully it'll work.
+
+Sincerly,
+
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
+
+--Sig_/KkKrxzsZy/AgKq_3jGyWbPG
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+
+iD8DBQFIkIts9lPLMJjT96cRAu+gAKCSr8z5X4fgX7KGFQ4svShUTmPovwCfQD0m
+i1EN/4GQJAdVZZwhE2QxjY8=
+=OwXs
+-----END PGP SIGNATURE-----
+
+--Sig_/KkKrxzsZy/AgKq_3jGyWbPG--
