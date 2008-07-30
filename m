@@ -1,93 +1,51 @@
-From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+From: Jamie Lokier <jamie@shareable.org>
 Subject: Re: prevalence of C++ in embedded linux?
-Date: Wed, 30 Jul 2008 15:01:38 +0200
-Message-ID: <20080730150138.5b5e558e@hskinnemo-gx745.norway.atmel.com>
-References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain>
-	<200807290951.34563.neundorf@eit.uni-kl.de>
-	<1217319612.24988.15.camel@spike.firmix.at>
-	<200807291058.06240.neundorf@eit.uni-kl.de>
-	<1217324838.24988.41.camel@spike.firmix.at>
-	<556445368AFA1C438794ABDA8901891C092D3CF7@USA0300MS03.na.xerox.net>
-	<e2e108260807292146n581b655an3119be9e33af871c@mail.gmail.com>
-	<20080730102523.GB8992@shareable.org>
-	<e2e108260807300404r65bfb2b2xfb07687601dc59da@mail.gmail.com>
-	<20080730135834.74018bf6@hskinnemo-gx745.norway.atmel.com>
-	<20080730123827.GA12252@shareable.org>
+Date: Wed, 30 Jul 2008 14:07:12 +0100
+Message-ID: <20080730130712.GA12991@shareable.org>
+References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain> <200807290951.34563.neundorf@eit.uni-kl.de> <1217319612.24988.15.camel@spike.firmix.at> <200807291058.06240.neundorf@eit.uni-kl.de> <1217324838.24988.41.camel@spike.firmix.at> <556445368AFA1C438794ABDA8901891C092D3CF7@USA0300MS03.na.xerox.net> <e2e108260807292146n581b655an3119be9e33af871c@mail.gmail.com> <20080730102523.GB8992@shareable.org> <e2e108260807300404r65bfb2b2xfb07687601dc59da@mail.gmail.com> <1217422102.7892.21.camel@spike.firmix.at>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080730123827.GA12252@shareable.org>
+Content-Disposition: inline
+In-Reply-To: <1217422102.7892.21.camel@spike.firmix.at>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Jamie Lokier <jamie@shareable.org>
-Cc: Bart Van Assche <bart.vanassche@gmail.com>, "Leisner, Martin" <Martin.Leisner@xerox.com>, Bernd Petrovitsch <bernd@firmix.at>, Alexander Neundorf <neundorf@eit.uni-kl.de>, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Bernd Petrovitsch <bernd@firmix.at>
+Cc: Bart Van Assche <bart.vanassche@gmail.com>, "Leisner, Martin" <Martin.Leisner@xerox.com>, Alexander Neundorf <neundorf@eit.uni-kl.de>, linux-embedded@vger.kernel.org
 
-Jamie Lokier <jamie@shareable.org> wrote:
-> The GNU Binutils requirement was to target lots of different object
-> formats, and architectures, allow different ones to be interconverted
-> and linked together, and to run on lots of platforms.
+Bernd Petrovitsch wrote:
+> If "GOLD" is as old and flexible (and portable?) as binutils,
 
-The Linux kernel also meets those requirements (the ones that are
-relevant for a kernel that is.)
+The author says it will only work with ELF, and he does not
+intend to add support for all the other things binutils does.
 
-> Given those constraints, probably C was the only option at the time,
-> and BFD's interface, although ugly and difficult to work with, does
-> reflect the abstractions of different object formats and architectures
-> moderately well IMHO.
+> gcc and/or other huge software maintained to death, it is probably
+> similar complex and odd.  If people take a > 10 year old tool and
+> rewrite it from scratch, I would assume that design is better.
 
-Well, I guess it does work moderately well once you get used to it. But
-there are lots of hidden dependencies all over the place. I still
-haven't figured out how to un-break the debugging information after
-relaxing, for example.
+Only true if the cruft is no longer relevant.  If the cruft is
+intrinsic to the problem, e.g. supporting umpteen quirky architectures
+implies umpteen quirks of cruft, then it'll be in the new design.
 
-But what I disagree with is that these problems are somehow a symptom
-of using C as the implementation language. They're a symptom of bad
-design decisions IMO.
+Btw, gcc and binutils are more like 30 years old :-)
 
-> It's tough to make a nice design that meets those requirements.
+> And I can't see any direct dependence on the used programming
+> language(s) if one compares running code and what is left of "design"
+> after years of design extensions, changes, enhancements, etc. to a new
+> design from scratch from the lessons learned (hopefully) from the former
+> one.
 
-Absolutely. But does using C++ as an implementation language really
-make it any easier?
+Some programming languages allow you to express a problem concisely
+and clearly, and some don't.  That clarity then affects whether an
+evolving design becomes loaded with implementation cruft or not - and
+you can't always tell the difference.
 
-> It's unfortunate that BFD is so hard to work with that people resort
-> to post-processing tools and other hacks, instead of enjoying adding
-> new format support to it.
-> 
-> For all it's faults working with it, the tools themselves are very
-> versatile and useful compared with most equivalents.
+Most languages are well-matched to different problem domains.
 
-Agreed. I definitely prefer using the GNU tools over the alternatives
-I've seen. But that doesn't mean they can't be improved further.
+Binutils and bfd look very crufty, but I think it's hard to tell how
+much of that is due to the implementation language and implementation,
+or the design and requirements, and how much would exist in any
+implementation on any language.
 
-> If you have clear improvements that would simplify GOLD (without
-> breaking it or requirements you might not be aware of), the author may
-> be quite receptive to them.  He seems keen on the code being of high
-> quality, and he's quite experienced at working on "open" projects with
-> many contributors.
-
-Yeah, I suppose I should put my money where my mouth is and offer some
-constructive suggestions. Right now I'm waiting for someone to get the
-necessary paperwork in place so that we can work as closely with the
-GNU community as we do with the Linux kernel and several other
-communities.
-
-Off the top of my head, after looking just at the target interface, I'd
-really like to see
-  * A few better abstractions so that the target relocation hooks
-    don't need a gazillion parameters.
-  * Some way to spread the target implementation across a few more
-    files/classes so that we don't end up with a single
-    several-thousand-lines file for each architecture. A subdir for each
-    arch would be nice.
-
-Currently, it looks like the target interface is headed down the same
-road as libbfd, and that means the code will be just as unmanageable in
-a few years.
-
-I'm also curious about what things will look like once support for
-complicated things like --relax and --gc-sections is added...
-
-But I guess complaining about it here won't do much good.
-
-Haavard
+-- Jamie
