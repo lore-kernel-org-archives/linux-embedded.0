@@ -1,31 +1,42 @@
-From: Adrian Bunk <bunk@kernel.org>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Wed, 30 Jul 2008 17:27:54 +0300
-Message-ID: <20080730142754.GD19966@cs181140183.pp.htv.fi>
-References: <20080729154520.728594017@free-electrons.com>> <20080729154747.872888047@free-electrons.com> <20080729181751.GA24924@parisc-linux.org>
+From: Marco Stornelli <marco.stornelli@coritel.it>
+Subject: Re: embedded rootfs utility
+Date: Wed, 30 Jul 2008 17:12:11 +0200
+Message-ID: <489084CB.6080305@coritel.it>
+References: <488FCF7D.5010005@websterwood.com> <20080730140925.GA21958@secretlab.ca>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080729181751.GA24924@parisc-linux.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Matthew Wilcox <matthew@wil.cx>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, mpm@selenic.com, akpm@linux-foundation.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20080730140925.GA21958@secretlab.ca>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Behan Webster <behanw@websterwood.com>
+Cc: linux-embedded@vger.kernel.org
 
-It seems the emails containing the patches never made it to the vger 
-lists, which makes it a bit hard to comment on them.
 
-Thomas, can you try to figure out what went wrong and resend them then?
+  On Tue, Jul 29, 2008 at 10:18:37PM -0400, Behan Webster wrote:
+> A quick announcement of the release of elbs, or the "Embedded Linux
+> Build System" (it seemed like a good name at the time I started writing
+> it...)  So far it's just a few utilities that I wrote to make a few of
+> my own projects easier.
+>
+> However, most notably it contains a utility called "elbs-rootfs" which
+> makes it easy to create an embedded rootfs for any architecture
+> supported by the Debian projecy (or Ubuntu Linux).  The idea is to get a
+> rootfs up and working quickly via nfs (or a flash drive) which allows
+> you to install any debian package and/or to do native development.  This
+> is (not yet) meant as a tool to make your final rootfs fit on a small
+> flash partition.
+> 
 
-cu
-Adrian
+Very interesting, where can I found it? Can you give me a site to 
+download it?
 
 -- 
+Marco Stornelli
+Embedded Software Engineer
+CoRiTeL - Consorzio di Ricerca sulle Telecomunicazioni
+http://www.coritel.it
 
-       "Is there not promise of rain?" Ling Tan asked suddenly out
-        of the darkness. There had been need of rain for many days.
-       "Only a promise," Lao Er said.
-                                       Pearl S. Buck - Dragon Seed
-
+marco.stornelli@coritel.it
++39 06 72582838
