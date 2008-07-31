@@ -1,39 +1,50 @@
-From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Subject: Re: [patch 3/4] Configure out ethtool support
-Date: Thu, 31 Jul 2008 18:35:46 +0200
-Message-ID: <20080731183546.2b047cee@surf>
-References: <1217500967.3454.140.camel@pmac.infradead.org>
-	<20080731.035121.177567346.davem@davemloft.net>
-	<1217503770.3454.162.camel@pmac.infradead.org>
-	<20080731.043355.143045459.davem@davemloft.net>
-	<1217504801.3454.170.camel@pmac.infradead.org>
-	<20080731155820.GC20212@cs181140183.pp.htv.fi>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: [patch 0/4] [resend] Add configuration options to disable features
+ not needed on embedded devices
+Date: Thu, 31 Jul 2008 09:42:42 -0700
+Message-ID: <4891EB82.9060703@am.sony.com>
+References: <20080731092703.661994657@free-electrons.com>	<20080731.024027.162488608.davem@davemloft.net>	<1217497912.3454.95.camel@pmac.infradead.org> <20080731.025547.35826309.davem@davemloft.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080731155820.GC20212@cs181140183.pp.htv.fi>
+In-Reply-To: <20080731.025547.35826309.davem@davemloft.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Adrian Bunk <bunk@kernel.org>
-Cc: David Woodhouse <dwmw2@infradead.org>, David Miller <davem@davemloft.net>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, mpm@selenic.com, jgarzik@pobox.com, netdev@vger.kernel.org, akpm@linux-foundation.org
+Content-Type: text/plain; charset="us-ascii"
+To: David Miller <davem@davemloft.net>
+Cc: dwmw2@infradead.org, torvalds@linux-foundation.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com
 
-Le Thu, 31 Jul 2008 18:58:20 +0300,
-Adrian Bunk <bunk@kernel.org> a =C3=A9crit :
+David Miller wrote:
+> From: David Woodhouse <dwmw2@infradead.org>
+> Date: Thu, 31 Jul 2008 10:51:52 +0100
+> 
+>> But there are a lot of people who really don't need these features
+>> and really want the option of leaving them out.
+> 
+> I'll say it one last time.
+> 
+> If you have ipv4 enabled, you need ETHTOOL.
 
-> It might have also made more sense to spend some of the energy used
-> in this discussion instead on checking where the global 24 kB size
-> increase Thomas reported for 2.6.27-rc1 compared to 2.6.26 comes from=
-=2E
+I've been using and administering Linux for 16 years,
+and using it successfully in embedded projects for 10.
+Until I stumbled upon this patch in Linux-tiny, I had
+never heard of ethtool.  Sony has shipped hundreds
+of thousands of products with ETHTOOL turned off.
 
-I agree. This is something I'm working on. I hope to have results soon.
-But I *fear* that the results will be: the size growth is 10 bytes
-here, 22 bytes there, 35 bytes here, spread over hundreds of patches.
-Something we can do anything against.
+It sounds like you don't want to talk about it any more,
+but could you please give me the 30-second overview
+of why ETHTOOL is required for proper ipv4 operation?
 
-Thomas
---=20
-Thomas Petazzoni, Free Electrons
-Kernel, drivers and embedded Linux development,
-consulting, training and support.
-http://free-electrons.com
+If Sony is shipping network-buggy products I certainly
+want to know about it.
+
+Sorry if I missed an earlier explanation.
+
+Thanks,
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
