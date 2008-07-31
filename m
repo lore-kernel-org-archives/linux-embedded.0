@@ -1,293 +1,171 @@
 From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Subject: [patch 2/4] Configure out file locking features
-Date: Thu, 31 Jul 2008 11:27:05 +0200
-Message-ID: <20080731093220.969460336@free-electrons.com>
+Subject: [patch 3/4] Configure out ethtool support
+Date: Thu, 31 Jul 2008 11:27:06 +0200
+Message-ID: <20080731093221.236840420@free-electrons.com>
 References: <20080731092703.661994657@free-electrons.com>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline; filename=configure-out-fs-locks-support.patch
-Sender: linux-fsdevel-owner@vger.kernel.org
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline; filename=configure-out-ethtool-support
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
-Cc: michael@free-electrons.com, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Cc: michael@free-electrons.com, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Matt Mackall <mpm@selenic.com>, jgarzik@pobox.com, netdev@vger.kernel.org, davem@davemloft.net, akpm@linux-foundation.org
 
-This patch adds the CONFIG_FILE_LOCKING option which allows to remove
-support for advisory locks. With this patch enabled, the flock()
-system call, the F_GETLK, F_SETLK and F_SETLKW operations of fcntl()
-and NFS support are disabled. These features are not necessarly needed
-on embedded systems. It allows to save ~11 Kb of kernel code and data:
+This patchs add the CONFIG_ETHTOOL option which allows to remove
+support for ethtool, not necessarly used on embedded systems. As this
+is a size-reduction option, it depends on CONFIG_EMBEDDED. It allows
+to save ~6 kilobytes of kernel code:
 
    text	   data	    bss	    dec	    hex	filename
-1125436	 118764	 212992	1457192	 163c28	vmlinux.old
-1114299	 118564	 212992	1445855	 160fdf	vmlinux
- -11137    -200       0  -11337   -2C49 +/-
+1258447	 123592	 212992	1595031	 185697	vmlinux
+1252147	 123592	 212992	1588731	 183dfb	vmlinux.new
+  -6300       0       0   -6300   -189C +/-
 
-This patch has originally been written by Matt Mackall
+Bonding and bridging both depends on Ethtool functionnality, so
+ETHTOOL is selected automatically when either bonding and bridging are
+selected.
+
+Question: should we also remove ethtool-related functions from all
+network drivers ?
+
+This patch has been originally written by Matt Mackall
 <mpm@selenic.com>, and is part of the Linux Tiny project.
 
 Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 Signed-off-by: Matt Mackall <mpm@selenic.com>
-Cc: matthew@wil.cx
-Cc: linux-fsdevel@vger.kernel.org
+Cc: jgarzik@pobox.com
+Cc: netdev@vger.kernel.org
+Cc: davem@davemloft.net
 Cc: mpm@selenic.com
 Cc: akpm@linux-foundation.org
 
 ---
- fs/Kconfig          |    2 +-
- fs/Makefile         |    3 ++-
- fs/proc/proc_misc.c |    4 ++++
- include/linux/fs.h  |   52 +++++++++++++++++++++++++++++++++++++++++++++-------
- init/Kconfig        |    8 ++++++++
- kernel/sys_ni.c     |    1 +
- kernel/sysctl.c     |    6 +++++-
- 7 files changed, 66 insertions(+), 10 deletions(-)
+ drivers/net/Kconfig     |    1 +
+ include/linux/ethtool.h |   16 ++++++++++++++++
+ init/Kconfig            |    8 ++++++++
+ net/bridge/Kconfig      |    1 +
+ net/core/Makefile       |    3 ++-
+ net/core/dev.c          |    4 ++++
+ 6 files changed, 32 insertions(+), 1 deletion(-)
 
-Index: linuxdev/fs/Kconfig
+Index: linuxdev/drivers/net/Kconfig
 ===================================================================
---- linuxdev.orig/fs/Kconfig
-+++ linuxdev/fs/Kconfig
-@@ -1559,7 +1559,7 @@
- 
- config NFS_FS
- 	tristate "NFS client support"
--	depends on INET
-+	depends on INET && FILE_LOCKING
- 	select LOCKD
- 	select SUNRPC
- 	select NFS_ACL_SUPPORT if NFS_V3_ACL
-Index: linuxdev/fs/Makefile
+--- linuxdev.orig/drivers/net/Kconfig
++++ linuxdev/drivers/net/Kconfig
+@@ -61,6 +61,7 @@
+ config BONDING
+ 	tristate "Bonding driver support"
+ 	depends on INET
++	select ETHTOOL
+ 	---help---
+ 	  Say 'Y' or 'M' if you wish to be able to 'bond' multiple Ethernet
+ 	  Channels together. This is called 'Etherchannel' by Cisco,
+Index: linuxdev/include/linux/ethtool.h
 ===================================================================
---- linuxdev.orig/fs/Makefile
-+++ linuxdev/fs/Makefile
-@@ -7,7 +7,7 @@
+--- linuxdev.orig/include/linux/ethtool.h
++++ linuxdev/include/linux/ethtool.h
+@@ -283,6 +283,7 @@
+ struct net_device;
  
- obj-y :=	open.o read_write.o file_table.o super.o \
- 		char_dev.o stat.o exec.o pipe.o namei.o fcntl.o \
--		ioctl.o readdir.o select.o fifo.o locks.o dcache.o inode.o \
-+		ioctl.o readdir.o select.o fifo.o dcache.o inode.o \
- 		attr.o bad_inode.o file.o filesystems.o namespace.o \
- 		seq_file.o xattr.o libfs.o fs-writeback.o \
- 		pnode.o drop_caches.o splice.o sync.o utimes.o \
-@@ -28,6 +28,7 @@
- obj-$(CONFIG_TIMERFD)		+= timerfd.o
- obj-$(CONFIG_EVENTFD)		+= eventfd.o
- obj-$(CONFIG_AIO)               += aio.o
-+obj-$(CONFIG_FILE_LOCKING)      += locks.o
- obj-$(CONFIG_COMPAT)		+= compat.o compat_ioctl.o
- 
- nfsd-$(CONFIG_NFSD)		:= nfsctl.o
-Index: linuxdev/fs/proc/proc_misc.c
-===================================================================
---- linuxdev.orig/fs/proc/proc_misc.c
-+++ linuxdev/fs/proc/proc_misc.c
-@@ -677,6 +677,7 @@
- 	return proc_calc_metrics(page, start, off, count, eof, len);
- }
- 
-+#ifdef CONFIG_FILE_LOCKING
- static int locks_open(struct inode *inode, struct file *filp)
- {
- 	return seq_open(filp, &locks_seq_operations);
-@@ -688,6 +689,7 @@
- 	.llseek		= seq_lseek,
- 	.release	= seq_release,
- };
-+#endif /* CONFIG_FILE_LOCKING */
- 
- static int execdomains_read_proc(char *page, char **start, off_t off,
- 				 int count, int *eof, void *data)
-@@ -881,7 +883,9 @@
- #ifdef CONFIG_PRINTK
- 	proc_create("kmsg", S_IRUSR, NULL, &proc_kmsg_operations);
- #endif
-+#ifdef CONFIG_FILE_LOCKING
- 	proc_create("locks", 0, NULL, &proc_locks_operations);
+ /* Some generic methods drivers may use in their ethtool_ops */
++#ifdef CONFIG_ETHTOOL
+ u32 ethtool_op_get_link(struct net_device *dev);
+ u32 ethtool_op_get_tx_csum(struct net_device *dev);
+ int ethtool_op_set_tx_csum(struct net_device *dev, u32 data);
+@@ -296,6 +297,21 @@
+ int ethtool_op_set_ufo(struct net_device *dev, u32 data);
+ u32 ethtool_op_get_flags(struct net_device *dev);
+ int ethtool_op_set_flags(struct net_device *dev, u32 data);
++#else
++static inline u32 ethtool_op_get_link(struct net_device *dev) { return 0; }
++static inline u32 ethtool_op_get_tx_csum(struct net_device *dev) { return 0; }
++static inline int ethtool_op_set_tx_csum(struct net_device *dev, u32 data) { return 0; }
++static inline int ethtool_op_set_tx_hw_csum(struct net_device *dev, u32 data) { return 0; }
++static inline int ethtool_op_set_tx_ipv6_csum(struct net_device *dev, u32 data) { return 0; }
++static inline u32 ethtool_op_get_sg(struct net_device *dev) { return 0; }
++static inline int ethtool_op_set_sg(struct net_device *dev, u32 data) { return 0; }
++static inline u32 ethtool_op_get_tso(struct net_device *dev) { return 0; }
++static inline int ethtool_op_set_tso(struct net_device *dev, u32 data) { return 0; }
++static inline u32 ethtool_op_get_ufo(struct net_device *dev) { return 0; }
++static inline int ethtool_op_set_ufo(struct net_device *dev, u32 data) { return 0; }
++static inline u32 ethtool_op_get_flags(struct net_device *dev) { return 0; }
++static inline int ethtool_op_set_flags(struct net_device *dev, u32 data) { return 0; }
 +#endif
- 	proc_create("devices", 0, NULL, &proc_devinfo_operations);
- 	proc_create("cpuinfo", 0, NULL, &proc_cpuinfo_operations);
- #ifdef CONFIG_BLOCK
-Index: linuxdev/include/linux/fs.h
-===================================================================
---- linuxdev.orig/include/linux/fs.h
-+++ linuxdev/include/linux/fs.h
-@@ -983,6 +983,13 @@
  
- #include <linux/fcntl.h>
- 
-+extern void send_sigio(struct fown_struct *fown, int fd, int band);
-+
-+/* fs/sync.c */
-+extern int do_sync_mapping_range(struct address_space *mapping, loff_t offset,
-+			loff_t endbyte, unsigned int flags);
-+
-+#ifdef CONFIG_FILE_LOCKING
- extern int fcntl_getlk(struct file *, struct flock __user *);
- extern int fcntl_setlk(unsigned int, struct file *, unsigned int,
- 			struct flock __user *);
-@@ -993,14 +1000,9 @@
- 			struct flock64 __user *);
- #endif
- 
--extern void send_sigio(struct fown_struct *fown, int fd, int band);
- extern int fcntl_setlease(unsigned int fd, struct file *filp, long arg);
- extern int fcntl_getlease(struct file *filp);
- 
--/* fs/sync.c */
--extern int do_sync_mapping_range(struct address_space *mapping, loff_t offset,
--			loff_t endbyte, unsigned int flags);
--
- /* fs/locks.c */
- extern void locks_init_lock(struct file_lock *);
- extern void locks_copy_lock(struct file_lock *, struct file_lock *);
-@@ -1023,6 +1025,33 @@
- extern int lock_may_read(struct inode *, loff_t start, unsigned long count);
- extern int lock_may_write(struct inode *, loff_t start, unsigned long count);
- extern struct seq_operations locks_seq_operations;
-+#else /* !CONFIG_FILE_LOCKING */
-+#define fcntl_getlk(a, b) (-EINVAL)
-+#define fcntl_setlk(a, b, c, d) (-EACCES)
-+#if BITS_PER_LONG == 32
-+#define fcntl_getlk64(a, b) (-EINVAL)
-+#define fcntl_setlk64(a, b, c, d) (-EACCES)
-+#endif
-+#define fcntl_setlease(a, b, c) (0)
-+#define fcntl_getlease(a) (0)
-+#define locks_init_lock(a)
-+#define locks_copy_lock(a, b)
-+#define locks_remove_posix(a, b)
-+#define locks_remove_flock(a)
-+#define posix_test_lock(a, b) (0)
-+#define posix_lock_file(a, b) (-ENOLCK)
-+#define posix_lock_file_wait(a, b) (-ENOLCK)
-+#define posix_unblock_lock(a, b) (-ENOENT)
-+#define vfs_test_lock(a, b) (0)
-+#define vfs_lock_file(a, b, c, d) (-ENOLCK)
-+#define vfs_cancel_lock(a, b) (0)
-+#define flock_lock_file_wait(a, b) (-ENOLCK)
-+#define __break_lease(a, b) (0)
-+#define lease_get_mtime(a, b)
-+#define lock_may_read(a, b, c) (1)
-+#define lock_may_write(a, b, c) (1)
-+#endif /* !CONFIG_FILE_LOCKING */
-+
- 
- struct fasync_struct {
- 	int	magic;
-@@ -1554,9 +1583,12 @@
- /* /sys/fs */
- extern struct kobject *fs_kobj;
- 
-+extern int rw_verify_area(int, struct file *, loff_t *, size_t);
-+
- #define FLOCK_VERIFY_READ  1
- #define FLOCK_VERIFY_WRITE 2
- 
-+#ifdef CONFIG_FILE_LOCKING
- extern int locks_mandatory_locked(struct inode *);
- extern int locks_mandatory_area(int, struct inode *, struct file *, loff_t, size_t);
- 
-@@ -1587,8 +1619,6 @@
- 	return 0;
- }
- 
--extern int rw_verify_area(int, struct file *, loff_t *, size_t);
--
- static inline int locks_verify_truncate(struct inode *inode,
- 				    struct file *filp,
- 				    loff_t size)
-@@ -1609,6 +1639,14 @@
- 		return __break_lease(inode, mode);
- 	return 0;
- }
-+#else /* !CONFIG_FILE_LOCKING */
-+#define locks_mandatory_locked(a) (0)
-+#define locks_mandatory_area(a, b, c, d, e) (0)
-+#define mandatory_lock(a) (0)
-+#define locks_verify_locked(a) (0)
-+#define locks_verify_truncate(a, b, c) (0)
-+#define break_lease(a, b) (0)
-+#endif /* CONFIG_FILE_LOCKING */
- 
- /* fs/open.c */
- 
+ /**
+  * &ethtool_ops - Alter and report network device settings
 Index: linuxdev/init/Kconfig
 ===================================================================
 --- linuxdev.orig/init/Kconfig
 +++ linuxdev/init/Kconfig
-@@ -732,6 +732,14 @@
-           by some high performance threaded applications. Disabling
-           this option saves about 7k.
+@@ -740,6 +740,14 @@
+           for filesystems like NFS and for the flock() system
+           call. Disabling this option saves about 11k.
  
-+config FILE_LOCKING
-+	bool "Enable POSIX file locking API" if EMBEDDED
++config ETHTOOL
++	bool "Enable ethtool support" if EMBEDDED
++	depends on NET
 +	default y
 +	help
-+	  This option enables standard file locking support, required
-+          for filesystems like NFS and for the flock() system
-+          call. Disabling this option saves about 11k.
++	  Disabling this option removes support for configuring
++	  ethernet device features via ethtool. Saves about 6k.
 +
  config VM_EVENT_COUNTERS
  	default y
  	bool "Enable VM event counters for /proc/vmstat" if EMBEDDED
-Index: linuxdev/kernel/sys_ni.c
+Index: linuxdev/net/bridge/Kconfig
 ===================================================================
---- linuxdev.orig/kernel/sys_ni.c
-+++ linuxdev/kernel/sys_ni.c
-@@ -130,6 +130,7 @@
- cond_syscall(sys_io_submit);
- cond_syscall(sys_io_cancel);
- cond_syscall(sys_io_getevents);
-+cond_syscall(sys_flock);
- 
- /* arch-specific weak syscall entries */
- cond_syscall(sys_pciconfig_read);
-Index: linuxdev/kernel/sysctl.c
+--- linuxdev.orig/net/bridge/Kconfig
++++ linuxdev/net/bridge/Kconfig
+@@ -6,6 +6,7 @@
+ 	tristate "802.1d Ethernet Bridging"
+ 	select LLC
+ 	select STP
++	select ETHTOOL
+ 	---help---
+ 	  If you say Y here, then your Linux box will be able to act as an
+ 	  Ethernet bridge, which means that the different Ethernet segments it
+Index: linuxdev/net/core/Makefile
 ===================================================================
---- linuxdev.orig/kernel/sysctl.c
-+++ linuxdev/kernel/sysctl.c
-@@ -97,7 +97,7 @@
- static int neg_one = -1;
- #endif
+--- linuxdev.orig/net/core/Makefile
++++ linuxdev/net/core/Makefile
+@@ -7,10 +7,11 @@
  
--#ifdef CONFIG_MMU
-+#if defined(CONFIG_MMU) && defined(CONFIG_FILE_LOCKING)
- static int two = 2;
- #endif
+ obj-$(CONFIG_SYSCTL) += sysctl_net_core.o
  
-@@ -1260,6 +1260,7 @@
- 		.extra1		= &minolduid,
- 		.extra2		= &maxolduid,
- 	},
-+#ifdef CONFIG_FILE_LOCKING
- 	{
- 		.ctl_name	= FS_LEASES,
- 		.procname	= "leases-enable",
-@@ -1268,6 +1269,7 @@
- 		.mode		= 0644,
- 		.proc_handler	= &proc_dointvec,
- 	},
+-obj-y		     += dev.o ethtool.o dev_mcast.o dst.o netevent.o \
++obj-y		     += dev.o dev_mcast.o dst.o netevent.o \
+ 			neighbour.o rtnetlink.o utils.o link_watch.o filter.o
+ 
+ obj-$(CONFIG_XFRM) += flow.o
++obj-$(CONFIG_ETHTOOL) += ethtool.o
+ obj-y += net-sysfs.o
+ obj-$(CONFIG_NET_PKTGEN) += pktgen.o
+ obj-$(CONFIG_NETPOLL) += netpoll.o
+Index: linuxdev/net/core/dev.c
+===================================================================
+--- linuxdev.orig/net/core/dev.c
++++ linuxdev/net/core/dev.c
+@@ -3669,6 +3669,7 @@
+ 			return ret;
+ 
+ 		case SIOCETHTOOL:
++#ifdef CONFIG_ETHTOOL
+ 			dev_load(net, ifr.ifr_name);
+ 			rtnl_lock();
+ 			ret = dev_ethtool(net, &ifr);
+@@ -3681,6 +3682,9 @@
+ 					ret = -EFAULT;
+ 			}
+ 			return ret;
++#else
++			return -EINVAL;
 +#endif
- #ifdef CONFIG_DNOTIFY
- 	{
- 		.ctl_name	= FS_DIR_NOTIFY,
-@@ -1279,6 +1281,7 @@
- 	},
- #endif
- #ifdef CONFIG_MMU
-+#ifdef CONFIG_FILE_LOCKING
- 	{
- 		.ctl_name	= FS_LEASE_TIME,
- 		.procname	= "lease-break-time",
-@@ -1290,6 +1293,7 @@
- 		.extra1		= &zero,
- 		.extra2		= &two,
- 	},
-+#endif /* CONFIG_FILE_LOCKING */
- #ifdef CONFIG_AIO
- 	{
- 		.procname	= "aio-nr",
+ 
+ 		/*
+ 		 *	These ioctl calls:
 
 -- 
 Thomas Petazzoni, Free Electrons
