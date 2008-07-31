@@ -1,39 +1,40 @@
-From: Adrian Bunk <bunk@kernel.org>
-Subject: Re: [patch 1/4] Configure out AIO support
-Date: Thu, 31 Jul 2008 13:12:19 +0300
-Message-ID: <20080731101219.GC4221@cs181140183.pp.htv.fi>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.690886851@free-electrons.com> <20080731100929.GA9206@mx.loc>
+From: David Woodhouse <dwmw2@infradead.org>
+Subject: Re: [patch 0/4] [resend] Add configuration options to disable
+	features not needed on embedded devices
+Date: Thu, 31 Jul 2008 11:15:16 +0100
+Message-ID: <1217499316.3454.118.camel@pmac.infradead.org>
+References: <1217497912.3454.95.camel@pmac.infradead.org>
+	 <20080731.025547.35826309.davem@davemloft.net>
+	 <1217498355.3454.103.camel@pmac.infradead.org>
+	 <20080731.030205.153067850.davem@davemloft.net>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080731100929.GA9206@mx.loc>
+In-Reply-To: <20080731.030205.153067850.davem@davemloft.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Bernhard Fischer <rep.dot.nop@gmail.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, bcrl@kvack.org, linux-aio@kvack.org, akpm@linux-foundation.org
+To: David Miller <davem@davemloft.net>
+Cc: torvalds@linux-foundation.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com
 
-On Thu, Jul 31, 2008 at 12:09:29PM +0200, Bernhard Fischer wrote:
-> On Thu, Jul 31, 2008 at 11:27:04AM +0200, Thomas Petazzoni wrote:
-> >This patchs adds the CONFIG_AIO option which allows to remove support
-> >for asynchronous I/O operations, that are not necessarly used by
-> >applications, particularly on embedded devices. As this is a
-> >size-reduction option, it depends on CONFIG_EMBEDDED. It allows to
-> >save ~7 kilobytes of kernel code/data:
-> 
-> Shouldn't this also make sure not to install aio_abi.h or at least an
-> empty aio_abi.h?
+On Thu, 2008-07-31 at 03:02 -0700, David Miller wrote:
+> I explained why I didn't want to apply the IGMP one too.
+>
+> Andrew didn't like my objections, but that doesn't mean I
+> need to defend my position further.
 
-The userspace headers are independent of any kernel configuration
-(except for the architecture).
+You said that it was part of the core BSD socket API and "Like TCP and
+UDP, multicast capabilities are something applications can always depend
+upon being available".
 
-cu
-Adrian
+Andrew's response was that embedded devices have full control over their
+userspace and that they are in a position to _know_ that they never use
+multicast, so your argument is bogus. If they _know_ they don't want
+multicast, it makes a lot of sense for them to turn it off.
+
+While I agree with Andrew's observation, I'd also respectfully submit
+that your argument is more fundamentally bogus than that. TCP and UDP
+are _not_ universally available. They go away if you set CONFIG_INET=n.
 
 -- 
-
-       "Is there not promise of rain?" Ling Tan asked suddenly out
-        of the darkness. There had been need of rain for many days.
-       "Only a promise," Lao Er said.
-                                       Pearl S. Buck - Dragon Seed
+dwmw2
