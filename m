@@ -1,47 +1,50 @@
-From: Adrian Bunk <bunk@kernel.org>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Thu, 31 Jul 2008 22:31:26 +0300
-Message-ID: <20080731193126.GB23516@cs181140183.pp.htv.fi>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080731135319.GA20212@cs181140183.pp.htv.fi> <20080731162007.285938e0@surf> <20080731153757.GB20212@cs181140183.pp.htv.fi> <20080731182616.4c20f0db@surf> <20080731164918.GE20212@cs181140183.pp.htv.fi> <4891F724.3030406@am.sony.com> <20080731181214.GD8254@pengutronix.de>
+From: Josh Boyer <jwboyer@gmail.com>
+Subject: Re: [patch 0/4] [resend] Add configuration options to disable
+	features
+Date: Thu, 31 Jul 2008 15:46:28 -0400
+Message-ID: <1217533588.2328.1.camel@localhost.localdomain>
+References: <200807311850.m6VIoqCE015883@arbas.nms.ulrich-teichert.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080731181214.GD8254@pengutronix.de>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:subject:from:to:cc
+         :in-reply-to:references:content-type:date:message-id:mime-version
+         :x-mailer:content-transfer-encoding;
+        bh=wzoEuryddcpQGLZHMZ4eQJLcAjIQh6ZJA8erag/6x2c=;
+        b=AZ5OmjGO35D+fIeapNRK5qx4d4Ikef790jks8ktvNE/GYTvFTDEjlt9D/AUWN3eLK+
+         5ne9fWmWSF2Hyt9dtX0JplFiHUVYpyYLgHBtiO2yyplt8PdRV465oetYBPxmmVVsMJGI
+         A+nO0XAwLWThUSUTzQszZs1e+pNU9fDwZU1kc=
+In-Reply-To: <200807311850.m6VIoqCE015883@arbas.nms.ulrich-teichert.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Robert Schwebel <r.schwebel@pengutronix.de>
-Cc: Tim Bird <tim.bird@am.sony.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+To: Ulrich Teichert <krypton@ulrich-teichert.org>
+Cc: Tim Bird <tim.bird@am.sony.com>, David Miller <davem@davemloft.net>, dwmw2@infradead.org, torvalds@linux-foundation.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com
 
-On Thu, Jul 31, 2008 at 08:12:14PM +0200, Robert Schwebel wrote:
-> On Thu, Jul 31, 2008 at 10:32:20AM -0700, Tim Bird wrote:
-> > > And for embedded systems with which applications is it 100% safe to
-> > > disable this option?
-> >
-> > Sony's digital cameras.
+On Thu, 2008-07-31 at 20:50 +0200, Ulrich Teichert wrote:
+> Hi,
 > 
-> We have also several very small automation & measurement devices in the
-> field which run a very dedicated more or less single application which
-> can be carefully audited.
+> >I don't know of any embedded products that ship with NTP turned
+> >on.
 > 
-> In the OSADL safety working group, people are discussing about Linux for
-> safety critical applications. If we want to achieve such scenarios,
-> stripped-down systems are an absolute must.
->...
+> Well, I do. To be exact, I've developed parts of it. But it's numbers
+> are only into the thousands, so that makes it insignificant ;-)
+> 
+> >It's best to assume, with embedded, that we're not shipping
+> >ANY of the desktop or server applications you are familiar with.
+> >Absent those, does something break in the kernel with multicast
+> >support when IGMP is turned off?
+> 
+> I do not think of NTP as desktop or server application, but that's
+> probably just me,
 
-My first reaction is that as soon as you enable CONFIG_EMBEDDED you can 
-easily enter codepaths noone else has used for a while and that got 
-unnoticed broken.
+No, it's not just you.  NTP is useful in cases where things do care
+about time but hardware designers were too cheap to put an RTC on the
+board.
 
-> rsc
+I will admit that it's use in embedded products is probably very limited
+though.
 
-cu
-Adrian
-
--- 
-
-       "Is there not promise of rain?" Ling Tan asked suddenly out
-        of the darkness. There had been need of rain for many days.
-       "Only a promise," Lao Er said.
-                                       Pearl S. Buck - Dragon Seed
+josh
