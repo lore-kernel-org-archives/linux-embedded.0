@@ -1,35 +1,27 @@
-From: David Woodhouse <dwmw2@infradead.org>
+From: David Miller <davem@davemloft.net>
 Subject: Re: [patch 3/4] Configure out ethtool support
-Date: Thu, 31 Jul 2008 11:54:24 +0100
-Message-ID: <1217501664.3454.151.camel@pmac.infradead.org>
-References: <20080731092703.661994657@free-electrons.com>
-	 <20080731093221.236840420@free-electrons.com>
-	 <20080731104004.GN10471@solarflare.com>
-	 <20080731.034904.190066778.davem@davemloft.net>
+Date: Thu, 31 Jul 2008 03:57:08 -0700 (PDT)
+Message-ID: <20080731.035708.149435626.davem@davemloft.net>
+References: <20080731104004.GN10471@solarflare.com>
+	<20080731.034904.190066778.davem@davemloft.net>
+	<1217501664.3454.151.camel@pmac.infradead.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080731.034904.190066778.davem@davemloft.net>
+In-Reply-To: <1217501664.3454.151.camel@pmac.infradead.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: David Miller <davem@davemloft.net>
+Content-Type: Text/Plain; charset="us-ascii"
+To: dwmw2@infradead.org
 Cc: bhutchings@solarflare.com, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, mpm@selenic.com, jgarzik@pobox.com, netdev@vger.kernel.org, akpm@linux-foundation.org
 
-On Thu, 2008-07-31 at 03:49 -0700, David Miller wrote:
-> From: Ben Hutchings <bhutchings@solarflare.com>
-> Date: Thu, 31 Jul 2008 11:40:05 +0100
-> 
-> > You also need to conditionalise dev_disable_lro().
-> 
-> That can only be done once the CONFIG_ETHTOOL select statement
-> is added for CONFIG_INET.
-> 
-> Which basically makes this CONFIG_ETHTOOL thing completely pointless.
+From: David Woodhouse <dwmw2@infradead.org>
+Date: Thu, 31 Jul 2008 11:54:24 +0100
 
-Other potential approaches include not enabling LRO by default if 
-!CONFIG_ETHTOOL. Or having the driver(s) which _do_ enable LRO by
-default 'select ETHTOOL'.
+> Other potential approaches include not enabling LRO by default if 
+> !CONFIG_ETHTOOL. Or having the driver(s) which _do_ enable LRO by
+> default 'select ETHTOOL'.
 
--- 
-dwmw2
+It is possible for us to generically enable LRO for every device,
+since it is a software algorithm.  And likely we will do something
+like this in the not too distant future.
