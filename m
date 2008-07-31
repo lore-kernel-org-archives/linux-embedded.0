@@ -1,63 +1,81 @@
-From: Adrian Bunk <bunk@kernel.org>
-Subject: Re: [patch 3/4] Configure out ethtool support
-Date: Thu, 31 Jul 2008 18:58:20 +0300
-Message-ID: <20080731155820.GC20212@cs181140183.pp.htv.fi>
-References: <1217500967.3454.140.camel@pmac.infradead.org> <20080731.035121.177567346.davem@davemloft.net> <1217503770.3454.162.camel@pmac.infradead.org> <20080731.043355.143045459.davem@davemloft.net> <1217504801.3454.170.camel@pmac.infradead.org>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: Re: [patch 2/4] Configure out file locking features
+Date: Thu, 31 Jul 2008 18:26:16 +0200
+Message-ID: <20080731182616.4c20f0db@surf>
+References: <20080731092703.661994657@free-electrons.com>
+	<20080731093220.969460336@free-electrons.com>
+	<20080731135319.GA20212@cs181140183.pp.htv.fi>
+	<20080731162007.285938e0@surf>
+	<20080731153757.GB20212@cs181140183.pp.htv.fi>
 Mime-Version: 1.0
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1217504801.3454.170.camel@pmac.infradead.org>
-Sender: netdev-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20080731153757.GB20212@cs181140183.pp.htv.fi>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: David Miller <davem@davemloft.net>, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, mpm@selenic.com, jgarzik@pobox.com, netdev@vger.kernel.org, akpm@linux-foundation.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Adrian Bunk <bunk@kernel.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
 
-On Thu, Jul 31, 2008 at 12:46:41PM +0100, David Woodhouse wrote:
-> On Thu, 2008-07-31 at 04:33 -0700, David Miller wrote:
-> > From: David Woodhouse <dwmw2@infradead.org>
-> > Date: Thu, 31 Jul 2008 12:29:30 +0100
-> > 
-> > > After an offline discussion, I understand that if we can sort out the
-> > > actual technical issues, you'll carry this in the net tree. Thanks.
-> > 
-> > I will, but only because you threatened to bypass me and send them
-> > directly to Linus.  And frankly fighting someone willing to do things
-> > like that is simply not worth my time, so I'll just merge them
-> > blindly.
-> 
-> That doesn't make a lot of sense, Dave. Just because I _submit_ them to
-> Linus, that doesn't mean he automatically takes them.
-> 
-> I only said I'd submit them directly to Linus because I _think_ he'd
-> agree with Andrew and I, and take them despite your objections. And
-> because I think that's the right thing for him to do.
->...
+Le Thu, 31 Jul 2008 18:37:57 +0300,
+Adrian Bunk <bunk@kernel.org> a =C3=A9crit :
 
-I'm sure we can find simpler and less controversial ways to save 6 kB in 
-the network stack. E.g. Ilpo's past work on making inline functions in 
-the network stack out-of-line had far bigger effects than the patch in 
-this discussion. And as a bonus, his work brings benefits to everyone.
+> I'm just not a fan of adding config options for each few kB of code -=
+=20
+> we have to maintain them and the more complex the configuration
+> becomes the more often it breaks.
 
-It might have also made more sense to spend some of the energy used in 
-this discussion instead on checking where the global 24 kB size increase 
-Thomas reported for 2.6.27-rc1 compared to 2.6.26 comes from.
+I'm not a fan of these too, but are there other solutions ?
 
-It's kinda silly to spend time on creating and arguing about non-trivial 
-patches that might save a few kB for very few people while noone seems 
-to work on reducing the continuous size increase of the kernel that 
-affects everyone...
+> What became bigger was most likely not related to the patches you
+> sent.
 
-> dwmw2
+No, it is not.
 
-cu
-Adrian
+> Where and why did the kernel become bigger?
 
--- 
+It's not up-to-date with 2.6.26 and 2.6.27-rc1, but Bloatwatch
+<http://www.selenic.com/bloatwatch/>, by Matt Mackall, is here to
+answer these questions. I haven't made the analysis for
+2.6.26->2.6.27-rc1.
 
-       "Is there not promise of rain?" Ling Tan asked suddenly out
-        of the darkness. There had been need of rain for many days.
-       "Only a promise," Lao Er said.
-                                       Pearl S. Buck - Dragon Seed
+> Why did CONFIG_FW_LOADER get enabled?
+> Due to alnoconfig disabling CONFIG_EMBEDDED?
 
+I don't know. Haven't made the analysis for now.
+
+> A user will ask:
+> I'm using $applications with $libraries, can I safely disable this
+> option?
+
+Hard to tell in the general case.
+
+> And e.g. according to a quick grep through the sources uClibc's=20
+> updwtmp() seems to cease working without flock().
+
+Correct. But on many embedded systems, we don't care about logging past
+user logins. We might even not care about logins at all.
+
+> It costs us maintainance of the option and the #ifdef's and gives
+> users one way more to shoot themselves into the foot in nontrivial to
+> detect ways.
+
+That's correct, and as I said previously, I fully understand the
+maintainance problem of all these new configuration options. I must
+admit that I do not really have more objective technical arguments that
+would help us deciding whether the code size reduction vs. code
+maintainance choice should be made in one direction or the other.
+
+Sincerly,
+
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
