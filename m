@@ -1,43 +1,37 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Thu, 31 Jul 2008 20:12:14 +0200
-Message-ID: <20080731181214.GD8254@pengutronix.de>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080731135319.GA20212@cs181140183.pp.htv.fi> <20080731162007.285938e0@surf> <20080731153757.GB20212@cs181140183.pp.htv.fi> <20080731182616.4c20f0db@surf> <20080731164918.GE20212@cs181140183.pp.htv.fi> <4891F724.3030406@am.sony.com>
+From: Ulrich Teichert <krypton@ulrich-teichert.org>
+Subject: Re: [patch 0/4] [resend] Add configuration options to disable features
+Date: Thu, 31 Jul 2008 20:50:51 +0200 (MEST)
+Message-ID: <200807311850.m6VIoqCE015883@arbas.nms.ulrich-teichert.org>
+References: <4891FD95.7090700@am.sony.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4891F724.3030406@am.sony.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757665AbYGaSzu@vger.kernel.org>
+In-Reply-To: <4891FD95.7090700@am.sony.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Tim Bird <tim.bird@am.sony.com>
-Cc: Adrian Bunk <bunk@kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Cc: David Miller <davem@davemloft.net>, dwmw2@infradead.org, torvalds@linux-foundation.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com
 
-On Thu, Jul 31, 2008 at 10:32:20AM -0700, Tim Bird wrote:
-> > And for embedded systems with which applications is it 100% safe to
-> > disable this option?
->
-> Sony's digital cameras.
+Hi,
 
-We have also several very small automation & measurement devices in the
-field which run a very dedicated more or less single application which
-can be carefully audited.
+>I don't know of any embedded products that ship with NTP turned
+>on.
 
-In the OSADL safety working group, people are discussing about Linux for
-safety critical applications. If we want to achieve such scenarios,
-stripped-down systems are an absolute must.
+Well, I do. To be exact, I've developed parts of it. But it's numbers
+are only into the thousands, so that makes it insignificant ;-)
 
-Although increasing processor power even in embedded applications lead
-to more and more standard-line kernels plus normal userspace components
-(i.e. glibc instead of uclibc), there are still applications where the
-final product consists only of the kernel plus the app, whereas during
-development time, the system has a full-blown configuration.
+>It's best to assume, with embedded, that we're not shipping
+>ANY of the desktop or server applications you are familiar with.
+>Absent those, does something break in the kernel with multicast
+>support when IGMP is turned off?
 
-rsc
+I do not think of NTP as desktop or server application, but that's
+probably just me,
+
+CU,
+Uli
 -- 
- Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
- Pengutronix - Linux Solutions for Science and Industry
-   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
-     Hannoversche Str. 2, 31134 Hildesheim, Germany
-   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
+Dipl. Inf. Ulrich Teichert|e-mail: Ulrich.Teichert@gmx.de | Listening to:
+Stormweg 24               |Pale Bride (The Von Bondies), No Time (Statues),
+24539 Neumuenster, Germany|Am Strand (Smoke Blow), Sacred Decay (The Estranged)
