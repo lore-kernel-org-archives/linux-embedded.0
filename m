@@ -1,37 +1,50 @@
-From: "Constantine Shulyupin" <const@linuxdriver.co.il>
-Subject: conceptual map of the kernel source (Interactive Linux kernel map)
-Date: Thu, 31 Jul 2008 16:44:26 +0300
-Message-ID: <8aa6b0650807310644g10b8ce3dvd634d482cab659ea@mail.gmail.com>
+From: Adrian Bunk <bunk@kernel.org>
+Subject: Re: [patch 2/4] Configure out file locking features
+Date: Thu, 31 Jul 2008 16:53:19 +0300
+Message-ID: <20080731135319.GA20212@cs181140183.pp.htv.fi>
+References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:sender
-         :to:subject:mime-version:content-type:content-transfer-encoding
-         :content-disposition:x-google-sender-auth;
-        bh=pxZ7Qs4vBHRc2Fjq5dpnPTdDCkznBsHyAoy2okp5rYM=;
-        b=sX3MoHU52Z9f3q4tkoYwcY0AcTxqz95OCJ1qjguUiaaVDZ9NdU9iSuWbBHClhjVWWc
-         ztJIrfuOTz8WhAmw9qW2JaJHx755F2MNgXV5KB6Tcq5nfyJgjWJedYcCfYIkKVSXMJvX
-         Xv5MHP5z301I4QuRReqttjd9uxalXjWe1hIt8=
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <20080731093220.969460336@free-electrons.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
 
-Hi,
-I am updating the kernel map: http://www.makelinux.net/kernel_map
-It is conceptual map consisting of more than 200 most important kernel
-functions.
-Could you please have a look and suggest fixes and updates.
+On Thu, Jul 31, 2008 at 11:27:05AM +0200, Thomas Petazzoni wrote:
+> This patch adds the CONFIG_FILE_LOCKING option which allows to remove
+> support for advisory locks. With this patch enabled, the flock()
+> system call, the F_GETLK, F_SETLK and F_SETLKW operations of fcntl()
+> and NFS support are disabled. These features are not necessarly needed
+> on embedded systems. It allows to save ~11 Kb of kernel code and data:
+> 
+>    text	   data	    bss	    dec	    hex	filename
+> 1125436	 118764	 212992	1457192	 163c28	vmlinux.old
+> 1114299	 118564	 212992	1445855	 160fdf	vmlinux
+>  -11137    -200       0  -11337   -2C49 +/-
+> 
+> This patch has originally been written by Matt Mackall
+> <mpm@selenic.com>, and is part of the Linux Tiny project.
+>...
 
-PS:
-png image: http://www.makelinux.info/kernel_map.d/LKM63_2048.png
-Other comments:
-http://makelinux.wordpress.com/2008/06/07/comments-on-interactive-linux-kernel-map/
+As I've already said in the past I'm personally not a huge fan of these 
+patches, but if it brings advantages in real-life situations it's hard
+to argue against it.
 
-Regards.
+In which use cases can users safely disable this option, and on what 
+devices have you verified that CONFIG_FILE_LOCKING=n kernels actually 
+work in practice?
+
+cu
+Adrian
+
 -- 
-Constantine Shulyupin
-http://www.linuxdriver.co.il/
+
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
+
