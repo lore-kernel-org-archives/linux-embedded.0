@@ -1,53 +1,41 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: [patch 0/4] [resend] Add configuration options to disable
-	features
-Date: Thu, 31 Jul 2008 20:55:34 +0100
-Message-ID: <1217534134.3454.300.camel@pmac.infradead.org>
-References: <200807311850.m6VIoqCE015883@arbas.nms.ulrich-teichert.org>
-	 <1217533588.2328.1.camel@localhost.localdomain>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: [patch 2/4] Configure out file locking features
+Date: Thu, 31 Jul 2008 13:37:39 -0700
+Message-ID: <48922293.9020007@am.sony.com>
+References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080731135319.GA20212@cs181140183.pp.htv.fi> <20080731162007.285938e0@surf> <20080731153757.GB20212@cs181140183.pp.htv.fi> <20080731182616.4c20f0db@surf> <20080731164918.GE20212@cs181140183.pp.htv.fi> <4891F724.3030406@am.sony.com> <20080731191650.GA23516@cs181140183.pp.htv.fi>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1217533588.2328.1.camel@localhost.localdomain>
+In-Reply-To: <20080731191650.GA23516@cs181140183.pp.htv.fi>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Josh Boyer <jwboyer@gmail.com>
-Cc: Ulrich Teichert <krypton@ulrich-teichert.org>, Tim Bird <tim.bird@am.sony.com>, David Miller <davem@davemloft.net>, torvalds@linux-foundation.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com
+To: Adrian Bunk <bunk@kernel.org>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
 
-On Thu, 2008-07-31 at 15:46 -0400, Josh Boyer wrote:
-> On Thu, 2008-07-31 at 20:50 +0200, Ulrich Teichert wrote:
-> > Hi,
-> > 
-> > >I don't know of any embedded products that ship with NTP turned
-> > >on.
-> > 
-> > Well, I do. To be exact, I've developed parts of it. But it's numbers
-> > are only into the thousands, so that makes it insignificant ;-)
-> > 
-> > >It's best to assume, with embedded, that we're not shipping
-> > >ANY of the desktop or server applications you are familiar with.
-> > >Absent those, does something break in the kernel with multicast
-> > >support when IGMP is turned off?
-> > 
-> > I do not think of NTP as desktop or server application, but that's
-> > probably just me,
+Adrian Bunk wrote:
+> On Thu, Jul 31, 2008 at 10:32:20AM -0700, Tim Bird wrote:
+>> If warnings or support avoidance for the general population using
+>> such config options is the issue, I think that David Woodhouse's
+>> suggestion that such things could taint the kernel is an interesting
+>> idea. Maybe have we could have an "unsafe-config" taint flag?
 > 
-> No, it's not just you.  NTP is useful in cases where things do care
-> about time but hardware designers were too cheap to put an RTC on the
-> board.
+> A CONFIG_EMBEDDED=y flag?
+
+If this is sufficient, it works for me!
+
+> It's not only about limits, I also have a general dislike for the
+> "add more config options" approach.
 > 
-> I will admit that it's use in embedded products is probably very limited
-> though.
+> I get your point why it brings advantages in some cases, but if you are 
+> looking for a cheerleader it won't be me.  ;-)
 
-NTP is a red herring. It has a check for multicast support in its
-configure script and wraps it all in #ifdef MCAST anyway.
+Understood.  I promise not to send you any pom-poms. ;-)
+ -- Tim
 
-So even if it _does_ crap out when I build my standard distro kernel
-with !CONFIG_IGMP and use the standard distro build of ntpd, that still
-isn't particularly relevant to the kind of application where someone
-would built a kernel without IGMP support and build their own ntpd to
-match.
 
--- 
-dwmw2
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
