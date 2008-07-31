@@ -1,34 +1,82 @@
-From: David Miller <davem@davemloft.net>
-Subject: Re: [patch 0/4] [resend] Add configuration options to disable
- features not needed on embedded devices
-Date: Thu, 31 Jul 2008 03:25:53 -0700 (PDT)
-Message-ID: <20080731.032553.67275433.davem@davemloft.net>
-References: <1217498355.3454.103.camel@pmac.infradead.org>
-	<20080731.030205.153067850.davem@davemloft.net>
-	<1217499316.3454.118.camel@pmac.infradead.org>
+From: Ben Hutchings <bhutchings@solarflare.com>
+Subject: Re: [patch 3/4] Configure out ethtool support
+Date: Thu, 31 Jul 2008 11:40:05 +0100
+Message-ID: <20080731104004.GN10471@solarflare.com>
+References: <20080731092703.661994657@free-electrons.com> <20080731093221.236840420@free-electrons.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1217499316.3454.118.camel@pmac.infradead.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20080731093221.236840420@free-electrons.com>
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: dwmw2@infradead.org
-Cc: torvalds@linux-foundation.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, jgarzik@pobox.com, netdev@vger.kernel.org, davem@davemloft.net, akpm@linux-foundation.org
 
-From: David Woodhouse <dwmw2@infradead.org>
-Date: Thu, 31 Jul 2008 11:15:16 +0100
+Thomas Petazzoni wrote:
+[...]
+> --- linuxdev.orig/include/linux/ethtool.h
+> +++ linuxdev/include/linux/ethtool.h
+> @@ -283,6 +283,7 @@
+>  struct net_device;
+>  
+>  /* Some generic methods drivers may use in their ethtool_ops */
+> +#ifdef CONFIG_ETHTOOL
+>  u32 ethtool_op_get_link(struct net_device *dev);
+>  u32 ethtool_op_get_tx_csum(struct net_device *dev);
+>  int ethtool_op_set_tx_csum(struct net_device *dev, u32 data);
+> @@ -296,6 +297,21 @@
+>  int ethtool_op_set_ufo(struct net_device *dev, u32 data);
+>  u32 ethtool_op_get_flags(struct net_device *dev);
+>  int ethtool_op_set_flags(struct net_device *dev, u32 data);
+> +#else
+> +static inline u32 ethtool_op_get_link(struct net_device *dev) { return 0; }
+> +static inline u32 ethtool_op_get_tx_csum(struct net_device *dev) { return 0; }
+> +static inline int ethtool_op_set_tx_csum(struct net_device *dev, u32 data) { return 0; }
+> +static inline int ethtool_op_set_tx_hw_csum(struct net_device *dev, u32 data) { return 0; }
+> +static inline int ethtool_op_set_tx_ipv6_csum(struct net_device *dev, u32 data) { return 0; }
+> +static inline u32 ethtool_op_get_sg(struct net_device *dev) { return 0; }
+> +static inline int ethtool_op_set_sg(struct net_device *dev, u32 data) { return 0; }
+> +static inline u32 ethtool_op_get_tso(struct net_device *dev) { return 0; }
+> +static inline int ethtool_op_set_tso(struct net_device *dev, u32 data) { return 0; }
+> +static inline u32 ethtool_op_get_ufo(struct net_device *dev) { return 0; }
+> +static inline int ethtool_op_set_ufo(struct net_device *dev, u32 data) { return 0; }
+> +static inline u32 ethtool_op_get_flags(struct net_device *dev) { return 0; }
+> +static inline int ethtool_op_set_flags(struct net_device *dev, u32 data) { return 0; }
 
-> While I agree with Andrew's observation, I'd also respectfully submit
-> that your argument is more fundamentally bogus than that. TCP and UDP
-> are _not_ universally available. They go away if you set CONFIG_INET=n.
+The dummy setter functions should return -EOPNOTSUPP.  The getter functions
+just read device feature flags and could be made inline.  They have no way
+of returning failure.
 
-Like I said, people can locally patch their systems if they really
-want to rip out fundamental things like multicast support.
+[...]
+> ===================================================================
+> --- linuxdev.orig/net/core/dev.c
+> +++ linuxdev/net/core/dev.c
+> @@ -3669,6 +3669,7 @@
+>  			return ret;
+>  
+>  		case SIOCETHTOOL:
+> +#ifdef CONFIG_ETHTOOL
+>  			dev_load(net, ifr.ifr_name);
+>  			rtnl_lock();
+>  			ret = dev_ethtool(net, &ifr);
+> @@ -3681,6 +3682,9 @@
+>  					ret = -EFAULT;
+>  			}
+>  			return ret;
+> +#else
+> +			return -EINVAL;
+> +#endif
+>  
+>  		/*
+>  		 *	These ioctl calls:
 
-Some folks might find it instructive to do a google code search
-or similar on the multicast socket options this things dikes out
-of the tree.
+You also need to conditionalise dev_disable_lro().
 
-Even simple things like NTP will spew failures with this CONFIG_IGMP
-thing turned off.  And that's just the tip of the iceberg.
+Ben.
+
+-- 
+Ben Hutchings, Senior Software Engineer, Solarflare Communications
+Not speaking for my employer; that's the marketing department's job.
+They asked us to note that Solarflare product names are trademarked.
