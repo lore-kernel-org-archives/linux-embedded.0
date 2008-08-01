@@ -1,87 +1,35 @@
-From: Matt Helsley <matthltc@us.ibm.com>
-Subject: Re: [PATCH 2/6] Container Freezer: Make refrigerator always
-	available
-Date: Fri, 01 Aug 2008 12:08:09 -0700
-Message-ID: <1217617689.25300.213.camel@localhost.localdomain>
-References: <20080801050659.924495279@us.ibm.com>
-	 <20080801050700.528446138@us.ibm.com>  <20080801162712.63721e8c@surf>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [patch 0/4] [resend] Add configuration options to disable
+ features
+Date: Fri, 1 Aug 2008 12:15:15 -0700 (PDT)
+Message-ID: <alpine.LFD.1.10.0808011212430.3277@nehalem.linux-foundation.org>
+References: <200807311850.m6VIoqCE015883@arbas.nms.ulrich-teichert.org> <1217533588.2328.1.camel@localhost.localdomain>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080801162712.63721e8c@surf>
+In-Reply-To: <1217533588.2328.1.camel@localhost.localdomain>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, Paul Menage <menage@google.com>, Li Zefan <lizf@cn.fujitsu.com>, Linux-Kernel <linux-kernel@vger.kernel.org>, Linux Containers <containers@lists.linux-foundation.org>, linux-pm@lists.linux-foundation.org, Cedric Le Goater <clg@fr.ibm.com>, "Serge E. Hallyn" <serue@us.ibm.com>, Michael Opdenacker <michael@free-electrons.com>, linux-embedded@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Josh Boyer <jwboyer@gmail.com>
+Cc: Ulrich Teichert <krypton@ulrich-teichert.org>, Tim Bird <tim.bird@am.sony.com>, David Miller <davem@davemloft.net>, dwmw2@infradead.org, thomas.petazzoni@free-electrons.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com
 
 
-On Fri, 2008-08-01 at 16:27 +-0200, Thomas Petazzoni wrote:
-+AD4 Hi,
-+AD4 
-+AD4 Le Thu, 31 Jul 2008 22:07:01 -0700,
-+AD4 Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4 a +AOk-crit :
-+AD4 
-+AD4 +AD4 --- a/kernel/Makefile
-+AD4 +AD4 +-+-+- b/kernel/Makefile
-+AD4 +AD4 +AEAAQA -5,7 +-5,7 +AEAAQA
-+AD4 +AD4  obj-y     +AD0 sched.o fork.o exec+AF8-domain.o panic.o printk.o +AFw
-+AD4 +AD4  	    cpu.o exit.o itimer.o time.o softirq.o resource.o +AFw
-+AD4 +AD4  	    sysctl.o capability.o ptrace.o timer.o user.o +AFw
-+AD4 +AD4 -	    signal.o sys.o kmod.o workqueue.o pid.o +AFw
-+AD4 +AD4 +-	    signal.o sys.o kmod.o workqueue.o pid.o freezer.o +AFw
-+AD4 
-+AD4 I have the impression that the code in kernel/power/process.c was
-+AD4 compiled only if CONFIG+AF8-PM+AF8-SLEEP was set. Now that the code has been
-+AD4 moved to kernel/freezer.c, it is unconditionnaly compiled in every
-+AD4 kernel. Is that correct ?
-+AD4
-+AD4 If so, is it possible to put this new feature under some
-+AD4 CONFIG+AF8-SOMETHING option, for people who care about the kernel size ?
 
-	How about making it depend on a combination of CONFIG variables?
-Here's an RFC PATCH. Completely untested.
+On Thu, 31 Jul 2008, Josh Boyer wrote:
+> On Thu, 2008-07-31 at 20:50 +0200, Ulrich Teichert wrote:
+> > 
+> > I do not think of NTP as desktop or server application, but that's
+> > probably just me,
+> 
+> No, it's not just you.  NTP is useful in cases where things do care
+> about time but hardware designers were too cheap to put an RTC on the
+> board.
 
-Signed-off-by: Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4
----
- kernel/Makefile      +AHw    3 +-+--
- kernel/power/Kconfig +AHw    3 +-+-+-
- 2 files changed, 5 insertions(+-), 1 deletion(-)
+In fact, didn't one of the netgear firewall/switch/routers end up being 
+famous for overloading some NTP service exactly because all the _millions_ 
+of routers ended up using the same (incorrect) NTP host?
 
-Index: linux-2.6.27-rc1-mm1/kernel/Makefile
-+AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0
---- linux-2.6.27-rc1-mm1.orig/kernel/Makefile
-+-+-+- linux-2.6.27-rc1-mm1/kernel/Makefile
-+AEAAQA -5,7 +-5,7 +AEAAQA
- obj-y     +AD0 sched.o fork.o exec+AF8-domain.o panic.o printk.o +AFw
- 	    cpu.o exit.o itimer.o time.o softirq.o resource.o +AFw
- 	    sysctl.o capability.o ptrace.o timer.o user.o +AFw
--	    signal.o sys.o kmod.o workqueue.o pid.o freezer.o +AFw
-+-	    signal.o sys.o kmod.o workqueue.o pid.o +AFw
- 	    rcupdate.o extable.o params.o posix-timers.o +AFw
- 	    kthread.o wait.o kfifo.o sys+AF8-ni.o posix-cpu-timers.o mutex.o +AFw
- 	    hrtimer.o rwsem.o nsproxy.o srcu.o semaphore.o +AFw
-+AEAAQA -24,6 +-24,7 +AEAAQA CFLAGS+AF8-REMOVE+AF8-sched+AF8-clock.o +AD0 -pg
- CFLAGS+AF8-REMOVE+AF8-sched.o +AD0 -mno-spe -pg
- endif
- 
-+-obj-+ACQ(CONFIG+AF8-FREEZER) +-+AD0 freezer.o
- obj-+ACQ(CONFIG+AF8-PROFILING) +-+AD0 profile.o
- obj-+ACQ(CONFIG+AF8-SYSCTL+AF8-SYSCALL+AF8-CHECK) +-+AD0 sysctl+AF8-check.o
- obj-+ACQ(CONFIG+AF8-STACKTRACE) +-+AD0 stacktrace.o
-Index: linux-2.6.27-rc1-mm1/kernel/power/Kconfig
-+AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0APQA9AD0
---- linux-2.6.27-rc1-mm1.orig/kernel/power/Kconfig
-+-+-+- linux-2.6.27-rc1-mm1/kernel/power/Kconfig
-+AEAAQA -85,6 +-85,9 +AEAAQA config PM+AF8-SLEEP
- 	depends on SUSPEND +AHwAfA HIBERNATION +AHwAfA XEN+AF8-SAVE+AF8-RESTORE
- 	default y
- 
-+-config FREEZER
-+-	def+AF8-bool PM+AF8-SLEEP +AHwAfA CGROUP+AF8-FREEZER
-+-
- config SUSPEND
- 	bool +ACI-Suspend to RAM and standby+ACI
- 	depends on PM +ACYAJg ARCH+AF8-SUSPEND+AF8-POSSIBLE
+So NTP is very definitely an embedded thing too.
 
-
+			Linus
