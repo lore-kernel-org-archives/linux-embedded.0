@@ -1,59 +1,71 @@
-From: Bernhard Fischer <rep.dot.nop@gmail.com>
-Subject: Re: [patch 1/4] Configure out AIO support
-Date: Fri, 1 Aug 2008 00:42:22 +0200
-Message-ID: <20080731224222.GB9208@mx.loc>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.690886851@free-electrons.com> <20080731100929.GA9206@mx.loc> <20080731101219.GC4221@cs181140183.pp.htv.fi>
+From: Stefan Schoenleitner <dev.c0debabe@gmail.com>
+Subject: Re: AT91 kernel programming documentation ?
+Date: Fri, 01 Aug 2008 08:36:49 +0200
+Message-ID: <4892AF01.7040205@gmail.com>
+References: <4890724F.2020505@gmail.com> <20080730140113.GY8254@pengutronix.de>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:received:date:from:to:cc
-         :subject:message-id:references:mime-version:content-type
-         :content-disposition:in-reply-to:user-agent;
-        bh=f9kz4Xnp4ARiEYSDemIdQlJ1n81+aOi4yBqaTZGCqcg=;
-        b=v7wcdNlfTzzXj8T1fPlwQLEcTydBFVhgDsH4PPaJMACVcEBFqITdkP44qErVM7cJWO
-         sgXvDPwukfIjnXcKv+yDGkYlwttmvNS2sKS3mkWkFwzgDJrFMDNNc1t7DmAlpuQ1+047
-         WrdgsHe+9t5pIOF8kuxF0o4MzwdtHa5FFPEhE=
-Content-Disposition: inline
-In-Reply-To: <20080731101219.GC4221@cs181140183.pp.htv.fi>
+In-Reply-To: <20080730140113.GY8254@pengutronix.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Adrian Bunk <bunk@kernel.org>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, bcrl@kvack.org, linux-aio@kvack.org, akpm@linux-foundation.org
+To: Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: linux-embedded@vger.kernel.org
 
-On Thu, Jul 31, 2008 at 01:12:19PM +0300, Adrian Bunk wrote:
->On Thu, Jul 31, 2008 at 12:09:29PM +0200, Bernhard Fischer wrote:
->> On Thu, Jul 31, 2008 at 11:27:04AM +0200, Thomas Petazzoni wrote:
->> >This patchs adds the CONFIG_AIO option which allows to remove support
->> >for asynchronous I/O operations, that are not necessarly used by
->> >applications, particularly on embedded devices. As this is a
->> >size-reduction option, it depends on CONFIG_EMBEDDED. It allows to
->> >save ~7 kilobytes of kernel code/data:
->> 
->> Shouldn't this also make sure not to install aio_abi.h or at least an
->> empty aio_abi.h?
->
->The userspace headers are independent of any kernel configuration
->(except for the architecture).
+Hi,
 
-I beg to disagree:
-internals as exposed by e.g. aio_abi.h are impl dependent. Noone except
-the impl and it's users are interrested in it.
+Robert Schwebel wrote:
+> [...]
+> 
+>> Now I would like to add different hardware to the board and write some
+>> kernel code for it.
+> 
+> What kind of hardware?
 
-If a per package feature, independent of arch, is off, all respective
-features stuff should be off for that particular installation.
+An audio codec (TLV320AIC23B) connected to the I2C and I2S (over Atmel SSC) bus.
+There seems to be a codec driver already (drivers/media/video/tlv320aic23b.c)
+though it looks like I'll have to modify the driver a bit to support other
+sampling rates as well.
+Currently my first goal is to get the audio codec up and running so that it
+works with ALSA.
 
-I.e. if I, for subsequent installations, choose to turn on feature, the
-requested feature-stuff will be installed properly. If I, OTOH, choose
-to (keep to) turn off feature, then all feature-related stuff should --
-and has to be and stay -- turned off.
+Then I would like to add two SPI devices as well.
+Since most of the chipselect lines are already used I was thinking of using a
+demultiplexer which is supported by the AT91SAM9260.
 
-In the particular case of the kernel exposing unwanted API extensions
-that are off, all such API reminiscences should be off, thus not
-installed to my staging dir at all since i explicitely asked for doing
-away with all of the API.
+Due to the fact that the board will be a custom design, I guess I will also have
+to write a board implementation (i.e. arch/arm/mach-at91/board-<myboardname>.c)
+so that the kernel for example knows which ports are used for communication
+buses on the pins.
 
-From a libc POV i'd agree, but from an inherently broken userspace POV
-installing willingly broken stuff is just wrong and misleading, imo.
+Reading the source code already shed a little light on how things are done.
+
+
+> 
+>> Unfortunately, there doesn't seem to be a lot of documentation. At
+>> the moment I'm reading mach-at91 related source code and trying to
+>> find out how things work.
+> 
+> I assume you've already bought a copy of the Rubini Device Driver book?
+
+I read various papers and kernel documentation, parts of it also being from the
+second edition of the book.
+However, I just saw that there's a newer (third edition) available.
+It's online under a CC license: http://lwn.net/Kernel/LDD3/
+
+However, although the book gives a good intoduction on writing drivers, it seems
+to miss some parts like SPI, I2C, board implementation and such.
+IMHO the best way is to use the book as reference for driver implementation and
+to read the existing AT91 kernel code.
+
+>> Specificly, I would like to know how the different SoC devices can be
+>> accessed and used, how I can do port multiplexing, how I can tell the
+>> kernel which hardware is attached to where and so on.
+> 
+> Check arch/arm/mach-at91/*. It very much depends on what you want to do.
+> Documentation/drivermodel/ might also be worth a look.
+
+arch/arm/mach-at91 is where I looked at the source most of the time.
+However, I didn't notice Documentation/drivermodel until now.
+Thank you for mentioning it.
