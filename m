@@ -1,30 +1,47 @@
-From: Markus Franke <Markus.Franke@informatik.tu-chemnitz.de>
-Subject: Re: Book about embedded-type device drivers
-Date: Fri, 01 Aug 2008 11:13:40 +0200
-Message-ID: <4892D3C4.5080605@informatik.tu-chemnitz.de>
-References: <4890724F.2020505@gmail.com>	<20080730140113.GY8254@pengutronix.de>	<4892AF01.7040205@gmail.com> <20080801104210.462583ee@surf>
-Reply-To: Markus.Franke@informatik.tu-chemnitz.de
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: Re: [PATCH 2/6] Container Freezer: Make refrigerator always
+ available
+Date: Fri, 1 Aug 2008 16:27:12 +0200
+Message-ID: <20080801162712.63721e8c@surf>
+References: <20080801050659.924495279@us.ibm.com>
+	<20080801050700.528446138@us.ibm.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080801104210.462583ee@surf>
+In-Reply-To: <20080801050700.528446138@us.ibm.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"; format="flowed"
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Matt Helsley <matthltc@us.ibm.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, Paul Menage <menage@google.com>, Li Zefan <lizf@cn.fujitsu.com>, Linux-Kernel <linux-kernel@vger.kernel.org>, Linux Containers <containers@lists.linux-foundation.org>, linux-pm@lists.linux-foundation.org, Cedric Le Goater <clg@fr.ibm.com>, "Serge E. Hallyn" <serue@us.ibm.com>, Michael Opdenacker <michael@free-electrons.com>, linux-embedded@vger.kernel.org
 
 Hi,
 
-Thomas Petazzoni schrieb:
-> In addition to =C2=AB Linux Device Drivers =C2=BB, a good book is =C2=
-=AB Essential
-> Linux Device Drivers =C2=BB, from Sreekrishnan Venkateswaran, availab=
-le at
-> Prentice Hall. This book is very recent (April 2008).
+Le Thu, 31 Jul 2008 22:07:01 -0700,
+Matt Helsley <matthltc@us.ibm.com> a =C3=A9crit :
 
-thank you very much for the hint. LDD3 is indeed a bit outdated and I=20
-also missed a chapter about I2C device driver development.
+> --- a/kernel/Makefile
+> +++ b/kernel/Makefile
+> @@ -5,7 +5,7 @@
+>  obj-y     =3D sched.o fork.o exec_domain.o panic.o printk.o \
+>  	    cpu.o exit.o itimer.o time.o softirq.o resource.o \
+>  	    sysctl.o capability.o ptrace.o timer.o user.o \
+> -	    signal.o sys.o kmod.o workqueue.o pid.o \
+> +	    signal.o sys.o kmod.o workqueue.o pid.o freezer.o \
 
-Best regards,
-Markus
+I have the impression that the code in kernel/power/process.c was
+compiled only if CONFIG_PM_SLEEP was set. Now that the code has been
+moved to kernel/freezer.c, it is unconditionnaly compiled in every
+kernel. Is that correct ?
+
+If so, is it possible to put this new feature under some
+CONFIG_SOMETHING option, for people who care about the kernel size ?
+
+Thanks,
+
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
