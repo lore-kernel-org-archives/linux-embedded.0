@@ -1,37 +1,72 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Fri, 1 Aug 2008 09:28:13 +0200
-Message-ID: <20080801072813.GK8254@pengutronix.de>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080731135319.GA20212@cs181140183.pp.htv.fi> <20080731162007.285938e0@surf> <20080731153757.GB20212@cs181140183.pp.htv.fi> <20080731182616.4c20f0db@surf> <20080731164918.GE20212@cs181140183.pp.htv.fi> <4891F724.3030406@am.sony.com> <20080731181214.GD8254@pengutronix.de> <20080731193126.GB23516@cs181140183.pp.htv.fi>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: Book about embedded-type device drivers
+Date: Fri, 1 Aug 2008 10:42:10 +0200
+Message-ID: <20080801104210.462583ee@surf>
+References: <4890724F.2020505@gmail.com>
+	<20080730140113.GY8254@pengutronix.de>
+	<4892AF01.7040205@gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080731193126.GB23516@cs181140183.pp.htv.fi>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4892AF01.7040205@gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Adrian Bunk <bunk@kernel.org>
-Cc: Robert Schwebel <r.schwebel@pengutronix.de>, Tim Bird <tim.bird@am.sony.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Content-Type: text/plain; charset="utf-8"
+To: linux-embedded@vger.kernel.org
 
-On Thu, Jul 31, 2008 at 10:31:26PM +0300, Adrian Bunk wrote:
-> > In the OSADL safety working group, people are discussing about Linux
-> > for safety critical applications. If we want to achieve such
-> > scenarios, stripped-down systems are an absolute must.
-> >...
->
-> My first reaction is that as soon as you enable CONFIG_EMBEDDED you
-> can easily enter codepaths noone else has used for a while and that
-> got unnoticed broken.
+Le Fri, 01 Aug 2008 08:36:49 +0200,
+Stefan Schoenleitner <dev.c0debabe@gmail.com> a =C3=A9crit :
 
-That may be no problem; if we ever come to a safety kernel, it will have
-to be audited and carefully tested anyway.
+> I read various papers and kernel documentation, parts of it also
+> being from the second edition of the book.
+> However, I just saw that there's a newer (third edition) available.
+> It's online under a CC license: http://lwn.net/Kernel/LDD3/
 
-rsc
--- 
- Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
- Pengutronix - Linux Solutions for Science and Industry
-   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
-     Hannoversche Str. 2, 31134 Hildesheim, Germany
-   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
+The 3rd edition is certainly newer than the second, but starts to be
+quite old. It has been written against the 2.6.10/2.6.11 kernels.
 
+> However, although the book gives a good intoduction on writing
+> drivers, it seems to miss some parts like SPI, I2C, board
+> implementation and such. IMHO the best way is to use the book as
+> reference for driver implementation and to read the existing AT91
+> kernel code.
+
+In addition to =C2=AB Linux Device Drivers =C2=BB, a good book is =C2=AB=
+ Essential
+Linux Device Drivers =C2=BB, from Sreekrishnan Venkateswaran, available=
+ at
+Prentice Hall. This book is very recent (April 2008).
+
+  1. Introduction
+  2. A peek inside the kernel (timers, concurrency, memory, etc.)
+  3. Kernel facilities (threads, helper interfaces)
+  4. Laying the groundwork (IRQ, device model, memory barriers, etc.)
+  5. Character drivers
+  6. Serial drivers (including TTY drivers and line discipline drivers)
+  7. Input drivers (evdev interface, serio, keyboard, mice, touch
+     controllers, accelerometers, etc.)
+  8. I2C (I2C core, EEPROM driver, RTC driver, i2c-dev, SPI, 1-wire)
+  9. PCMCIA and Compact Flash
+ 10. PCI
+ 11. USB
+ 12. Video drivers (frame buffer, console drivers)
+ 13. Audio drivers
+ 14. Block drivers
+ 15. Network interface cards
+ 16. Linux without wires (Bluetooth, Infrared, Wifi)
+ 17. MTD
+ 18. Embedded Linux
+ 19. Drivers in userspace
+ 20. More devices and drivers
+ 21. Debugging device drivers
+ 22. Maintenance and delivery
+ 23. Shutting Down
+
+I'm at the end of chapter 8, and until now, it's really good.
+
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
