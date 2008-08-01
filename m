@@ -1,39 +1,46 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: [PATCH] embedded: fix vc_translate operator precedence
-Date: Fri, 1 Aug 2008 14:05:50 -0700
-Message-ID: <48937AAE.5070407@am.sony.com>
+From: "Linus Walleij" <linus.ml.walleij@gmail.com>
+Subject: Re: conceptual map of the kernel source (Interactive Linux kernel map)
+Date: Sat, 2 Aug 2008 00:07:20 +0200
+Message-ID: <63386a3d0808011507h28aa213mb27d32b2f855b9ac@mail.gmail.com>
+References: <8aa6b0650807310644g10b8ce3dvd634d482cab659ea@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=GOfHC8TGFYB3SEpVhHTwAJ8azurOWby2vge4798knMc=;
+        b=f9B98fzsyo9DWsJRoM7bnemgIxH4Gi4O22twSnHFt7lygUj880PG2jxaCZb+enj3oe
+         iqMayhcq7dSuHYfBjVoNEpvApFMvHoWezs8PofiQMcLc3HL5OigttsiJZ5WWNTeHT6BU
+         A6udjfaErr3Ptv7G4eMNq1i0CkXdk64GfaN+s=
+In-Reply-To: <8aa6b0650807310644g10b8ce3dvd634d482cab659ea@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
-Cc: linux kernel <linux-kernel@vger.kernel.org>
+To: Constantine Shulyupin <const@linuxdriver.co.il>, linux-embedded@vger.kernel.org
 
-This fixes a bug in operator precedence in the newly introduced vc_translate
-macro.  Without this fix, the translation of some characters on the
-kernel console is garbled.
+2008/7/31 Constantine Shulyupin <const@linuxdriver.co.il>:
 
-This patch was copied to the e-mail list previously for testing.  Now,
-all reports confirm that it works, so this is an official post for
-application.
+> I am updating the kernel map: http://www.makelinux.net/kernel_map
+> It is conceptual map consisting of more than 200 most important kernel
+> functions.
 
-Signed-off-by: Tim Bird <tim.bird@am.sony.com>
----
- vt_kern.h |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I was very impressed once I saw this map first, which was through
+your (?) contributions to the Linux entries in Wikipedia. Keep up the
+good work!
 
-diff --git a/include/linux/vt_kern.h b/include/linux/vt_kern.h
-index 14c0e91..8c8119f 100644
---- a/include/linux/vt_kern.h
-+++ b/include/linux/vt_kern.h
-@@ -74,7 +74,7 @@ void con_protect_unimap(struct vc_data *vc, int rdonly);
- int con_copy_unimap(struct vc_data *dst_vc, struct vc_data *src_vc);
+> Could you please have a look and suggest fixes and updates.
 
- #define vc_translate(vc, c) ((vc)->vc_translate[(c) |			\
--					(vc)->vc_toggle_meta ? 0x80 : 0])
-+					((vc)->vc_toggle_meta ? 0x80 : 0)])
- #else
- #define con_set_trans_old(arg) (0)
- #define con_get_trans_old(arg) (-EINVAL)
+The embedded systems will be interested in most things not
+asm-i386 and arch-i386. For example you show a lot of PCI
+and such things in the lowest layers, I wonder if it'd be worth
+the effort to make arch-specific views of the lowermost parts
+(but probably not).
+
+Another this is that flash drivers MTD, doesn't fit into the picture,
+instead harddisk is uses as example.
+
+Linus
