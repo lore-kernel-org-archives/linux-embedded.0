@@ -1,79 +1,39 @@
-From: Matt Helsley <matthltc@us.ibm.com>
-Subject: Re: [PATCH 2/6] Container Freezer: Make refrigerator always
-	available
-Date: Fri, 01 Aug 2008 16:24:34 -0700
-Message-ID: <1217633074.25300.281.camel@localhost.localdomain>
-References: <20080801050659.924495279@us.ibm.com>
-	 <20080801162712.63721e8c@surf>
-	 <1217617689.25300.213.camel@localhost.localdomain>
-	 <200808020053.18638.rjw@sisk.pl>
+From: Ben Nizette <bn@niasdigital.com>
+Subject: Re: prevalence of C++ in embedded linux?
+Date: Sat, 02 Aug 2008 14:14:40 +1000
+Message-ID: <1217650480.3546.94.camel@moss.renham>
+References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain>
+	 <1217281654.3546.16.camel@moss.renham>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200808020053.18638.rjw@sisk.pl>
+In-Reply-To: <1217281654.3546.16.camel@moss.renham>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Paul Menage <menage@google.com>, Li Zefan <lizf@cn.fujitsu.com>, Linux-Kernel <linux-kernel@vger.kernel.org>, Linux Containers <containers@lists.linux-foundation.org>, linux-pm@lists.linux-foundation.org, Cedric Le Goater <clg@fr.ibm.com>, "Serge E. Hallyn" <serue@us.ibm.com>, Michael Opdenacker <michael@free-electrons.com>, linux-embedded@vger.kernel.org
+To: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
 
-On Sat, 2008-08-02 at 00:53 +-0200, Rafael J. Wysocki wrote:
-+AD4 On Friday, 1 of August 2008, Matt Helsley wrote:
-+AD4 +AD4 
-+AD4 +AD4 On Fri, 2008-08-01 at 16:27 +-0200, Thomas Petazzoni wrote:
-+AD4 +AD4 +AD4 Hi,
-+AD4 +AD4 +AD4 
-+AD4 +AD4 +AD4 Le Thu, 31 Jul 2008 22:07:01 -0700,
-+AD4 +AD4 +AD4 Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4 a +AOk-crit :
-+AD4 +AD4 +AD4 
-+AD4 +AD4 +AD4 +AD4 --- a/kernel/Makefile
-+AD4 +AD4 +AD4 +AD4 +-+-+- b/kernel/Makefile
-+AD4 +AD4 +AD4 +AD4 +AEAAQA -5,7 +-5,7 +AEAAQA
-+AD4 +AD4 +AD4 +AD4  obj-y     +AD0 sched.o fork.o exec+AF8-domain.o panic.o printk.o +AFw
-+AD4 +AD4 +AD4 +AD4  	    cpu.o exit.o itimer.o time.o softirq.o resource.o +AFw
-+AD4 +AD4 +AD4 +AD4  	    sysctl.o capability.o ptrace.o timer.o user.o +AFw
-+AD4 +AD4 +AD4 +AD4 -	    signal.o sys.o kmod.o workqueue.o pid.o +AFw
-+AD4 +AD4 +AD4 +AD4 +-	    signal.o sys.o kmod.o workqueue.o pid.o freezer.o +AFw
-+AD4 +AD4 +AD4 
-+AD4 +AD4 +AD4 I have the impression that the code in kernel/power/process.c was
-+AD4 +AD4 +AD4 compiled only if CONFIG+AF8-PM+AF8-SLEEP was set. Now that the code has been
-+AD4 +AD4 +AD4 moved to kernel/freezer.c, it is unconditionnaly compiled in every
-+AD4 +AD4 +AD4 kernel. Is that correct ?
-+AD4 +AD4 +AD4
-+AD4 +AD4 +AD4 If so, is it possible to put this new feature under some
-+AD4 +AD4 +AD4 CONFIG+AF8-SOMETHING option, for people who care about the kernel size ?
-+AD4 +AD4 
-+AD4 +AD4 	How about making it depend on a combination of CONFIG variables?
-+AD4 +AD4 Here's an RFC PATCH. Completely untested.
-+AD4 +AD4 
-+AD4 +AD4 Signed-off-by: Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4
-+AD4 
-+AD4 Can you please also make the contents of include/linux/freezer.h depend on
-+AD4 CONFIG+AF8-FREEZER instead of CONFIG+AF8-PM+AF8-SLEEP?
+On Tue, 2008-07-29 at 07:47 +1000, Ben Nizette wrote:
+> On Mon, 2008-07-28 at 11:43 -0400, Robert P. J. Day wrote:
+> > just curious -- how many folks are working in C++ in their embedded
+> > linux work?
+> 
+> I hang out on AVRFreaks - an AVR and AVR32 support forum - quite a bit.
+> I personally think C++ is the language of the devil but I'd say that
+> around 50% of the people I talk to on 'freaks think otherwise.  It's
+> certainly the language of choice.
 
-Good point -- I'll add that to this patch and repost.
+Having said that, I would appear to be quite wrong.  Of course, I only
+see people's language of choice on a support forum when it doesn't work
+as they'd like.  From those numbers I got the 50% figure.  A quick poll
+[1] doesn't even almost agree, though admittedly the sample group isn't
+huge yet.
 
-+AD4 Also, I'm not really sure if kernel/power/Kconfig is the right place to define
-+AD4 CONFIG+AF8-FREEZER.
+Interesting.
 
-	There's no nice place to put it since we're dealing with CONFIG+AF8
-variables in two different Kconfig files. I put it in
-kernel/power/Kconfig because I wasn't certain Kbuild would do the right
-thing if I referenced PM+AF8-SLEEP from init/Kconfig.
+	--Ben.
 
-+AD4 Perhaps we should even move freezer.c from kernel/power to kernel
-
-It's already there. Perhaps you meant something else
-(kernel/power/process.c?)?
-
-+AD4 and define CONFIG+AF8-FREEZER in Kconfig in there.  Andrew, what do you think?
-
-The Kconfig files in kernel/ are Kconfig.hz and Kconfig.preemt which
-don't seem appropriate. I suppose we could add another (perhaps
-Kconfig.cgroup).
-
-Thanks for the review+ACE
-
-Cheers,
-	-Matt
+[1]
+http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=473243#473243
