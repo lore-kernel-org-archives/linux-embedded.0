@@ -1,99 +1,68 @@
-From: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Subject: Re: is it worth separating initrd from initramfs support?
-Date: Mon, 4 Aug 2008 16:29:19 -0400 (EDT)
-Message-ID: <alpine.LFD.1.10.0808041626040.22985@localhost.localdomain>
-References: <alpine.LFD.1.10.0808041449420.9561@localhost.localdomain> <c384c5ea0808041316v26ead859se5e778b074c735f4@mail.gmail.com>
+From: Matt Helsley <matthltc@us.ibm.com>
+Subject: Re: [PATCH 2/6] Container Freezer: Make refrigerator always
+	available
+Date: Fri, 01 Aug 2008 19:30:26 -0700
+Message-ID: <1217644226.25300.296.camel@localhost.localdomain>
+References: <20080801050659.924495279@us.ibm.com>
+	 <20080801162712.63721e8c@surf>
+	 <1217617689.25300.213.camel@localhost.localdomain>
+	 <200808020053.18638.rjw@sisk.pl>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <c384c5ea0808041316v26ead859se5e778b074c735f4@mail.gmail.com>
+In-Reply-To: <200808020053.18638.rjw@sisk.pl>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Leon Woestenberg <leon.woestenberg@gmail.com>
-Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Paul Menage <menage@google.com>, Li Zefan <lizf@cn.fujitsu.com>, Linux-Kernel <linux-kernel@vger.kernel.org>, Linux Containers <containers@lists.linux-foundation.org>, linux-pm@lists.linux-foundation.org, Cedric Le Goater <clg@fr.ibm.com>, "Serge E. Hallyn" <serue@us.ibm.com>, Michael Opdenacker <michael@free-electrons.com>, linux-embedded@vger.kernel.org
 
-On Mon, 4 Aug 2008, Leon Woestenberg wrote:
 
-> Robert,
->
-> On Mon, Aug 4, 2008 at 8:53 PM, Robert P. J. Day <rpjday@crashcourse.ca> wrote:
-> >
-> >  not sure if i asked this here once upon a time but, in the
-> > current kernel, you get to select support for *both* initrd and
-> > initramfs with a single selection (CONFIG_BLK_DEV_INITRD).
-> >
-> > ...
-> >
-> >  in the context of embedded linux, is there any value in
-> > separating these features and letting one select them
-> > individually?  isn't it
-> >
-> Makes sense to me to seperate them, especially if this reduces code
-> size.
->
-> Small kernels and initramfs's are used in memory constrained
-> systems, we run it on FPGA SoC cores.
->
-> Does disabling initrd alone reduce code size? Is the dependency on
-> some subsystem removed (block i/o layer?)
+On Sat, 2008-08-02 at 00:53 +-0200, Rafael J. Wysocki wrote:
++AD4 On Friday, 1 of August 2008, Matt Helsley wrote:
++AD4 +AD4 
++AD4 +AD4 On Fri, 2008-08-01 at 16:27 +-0200, Thomas Petazzoni wrote:
++AD4 +AD4 +AD4 Hi,
++AD4 +AD4 +AD4 
++AD4 +AD4 +AD4 Le Thu, 31 Jul 2008 22:07:01 -0700,
++AD4 +AD4 +AD4 Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4 a +AOk-crit :
++AD4 +AD4 +AD4 
++AD4 +AD4 +AD4 +AD4 --- a/kernel/Makefile
++AD4 +AD4 +AD4 +AD4 +-+-+- b/kernel/Makefile
++AD4 +AD4 +AD4 +AD4 +AEAAQA -5,7 +-5,7 +AEAAQA
++AD4 +AD4 +AD4 +AD4  obj-y     +AD0 sched.o fork.o exec+AF8-domain.o panic.o printk.o +AFw
++AD4 +AD4 +AD4 +AD4  	    cpu.o exit.o itimer.o time.o softirq.o resource.o +AFw
++AD4 +AD4 +AD4 +AD4  	    sysctl.o capability.o ptrace.o timer.o user.o +AFw
++AD4 +AD4 +AD4 +AD4 -	    signal.o sys.o kmod.o workqueue.o pid.o +AFw
++AD4 +AD4 +AD4 +AD4 +-	    signal.o sys.o kmod.o workqueue.o pid.o freezer.o +AFw
++AD4 +AD4 +AD4 
++AD4 +AD4 +AD4 I have the impression that the code in kernel/power/process.c was
++AD4 +AD4 +AD4 compiled only if CONFIG+AF8-PM+AF8-SLEEP was set. Now that the code has been
++AD4 +AD4 +AD4 moved to kernel/freezer.c, it is unconditionnaly compiled in every
++AD4 +AD4 +AD4 kernel. Is that correct ?
++AD4 +AD4 +AD4
++AD4 +AD4 +AD4 If so, is it possible to put this new feature under some
++AD4 +AD4 +AD4 CONFIG+AF8-SOMETHING option, for people who care about the kernel size ?
++AD4 +AD4 
++AD4 +AD4 	How about making it depend on a combination of CONFIG variables?
++AD4 +AD4 Here's an RFC PATCH. Completely untested.
++AD4 +AD4 
++AD4 +AD4 Signed-off-by: Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4
++AD4 
++AD4 Can you please also make the contents of include/linux/freezer.h depend on
++AD4 CONFIG+AF8-FREEZER instead of CONFIG+AF8-PM+AF8-SLEEP?
 
-from a quick inspection, i *think* specifically disabling initrd
-support would save a few bytes.  see the end of init/initramfs.c:
+Done.
 
-===========
-static int __init populate_rootfs(void)
-{
-        char *err = unpack_to_rootfs(__initramfs_start,
-                         __initramfs_end - __initramfs_start, 0);
-        if (err)
-                panic(err);
-        if (initrd_start) {
-#ifdef CONFIG_BLK_DEV_RAM
-                int fd;
-                printk(KERN_INFO "checking if image is initramfs...");
-                err = unpack_to_rootfs((char *)initrd_start,
-                        initrd_end - initrd_start, 1);
-                if (!err) {
-                        printk(" it is\n");
-                        unpack_to_rootfs((char *)initrd_start,
-                                initrd_end - initrd_start, 0);
-                        free_initrd();
-                        return 0;
-                }
-                printk("it isn't (%s); looks like an initrd\n", err);
-                fd = sys_open("/initrd.image", O_WRONLY|O_CREAT, 0700);
-                if (fd >= 0) {
-                        sys_write(fd, (char *)initrd_start,
-                                        initrd_end - initrd_start);
-                        sys_close(fd);
-                        free_initrd();
-                }
-#else
-                printk(KERN_INFO "Unpacking initramfs...");
-                err = unpack_to_rootfs((char *)initrd_start,
-                        initrd_end - initrd_start, 0);
-                if (err)
-                        panic(err);
-                printk(" done\n");
-                free_initrd();
-#endif
-        }
-        return 0;
-}
-==========
++AD4 Also, I'm not really sure if kernel/power/Kconfig is the right place to define
++AD4 CONFIG+AF8-FREEZER.
++AD4 
++AD4 Perhaps we should even move freezer.c from kernel/power to kernel
++AD4 and define CONFIG+AF8-FREEZER in Kconfig in there.  Andrew, what do you think?
 
-  if you're interested in *only* an internal intramfs, surely some of
-the code above could be dropped, no?  but that's just my first
-impression.
+	I'll check this weekend for replies and repost the RFC PATCH on Monday
+if I don't hear anything. In the meantime I'll be doing some config
+build testing with the above changes to make sure it's correct.
 
-rday
---
-
-========================================================================
-Robert P. J. Day
-Linux Consulting, Training and Annoying Kernel Pedantry:
-    Have classroom, will lecture.
-
-http://crashcourse.ca                          Waterloo, Ontario, CANADA
-========================================================================
+Cheers,
+	-Matt
