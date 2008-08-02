@@ -1,39 +1,36 @@
-From: Ben Nizette <bn@niasdigital.com>
-Subject: Re: prevalence of C++ in embedded linux?
-Date: Sat, 02 Aug 2008 14:14:40 +1000
-Message-ID: <1217650480.3546.94.camel@moss.renham>
-References: <alpine.LFD.1.10.0807281142430.4286@localhost.localdomain>
-	 <1217281654.3546.16.camel@moss.renham>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: Re: [PATCH 2/6] Container Freezer: Make refrigerator always
+ available
+Date: Sat, 2 Aug 2008 12:39:36 +0200
+Message-ID: <20080802123936.5f8613bd@surf>
+References: <20080801050659.924495279@us.ibm.com>
+	<20080801050700.528446138@us.ibm.com>
+	<20080801162712.63721e8c@surf>
+	<1217617689.25300.213.camel@localhost.localdomain>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1217281654.3546.16.camel@moss.renham>
+In-Reply-To: <1217617689.25300.213.camel@localhost.localdomain>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Matt Helsley <matthltc@us.ibm.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, Paul Menage <menage@google.com>, Li Zefan <lizf@cn.fujitsu.com>, Linux-Kernel <linux-kernel@vger.kernel.org>, Linux Containers <containers@lists.linux-foundation.org>, linux-pm@lists.linux-foundation.org, Cedric Le Goater <clg@fr.ibm.com>, "Serge E. Hallyn" <serue@us.ibm.com>, Michael Opdenacker <michael@free-electrons.com>, linux-embedded@vger.kernel.org
 
+Le Fri, 01 Aug 2008 12:08:09 -0700,
+Matt Helsley <matthltc@us.ibm.com> a =C3=A9crit :
 
-On Tue, 2008-07-29 at 07:47 +1000, Ben Nizette wrote:
-> On Mon, 2008-07-28 at 11:43 -0400, Robert P. J. Day wrote:
-> > just curious -- how many folks are working in C++ in their embedded
-> > linux work?
-> 
-> I hang out on AVRFreaks - an AVR and AVR32 support forum - quite a bit.
-> I personally think C++ is the language of the devil but I'd say that
-> around 50% of the people I talk to on 'freaks think otherwise.  It's
-> certainly the language of choice.
+> 	How about making it depend on a combination of CONFIG
+> variables? Here's an RFC PATCH. Completely untested.
 
-Having said that, I would appear to be quite wrong.  Of course, I only
-see people's language of choice on a support forum when it doesn't work
-as they'd like.  From those numbers I got the 50% figure.  A quick poll
-[1] doesn't even almost agree, though admittedly the sample group isn't
-huge yet.
+It solves my kernel size increase problem, so it's perfectly fine for
+me.
 
-Interesting.
+Thanks!
 
-	--Ben.
-
-[1]
-http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=473243#473243
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
