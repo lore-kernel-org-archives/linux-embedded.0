@@ -1,154 +1,308 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 2/6] Container Freezer: Make refrigerator always available
-Date: Sat, 2 Aug 2008 16:34:45 +0200
-Message-ID: <200808021634.46459.rjw@sisk.pl>
-References: <20080801050659.924495279@us.ibm.com> <200808020053.18638.rjw@sisk.pl> <1217633074.25300.281.camel@localhost.localdomain>
+From: "J. Bruce Fields" <bfields@fieldses.org>
+Subject: Re: [patch 2/4] Configure out file locking features
+Date: Sat, 2 Aug 2008 12:38:48 -0400
+Message-ID: <20080802163848.GB30454@fieldses.org>
+References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1217633074.25300.281.camel@localhost.localdomain>
 Content-Disposition: inline
+In-Reply-To: <20080731093220.969460336@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="macroman"
-To: Matt Helsley <matthltc@us.ibm.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Paul Menage <menage@google.com>, Li Zefan <lizf@cn.fujitsu.com>, Linux-Kernel <linux-kernel@vger.kernel.org>, Linux Containers <containers@lists.linux-foundation.org>, linux-pm@lists.linux-foundation.org, Cedric Le Goater <clg@fr.ibm.com>, "Serge E. Hallyn" <serue@us.ibm.com>, Michael Opdenacker <michael@free-electrons.com>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
 
-T24gU2F0dXJkYXksIDIgb2YgQXVndXN0IDIwMDgsIE1hdHQgSGVsc2xleSB3cm90ZToKPiAKPiBP
-biBTYXQsIDIwMDgtMDgtMDIgYXQgMDA6NTMgKy0wMjAwLCBSYWZhZWwgSi4gV3lzb2NraSB3cm90
-ZToKPiA+IE9uIEZyaWRheSwgMSBvZiBBdWd1c3QgMjAwOCwgTWF0dCBIZWxzbGV5IHdyb3RlOgo+
-ID4gPiAKPiA+ID4gT24gRnJpLCAyMDA4LTA4LTAxIGF0IDE2OjI3ICstMDIwMCwgVGhvbWFzIFBl
-dGF6em9uaSB3cm90ZToKPiA+ID4gPiBIaSwKPiA+ID4gPiAKPiA+ID4gPiBMZSBUaHUsIDMxIEp1
-bCAyMDA4IDIyOjA3OjAxIC0wNzAwLAo+ID4gPiA+IE1hdHQgSGVsc2xleSA8bWF0dGhsdGNAdXMu
-aWJtLmNvbT4gYSArQU9rLWNyaXQgOgo+ID4gPiA+IAo+ID4gPiA+ID4gLS0tIGEva2VybmVsL01h
-a2VmaWxlCj4gPiA+ID4gPiArLSstKy0gYi9rZXJuZWwvTWFrZWZpbGUKPiA+ID4gPiA+IEBAIC01
-LDcgKy01LDcgQEAKPiA+ID4gPiA+ICBvYmoteSAgICAgPSBzY2hlZC5vIGZvcmsubyBleGVjX2Rv
-bWFpbi5vIHBhbmljLm8gcHJpbnRrLm8gK0FGdwo+ID4gPiA+ID4gIAkgICAgY3B1Lm8gZXhpdC5v
-IGl0aW1lci5vIHRpbWUubyBzb2Z0aXJxLm8gcmVzb3VyY2UubyArQUZ3Cj4gPiA+ID4gPiAgCSAg
-ICBzeXNjdGwubyBjYXBhYmlsaXR5Lm8gcHRyYWNlLm8gdGltZXIubyB1c2VyLm8gK0FGdwo+ID4g
-PiA+ID4gLQkgICAgc2lnbmFsLm8gc3lzLm8ga21vZC5vIHdvcmtxdWV1ZS5vIHBpZC5vICtBRncK
-PiA+ID4gPiA+ICstCSAgICBzaWduYWwubyBzeXMubyBrbW9kLm8gd29ya3F1ZXVlLm8gcGlkLm8g
-ZnJlZXplci5vICtBRncKPiA+ID4gPiAKPiA+ID4gPiBJIGhhdmUgdGhlIGltcHJlc3Npb24gdGhh
-dCB0aGUgY29kZSBpbiBrZXJuZWwvcG93ZXIvcHJvY2Vzcy5jIHdhcwo+ID4gPiA+IGNvbXBpbGVk
-IG9ubHkgaWYgQ09ORklHX1BNX1NMRUVQIHdhcyBzZXQuIE5vdyB0aGF0IHRoZSBjb2RlIGhhcyBi
-ZWVuCj4gPiA+ID4gbW92ZWQgdG8ga2VybmVsL2ZyZWV6ZXIuYywgaXQgaXMgdW5jb25kaXRpb25u
-YWx5IGNvbXBpbGVkIGluIGV2ZXJ5Cj4gPiA+ID4ga2VybmVsLiBJcyB0aGF0IGNvcnJlY3QgPwo+
-ID4gPiA+Cj4gPiA+ID4gSWYgc28sIGlzIGl0IHBvc3NpYmxlIHRvIHB1dCB0aGlzIG5ldyBmZWF0
-dXJlIHVuZGVyIHNvbWUKPiA+ID4gPiBDT05GSUdfU09NRVRISU5HIG9wdGlvbiwgZm9yIHBlb3Bs
-ZSB3aG8gY2FyZSBhYm91dCB0aGUga2VybmVsIHNpemUgPwo+ID4gPiAKPiA+ID4gCUhvdyBhYm91
-dCBtYWtpbmcgaXQgZGVwZW5kIG9uIGEgY29tYmluYXRpb24gb2YgQ09ORklHIHZhcmlhYmxlcz8K
-PiA+ID4gSGVyZSdzIGFuIFJGQyBQQVRDSC4gQ29tcGxldGVseSB1bnRlc3RlZC4KPiA+ID4gCj4g
-PiA+IFNpZ25lZC1vZmYtYnk6IE1hdHQgSGVsc2xleSA8bWF0dGhsdGNAdXMuaWJtLmNvbT4KPiA+
-IAo+ID4gQ2FuIHlvdSBwbGVhc2UgYWxzbyBtYWtlIHRoZSBjb250ZW50cyBvZiBpbmNsdWRlL2xp
-bnV4L2ZyZWV6ZXIuaCBkZXBlbmQgb24KPiA+IENPTkZJR19GUkVFWkVSIGluc3RlYWQgb2YgQ09O
-RklHX1BNX1NMRUVQPwo+IAo+IEdvb2QgcG9pbnQgLS0gSSdsbCBhZGQgdGhhdCB0byB0aGlzIHBh
-dGNoIGFuZCByZXBvc3QuCj4gCj4gPiBBbHNvLCBJJ20gbm90IHJlYWxseSBzdXJlIGlmIGtlcm5l
-bC9wb3dlci9LY29uZmlnIGlzIHRoZSByaWdodCBwbGFjZSB0byBkZWZpbmUKPiA+IENPTkZJR19G
-UkVFWkVSLgo+IAo+IAlUaGVyZSdzIG5vIG5pY2UgcGxhY2UgdG8gcHV0IGl0IHNpbmNlIHdlJ3Jl
-IGRlYWxpbmcgd2l0aCBDT05GSUdfCj4gdmFyaWFibGVzIGluIHR3byBkaWZmZXJlbnQgS2NvbmZp
-ZyBmaWxlcy4gSSBwdXQgaXQgaW4KPiBrZXJuZWwvcG93ZXIvS2NvbmZpZyBiZWNhdXNlIEkgd2Fz
-bid0IGNlcnRhaW4gS2J1aWxkIHdvdWxkIGRvIHRoZSByaWdodAo+IHRoaW5nIGlmIEkgcmVmZXJl
-bmNlZCBQTV9TTEVFUCBmcm9tIGluaXQvS2NvbmZpZy4KPiAKPiA+IFBlcmhhcHMgd2Ugc2hvdWxk
-IGV2ZW4gbW92ZSBmcmVlemVyLmMgZnJvbSBrZXJuZWwvcG93ZXIgdG8ga2VybmVsCj4gCj4gSXQn
-cyBhbHJlYWR5IHRoZXJlLgoKWWVzLCBzb3JyeS4KCj4gUGVyaGFwcyB5b3UgbWVhbnQgc29tZXRo
-aW5nIGVsc2UgKGtlcm5lbC9wb3dlci9wcm9jZXNzLmM/KT8KCldlbGwsIEknbGwgaGF2ZSB0byBh
-Y3R1YWxseSBhcHBseSB0aGUgcGF0Y2hlcyBhbmQgbG9vayBhdCB0aGUgbW9kaWZpZWQgY29kZS4K
-Cj4gPiBhbmQgZGVmaW5lIENPTkZJR19GUkVFWkVSIGluIEtjb25maWcgaW4gdGhlcmUuICBBbmRy
-ZXcsIHdoYXQgZG8geW91IHRoaW5rPwo+IAo+IFRoZSBLY29uZmlnIGZpbGVzIGluIGtlcm5lbC8g
-YXJlIEtjb25maWcuaHogYW5kIEtjb25maWcucHJlZW10IHdoaWNoCj4gZG9uJ3Qgc2VlbSBhcHBy
-b3ByaWF0ZS4gSSBzdXBwb3NlIHdlIGNvdWxkIGFkZCBhbm90aGVyIChwZXJoYXBzCj4gS2NvbmZp
-Zy5jZ3JvdXApLgoKRWl0aGVyIHRoYXQsIG9yIEtjb25maWcuZnJlZXplciBtYXliZT8gIEFmdGVy
-IGFsbCwgaXQgd2lsbCBhbHNvIGJlIHVzZWQgZm9yClBNX1NMRUVQLCBhdCBsZWFzdCBmb3Igc29t
-ZSB0aW1lLgoKPiBUaGFua3MgZm9yIHRoZSByZXZpZXchCgpZb3UncmUgd2VsY29tZS4KClRoYW5r
-cywKUmFmYWVsCgA3bU7zfwAAkPluAAAAAADQN21O838AAHA0bwAAAAAAAAAAAAAAAAAwvmcAAAAA
-AEEVAAAAAAAAcOCdAQAAAADAqZpN838AAAAAAAAAAAAAAAAAAAAAAADQN21O838AACA1bwAAAAAA
-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
-X28AAAAAAAAAAAAAAA==
+On Thu, Jul 31, 2008 at 11:27:05AM +0200, Thomas Petazzoni wrote:
+> This patch adds the CONFIG_FILE_LOCKING option which allows to remove
+> support for advisory locks. With this patch enabled, the flock()
+> system call, the F_GETLK, F_SETLK and F_SETLKW operations of fcntl()
+> and NFS support are disabled. These features are not necessarly needed
+> on embedded systems. It allows to save ~11 Kb of kernel code and data:
+
+Out of curiosity, why does the nfs client need disabling, but not nfsd,
+gfs2, fuse, etc.?
+
+--b.
+
+> 
+>    text	   data	    bss	    dec	    hex	filename
+> 1125436	 118764	 212992	1457192	 163c28	vmlinux.old
+> 1114299	 118564	 212992	1445855	 160fdf	vmlinux
+>  -11137    -200       0  -11337   -2C49 +/-
+> 
+> This patch has originally been written by Matt Mackall
+> <mpm@selenic.com>, and is part of the Linux Tiny project.
+> 
+> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+> Signed-off-by: Matt Mackall <mpm@selenic.com>
+> Cc: matthew@wil.cx
+> Cc: linux-fsdevel@vger.kernel.org
+> Cc: mpm@selenic.com
+> Cc: akpm@linux-foundation.org
+> 
+> ---
+>  fs/Kconfig          |    2 +-
+>  fs/Makefile         |    3 ++-
+>  fs/proc/proc_misc.c |    4 ++++
+>  include/linux/fs.h  |   52 +++++++++++++++++++++++++++++++++++++++++++++-------
+>  init/Kconfig        |    8 ++++++++
+>  kernel/sys_ni.c     |    1 +
+>  kernel/sysctl.c     |    6 +++++-
+>  7 files changed, 66 insertions(+), 10 deletions(-)
+> 
+> Index: linuxdev/fs/Kconfig
+> ===================================================================
+> --- linuxdev.orig/fs/Kconfig
+> +++ linuxdev/fs/Kconfig
+> @@ -1559,7 +1559,7 @@
+>  
+>  config NFS_FS
+>  	tristate "NFS client support"
+> -	depends on INET
+> +	depends on INET && FILE_LOCKING
+>  	select LOCKD
+>  	select SUNRPC
+>  	select NFS_ACL_SUPPORT if NFS_V3_ACL
+> Index: linuxdev/fs/Makefile
+> ===================================================================
+> --- linuxdev.orig/fs/Makefile
+> +++ linuxdev/fs/Makefile
+> @@ -7,7 +7,7 @@
+>  
+>  obj-y :=	open.o read_write.o file_table.o super.o \
+>  		char_dev.o stat.o exec.o pipe.o namei.o fcntl.o \
+> -		ioctl.o readdir.o select.o fifo.o locks.o dcache.o inode.o \
+> +		ioctl.o readdir.o select.o fifo.o dcache.o inode.o \
+>  		attr.o bad_inode.o file.o filesystems.o namespace.o \
+>  		seq_file.o xattr.o libfs.o fs-writeback.o \
+>  		pnode.o drop_caches.o splice.o sync.o utimes.o \
+> @@ -28,6 +28,7 @@
+>  obj-$(CONFIG_TIMERFD)		+= timerfd.o
+>  obj-$(CONFIG_EVENTFD)		+= eventfd.o
+>  obj-$(CONFIG_AIO)               += aio.o
+> +obj-$(CONFIG_FILE_LOCKING)      += locks.o
+>  obj-$(CONFIG_COMPAT)		+= compat.o compat_ioctl.o
+>  
+>  nfsd-$(CONFIG_NFSD)		:= nfsctl.o
+> Index: linuxdev/fs/proc/proc_misc.c
+> ===================================================================
+> --- linuxdev.orig/fs/proc/proc_misc.c
+> +++ linuxdev/fs/proc/proc_misc.c
+> @@ -677,6 +677,7 @@
+>  	return proc_calc_metrics(page, start, off, count, eof, len);
+>  }
+>  
+> +#ifdef CONFIG_FILE_LOCKING
+>  static int locks_open(struct inode *inode, struct file *filp)
+>  {
+>  	return seq_open(filp, &locks_seq_operations);
+> @@ -688,6 +689,7 @@
+>  	.llseek		= seq_lseek,
+>  	.release	= seq_release,
+>  };
+> +#endif /* CONFIG_FILE_LOCKING */
+>  
+>  static int execdomains_read_proc(char *page, char **start, off_t off,
+>  				 int count, int *eof, void *data)
+> @@ -881,7 +883,9 @@
+>  #ifdef CONFIG_PRINTK
+>  	proc_create("kmsg", S_IRUSR, NULL, &proc_kmsg_operations);
+>  #endif
+> +#ifdef CONFIG_FILE_LOCKING
+>  	proc_create("locks", 0, NULL, &proc_locks_operations);
+> +#endif
+>  	proc_create("devices", 0, NULL, &proc_devinfo_operations);
+>  	proc_create("cpuinfo", 0, NULL, &proc_cpuinfo_operations);
+>  #ifdef CONFIG_BLOCK
+> Index: linuxdev/include/linux/fs.h
+> ===================================================================
+> --- linuxdev.orig/include/linux/fs.h
+> +++ linuxdev/include/linux/fs.h
+> @@ -983,6 +983,13 @@
+>  
+>  #include <linux/fcntl.h>
+>  
+> +extern void send_sigio(struct fown_struct *fown, int fd, int band);
+> +
+> +/* fs/sync.c */
+> +extern int do_sync_mapping_range(struct address_space *mapping, loff_t offset,
+> +			loff_t endbyte, unsigned int flags);
+> +
+> +#ifdef CONFIG_FILE_LOCKING
+>  extern int fcntl_getlk(struct file *, struct flock __user *);
+>  extern int fcntl_setlk(unsigned int, struct file *, unsigned int,
+>  			struct flock __user *);
+> @@ -993,14 +1000,9 @@
+>  			struct flock64 __user *);
+>  #endif
+>  
+> -extern void send_sigio(struct fown_struct *fown, int fd, int band);
+>  extern int fcntl_setlease(unsigned int fd, struct file *filp, long arg);
+>  extern int fcntl_getlease(struct file *filp);
+>  
+> -/* fs/sync.c */
+> -extern int do_sync_mapping_range(struct address_space *mapping, loff_t offset,
+> -			loff_t endbyte, unsigned int flags);
+> -
+>  /* fs/locks.c */
+>  extern void locks_init_lock(struct file_lock *);
+>  extern void locks_copy_lock(struct file_lock *, struct file_lock *);
+> @@ -1023,6 +1025,33 @@
+>  extern int lock_may_read(struct inode *, loff_t start, unsigned long count);
+>  extern int lock_may_write(struct inode *, loff_t start, unsigned long count);
+>  extern struct seq_operations locks_seq_operations;
+> +#else /* !CONFIG_FILE_LOCKING */
+> +#define fcntl_getlk(a, b) (-EINVAL)
+> +#define fcntl_setlk(a, b, c, d) (-EACCES)
+> +#if BITS_PER_LONG == 32
+> +#define fcntl_getlk64(a, b) (-EINVAL)
+> +#define fcntl_setlk64(a, b, c, d) (-EACCES)
+> +#endif
+> +#define fcntl_setlease(a, b, c) (0)
+> +#define fcntl_getlease(a) (0)
+> +#define locks_init_lock(a)
+> +#define locks_copy_lock(a, b)
+> +#define locks_remove_posix(a, b)
+> +#define locks_remove_flock(a)
+> +#define posix_test_lock(a, b) (0)
+> +#define posix_lock_file(a, b) (-ENOLCK)
+> +#define posix_lock_file_wait(a, b) (-ENOLCK)
+> +#define posix_unblock_lock(a, b) (-ENOENT)
+> +#define vfs_test_lock(a, b) (0)
+> +#define vfs_lock_file(a, b, c, d) (-ENOLCK)
+> +#define vfs_cancel_lock(a, b) (0)
+> +#define flock_lock_file_wait(a, b) (-ENOLCK)
+> +#define __break_lease(a, b) (0)
+> +#define lease_get_mtime(a, b)
+> +#define lock_may_read(a, b, c) (1)
+> +#define lock_may_write(a, b, c) (1)
+> +#endif /* !CONFIG_FILE_LOCKING */
+> +
+>  
+>  struct fasync_struct {
+>  	int	magic;
+> @@ -1554,9 +1583,12 @@
+>  /* /sys/fs */
+>  extern struct kobject *fs_kobj;
+>  
+> +extern int rw_verify_area(int, struct file *, loff_t *, size_t);
+> +
+>  #define FLOCK_VERIFY_READ  1
+>  #define FLOCK_VERIFY_WRITE 2
+>  
+> +#ifdef CONFIG_FILE_LOCKING
+>  extern int locks_mandatory_locked(struct inode *);
+>  extern int locks_mandatory_area(int, struct inode *, struct file *, loff_t, size_t);
+>  
+> @@ -1587,8 +1619,6 @@
+>  	return 0;
+>  }
+>  
+> -extern int rw_verify_area(int, struct file *, loff_t *, size_t);
+> -
+>  static inline int locks_verify_truncate(struct inode *inode,
+>  				    struct file *filp,
+>  				    loff_t size)
+> @@ -1609,6 +1639,14 @@
+>  		return __break_lease(inode, mode);
+>  	return 0;
+>  }
+> +#else /* !CONFIG_FILE_LOCKING */
+> +#define locks_mandatory_locked(a) (0)
+> +#define locks_mandatory_area(a, b, c, d, e) (0)
+> +#define mandatory_lock(a) (0)
+> +#define locks_verify_locked(a) (0)
+> +#define locks_verify_truncate(a, b, c) (0)
+> +#define break_lease(a, b) (0)
+> +#endif /* CONFIG_FILE_LOCKING */
+>  
+>  /* fs/open.c */
+>  
+> Index: linuxdev/init/Kconfig
+> ===================================================================
+> --- linuxdev.orig/init/Kconfig
+> +++ linuxdev/init/Kconfig
+> @@ -732,6 +732,14 @@
+>            by some high performance threaded applications. Disabling
+>            this option saves about 7k.
+>  
+> +config FILE_LOCKING
+> +	bool "Enable POSIX file locking API" if EMBEDDED
+> +	default y
+> +	help
+> +	  This option enables standard file locking support, required
+> +          for filesystems like NFS and for the flock() system
+> +          call. Disabling this option saves about 11k.
+> +
+>  config VM_EVENT_COUNTERS
+>  	default y
+>  	bool "Enable VM event counters for /proc/vmstat" if EMBEDDED
+> Index: linuxdev/kernel/sys_ni.c
+> ===================================================================
+> --- linuxdev.orig/kernel/sys_ni.c
+> +++ linuxdev/kernel/sys_ni.c
+> @@ -130,6 +130,7 @@
+>  cond_syscall(sys_io_submit);
+>  cond_syscall(sys_io_cancel);
+>  cond_syscall(sys_io_getevents);
+> +cond_syscall(sys_flock);
+>  
+>  /* arch-specific weak syscall entries */
+>  cond_syscall(sys_pciconfig_read);
+> Index: linuxdev/kernel/sysctl.c
+> ===================================================================
+> --- linuxdev.orig/kernel/sysctl.c
+> +++ linuxdev/kernel/sysctl.c
+> @@ -97,7 +97,7 @@
+>  static int neg_one = -1;
+>  #endif
+>  
+> -#ifdef CONFIG_MMU
+> +#if defined(CONFIG_MMU) && defined(CONFIG_FILE_LOCKING)
+>  static int two = 2;
+>  #endif
+>  
+> @@ -1260,6 +1260,7 @@
+>  		.extra1		= &minolduid,
+>  		.extra2		= &maxolduid,
+>  	},
+> +#ifdef CONFIG_FILE_LOCKING
+>  	{
+>  		.ctl_name	= FS_LEASES,
+>  		.procname	= "leases-enable",
+> @@ -1268,6 +1269,7 @@
+>  		.mode		= 0644,
+>  		.proc_handler	= &proc_dointvec,
+>  	},
+> +#endif
+>  #ifdef CONFIG_DNOTIFY
+>  	{
+>  		.ctl_name	= FS_DIR_NOTIFY,
+> @@ -1279,6 +1281,7 @@
+>  	},
+>  #endif
+>  #ifdef CONFIG_MMU
+> +#ifdef CONFIG_FILE_LOCKING
+>  	{
+>  		.ctl_name	= FS_LEASE_TIME,
+>  		.procname	= "lease-break-time",
+> @@ -1290,6 +1293,7 @@
+>  		.extra1		= &zero,
+>  		.extra2		= &two,
+>  	},
+> +#endif /* CONFIG_FILE_LOCKING */
+>  #ifdef CONFIG_AIO
+>  	{
+>  		.procname	= "aio-nr",
+> 
+> -- 
+> Thomas Petazzoni, Free Electrons
+> Kernel, drivers and embedded Linux development,
+> consulting, training and support.
+> http://free-electrons.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
