@@ -1,224 +1,55 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Mon, 4 Aug 2008 15:32:27 -0700
-Message-ID: <4897837B.3070605@am.sony.com>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080802163848.GB30454@fieldses.org> <20080804155237.1f64892d@surf> <20080804181641.GE25940@fieldses.org> <48974973.6000408@am.sony.com> <20080804182532.GF25940@fieldses.org>
+From: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Subject: Re: is it worth separating initrd from initramfs support?
+Date: Mon, 4 Aug 2008 19:07:17 -0400 (EDT)
+Message-ID: <alpine.LFD.1.10.0808041905510.3387@localhost.localdomain>
+References: <alpine.LFD.1.10.0808041449420.9561@localhost.localdomain> <c384c5ea0808041316v26ead859se5e778b074c735f4@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080804182532.GF25940@fieldses.org>
+In-Reply-To: <c384c5ea0808041316v26ead859se5e778b074c735f4@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: "J. Bruce Fields" <bfields@fieldses.org>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Leon Woestenberg <leon.woestenberg@gmail.com>
+Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-J. Bruce Fields wrote:
-> On Mon, Aug 04, 2008 at 11:24:51AM -0700, Tim Bird wrote:
->> J. Bruce Fields wrote:
->>> On Mon, Aug 04, 2008 at 03:52:37PM +0200, Thomas Petazzoni wrote:
->>>> Le Sat, 2 Aug 2008 12:38:48 -0400,
->>>> "J. Bruce Fields" <bfields@fieldses.org> a =C3=A9crit :
->>>>
->>>>> Out of curiosity, why does the nfs client need disabling, but not
->>>>> nfsd, gfs2, fuse, etc.?
->>>> Then also need disabling.
->>> OK by me, but again, why exactly?  Since you're replacing the locki=
-ng
->>> calls they used by stubs that just return errors, in theory nfs, nf=
-sd,
->>> gfs2, and the rest should still compile and run, just without locki=
-ng
->>> support, right?
->> I think so, but haven't tested this myself.
->>
->> However, I would still be inclined to NOT add the extra config
->> dependencies.  Just my 2 cents.
->=20
-> OK.  My fear was that there was some good reason that the nfs depende=
-ncy
-> was added in the first place, and that it's since been lost....
+On Mon, 4 Aug 2008, Leon Woestenberg wrote:
 
-=46or general information,  I just ran a test with the NFS dependency
-on file locking turned off, and with the NFS auto-enable of
-CONFIG_LOCKD removed.
+> Robert,
+>
+> On Mon, Aug 4, 2008 at 8:53 PM, Robert P. J. Day <rpjday@crashcourse.ca> wrote:
+> >
+> >  not sure if i asked this here once upon a time but, in the
+> > current kernel, you get to select support for *both* initrd and
+> > initramfs with a single selection (CONFIG_BLK_DEV_INITRD).
+> >
+> > ...
+> >
+> >  in the context of embedded linux, is there any value in
+> > separating these features and letting one select them
+> > individually?  isn't it
+> >
+> Makes sense to me to seperate them, especially if this reduces code
+> size.
+>
+> Small kernels and initramfs's are used in memory constrained
+> systems, we run it on FPGA SoC cores.
+>
+> Does disabling initrd alone reduce code size? Is the dependency on
+> some subsystem removed (block i/o layer?)
 
-It got me about a 16K savings, and I was able to successfully boot
-a target with an NFS-mounted root file system.  I haven't run extensive
-tests, so I don't know what apps might break in this configuration,
-but at least in this test, it ran well enough to boot the machine.
+i'm going to move this discussion to the kernel-newbies list since
+it's really not tightly related to embedded, we'll hash it out there,
+and i'll report back.  i'm *reasonably* convinced that we can save
+some bytes here, but i'll make sure, then i'll let you know.
 
-Below is the patch I used, which is only provided for information.
-This should NOT be applied - it consists of quick hacks to test this
-configuration only (that is, to test NFS with CONFIG_FILE_LOCKING=3Dn).
+rday
+--
 
-BTW - this is on a 2.6.23 kernel, so even the regular FILE_LOCKING
-bits may be different from the current no-file-locking patch.
+========================================================================
+Robert P. J. Day
+Linux Consulting, Training and Annoying Kernel Pedantry:
+    Have classroom, will lecture.
 
----
- fs/Kconfig         |    3 +--
- fs/nfs/client.c    |    6 ++++++
- fs/nfs/nfs3proc.c  |    4 ++++
- fs/nfs/proc.c      |    4 ++++
- fs/read_write.c    |    2 ++
- include/linux/fs.h |   13 +++++++------
- 6 files changed, 24 insertions(+), 8 deletions(-)
-
---- a/fs/Kconfig
-+++ b/fs/Kconfig
-@@ -1701,8 +1701,7 @@ menu "Network File Systems"
-
- config NFS_FS
- 	tristate "NFS file system support"
--	depends on INET && FILE_LOCKING
--	select LOCKD
-+	depends on INET
- 	select SUNRPC
- 	select NFS_ACL_SUPPORT if NFS_V3_ACL
- 	help
---- a/fs/nfs/client.c
-+++ b/fs/nfs/client.c
-@@ -414,6 +414,7 @@ static void nfs_destroy_server(struct nf
- 		lockd_down();	/* release rpc.lockd */
- }
-
-+#ifdef LOCKD
- /*
-  * Version 2 or 3 lockd setup
-  */
-@@ -434,6 +435,7 @@ static int nfs_start_lockd(struct nfs_se
- out:
- 	return error;
- }
-+#endif
-
- /*
-  * Initialise an NFSv3 ACL client connection
-@@ -577,9 +579,11 @@ static int nfs_init_server(struct nfs_se
- 	server->acdirmax =3D data->acdirmax * HZ;
-
- 	/* Start lockd here, before we might error out */
-+#ifdef LOCKD
- 	error =3D nfs_start_lockd(server);
- 	if (error < 0)
- 		goto error;
-+#endif
-
- 	error =3D nfs_init_server_rpcclient(server, data->pseudoflavor);
- 	if (error < 0)
-@@ -1128,9 +1132,11 @@ struct nfs_server *nfs_clone_server(stru
- 		(unsigned long long) server->fsid.major,
- 		(unsigned long long) server->fsid.minor);
-
-+#ifdef LOCKD
- 	error =3D nfs_start_lockd(server);
- 	if (error < 0)
- 		goto out_free_server;
-+#endif
-
- 	spin_lock(&nfs_client_lock);
- 	list_add_tail(&server->client_link, &server->nfs_client->cl_superbloc=
-ks);
---- a/fs/nfs/nfs3proc.c
-+++ b/fs/nfs/nfs3proc.c
-@@ -795,7 +795,11 @@ static void nfs3_proc_commit_setup(struc
- static int
- nfs3_proc_lock(struct file *filp, int cmd, struct file_lock *fl)
- {
-+#ifdef LOCKD
- 	return nlmclnt_proc(filp->f_path.dentry->d_inode, cmd, fl);
-+#else
-+	return -ENOLCK;
-+#endif
- }
-
- const struct nfs_rpc_ops nfs_v3_clientops =3D {
---- a/fs/nfs/proc.c
-+++ b/fs/nfs/proc.c
-@@ -605,7 +605,11 @@ nfs_proc_commit_setup(struct nfs_write_d
- static int
- nfs_proc_lock(struct file *filp, int cmd, struct file_lock *fl)
- {
-+#ifdef LOCKD
- 	return nlmclnt_proc(filp->f_path.dentry->d_inode, cmd, fl);
-+#else
-+	return -ENOLCK;
-+#endif
- }
-
-
---- a/fs/read_write.c
-+++ b/fs/read_write.c
-@@ -211,6 +211,7 @@ int rw_verify_area(int read_write, struc
- 	if (unlikely((pos < 0) || (loff_t) (pos + count) < 0))
- 		goto Einval;
-
-+#ifdef FILE_LOCKING
- 	if (unlikely(inode->i_flock && MANDATORY_LOCK(inode))) {
- 		int retval =3D locks_mandatory_area(
- 			read_write =3D=3D READ ? FLOCK_VERIFY_READ : FLOCK_VERIFY_WRITE,
-@@ -218,6 +219,7 @@ int rw_verify_area(int read_write, struc
- 		if (retval < 0)
- 			return retval;
- 	}
-+#endif
- 	return count > MAX_RW_COUNT ? MAX_RW_COUNT : count;
-
- Einval:
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -863,10 +863,6 @@ extern int fcntl_setlk64(unsigned int, s
- extern int fcntl_setlease(unsigned int fd, struct file *filp, long arg=
-);
- extern int fcntl_getlease(struct file *filp);
-
--/* fs/sync.c */
--extern int do_sync_mapping_range(struct address_space *mapping, loff_t=
- offset,
--			loff_t endbyte, unsigned int flags);
--
- /* fs/locks.c */
- extern void locks_init_lock(struct file_lock *);
- extern void locks_copy_lock(struct file_lock *, struct file_lock *);
-@@ -918,6 +914,10 @@ extern int lock_may_write(struct inode *
- #define steal_locks(a)
- #endif /* !CONFIG_FILE_LOCKING */
-
-+/* fs/sync.c */
-+extern int do_sync_mapping_range(struct address_space *mapping, loff_t=
- offset,
-+			loff_t endbyte, unsigned int flags);
-+
- struct fasync_struct {
- 	int	magic;
- 	int	fa_fd;
-@@ -1424,8 +1424,6 @@ static inline int locks_verify_locked(st
- 	return 0;
- }
-
--extern int rw_verify_area(int, struct file *, loff_t *, size_t);
--
- static inline int locks_verify_truncate(struct inode *inode,
- 				    struct file *filp,
- 				    loff_t size)
-@@ -1459,6 +1457,9 @@ static inline int break_lease(struct ino
-
- #endif /* !CONFIG_FILE_LOCKING */
-
-+extern int rw_verify_area(int, struct file *, loff_t *, size_t);
-+
-+
- /* fs/open.c */
-
- extern int do_truncate(struct dentry *, loff_t start, unsigned int tim=
-e_attrs,
-
-
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
+http://crashcourse.ca                          Waterloo, Ontario, CANADA
+========================================================================
