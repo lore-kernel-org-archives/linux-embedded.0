@@ -1,49 +1,62 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: [PATCH] embedded: fix vc_translate operator precedence
-Date: Mon, 4 Aug 2008 10:33:44 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0808041033270.31424@vixen.sonytel.be>
-References: <48937AAE.5070407@am.sony.com> <Pine.LNX.4.64.0808041028230.31424@vixen.sonytel.be>
- <1217838685.3454.564.camel@pmac.infradead.org>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: Re: [patch 4/4] Configure out IGMP support
+Date: Mon, 4 Aug 2008 14:48:07 +0200
+Message-ID: <20080804144807.6b2374d9@surf>
+References: <20080731092703.661994657@free-electrons.com>
+	<20080731093221.565015353@free-electrons.com>
+	<1217619715.3454.488.camel@pmac.infradead.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1414564800-1217838824=:31424"
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1217838685.3454.564.camel@pmac.infradead.org>
+In-Reply-To: <1217619715.3454.488.camel@pmac.infradead.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
 To: David Woodhouse <dwmw2@infradead.org>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, netdev@vger.kernel.org, davem@davemloft.net, akpm@linux-foundation.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Le Fri, 01 Aug 2008 20:41:55 +0100,
+David Woodhouse <dwmw2@infradead.org> a =C3=A9crit :
 
----584349381-1414564800-1217838824=:31424
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+> The config option probably lives in net/Kconfig, not init/Kconfig.
 
-On Mon, 4 Aug 2008, David Woodhouse wrote:
-> On Mon, 2008-08-04 at 10:29 +0200, Geert Uytterhoeven wrote:
-> > The above paragraph is not part of the patch description and should
-> > not end up in the git history, so it should be below the first `---'
-> > and above the diffstat, i.e.
-> 
-> Since it reports successful testing, I figured I might as well keep it.
+Yes, it could. But AFAIK, until now, all CONFIG_EMBEDDED-related
+options have been put in init/Kconfig. But if it's preferred, I can of
+course change the patch to move the config option to net/Kconfig.
 
-... unlike all other patches you take? ;-)
+> And please could you make it clear how this interacts with
+> IP_MULTICAST?
+>=20
+> We already have a CONFIG_IP_MULTICAST option, for which the help text
+> says "For more people, it's safe to say N'. And I think it defaults t=
+o
+> that too. What more does CONFIG_IGMP remove? It's not made clear by
+> the help text.
 
-With kind regards,
+The interaction of IGMP support with CONFIG_IP_MULTICAST is fairly
+unclear to me.
 
-Geert Uytterhoeven
-Software Architect
+A large portion of igmp.c is already under #ifdef CONFIG_IP_MULTICAST:
+all the igmp_*() functions, amongst which is igmp_rcv(), referenced in
+igmp_protocol in net/ipv4/af_inet.c, which is compiled-out
+when !CONFIG_IP_MULTICAST.
 
-Sony Techsoft Centre Europe
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+All the proc-related code at the end of the file is only conditionnaly
+compiled on CONFIG_PROC_FS, but seems to in fact be only used if both
+CONFIG_IP_MULTICAST and CONFIG_PROC_FS are selected:
+igmp_mc_proc_init() in net/ipv4/ip_output.c is only called when
+CONFIG_IP_MULTICAST and CONFIG_PROC_FS are selected.
 
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
+Besides that, it's unclear to me why the ip_mc_*() functions are useful
+when !CONFIG_IP_MULTICAST, but I'm probably missing something. They are
+used to implement setsockopt-operations related to multicast, hooks for
+the routing code to handle multicast-related traffic, etc.
 
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 · RPR Brussels
-Fortis 293-0376800-10 GEBA-BE-BB
----584349381-1414564800-1217838824=:31424--
+Sincerly,
+
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
