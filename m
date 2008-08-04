@@ -1,49 +1,37 @@
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Mon, 4 Aug 2008 14:25:32 -0400
-Message-ID: <20080804182532.GF25940@fieldses.org>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080802163848.GB30454@fieldses.org> <20080804155237.1f64892d@surf> <20080804181641.GE25940@fieldses.org> <48974973.6000408@am.sony.com>
+From: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Subject: is it worth separating initrd from initramfs support?
+Date: Mon, 4 Aug 2008 14:53:26 -0400 (EDT)
+Message-ID: <alpine.LFD.1.10.0808041449420.9561@localhost.localdomain>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <48974973.6000408@am.sony.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-On Mon, Aug 04, 2008 at 11:24:51AM -0700, Tim Bird wrote:
-> J. Bruce Fields wrote:
-> > On Mon, Aug 04, 2008 at 03:52:37PM +0200, Thomas Petazzoni wrote:
-> >> Le Sat, 2 Aug 2008 12:38:48 -0400,
-> >> "J. Bruce Fields" <bfields@fieldses.org> a =C3=A9crit :
-> >>
-> >>> Out of curiosity, why does the nfs client need disabling, but not
-> >>> nfsd, gfs2, fuse, etc.?
-> >> Then also need disabling.
-> >=20
-> > OK by me, but again, why exactly?  Since you're replacing the locki=
-ng
-> > calls they used by stubs that just return errors, in theory nfs, nf=
-sd,
-> > gfs2, and the rest should still compile and run, just without locki=
-ng
-> > support, right?
->=20
-> I think so, but haven't tested this myself.
->=20
-> However, I would still be inclined to NOT add the extra config
-> dependencies.  Just my 2 cents.
 
-OK.  My fear was that there was some good reason that the nfs dependenc=
-y
-was added in the first place, and that it's since been lost....
+  not sure if i asked this here once upon a time but, in the current
+kernel, you get to select support for *both* initrd and initramfs with
+a single selection (CONFIG_BLK_DEV_INITRD).
 
---b.
+  however, folks who have been around a while generally associate the
+feature INITRD with, well, an initrd image, while initramfs is
+something a bit newer.
+
+  in the context of embedded linux, is there any value in separating
+these features and letting one select them individually?  isn't it
+reasonable to think that one might need initramfs support but have
+absolutely no use for "initrd" support?  or is that not worth worrying
+about?
+
+rday
 --
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+========================================================================
+Robert P. J. Day
+Linux Consulting, Training and Annoying Kernel Pedantry:
+    Have classroom, will lecture.
+
+http://crashcourse.ca                          Waterloo, Ontario, CANADA
+========================================================================
