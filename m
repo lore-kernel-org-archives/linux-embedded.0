@@ -1,62 +1,49 @@
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Mon, 4 Aug 2008 15:42:39 -0400
-Message-ID: <20080804194239.GN25940@fieldses.org>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080802163848.GB30454@fieldses.org> <20080804155237.1f64892d@surf> <20080804181641.GE25940@fieldses.org> <48974973.6000408@am.sony.com> <20080804182532.GF25940@fieldses.org> <1217876041.3657.119.camel@calx>
+From: "Leon Woestenberg" <leon.woestenberg@gmail.com>
+Subject: Re: is it worth separating initrd from initramfs support?
+Date: Mon, 4 Aug 2008 22:16:03 +0200
+Message-ID: <c384c5ea0808041316v26ead859se5e778b074c735f4@mail.gmail.com>
+References: <alpine.LFD.1.10.0808041449420.9561@localhost.localdomain>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=waxXbOzkdRZEQjgbp36BRQzMrZNqi3rLKqZ8hOcAYV4=;
+        b=KyJb6RBLfLQL9QwYzAzgY9AqdCLHrV9YuJ3kffP0euPsP5MUxj+LiCo8aDepRaRTVd
+         LDiVOt0+Mx5z2T2fNLUbDqPnGSquKM0yHAtkEzxxnO5KFRyNLH75vREHTUEjCjsBiKAF
+         LcPl3g2KeFlOymbpw+M/sT71nGDpno/NIFrPE=
+In-Reply-To: <alpine.LFD.1.10.0808041449420.9561@localhost.localdomain>
 Content-Disposition: inline
-In-Reply-To: <1217876041.3657.119.camel@calx>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Matt Mackall <mpm@selenic.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Content-Type: text/plain; charset="us-ascii"
+To: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-On Mon, Aug 04, 2008 at 01:54:01PM -0500, Matt Mackall wrote:
->=20
-> On Mon, 2008-08-04 at 14:25 -0400, J. Bruce Fields wrote:
-> > On Mon, Aug 04, 2008 at 11:24:51AM -0700, Tim Bird wrote:
-> > > J. Bruce Fields wrote:
-> > > > On Mon, Aug 04, 2008 at 03:52:37PM +0200, Thomas Petazzoni wrot=
-e:
-> > > >> Le Sat, 2 Aug 2008 12:38:48 -0400,
-> > > >> "J. Bruce Fields" <bfields@fieldses.org> a =C3=A9crit :
-> > > >>
-> > > >>> Out of curiosity, why does the nfs client need disabling, but=
- not
-> > > >>> nfsd, gfs2, fuse, etc.?
-> > > >> Then also need disabling.
-> > > >=20
-> > > > OK by me, but again, why exactly?  Since you're replacing the l=
-ocking
-> > > > calls they used by stubs that just return errors, in theory nfs=
-, nfsd,
-> > > > gfs2, and the rest should still compile and run, just without l=
-ocking
-> > > > support, right?
-> > >=20
-> > > I think so, but haven't tested this myself.
-> > >=20
-> > > However, I would still be inclined to NOT add the extra config
-> > > dependencies.  Just my 2 cents.
-> >=20
-> > OK.  My fear was that there was some good reason that the nfs depen=
-dency
-> > was added in the first place, and that it's since been lost....
->=20
-> I vaguely remember there was some compile issue here, but that would
-> have been back in the 2.6.10 era.
+Robert,
 
-Sounds plausible.  I've got no objection to the patch either way, but i=
-f
-we could at least just add a comment documenting the issue (if it
-exists), that might be helpful.
+On Mon, Aug 4, 2008 at 8:53 PM, Robert P. J. Day <rpjday@crashcourse.ca> wrote:
+>
+>  not sure if i asked this here once upon a time but, in the current
+> kernel, you get to select support for *both* initrd and initramfs with
+> a single selection (CONFIG_BLK_DEV_INITRD).
+>
+> ...
+>
+>  in the context of embedded linux, is there any value in separating
+> these features and letting one select them individually?  isn't it
+>
+Makes sense to me to seperate them, especially if this reduces code size.
 
---b.
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Small kernels and initramfs's are used in memory constrained systems,
+we run it on FPGA SoC cores.
+
+Does disabling initrd alone reduce code size? Is the dependency on
+some subsystem removed (block i/o layer?)
+
+Regards,
+-- 
+Leon
