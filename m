@@ -1,68 +1,224 @@
-From: Matt Helsley <matthltc@us.ibm.com>
-Subject: Re: [PATCH 2/6] Container Freezer: Make refrigerator always
-	available
-Date: Fri, 01 Aug 2008 19:30:26 -0700
-Message-ID: <1217644226.25300.296.camel@localhost.localdomain>
-References: <20080801050659.924495279@us.ibm.com>
-	 <20080801162712.63721e8c@surf>
-	 <1217617689.25300.213.camel@localhost.localdomain>
-	 <200808020053.18638.rjw@sisk.pl>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: [patch 2/4] Configure out file locking features
+Date: Mon, 4 Aug 2008 15:32:27 -0700
+Message-ID: <4897837B.3070605@am.sony.com>
+References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080802163848.GB30454@fieldses.org> <20080804155237.1f64892d@surf> <20080804181641.GE25940@fieldses.org> <48974973.6000408@am.sony.com> <20080804182532.GF25940@fieldses.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200808020053.18638.rjw@sisk.pl>
+In-Reply-To: <20080804182532.GF25940@fieldses.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Paul Menage <menage@google.com>, Li Zefan <lizf@cn.fujitsu.com>, Linux-Kernel <linux-kernel@vger.kernel.org>, Linux Containers <containers@lists.linux-foundation.org>, linux-pm@lists.linux-foundation.org, Cedric Le Goater <clg@fr.ibm.com>, "Serge E. Hallyn" <serue@us.ibm.com>, Michael Opdenacker <michael@free-electrons.com>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: "J. Bruce Fields" <bfields@fieldses.org>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+
+J. Bruce Fields wrote:
+> On Mon, Aug 04, 2008 at 11:24:51AM -0700, Tim Bird wrote:
+>> J. Bruce Fields wrote:
+>>> On Mon, Aug 04, 2008 at 03:52:37PM +0200, Thomas Petazzoni wrote:
+>>>> Le Sat, 2 Aug 2008 12:38:48 -0400,
+>>>> "J. Bruce Fields" <bfields@fieldses.org> a =C3=A9crit :
+>>>>
+>>>>> Out of curiosity, why does the nfs client need disabling, but not
+>>>>> nfsd, gfs2, fuse, etc.?
+>>>> Then also need disabling.
+>>> OK by me, but again, why exactly?  Since you're replacing the locki=
+ng
+>>> calls they used by stubs that just return errors, in theory nfs, nf=
+sd,
+>>> gfs2, and the rest should still compile and run, just without locki=
+ng
+>>> support, right?
+>> I think so, but haven't tested this myself.
+>>
+>> However, I would still be inclined to NOT add the extra config
+>> dependencies.  Just my 2 cents.
+>=20
+> OK.  My fear was that there was some good reason that the nfs depende=
+ncy
+> was added in the first place, and that it's since been lost....
+
+=46or general information,  I just ran a test with the NFS dependency
+on file locking turned off, and with the NFS auto-enable of
+CONFIG_LOCKD removed.
+
+It got me about a 16K savings, and I was able to successfully boot
+a target with an NFS-mounted root file system.  I haven't run extensive
+tests, so I don't know what apps might break in this configuration,
+but at least in this test, it ran well enough to boot the machine.
+
+Below is the patch I used, which is only provided for information.
+This should NOT be applied - it consists of quick hacks to test this
+configuration only (that is, to test NFS with CONFIG_FILE_LOCKING=3Dn).
+
+BTW - this is on a 2.6.23 kernel, so even the regular FILE_LOCKING
+bits may be different from the current no-file-locking patch.
+
+---
+ fs/Kconfig         |    3 +--
+ fs/nfs/client.c    |    6 ++++++
+ fs/nfs/nfs3proc.c  |    4 ++++
+ fs/nfs/proc.c      |    4 ++++
+ fs/read_write.c    |    2 ++
+ include/linux/fs.h |   13 +++++++------
+ 6 files changed, 24 insertions(+), 8 deletions(-)
+
+--- a/fs/Kconfig
++++ b/fs/Kconfig
+@@ -1701,8 +1701,7 @@ menu "Network File Systems"
+
+ config NFS_FS
+ 	tristate "NFS file system support"
+-	depends on INET && FILE_LOCKING
+-	select LOCKD
++	depends on INET
+ 	select SUNRPC
+ 	select NFS_ACL_SUPPORT if NFS_V3_ACL
+ 	help
+--- a/fs/nfs/client.c
++++ b/fs/nfs/client.c
+@@ -414,6 +414,7 @@ static void nfs_destroy_server(struct nf
+ 		lockd_down();	/* release rpc.lockd */
+ }
+
++#ifdef LOCKD
+ /*
+  * Version 2 or 3 lockd setup
+  */
+@@ -434,6 +435,7 @@ static int nfs_start_lockd(struct nfs_se
+ out:
+ 	return error;
+ }
++#endif
+
+ /*
+  * Initialise an NFSv3 ACL client connection
+@@ -577,9 +579,11 @@ static int nfs_init_server(struct nfs_se
+ 	server->acdirmax =3D data->acdirmax * HZ;
+
+ 	/* Start lockd here, before we might error out */
++#ifdef LOCKD
+ 	error =3D nfs_start_lockd(server);
+ 	if (error < 0)
+ 		goto error;
++#endif
+
+ 	error =3D nfs_init_server_rpcclient(server, data->pseudoflavor);
+ 	if (error < 0)
+@@ -1128,9 +1132,11 @@ struct nfs_server *nfs_clone_server(stru
+ 		(unsigned long long) server->fsid.major,
+ 		(unsigned long long) server->fsid.minor);
+
++#ifdef LOCKD
+ 	error =3D nfs_start_lockd(server);
+ 	if (error < 0)
+ 		goto out_free_server;
++#endif
+
+ 	spin_lock(&nfs_client_lock);
+ 	list_add_tail(&server->client_link, &server->nfs_client->cl_superbloc=
+ks);
+--- a/fs/nfs/nfs3proc.c
++++ b/fs/nfs/nfs3proc.c
+@@ -795,7 +795,11 @@ static void nfs3_proc_commit_setup(struc
+ static int
+ nfs3_proc_lock(struct file *filp, int cmd, struct file_lock *fl)
+ {
++#ifdef LOCKD
+ 	return nlmclnt_proc(filp->f_path.dentry->d_inode, cmd, fl);
++#else
++	return -ENOLCK;
++#endif
+ }
+
+ const struct nfs_rpc_ops nfs_v3_clientops =3D {
+--- a/fs/nfs/proc.c
++++ b/fs/nfs/proc.c
+@@ -605,7 +605,11 @@ nfs_proc_commit_setup(struct nfs_write_d
+ static int
+ nfs_proc_lock(struct file *filp, int cmd, struct file_lock *fl)
+ {
++#ifdef LOCKD
+ 	return nlmclnt_proc(filp->f_path.dentry->d_inode, cmd, fl);
++#else
++	return -ENOLCK;
++#endif
+ }
 
 
-On Sat, 2008-08-02 at 00:53 +-0200, Rafael J. Wysocki wrote:
-+AD4 On Friday, 1 of August 2008, Matt Helsley wrote:
-+AD4 +AD4 
-+AD4 +AD4 On Fri, 2008-08-01 at 16:27 +-0200, Thomas Petazzoni wrote:
-+AD4 +AD4 +AD4 Hi,
-+AD4 +AD4 +AD4 
-+AD4 +AD4 +AD4 Le Thu, 31 Jul 2008 22:07:01 -0700,
-+AD4 +AD4 +AD4 Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4 a +AOk-crit :
-+AD4 +AD4 +AD4 
-+AD4 +AD4 +AD4 +AD4 --- a/kernel/Makefile
-+AD4 +AD4 +AD4 +AD4 +-+-+- b/kernel/Makefile
-+AD4 +AD4 +AD4 +AD4 +AEAAQA -5,7 +-5,7 +AEAAQA
-+AD4 +AD4 +AD4 +AD4  obj-y     +AD0 sched.o fork.o exec+AF8-domain.o panic.o printk.o +AFw
-+AD4 +AD4 +AD4 +AD4  	    cpu.o exit.o itimer.o time.o softirq.o resource.o +AFw
-+AD4 +AD4 +AD4 +AD4  	    sysctl.o capability.o ptrace.o timer.o user.o +AFw
-+AD4 +AD4 +AD4 +AD4 -	    signal.o sys.o kmod.o workqueue.o pid.o +AFw
-+AD4 +AD4 +AD4 +AD4 +-	    signal.o sys.o kmod.o workqueue.o pid.o freezer.o +AFw
-+AD4 +AD4 +AD4 
-+AD4 +AD4 +AD4 I have the impression that the code in kernel/power/process.c was
-+AD4 +AD4 +AD4 compiled only if CONFIG+AF8-PM+AF8-SLEEP was set. Now that the code has been
-+AD4 +AD4 +AD4 moved to kernel/freezer.c, it is unconditionnaly compiled in every
-+AD4 +AD4 +AD4 kernel. Is that correct ?
-+AD4 +AD4 +AD4
-+AD4 +AD4 +AD4 If so, is it possible to put this new feature under some
-+AD4 +AD4 +AD4 CONFIG+AF8-SOMETHING option, for people who care about the kernel size ?
-+AD4 +AD4 
-+AD4 +AD4 	How about making it depend on a combination of CONFIG variables?
-+AD4 +AD4 Here's an RFC PATCH. Completely untested.
-+AD4 +AD4 
-+AD4 +AD4 Signed-off-by: Matt Helsley +ADw-matthltc+AEA-us.ibm.com+AD4
-+AD4 
-+AD4 Can you please also make the contents of include/linux/freezer.h depend on
-+AD4 CONFIG+AF8-FREEZER instead of CONFIG+AF8-PM+AF8-SLEEP?
+--- a/fs/read_write.c
++++ b/fs/read_write.c
+@@ -211,6 +211,7 @@ int rw_verify_area(int read_write, struc
+ 	if (unlikely((pos < 0) || (loff_t) (pos + count) < 0))
+ 		goto Einval;
 
-Done.
++#ifdef FILE_LOCKING
+ 	if (unlikely(inode->i_flock && MANDATORY_LOCK(inode))) {
+ 		int retval =3D locks_mandatory_area(
+ 			read_write =3D=3D READ ? FLOCK_VERIFY_READ : FLOCK_VERIFY_WRITE,
+@@ -218,6 +219,7 @@ int rw_verify_area(int read_write, struc
+ 		if (retval < 0)
+ 			return retval;
+ 	}
++#endif
+ 	return count > MAX_RW_COUNT ? MAX_RW_COUNT : count;
 
-+AD4 Also, I'm not really sure if kernel/power/Kconfig is the right place to define
-+AD4 CONFIG+AF8-FREEZER.
-+AD4 
-+AD4 Perhaps we should even move freezer.c from kernel/power to kernel
-+AD4 and define CONFIG+AF8-FREEZER in Kconfig in there.  Andrew, what do you think?
+ Einval:
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -863,10 +863,6 @@ extern int fcntl_setlk64(unsigned int, s
+ extern int fcntl_setlease(unsigned int fd, struct file *filp, long arg=
+);
+ extern int fcntl_getlease(struct file *filp);
 
-	I'll check this weekend for replies and repost the RFC PATCH on Monday
-if I don't hear anything. In the meantime I'll be doing some config
-build testing with the above changes to make sure it's correct.
+-/* fs/sync.c */
+-extern int do_sync_mapping_range(struct address_space *mapping, loff_t=
+ offset,
+-			loff_t endbyte, unsigned int flags);
+-
+ /* fs/locks.c */
+ extern void locks_init_lock(struct file_lock *);
+ extern void locks_copy_lock(struct file_lock *, struct file_lock *);
+@@ -918,6 +914,10 @@ extern int lock_may_write(struct inode *
+ #define steal_locks(a)
+ #endif /* !CONFIG_FILE_LOCKING */
 
-Cheers,
-	-Matt
++/* fs/sync.c */
++extern int do_sync_mapping_range(struct address_space *mapping, loff_t=
+ offset,
++			loff_t endbyte, unsigned int flags);
++
+ struct fasync_struct {
+ 	int	magic;
+ 	int	fa_fd;
+@@ -1424,8 +1424,6 @@ static inline int locks_verify_locked(st
+ 	return 0;
+ }
+
+-extern int rw_verify_area(int, struct file *, loff_t *, size_t);
+-
+ static inline int locks_verify_truncate(struct inode *inode,
+ 				    struct file *filp,
+ 				    loff_t size)
+@@ -1459,6 +1457,9 @@ static inline int break_lease(struct ino
+
+ #endif /* !CONFIG_FILE_LOCKING */
+
++extern int rw_verify_area(int, struct file *, loff_t *, size_t);
++
++
+ /* fs/open.c */
+
+ extern int do_truncate(struct dentry *, loff_t start, unsigned int tim=
+e_attrs,
+
+
+
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
