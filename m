@@ -1,31 +1,54 @@
-From: "Grant Likely" <grant.likely@secretlab.ca>
-Subject: Re: linux under emulator
-Date: Tue, 5 Aug 2008 11:30:45 -0600
-Message-ID: <fa686aa40808051030g5aeaf166q6146014e30b80982@mail.gmail.com>
-References: <78ef7ce10808051028r14aa7973t3aaa3bc92132cbba@mail.gmail.com>
+From: Adrian Bunk <bunk@kernel.org>
+Subject: Re: [patch 1/4] Configure out AIO support
+Date: Tue, 5 Aug 2008 21:15:36 +0300
+Message-ID: <20080805181536.GH22895@cs181140183.pp.htv.fi>
+References: <20080731092703.661994657@free-electrons.com> <20080731093220.690886851@free-electrons.com> <20080731100929.GA9206@mx.loc> <20080731101219.GC4221@cs181140183.pp.htv.fi> <20080731224222.GB9208@mx.loc>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <78ef7ce10808051028r14aa7973t3aaa3bc92132cbba@mail.gmail.com>
 Content-Disposition: inline
+In-Reply-To: <20080731224222.GB9208@mx.loc>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mihaela Grigore <grigore.mihaela@gmail.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Bernhard Fischer <rep.dot.nop@gmail.com>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, bcrl@kvack.org, linux-aio@kvack.org, akpm@linux-foundation.org
 
-On Tue, Aug 5, 2008 at 11:28 AM, Mihaela Grigore
-<grigore.mihaela@gmail.com> wrote:
-> If I intend to run a 2.6 linux kernel under a powerpc emulator, what
-> is needed to make a minimal bootable system? I mean, apart from the
-> kernel itself and busybox, do I need a bootloader ? If no actual
-> hardware is used and the kernel can reside directly in ram from the
-> emulator's point of view (so no relocation is needed), what else is to
-> be done before the kernel can start running ?
+On Fri, Aug 01, 2008 at 12:42:22AM +0200, Bernhard Fischer wrote:
+> On Thu, Jul 31, 2008 at 01:12:19PM +0300, Adrian Bunk wrote:
+> >On Thu, Jul 31, 2008 at 12:09:29PM +0200, Bernhard Fischer wrote:
+> >> On Thu, Jul 31, 2008 at 11:27:04AM +0200, Thomas Petazzoni wrote:
+> >> >This patchs adds the CONFIG_AIO option which allows to remove support
+> >> >for asynchronous I/O operations, that are not necessarly used by
+> >> >applications, particularly on embedded devices. As this is a
+> >> >size-reduction option, it depends on CONFIG_EMBEDDED. It allows to
+> >> >save ~7 kilobytes of kernel code/data:
+> >> 
+> >> Shouldn't this also make sure not to install aio_abi.h or at least an
+> >> empty aio_abi.h?
+> >
+> >The userspace headers are independent of any kernel configuration
+> >(except for the architecture).
+> 
+> I beg to disagree:
+> internals as exposed by e.g. aio_abi.h are impl dependent. Noone except
+> the impl and it's users are interrested in it.
+>...
 
-Look at the firmware linux documentation.  It should tell you
-everything you need.
+That's utter bullshit.
 
-http://www.landley.net/code/firmware/
+The contents of aio_abi.h is a kernel<->userspace ABI that mustn't ever 
+change. [1]
 
-g.
+cu
+Adrian
+
+[1] there are some exceptions like adding stuff (but not in existing 
+    structs), but basically the contents of aio_abi.h is cast in stone
+
+-- 
+
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
