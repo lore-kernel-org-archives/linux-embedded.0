@@ -1,28 +1,30 @@
-From: "Mihaela Grigore" <grigore.mihaela@gmail.com>
-Subject: linux kernel under psim
-Date: Tue, 5 Aug 2008 13:58:54 +0100
-Message-ID: <78ef7ce10808050558j7b95f4d5vb889f167de6e44bb@mail.gmail.com>
-Mime-Version: 1.0
+From: Kumar Gala <galak@kernel.crashing.org>
+Subject: Re: Intrusion detection system
+Date: Tue, 5 Aug 2008 08:18:29 -0500
+Message-ID: <5AD9E3BF-4FF2-4322-ACD5-44ABEA5B151A@kernel.crashing.org>
+References: <48981481.1060701@coritel.it>
+Mime-Version: 1.0 (Apple Message framework v926)
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:mime-version:content-type:content-transfer-encoding
-         :content-disposition;
-        bh=v2jkxF6z8CGlG7SKh6GjyZWmr9VRt6ogHSxGKWGARzA=;
-        b=qdUooajNDNfygjUDvGGNoOErgix0iXvmhBDNAte02uIpABlEDxbIQnc/le91ZL5n32
-         ewrZ7XDzjdhFTHbqKQzVJ2pBlx6TKS9vwdxCPvhGECJ9oUIv1A9ilr7vKdq5rqIGFksz
-         4jxOUjks2FGOGTpFmLZ0tQrSBDZ+4SpzfJpU8=
-Content-Disposition: inline
+In-Reply-To: <48981481.1060701@coritel.it>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
+To: Marco Stornelli <marco.stornelli@coritel.it>
+Cc: Linux-Embedded <linux-embedded@vger.kernel.org>
 
-Hello,
 
-Has anyone tried or knows if it is possible to run a 2.6 linux kernel
-under psim?
+On Aug 5, 2008, at 3:51 AM, Marco Stornelli wrote:
 
-ps: please add me in cc in a reply to this message.
+> Hi,
+>
+> I have to design a network application on a board. I have to use an  
+> IDS/IPS system. Have you got any suggestions? Is there a good  
+> solution about an IDS system on embedded linux?
+
+Have you looked at http://www.snort.org/?
+
+I know Freescale has some embedded PPC products w/HW pattern matching  
+acceleration that are geared towards helping improving IDS/IPS.
+
+- k
