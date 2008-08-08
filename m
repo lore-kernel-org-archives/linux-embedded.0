@@ -1,55 +1,55 @@
-From: "Mike Frysinger" <vapier.adi@gmail.com>
-Subject: Re: [PATCH] [RFC] emit-crash-char: Allow diversion of printk output for crash logging
-Date: Fri, 8 Aug 2008 14:09:04 -0400
-Message-ID: <8bd0f97a0808081109q693f6f1at650a9be0547b7f9b@mail.gmail.com>
-References: <489BAD5C.2080009@cisco.com>
-	 <1218210904.19162.144.camel@localhost.localdomain>
-	 <8bd0f97a0808080905u1b515556gd68c2ba1d0b47cb4@mail.gmail.com>
-	 <1218212266.19162.149.camel@localhost.localdomain>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
+Subject: Re: initrd and uImage
+Date: Fri, 8 Aug 2008 20:16:08 +0200
+Message-ID: <20080808181608.GL10168@pengutronix.de>
+References: <54582.81328.qm@web63407.mail.re1.yahoo.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=uIp0K5YnETtgU92htp+ITYe8MwFLtPr1hhCE8U11DQY=;
-        b=aL3I70aLLrrsWZjUba3/iOCENwu7QRHHp+9lpVHOZuWdq8T3cgMMEjnmDu1iFkFZl3
-         /gwEyXijJIBDqT/wFwX/9noK6cKzOvig1xX1PJHXE/E2HFU4Rjj+UutpeJsTj0EUycj4
-         KDbwyj6wUFNDfM0YD6ffKQJHDC4AuYTVe/jpI=
-In-Reply-To: <1218212266.19162.149.camel@localhost.localdomain>
 Content-Disposition: inline
+In-Reply-To: <54582.81328.qm@web63407.mail.re1.yahoo.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Daniel Walker <dwalker@mvista.com>
-Cc: dvomlehn@cisco.com, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Fundu <fundu_1999@yahoo.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Fri, Aug 8, 2008 at 12:17 PM, Daniel Walker wrote:
-> On Fri, 2008-08-08 at 12:05 -0400, Mike Frysinger wrote:
->> On Fri, Aug 8, 2008 at 11:55 AM, Daniel Walker wrote:
->> > Another note, usually when submitting new interfaces like this you
->> > should also submit the code that uses the interface .. In your case you
->> > might not be able to do that, but it could never be accepted without at
->> > least one user.
->>
->> i really doubt that.  lack of existing tangible users makes it a
->> harder case, but it certainly is not a "never" case.  there is plenty
->> of examples in the tree where things were merged without any users and
->> the commit wouldnt be immediately leveraged.
->
-> Well, I did say "usually" ..
+On Fri, Aug 08, 2008 at 09:42:41AM -0700, Fundu wrote:
+> First off i have a ppc based board.
+> and i'm trying to load a kernel image with ramdisk rootfs.
 
-you said "usually people submit new interfaces", not "it is usually
-not accepted without at least one user".
+Why? You can also boot your root fs for example directly from a flash
+partition.
 
-> I invite you to give some of the "plenty of
-> examples in the tree", you might surprise me..
+> i have build the kernel. it spit uImage,zImage and vmlinux.gz
 
-look at all the new syscalls added without any userspace code in place
-(still) to use it.  or Linus' recent printk modifier extension.  or my
-printk extensions for extracting portions of the kernel log buffer.
-people usually submit interfaces with backend extesions, or the intent
-to use it is obvious.
--mike
+That depends on your build system ...
+
+> my question are.
+> 1) what are all the different image types ? 
+> i know the uImage is just the kernel, what are the rest (zImage & vmlinux.gz)?
+
+An uImage can contain a kernel but also other things. Please check the
+U-Boot documentation for more details.
+
+zImage and vmlinux.gz are kernel images. You usually need only one of
+them, but the details do surely depend also on your build system.
+
+> 2) i'm using u-boot as the bootldr. so i download the uImage (cause
+> zImage and vmlinux.gz aren't bootlable) from tftp server and then do
+> bootm <address> the kernel only load partially. How does the kernel
+> know where/how to load the rootfs ? 
+
+In U-Boot you can add a kernel command line by setting the bootargs
+environment variable.
+
+It's probably a good idea to start reading the U-Boot documentation, or
+whatever came with your board support package.
+
+rsc
+-- 
+ Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
+ Pengutronix - Linux Solutions for Science and Industry
+   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
+     Hannoversche Str. 2, 31134 Hildesheim, Germany
+   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
