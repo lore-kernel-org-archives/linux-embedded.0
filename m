@@ -1,35 +1,32 @@
-From: Daniel Walker <dwalker@mvista.com>
-Subject: Re: [PATCH] [RFC] emit-crash-char: Allow diversion of printk
-	output for crash logging
-Date: Fri, 08 Aug 2008 09:17:46 -0700
-Message-ID: <1218212266.19162.149.camel@localhost.localdomain>
-References: <489BAD5C.2080009@cisco.com>
-	 <1218210904.19162.144.camel@localhost.localdomain>
-	 <8bd0f97a0808080905u1b515556gd68c2ba1d0b47cb4@mail.gmail.com>
+From: Fundu <fundu_1999@yahoo.com>
+Subject: initrd and uImage
+Date: Fri, 8 Aug 2008 09:42:41 -0700 (PDT)
+Message-ID: <54582.81328.qm@web63407.mail.re1.yahoo.com>
+Reply-To: fundu_1999@yahoo.com
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8bd0f97a0808080905u1b515556gd68c2ba1d0b47cb4@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: dvomlehn@cisco.com, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Fri, 2008-08-08 at 12:05 -0400, Mike Frysinger wrote:
-> On Fri, Aug 8, 2008 at 11:55 AM, Daniel Walker wrote:
-> > Another note, usually when submitting new interfaces like this you
-> > should also submit the code that uses the interface .. In your case you
-> > might not be able to do that, but it could never be accepted without at
-> > least one user.
-> 
-> i really doubt that.  lack of existing tangible users makes it a
-> harder case, but it certainly is not a "never" case.  there is plenty
-> of examples in the tree where things were merged without any users and
-> the commit wouldnt be immediately leveraged.
+Hi,
+First off i have a ppc based board.
+and i'm trying to load a kernel image with ramdisk rootfs.
+
+i have build the kernel. it spit uImage,zImage and vmlinux.gz
+
+my question are.
+1) what are all the different image types ? 
+i know the uImage is just the kernel, what are the rest (zImage & vmlinux.gz)?
+
+2) i'm using u-boot as the bootldr. so i download the uImage (cause zImage and vmlinux.gz aren't bootlable) from tftp server and then do bootm <address> the kernel only load partially. How does the kernel know where/how to load the rootfs ? 
 
 
-Well, I did say "usually" .. I invite you to give some of the "plenty of
-examples in the tree", you might surprise me..
+thanks !
 
-Daniel
+
+
+
+      
