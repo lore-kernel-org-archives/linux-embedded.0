@@ -1,351 +1,183 @@
-From: "J. Bruce Fields" <bfields@fieldses.org>
-Subject: Re: [patch 2/4] Configure out file locking features
-Date: Thu, 7 Aug 2008 18:55:50 -0400
-Message-ID: <20080807225549.GC30332@fieldses.org>
-References: <20080731092703.661994657@free-electrons.com> <20080731093220.969460336@free-electrons.com> <20080802163848.GB30454@fieldses.org> <20080804155237.1f64892d@surf> <20080804181641.GE25940@fieldses.org> <20080806151222.618ae70a@surf>
+From: David VomLehn <dvomlehn@cisco.com>
+Subject: [PATCH] [RFC] emit-crash-char: Allow diversion of printk output for
+ crash logging
+Date: Thu, 07 Aug 2008 19:20:12 -0700
+Message-ID: <489BAD5C.2080009@cisco.com>
+Reply-To: dvomlehn@cisco.com
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080806151222.618ae70a@surf>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=5589; t=1218162017; x=1219026017;
+	c=relaxed/simple; s=rtpdkim2001;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=dvomlehn@cisco.com;
+	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	|Subject:=20[PATCH]=20[RFC]=20emit-crash-char=3A=20Allow=20
+	diversion=20of=20printk=20output=20for=0A=20crash=20logging
+	|Sender:=20
+	|To:=20linux-embedded@vger.kernel.org;
+	bh=r8Il7vuEhk3AozSXvcAAxKs9NtcXHmGpqQ5GUmU3u3Y=;
+	b=cp6KWsUIFPV+k77siA7QHzzH+MJ5zwfDJP35wLeDeZSbO+IHpeg5LEgZ15
+	Yxh0OQgvqq0oxCSVpWNl4M6KUZccG6FJGgN9EGHlZms8KoHwrZwwPgNbueOU
+	Dm0Mx5OnZ0;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, michael@free-electrons.com, Matt Mackall <mpm@selenic.com>, matthew@wil.cx, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded@vger.kernel.org
 
-On Wed, Aug 06, 2008 at 03:12:22PM +0200, Thomas Petazzoni wrote:
-> Le Mon, 4 Aug 2008 14:16:41 -0400,
-> "J. Bruce Fields" <bfields@fieldses.org> a =C3=A9crit :
->=20
-> > OK by me, but again, why exactly?  Since you're replacing the locki=
-ng
-> > calls they used by stubs that just return errors, in theory nfs, nf=
-sd,
-> > gfs2, and the rest should still compile and run, just without locki=
-ng
-> > support, right?
->=20
-> You're right, that was stupid. Either should I add the Kconfig
-> dependencies *OR* add the function stubs, not both. The following pat=
-ch
-> implements the second solution. I've checked that NFS, CIFS, GFS2,
-> OCFS2, AFS and FUSE compile correctly. I've tested NFS only, though.
->=20
-> Here is the new patch. Comments and suggestions welcome.
+Allow diversion of characters generated through printk so that they can
+be logged separately. The printk_time variables is made externally visible
+so that functions processing the diverted characters can parse off the
+time added if CONFIG_PRINTK_TIME is enabled.
 
-Seems fine to me, thanks!  I can queue it up in my tree for 2.6.28 if
-there's no objections.
+Signed-off-by: David VomLehn <dvomlehn@cisco.com>
+---
+I apologize for the crufty disclaimer Cisco adds. It is on a long list on
+things that make us awkward open source community members but things change
+slowly at many large companies.
 
-(But, basic mail question: so I give this message to git-am and it
-complains because of all this =3D3D=3D20 stuff, which google tells me i=
-s
-quoted-printable encoding.  Fine, I fixed it up by hand, but a) there
-must be some less boring way to deal with it, and b) there must have
-been some easy way to avoid it in the first place, either on my side or
-yours?  Enlightenment welcome.)
+Rationale for this patch: The ability to divert characters is useful for
+embedded systems when a panic occurs. It is frequently the case that there
+is insufficient storage to hold a crash dump and too little, if any, upstream
+network bandwith to upload a dump if one could be stored. Instead, we rely upon
+the report written to the console for most of our debugging. The ability to
+capture that report and either store it or send it upstream is a fundamental
+part of our ability to support our systems in the lab and in the field.
 
---b.
+ include/linux/kernel.h |    5 ++++
+ kernel/printk.c        |   56 ++++++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 59 insertions(+), 2 deletions(-)
 
->=20
-> Sincerly,
->=20
-> Thomas
->=20
-> ---
->=20
-> Configure out file locking features
->=20
-> This patch adds the CONFIG_FILE_LOCKING option which allows to remove
-> support for advisory locks. With this patch enabled, the flock()
-> system call, the F_GETLK, F_SETLK and F_SETLKW operations of fcntl()
-> and NFS support are disabled. These features are not necessarly neede=
-d
-> on embedded systems. It allows to save ~11 Kb of kernel code and data=
-:
->=20
->    text	   data	    bss	    dec	    hex	filename
-> 1125436	 118764	 212992	1457192	 163c28	vmlinux.old
-> 1114299	 118564	 212992	1445855	 160fdf	vmlinux
->  -11137    -200       0  -11337   -2C49 +/-
->=20
-> This patch has originally been written by Matt Mackall
-> <mpm@selenic.com>, and is part of the Linux Tiny project.
->=20
-> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-> Signed-off-by: Matt Mackall <mpm@selenic.com>
-> Cc: matthew@wil.cx
-> Cc: linux-fsdevel@vger.kernel.org
-> Cc: mpm@selenic.com
-> Cc: akpm@linux-foundation.org
->=20
-> ---
->  fs/Kconfig          |    8 +++++++
->  fs/Makefile         |    3 +-
->  fs/proc/proc_misc.c |    4 +++
->  include/linux/fs.h  |   55 +++++++++++++++++++++++++++++++++++++++++=
-++++-------
->  kernel/sys_ni.c     |    1=20
->  kernel/sysctl.c     |    6 ++++-
->  6 files changed, 68 insertions(+), 9 deletions(-)
->=20
-> Index: linuxdev/fs/Kconfig
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> --- linuxdev.orig/fs/Kconfig
-> +++ linuxdev/fs/Kconfig
-> @@ -419,6 +419,14 @@
->  	bool
->  	default n
-> =20
-> +config FILE_LOCKING
-> +	bool "Enable POSIX file locking API" if EMBEDDED
-> +	default y
-> +	help
-> +	  This option enables standard file locking support, required
-> +          for filesystems like NFS and for the flock() system
-> +          call. Disabling this option saves about 11k.
-> +
->  source "fs/xfs/Kconfig"
->  source "fs/gfs2/Kconfig"
-> =20
-> Index: linuxdev/fs/Makefile
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> --- linuxdev.orig/fs/Makefile
-> +++ linuxdev/fs/Makefile
-> @@ -7,7 +7,7 @@
-> =20
->  obj-y :=3D	open.o read_write.o file_table.o super.o \
->  		char_dev.o stat.o exec.o pipe.o namei.o fcntl.o \
-> -		ioctl.o readdir.o select.o fifo.o locks.o dcache.o inode.o \
-> +		ioctl.o readdir.o select.o fifo.o dcache.o inode.o \
->  		attr.o bad_inode.o file.o filesystems.o namespace.o aio.o \
->  		seq_file.o xattr.o libfs.o fs-writeback.o \
->  		pnode.o drop_caches.o splice.o sync.o utimes.o \
-> @@ -27,6 +27,7 @@
->  obj-$(CONFIG_SIGNALFD)		+=3D signalfd.o
->  obj-$(CONFIG_TIMERFD)		+=3D timerfd.o
->  obj-$(CONFIG_EVENTFD)		+=3D eventfd.o
-> +obj-$(CONFIG_FILE_LOCKING)      +=3D locks.o
->  obj-$(CONFIG_COMPAT)		+=3D compat.o compat_ioctl.o
-> =20
->  nfsd-$(CONFIG_NFSD)		:=3D nfsctl.o
-> Index: linuxdev/fs/proc/proc_misc.c
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> --- linuxdev.orig/fs/proc/proc_misc.c
-> +++ linuxdev/fs/proc/proc_misc.c
-> @@ -677,6 +677,7 @@
->  	return proc_calc_metrics(page, start, off, count, eof, len);
->  }
-> =20
-> +#ifdef CONFIG_FILE_LOCKING
->  static int locks_open(struct inode *inode, struct file *filp)
->  {
->  	return seq_open(filp, &locks_seq_operations);
-> @@ -688,6 +689,7 @@
->  	.llseek		=3D seq_lseek,
->  	.release	=3D seq_release,
->  };
-> +#endif /* CONFIG_FILE_LOCKING */
-> =20
->  static int execdomains_read_proc(char *page, char **start, off_t off=
-,
->  				 int count, int *eof, void *data)
-> @@ -881,7 +883,9 @@
->  #ifdef CONFIG_PRINTK
->  	proc_create("kmsg", S_IRUSR, NULL, &proc_kmsg_operations);
->  #endif
-> +#ifdef CONFIG_FILE_LOCKING
->  	proc_create("locks", 0, NULL, &proc_locks_operations);
-> +#endif
->  	proc_create("devices", 0, NULL, &proc_devinfo_operations);
->  	proc_create("cpuinfo", 0, NULL, &proc_cpuinfo_operations);
->  #ifdef CONFIG_BLOCK
-> Index: linuxdev/include/linux/fs.h
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> --- linuxdev.orig/include/linux/fs.h
-> +++ linuxdev/include/linux/fs.h
-> @@ -983,6 +983,13 @@
-> =20
->  #include <linux/fcntl.h>
-> =20
-> +extern void send_sigio(struct fown_struct *fown, int fd, int band);
-> +
-> +/* fs/sync.c */
-> +extern int do_sync_mapping_range(struct address_space *mapping, loff=
-_t offset,
-> +			loff_t endbyte, unsigned int flags);
-> +
-> +#ifdef CONFIG_FILE_LOCKING
->  extern int fcntl_getlk(struct file *, struct flock __user *);
->  extern int fcntl_setlk(unsigned int, struct file *, unsigned int,
->  			struct flock __user *);
-> @@ -993,14 +1000,9 @@
->  			struct flock64 __user *);
->  #endif
-> =20
-> -extern void send_sigio(struct fown_struct *fown, int fd, int band);
->  extern int fcntl_setlease(unsigned int fd, struct file *filp, long a=
-rg);
->  extern int fcntl_getlease(struct file *filp);
-> =20
-> -/* fs/sync.c */
-> -extern int do_sync_mapping_range(struct address_space *mapping, loff=
-_t offset,
-> -			loff_t endbyte, unsigned int flags);
-> -
->  /* fs/locks.c */
->  extern void locks_init_lock(struct file_lock *);
->  extern void locks_copy_lock(struct file_lock *, struct file_lock *);
-> @@ -1023,6 +1025,35 @@
->  extern int lock_may_read(struct inode *, loff_t start, unsigned long=
- count);
->  extern int lock_may_write(struct inode *, loff_t start, unsigned lon=
-g count);
->  extern struct seq_operations locks_seq_operations;
-> +#else /* !CONFIG_FILE_LOCKING */
-> +#define fcntl_getlk(a, b) ({ -EINVAL; })
-> +#define fcntl_setlk(a, b, c, d) ({ -EACCES; })
-> +#if BITS_PER_LONG =3D=3D 32
-> +#define fcntl_getlk64(a, b) ({ -EINVAL; })
-> +#define fcntl_setlk64(a, b, c, d) ({ -EACCES; })
-> +#endif
-> +#define fcntl_setlease(a, b, c) ({ 0; })
-> +#define fcntl_getlease(a) ({ 0; })
-> +#define locks_init_lock(a) ({ })
-> +#define __locks_copy_lock(a, b) ({ })
-> +#define locks_copy_lock(a, b) ({ })
-> +#define locks_remove_posix(a, b) ({ })
-> +#define locks_remove_flock(a) ({ })
-> +#define posix_test_lock(a, b) ({ 0; })
-> +#define posix_lock_file(a, b, c) ({ -ENOLCK; })
-> +#define posix_lock_file_wait(a, b) ({ -ENOLCK; })
-> +#define posix_unblock_lock(a, b) (-ENOENT)
-> +#define vfs_test_lock(a, b) ({ 0; })
-> +#define vfs_lock_file(a, b, c, d) (-ENOLCK)
-> +#define vfs_cancel_lock(a, b) ({ 0; })
-> +#define flock_lock_file_wait(a, b) ({ -ENOLCK; })
-> +#define __break_lease(a, b) ({ 0; })
-> +#define lease_get_mtime(a, b) ({ })
-> +#define generic_setlease(a, b, c) ({ -EINVAL; })
-> +#define lock_may_read(a, b, c) ({ 1; })
-> +#define lock_may_write(a, b, c) ({ 1; })
-> +#endif /* !CONFIG_FILE_LOCKING */
-> +
-> =20
->  struct fasync_struct {
->  	int	magic;
-> @@ -1554,9 +1585,12 @@
->  /* /sys/fs */
->  extern struct kobject *fs_kobj;
-> =20
-> +extern int rw_verify_area(int, struct file *, loff_t *, size_t);
-> +
->  #define FLOCK_VERIFY_READ  1
->  #define FLOCK_VERIFY_WRITE 2
-> =20
-> +#ifdef CONFIG_FILE_LOCKING
->  extern int locks_mandatory_locked(struct inode *);
->  extern int locks_mandatory_area(int, struct inode *, struct file *, =
-loff_t, size_t);
-> =20
-> @@ -1587,8 +1621,6 @@
->  	return 0;
->  }
-> =20
-> -extern int rw_verify_area(int, struct file *, loff_t *, size_t);
-> -
->  static inline int locks_verify_truncate(struct inode *inode,
->  				    struct file *filp,
->  				    loff_t size)
-> @@ -1609,6 +1641,15 @@
->  		return __break_lease(inode, mode);
->  	return 0;
->  }
-> +#else /* !CONFIG_FILE_LOCKING */
-> +#define locks_mandatory_locked(a) ({ 0; })
-> +#define locks_mandatory_area(a, b, c, d, e) ({ 0; })
-> +#define __mandatory_lock(a) ({ 0; })
-> +#define mandatory_lock(a) ({ 0; })
-> +#define locks_verify_locked(a) ({ 0; })
-> +#define locks_verify_truncate(a, b, c) ({ 0; })
-> +#define break_lease(a, b) ({ 0; })
-> +#endif /* CONFIG_FILE_LOCKING */
-> =20
->  /* fs/open.c */
-> =20
-> Index: linuxdev/kernel/sys_ni.c
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> --- linuxdev.orig/kernel/sys_ni.c
-> +++ linuxdev/kernel/sys_ni.c
-> @@ -125,6 +125,7 @@
->  cond_syscall(sys_vm86);
->  cond_syscall(compat_sys_ipc);
->  cond_syscall(compat_sys_sysctl);
-> +cond_syscall(sys_flock);
-> =20
->  /* arch-specific weak syscall entries */
->  cond_syscall(sys_pciconfig_read);
-> Index: linuxdev/kernel/sysctl.c
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> --- linuxdev.orig/kernel/sysctl.c
-> +++ linuxdev/kernel/sysctl.c
-> @@ -97,7 +97,7 @@
->  static int neg_one =3D -1;
->  #endif
-> =20
-> -#ifdef CONFIG_MMU
-> +#if defined(CONFIG_MMU) && defined(CONFIG_FILE_LOCKING)
->  static int two =3D 2;
->  #endif
-> =20
-> @@ -1260,6 +1260,7 @@
->  		.extra1		=3D &minolduid,
->  		.extra2		=3D &maxolduid,
->  	},
-> +#ifdef CONFIG_FILE_LOCKING
->  	{
->  		.ctl_name	=3D FS_LEASES,
->  		.procname	=3D "leases-enable",
-> @@ -1268,6 +1269,7 @@
->  		.mode		=3D 0644,
->  		.proc_handler	=3D &proc_dointvec,
->  	},
-> +#endif
->  #ifdef CONFIG_DNOTIFY
->  	{
->  		.ctl_name	=3D FS_DIR_NOTIFY,
-> @@ -1279,6 +1281,7 @@
->  	},
->  #endif
->  #ifdef CONFIG_MMU
-> +#ifdef CONFIG_FILE_LOCKING
->  	{
->  		.ctl_name	=3D FS_LEASE_TIME,
->  		.procname	=3D "lease-break-time",
-> @@ -1290,6 +1293,7 @@
->  		.extra1		=3D &zero,
->  		.extra2		=3D &two,
->  	},
-> +#endif
->  	{
->  		.procname	=3D "aio-nr",
->  		.data		=3D &aio_nr,
->=20
->=20
-> --=20
-> Thomas Petazzoni, Free Electrons
-> Kernel, drivers and embedded Linux development,
-> consulting, training and support.
-> http://free-electrons.com
+diff --git a/include/linux/kernel.h b/include/linux/kernel.h
+index aaa998f..1848260 100644
+--- a/include/linux/kernel.h
++++ b/include/linux/kernel.h
+@@ -200,6 +200,8 @@ extern struct ratelimit_state printk_ratelimit_state;
+ extern int printk_ratelimit(void);
+ extern bool printk_timed_ratelimit(unsigned long *caller_jiffies,
+ 				   unsigned int interval_msec);
++extern void register_emit_crash_char(void (*fn)(char c));
++extern void unregister_emit_crash_char(void);
+ #else
+ static inline int vprintk(const char *s, va_list args)
+ 	__attribute__ ((format (printf, 1, 0)));
+@@ -211,6 +213,8 @@ static inline int printk_ratelimit(void) { return 0; }
+ static inline bool printk_timed_ratelimit(unsigned long *caller_jiffies, \
+ 					  unsigned int interval_msec)	\
+ 		{ return false; }
++static inline void register_emit_crash_char(void (*fn)(char c)) {}
++static inline void unregister_emit_crash_char() {}
+ #endif
+ 
+ extern void asmlinkage __attribute__((format(printf, 1, 2)))
+@@ -229,6 +233,7 @@ static inline void console_verbose(void)
+ 		console_loglevel = 15;
+ }
+ 
++extern int printk_time;
+ extern void bust_spinlocks(int yes);
+ extern void wake_up_klogd(void);
+ extern int oops_in_progress;		/* If set, an oops, panic(), BUG() or die() is in progress */
+diff --git a/kernel/printk.c b/kernel/printk.c
+index b51b156..35a4d81 100644
+--- a/kernel/printk.c
++++ b/kernel/printk.c
+@@ -67,6 +67,9 @@ int console_printk[4] = {
+ int oops_in_progress;
+ EXPORT_SYMBOL(oops_in_progress);
+ 
++static void (*emit_crash_char_fn)(char c);
++static bool recursive_emit_crash_char;
++
+ /*
+  * console_sem protects the console_drivers list, and also
+  * provides serialisation for access to the entire console
+@@ -520,8 +523,35 @@ static void call_console_drivers(unsigned start, unsigned end)
+ 	_call_console_drivers(start_print, end, msg_level);
+ }
+ 
++/*
++ * This emits a character intended for a crash log. We take special care
++ * to avoid recursive use so that we don't end up in an crash reporting loop.
++ */
++static void emit_crash_char(char c)
++{
++	static	bool in_call;
++
++	if (emit_crash_char_fn != NULL) {
++		/* Detect recursive calls and ignore them. This could happen
++		 * if the function we use to emit the character to the crash
++		 * log failed and called printk. Though we ignore the output,
++		 * we remember that we had a recursive call so that we can
++		 * report it later. */
++		if (in_call)
++			recursive_emit_crash_char = true;
++
++		else {
++			in_call = true;
++			emit_crash_char_fn(c);
++			in_call = false;
++		}
++	}
++}
++
+ static void emit_log_char(char c)
+ {
++	emit_crash_char(c);
++
+ 	LOG_BUF(log_end) = c;
+ 	log_end++;
+ 	if (log_end - log_start > log_buf_len)
+@@ -533,6 +563,28 @@ static void emit_log_char(char c)
+ }
+ 
+ /*
++ * Register a function to emit a crash character
++ * @fn:	Function to register
++ */
++void register_emit_crash_char(void (*fn)(char c))
++{
++	emit_crash_char_fn = fn;
++}
++
++/*
++ * Unregister a function emiting a crash character
++ */
++void unregister_emit_crash_char()
++{
++	emit_crash_char_fn = NULL;
++
++	if (recursive_emit_crash_char) {
++		pr_err("emit_crash_char was called recursively!\n");
++		recursive_emit_crash_char = false;
++	}
++}
++
++/*
+  * Zap console related locks when oopsing. Only zap at most once
+  * every 10 seconds, to leave time for slow consoles to print a
+  * full oops.
+@@ -554,9 +606,9 @@ static void zap_locks(void)
+ }
+ 
+ #if defined(CONFIG_PRINTK_TIME)
+-static int printk_time = 1;
++int printk_time = 1;
+ #else
+-static int printk_time = 0;
++int printk_time;
+ #endif
+ module_param_named(time, printk_time, bool, S_IRUGO | S_IWUSR);
+ 
+
+
+
+
+     - - - - -                              Cisco                            - - - - -         
+This e-mail and any attachments may contain information which is confidential, 
+proprietary, privileged or otherwise protected by law. The information is solely 
+intended for the named addressee (or a person responsible for delivering it to 
+the addressee). If you are not the intended recipient of this message, you are 
+not authorized to read, print, retain, copy or disseminate this message or any 
+part of it. If you have received this e-mail in error, please notify the sender 
+immediately by return e-mail and delete it from your computer.
