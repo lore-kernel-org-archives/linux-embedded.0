@@ -1,32 +1,53 @@
-From: Fundu <fundu_1999@yahoo.com>
-Subject: initrd and uImage
-Date: Fri, 8 Aug 2008 09:42:41 -0700 (PDT)
-Message-ID: <54582.81328.qm@web63407.mail.re1.yahoo.com>
-Reply-To: fundu_1999@yahoo.com
+From: Behan Webster <behanw@websterwood.com>
+Subject: Re: embedded rootfs utility
+Date: Fri, 08 Aug 2008 13:03:37 -0400
+Message-ID: <489C7C69.5060209@websterwood.com>
+References: <488FCF7D.5010005@websterwood.com> <Pine.LNX.4.64.0808061345080.28556@vixen.sonytel.be>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.0808061345080.28556@vixen.sonytel.be>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded <linux-embedded@vger.kernel.org>
+To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Cc: linux-embedded@vger.kernel.org
 
-Hi,
-First off i have a ppc based board.
-and i'm trying to load a kernel image with ramdisk rootfs.
+Geert Uytterhoeven wrote:
+> Thanks for this useful tool!
+> I'm used to plain debootstrap, but decided to give your elbs-rootfs a try for
+> creating up a mipsel and a powerpc NFS root file system. It worked fine,
+> except for one minor nit. As an NFS root file system is mounted read-only by
+> default, I had to manually do
+>
+> | mount -n proc /proc -t proc       
+> | mount -n -o remount -w /
+>
+> before running finish.sh. Perhaps this can be added to the top of finish.sh?
+>   
+Odd.  I never had this issue.  It has always just worked for me.
 
-i have build the kernel. it spit uImage,zImage and vmlinux.gz
+None the less, I will add checks for this to the script.
 
-my question are.
-1) what are all the different image types ? 
-i know the uImage is just the kernel, what are the rest (zImage & vmlinux.gz)?
+> Add the end of its execution, finish.sh says:
+>
+> | Feel free to delete /debootstrap and the downloaded packages
+> |   # rm -rf /debootstrap
+> |   # apt-get clean
+> | Please reboot now
+> |   # shutdown -r now
+>
+> Shouldn't it suggest to delete /finish.sh, too?
+>   
+Ah.  finish.sh used to delete itself when finished.  I removed that
+while testing, and forgot to put it back in.
 
-2) i'm using u-boot as the bootldr. so i download the uImage (cause zImage and vmlinux.gz aren't bootlable) from tftp server and then do bootm <address> the kernel only load partially. How does the kernel know where/how to load the rootfs ? 
+Indeed you are correct.
 
+> Anyway, thanks for this tool!
+>   
+I'm glad you are finding it useful.
 
-thanks !
-
-
-
-
-      
+-- 
+Behan Webster
+behanw@websterwood.com
