@@ -1,76 +1,67 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH] bootup: Add built-in kernel command line for x86
-Date: Mon, 11 Aug 2008 15:40:35 -0700
-Message-ID: <48A0BFE3.2060403@am.sony.com>
-References: <489A1844.3090502@am.sony.com> <20080811191012.GA16553@elte.hu> <48A091B7.6050601@zytor.com>
+From: David VomLehn <dvomlehn@cisco.com>
+Subject: Re: [PATCH] [RFC] emit-crash-char: Allow diversion of printk	output
+ for crash logging
+Date: Mon, 11 Aug 2008 16:34:37 -0700
+Message-ID: <48A0CC8D.3050302@cisco.com>
+References: <489BAD5C.2080009@cisco.com> <1218210904.19162.144.camel@localhost.localdomain>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48A091B7.6050601@zytor.com>
+In-Reply-To: <1218210904.19162.144.camel@localhost.localdomain>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1633; t=1218497678; x=1219361678;
+	c=relaxed/simple; s=sjdkim3002;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=dvomlehn@cisco.com;
+	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	|Subject:=20Re=3A=20[PATCH]=20[RFC]=20emit-crash-char=3A=20
+	Allow=20diversion=20of=20printk=09output=0A=20for=20crash=20
+	logging
+	|Sender:=20;
+	bh=VBzqaOLKhKLUaRCwJeLZ6SM+lXSvaD905D/7ab2pKZo=;
+	b=Ja+2gW8LUkxOdrUDYRkiorxZ2hV712ZE4PSpmv5j2e/jC3PkEg+euZQVkq
+	O5IaiuhBJHvKXBbKfS4OMTZjoVEmoPlhnYVS2N3Bd5CifiWvTMIbzLhdgQ2m
+	vPQt6PoIrl;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@elte.hu>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>, Matt Mackall <mpm@selenic.com>, Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Daniel Walker <dwalker@mvista.com>
+Cc: linux-embedded@vger.kernel.org
 
-H. Peter Anvin wrote:
-> Ingo Molnar wrote:
->> * Tim Bird <tim.bird@am.sony.com> wrote:
->>
->>> Add support for a built-in command line for x86 architectures. The
->>> Kconfig help gives the major rationale for this addition.
->>
->> i have actually used a local hack quite similar to this to inject boot
->> options into bzImages via randconfig - so i would find this feature
->> rather useful.
->>
->> a small observation:
->>
->>> +    /* append boot loader cmdline to builtin, unless builtin
->>> overrides it */
->>> +    if (builtin_cmdline[0] != '!') {
->>> +        strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
->>> +        strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
->>> +        strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
->>> +    } else {
->>> +        strlcpy(boot_command_line, &builtin_cmdline[1],
->>> +            COMMAND_LINE_SIZE);
->>> +    }
->>
->> the default branch changes existing command lines slightly: it appends
->> a space to them. This could break scripts that rely on the precise
->> contents of /proc/cmdline output. (i have some - they are arguably dodgy)
-
-Yeah, I wasn't too comfortable with that.
-
->> Best would be to make it really apparent in the code that nothing
->> changes if this config option is not set. Preferably there should be
->> no extra code at all in that case.
-
-Agreed.
-
+Daniel Walker wrote:
+> On Thu, 2008-08-07 at 19:20 -0700, David VomLehn wrote:
+>> Allow diversion of characters generated through printk so that they can
+>> be logged separately. The printk_time variables is made externally visible
+>> so that functions processing the diverted characters can parse off the
+>> time added if CONFIG_PRINTK_TIME is enabled.
 > 
-> I would like to see this:
+>> +
+>>  static void emit_log_char(char c)
+>>  {
+>> +	emit_crash_char(c);
+>> +
+>>  	LOG_BUF(log_end) = c;
 > 
-> #ifdef CONFIG_BUILTIN_CMDLINE
-> # ifdef CONFIG_BUILTIN_CMDLINE_OVERRIDE
->     strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
-> # else
->     if (boot_command_line) {
->         strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
->         strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
->     }
-> # endif
-> #endif
+> Isn't this duplicating the making of a custom console driver? I'm not a
+> console expect, but I think you could have a console driver which
+> catches this output and logs it..
 
-You missed copying builtin_cmdline back to boot_command_line, but
-in general this looks OK to me.  If nobody objects to the ifdef
-multiplicity, I'll work up a version tomorrow for review.  (Sorry,
-I'm a bit swamped today.)
- -- Tim
+Yes, you could, but this seems *so much* more straight-forward. Another option I 
+considered was changing things so that the first level interface would simply 
+output a character, possibly also passing some sort of context pointer. Then 
+whatever was called by that interface could call a console driver, if 
+appropriate. Even though I think this is really a cleaner way to do this, it also 
+involves many more changes than I think are warranted just to get this little 
+piece of functionality.
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+> Another note, usually when submitting new interfaces like this you
+> should also submit the code that uses the interface .. In your case you
+> might not be able to do that, but it could never be accepted without at
+> least one user.
+
+A highly valid criticism. I actually quoted your message to my management in 
+order to underscore how important it is that Cisco becomes a good open source 
+citizen. Personally, I view it as an absolute must.
+
+> Daniel
+
+
