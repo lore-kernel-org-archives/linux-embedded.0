@@ -1,67 +1,41 @@
-From: David VomLehn <dvomlehn@cisco.com>
-Subject: Re: [PATCH] [RFC] emit-crash-char: Allow diversion of printk	output
- for crash logging
-Date: Mon, 11 Aug 2008 16:34:37 -0700
-Message-ID: <48A0CC8D.3050302@cisco.com>
-References: <489BAD5C.2080009@cisco.com> <1218210904.19162.144.camel@localhost.localdomain>
+From: "Mihaela Grigore" <grigore.mihaela@gmail.com>
+Subject: ppc linux cpu features fixups
+Date: Tue, 12 Aug 2008 20:49:37 +0300
+Message-ID: <78ef7ce10808121049s178a7be5m6cd2c2a5d6b8dd42@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1218210904.19162.144.camel@localhost.localdomain>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1633; t=1218497678; x=1219361678;
-	c=relaxed/simple; s=sjdkim3002;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Re=3A=20[PATCH]=20[RFC]=20emit-crash-char=3A=20
-	Allow=20diversion=20of=20printk=09output=0A=20for=20crash=20
-	logging
-	|Sender:=20;
-	bh=VBzqaOLKhKLUaRCwJeLZ6SM+lXSvaD905D/7ab2pKZo=;
-	b=Ja+2gW8LUkxOdrUDYRkiorxZ2hV712ZE4PSpmv5j2e/jC3PkEg+euZQVkq
-	O5IaiuhBJHvKXBbKfS4OMTZjoVEmoPlhnYVS2N3Bd5CifiWvTMIbzLhdgQ2m
-	vPQt6PoIrl;
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:mime-version:content-type:content-transfer-encoding
+         :content-disposition;
+        bh=Boa4LEyAvnZP6Wf1GSxN6NxMh/XO+r6Bz0CeYnQJuRs=;
+        b=dZD/9SsEm0nYfKf9FTGn67O4bldjd3rSRYDH/t0DjwuMqMrEVcHkKJU4gwY5Ii5NOW
+         oY2ZSHevfKiNBTB9HUcaBA27NNWmpkLzUYe3VnTbNcxlXsUwFH4KwYE1qBO7JHuquGlN
+         sb72FaS1G5FrpHIN7etzzBYBcKGR380FrRUcg=
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Daniel Walker <dwalker@mvista.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: linux-embedded@vger.kernel.org
 
-Daniel Walker wrote:
-> On Thu, 2008-08-07 at 19:20 -0700, David VomLehn wrote:
->> Allow diversion of characters generated through printk so that they can
->> be logged separately. The printk_time variables is made externally visible
->> so that functions processing the diverted characters can parse off the
->> time added if CONFIG_PRINTK_TIME is enabled.
-> 
->> +
->>  static void emit_log_char(char c)
->>  {
->> +	emit_crash_char(c);
->> +
->>  	LOG_BUF(log_end) = c;
-> 
-> Isn't this duplicating the making of a custom console driver? I'm not a
-> console expect, but I think you could have a console driver which
-> catches this output and logs it..
+Hello,
 
-Yes, you could, but this seems *so much* more straight-forward. Another option I 
-considered was changing things so that the first level interface would simply 
-output a character, possibly also passing some sort of context pointer. Then 
-whatever was called by that interface could call a console driver, if 
-appropriate. Even though I think this is really a cleaner way to do this, it also 
-involves many more changes than I think are warranted just to get this little 
-piece of functionality.
+There is a piece of code in the early initialization of the 2.6 kernel
+that identifies the cpu type and then tries to eliminate code that
+does not apply to the current cpu. This is done by writing nop's over
+sections of code that are not needed (do_cpu_ftr_fixups in
+arch/ppc/kernel/misc.S)
 
-> Another note, usually when submitting new interfaces like this you
-> should also submit the code that uses the interface .. In your case you
-> might not be able to do that, but it could never be accepted without at
-> least one user.
+When I try to run the kernel in a ppc emulator, I get a segmentation
+fault in do_cpu_ftr_fixups. From examining the section headers of the
+vmlinux, the text section is marked as readonly. The piece of code
+above mentioned is trying to write a nop to memory location inside the
+text section.
 
-A highly valid criticism. I actually quoted your message to my management in 
-order to underscore how important it is that Cisco becomes a good open source 
-citizen. Personally, I view it as an absolute must.
+Since the kernel does run on boards with ppc cpu's, can somebody
+explain how come this is actually working ? Or if/where I am mistaking
+with my assumptions ?
 
-> Daniel
-
-
+Thank you and please ass me in cc in a reply to this message
