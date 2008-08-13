@@ -1,69 +1,73 @@
-From: David VomLehn <dvomlehn@cisco.com>
+From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: [PATCH] [RFC] emit-crash-char: Allow diversion of printk	output
  for crash logging
-Date: Wed, 13 Aug 2008 10:56:56 -0700
-Message-ID: <48A32068.3010000@cisco.com>
-References: <489BAD5C.2080009@cisco.com> <1218210904.19162.144.camel@localhost.localdomain> <48A0CC8D.3050302@cisco.com> <fa686aa40808121539pc02a645n908500844c698bca@mail.gmail.com> <48A2394E.8030500@cisco.com> <20080813021212.GA17587@secretlab.ca>
+Date: Wed, 13 Aug 2008 12:02:28 -0700
+Message-ID: <48A32FC4.7060006@am.sony.com>
+References: <489BAD5C.2080009@cisco.com> <1218210904.19162.144.camel@localhost.localdomain> <48A0CC8D.3050302@cisco.com> <fa686aa40808121539pc02a645n908500844c698bca@mail.gmail.com> <48A2394E.8030500@cisco.com> <20080813021212.GA17587@secretlab.ca> <48A32068.3010000@cisco.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080813021212.GA17587@secretlab.ca>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1924; t=1218650224; x=1219514224;
-	c=relaxed/simple; s=sjdkim3002;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Re=3A=20[PATCH]=20[RFC]=20emit-crash-char=3A=20
-	Allow=20diversion=20of=20printk=09output=0A=20for=20crash=20
-	logging
-	|Sender:=20;
-	bh=JFvLQDNx6fo2sCMZDDOfDvE8LDmanek1JuNJnxHLbeU=;
-	b=qzOklrU3gNnK2aoA9KVGBwPuDAXE8qVt43FILEMWyjkp1OqO1U9UZ7plR0
-	WwpgsOxXyCx69MWAnOjALFpANyn82tPHKL0AZZBVSc0GSYARDB4k8DGv48ca
-	DtYSdz8tZR;
+In-Reply-To: <48A32068.3010000@cisco.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Daniel Walker <dwalker@mvista.com>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: David VomLehn <dvomlehn@cisco.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Daniel Walker <dwalker@mvista.com>, linux-embedded@vger.kernel.org
 
-Grant Likely wrote:
-> On Tue, Aug 12, 2008 at 06:30:54PM -0700, David VomLehn wrote:
->>
->> Regardless of implementation, it seems to me that it could be of use for 
->> some other embedded platforms. Any suggestions as to where it should go 
->> in the tree? drivers/char? drivers/misc?
+David VomLehn wrote:
+> Our use case is:
+> 1. We register a panic handler
+> 2. The kernel panics and calls our panic handler
+> 3. We register a function to log printk output
+> 4. We print registers, stack, memory, and various other pieces of
+>    information using standard kernel functions, which all use printk
+> 5. As printk output is generated, we store it in memory
+> 6. We unregister the printk logging function
+> 7. The panic handler exits
+> 8. The kernel does the rest of its usual panic handling
 > 
-> Depends on what you're storing to.  Can you send more details about the
-> specific use case that you will use this interface for?
+> I'm not proposing storing the data in a specific place; that will be up
+> to the platform. We will be storing in a piece of memory set aside for
+> this purpose, but storing it in NOR flash makes a lot of sense, too, or
+> using NAND flash or possibly even disk. All I'm proposing is a small
+> framework that will allow plugging in a logging function when needed and
+> removing it when done. I'll do the common piece that looks like a fake
+> console and we, and other people, can use the simpler interface it
+> provides.
 
-The system I'm working on is a settop box. It is in an environment where it is 
-connected to a central server. The settop box doesn't have enough space to hold 
-core dumps and the upstream connection to the server has too little bandwidth to 
-upload them if we did store them. We have found that we can usually diagnose and 
-fix problems with much less information than a core dump however, so we want to 
-be able to capture that information and send it upstream.
+I'm not sure exactly what triggers the transition from step 5 to 6 in
+your steps above.  That is, how do you know when to unregister the
+printk logging function?
 
-Our use case is:
-1. We register a panic handler
+But, taking a step back, instead of storing the information somewhere
+else, why not just use the log buffer as the storage medium, and transfer
+that all-at-once when you've collected the information you want?  That is,
+change your steps to:
+
+1. Register a panic handler
 2. The kernel panics and calls our panic handler
-3. We register a function to log printk output
-4. We print registers, stack, memory, and various other pieces of
+3. Record the current position of the log buffer insertion point
+4. Print registers, stack, memory, and various other pieces of
     information using standard kernel functions, which all use printk
-5. As printk output is generated, we store it in memory
-6. We unregister the printk logging function
+5. As printk output is generated - it is stored by the kernel
+ in the log buffer (no change to printk code is needed).
+** (not sure what the trigger is to stop, here) **
+6. Record the current position of the log buffer, and transfer
+data logged between steps 3 and 6 to wherever you like.  That
+is, copy it directly from the log buffer.
 7. The panic handler exits
 8. The kernel does the rest of its usual panic handling
 
-I'm not proposing storing the data in a specific place; that will be up to the 
-platform. We will be storing in a piece of memory set aside for this purpose, but 
-storing it in NOR flash makes a lot of sense, too, or using NAND flash or 
-possibly even disk. All I'm proposing is a small framework that will allow 
-plugging in a logging function when needed and removing it when done. I'll do the 
-common piece that looks like a fake console and we, and other people, can use the 
-simpler interface it provides.
+This reduces your intrusion to just your trigger points, and
+grabbing the log buffer position.  (Side Note - the way the log
+buffer position is stored is a bit funky.  It is an absolute
+value that monotonically increases, and is masked when used
+to refer to the buffer.  This is why the log buffer size
+is constrained to a power of two).
+ -- Tim
 
-> g.
---
-David VomLehn
-
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
