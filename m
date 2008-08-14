@@ -1,52 +1,28 @@
 From: "Grant Likely" <grant.likely@secretlab.ca>
-Subject: Re: embedded rootfs utility
-Date: Thu, 14 Aug 2008 00:29:42 -0600
-Message-ID: <fa686aa40808132329k49dee24br1d5c83c0d90ea113@mail.gmail.com>
-References: <488FCF7D.5010005@websterwood.com>
-	 <Pine.LNX.4.64.0808061345080.28556@vixen.sonytel.be>
-	 <489C7C69.5060209@websterwood.com>
+Subject: Re: Flatten device tree & PPC linu
+Date: Thu, 14 Aug 2008 00:43:05 -0600
+Message-ID: <fa686aa40808132343r1b0bed8bx79252d3450c34483@mail.gmail.com>
+References: <1218656903.10489.50.camel@localhost.localdomain>
+	 <260388.87819.qm@web63408.mail.re1.yahoo.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <489C7C69.5060209@websterwood.com>
+In-Reply-To: <260388.87819.qm@web63408.mail.re1.yahoo.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Behan Webster <behanw@websterwood.com>
-Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, linux-embedded@vger.kernel.org
+To: fundu_1999@yahoo.com
+Cc: linux-embedded@vger.kernel.org
 
-Hey Behan, a few more comments...
+On Wed, Aug 13, 2008 at 11:44 PM, Fundu <fundu_1999@yahoo.com> wrote:
+> i was reading this ...
+> http://free-electrons.com/kerneldoc/latest/powerpc/booting-without-of.txt
+> and was wondering if the kernel 2.4(yes 2.4) expects a flatten device tree ?
 
-On Fri, Aug 8, 2008 at 11:03 AM, Behan Webster <behanw@websterwood.com> wrote:
-> Geert Uytterhoeven wrote:
->> Thanks for this useful tool!
->> I'm used to plain debootstrap, but decided to give your elbs-rootfs a try for
->> creating up a mipsel and a powerpc NFS root file system. It worked fine,
->> except for one minor nit. As an NFS root file system is mounted read-only by
->> default, I had to manually do
->>
->> | mount -n proc /proc -t proc
->> | mount -n -o remount -w /
->>
->> before running finish.sh. Perhaps this can be added to the top of finish.sh?
->>
-> Odd.  I never had this issue.  It has always just worked for me.
+No, 2.4 does not support flattened device trees.  It is a 2.6 thing
+for arch/powerpc.
 
-I had to do this also, and I had to explicitly "export PATH" to get
-the finish script to work.  Otherwise I dpkg complains.
-
-What I probably did differently is that I booted the system with
-"init=/bin/bash" on the command line instead of letting it just run
-init.  I needed to do this because if I let it run init, I got
-complaints about PAM failures when trying to log in as root.  How are
-you booting the system on first run?
-
-Also, when booting on something like a 5200 with an uncommon serial
-ports name (ttyPSC0), I had to manually add the /dev/ttyPSC0 device
-file before it would boot.
-
-Cheers,
 g.
 
 -- 
