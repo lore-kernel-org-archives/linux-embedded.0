@@ -1,51 +1,56 @@
-From: "Grant Likely" <grant.likely@secretlab.ca>
+From: Behan Webster <behanw@websterwood.com>
 Subject: Re: embedded rootfs utility
-Date: Thu, 14 Aug 2008 13:25:37 -0600
-Message-ID: <fa686aa40808141225r561eb0b0wcead5618542de85@mail.gmail.com>
-References: <488FCF7D.5010005@websterwood.com>
-	 <Pine.LNX.4.64.0808061345080.28556@vixen.sonytel.be>
-	 <489C7C69.5060209@websterwood.com>
-	 <fa686aa40808132329k49dee24br1d5c83c0d90ea113@mail.gmail.com>
-	 <48A442C2.2060309@websterwood.com>
-	 <fa686aa40808140935h666c2c7bt18e1ec6e53089f37@mail.gmail.com>
-	 <48A48576.5060601@websterwood.com>
+Date: Thu, 14 Aug 2008 15:32:53 -0400
+Message-ID: <48A48865.1090609@websterwood.com>
+References: <488FCF7D.5010005@websterwood.com>	 <Pine.LNX.4.64.0808061345080.28556@vixen.sonytel.be>	 <489C7C69.5060209@websterwood.com>	 <fa686aa40808132329k49dee24br1d5c83c0d90ea113@mail.gmail.com>	 <48A442C2.2060309@websterwood.com>	 <fa686aa40808140935h666c2c7bt18e1ec6e53089f37@mail.gmail.com>	 <48A48576.5060601@websterwood.com> <fa686aa40808141225r561eb0b0wcead5618542de85@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48A48576.5060601@websterwood.com>
-Content-Disposition: inline
+In-Reply-To: <fa686aa40808141225r561eb0b0wcead5618542de85@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Behan Webster <behanw@websterwood.com>
+To: Grant Likely <grant.likely@secretlab.ca>
 Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, linux-embedded@vger.kernel.org
 
-On Thu, Aug 14, 2008 at 1:20 PM, Behan Webster <behanw@websterwood.com> wrote:
-> Grant Likely wrote:
->> On Thu, Aug 14, 2008 at 8:35 AM, Behan Webster <behanw@websterwood.com> wrote:
->>
->>> Grant Likely wrote:
+Grant Likely wrote:
+> On Thu, Aug 14, 2008 at 1:20 PM, Behan Webster <behanw@websterwood.com> wrote:
+>   
+>> Grant Likely wrote:
+>>     
+>>> On Thu, Aug 14, 2008 at 8:35 AM, Behan Webster <behanw@websterwood.com> wrote:
 >>>
->>>> Also, when booting on something like a 5200 with an uncommon serial
->>>> ports name (ttyPSC0), I had to manually add the /dev/ttyPSC0 device
->>>> file before it would boot.
+>>>       
+>>>> Grant Likely wrote:
 >>>>
+>>>>         
+>>>>> Also, when booting on something like a 5200 with an uncommon serial
+>>>>> ports name (ttyPSC0), I had to manually add the /dev/ttyPSC0 device
+>>>>> file before it would boot.
+>>>>>
+>>>>>
+>>>>>           
+>>>> You're using an older version then.  The latest (v1.2) allows you to
+>>>> specify the serial port/baud rate when running the tool.
 >>>>
->>> You're using an older version then.  The latest (v1.2) allows you to
->>> specify the serial port/baud rate when running the tool.
+>>>>         
+>>> Hmm, I can only find v1.1.2 on your website.
 >>>
->>
->> Hmm, I can only find v1.1.2 on your website.
->>
-> Version 1.1.2 of elbs contains v1.2 of the rootfs tool.  I suppose I
-> should Sync the version numbers on a release.
+>>>       
+>> Version 1.1.2 of elbs contains v1.2 of the rootfs tool.  I suppose I
+>> should Sync the version numbers on a release.
+>>     
+>
+> Okay, then I've still got a problem.  I did specify the serial port
+> when running it, and the files in /etc were all set correctly.  It was
+> just the /dev/ttyPSC0 device file which was missing
+I see.  I thought MAKEDEV would have done that for you.  It appears that
+MAKEDEV doesn't support ttyPSC0.
 
-Okay, then I've still got a problem.  I did specify the serial port
-when running it, and the files in /etc were all set correctly.  It was
-just the /dev/ttyPSC0 device file which was missing.
+Yes, I suppose then you would have to make that dev file manually...
 
-g.
+Best laid plans...
 
 -- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+Behan Webster
+behanw@websterwood.com
