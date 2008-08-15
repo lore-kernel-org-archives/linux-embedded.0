@@ -1,38 +1,42 @@
 From: Ingo Molnar <mingo@elte.hu>
-Subject: Re: [PATCH] bootup: Add built-in kernel command line for x86 (v2)
-Date: Fri, 15 Aug 2008 16:12:07 +0200
-Message-ID: <20080815141207.GF14103@elte.hu>
-References: <489A1844.3090502@am.sony.com> <20080811191012.GA16553@elte.hu> <48A091B7.6050601@zytor.com> <48A1EA04.7090102@am.sony.com>
+Subject: Re: [PATCH 1/1] [x86] Configuration options to compile out x86 CPU
+	support code
+Date: Fri, 15 Aug 2008 16:18:55 +0200
+Message-ID: <20080815141855.GB12954@elte.hu>
+References: <1217929519-10527-1-git-send-email-thomas.petazzoni@free-electrons.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <48A1EA04.7090102@am.sony.com>
+In-Reply-To: <1217929519-10527-1-git-send-email-thomas.petazzoni@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>, Matt Mackall <mpm@selenic.com>, Thomas Gleixner <tglx@linutronix.de>
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, michael@free-electrons.com
 
 
-* Tim Bird <tim.bird@am.sony.com> wrote:
+* Thomas Petazzoni <thomas.petazzoni@free-electrons.com> wrote:
 
-> +	  To compile command line arguments into the kernel,
-> +         set this option to 'Y', then fill in the
+> This patch adds some configuration options that allow to compile out 
+> CPU vendor-specific code in x86 kernels (in arch/x86/kernel/cpu). The 
+> new configuration options are only visible when CONFIG_EMBEDDED is 
+> selected, as they are mostly interesting for space savings reasons.
+> 
+> An example of size saving, on x86 with only Intel CPU support:
+> 
+>    text	   data	    bss	    dec	    hex	filename
+> 1125479	 118760	 212992	1457231	 163c4f	vmlinux.old
+> 1121355	 116536	 212992	1450883	 162383	vmlinux
+>   -4124   -2224       0   -6348   -18CC +/-
+> 
+> However, I'm not exactly sure that the Kconfig wording is correct with 
+> regard to !64BIT / 64BIT.
 
-FYI, this tab-to-space whitespace error caused this build failure in 
--tip testing:
+applied to tip/x86/cpu, thanks Thomas. (I've done a trivial cleanup: 
+converted the macro to an inline.)
 
-arch/x86/Kconfig:1500: unknown option "set"
-arch/x86/Kconfig:1501: unknown option "the"
-arch/x86/Kconfig:1503: unknown option "Systems"
-arch/x86/Kconfig:1504: unknown option "should"
-arch/x86/Kconfig:1519: unknown option "In"
-arch/x86/Kconfig:1520: unknown option "by"
-arch/x86/Kconfig:1521: unknown option "file"
-
-i fixed it up. This line was broken too:
-
-> +         In most cases, the command line (whether built-in or provided
+Peter, do you like this version of the patch or would you like further 
+improvements?
 
 	Ingo
