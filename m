@@ -1,13 +1,13 @@
 From: Ingo Molnar <mingo@elte.hu>
 Subject: Re: [PATCH 1/1] [x86] Configuration options to compile out x86 CPU
 	support code
-Date: Fri, 15 Aug 2008 16:18:55 +0200
-Message-ID: <20080815141855.GB12954@elte.hu>
-References: <1217929519-10527-1-git-send-email-thomas.petazzoni@free-electrons.com>
+Date: Fri, 15 Aug 2008 16:38:43 +0200
+Message-ID: <20080815143843.GA519@elte.hu>
+References: <1217929519-10527-1-git-send-email-thomas.petazzoni@free-electrons.com> <20080815141855.GB12954@elte.hu>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1217929519-10527-1-git-send-email-thomas.petazzoni@free-electrons.com>
+In-Reply-To: <20080815141855.GB12954@elte.hu>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -16,27 +16,38 @@ To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, michael@free-electrons.com
 
 
-* Thomas Petazzoni <thomas.petazzoni@free-electrons.com> wrote:
+-tip testing found a couple of build failures:
 
-> This patch adds some configuration options that allow to compile out 
-> CPU vendor-specific code in x86 kernels (in arch/x86/kernel/cpu). The 
-> new configuration options are only visible when CONFIG_EMBEDDED is 
-> selected, as they are mostly interesting for space savings reasons.
-> 
-> An example of size saving, on x86 with only Intel CPU support:
-> 
->    text	   data	    bss	    dec	    hex	filename
-> 1125479	 118760	 212992	1457231	 163c4f	vmlinux.old
-> 1121355	 116536	 212992	1450883	 162383	vmlinux
->   -4124   -2224       0   -6348   -18CC +/-
-> 
-> However, I'm not exactly sure that the Kconfig wording is correct with 
-> regard to !64BIT / 64BIT.
+  LD      .tmp_vmlinux1
+arch/x86/lib/lib.a(usercopy_32.o): In function `__copy_to_user_ll':
+(.text+0x11e): undefined reference to `movsl_mask'
+arch/x86/lib/lib.a(usercopy_32.o): In function `__copy_from_user_ll':
+(.text+0x1fa): undefined reference to `movsl_mask'
+arch/x86/lib/lib.a(usercopy_32.o): In function 
+`__copy_from_user_ll_nozero':
+(.text+0x2d6): undefined reference to `movsl_mask'
+arch/x86/lib/lib.a(usercopy_32.o): In function `copy_from_user':
+(.text+0x5ac): undefined reference to `movsl_mask'
+arch/x86/lib/lib.a(usercopy_32.o): In function `copy_to_user':
+(.text+0x6bf): undefined reference to `movsl_mask'
+make: *** [.tmp_vmlinux1] Error 1
 
-applied to tip/x86/cpu, thanks Thomas. (I've done a trivial cleanup: 
-converted the macro to an inline.)
+with:
 
-Peter, do you like this version of the patch or would you like further 
-improvements?
+  http://redhat.com/~mingo/misc/config-Fri_Aug_15_16_35_03_CEST_2008.bad
+
+and:
+
+arch/x86/kvm/built-in.o: In function `paging64_cmpxchg_gpte':
+mmu.c:(.text+0xa80d): undefined reference to `cmpxchg_486_u64'
+
+with:
+
+  http://redhat.com/~mingo/misc/config-Fri_Aug_15_16_27_47_CEST_2008.bad
+
+reverting your change solved both of them.
+
+i still have the commit in tip/x86/cpu so please send a delta fix ontop 
+of your previous patch once you figure out the problem. Thanks,
 
 	Ingo
