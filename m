@@ -1,7 +1,7 @@
 From: Ingo Molnar <mingo@elte.hu>
 Subject: Re: [PATCH] bootup: Add built-in kernel command line for x86 (v2)
-Date: Fri, 15 Aug 2008 16:03:00 +0200
-Message-ID: <20080815140300.GC14103@elte.hu>
+Date: Fri, 15 Aug 2008 16:12:07 +0200
+Message-ID: <20080815141207.GF14103@elte.hu>
 References: <489A1844.3090502@am.sony.com> <20080811191012.GA16553@elte.hu> <48A091B7.6050601@zytor.com> <48A1EA04.7090102@am.sony.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -17,13 +17,22 @@ Cc: "H. Peter Anvin" <hpa@zytor.com>, linux kernel <linux-kernel@vger.kernel.org
 
 * Tim Bird <tim.bird@am.sony.com> wrote:
 
-> Allow x86 to support a built-in kernel command line.  The built-in 
-> command line can override the one provided by the boot loader, for 
-> those cases where the boot loader is broken or it is difficult to 
-> change the command line in the the boot loader.
-> 
-> Signed-off-by: Tim Bird <tim.bird@am.sony.com>
+> +	  To compile command line arguments into the kernel,
+> +         set this option to 'Y', then fill in the
 
-applied to tip/x86/commandline for v2.6.28 merging - thanks Tim!
+FYI, this tab-to-space whitespace error caused this build failure in 
+-tip testing:
+
+arch/x86/Kconfig:1500: unknown option "set"
+arch/x86/Kconfig:1501: unknown option "the"
+arch/x86/Kconfig:1503: unknown option "Systems"
+arch/x86/Kconfig:1504: unknown option "should"
+arch/x86/Kconfig:1519: unknown option "In"
+arch/x86/Kconfig:1520: unknown option "by"
+arch/x86/Kconfig:1521: unknown option "file"
+
+i fixed it up. This line was broken too:
+
+> +         In most cases, the command line (whether built-in or provided
 
 	Ingo
