@@ -1,42 +1,44 @@
-From: Ingo Molnar <mingo@elte.hu>
-Subject: Re: [PATCH] [x86] Move cmpxchg fallbacks to a generic place
-Date: Mon, 18 Aug 2008 16:07:06 +0200
-Message-ID: <20080818140706.GB30511@elte.hu>
-References: <20080815143843.GA519@elte.hu> <1219055602-8046-2-git-send-email-thomas.petazzoni@free-electrons.com>
+From: "Grant Likely" <grant.likely@secretlab.ca>
+Subject: Re: embedded rootfs utility
+Date: Mon, 18 Aug 2008 10:00:06 -0600
+Message-ID: <fa686aa40808180900q730b921an64483d985793b33b@mail.gmail.com>
+References: <488FCF7D.5010005@websterwood.com>
+	 <Pine.LNX.4.64.0808061345080.28556@vixen.sonytel.be>
+	 <489C7C69.5060209@websterwood.com>
+	 <fa686aa40808132329k49dee24br1d5c83c0d90ea113@mail.gmail.com>
+	 <48A442C2.2060309@websterwood.com>
+	 <Pine.LNX.4.64.0808181328260.30933@vixen.sonytel.be>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.0808181328260.30933@vixen.sonytel.be>
 Content-Disposition: inline
-In-Reply-To: <1219055602-8046-2-git-send-email-thomas.petazzoni@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, michael@free-electrons.com
+To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Cc: Behan Webster <behanw@websterwood.com>, linux-embedded@vger.kernel.org
 
+On Mon, Aug 18, 2008 at 5:30 AM, Geert Uytterhoeven
+<Geert.Uytterhoeven@sonycom.com> wrote:
+> On Thu, 14 Aug 2008, Behan Webster wrote:
+>> Grant Likely wrote:
+>> > On Fri, Aug 8, 2008 at 11:03 AM, Behan Webster <behanw@websterwood.com> wrote:
+>> > Also, when booting on something like a 5200 with an uncommon serial
+>> > ports name (ttyPSC0), I had to manually add the /dev/ttyPSC0 device
+>> > file before it would boot.
+>> >
+>> You're using an older version then.  The latest (v1.2) allows you to
+>> specify the serial port/baud rate when running the tool.
+>
+> Yep, it's a pity we cannot standardize on /dev/ttyS0 for the first serial
+> port...
 
-* Thomas Petazzoni <thomas.petazzoni@free-electrons.com> wrote:
+Indeed; but it could be potentially solved with a few udev rules.  I
+should look into that...
 
-> arch/x86/kernel/cpu/intel.c defines a few fallback functions
-> (cmpxchg_*()) that are used when the CPU doesn't support cmpxchg
-> and/or cmpxchg64 natively. However, while defined in an Intel-specific
-> file, these functions are also used for CPUs from other vendors when
-> they don't support cmpxchg and/or cmpxchg64. This breaks the
-> compilation when support for Intel CPUs is disabled.
-> 
-> This patch moves these functions to a new
-> arch/x86/kernel/cpu/cmpxchg.c file, unconditionally compiled when
-> X86_32 is enabled.
-> 
-> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+g.
 
-applied both fixes to tip/x86/cpu, thanks Thomas.
-
-I also flipped it around with the cpu-id reduction patch, so that it 
-remains bisectable. The new commit IDs in -tip are:
-
-8bfcb39: x86: make movsl_mask definition non-CPU specific
-774400a: x86: move cmpxchg fallbacks to a generic place
-8d02c21: x86: configuration options to compile out x86 CPU support code
-
-	Ingo
+-- 
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
