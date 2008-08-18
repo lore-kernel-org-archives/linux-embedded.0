@@ -1,50 +1,203 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: [PATCH 1/1] [x86] Configuration options to compile out x86 CPU
- support code
-Date: Fri, 15 Aug 2008 13:36:12 -0700
-Message-ID: <48A5E8BC.6060601@zytor.com>
-References: <1217929519-10527-1-git-send-email-thomas.petazzoni@free-electrons.com> <20080815141855.GB12954@elte.hu>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: [PATCH] [x86] Move cmpxchg fallbacks to a generic place
+Date: Mon, 18 Aug 2008 12:33:21 +0200
+Message-ID: <1219055602-8046-2-git-send-email-thomas.petazzoni@free-electrons.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080815141855.GB12954@elte.hu>
+In-Reply-To: <>
+References: <>
+In-Reply-To: <20080815143843.GA519@elte.hu>
+References: <20080815143843.GA519@elte.hu>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Ingo Molnar <mingo@elte.hu>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, michael@free-electrons.com
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: mingo@elte.hu
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, michael@free-electrons.com, thomas.petazzoni@free-electrons.com
 
-Ingo Molnar wrote:
-> * Thomas Petazzoni <thomas.petazzoni@free-electrons.com> wrote:
-> 
->> This patch adds some configuration options that allow to compile out 
->> CPU vendor-specific code in x86 kernels (in arch/x86/kernel/cpu). The 
->> new configuration options are only visible when CONFIG_EMBEDDED is 
->> selected, as they are mostly interesting for space savings reasons.
->>
->> An example of size saving, on x86 with only Intel CPU support:
->>
->>    text	   data	    bss	    dec	    hex	filename
->> 1125479	 118760	 212992	1457231	 163c4f	vmlinux.old
->> 1121355	 116536	 212992	1450883	 162383	vmlinux
->>   -4124   -2224       0   -6348   -18CC +/-
->>
->> However, I'm not exactly sure that the Kconfig wording is correct with 
->> regard to !64BIT / 64BIT.
-> 
-> applied to tip/x86/cpu, thanks Thomas. (I've done a trivial cleanup: 
-> converted the macro to an inline.)
-> 
-> Peter, do you like this version of the patch or would you like further 
-> improvements?
-> 
+arch/x86/kernel/cpu/intel.c defines a few fallback functions
+(cmpxchg_*()) that are used when the CPU doesn't support cmpxchg
+and/or cmpxchg64 natively. However, while defined in an Intel-specific
+file, these functions are also used for CPUs from other vendors when
+they don't support cmpxchg and/or cmpxchg64. This breaks the
+compilation when support for Intel CPUs is disabled.
 
-I'm fine with it.
+This patch moves these functions to a new
+arch/x86/kernel/cpu/cmpxchg.c file, unconditionally compiled when
+X86_32 is enabled.
 
-I think there might still be cross-dependencies, but it doesn't break 
-anything old, so we can deal with that via bug reports.
+Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+---
+ arch/x86/kernel/cpu/Makefile  |    2 +-
+ arch/x86/kernel/cpu/cmpxchg.c |   72 +++++++++++++++++++++++++++++++++++++++++
+ arch/x86/kernel/cpu/intel.c   |   64 ------------------------------------
+ 3 files changed, 73 insertions(+), 65 deletions(-)
+ create mode 100644 arch/x86/kernel/cpu/cmpxchg.c
 
-The other thing that probably should be done is breaking out the 
-Intel-specific versus generic parts of intel_cacheinfo.c.
-
-	-hpa
+diff --git a/arch/x86/kernel/cpu/Makefile b/arch/x86/kernel/cpu/Makefile
+index a35ee92..a0fc6c1 100644
+--- a/arch/x86/kernel/cpu/Makefile
++++ b/arch/x86/kernel/cpu/Makefile
+@@ -5,7 +5,7 @@
+ obj-y			:= intel_cacheinfo.o addon_cpuid_features.o
+ obj-y			+= proc.o feature_names.o
+ 
+-obj-$(CONFIG_X86_32)	+= common.o bugs.o
++obj-$(CONFIG_X86_32)	+= common.o bugs.o cmpxchg.o
+ obj-$(CONFIG_X86_64)	+= common_64.o bugs_64.o
+ 
+ obj-$(CONFIG_CPU_SUP_AMD_32)		+= amd.o
+diff --git a/arch/x86/kernel/cpu/cmpxchg.c b/arch/x86/kernel/cpu/cmpxchg.c
+new file mode 100644
+index 0000000..2056ccf
+--- /dev/null
++++ b/arch/x86/kernel/cpu/cmpxchg.c
+@@ -0,0 +1,72 @@
++/*
++ * cmpxchg*() fallbacks for CPU not supporting these instructions
++ */
++
++#include <linux/kernel.h>
++#include <linux/smp.h>
++#include <linux/module.h>
++
++#ifndef CONFIG_X86_CMPXCHG
++unsigned long cmpxchg_386_u8(volatile void *ptr, u8 old, u8 new)
++{
++	u8 prev;
++	unsigned long flags;
++
++	/* Poor man's cmpxchg for 386. Unsuitable for SMP */
++	local_irq_save(flags);
++	prev = *(u8 *)ptr;
++	if (prev == old)
++		*(u8 *)ptr = new;
++	local_irq_restore(flags);
++	return prev;
++}
++EXPORT_SYMBOL(cmpxchg_386_u8);
++
++unsigned long cmpxchg_386_u16(volatile void *ptr, u16 old, u16 new)
++{
++	u16 prev;
++	unsigned long flags;
++
++	/* Poor man's cmpxchg for 386. Unsuitable for SMP */
++	local_irq_save(flags);
++	prev = *(u16 *)ptr;
++	if (prev == old)
++		*(u16 *)ptr = new;
++	local_irq_restore(flags);
++	return prev;
++}
++EXPORT_SYMBOL(cmpxchg_386_u16);
++
++unsigned long cmpxchg_386_u32(volatile void *ptr, u32 old, u32 new)
++{
++	u32 prev;
++	unsigned long flags;
++
++	/* Poor man's cmpxchg for 386. Unsuitable for SMP */
++	local_irq_save(flags);
++	prev = *(u32 *)ptr;
++	if (prev == old)
++		*(u32 *)ptr = new;
++	local_irq_restore(flags);
++	return prev;
++}
++EXPORT_SYMBOL(cmpxchg_386_u32);
++#endif
++
++#ifndef CONFIG_X86_CMPXCHG64
++unsigned long long cmpxchg_486_u64(volatile void *ptr, u64 old, u64 new)
++{
++	u64 prev;
++	unsigned long flags;
++
++	/* Poor man's cmpxchg8b for 386 and 486. Unsuitable for SMP */
++	local_irq_save(flags);
++	prev = *(u64 *)ptr;
++	if (prev == old)
++		*(u64 *)ptr = new;
++	local_irq_restore(flags);
++	return prev;
++}
++EXPORT_SYMBOL(cmpxchg_486_u64);
++#endif
++
+diff --git a/arch/x86/kernel/cpu/intel.c b/arch/x86/kernel/cpu/intel.c
+index 5c8959b..77618c7 100644
+--- a/arch/x86/kernel/cpu/intel.c
++++ b/arch/x86/kernel/cpu/intel.c
+@@ -307,69 +307,5 @@ static struct cpu_dev intel_cpu_dev __cpuinitdata = {
+ 
+ cpu_vendor_dev_register(X86_VENDOR_INTEL, &intel_cpu_dev);
+ 
+-#ifndef CONFIG_X86_CMPXCHG
+-unsigned long cmpxchg_386_u8(volatile void *ptr, u8 old, u8 new)
+-{
+-	u8 prev;
+-	unsigned long flags;
+-
+-	/* Poor man's cmpxchg for 386. Unsuitable for SMP */
+-	local_irq_save(flags);
+-	prev = *(u8 *)ptr;
+-	if (prev == old)
+-		*(u8 *)ptr = new;
+-	local_irq_restore(flags);
+-	return prev;
+-}
+-EXPORT_SYMBOL(cmpxchg_386_u8);
+-
+-unsigned long cmpxchg_386_u16(volatile void *ptr, u16 old, u16 new)
+-{
+-	u16 prev;
+-	unsigned long flags;
+-
+-	/* Poor man's cmpxchg for 386. Unsuitable for SMP */
+-	local_irq_save(flags);
+-	prev = *(u16 *)ptr;
+-	if (prev == old)
+-		*(u16 *)ptr = new;
+-	local_irq_restore(flags);
+-	return prev;
+-}
+-EXPORT_SYMBOL(cmpxchg_386_u16);
+-
+-unsigned long cmpxchg_386_u32(volatile void *ptr, u32 old, u32 new)
+-{
+-	u32 prev;
+-	unsigned long flags;
+-
+-	/* Poor man's cmpxchg for 386. Unsuitable for SMP */
+-	local_irq_save(flags);
+-	prev = *(u32 *)ptr;
+-	if (prev == old)
+-		*(u32 *)ptr = new;
+-	local_irq_restore(flags);
+-	return prev;
+-}
+-EXPORT_SYMBOL(cmpxchg_386_u32);
+-#endif
+-
+-#ifndef CONFIG_X86_CMPXCHG64
+-unsigned long long cmpxchg_486_u64(volatile void *ptr, u64 old, u64 new)
+-{
+-	u64 prev;
+-	unsigned long flags;
+-
+-	/* Poor man's cmpxchg8b for 386 and 486. Unsuitable for SMP */
+-	local_irq_save(flags);
+-	prev = *(u64 *)ptr;
+-	if (prev == old)
+-		*(u64 *)ptr = new;
+-	local_irq_restore(flags);
+-	return prev;
+-}
+-EXPORT_SYMBOL(cmpxchg_486_u64);
+-#endif
+-
+ /* arch_initcall(intel_cpu_init); */
+ 
+-- 
+1.5.4.3
