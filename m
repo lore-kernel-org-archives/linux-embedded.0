@@ -1,31 +1,53 @@
-From: T Ziomek <ctz001@email.mot.com>
+From: Fundu <fundu_1999@yahoo.com>
 Subject: Re: Module init for compiled in vs loaded modules
-Date: Tue, 19 Aug 2008 11:11:45 -0500
-Message-ID: <20080819161145.GX4992@email.mot.com>
-References: <fa686aa40808180900q730b921an64483d985793b33b@mail.gmail.com> <970019.41811.qm@web63401.mail.re1.yahoo.com>
+Date: Tue, 19 Aug 2008 10:26:10 -0700 (PDT)
+Message-ID: <487558.67644.qm@web63404.mail.re1.yahoo.com>
+Reply-To: fundu_1999@yahoo.com
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <970019.41811.qm@web63401.mail.re1.yahoo.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Fundu <fundu_1999@yahoo.com>
-Cc: linux-embedded@vger.kernel.org
+To: linux embedded <linux-embedded@vger.kernel.org>
+Cc: Amol Lad <amol.lad@gmail.com>
 
-Please, do not start a new thread by replying to a message in an existing
-thread.  Compose a new message from scratch to the mailing list.
+> linux/init.h:
+> 
+> #ifndef MODULE
+> ...
+> #define module_init(x)  __initcall(x);
+> #define __initcall(fn) device_initcall(fn)
+> #define device_initcall(fn)    
+> __define_initcall("6",fn)
+> #define __define_initcall(level,fn) \
+>     static initcall_t __initcall_##fn __attribute_used__
+> \
+>     __attribute__((__section__(".initcall" level
+> ".init"))) = fn
+> ...
+> #endif
+> 
+> initcalls are processed in do_initcalls function in
+> init/main.c
+> 
+> static void __init do_basic_setup(void)
+> {
+>     ....
+>     do_initcalls();
+> }
+> 
+> >
+> > thanks !
+> 
+> Amol
+thanks Rajat and Amol. 
 
-Otherwise your thread shows up in the middle of another, *unrelated*
-thread when anybody looks at a threaded view of the archives.  Just
-look at
-<http://thread.gmane.org/gmane.linux.kernel.embedded/626/focus=815> to
-see what I mean.
+One other question,
+1) how does the kernel know which module to load first in order to satisfy dependencies issues ?
+2) is there a way i could print the module init fn name from do_initcalls. to see in what order compiled in modules are called.
 
-Thanks, Tom
--- 
-  /"\  ASCII Ribbon Campaign   |
-  \ /                          |   Email to user 'CTZ001'
-   X        Against HTML       |             at 'email.mot.com'
-  / \     in e-mail & news     |
+tia. 
+
+
+      
