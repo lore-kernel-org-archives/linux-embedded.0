@@ -1,29 +1,30 @@
-From: David VomLehn <dvomlehn@cisco.com>
-Subject: Adding a new platform
-Date: Tue, 19 Aug 2008 11:01:30 -0700
-Message-ID: <48AB0A7A.8040209@cisco.com>
+From: Ralf Baechle <ralf@linux-mips.org>
+Subject: Re: Adding a new platform
+Date: Tue, 19 Aug 2008 19:22:22 +0100
+Message-ID: <20080819182222.GB8215@linux-mips.org>
+References: <48AB0A7A.8040209@cisco.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=229; t=1219168934; x=1220032934;
-	c=relaxed/simple; s=sjdkim2002;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Adding=20a=20new=20platform
-	|Sender:=20;
-	bh=+/G+TdHjDo5ABuM5uMPpbUommnjCBZTdgZXZMeuN3hY=;
-	b=jvX9JBL5B4CyPNhwk34lBMJhmeSW3CzFiHCpzU5/LK2fsKL6naWZ/uzzsx
-	kGeMv+TmqOztTOt4lhLSCLroBefiUYDeGmLTemdCldMbJj2WFUMpVo18cVR3
-	tWt63FsmRS;
+Content-Disposition: inline
+In-Reply-To: <48AB0A7A.8040209@cisco.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Ralf Baechle <ralf@linux-mips.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: David VomLehn <dvomlehn@cisco.com>
 Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-I'm working to educate our management on the need to get our platform in the 
-kernel mainline. I expect I will be asked to tell them how much work this is. 
-What do we need to do to add a new MIPS platform?
---
-David VomLehn
+On Tue, Aug 19, 2008 at 11:01:30AM -0700, David VomLehn wrote:
+
+> I'm working to educate our management on the need to get our platform in 
+> the kernel mainline. I expect I will be asked to tell them how much work 
+> this is. What do we need to do to add a new MIPS platform?
+
+Basically a patchset that adds support for the base platform and all
+necessary drivers.  Send that to the respective mailing lists and
+maintainers (see MAINTAINERS file) and wait for the feedback.  Expect to
+polish your patchset a few times until everybody is happy.  That's the
+basic receipe.  See also Documentation/SubmittingPatches,
+Documentation/SubmittingDrivers and Documentation/SubmitChecklist.
+
+  Ralf
