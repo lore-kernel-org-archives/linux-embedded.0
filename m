@@ -1,43 +1,31 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: [RFC] Remove more code when IP_MULTICAST=n
-Date: Tue, 19 Aug 2008 16:18:38 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0808191618190.25348@vixen.sonytel.be>
-References: <20080819150047.38f09acf@surf>
+From: T Ziomek <ctz001@email.mot.com>
+Subject: Re: Module init for compiled in vs loaded modules
+Date: Tue, 19 Aug 2008 11:11:45 -0500
+Message-ID: <20080819161145.GX4992@email.mot.com>
+References: <fa686aa40808180900q730b921an64483d985793b33b@mail.gmail.com> <970019.41811.qm@web63401.mail.re1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1138063954-1219155518=:25348"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080819150047.38f09acf@surf>
+Content-Disposition: inline
+In-Reply-To: <970019.41811.qm@web63401.mail.re1.yahoo.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: linux-embedded@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Fundu <fundu_1999@yahoo.com>
+Cc: linux-embedded@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Please, do not start a new thread by replying to a message in an existing
+thread.  Compose a new message from scratch to the mailing list.
 
----584349381-1138063954-1219155518=:25348
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Otherwise your thread shows up in the middle of another, *unrelated*
+thread when anybody looks at a threaded view of the archives.  Just
+look at
+<http://thread.gmane.org/gmane.linux.kernel.embedded/626/focus=815> to
+see what I mean.
 
-On Tue, 19 Aug 2008, Thomas Petazzoni wrote:
-> [RFC] Remove more code when IP_MULTICAST=n
-
-Probably you wanted to cc netdev@vger.kernel.org?
-
-With kind regards,
-
-Geert Uytterhoeven
-Software Architect
-
-Sony Techsoft Centre Europe
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
-
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
-
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 · RPR Brussels
-Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-1138063954-1219155518=:25348--
+Thanks, Tom
+-- 
+  /"\  ASCII Ribbon Campaign   |
+  \ /                          |   Email to user 'CTZ001'
+   X        Against HTML       |             at 'email.mot.com'
+  / \     in e-mail & news     |
