@@ -1,30 +1,26 @@
-From: Ralf Baechle <ralf@linux-mips.org>
-Subject: Re: Adding a new platform
-Date: Tue, 19 Aug 2008 19:22:22 +0100
-Message-ID: <20080819182222.GB8215@linux-mips.org>
-References: <48AB0A7A.8040209@cisco.com>
+From: "Bill Traynor" <wmat@naoi.ca>
+Subject: New elinux.org mailing lists
+Date: Tue, 19 Aug 2008 15:56:35 -0400 (EDT)
+Message-ID: <0c62747a6e9b254692b71bbe55f82510.squirrel@www.geekisp.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <48AB0A7A.8040209@cisco.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: David VomLehn <dvomlehn@cisco.com>
-Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-On Tue, Aug 19, 2008 at 11:01:30AM -0700, David VomLehn wrote:
+I've added a few mailing lists to elinux.org at
+http://elinux.org/ELinuxWiki:Mailing_List
 
-> I'm working to educate our management on the need to get our platform in 
-> the kernel mainline. I expect I will be asked to tell them how much work 
-> this is. What do we need to do to add a new MIPS platform?
+"Announce" is the ubiquitous announce list and will be extremely low traffic.
+"wiki-dev" is for anyone interested in the content/functionality of the wiki.
+"discuss" is for everything else.
 
-Basically a patchset that adds support for the base platform and all
-necessary drivers.  Send that to the respective mailing lists and
-maintainers (see MAINTAINERS file) and wait for the feedback.  Expect to
-polish your patchset a few times until everybody is happy.  That's the
-basic receipe.  See also Documentation/SubmittingPatches,
-Documentation/SubmittingDrivers and Documentation/SubmitChecklist.
+The "discuss" list is probably most applicable to the linux-embedded
+audience and will be dedicated to topics that would otherwise not be
+applicable to this list, such as detailed discussion about particular
+devices, and or non-kernel specific topics.
 
-  Ralf
+Thanks
+Bill
