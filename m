@@ -1,32 +1,80 @@
-From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Subject: Re: Adding a new platform
-Date: Wed, 20 Aug 2008 10:10:44 +0200
-Message-ID: <20080820101044.5df8b7d8@hskinnemo-gx745.norway.atmel.com>
-References: <48AB0A7A.8040209@cisco.com>
-	<7d1d9c250808192019g6ec73ec7x53563b8ad2130df@mail.gmail.com>
-	<f608b67d0808192057w29988500o2793dfb7f0c99314@mail.gmail.com>
-	<7d1d9c250808192129j3fb7ef28p8f404c6affd82078@mail.gmail.com>
-	<f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: Module init for compiled in vs loaded modules
+Date: Wed, 20 Aug 2008 11:06:32 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0808201104131.4596@vixen.sonytel.be>
+References: <487558.67644.qm@web63404.mail.re1.yahoo.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1264883109-1219223192=:4596"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
+In-Reply-To: <487558.67644.qm@web63404.mail.re1.yahoo.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: vb <vb@vsbe.com>
-Cc: Paul Gortmaker <paul.gortmaker@gmail.com>, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
+To: Fundu <fundu_1999@yahoo.com>
+Cc: linux embedded <linux-embedded@vger.kernel.org>, Amol Lad <amol.lad@gmail.com>
 
-vb <vb@vsbe.com> wrote:
-> Would such a driver be accepted? Wouldn't such a driver get stale
-> after a few kernel releases?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Yes, the kernel contains tons of such platform-specific drivers. No, it
-won't get stale as long as someone who has access to the hardware is
-willing to test a -rc kernel every once in a while.
+---584349381-1264883109-1219223192=:4596
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-You can't really expect to get away with no maintenance at all, but in
-my experience, it takes much less effort to maintain a driver in-tree
-than out-of-tree. It's also much easier to get help if it's in-tree.
+On Tue, 19 Aug 2008, Fundu wrote:
+> > linux/init.h:
+> > 
+> > #ifndef MODULE
+> > ...
+> > #define module_init(x)  __initcall(x);
+> > #define __initcall(fn) device_initcall(fn)
+> > #define device_initcall(fn)    
+> > __define_initcall("6",fn)
+> > #define __define_initcall(level,fn) \
+> >     static initcall_t __initcall_##fn __attribute_used__
+> > \
+> >     __attribute__((__section__(".initcall" level
+> > ".init"))) = fn
+> > ...
+> > #endif
+> > 
+> > initcalls are processed in do_initcalls function in
+> > init/main.c
+> > 
+> > static void __init do_basic_setup(void)
+> > {
+> >     ....
+> >     do_initcalls();
+> > }
+> > 
+> > >
+> > > thanks !
+> > 
+> > Amol
+> thanks Rajat and Amol. 
+> 
+> One other question,
+> 1) how does the kernel know which module to load first in order to satisfy dependencies issues ?
 
-Haavard
+By looking at the needed symbols (cfr. depmod).
+
+> 2) is there a way i could print the module init fn name from do_initcalls. to see in what order compiled in modules are called.
+
+Add `initcall_debug' to the kernel command line (if you would have looked at
+do_initcalls() and do_one_initcall(), you would have known).
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-1264883109-1219223192=:4596--
