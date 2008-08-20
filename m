@@ -1,70 +1,74 @@
-From: Bill Traynor <wmat@naoi.ca>
-Subject: Re: New elinux.org mailing lists
-Date: Tue, 19 Aug 2008 23:42:14 -0400
-Message-ID: <48AB9296.80408@naoi.ca>
-References: <188734.8313.qm@web54402.mail.yahoo.com>
+From: vb <vb@vsbe.com>
+Subject: Re: Adding a new platform
+Date: Tue, 19 Aug 2008 20:57:59 -0700
+Message-ID: <f608b67d0808192057w29988500o2793dfb7f0c99314@mail.gmail.com>
+References: <48AB0A7A.8040209@cisco.com>
+	 <7d1d9c250808192019g6ec73ec7x53563b8ad2130df@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <188734.8313.qm@web54402.mail.yahoo.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:sender
+         :to:subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references
+         :x-google-sender-auth;
+        bh=APFAgepqiOh+DLwsClruL3Hh0ZVU7pOtJKq4/+AAb+0=;
+        b=jdfNo4BugdZkxrlXGl4yA3CAtEpqvIN5kqeoxdrj6+2a2QlesYlrFX1QeyesIq+ELC
+         Yh5N3daHDQMkgKQEQpOIxagpva6D+yeWrkW9cQG6TGdC0pqJ4xrZc/fCFFs9ZOiG0jKO
+         /f9dPz/TSTcSKHGziBBLiail1nRpNyOqg421Q=
+In-Reply-To: <7d1d9c250808192019g6ec73ec7x53563b8ad2130df@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: dave123_aml@yahoo.com
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Paul Gortmaker <paul.gortmaker@gmail.com>
+Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
 
-David Anders wrote:
-> bill aka wmat,
+On Tue, Aug 19, 2008 at 8:19 PM, Paul Gortmaker
+<paul.gortmaker@gmail.com> wrote:
+> On Tue, Aug 19, 2008 at 2:01 PM, David VomLehn <dvomlehn@cisco.com> wrote:
+>> I'm working to educate our management on the need to get our platform in the
+>> kernel mainline. I expect I will be asked to tell them how much work this
+>> is. What do we need to do to add a new MIPS platform?
 >
-> could you add something for hacking news? maybe something like device-hacking@elinux.org  ?
+> Based on the phrase "educate our management"  -- I would strongly suggest you
+> have a look at Jonathan Corbet's document that describes the process and the
+> eventual value-add of having things in-kernel -- with an audience of non-kernel
+> hackers in mind.  I think this will really assist you in your efforts,
+> and I'm glad that
+> Jonathan put the time into this that he did.
 >
-> i think this would be good to use for things like the zipit and news of cheap devices for hacking.
->   
-Couldn't we just use the discuss list for these things?
-> dave aka prpplague
+> His original post can be viewed here:
 >
+> http://lkml.org/lkml/2008/7/29/363
 >
+> or here:
 >
+> http://lwn.net/Articles/291967/
 >
->
-> --- On Tue, 8/19/08, Bill Traynor <wmat@naoi.ca> wrote:
->
->   
->> From: Bill Traynor <wmat@naoi.ca>
->> Subject: New elinux.org mailing lists
->> To: linux-embedded@vger.kernel.org
->> Date: Tuesday, August 19, 2008, 2:56 PM
->> I've added a few mailing lists to elinux.org at
->> http://elinux.org/ELinuxWiki:Mailing_List
->>
->> "Announce" is the ubiquitous announce list and
->> will be extremely low traffic.
->> "wiki-dev" is for anyone interested in the
->> content/functionality of the wiki.
->> "discuss" is for everything else.
->>
->> The "discuss" list is probably most applicable to
->> the linux-embedded
->> audience and will be dedicated to topics that would
->> otherwise not be
->> applicable to this list, such as detailed discussion about
->> particular
->> devices, and or non-kernel specific topics.
->>
->> Thanks
->> Bill
->> --
->> To unsubscribe from this list: send the line
->> "unsubscribe linux-embedded" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at 
->> http://vger.kernel.org/majordomo-info.html
->>     
->
->
->       
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->   
+
+This indeed is a very interesting document. I can hardly agree with
+the below point, however:
+
++- While kernel developers strive to maintain a stable interface to user
++  space, the internal kernel API is in constant flux.  The lack of a stable
++  internal interface is a deliberate design decision; it allows fundamental
++  improvements to be made at any time and results in higher-quality code.
++  But one result of that policy is that any out-of-tree code requires
++  constant upkeep if it is to work with new kernels.  Maintaining
++  out-of-tree code requires significant amounts of work just to keep that
++  code working.
+
+so, say a developer submits a proprietary driver and it gets accepted.
+Then some internal kernel interface gets changed. Who now has to
+modify and retest the driver? Is it the person who introduces the
+change (how can he even do this, as he does not have the proprietary
+hardware available)? Or is this the original submitter - then where is
+the benefit of saving on upkeep?
+
+This constant change of the kernel innards is hardly a good selling
+point, would you agree?
+
+cheers,
+/vb
