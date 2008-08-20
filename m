@@ -1,80 +1,53 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: Module init for compiled in vs loaded modules
-Date: Wed, 20 Aug 2008 11:06:32 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0808201104131.4596@vixen.sonytel.be>
-References: <487558.67644.qm@web63404.mail.re1.yahoo.com>
+From: vb <vb@vsbe.com>
+Subject: Re: Adding a new platform
+Date: Wed, 20 Aug 2008 08:39:17 -0700
+Message-ID: <f608b67d0808200839l2b41f0fejbf813a5dbc6e9fc4@mail.gmail.com>
+References: <48AB0A7A.8040209@cisco.com>
+	 <7d1d9c250808192019g6ec73ec7x53563b8ad2130df@mail.gmail.com>
+	 <f608b67d0808192057w29988500o2793dfb7f0c99314@mail.gmail.com>
+	 <7d1d9c250808192129j3fb7ef28p8f404c6affd82078@mail.gmail.com>
+	 <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
+	 <20080820101044.5df8b7d8@hskinnemo-gx745.norway.atmel.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1264883109-1219223192=:4596"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <487558.67644.qm@web63404.mail.re1.yahoo.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:sender
+         :to:subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references
+         :x-google-sender-auth;
+        bh=ohXzzxFroYexCsORSCP6xo4cwOEqP3nCULYJIydLnIA=;
+        b=cg7n0qgjJrXigBsMFGVgfwDOnVxqUdoEg1LHfR1855svlXHj7grZwj4DYLL+86ULzr
+         mQxCo+YJNoIKwUlRMqGuOitCod82S/tQtUIr6wGJZM+KZtACmnJp6cugNfbAAUNRqZ2I
+         yyn4PuFJKO9n2YHPgW29L8wNuAUyTuGarvRUc=
+In-Reply-To: <20080820101044.5df8b7d8@hskinnemo-gx745.norway.atmel.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Fundu <fundu_1999@yahoo.com>
-Cc: linux embedded <linux-embedded@vger.kernel.org>, Amol Lad <amol.lad@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, Aug 20, 2008 at 1:10 AM, Haavard Skinnemoen
+<haavard.skinnemoen@atmel.com> wrote:
+> vb <vb@vsbe.com> wrote:
+>> Would such a driver be accepted? Wouldn't such a driver get stale
+>> after a few kernel releases?
+>
+> Yes, the kernel contains tons of such platform-specific drivers. No, it
+> won't get stale as long as someone who has access to the hardware is
+> willing to test a -rc kernel every once in a while.
+>
+> You can't really expect to get away with no maintenance at all, but in
+> my experience, it takes much less effort to maintain a driver in-tree
+> than out-of-tree. It's also much easier to get help if it's in-tree.
+>
 
----584349381-1264883109-1219223192=:4596
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+fair enough, maybe this paragraph should be added to the original document.
 
-On Tue, 19 Aug 2008, Fundu wrote:
-> > linux/init.h:
-> > 
-> > #ifndef MODULE
-> > ...
-> > #define module_init(x)  __initcall(x);
-> > #define __initcall(fn) device_initcall(fn)
-> > #define device_initcall(fn)    
-> > __define_initcall("6",fn)
-> > #define __define_initcall(level,fn) \
-> >     static initcall_t __initcall_##fn __attribute_used__
-> > \
-> >     __attribute__((__section__(".initcall" level
-> > ".init"))) = fn
-> > ...
-> > #endif
-> > 
-> > initcalls are processed in do_initcalls function in
-> > init/main.c
-> > 
-> > static void __init do_basic_setup(void)
-> > {
-> >     ....
-> >     do_initcalls();
-> > }
-> > 
-> > >
-> > > thanks !
-> > 
-> > Amol
-> thanks Rajat and Amol. 
-> 
-> One other question,
-> 1) how does the kernel know which module to load first in order to satisfy dependencies issues ?
+cheers,
+/v
 
-By looking at the needed symbols (cfr. depmod).
-
-> 2) is there a way i could print the module init fn name from do_initcalls. to see in what order compiled in modules are called.
-
-Add `initcall_debug' to the kernel command line (if you would have looked at
-do_initcalls() and do_one_initcall(), you would have known).
-
-With kind regards,
-
-Geert Uytterhoeven
-Software Architect
-
-Sony Techsoft Centre Europe
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
-
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
-
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 · RPR Brussels
-Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-1264883109-1219223192=:4596--
+> Haavard
+>
