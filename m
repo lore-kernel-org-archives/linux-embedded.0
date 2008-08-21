@@ -1,47 +1,51 @@
-From: "Jared Hulbert" <jaredeh@gmail.com>
-Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
-Date: Thu, 21 Aug 2008 08:17:21 -0700
-Message-ID: <6934efce0808210817h489bbeafyaf27217ca68bd31e@mail.gmail.com>
-References: <48AD00F8.1030004@gmail.com> <200808211339.37187.arnd@arndb.de>
-	 <6934efce0808210755n1977e085o63b8b91e84575dc9@mail.gmail.com>
-	 <200808211706.37761.arnd@arndb.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
+Date: Thu, 21 Aug 2008 17:12:26 +0200
+Message-ID: <200808211712.27146.arnd@arndb.de>
+References: <48AD00F0.5030403@gmail.com> <200808211417.14425.arnd@arndb.de> <6934efce0808210806r701f2e3bo677d2bd2da78faec@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=bCFyOQICpeirCaCUNGrWCcvzYTn1BbDNWTBVKdO9V+0=;
-        b=XTSV/RrBWE3tKpXwKBkzZsPo2TRb0GfvUotZHvQYTP2aBRNO9Xj8HewafK2lshcbtS
-         OuBI8750kKhp+DLp4tuZHAF4P1ZKO9WxeZFOphMNzrx/E4ztnr0a3YCcRvE6EEbWa2Hz
-         7q9Kmsw45PrMUjOzvZXA49AkxCD8gmcOUpbUk=
-In-Reply-To: <200808211706.37761.arnd@arndb.de>
+In-Reply-To: <6934efce0808210806r701f2e3bo677d2bd2da78faec@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: David Woodhouse <dwmw2@infradead.org>, carsteno@de.ibm.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-> /proc has the same ABI restrictions as sysfs. We more or less stopped
-> allowing new files in /proc some 5 years ago for this reason. I didn't
-> even read beyond the word /proc to know that what you do here is wrong.
-> debugfs is normally easier to use than procfs as well, you just
-> define some file_operations with read/write callbacks and call
-> debugfs_create_file with the path name below /sys/kernel/debug.
+On Thursday 21 August 2008, Jared Hulbert wrote:
+> > Have you seen any benefit of the rwsem over a simple mutex? I would=
+ guess
+> > that you can never even get into the situation where you get concur=
+rent
+> > readers since I haven't found a single down_read() in your code, on=
+ly
+> > downgrade_write()
+>=20
+> We implemented a rwsem here because you can get concurrent readers.
+> My understanding is that downgrade_write() puts the rewem into the
+> same state as down_read(). =C2=A0Am I mistaken?
 
-no /proc.
-thanks for the explanation.
+Your interpretation of downgrade_write is correct, but if every thread
+always does
 
-So /sys/kernel/debug/axfs/volume0 would work?
+down_write();
+serialized_code();
+downgrade_write();
+parallel_code();
+up_read();
 
-> 4) no profiling at all
-> The profiling code has certainly been useful to you during development,
-> and you should keep that code around for your own work on it,
-> but maybe you should not push that upstream, because regular users
-> are not going to need it.
+Then you still won't have any concurrency, because each thread trying
+to down_write() will be blocked until the previous one has done its up_=
+read(),
+causing parallel_code() to be serialized as well.
 
-Nope.  Profiling is absolutely fundamental to how AXFS works.  Read
-the [PATCH 00/10] thread again.
+In addition to that, I'd still consider it better to use a simple mutex
+if parallel_code() is a much faster operation than serialized_code(), a=
+s it
+is in your case, where only the memcpy is parallel and that is much slo=
+wer
+than the deflate.
+
+	Arnd <><
