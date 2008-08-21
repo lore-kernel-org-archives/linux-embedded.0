@@ -1,51 +1,52 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
-Date: Thu, 21 Aug 2008 17:12:26 +0200
-Message-ID: <200808211712.27146.arnd@arndb.de>
-References: <48AD00F0.5030403@gmail.com> <200808211417.14425.arnd@arndb.de> <6934efce0808210806r701f2e3bo677d2bd2da78faec@mail.gmail.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
+Date: Thu, 21 Aug 2008 17:18:06 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0808211716280.20704@vixen.sonytel.be>
+References: <48AD00F8.1030004@gmail.com> <200808211339.37187.arnd@arndb.de>
+ <6934efce0808210755n1977e085o63b8b91e84575dc9@mail.gmail.com>
+ <200808211706.37761.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-2097915047-1219331886=:20704"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <6934efce0808210806r701f2e3bo677d2bd2da78faec@mail.gmail.com>
-Content-Disposition: inline
+In-Reply-To: <200808211706.37761.arnd@arndb.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Jared Hulbert <jaredeh@gmail.com>, David Woodhouse <dwmw2@infradead.org>, carsteno@de.ibm.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>
 
-On Thursday 21 August 2008, Jared Hulbert wrote:
-> > Have you seen any benefit of the rwsem over a simple mutex? I would=
- guess
-> > that you can never even get into the situation where you get concur=
-rent
-> > readers since I haven't found a single down_read() in your code, on=
-ly
-> > downgrade_write()
->=20
-> We implemented a rwsem here because you can get concurrent readers.
-> My understanding is that downgrade_write() puts the rewem into the
-> same state as down_read(). =C2=A0Am I mistaken?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Your interpretation of downgrade_write is correct, but if every thread
-always does
+---584349381-2097915047-1219331886=:20704
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-down_write();
-serialized_code();
-downgrade_write();
-parallel_code();
-up_read();
+On Thu, 21 Aug 2008, Arnd Bergmann wrote:
+> On Thursday 21 August 2008, Jared Hulbert wrote:
+> 4) no profiling at all
+> The profiling code has certainly been useful to you during development,
+> and you should keep that code around for your own work on it,
+> but maybe you should not push that upstream, because regular users
+> are not going to need it.
 
-Then you still won't have any concurrency, because each thread trying
-to down_write() will be blocked until the previous one has done its up_=
-read(),
-causing parallel_code() to be serialized as well.
+The profiling is needed to feedback into mkfs.axfs, to decide which pages to
+make XIP (in NOR) or not (in NAND). So yes, normal users need it when creating
+file systems for a mixed NOR/NAND FLASH system.
 
-In addition to that, I'd still consider it better to use a simple mutex
-if parallel_code() is a much faster operation than serialized_code(), a=
-s it
-is in your case, where only the memcpy is parallel and that is much slo=
-wer
-than the deflate.
+With kind regards,
 
-	Arnd <><
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-2097915047-1219331886=:20704--
