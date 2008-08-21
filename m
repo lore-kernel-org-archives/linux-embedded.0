@@ -1,75 +1,56 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Thu, 21 Aug 2008 16:49:40 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0808211641150.20704@vixen.sonytel.be>
-References: <48AD00C4.6060302@gmail.com> <20080821083916.GF5706@disturbed>
- <6934efce0808210719s6458dc77w2c0755a4bf90bf8a@mail.gmail.com>
- <c384c5ea0808210731k17ccc836u60c4803c3abfea31@mail.gmail.com>
+From: "Jared Hulbert" <jaredeh@gmail.com>
+Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
+Date: Thu, 21 Aug 2008 07:55:34 -0700
+Message-ID: <6934efce0808210755n1977e085o63b8b91e84575dc9@mail.gmail.com>
+References: <48AD00F8.1030004@gmail.com> <48AD2AFF.5060609@de.ibm.com>
+	 <1219308560.2988.247.camel@pmac.infradead.org>
+	 <200808211339.37187.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1853657733-1219330180=:20704"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <c384c5ea0808210731k17ccc836u60c4803c3abfea31@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=/Xhu9Ep/oHgBDjHuZPl1jGRwskHE4pUXnP2vy1kiw5E=;
+        b=RhNrCpcxaz9sk4a+AmTpzvoeJtD+UCPE6atr8ddwbYTXg+Tsyxwcuk59TPo/XwZkfu
+         JaIPEQA6ZOlA6jbmWcOJR8iYOwxOMGciYcDXQl9voLz6Qc2U2bcfZmWRVCu3c9YrjWMP
+         6L3oOaBl62vj2YlIhxjr9otVdEpqgS1Z1KjJI=
+In-Reply-To: <200808211339.37187.arnd@arndb.de>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Leon Woestenberg <leon.woestenberg@gmail.com>
-Cc: Jared Hulbert <jaredeh@gmail.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Type: text/plain; charset="us-ascii"
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: David Woodhouse <dwmw2@infradead.org>, carsteno@de.ibm.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, nickpiggin@yahoo.com.au
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Thu, Aug 21, 2008 at 4:39 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Thursday 21 August 2008, David Woodhouse wrote:
+>> On Thu, 2008-08-21 at 10:44 +0200, Carsten Otte wrote:
+>> >
+>> > Exporting profiling data for a file system in another file system
+>> > (/proc) seems not very straigtforward to me. I think it is worth
+>> > considering to export this information via the same mount point.
+>>
+>> I would have said sysfs, rather than 'the same mount point'.
+>>
+>
+> Let me throw in debugfs as my preferred option. sysfs is for stable
+> interfaces, while profiling generally fits into the debugging category.
 
----584349381-1853657733-1219330180=:20704
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Three responses, three suggestions....
 
-On Thu, 21 Aug 2008, Leon Woestenberg wrote:
-> On Thu, Aug 21, 2008 at 4:19 PM, Jared Hulbert <jaredeh@gmail.com> wrote:
-> >> FWIW, I'm not sure it's a good idea to name this new filesystem AXFS.
-> >> People are almost certainly going to confuse it with XFS despite
-> >
-> People that care about their filesystem choice know their choices.
-> People that don't
-> care, well they don't care.
-> 
-> Maybe AXIPFS would be the close alternative.
+1) same mount point -
+I don't see how this works without an ioctl.  I can't just make up
+files in my mounted filesystem.   You expect the mounted version to
+match input to the mkfs.  I'd not be happy with an ioctl.  You can
+just read it.
 
-It seems to be useful for non-XIP, too...
+2) sysfs -
+I agree with Carsten, I don't see how this fits in the sysfs hierarchy.
 
-> One question on the use-case profiling and subsequent image rebuild:
-> 
-> What if the use-case did not cover all cases of XIP use?
-> 
-> If a compressed page is attempted to be executed, will the filesystem
-> fall back to decompression to RAM and execution from RAM, or will this
-> result in a faulty system?
-> 
-> The design choices look real good. Congrats on the achievement.
+3) debugfs -
+I don't know diddly about this.
 
-You probably want to read the paper at
-http://ols.fedoraproject.org/OLS/Reprints-2008/hulbert-reprint.pdf
-
-BTW, I regret now not having attended the OLS presentation, because there was
-so much emphasis on `XIP' in the description :-)
-
-Fortunately it's been recorded:
-
-http://free-electrons.com/community/videos/conferences/
-
-so I'm gonna watch it right now...
-
-With kind regards,
-
-Geert Uytterhoeven
-Software Architect
-
-Sony Techsoft Centre Europe
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
-
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
-
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 · RPR Brussels
-Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-1853657733-1219330180=:20704--
+So why not /proc?
