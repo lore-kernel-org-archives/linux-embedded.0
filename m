@@ -1,26 +1,40 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 02/10] AXFS: Kconfig and Makefiles
-Date: Thu, 21 Aug 2008 13:24:22 +0200
-Message-ID: <200808211324.22989.arnd@arndb.de>
-References: <48AD00DF.9080207@gmail.com>
+From: Sven Wegener <sven.wegener@stealer.net>
+Subject: Re: [PATCH 06/10] AXFS: axfs_super.c
+Date: Thu, 21 Aug 2008 13:27:57 +0200 (CEST)
+Message-ID: <alpine.LNX.1.10.0808211325530.12259@titan.stealer.net>
+References: <48AD0101.4020505@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48AD00DF.9080207@gmail.com>
-Content-Disposition: inline
+In-Reply-To: <48AD0101.4020505@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: jaredeh@gmail.com
-Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-15?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Thursday 21 August 2008, Jared Hulbert wrote:
-> The Kconfig edits and Makefiles required for AXFS.
+On Wed, 20 Aug 2008, Jared Hulbert wrote:
+
+> The many different devices AXFS can mount to and the various
+> dual device mounting schemes are supported here.
 > 
 > Signed-off-by: Jared Hulbert <jaredeh@gmail.com>
+> ---
+> +static int __init init_axfs_fs(void)
+> +{
+> +	axfs_uncompress_init();
 
-If you split out this patch separate from the files, please make it the
-*last* patch so that you cannot get build errors during a later git-bisect
-through the middle of your series.
+one more thing, axfs_uncompress_init() can fail
 
-	Arnd <><
+> +	return register_filesystem(&axfs_fs_type);
+> +}
+> +
+> +static void __exit exit_axfs_fs(void)
+> +{
+> +	axfs_uncompress_exit();
+> +	unregister_filesystem(&axfs_fs_type);
+> +}
+> +
+> +module_init(init_axfs_fs);
+> +module_exit(exit_axfs_fs);
+> +MODULE_LICENSE("GPL");
