@@ -1,53 +1,46 @@
-From: vb <vb@vsbe.com>
+From: Charles Manning <manningc2@actrix.gen.nz>
 Subject: Re: Adding a new platform
-Date: Wed, 20 Aug 2008 08:39:17 -0700
-Message-ID: <f608b67d0808200839l2b41f0fejbf813a5dbc6e9fc4@mail.gmail.com>
-References: <48AB0A7A.8040209@cisco.com>
-	 <7d1d9c250808192019g6ec73ec7x53563b8ad2130df@mail.gmail.com>
-	 <f608b67d0808192057w29988500o2793dfb7f0c99314@mail.gmail.com>
-	 <7d1d9c250808192129j3fb7ef28p8f404c6affd82078@mail.gmail.com>
-	 <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
-	 <20080820101044.5df8b7d8@hskinnemo-gx745.norway.atmel.com>
+Date: Thu, 21 Aug 2008 15:02:58 +1200
+Message-ID: <200808211502.58206.manningc2@actrix.gen.nz>
+References: <48AB0A7A.8040209@cisco.com> <7d1d9c250808192129j3fb7ef28p8f404c6affd82078@mail.gmail.com> <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:sender
-         :to:subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references
-         :x-google-sender-auth;
-        bh=ohXzzxFroYexCsORSCP6xo4cwOEqP3nCULYJIydLnIA=;
-        b=cg7n0qgjJrXigBsMFGVgfwDOnVxqUdoEg1LHfR1855svlXHj7grZwj4DYLL+86ULzr
-         mQxCo+YJNoIKwUlRMqGuOitCod82S/tQtUIr6wGJZM+KZtACmnJp6cugNfbAAUNRqZ2I
-         yyn4PuFJKO9n2YHPgW29L8wNuAUyTuGarvRUc=
-In-Reply-To: <20080820101044.5df8b7d8@hskinnemo-gx745.norway.atmel.com>
+In-Reply-To: <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Cc: Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
+To: vb <vb@vsbe.com>
+Cc: Paul Gortmaker <paul.gortmaker@gmail.com>, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
 
-On Wed, Aug 20, 2008 at 1:10 AM, Haavard Skinnemoen
-<haavard.skinnemoen@atmel.com> wrote:
-> vb <vb@vsbe.com> wrote:
->> Would such a driver be accepted? Wouldn't such a driver get stale
->> after a few kernel releases?
+On Wednesday 20 August 2008 17:15:01 vb wrote:
+> On Tue, Aug 19, 2008 at 9:29 PM, Paul Gortmaker
 >
-> Yes, the kernel contains tons of such platform-specific drivers. No, it
-> won't get stale as long as someone who has access to the hardware is
-> willing to test a -rc kernel every once in a while.
+> <paul.gortmaker@gmail.com> wrote:
+> > On Tue, Aug 19, 2008 at 11:57 PM, vb <vb@vsbe.com> wrote:
+> >> so, say a developer submits a proprietary driver and it gets accepted.
+> >
+> > Doesn't happen.  By design.  If the driver is proprietary then it is
+> > presumably not meant for open distribution, and hence not compatible with
+> > GPL and widespread distribution into 100,000 public git repositories.  So
+> > it won't get submitted and it won't get accepted.
 >
-> You can't really expect to get away with no maintenance at all, but in
-> my experience, it takes much less effort to maintain a driver in-tree
-> than out-of-tree. It's also much easier to get help if it's in-tree.
+> I guess 'proprietary' is not the right term then, how do you call a
+> driver which is not a secret and not a problem to release, but
+> controls some hardware present in only in certain devices of a certain
+> company.
 >
+> Would such a driver be accepted? Wouldn't such a driver get stale
+> after a few kernel releases?
 
-fair enough, maybe this paragraph should be added to the original document.
+In-tree is no silver bullet.
 
-cheers,
-/v
+When people modify internal APIs they will likely fix anything that breaks 
+compilation. However many things are more subtle than that and it is very 
+easy to end up with a driver or other code that compiles but does not work 
+properly.
 
-> Haavard
->
+Luckily APIs for drivers (the most common stuff that people work on) don't 
+change that much, and the interfaces are reasonably clear. If you want some 
+hell then try working on file systems :-).
