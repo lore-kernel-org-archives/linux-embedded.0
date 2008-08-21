@@ -1,47 +1,32 @@
 From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: Adding a new platform
-Date: Thu, 21 Aug 2008 09:40:39 +0100
-Message-ID: <1219308039.2988.242.camel@pmac.infradead.org>
-References: <48AB0A7A.8040209@cisco.com>
-	 <7d1d9c250808192129j3fb7ef28p8f404c6affd82078@mail.gmail.com>
-	 <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
-	 <200808211502.58206.manningc2@actrix.gen.nz>
+Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
+Date: Thu, 21 Aug 2008 09:49:19 +0100
+Message-ID: <1219308560.2988.247.camel@pmac.infradead.org>
+References: <48AD00F8.1030004@gmail.com>  <48AD2AFF.5060609@de.ibm.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200808211502.58206.manningc2@actrix.gen.nz>
+In-Reply-To: <48AD2AFF.5060609@de.ibm.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Charles Manning <manningc2@actrix.gen.nz>
-Cc: vb <vb@vsbe.com>, Paul Gortmaker <paul.gortmaker@gmail.com>, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
+To: carsteno@de.ibm.com
+Cc: jaredeh@gmail.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@AM.SONY.COM, nickpiggin@yahoo.com.au
 
-On Thu, 2008-08-21 at 15:02 +1200, Charles Manning wrote:
-> 
-> In-tree is no silver bullet.
-> 
-> When people modify internal APIs they will likely fix anything that breaks 
-> compilation. However many things are more subtle than that and it is very 
-> easy to end up with a driver or other code that compiles but does not work 
-> properly.
-> 
-> Luckily APIs for drivers (the most common stuff that people work on) don't 
-> change that much, and the interfaces are reasonably clear. If you want some 
-> hell then try working on file systems :-).
+On Thu, 2008-08-21 at 10:44 +0200, Carsten Otte wrote:
+> Jared Hulbert wrote:
+> > Profiling is a fault instrumentation and /proc formating system.
+> > This is used to get an accurate picture of what the pages are actually used.
+> > Using this info the image can be optimized for XIP
 
-File systems show an excellent example of why you're wrong, in fact. The
-API for file systems changes quite a lot, and the people who make those
-changes do tend to fix up all the in-tree file systems simultaneously,
--- and since they're doing it with a full understanding of the
-implications of the change they're making, they usually manage to get
-the change _right_.
+> Exporting profiling data for a file system in another file system 
+> (/proc) seems not very straigtforward to me. I think it is worth 
+> considering to export this information via the same mount point.
 
-I find it's more common to introduce subtle errors when the person
-modifying the core API _hasn't_ also modified the driver/fs code which
-uses that API. Which is what happens when you have out-of-tree code.
-
-I'd rather remove my gonads with a rusty spoon than maintain an
-out-of-tree file system.
+I would have said sysfs, rather than 'the same mount point'.
 
 -- 
-dwmw2
+David Woodhouse                            Open Source Technology Centre
+David.Woodhouse@intel.com                              Intel Corporation
+
+
