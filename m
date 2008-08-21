@@ -1,54 +1,63 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
-Date: Thu, 21 Aug 2008 14:17:13 +0200
-Message-ID: <200808211417.14425.arnd@arndb.de>
-References: <48AD00F0.5030403@gmail.com>
+Subject: Re: [PATCH 03/10] AXFS: axfs.h
+Date: Thu, 21 Aug 2008 14:24:31 +0200
+Message-ID: <200808211424.31966.arnd@arndb.de>
+References: <48AD00E6.2070505@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753695AbYHUMS1@vger.kernel.org>
-In-Reply-To: <48AD00F0.5030403@gmail.com>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <48AD00E6.2070505@gmail.com>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
 To: jaredeh@gmail.com
 Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-T24gVGh1cnNkYXkgMjEgQXVndXN0IDIwMDgsIEphcmVkIEh1bGJlcnQgd3JvdGU6Cj4gKyAgICAg
-ICBhcnJheV9pbmRleCA9IEFYRlNfR0VUX0lOT0RFX0FSUkFZX0lOREVYKHNiaSwgaW5vX251bWJl
-cik7Cj4gKyAgICAgICBhcnJheV9pbmRleCArPSBwYWdlLT5pbmRleDsKPiArCj4gKyAgICAgICBu
-b2RlX2luZGV4ID0gQVhGU19HRVRfTk9ERV9JTkRFWChzYmksIGFycmF5X2luZGV4KTsKPiArICAg
-ICAgIG5vZGVfdHlwZSA9IEFYRlNfR0VUX05PREVfVFlQRShzYmksIGFycmF5X2luZGV4KTsKPiAr
-Cj4gK6CgoKCgoKBpZiAobm9kZV90eXBlID09IENvbXByZXNzZWQpIHsKPiAroKCgoKCgoKCgoKCg
-oKCgLyogbm9kZSBpcyBpbiBjb21wZXNzZWQgcmVnaW9uICovCj4gK6CgoKCgoKCgoKCgoKCgoGNu
-b2RlX29mZnNldCA9IEFYRlNfR0VUX0NOT0RFX09GRlNFVChzYmksIG5vZGVfaW5kZXgpOwo+ICug
-oKCgoKCgoKCgoKCgoKBjbm9kZV9pbmRleCA9IEFYRlNfR0VUX0NOT0RFX0lOREVYKHNiaSwgbm9k
-ZV9pbmRleCk7Cj4gK6CgoKCgoKCgoKCgoKCgoGRvd25fd3JpdGUoJnNiaS0+bG9jayk7Cj4gK6Cg
-oKCgoKCgoKCgoKCgoGlmIChjbm9kZV9pbmRleCAhPSBzYmktPmN1cnJlbnRfY25vZGVfaW5kZXgp
-IHsKPiAroKCgoKCgoKCgoKCgoKCgoKCgoKCgoKAvKiB1bmNvbXByZXNzIG9ubHkgbmVjZXNzYXJ5
-IGlmIGRpZmZlcmVudCBjYmxvY2sgKi8KPiAroKCgoKCgoKCgoKCgoKCgoKCgoKCgoKBvZnMgPSBB
-WEZTX0dFVF9DQkxPQ0tfT0ZGU0VUKHNiaSwgY25vZGVfaW5kZXgpOwo+ICugoKCgoKCgoKCgoKCg
-oKCgoKCgoKCgoGxlbiA9IEFYRlNfR0VUX0NCTE9DS19PRkZTRVQoc2JpLCBjbm9kZV9pbmRleCAr
-IDEpOwo+ICugoKCgoKCgoKCgoKCgoKCgoKCgoKCgoGxlbiAtPSBvZnM7Cj4gK6CgoKCgoKCgoKCg
-oKCgoKCgoKCgoKCgYXhmc19jb3B5X2RhdGEoc2IsIGNibGsxLCAmKHNiaS0+Y29tcHJlc3NlZCks
-IG9mcywgbGVuKTsKPiAroKCgoKCgoKCgoKCgoKCgoKCgoKCgoKBheGZzX3VuY29tcHJlc3NfYmxv
-Y2soY2JsazAsIGNibGtfc2l6ZSwgY2JsazEsIGxlbik7Cj4gK6CgoKCgoKCgoKCgoKCgoKCgoKCg
-oKCgc2JpLT5jdXJyZW50X2Nub2RlX2luZGV4ID0gY25vZGVfaW5kZXg7Cj4gK6CgoKCgoKCgoKCg
-oKCgoH0KPiAroKCgoKCgoKCgoKCgoKCgZG93bmdyYWRlX3dyaXRlKCZzYmktPmxvY2spOwo+ICug
-oKCgoKCgoKCgoKCgoKBtYXhfbGVuID0gY2Jsa19zaXplIC0gY25vZGVfb2Zmc2V0Owo+ICugoKCg
-oKCgoKCgoKCgoKBsZW4gPSBtYXhfbGVuID4gUEFHRV9DQUNIRV9TSVpFID8gUEFHRV9DQUNIRV9T
-SVpFIDogbWF4X2xlbjsKPiAroKCgoKCgoKCgoKCgoKCgc3JjID0gKHZvaWQgKikoKHVuc2lnbmVk
-IGxvbmcpY2JsazAgKyBjbm9kZV9vZmZzZXQpOwo+ICugoKCgoKCgoKCgoKCgoKBtZW1jcHkocGdk
-YXRhLCBzcmMsIGxlbik7Cj4gK6CgoKCgoKCgoKCgoKCgoHVwX3JlYWQoJnNiaS0+bG9jayk7CgpU
-aGlzIGxvb2tzIHZlcnkgbmljZSwgYnV0IGNvdWxkIHVzZSBzb21lIGNvbW1lbnRzIGFib3V0IGhv
-dyB0aGUgZGF0YSBpcwphY3R1YWxseSBzdG9yZWQgb24gZGlzay4gSXQgdG9vayBtZSBzb21lIHRp
-bWUgdG8gZmlndXJlIG91dCB0aGF0IGl0IGFjdHVhbGx5CmFsbG93cyB0byBkbyB0YWlsIG1lcmdp
-bmcgaW50byBjb21wcmVzc2VkIGJsb2Nrcywgd2hpY2ggSSB3YXMgYWJvdXQgdG8gc3VnZ2VzdAp5
-b3UgaW1wbGVtZW50IDstKS4gQ3JhbWZzIGRvZXNuJ3QgaGF2ZSB0aGVtLCBhbmQgSSBmb3VuZCB0
-aGF0IHRoZXkgYXJlIHRoZQptYWluIHJlYXNvbiB3aHkgc3F1YXNoZnMgY29tcHJlc3NlcyBiZXR0
-ZXIgdGhhbiBjcmFtZnMsIGJlc2lkZXMgdGhlIGRlZmF1bHQKYmxvY2sgc2l6ZSwgd2hpY2ggeW91
-IGNhbiBjaGFuZ2Ugb24gZWl0aGVyIG9uZS4KCkhhdmUgeW91IHNlZW4gYW55IGJlbmVmaXQgb2Yg
-dGhlIHJ3c2VtIG92ZXIgYSBzaW1wbGUgbXV0ZXg/IEkgd291bGQgZ3Vlc3MKdGhhdCB5b3UgY2Fu
-IG5ldmVyIGV2ZW4gZ2V0IGludG8gdGhlIHNpdHVhdGlvbiB3aGVyZSB5b3UgZ2V0IGNvbmN1cnJl
-bnQKcmVhZGVycyBzaW5jZSBJIGhhdmVuJ3QgZm91bmQgYSBzaW5nbGUgZG93bl9yZWFkKCkgaW4g
-eW91ciBjb2RlLCBvbmx5CmRvd25ncmFkZV93cml0ZSgpLgoKCUFybmQgPD48Cg==
+On Thursday 21 August 2008, Jared Hulbert wrote:
+> +static inline u64 axfs_bytetable_stitch(u8 depth, u8 *table, u64 ind=
+ex)
+> +{
+> +=A0=A0=A0=A0=A0=A0=A0u64 i;
+> +=A0=A0=A0=A0=A0=A0=A0u64 output =3D 0;
+> +=A0=A0=A0=A0=A0=A0=A0u64 byte =3D 0;
+> +=A0=A0=A0=A0=A0=A0=A0u64 j;
+> +=A0=A0=A0=A0=A0=A0=A0u64 bits;
+> +
+> +=A0=A0=A0=A0=A0=A0=A0for (i =3D 0; i < depth; i++) {
+> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0j =3D index * depth + i=
+;
+> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0bits =3D 8 * (depth - i=
+ - 1);
+> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0byte =3D table[j];
+> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0output +=3D byte << bit=
+s;
+> +=A0=A0=A0=A0=A0=A0=A0}
+> +=A0=A0=A0=A0=A0=A0=A0return output;
+> +}
+> +
+> +#define AXFS_GET_BYTETABLE_VAL(desc,index) \
+> + =A0axfs_bytetable_stitch(((struct axfs_region_desc)(desc)).table_by=
+te_depth,\
+> + =A0(u8 *)((struct axfs_region_desc)(desc)).virt_addr, index)
+> +
+
+This bytetable stuff looks overly complicated, both the data structure =
+and
+the access method. It seems like you are implementing your own custom H=
+uffman
+compression with this.
+
+Is the reasonn for the bytetable just to pack numbers efficiently, or d=
+o you
+have a different intention?
+
+Did you see a significant size benefit over simply storing all metadata=
+ as
+uncompressed data structures like in cramfs?
+
+Have you considered storing simple dentry/inode data in node_type=3D=3D=
+Compressed
+nodes?
+
+	Arnd <><
