@@ -1,51 +1,36 @@
-From: "Leon Woestenberg" <leon.woestenberg@gmail.com>
-Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Thu, 21 Aug 2008 16:31:44 +0200
-Message-ID: <c384c5ea0808210731k17ccc836u60c4803c3abfea31@mail.gmail.com>
-References: <48AD00C4.6060302@gmail.com> <20080821083916.GF5706@disturbed>
-	 <6934efce0808210719s6458dc77w2c0755a4bf90bf8a@mail.gmail.com>
+From: "Jared Hulbert" <jaredeh@gmail.com>
+Subject: Re: [PATCH 10/10] AXFS: axfs_uncompress.c
+Date: Thu, 21 Aug 2008 07:35:21 -0700
+Message-ID: <6934efce0808210735w479075abga9f660e42ab8935d@mail.gmail.com>
+References: <48AD0126.1050609@gmail.com> <1219318838.18027.68.camel@sauron>
+	 <Pine.LNX.4.64.0808211423360.20704@vixen.sonytel.be>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1759907AbYHUOb7@vger.kernel.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1760182AbYHUOft@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from:to
          :subject:cc:in-reply-to:mime-version:content-type
          :content-transfer-encoding:content-disposition:references;
-        bh=aYlfMKEbmcLkpLQkOhKn8VTdRX5t7EjNz547Tv94l84=;
-        b=CiqxdTsSLY5ZY7JIbmziBa3T4fKT+YlJggvkWyQunnqTEr108b+gu9pqyWazenY/4C
-         tC/XLPmwHTUZxWLr69UW4i7cBwnkNExTc5Uu+ZJD0bMXsuzEg5KzZbh+lGsmkC9lHZ8b
-         6/aY68+JHUjD2ex0M/s8fznj7KRSQFqB4b2Mc=
-In-Reply-To: <6934efce0808210719s6458dc77w2c0755a4bf90bf8a@mail.gmail.com>
+        bh=EcSP7//YrxJuwswpSPFoRahE68GERXcllHcWkpX5/sg=;
+        b=HmtLYcYzVp4yJ6m4qQx1yjWSeKG1XUQeDiLRT665xIo85UJKot3F/gbpwra1i9L7RF
+         0DERTg/a7kS3ENhVNW5cD4g6ZqPE0xsMApcrpiEOLQTVItUcmraNpxx/ouTdSo+/kP+8
+         Qk2nxKPgwWmELUoMIFNaG6OWNcOXUqgBSq/5w=
+In-Reply-To: <Pine.LNX.4.64.0808211423360.20704@vixen.sonytel.be>
 Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Cc: Artem Bityutskiy <dedekind@infradead.org>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-Hello Jared,
-
-On Thu, Aug 21, 2008 at 4:19 PM, Jared Hulbert <jaredeh@gmail.com> wrote:
->> FWIW, I'm not sure it's a good idea to name this new filesystem AXFS.
->> People are almost certainly going to confuse it with XFS despite
+> If you want support for multiple decompression algorithms, you can switch
+> from using zlib_inflate*() directly to calling zlib through the crypto API.
+> Then you can call crypto_alloc_comp() with the correct decompression algorithm
+> name.
 >
-People that care about their filesystem choice know their choices.
-People that don't
-care, well they don't care.
+> For squashfs, I had to modify only ca. 40 lines of code.
 
-Maybe AXIPFS would be the close alternative.
-
-One question on the use-case profiling and subsequent image rebuild:
-
-What if the use-case did not cover all cases of XIP use?
-
-If a compressed page is attempted to be executed, will the filesystem
-fall back to decompression to RAM and execution from RAM, or will this
-result in a faulty system?
-
-The design choices look real good. Congrats on the achievement.
-
-Regards,
--- 
-Leon
+I definately want to support multiple formats.  I have a flag in the
+superblock all ready to go for that.  One problem.  I'm not sure how
+to do it.  Can you point us to some reference code?
