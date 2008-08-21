@@ -1,54 +1,49 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
-Date: Thu, 21 Aug 2008 17:50:44 +0200
-Message-ID: <200808211750.45559.arnd@arndb.de>
-References: <48AD00F8.1030004@gmail.com> <200808211706.37761.arnd@arndb.de> <6934efce0808210817h489bbeafyaf27217ca68bd31e@mail.gmail.com>
+From: "Jared Hulbert" <jaredeh@gmail.com>
+Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
+Date: Thu, 21 Aug 2008 12:32:13 -0700
+Message-ID: <6934efce0808211232i21fcf347vb6baa6502246adb2@mail.gmail.com>
+References: <48AD00C4.6060302@gmail.com>
+	 <ac9c93b10808202332n2654884eh877848df2da59f20@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1759192AbYHUPxJ@vger.kernel.org>
-In-Reply-To: <6934efce0808210817h489bbeafyaf27217ca68bd31e@mail.gmail.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=ROjE+7R/NRJVYvDjlKL143F5BHAMLslfFpRSyCdyf+k=;
+        b=h3bqlxFGbMXzWJl8KB+xJVapNpPDncU/nws50P7E4H0cpxxHXKGRZw8EGKfYOYpMDv
+         3rwLDK0XXsA2fo+7voFyipXH4BnxoJAxU/K67iPkk1m5c6OX00cizgPR+r23SmWl7zKt
+         +8dw8cS9h865tENplLBNRaZ0NowJTP8WY9nx4=
+In-Reply-To: <ac9c93b10808202332n2654884eh877848df2da59f20@mail.gmail.com>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Jared Hulbert <jaredeh@gmail.com>
-Cc: David Woodhouse <dwmw2@infradead.org>, carsteno@de.ibm.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Frans Meulenbroeks <fransmeulenbroeks@gmail.com>
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Thursday 21 August 2008, Jared Hulbert wrote:
-> So /sys/kernel/debug/axfs/volume0 would work?
->=20
-> > 4) no profiling at all
-> > The profiling code has certainly been useful to you during developm=
-ent,
-> > and you should keep that code around for your own work on it,
-> > but maybe you should not push that upstream, because regular users
-> > are not going to need it.
->=20
-> Nope. =C2=A0Profiling is absolutely fundamental to how AXFS works. =C2=
-=A0Read
-> the [PATCH 00/10] thread again.
+> Jared, nice work!
 
-Ok, understood it now. So it actually is a stable interface into
-the file system, which means that debugfs might not be the best
-solution.
+Thanks.
 
-I need to think about this some more. So far none of the options
-are perfect. What I can think of so far includes:
+> A few questions:
 
-1. An ioctl on the mount point of the fs
-2. An ioctl that you need to call on each file
-3. sysfs files is /sys/fs/axfs/
-4. A new virtual file system to be mounted to /sys/fs/axfs/
-5. A file below the device in sysfs, e.g. /sys/block/mtdblk0/axfs-profi=
-le
+I meant to address these before.  Sorry.
 
-I've also taken a look at the format of the profiling data file.
-I'm not sure that it is ideal if you want to be able to share
-identical data blocks between files. Do you currently do that
-in your mkfs? The fs format certainly allows it. I would expect
-that if you checksum each page, you can find duplicates on a page
-basis and save some space this way. However, it can make profiling
-harder if you count based on blocks but report the data based on
-the file name. Not sure what a better solution would look like.
+> - how does this benchmark compared to cramfs and squashfs in a NAND-only system
+>  (or is it just not a good plan to use this with NAND-only (of course
+> I won't get XIP with NAND, I understand that)
 
-	Arnd <><
+I don't know, I'm interested to find out.  I just benchmarked that.
+Actually it should work very well as a NAND-only fs.  Also you do get
+something like XIP with NAND.  If you boot an XIP AXFS image on NAND
+or a blkdev it will copy that XIP region into RAM and "XIP" it from
+there.  I think this will make it very good for LiveCD's.  Though we
+just (minutes ago) realized our testing of that feature was flawed, so
+no guarantees.
+
+> - would axfs be suitable as a filesystem on a ram disk?
+
+It could be.  I plan on implementing support for brd.  That might work nicely.
