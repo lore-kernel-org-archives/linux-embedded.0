@@ -1,7 +1,7 @@
 From: Jared Hulbert <jaredeh@gmail.com>
-Subject: [PATCH 09/10] AXFS: axfs_uml.c
-Date: Wed, 20 Aug 2008 22:46:02 -0700
-Message-ID: <48AD011A.30505@gmail.com>
+Subject: [PATCH 07/10] AXFS: axfs_bdev.c
+Date: Wed, 20 Aug 2008 22:45:47 -0700
+Message-ID: <48AD010B.6030209@gmail.com>
 Reply-To: jaredeh@gmail.com
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -11,25 +11,25 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from:reply-to
          :user-agent:mime-version:to:subject:content-type
          :content-transfer-encoding;
-        bh=o1pVxoX5Mh8tpjGEd52bLk/47WY9VPPJh0qLfQGGkxo=;
-        b=TqmEfbAw4SjbVHImbhLaT9QL22KFvAOMX4tzs/yd+0D1b94HSBlMQLjB9R7bn68Ue7
-         MzbbyCBQTgc5z65tZgcSev+vbk4qQmbZutozbG8VcGw6/ynLAW156kvrT5KSCIK5Urmo
-         UcpFHP+95rFjhInF2LioyctAovp//z3YAwXO8=
+        bh=RcTO90bK6wmWgLQamvLaFWYwbw6tWmylSAL+LtwoHog=;
+        b=WtIIAMdJG7CvXDoohB89/BgZaQcBk6PJRo5M9zuawMLQ87DSCiPu5RgvBKRXEJ0xa6
+         QOWBCK0dPWzB1CppqlnC19CXWPCPKmhkTVS2EKobCR6OeumHWF1Grz6620XA8T8Yho2C
+         Ca9OVx59OB4uSZUeZogMjZNYuk4cfldChEx2E=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@d
 
-UML specific code for working with iomem 'devices'.  UML is handy for testing.
+All the block device code goes here.
 
 Signed-off-by: Jared Hulbert <jaredeh@gmail.com>
 ---
-diff --git a/fs/axfs/axfs_uml.c b/fs/axfs/axfs_uml.c
+diff --git a/fs/axfs/axfs_bdev.c b/fs/axfs/axfs_bdev.c
 new file mode 100644
-index 0000000..7d479a0
+index 0000000..4c6f83c
 --- /dev/null
-+++ b/fs/axfs/axfs_uml.c
-@@ -0,0 +1,47 @@
++++ b/fs/axfs/axfs_bdev.c
+@@ -0,0 +1,158 @@
 +/*
 + * Advanced XIP File System for Linux - AXFS
 + *   Readonly, compressed, and XIP filesystem for Linux systems big and small
@@ -45,36 +45,147 @@ index 0000000..7d479a0
 + *
 + * Project url: http://axfs.sourceforge.net
 + *
-+ * axfs_uml.c -
-+ *   Allows axfs to a UML kernels find_iomem() interface as an XIP device or
-+ *   dummy functions if this is not a UML build.
++ * axfs_bdev.c -
++ *   Allows axfs to use block devices or has dummy functions if block
++ *   device support is compiled out of the kernel.
++ *
 + */
 +
 +#include <linux/axfs.h>
-+#ifdef CONFIG_UML
-+#include <mem_user.h>
-+int axfs_get_uml_address(char *iomem, unsigned long *address,
-+			 unsigned long *length)
-+{
-+	*address = find_iomem(iomem, length);
-+	if (!(*address)) {
-+		printk(KERN_DEBUG "axfs: find_iomem() failed\n");
-+		return -EINVAL;
-+	}
++#include <linux/mount.h>
++#ifdef CONFIG_BLOCK
++#include <linux/buffer_head.h>
++#include <linux/namei.h>
 +
-+	if (*length < PAGE_SIZE) {
-+		printk(KERN_DEBUG
-+		       "axfs: iomem() too small, must be at least %li Bytes\n",
-+		       PAGE_SIZE);
-+		return -EINVAL;
++int axfs_fill_super(struct super_block *sb, void *data, int silent);
++
++int axfs_get_sb_bdev(struct file_system_type *fs_type, int flags,
++		     const char *dev_name, struct axfs_super *sbi,
++		     struct vfsmount *mnt, int *err)
++{
++	*err = get_sb_bdev(fs_type, flags, dev_name, sbi, axfs_fill_super, mnt);
++
++	if (*err)
++		return FALSE;
++	return TRUE;
++}
++
++void axfs_kill_block_super(struct super_block *sb)
++{
++	kill_block_super(sb);
++}
++
++/******************************************************************************
++ *
++ * axfs_copy_block_data
++ *
++ * Description: Helper function to read data from block device
++ *
++ * Parameters:
++ *    (IN) sb - pointer to super block structure.
++ *
++ *    (IN) dst_addr - pointer to buffer into which data is to be read.
++ *
++ *    (IN) boffset - offset within block device
++ *
++ *    (IN) len - length of data to be read
++ *
++ * Returns:
++ *     0 or error number
++ *
++ *****************************************************************************/
++int axfs_copy_block(struct super_block *sb, void *dst_addr, u64 fsoffset,
++		    u64 len)
++{
++	struct axfs_super *sbi = AXFS_SB(sb);
++	u64 boffset = AXFS_FSOFFSET_2_DEVOFFSET(sbi, fsoffset);
++	u64 blocks;
++	u64 blksize = sb->s_blocksize;
++	unsigned long dst;
++	unsigned long src;
++	sector_t block;
++	size_t bytes;
++	struct buffer_head *bh;
++	u64 copied = 0;
++
++	if (len == 0)
++		return 0;
++
++	blocks = len / blksize;
++	if ((len % blksize) > 0)
++		blocks += 1;
++
++	while (copied < len) {
++		/* Explicit casting for ARM linker errors. */
++		block = (sector_t) boffset + (sector_t) copied;
++		block /= (sector_t) blksize;
++		bh = sb_bread(sb, block);
++		src = (unsigned long)bh->b_data;
++		dst = (unsigned long)dst_addr;
++		if (copied == 0) {
++			/* Explicit casting for ARM linker errors. */
++			bytes = (size_t) blksize;
++			bytes -= (size_t) boffset % (size_t) blksize;
++			if (bytes > len)
++				bytes = len;
++			/* Explicit casting for ARM linker errors. */
++			src += (unsigned long)boffset % (unsigned long)blksize;
++		} else {
++			dst += copied;
++			if ((len - copied) < blksize) {
++				bytes = len - copied;
++			} else {
++				bytes = blksize;
++			}
++		}
++		memcpy((void *)dst, (void *)src, bytes);
++		copied += bytes;
++		brelse(bh);
 +	}
 +	return 0;
 +}
-+#else
-+int axfs_get_uml_address(char *iomem, unsigned long *address,
-+			 unsigned long *length)
++
++int axfs_is_dev_bdev(char *path)
 +{
-+	return 0;
++	struct nameidata nd;
++	int ret = FALSE;
++
++	if (!path)
++		return FALSE;
++
++	if (path_lookup(path, LOOKUP_FOLLOW, &nd))
++		return FALSE;
++
++	if (S_ISBLK(nd.path.dentry->d_inode->i_mode))
++		ret = TRUE;
++
++	path_put(&nd.path);
++	return ret;
 +}
-+#endif /* CONFIG_UML */
++
++#else
++
++int axfs_get_sb_bdev(struct file_system_type *fs_type, int flags,
++		     const char *dev_name, struct axfs_super *sbi,
++		     struct vfsmount *mnt, int *err)
++{
++	return FALSE;
++}
++
++void axfs_kill_block_super(struct super_block *sb)
++{
++}
++
++int axfs_copy_block(struct super_block *sb, void *dst_addr, u64 fsoffset,
++		    u64 len)
++{
++	return -EINVAL;
++}
++
++int axfs_is_dev_bdev(char *path)
++{
++	return FALSE;
++}
++
++#endif /* CONFIG_BLOCK */
 
