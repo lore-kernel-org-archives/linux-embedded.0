@@ -1,33 +1,61 @@
-From: "Jared Hulbert" <jaredeh@gmail.com>
-Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
-Date: Thu, 21 Aug 2008 08:06:50 -0700
-Message-ID: <6934efce0808210806r701f2e3bo677d2bd2da78faec@mail.gmail.com>
-References: <48AD00F0.5030403@gmail.com> <200808211417.14425.arnd@arndb.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
+Date: Thu, 21 Aug 2008 17:06:36 +0200
+Message-ID: <200808211706.37761.arnd@arndb.de>
+References: <48AD00F8.1030004@gmail.com> <200808211339.37187.arnd@arndb.de> <6934efce0808210755n1977e085o63b8b91e84575dc9@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1760015AbYHUPHG@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=Am1XcVjWpi5sVlvmldBb3oztVpGoQXNT94nme/jHODc=;
-        b=F7eE3J3mHqWhSJMMtWTYiIT9tqIq5cadwIJHIO/odUkm9UM563zGc/ZuMWvRQfbHU5
-         DKh1etCh4XOY8U3BkGSp3o5iZreqMWzk1DdT8fwLX7AdrAH+64PYQD3CuD/pYDh0dEZH
-         H2eALffhJz0EolyBpYhByyCHLOds7E5c8MoOg=
-In-Reply-To: <200808211417.14425.arnd@arndb.de>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <6934efce0808210755n1977e085o63b8b91e84575dc9@mail.gmail.com>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Type: text/plain; charset="utf-8"
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: David Woodhouse <dwmw2@infradead.org>, carsteno@de.ibm.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>
 
-> Have you seen any benefit of the rwsem over a simple mutex? I would guess
-> that you can never even get into the situation where you get concurrent
-> readers since I haven't found a single down_read() in your code, only
-> downgrade_write()
+On Thursday 21 August 2008, Jared Hulbert wrote:
 
-We implemented a rwsem here because you can get concurrent readers.
-My understanding is that downgrade_write() puts the rewem into the
-same state as down_read().  Am I mistaken?
+> 1) same mount point -
+> I don't see how this works without an ioctl. =C2=A0I can't just make =
+up
+> files in my mounted filesystem. =C2=A0 You expect the mounted version=
+ to
+> match input to the mkfs. =C2=A0I'd not be happy with an ioctl. =C2=A0=
+You can
+> just read it.
+
+I think what Carsten was suggesting is that you create extra files
+in the file system that behave like your current procfs files.
+This limits the choice for names inside of the file system, and
+therefor I think should not be done.
+=20
+> 2) sysfs -
+> I agree with Carsten, I don't see how this fits in the sysfs hierarch=
+y.
+
+You can create attributes below the device you have mounted.
+Technically possible, the main issue I see with this is having
+to maintain ABI compatibility.
+
+> 3) debugfs -
+> I don't know diddly about this.
+>=20
+> So why not /proc?
+
+/proc has the same ABI restrictions as sysfs. We more or less stopped
+allowing new files in /proc some 5 years ago for this reason. I didn't
+even read beyond the word /proc to know that what you do here is wrong.
+debugfs is normally easier to use than procfs as well, you just
+define some file_operations with read/write callbacks and call
+debugfs_create_file with the path name below /sys/kernel/debug.
+
+If I may give yet another suggestion:
+
+4) no profiling at all
+The profiling code has certainly been useful to you during development,
+and you should keep that code around for your own work on it,
+but maybe you should not push that upstream, because regular users
+are not going to need it.
+
+	Arnd <><
