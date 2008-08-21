@@ -1,63 +1,64 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 03/10] AXFS: axfs.h
-Date: Thu, 21 Aug 2008 14:24:31 +0200
-Message-ID: <200808211424.31966.arnd@arndb.de>
-References: <48AD00E6.2070505@gmail.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: [PATCH 10/10] AXFS: axfs_uncompress.c
+Date: Thu, 21 Aug 2008 14:28:52 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0808211423360.20704@vixen.sonytel.be>
+References: <48AD0126.1050609@gmail.com> <1219318838.18027.68.camel@sauron>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48AD00E6.2070505@gmail.com>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-461250853-1219321732=:20704"
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754860AbYHUM3L@vger.kernel.org>
+In-Reply-To: <1219318838.18027.68.camel@sauron>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: jaredeh@gmail.com
-Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+To: Artem Bityutskiy <dedekind@infradead.org>
+Cc: jaredeh@gmail.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Thursday 21 August 2008, Jared Hulbert wrote:
-> +static inline u64 axfs_bytetable_stitch(u8 depth, u8 *table, u64 ind=
-ex)
-> +{
-> +=A0=A0=A0=A0=A0=A0=A0u64 i;
-> +=A0=A0=A0=A0=A0=A0=A0u64 output =3D 0;
-> +=A0=A0=A0=A0=A0=A0=A0u64 byte =3D 0;
-> +=A0=A0=A0=A0=A0=A0=A0u64 j;
-> +=A0=A0=A0=A0=A0=A0=A0u64 bits;
-> +
-> +=A0=A0=A0=A0=A0=A0=A0for (i =3D 0; i < depth; i++) {
-> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0j =3D index * depth + i=
-;
-> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0bits =3D 8 * (depth - i=
- - 1);
-> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0byte =3D table[j];
-> +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0output +=3D byte << bit=
-s;
-> +=A0=A0=A0=A0=A0=A0=A0}
-> +=A0=A0=A0=A0=A0=A0=A0return output;
-> +}
-> +
-> +#define AXFS_GET_BYTETABLE_VAL(desc,index) \
-> + =A0axfs_bytetable_stitch(((struct axfs_region_desc)(desc)).table_by=
-te_depth,\
-> + =A0(u8 *)((struct axfs_region_desc)(desc)).virt_addr, index)
-> +
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-This bytetable stuff looks overly complicated, both the data structure =
-and
-the access method. It seems like you are implementing your own custom H=
-uffman
-compression with this.
+---584349381-461250853-1219321732=:20704
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-Is the reasonn for the bytetable just to pack numbers efficiently, or d=
-o you
-have a different intention?
+On Thu, 21 Aug 2008, Artem Bityutskiy wrote:
+> On Wed, 2008-08-20 at 22:46 -0700, Jared Hulbert wrote:
+> > +	err = zlib_inflateReset(&stream);
+> > +	if (err != Z_OK) {
+> > +		printk(KERN_ERR "zlib_inflateReset error %d\n", err);
+> > +		zlib_inflateEnd(&stream);
+> > +		zlib_inflateInit(&stream);
+> > +	}
+> 
+> just FYI, are you aware that LZO which is also present in the kernel is
+> much faster on decompress than zlib, while its compression is only
+> slightly worse?
 
-Did you see a significant size benefit over simply storing all metadata=
- as
-uncompressed data structures like in cramfs?
+If you want support for multiple decompression algorithms, you can switch
+from using zlib_inflate*() directly to calling zlib through the crypto API.
+Then you can call crypto_alloc_comp() with the correct decompression algorithm
+name.
 
-Have you considered storing simple dentry/inode data in node_type=3D=3D=
-Compressed
-nodes?
+For squashfs, I had to modify only ca. 40 lines of code.
 
-	Arnd <><
+You do need a new zlib crypto module, as the existing deflate crypto module
+uses the raw deflate format instead of the zlib format, and has some parameters
+tuned for its use in IPSec.
+
+I hope to have some patches ready next week...
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-461250853-1219321732=:20704--
