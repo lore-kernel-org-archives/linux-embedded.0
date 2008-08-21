@@ -1,46 +1,50 @@
-From: Charles Manning <manningc2@actrix.gen.nz>
-Subject: Re: Adding a new platform
-Date: Thu, 21 Aug 2008 15:02:58 +1200
-Message-ID: <200808211502.58206.manningc2@actrix.gen.nz>
-References: <48AB0A7A.8040209@cisco.com> <7d1d9c250808192129j3fb7ef28p8f404c6affd82078@mail.gmail.com> <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
+From: Jared Hulbert <jaredeh@gmail.com>
+Subject: [PATCH 00/10] AXFS: Advanced XIP filesystem
+Date: Wed, 20 Aug 2008 22:44:36 -0700
+Message-ID: <48AD00C4.6060302@gmail.com>
+Reply-To: jaredeh@gmail.com
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
-Content-Disposition: inline
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:reply-to
+         :user-agent:mime-version:to:subject:content-type
+         :content-transfer-encoding;
+        bh=tlts+ZS2u4GMaZGMnM0blmCZUpHUCDY3ye/dfiNpm6k=;
+        b=H1nufmT70e3LzFORInShBwTCygaZdVvmfsu1vD6jCUPeSbzKB6ChpFoMYUH2tw8v9N
+         WBrLsjDvFh6Tuwj2b4PHhSFfcGsLQnPO8MkmzFFqGfEyxpGkEczJAiVM5bun0KEnTcPL
+         x1GOK0jJw2P+EbBQbtnaLCmokaX0oVvRmrQp4=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: vb <vb@vsbe.com>
-Cc: Paul Gortmaker <paul.gortmaker@gmail.com>, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
+To: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@d
 
-On Wednesday 20 August 2008 17:15:01 vb wrote:
-> On Tue, Aug 19, 2008 at 9:29 PM, Paul Gortmaker
->
-> <paul.gortmaker@gmail.com> wrote:
-> > On Tue, Aug 19, 2008 at 11:57 PM, vb <vb@vsbe.com> wrote:
-> >> so, say a developer submits a proprietary driver and it gets accepted.
-> >
-> > Doesn't happen.  By design.  If the driver is proprietary then it is
-> > presumably not meant for open distribution, and hence not compatible with
-> > GPL and widespread distribution into 100,000 public git repositories.  So
-> > it won't get submitted and it won't get accepted.
->
-> I guess 'proprietary' is not the right term then, how do you call a
-> driver which is not a secret and not a problem to release, but
-> controls some hardware present in only in certain devices of a certain
-> company.
->
-> Would such a driver be accepted? Wouldn't such a driver get stale
-> after a few kernel releases?
+I'd like to get a first round of review on my AXFS filesystem.  This is a simple
+read only compressed filesystem like Squashfs and cramfs.  AXFS is special
+because it also allows for execute-in-place of your applications.  It is a major
+improvement over the cramfs XIP patches that have been floating around for ages.
+The biggest improvement is in the way AXFS allows for each page to be XIP or
+not.  First, a user collects information about which pages are accessed on a
+compressed image for each mmap()ed region from /proc/axfs/volume0.  That
+'profile' is used as an input to the image builder.  The resulting image has
+only the relevant pages uncompressed and XIP.  The result is smaller memory
+sizes and faster launches.
+                            
 
-In-tree is no silver bullet.
+See http://axfs.sourceforge.net for more info.
 
-When people modify internal APIs they will likely fix anything that breaks 
-compilation. However many things are more subtle than that and it is very 
-easy to end up with a driver or other code that compiles but does not work 
-properly.
 
-Luckily APIs for drivers (the most common stuff that people work on) don't 
-change that much, and the interfaces are reasonably clear. If you want some 
-hell then try working on file systems :-).
+fs/Kconfig                |   21 +
+fs/Makefile               |    1 
+fs/axfs/Makefile          |    7 
+fs/axfs/axfs_bdev.c       |  158 ++++++++
+fs/axfs/axfs_inode.c      |  490 ++++++++++++++++++++++++++
+fs/axfs/axfs_mtd.c        |  233 ++++++++++++
+fs/axfs/axfs_profiling.c  |  594 +++++++++++++++++++++++++++++++
+fs/axfs/axfs_super.c      |  866 ++++++++++++++++++++++++++++++++++++++++++++++
+fs/axfs/axfs_uml.c        |   47 ++
+fs/axfs/axfs_uncompress.c |   97 +++++
+include/linux/axfs.h      |  358 +++++++++++++++++++
+11 files changed, 2872 insertions(+)
+
