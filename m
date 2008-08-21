@@ -1,34 +1,42 @@
-From: Daniel Walker <dwalker@mvista.com>
-Subject: Re: [PATCH 03/10] AXFS: axfs.h
-Date: Thu, 21 Aug 2008 06:10:58 -0700
-Message-ID: <1219324258.23311.14.camel@localhost.localdomain>
-References: <48AD00E6.2070505@gmail.com>
+From: "Jared Hulbert" <jaredeh@gmail.com>
+Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
+Date: Thu, 21 Aug 2008 07:11:08 -0700
+Message-ID: <6934efce0808210711t686a88eci6eb294dbb54d68fe@mail.gmail.com>
+References: <48AD00C4.6060302@gmail.com> <20080821110749.GA1926@shareable.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48AD00E6.2070505@gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1759058AbYHUOLY@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=8m3YUO1Nrj/z/V6m+nDHbrRwwWZW6OCgpE9M5dkcbEc=;
+        b=PGpyOG4XfmMhsOu6TyRQrIaJXPEBSIcAUeLOprikmap/00kBmuM+tu5f2RoUJaQ6dJ
+         uwH5Cfqj7XKGYkgnJToY3QCgJghGZw37TBGhnojcAlF0jG6S5a+RMzzzxrRbpaGdRlpR
+         Ihm3oX2HGr1vLqEZtebDn7v4wlNmVb5jNAtKU=
+In-Reply-To: <20080821110749.GA1926@shareable.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: jaredeh@gmail.com
-Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Wed, 2008-08-20 at 22:45 -0700, Jared Hulbert wrote:
-> +#define AXFS_GET_BYTETABLE_VAL(desc,index) \
-> +  axfs_bytetable_stitch(((struct
-> axfs_region_desc)(desc)).table_byte_depth,\
-> +  (u8 *)((struct axfs_region_desc)(desc)).virt_addr, index)
-> +
-> +#define AXFS_GET_NODE_TYPE(sbi,node_index) \
-> +  AXFS_GET_BYTETABLE_VAL(((struct axfs_super *)(sbi))->node_type,\
-> +   (node_index))
-> +
-> +#define AXFS_GET_NODE_INDEX(sbi,node__index) \
-> +  AXFS_GET_BYTETABLE_VAL(((struct axfs_super *)(sbi))->node_index,\
-> +   (node__index))
-> +
+> How does it fare with no MMU?  Can the profiler and image builder lay
+> out the XIP pages in such a way that no-MMU mmaps can map those regions?
+>
+> No complaint if not, it would be a nice bonus though.
 
-I think it would be much cleaner to do all these similar macro's as
-static inline functions.
+Sorry.  I don't believe it will work on no-MMU as is.  That said you
+_could_ tweak the mkfs tool to lay mmap()'ed regions down contiguously
+but then if you mmap() an unprofiled region, well that would be bad.
+I suppose you could make axfs_mmap smart enough to handle that.  I
+guess the cleanest way would be to just make files lay down
+contiguously, you lose some of the space saving but it would work.
 
-Daniel
+I'm not plannin to get to this anytime soon.  But I'd be willing merge
+patches.  Can anybody convince me offline that working on no-MMU this
+makes financial sense for my employer?  This is getting to be a common
+question.  How many noMMU users are out there and why are you so
+interested?
