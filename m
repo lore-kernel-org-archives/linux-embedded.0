@@ -1,11 +1,11 @@
 From: Sven Wegener <sven.wegener@stealer.net>
-Subject: Re: [PATCH 10/10] AXFS: axfs_uncompress.c
-Date: Thu, 21 Aug 2008 11:01:53 +0200 (CEST)
-Message-ID: <alpine.LNX.1.10.0808211028150.12259@titan.stealer.net>
-References: <48AD0126.1050609@gmail.com>
+Subject: Re: [PATCH 06/10] AXFS: axfs_super.c
+Date: Thu, 21 Aug 2008 11:04:38 +0200 (CEST)
+Message-ID: <alpine.LNX.1.10.0808211002340.12259@titan.stealer.net>
+References: <48AD0101.4020505@gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48AD0126.1050609@gmail.com>
+In-Reply-To: <48AD0101.4020505@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: TEXT/PLAIN; charset="us-ascii"
@@ -15,117 +15,247 @@ Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <lin
 
 On Wed, 20 Aug 2008, Jared Hulbert wrote:
 
-> Handles the decompression for axfs, modeled after fs/cramfs/uncompress.c.
+> The many different devices AXFS can mount to and the various
+> dual device mounting schemes are supported here.
 > 
 > Signed-off-by: Jared Hulbert <jaredeh@gmail.com>
 > ---
-> diff --git a/fs/axfs/axfs_uncompress.c b/fs/axfs/axfs_uncompress.c
+> diff --git a/fs/axfs/axfs_super.c b/fs/axfs/axfs_super.c
 > new file mode 100644
-> index 0000000..b7a2060
+> index 0000000..5efab38
 > --- /dev/null
-> +++ b/fs/axfs/axfs_uncompress.c
-> @@ -0,0 +1,97 @@
+> +++ b/fs/axfs/axfs_super.c
+> @@ -0,0 +1,864 @@
 > +/*
 > + * Advanced XIP File System for Linux - AXFS
 > + *   Readonly, compressed, and XIP filesystem for Linux systems big and small
 > + *
-> + *   Modified in 2006 by Eric Anderson
-> + *     from the cramfs sources fs/cramfs/uncompress.c
+> + * Copyright(c) 2008 Numonyx
 > + *
-> + * (C) Copyright 1999 Linus Torvalds
+> + * This program is free software; you can redistribute it and/or modify it
+> + * under the terms and conditions of the GNU General Public License,
+> + * version 2, as published by the Free Software Foundation.
 > + *
-> + * axfs_uncompress.c -
-> + *  axfs interfaces to the uncompression library. There's really just
-> + * three entrypoints:
+> + * Authors:
+> + *  Eric Anderson
+> + *  Jared Hulbert <jaredeh@gmail.com>
+> + *  Sujaya Srinivasan
+> + *  Justin Treon
 > + *
-> + *  - axfs_uncompress_init() - called to initialize the thing.
-> + *  - axfs_uncompress_exit() - tell me when you're done
-> + *  - axfs_uncompress_block() - uncompress a block.
+> + * More info and current contacts at http://axfs.sourceforge.net
 > + *
-> + * NOTE NOTE NOTE! The uncompression is entirely single-threaded. We
-> + * only have one stream, and we'll initialize it only once even if it
-> + * then is used by multiple filesystems.
+> + * axfs_super.c -
+> + *   Contains the core code used to mount the fs.
 > + *
 > + */
 > +
-> +#include <linux/errno.h>
+> +#include <linux/axfs.h>
+> +#include <linux/fs.h>
 > +#include <linux/vmalloc.h>
-> +#include <linux/zlib.h>
-> +#include <linux/mutex.h>
+> +#include <linux/parser.h>
+> +#include <linux/statfs.h>
+> +#include <linux/module.h>
+> +#include <linux/mount.h>
+> +#include <linux/mtd/mtd.h>
 > +
-> +static z_stream stream;
-> +static int initialized;
-> +static struct mutex axfs_uncmp_mutex;
+> +/******************** Function Declarations ****************************/
+> +static struct super_operations axfs_sops;
+> +static struct axfs_super *axfs_get_sbi(void);
+> +static void axfs_put_sbi(struct axfs_super *);
 
-Use DEFINE_MUTEX and drop the mutex_init() down in the init function.
+If you reorder the code slightly you can avoid these static forward 
+declarations.
 
-> +
-> +int axfs_uncompress_block(void *dst, int dstlen, void *src, int srclen)
+> +/***************** functions in other axfs files ***************************/
+> +int axfs_get_sb_bdev(struct file_system_type *, int, const char *,
+> +		     struct axfs_super *, struct vfsmount *, int *);
+> +void axfs_kill_block_super(struct super_block *);
+> +int axfs_copy_block(struct super_block *, void *, u64, u64);
+> +int axfs_is_dev_bdev(char *);
+> +int axfs_map_mtd(struct super_block *);
+> +void axfs_unmap_mtd(struct super_block *);
+> +int axfs_copy_mtd(struct super_block *, void *, u64, u64);
+> +int axfs_get_sb_mtd(struct file_system_type *, int, const char *,
+> +		    struct axfs_super *, struct vfsmount *, int *);
+> +int axfs_is_dev_mtd(char *, int *);
+> +void axfs_kill_mtd_super(struct super_block *);
+> +struct inode *axfs_create_vfs_inode(struct super_block *, int);
+> +int axfs_get_uml_address(char *, unsigned long *, unsigned long *);
+> +int axfs_init_profiling(struct axfs_super *);
+> +int axfs_shutdown_profiling(struct axfs_super *);
+> +void axfs_profiling_add(struct axfs_super *, unsigned long, unsigned int);
+> +struct inode *axfs_create_vfs_inode(struct super_block *, int);
+> +/******************************************************************************/
+
+These should probably be in axfs.h.
+
+> +static int axfs_fill_region_descriptors(struct super_block *sb,
+> +					struct axfs_super_onmedia *sbo)
 > +{
+> +	struct axfs_super *sbi = AXFS_SB(sb);
+> +	struct axfs_region_desc_onmedia *out;
+> +
+> +	out = kmalloc(sizeof(*out), GFP_KERNEL);
+> +	if (!out)
+> +		return -ENOMEM;
+> +	memset(out, 0, sizeof(*out));
+
+kzalloc()
+
+> +
+> +	axfs_fill_region_desc(sb, out, sbo->strings, &sbi->strings);
+> +	axfs_fill_region_desc(sb, out, sbo->xip, &sbi->xip);
+> +	axfs_fill_region_desc(sb, out, sbo->compressed, &sbi->compressed);
+> +	axfs_fill_region_desc(sb, out, sbo->byte_aligned, &sbi->byte_aligned);
+> +	axfs_fill_region_desc(sb, out, sbo->node_type, &sbi->node_type);
+> +	axfs_fill_region_desc(sb, out, sbo->node_index, &sbi->node_index);
+> +	axfs_fill_region_desc(sb, out, sbo->cnode_offset, &sbi->cnode_offset);
+> +	axfs_fill_region_desc(sb, out, sbo->cnode_index, &sbi->cnode_index);
+> +	axfs_fill_region_desc(sb, out, sbo->banode_offset, &sbi->banode_offset);
+> +	axfs_fill_region_desc(sb, out, sbo->cblock_offset, &sbi->cblock_offset);
+> +	axfs_fill_region_desc(sb, out, sbo->inode_file_size,
+> +			      &sbi->inode_file_size);
+> +	axfs_fill_region_desc(sb, out, sbo->inode_name_offset,
+> +			      &sbi->inode_name_offset);
+> +	axfs_fill_region_desc(sb, out, sbo->inode_num_entries,
+> +			      &sbi->inode_num_entries);
+> +	axfs_fill_region_desc(sb, out, sbo->inode_mode_index,
+> +			      &sbi->inode_mode_index);
+> +	axfs_fill_region_desc(sb, out, sbo->inode_array_index,
+> +			      &sbi->inode_array_index);
+> +	axfs_fill_region_desc(sb, out, sbo->modes, &sbi->modes);
+> +	axfs_fill_region_desc(sb, out, sbo->uids, &sbi->uids);
+> +	axfs_fill_region_desc(sb, out, sbo->gids, &sbi->gids);
+> +
+> +	kfree(out);
+> +
+> +	return 0;
+> +}
+
+
+> +int axfs_set_compression_type(struct axfs_super *sbi)
+
+static
+
+And this function actually doesn't set anything, check might be a better 
+name.
+
+> +{
+> +	if (sbi->compression_type != ZLIB)
+> +		return -EINVAL;
+> +
+> +	return 0;
+> +}
+
+
+> +/* Read the last four bytes of the volume and make sure the AXFS magic is
+> +   present. */
+> +int axfs_verify_eofs_magic(struct super_block *sb)
+> +{
+> +	struct axfs_super *sbi = AXFS_SB(sb);
+> +	u32 buf = 0;
 > +	int err;
-> +	int out;
+> +	u32 fsoffset = sbi->size - sizeof(u32);
+> +	int len = sizeof(u32);
 > +
-> +	mutex_lock(&axfs_uncmp_mutex);
+> +	err = axfs_copy_metadata(sb, &buf, fsoffset, len);
+
+sizeof(buf) instead of an additional variable named len.
+
 > +
-> +	stream.next_in = src;
-> +	stream.avail_in = srclen;
+> +	if (err)
+> +		return -EINVAL;
 > +
-> +	stream.next_out = dst;
-> +	stream.avail_out = dstlen;
-> +
-> +	err = zlib_inflateReset(&stream);
-> +	if (err != Z_OK) {
-> +		printk(KERN_ERR "zlib_inflateReset error %d\n", err);
-> +		zlib_inflateEnd(&stream);
-> +		zlib_inflateInit(&stream);
+> +	if (be32_to_cpu(buf) != AXFS_MAGIC) {
+> +		printk(KERN_ERR "READ: 0x%x\n", be32_to_cpu(buf));
+> +		printk(KERN_ERR "ERROR: Filesystem is incomplete and cannot be "
+> +		       "mounted!\n");
+> +		return -EINVAL;
 > +	}
 > +
-> +	err = zlib_inflate(&stream, Z_FINISH);
-> +	if (err != Z_STREAM_END)
-> +		goto err;
-> +
-> +	out = stream.total_out;
-> +
-> +	mutex_unlock(&axfs_uncmp_mutex);
-> +
-> +	return out;
-> +
-> +err:
-> +
-> +	mutex_unlock(&axfs_uncmp_mutex);
-> +
-> +	printk(KERN_ERR "Error %d while decompressing!\n", err);
-> +	printk(KERN_ERR "%p(%d)->%p(%d)\n", src, srclen, dst, dstlen);
-> +	return 0;
-> +}
-> +
-> +int axfs_uncompress_init(void)
-> +{
-> +	if (!initialized++) {
-> +
-> +		mutex_init(&axfs_uncmp_mutex);
-> +
-> +		stream.workspace = vmalloc(zlib_inflate_workspacesize());
-> +		if (!stream.workspace) {
-> +			initialized = 0;
-> +			return -ENOMEM;
-> +		}
-> +		stream.next_in = NULL;
-> +		stream.avail_in = 0;
-> +		zlib_inflateInit(&stream);
-> +	}
-> +	return 0;
-> +}
-> +
-> +int axfs_uncompress_exit(void)
-> +{
-> +	if (!--initialized) {
-> +		zlib_inflateEnd(&stream);
-> +		vfree(stream.workspace);
-> +	}
 > +	return 0;
 > +}
 
-axfs_uncompress_init() and axfs_uncompress_exit() are only called during 
-init and exit of the module, no need for the initialized variable and the 
-functions can be annotated with __init and __exit.
+
+> +int axfs_fill_super(struct super_block *sb, void *data, int silent)
+> +{
+> +	struct axfs_super *sbi_in = (struct axfs_super *)data;
+> +	struct axfs_super *sbi;
+> +	struct inode *root;
+> +	int err;
+> +
+> +	sbi = axfs_get_sbi();
+
+missing check for failure
+
+> +	sb->s_fs_info = (void *)sbi;
+> +	memcpy(sbi, sbi_in, sizeof(*sbi));
+> +
+> +	/* fully populate the incore superblock structures */
+> +	err = axfs_do_fill_super(sb);
+> +	if (err)
+> +		goto out;
+> +
+> +	sb->s_flags |= MS_RDONLY;
+> +
+> +	/* Setup the VFS super block now */
+> +	sb->s_op = &axfs_sops;
+> +	root = axfs_create_vfs_inode(sb, 0);
+> +	if (!root) {
+> +		err = -EINVAL;
+> +		goto out;
+> +	}
+> +
+> +	sb->s_root = d_alloc_root(root);
+> +	if (!sb->s_root) {
+> +		iput(root);
+> +		err = -EINVAL;
+> +		goto out;
+> +	}
+> +
+> +	err = axfs_init_profiling(sbi);
+> +	if (err)
+> +		goto out;
+> +
+> +	return 0;
+> +
+> +out:
+> +	axfs_put_super(sb);
+> +	return err;
+> +}
+
+
+> +static struct axfs_super *axfs_get_sbi(void)
+> +{
+> +	struct axfs_super *sbi;
+> +
+> +	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);
+> +	if (sbi)
+> +		return sbi;
+> +
+> +	axfs_put_sbi(sbi);
+
+Looks useless, sbi is NULL here.
+
+> +	return ERR_PTR(-ENOMEM);
+> +}
+
+
+> +static int __init init_axfs_fs(void)
+> +{
+> +	axfs_uncompress_init();
+> +	return register_filesystem(&axfs_fs_type);
+> +}
+> +
+> +static void __exit exit_axfs_fs(void)
+> +{
+> +	axfs_uncompress_exit();
+> +	unregister_filesystem(&axfs_fs_type);
+
+Order looks wrong compared to init_axfs_fs()
+
+> +}
+> +
+> +module_init(init_axfs_fs);
+> +module_exit(exit_axfs_fs);
+> +MODULE_LICENSE("GPL");
