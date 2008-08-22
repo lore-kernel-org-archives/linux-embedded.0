@@ -1,39 +1,51 @@
-From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
-Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
-Date: Fri, 22 Aug 2008 19:19:59 +0200
-Message-ID: <20080822171959.GA30977@logfs.org>
-References: <48AD00F0.5030403@gmail.com> <200808211417.14425.arnd@arndb.de> <48AE22F5.3000309@lougher.demon.co.uk> <200808221200.26052.arnd@arndb.de> <48AEF2A3.7020905@lougher.demon.co.uk>
+From: Phillip Lougher <phillip@lougher.demon.co.uk>
+Subject: Re: [PATCH 06/10] AXFS: axfs_super.c
+Date: Fri, 22 Aug 2008 18:37:58 +0100
+Message-ID: <48AEF976.1010705@lougher.demon.co.uk>
+References: <48AD0101.4020505@gmail.com> <48AE19AD.1020209@lougher.demon.co.uk> <6934efce0808212005h30fa16d8w48833e8a0becfd8c@mail.gmail.com> <200808221852.38950.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755687AbYHVRUd@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <48AEF2A3.7020905@lougher.demon.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <200808221852.38950.arnd@arndb.de>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Arnd Bergmann <arnd@arndb.de>, jaredeh@gmail.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Jared Hulbert <jaredeh@gmail.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Fri, 22 August 2008 18:08:51 +0100, Phillip Lougher wrote:
->=20
-> Squashfs stores significantly more metadata than cramfs.  Remember=20
-> cramfs has no support for filesystems > ~ 16Mbytes, no inode timestam=
-ps,=20
-> truncates uid/gids, no hard-links, no nlink counts, no hashed=20
-> directories,  no unique inode numbers.  If Squashfs didn't compress t=
-he=20
-> metadata it would be significantly larger than cramfs.
+Arnd Bergmann wrote:
+> On Friday 22 August 2008, Jared Hulbert wrote:
+>>> This implies for block devices that the entire filesystem metadata has to be
+>>> cached in RAM.  This severely limits the size of AXFS filesystems when using
+>>> block devices, or the else memory usage will be excessive.
+>> This is where 64bit squashfs could be a better fit.
+> 
+> Is this the only place where squashfs has a significant advantage? 
+> If so, you might want to change it in axfs eventually to make the
+> decision easier for users ;-)
 
-Elsewhere in this maze of threads Arnd claimed to have tested the
-benefits of metadata compression - and it making little impact.
+As you asked here's the list.
 
-My guess is that it would make a large impact if metadata would be a
-significant part of the filesystem image.  Usually metadata is close
-enough to 0% to be mistaken for statistical noise.  So compressing it
-makes a significant impact on an insignificant amount of data.
+1. Support for > 4GB filesystems.  In theory 2^64 bytes.
+2. Compressed metadata
+3. Inode timestamps
+4. Hard-link support, and correct nlink counts
+5. Sparse file support
+6. Support for ". & ".." in readdir
+7. Indexed directories for fast lookup
+8. NFS exporting
+9. No need to cache entire metadata in memory
 
-J=C3=B6rn
+Squashfs has been optimised for block-based rotating media like hard 
+disks, CDROMS.  AXFS has been optimised for flash based media.  Squashfs 
+will outperform AXFS on rotating media, AXFS will outperform Squashfs on 
+flash based media.
 
---=20
-One of my most productive days was throwing away 1000 lines of code.
--- Ken Thompson.
+Squashfs and AXFS should be seen as complementary filesystems, and there 
+should be room in the Linux kernel for both.
+
+I don't see what your problem is here.  I think AXFS is an extremely 
+good filesystem and should be merged.  But I don't see why this should 
+lead to more Squashfs bashing.
+
+Phillip
