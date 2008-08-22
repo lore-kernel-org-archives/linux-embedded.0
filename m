@@ -1,43 +1,50 @@
-From: "Jared Hulbert" <jaredeh@gmail.com>
-Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
-Date: Fri, 22 Aug 2008 11:04:08 -0700
-Message-ID: <6934efce0808221104w1609bea8mbbff54019c261d80@mail.gmail.com>
-References: <48AD00F0.5030403@gmail.com> <200808211417.14425.arnd@arndb.de>
-	 <48AE22F5.3000309@lougher.demon.co.uk>
-	 <200808221200.26052.arnd@arndb.de>
-	 <48AEF2A3.7020905@lougher.demon.co.uk>
-	 <20080822171959.GA30977@logfs.org>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
+Date: Fri, 22 Aug 2008 19:10:29 +0100
+Message-ID: <20080822181029.GA24179@shareable.org>
+References: <48AD00C4.6060302@gmail.com> <20080821110749.GA1926@shareable.org> <48ADFE65.1050007@snapgear.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756615AbYHVSEb@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=YlSc/Q6C/JKO05b5TZ5qL02yQiRe8TgaYht5IEYKg14=;
-        b=WKFCVJN0634sepbnavA12bTZ7DIq/HkFaV6Ta3+P05bUCGuG898T8ibjzezzmNeYbW
-         3kV1KQhw/NvB2zL1Zim/DQJQfnqz5CtjEicmoUeY/Q10dNPYWYwn+OLyjjs4FyXo1kSF
-         kzAypO3kMv5K+KceCMXwx6TmPQDphJMOwTPrc=
-In-Reply-To: <20080822171959.GA30977@logfs.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <48ADFE65.1050007@snapgear.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>
-Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, Arnd Bergmann <arnd@arndb.de>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Transfer-Encoding: 7bit
+To: Greg Ungerer <gerg@snapgear.com>
+Cc: Jared Hulbert <jaredeh@gmail.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-> Elsewhere in this maze of threads Arnd claimed to have tested the
-> benefits of metadata compression - and it making little impact.
->
-> My guess is that it would make a large impact if metadata would be a
-> significant part of the filesystem image.  Usually metadata is close
-> enough to 0% to be mistaken for statistical noise.  So compressing it
-> makes a significant impact on an insignificant amount of data.
+Greg Ungerer wrote:
+> 
+> Jamie Lokier wrote:
+> >Jared Hulbert wrote:
+> >>The biggest improvement is in the way AXFS allows for each page to be XIP 
+> >>or
+> >>not.  First, a user collects information about which pages are accessed 
+> >>on a
+> >>compressed image for each mmap()ed region from /proc/axfs/volume0.  That
+> >>'profile' is used as an input to the image builder.  The resulting image 
+> >>has
+> >>only the relevant pages uncompressed and XIP.  The result is smaller 
+> >>memory
+> >>sizes and faster launches.
+> >
+> >Sounds great, really nice idea.
+> >
+> >How does it fare with no MMU?  Can the profiler and image builder lay
+> >out the XIP pages in such a way that no-MMU mmaps can map those regions?
+> 
+> The key for XIP on noMMU would be the ability to store a
+> file as one complete contiguous chunk. Can AXFS do this?
 
-Like I said early it depends on the value you assign to significant.
-For a fs sizes I started designing to 16MB-64MB if you have to track a
-whole bunch of 8Byte numbers for every symlink, dev node, inode, and
-page.  It adds up quickly to a couple of MB, that can translate to
-lots of money.  Even at only an extra $0.25 a system * 12Million units
-= $3Million.
+Or more generally, the mmap'd parts of a file.
+
+XIP doesn't mmap the whole file, it just maps the code and rodata.
+The data segment is copied.
+
+AXFS's magic for keeping parts of the file uncompressed, but parts
+compressed, would be good for this - both for space saving, and also
+because decompressing compressed data from NOR is faster than reading
+uncompressed data.
+
+-- Jamie
