@@ -1,47 +1,35 @@
-From: Josh Boyer <jwboyer@gmail.com>
-Subject: Re: kernel dump solutions
-Date: Thu, 21 Aug 2008 22:54:59 -0400
-Message-ID: <1219373699.26429.71.camel@jdub.homelinux.org>
-References: <1218656903.10489.50.camel@localhost.localdomain>
-	 <21f828e90808211853r6e92f6b9ta4bf9252ed63eccd@mail.gmail.com>
+From: "Jared Hulbert" <jaredeh@gmail.com>
+Subject: Re: [PATCH 06/10] AXFS: axfs_super.c
+Date: Thu, 21 Aug 2008 20:05:48 -0700
+Message-ID: <6934efce0808212005h30fa16d8w48833e8a0becfd8c@mail.gmail.com>
+References: <48AD0101.4020505@gmail.com> <48AE19AD.1020209@lougher.demon.co.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:subject:from:to:cc
-         :in-reply-to:references:content-type:date:message-id:mime-version
-         :x-mailer:content-transfer-encoding;
-        bh=OnpAjlKC9M1rl5Fm7WQ75/J2QGlpxzHCauPW36aeDOw=;
-        b=GTVSUiMdWlHIjaYMSinp/SOE5vS1Al5I06HFni18+ZCg0h1UoHBgRXcDhr2PfBgojq
-         nGWh/YD1VI4cYH/42PgXBVDqo5z3XzLbJdmHic0sM6V5oX4fuN52mhOPnj9pAd4IdN+x
-         H93OliF8G3DgTwvP09w5KGpH/ExkkkkdsopKw=
-In-Reply-To: <21f828e90808211853r6e92f6b9ta4bf9252ed63eccd@mail.gmail.com>
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=lnrnXAqYF67jhNjJJFfLxQr4AAiilu3/VnJ1f+0EeKs=;
+        b=QrupmFtawZQ+t5fXSXaBQ0iTZGehpnvxHyUNlSxe/CdVn8kABBt731wIppX5nwg6WL
+         Y7c2/1T2qU/5f7TgWS/wRPFhYPdxhrZ7bI7k0upVO3D/PkvbiK4cjZKqOHE/3ZKVesVq
+         YMjsSnm6Ymm/m5UDP+H/wfDY6EBqZtduit1QU=
+In-Reply-To: <48AE19AD.1020209@lougher.demon.co.uk>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Randy MacLeod <rwmacleod@gmail.com>
-Cc: linux-embedded@vger.kernel.org
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Thu, 2008-08-21 at 21:53 -0400, Randy MacLeod wrote:
-> On Wed, Aug 13, 2008 at 3:48 PM, Josh Boyer <jwboyer@gmail.com> wrote:
-> > Hi All,
-> >
-> > I'm curious what people are using for a kernel dump solution on embedded
-> 
-> Create a region of memory that pesist across resets.
-> Put kernel panic info, exceptiions and scheduling events into said memory.
-> Profit!
+> From this it would appear that if the region data can't be mapped XIP (i.e.
+> it is compressed or on a block device), it is cached in its entirety in RAM?
 
-I've done that many times.  It works well enough, but it's not a dump.
-I've actually used some dumps to debug some rather difficult kernel
-problems in the past, but there are increasingly fewer options these
-days.
+That is correct.
 
-> If only more manufactures would support this in the bios...
-> Intel and BIOS writter folks are you listening?
+> This implies for block devices that the entire filesystem metadata has to be
+> cached in RAM.  This severely limits the size of AXFS filesystems when using
+> block devices, or the else memory usage will be excessive.
 
-BIOS... yeah... I don't have a BIOS.  That's the best way to deal with
-that.
-
-josh
+This is where 64bit squashfs could be a better fit.
