@@ -1,33 +1,41 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 06/10] AXFS: axfs_super.c
-Date: Fri, 22 Aug 2008 18:52:37 +0200
-Message-ID: <200808221852.38950.arnd@arndb.de>
-References: <48AD0101.4020505@gmail.com> <48AE19AD.1020209@lougher.demon.co.uk> <6934efce0808212005h30fa16d8w48833e8a0becfd8c@mail.gmail.com>
+From: Phillip Lougher <phillip@lougher.demon.co.uk>
+Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
+Date: Fri, 22 Aug 2008 18:08:51 +0100
+Message-ID: <48AEF2A3.7020905@lougher.demon.co.uk>
+References: <48AD00F0.5030403@gmail.com> <200808211417.14425.arnd@arndb.de> <48AE22F5.3000309@lougher.demon.co.uk> <200808221200.26052.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <6934efce0808212005h30fa16d8w48833e8a0becfd8c@mail.gmail.com>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754819AbYHVRIy@vger.kernel.org>
+In-Reply-To: <200808221200.26052.arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: jaredeh@gmail.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?windows-1252?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Friday 22 August 2008, Jared Hulbert wrote:
-> > This implies for block devices that the entire filesystem metadata =
-has to be
-> > cached in RAM. =C2=A0This severely limits the size of AXFS filesyst=
-ems when using
-> > block devices, or the else memory usage will be excessive.
->=20
-> This is where 64bit squashfs could be a better fit.
+Arnd Bergmann wrote:
+> On Friday 22 August 2008, Phillip Lougher wrote:
+>>> This looks very nice, but could use some comments about how the data is
+>>> actually stored on disk. It took me some time to figure out that it actually
+>>> allows to do tail merging into compressed blocks, which I was about to suggest
+>>> you implement ;-). Cramfs doesn't have them, and I found that they are the
+>>> main reason why squashfs compresses better than cramfs, besides the default
+>>> block size, which you can change on either one.
+>> Squashfs has much larger block sizes than cramfs (last time I looked it 
+>> was limited to 4K blocks), and it compresses the metadata which helps to 
+>> get better compression.  But tail merging (fragments in Squashfs 
+>> terminology) is obviously a major reason why Squashfs gets good compression.
+> 
+> The *default* block size in cramfs is smaller than in squashfs, but they both
+> have user selectable block sizes. I found the impact of compressed metadata
+> to be almost zero. 
 
-Is this the only place where squashfs has a significant advantage?=20
-If so, you might want to change it in axfs eventually to make the
-decision easier for users ;-)
+Squashfs stores significantly more metadata than cramfs.  Remember 
+cramfs has no support for filesystems > ~ 16Mbytes, no inode timestamps, 
+truncates uid/gids, no hard-links, no nlink counts, no hashed 
+directories,  no unique inode numbers.  If Squashfs didn't compress the 
+metadata it would be significantly larger than cramfs.
 
-It certainly sounds like something for your medium-term TODO list,
-although I wouldn't think of it as a show-stopper.
+Cheers
 
-	Arnd <><
+Phillip
