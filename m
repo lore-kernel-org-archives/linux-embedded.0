@@ -1,30 +1,79 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Fri, 22 Aug 2008 19:43:26 +0100
-Message-ID: <20080822184326.GE24179@shareable.org>
-References: <48AD00C4.6060302@gmail.com> <20080821110749.GA1926@shareable.org> <6934efce0808210711t686a88eci6eb294dbb54d68fe@mail.gmail.com> <48AE0476.80109@snapgear.com> <20080822181314.GB24179@shareable.org> <6934efce0808221116w76a662b0t954b0922b69d3232@mail.gmail.com> <20080822183713.GC24179@shareable.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
+Date: Fri, 22 Aug 2008 21:38:25 +0200
+Message-ID: <200808222138.26927.arnd@arndb.de>
+References: <48AD00F8.1030004@gmail.com> <200808221840.39206.arnd@arndb.de> <6934efce0808221037u4548dd00q9ccd67545bfbcc8@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <6934efce0808221037u4548dd00q9ccd67545bfbcc8@mail.gmail.com>
 Content-Disposition: inline
-In-Reply-To: <20080822183713.GC24179@shareable.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Greg Ungerer <gerg@snapgear.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Cc: David Woodhouse <dwmw2@infradead.org>, carsteno@de.ibm.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>
 
-Jamie Lokier wrote:
-> Jared Hulbert wrote:
-> > What kind of NOR you using?  That is not what I measure with fast
-> > synchronous burst NOR's.
+On Friday 22 August 2008, you wrote:
+> You mean to take this off list?
+
+No, i replied to your mail that was sent just to me.
+Putting everyone back on now
+
+> > In 3, you create files with sysfs_create_file, and are fairly limited
+> > with how you can use it. A structured file like you have in procfs
+> > would not be allowed. File names are fixed, directory names can
+> > be used to identify the mounted file systems. You can create symlinks
+> > between your directory and other things in sysfs.
 > 
-> I think the "fast" in "fast synchronous" gives it away :-)
+> What do you mean a structured file wouldn't be allowed?  What's in them then?
+
+sysfs files are meant to have just a single value. Some have a list of
+values of the same type, but a file that needs a nontrivial parser
+(even sscanf) is not allowed in sysfs, by convention.
+There is also the technical limitation of the size to a single page,
+which makes it hard to write variable size data.
+
+> > In 4, you write a whole file system like debugfs (it's not as hard
+> > as it sounds) and are free to do anything in there, but you can't
+> > easily symlink to sysfs.
 > 
-> I'm using Spansion MirrorBit S29GL128N, which reads at about 0.6 MByte/s.
+> Argh.  No it might not be too bad to do to do, but it sounds like a
+> maintenance hassle.  Sounds like the best option though.
+> 
+> Why did we decide debugfs is a bad fit?
 
-By the way, what speeds do you get on fast synchronous burst NORs - and
-which chips are those?
+It's basically the same as debugfs -- actually I once started a patch
+to make it a single function call to instantiate a debugfs-like
+file system, but I never finished that patch.
 
-Thanks,
--- Jamie
+debugfs is a bad idea here because it is not meant for stable interfaces
+but rather ad-hoc stuff. In a distribution kernel, debugfs is supposed
+to be empty.
+
+> > So where does a page show up in the profile if you have two identical
+> > files and both are mapped?
+> 
+> In which ever file was actually read.  The kernel driver doesn't
+> really know pages are redundant.
+
+ok.
+
+> > Will the kernel map them to the same page
+> > but count the files separately, or will it show the same count for both?
+> 
+> I count faults on pages in mmap() so I don't really care whether a
+> page is mapped twice or just once.  I'll count it every time you fault
+> it even if it's the same physical page.  It's the image builders job
+> to figure out if there are redundant pages.
+
+ok, makes sense.
+
+I think there is still another option, which would be to generalize
+the profiling interface so it can work with arbitrary file systems.
+I'm sure that other people can benefit from that as well, e.g. for
+optimizing boot times on disks. For such a general interface,
+a per-file ioctl would fit best, and then file systems can implement
+it if they want, or it can be moved into VFS.
+
+	Arnd <><
