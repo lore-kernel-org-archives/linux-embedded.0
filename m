@@ -1,192 +1,250 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
-Date: Fri, 22 Aug 2008 01:21:43 +0100
-Message-ID: <48AE0697.5040706@lougher.demon.co.uk>
-References: <48AD00F0.5030403@gmail.com>
+Subject: Re: [PATCH 06/10] AXFS: axfs_super.c
+Date: Fri, 22 Aug 2008 02:43:09 +0100
+Message-ID: <48AE19AD.1020209@lougher.demon.co.uk>
+References: <48AD0101.4020505@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <48AD00F0.5030403@gmail.com>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: linux-mtd-bounces@lists.infradead.org
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <48AD0101.4020505@gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: jaredeh@gmail.com
-Cc: cotte@de.ibm.com, linux-embedded@vger.kernel.org, nickpiggin@yahoo.com.au, =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@logfs.org>, Linux-kernel@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, tim.bird@AM.SONY.COM
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
 Jared Hulbert wrote:
-
-> +
-> +static int axfs_iget5_test(struct inode *inode, void *opaque)
+> +static void axfs_free_region(struct axfs_super *sbi,
+> +			     struct axfs_region_desc *region)
 > +{
-> +	u64 *inode_number = (u64 *) opaque;
+> +	if (!region)
+> +		return;
 > +
-> +	if (inode->i_sb == NULL) {
-> +		printk(KERN_ERR "axfs_iget5_test:"
-> +		       " the super block is set to null\n");
-> +	}
-> +	if (inode->i_ino == *inode_number)
-> +		return 1;	/* matches */
-> +	else
-> +		return 0;	/* does not match */
+> +	if (AXFS_IS_REGION_XIP(sbi, region))
+> +		return;
+> +
+> +	if (region->virt_addr)
+> +		vfree(region->virt_addr);
 > +}
 > +
 
-This implies inode_numbers are unique in AXFS?  If so you can get rid of 
-  the axfs_iget5_set/test logic.  This is only necessary for filesystems 
-with non-unique inode numbers like cramfs.
+No need to do
+
+	if(xxx)
+		vfree(xxx)
+
+vfree/kfree can cope with NULL pointers.
+
+> +static void axfs_put_sbi(struct axfs_super *sbi)
+> +{
+
+> +	axfs_free_region(sbi, &sbi->uids);
+> +	axfs_free_region(sbi, &sbi->gids);
+> +
+> +	if (sbi->second_dev)
+> +		kfree(sbi->second_dev);
+> +
+> +	if (sbi->cblock_buffer[0])
+> +		vfree(sbi->cblock_buffer[0]);
+> +	if (sbi->cblock_buffer[1])
+> +		vfree(sbi->cblock_buffer[1]);
+> +
+
+Again, just kfree(xxx)/vfree(xxx)
 
 > +
-> +struct inode *axfs_create_vfs_inode(struct super_block *sb, int ino)
+> +static int axfs_copy_mem(struct super_block *sb, void *buf, u64 fsoffset,
+> +			 u64 len)
 > +{
 > +	struct axfs_super *sbi = AXFS_SB(sb);
-> +	struct inode *inode;
-> +	u64 size;
+> +	unsigned long addr;
 > +
-> +	inode = iget5_locked(sb, ino, axfs_iget5_test, axfs_iget5_set, &ino);
+> +	addr = sbi->virt_start_addr + (unsigned long)fsoffset;
+> +	memcpy(buf, (void *)addr, (size_t) len);
+> +	return 0;
 
-If inode_numbers are unique, use iget_locked here.
+Always returns 0, consider changing to static void
 
+> +}
 > +
-> +	if (!(inode && (inode->i_state & I_NEW)))
-> +		return inode;
-> +
-> +	inode->i_mode = AXFS_GET_MODE(sbi, ino);
-> +	inode->i_uid = AXFS_GET_UID(sbi, ino);
-> +	size = AXFS_GET_INODE_FILE_SIZE(sbi, ino);
-> +	inode->i_size = size;
-
-What's the reason for splitting this into two lines, rather than
-
-inode->i_size = AXFS_GET_INODE_FILE_SIZE(sbi, ino);
-
-
-> +	inode->i_blocks = AXFS_GET_INODE_NUM_ENTRIES(sbi, ino);
-> +	inode->i_blkbits = PAGE_CACHE_SIZE * 8;
-> +	inode->i_gid = AXFS_GET_GID(sbi, ino);
-> +
-> +	inode->i_mtime = inode->i_atime = inode->i_ctime = sbi->timestamp;
-
-No unique per inode time?  Will cause problems using AXFS for archives 
-etc. where preserving timestamps is important.
-
-
-> +	inode->i_ino = ino;
-> +
-
-Unnecessary, set by iget_locked/iget_locked5
-
-> +
-> +static int axfs_readdir(struct file *filp, void *dirent, filldir_t filldir)
+> +static int axfs_copy_metadata(struct super_block *sb, void *buf, u64 fsoffset,
+> +			      u64 len)
 > +{
-> +	struct inode *inode = filp->f_dentry->d_inode;
-> +	struct super_block *sb = inode->i_sb;
 > +	struct axfs_super *sbi = AXFS_SB(sb);
-> +	u64 ino_number = inode->i_ino;
-> +	u64 entry;
-> +	loff_t dir_index;
-> +	char *name;
-> +	int namelen, mode;
-> +	int err = 0;
+> +	u64 end = fsoffset + len;
+> +	u64 a = sbi->mmap_size - fsoffset;
+> +	u64 b = end - sbi->mmap_size;
+> +	void *bb = (void *)((unsigned long)buf + (unsigned long)a);
+> +	int err;
 > +
-> +	/* Get the current index into the directory and verify it is not beyond
-> +	   the end of the list */
-> +	dir_index = filp->f_pos;
-> +	if (dir_index >= AXFS_GET_INODE_NUM_ENTRIES(sbi, ino_number))
+> +	/* Catches case where sbi is not yet fully initialized. */
+> +	if ((sbi->magic == 0) && (sbi->virt_start_addr != 0))
+> +		return axfs_copy_mem(sb, buf, fsoffset, len);
+> +
+> +	if (fsoffset < sbi->mmap_size) {
+> +		if (end > sbi->mmap_size) {
+> +			err = axfs_copy_metadata(sb, buf, fsoffset, a);
+> +			if (err)
+> +				return err;
+> +			err = axfs_copy_metadata(sb, bb, sbi->mmap_size, b);
+> +		} else {
+> +			if (AXFS_IS_OFFSET_MMAPABLE(sbi, fsoffset)) {
+> +				err = axfs_copy_mem(sb, buf, fsoffset, len);
+> +			} else if (AXFS_HAS_MTD(sb)) {
+> +				err = axfs_copy_mtd(sb, buf, fsoffset, len);
+> +			} else if (AXFS_HAS_BDEV(sb)) {
+> +				err = axfs_copy_block(sb, buf, fsoffset, len);
+> +			} else {
+> +				err = -EINVAL;
+
+Consider initialising err to -EINVAL at declaration time, and get rid of 
+this else,
+
+> +			}
+> +		}
+> +	} else {
+> +		if (AXFS_NODEV(sb)) {
+> +			err = axfs_copy_mem(sb, buf, fsoffset, len);
+> +		} else if (AXFS_HAS_BDEV(sb)) {
+> +			err = axfs_copy_block(sb, buf, fsoffset, len);
+> +		} else if (AXFS_HAS_MTD(sb)) {
+> +			err = axfs_copy_mtd(sb, buf, fsoffset, len);
+> +		} else {
+> +			err = -EINVAL;
+
+and this one.
+
+> +		}
+> +	}
+> +	return err;
+> +}
+> +
+> +static int axfs_fill_region_data(struct super_block *sb,
+> +				 struct axfs_region_desc *region, int force)
+> +{
+> +
+> +	if (AXFS_IS_REGION_INCORE(region))
+> +		goto incore;
+> +
+> +	if (AXFS_IS_REGION_COMPRESSED(region))
+> +		goto incore;
+> +
+> +	if (AXFS_IS_REGION_XIP(sbi, region)) {
+> +		if ((end > sbi->mmap_size) && (force))
+> +			goto incore;
+> +		addr = sbi->virt_start_addr;
+> +		addr += (unsigned long)fsoffset;
+> +		region->virt_addr = (void *)addr;
+> +		return 0;
+> +	}
+> +
+> +incore:
+> +	region->virt_addr = vmalloc(size);
+> +	if (!region->virt_addr)
 > +		goto out;
+> +	vaddr = region->virt_addr;
 > +
-> +	/* Verify the inode is for a directory */
-> +	if (!(S_ISDIR(inode->i_mode))) {
+> +	if (AXFS_IS_REGION_COMPRESSED(region)) {
+> +		buff = vmalloc(c_size);
+> +		if (!buff)
+> +			goto out;
+> +		axfs_copy_metadata(sb, buff, fsoffset, c_size);
+> +		err = axfs_uncompress_block(vaddr, size, buff, c_size);
+> +		if (!err)
+> +			goto out;
+> +		vfree(buff);
+> +	} else {
+> +		axfs_copy_metadata(sb, vaddr, fsoffset, size);
+> +	}
+> +
+> +	return 0;
+
+
+ From this it would appear that if the region data can't be mapped XIP 
+(i.e. it is compressed or on a block device), it is cached in its 
+entirety in RAM?
+
+This implies for block devices that the entire filesystem metadata has 
+to be cached in RAM.  This severely limits the size of AXFS filesystems 
+when using block devices, or the else memory usage will be excessive.
+
+
+> +
+> +out:
+> +	if (buff)
+> +		vfree(buff);
+> +	if (region->virt_addr)
+> +		vfree(region->virt_addr);
+> +	return err;
+> +}
+> +
+
+Just do kfree(xxx)
+
+
+> +
+> +static int axfs_get_onmedia_super(struct super_block *sb)
+> +{
+> +	int err;
+> +	struct axfs_super *sbi = AXFS_SB(sb);
+> +	struct axfs_super_onmedia *sbo;
+> +
+> +	sbo = kmalloc(sizeof(*sbo), GFP_KERNEL);
+> +	if (!sbo)
+> +		return -ENOMEM;
+> +
+> +	axfs_copy_metadata(sb, (void *)sbo, 0, sizeof(*sbo));
+> +
+> +	/* Do sanity checks on the superblock */
+> +	if (be32_to_cpu(sbo->magic) != AXFS_MAGIC) {
+> +		printk(KERN_ERR "axfs: wrong magic\n");
 > +		err = -EINVAL;
 > +		goto out;
 > +	}
 > +
-> +	while (dir_index < AXFS_GET_INODE_NUM_ENTRIES(sbi, ino_number)) {
-> +		entry = AXFS_GET_INODE_ARRAY_INDEX(sbi, ino_number) + dir_index;
-> +
-> +		name = (char *)AXFS_GET_INODE_NAME(sbi, entry);
-
-One to one mapping between inode number and inode name?  No hard link 
-support...?
-
-> +		namelen = strlen(name);
-> +
-> +		mode = (int)AXFS_GET_MODE(sbi, entry);
-> +		err = filldir(dirent, name, namelen, dir_index, entry, mode);
-> +
-> +		if (err)
-> +			break;
-> +
-> +		dir_index++;
-> +		filp->f_pos = dir_index;
+> +	/* verify the signiture is correct */
+> +	if (strncmp(sbo->signature, AXFS_SIGNATURE, sizeof(AXFS_SIGNATURE))) {
+> +		printk(KERN_ERR "axfs: wrong axfs signature,"
+> +		       " read %s, expected %s\n",
+> +		       sbo->signature, AXFS_SIGNATURE);
+> +		err = -EINVAL;
+> +		goto out;
 > +	}
 > +
+> +	sbi->magic = be32_to_cpu(sbo->magic);
+> +	sbi->version_major = sbo->version_major;
+> +	sbi->version_minor = sbo->version_minor;
+> +	sbi->version_sub = sbo->version_sub;
+> +	sbi->files = be64_to_cpu(sbo->files);
+> +	sbi->size = be64_to_cpu(sbo->size);
+> +	sbi->blocks = be64_to_cpu(sbo->blocks);
+> +	sbi->mmap_size = be64_to_cpu(sbo->mmap_size);
+> +	sbi->cblock_size = be32_to_cpu(sbo->cblock_size);
+> +	sbi->timestamp.tv_sec = be64_to_cpu(sbo->timestamp);
+> +	sbi->timestamp.tv_nsec = 0;
+> +	sbi->compression_type = sbo->compression_type;
+> +
+> +	err = axfs_set_compression_type(sbi);
+> +	if (err)
+> +		goto out;
+> +
+> +	/* If no block or MTD device, adjust mmapable to cover all image */
+> +	if (AXFS_NODEV(sb))
+> +		sbi->mmap_size = sbi->size;
+> +
+> +	err = axfs_fill_region_descriptors(sb, sbo);
+> +	if (err)
+> +		goto out;
+> +
+> +	err = 0;
+
+Redundant code
+
 > +out:
-> +	return 0;
+> +	kfree(sbo);
+> +	return err;
 > +}
-
-Are "." and ".." stored in the directory?  If not then axfs_readdir 
-should fabricate them to avoid confusing applications that expect 
-readdir(3) to return them.
-
-
-> +static ssize_t axfs_file_read(struct file *filp, char __user *buf, size_t len,
-> +			      loff_t *ppos)
-
-> +	actual_size = len > remaining ? remaining : len;
-> +	readlength = actual_size < PAGE_SIZE ? actual_size : PAGE_SIZE;
-
-Use min() or min_t()
-
 > +
-> +static int axfs_readpage(struct file *file, struct page *page)
-> +{
-> +
-> +	if (node_type == Compressed) {
-> +		/* node is in compessed region */
-> +		cnode_offset = AXFS_GET_CNODE_OFFSET(sbi, node_index);
-> +		cnode_index = AXFS_GET_CNODE_INDEX(sbi, node_index);
-> +		down_write(&sbi->lock);
-> +		if (cnode_index != sbi->current_cnode_index) {
-> +			/* uncompress only necessary if different cblock */
-> +			ofs = AXFS_GET_CBLOCK_OFFSET(sbi, cnode_index);
-> +			len = AXFS_GET_CBLOCK_OFFSET(sbi, cnode_index + 1);
-> +			len -= ofs;
-> +			axfs_copy_data(sb, cblk1, &(sbi->compressed), ofs, len);
-> +			axfs_uncompress_block(cblk0, cblk_size, cblk1, len);
-> +			sbi->current_cnode_index = cnode_index;
-
-I assume compressed blocks can be larger than PAGE_CACHE_SIZE?  This 
-suffers from the rather obvious inefficiency that you decompress a big 
-block > PAGE_CACHE_SIZE, but only copy one PAGE_CACHE_SIZE page out of 
-it.  If multiple files are being read simultaneously (a common 
-occurrence), then each is going to replace your one cached uncompressed 
-block (sbi->current_cnode_index), leading to decompressing the same 
-blocks over and over again on sequential file access.
-
-readpage file A, index 1 -> decompress block X
-readpage file B, index 1 -> decompress block Y (replaces X)
-readpage file A, index 2 -> repeated decompress of block X (replaces Y)
-readpage file B, index 2 -> repeated decompress of block Y (replaces X)
-
-and so on.
-
-> +		}
-> +		downgrade_write(&sbi->lock);
-> +		max_len = cblk_size - cnode_offset;
-> +		len = max_len > PAGE_CACHE_SIZE ? PAGE_CACHE_SIZE : max_len;
-
-Again, min() or min_t().  Lots of these.
 
 Phillip
 
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
