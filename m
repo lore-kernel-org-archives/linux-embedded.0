@@ -1,74 +1,67 @@
-From: Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>
-Subject: Re: [PATCH 07/10] AXFS: axfs_bdev.c
-Date: Fri, 22 Aug 2008 14:54:40 +0200
-Message-ID: <20080822125440.GA1396@mx.loc>
-References: <48AD010B.6030209@gmail.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: mkfs.axfs
+Date: Fri, 22 Aug 2008 16:49:35 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0808221644540.17105@vixen.sonytel.be>
 Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-842243557-1219416575=:17105"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:received:date:from:to:cc
-         :subject:message-id:references:mime-version:content-type
-         :content-disposition:in-reply-to:user-agent;
-        bh=m3GZbBE4szTsX+XAzEosBr3j1sWczpVybrnAfS0pAOs=;
-        b=ir4aCY59/SE4zA0KYPFAQHasSUvTf+KKf9h2IHjEdrKtZMRNKPDZOLeqQx6ACuR6bJ
-         vqU3Dg4+jMxbCmBPVHjgz65ozWkJH5Gt29N4L+6PHEAKfUaoqM4fqSczOUXkaC5ebYW2
-         aI2Jj0ZSzg1HtTD/fhYXG+3etdeib9Mm4yhuA=
-Content-Disposition: inline
-In-Reply-To: <48AD010B.6030209@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Cc: linux-embedded@vger.kernel.org
 
-On Wed, Aug 20, 2008 at 10:45:47PM -0700, Jared Hulbert wrote:
->+/******************************************************************************
->+ *
->+ * axfs_copy_block_data
->+ *
->+ * Description: Helper function to read data from block device
->+ *
->+ * Parameters:
->+ *    (IN) sb - pointer to super block structure.
->+ *
->+ *    (IN) dst_addr - pointer to buffer into which data is to be read.
->+ *
->+ *    (IN) boffset - offset within block device
->+ *
->+ *    (IN) len - length of data to be read
->+ *
->+ * Returns:
->+ *     0 or error number
->+ *
->+ *****************************************************************************/
->+int axfs_copy_block(struct super_block *sb, void *dst_addr, u64 fsoffset,
->+		    u64 len)
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-mismatch between documentation and implementation WRT the function name ;)
+---584349381-842243557-1219416575=:17105
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
+	Hi Jared,
 
->+{
->+	struct axfs_super *sbi = AXFS_SB(sb);
->+	u64 boffset = AXFS_FSOFFSET_2_DEVOFFSET(sbi, fsoffset);
->+	u64 blocks;
->+	u64 blksize = sb->s_blocksize;
->+	unsigned long dst;
->+	unsigned long src;
->+	sector_t block;
->+	size_t bytes;
->+	struct buffer_head *bh;
->+	u64 copied = 0;
->+
->+	if (len == 0)
->+		return 0;
->+
->+	blocks = len / blksize;
->+	if ((len % blksize) > 0)
->+		blocks += 1;
->+
->+	while (copied < len) {
->+		/* Explicit casting for ARM linker errors. */
+When compiling mkfs.axfs from SourceForge SVN (tried ia32, amd64, ppc64), I
+get:
 
-did it try to emit some external div()? Is this still needed?
+cc -g -I./ -O0   -c -o mkfs.axfs.o mkfs.axfs.c
+In file included from ./linux/axfs.h:32,
+                 from mkfs.axfs.c:58:
+/usr/include/linux/time.h:9: error: redefinition of ‘struct timespec’
+/usr/include/linux/time.h:15: error: redefinition of ‘struct timeval’
+
+The patch below fixes this:
+
+diff --git a/mkfs.axfs/trunk/linux/axfs.h b/mkfs.axfs/trunk/linux/axfs.h
+index 6dc7c62..60ffd70 100644
+--- a/mkfs.axfs/trunk/linux/axfs.h
++++ b/mkfs.axfs/trunk/linux/axfs.h
+@@ -26,9 +26,9 @@
+ 
+ #ifdef __KERNEL__
+ #include <linux/rwsem.h>
+-#endif
+ #include <linux/errno.h>
+ #include <linux/time.h>
++#endif
+ 
+ #define AXFS_MAGIC	0x48A0E4CD	/* some random number */
+ #define AXFS_SIGNATURE	"Advanced XIP FS"
+
+BTW, there are still lots of suspicious warnings if you compile it with -Wall.
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-842243557-1219416575=:17105--
