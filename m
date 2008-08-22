@@ -1,30 +1,42 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
 Subject: Re: [PATCH 04/10] AXFS: axfs_inode.c
-Date: Fri, 22 Aug 2008 04:29:50 +0100
-Message-ID: <48AE32AE.9010901@lougher.demon.co.uk>
-References: <48AD00F0.5030403@gmail.com> <200808211417.14425.arnd@arndb.de>	 <48AE22F5.3000309@lougher.demon.co.uk> <6934efce0808212023x758babf0w500da6801bd66f45@mail.gmail.com>
+Date: Fri, 22 Aug 2008 04:46:47 +0100
+Message-ID: <48AE36A7.4060000@lougher.demon.co.uk>
+References: <48AD00F0.5030403@gmail.com> <48AE0697.5040706@lougher.demon.co.uk> <6934efce0808212027q412c4cbbp6ea8673a7d3bc1b9@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <6934efce0808212023x758babf0w500da6801bd66f45@mail.gmail.com>
+In-Reply-To: <6934efce0808212027q412c4cbbp6ea8673a7d3bc1b9@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
 Jared Hulbert wrote:
-
+>> I assume compressed blocks can be larger than PAGE_CACHE_SIZE?  This suffers
+>> from the rather obvious inefficiency that you decompress a big block >
+>> PAGE_CACHE_SIZE, but only copy one PAGE_CACHE_SIZE page out of it.  If
+>> multiple files are being read simultaneously (a common occurrence), then
+>> each is going to replace your one cached uncompressed block
+>> (sbi->current_cnode_index), leading to decompressing the same blocks over
+>> and over again on sequential file access.
+>>
+>> readpage file A, index 1 -> decompress block X
+>> readpage file B, index 1 -> decompress block Y (replaces X)
+>> readpage file A, index 2 -> repeated decompress of block X (replaces Y)
+>> readpage file B, index 2 -> repeated decompress of block Y (replaces X)
+>>
+>> and so on.
 > 
-> The memcpy in question copies a c_node to the page.  The len is either
-> the max length of a c_node and size of the buffer I'm copying to
-> (PAGE_CACHE_SIZE) or it is the difference between the beginning of the
-> c_node in the c_block and the end of the c_block, whichever is
-> smaller.  The confusion is probably because of the fact that this
-> copies extra crap to the page for tails.
+> Yep.  Been thinking about optimizing it.  So far it hasn't been an
+> issue for my customers.  Most fs traffic being on the XIP pages.  Once
+> I get a good automated performance test up we'll probably look into
+> something to improve this.
 
-
-Ah yes, that's where I got confused :)  Glad to see AXFS uses tail packing.
-
+It's relatively easy to solve.  Squashfs explicitly pushes the extra 
+pages into the pagecache (so subsequent readpages find them there and 
+don't call readpage on squashfs again).
 
 Phillip
+
