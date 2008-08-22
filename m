@@ -1,40 +1,35 @@
-From: "Randy MacLeod" <rwmacleod@gmail.com>
-Subject: Re: kernel dump solutions
-Date: Thu, 21 Aug 2008 21:53:32 -0400
-Message-ID: <21f828e90808211853r6e92f6b9ta4bf9252ed63eccd@mail.gmail.com>
-References: <1218656903.10489.50.camel@localhost.localdomain>
+From: Nick Piggin <nickpiggin@yahoo.com.au>
+Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
+Date: Fri, 22 Aug 2008 12:04:57 +1000
+Message-ID: <200808221204.57413.nickpiggin@yahoo.com.au>
+References: <48AD00C4.6060302@gmail.com> <ac9c93b10808202332n2654884eh877848df2da59f20@mail.gmail.com> <6934efce0808211232i21fcf347vb6baa6502246adb2@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=xhs8439rCqQEMhgrqPLtzmIkNZ/3rTU1lxyuhZUovow=;
-        b=jxCuYeG4gONWozsd6zDGfmtFZh4YOgXYvW+cRC2KFY/guGO7F+z0hyPb0Bas8FruLX
-         0oUaq4RmW+79i78toJP0h9lqxMtcx9r/UoZeB00MRvmIQ6ZhNPOeCwTuTlVHTzGT94YM
-         8LGB/v97pGVD3NBt2ZabSk5cwkErNhXng4nKM=
-In-Reply-To: <1218656903.10489.50.camel@localhost.localdomain>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753061AbYHVCFW@vger.kernel.org>
+In-Reply-To: <6934efce0808211232i21fcf347vb6baa6502246adb2@mail.gmail.com>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Josh Boyer <jwboyer@gmail.com>
-Cc: linux-embedded@vger.kernel.org
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Frans Meulenbroeks <fransmeulenbroeks@gmail.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?utf-8?q?J=C3=B6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com
 
-On Wed, Aug 13, 2008 at 3:48 PM, Josh Boyer <jwboyer@gmail.com> wrote:
-> Hi All,
+On Friday 22 August 2008 05:32, Jared Hulbert wrote:
+> > Jared, nice work!
+
+> > - would axfs be suitable as a filesystem on a ram disk?
 >
-> I'm curious what people are using for a kernel dump solution on embedded
+> It could be.  I plan on implementing support for brd.  That might work
+> nicely.
 
-Create a region of memory that pesist across resets.
-Put kernel panic info, exceptiions and scheduling events into said memory.
-Profit!
+I was going to take a look at this too. With any luck, it should be
+little effort required as it looks like you have the block device
+support in place?
 
-If only more manufactures would support this in the bios...
-Intel and BIOS writter folks are you listening?
+This filesystem actually should in theory work fairly well with brd,
+because then we wouldn't have to bring the data over into pagecache
+for frequently used pages but we can retain the compressed storage
+for the infrequently used stuff.
 
-
--- 
-// Randy
+I say in theory because I don't know of any serious users (except
+kernel testing) of brd :)
