@@ -1,52 +1,28 @@
-From: Peter Korsgaard <jacmet@sunsite.dk>
-Subject: Re: Adding a new platform
-Date: Fri, 22 Aug 2008 09:25:52 +0200
-Message-ID: <87y72p5x4v.fsf@macbook.be.48ers.dk>
-References: <48AB0A7A.8040209@cisco.com>
-	<7d1d9c250808192129j3fb7ef28p8f404c6affd82078@mail.gmail.com>
-	<f608b67d0808192215q5b8ffbf0w70531c31cdd66bcd@mail.gmail.com>
-	<200808211502.58206.manningc2@actrix.gen.nz>
-	<Pine.LNX.4.64.0808211044590.20704@vixen.sonytel.be>
-	<48AE4647.5060407@lougher.demon.co.uk>
+From: Carsten Otte <cotte@de.ibm.com>
+Subject: Re: [PATCH 05/10] AXFS: axfs_profiling.c
+Date: Fri, 22 Aug 2008 09:26:31 +0200
+Message-ID: <48AE6A27.9070103@de.ibm.com>
+References: <48AD00F8.1030004@gmail.com> <200808211339.37187.arnd@arndb.de> <6934efce0808210755n1977e085o63b8b91e84575dc9@mail.gmail.com> <200808211706.37761.arnd@arndb.de> <6934efce0808210817h489bbeafyaf27217ca68bd31e@mail.gmail.com>
+Reply-To: carsteno@de.ibm.com
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:received:to:cc:subject
-         :references:from:date:in-reply-to:message-id:user-agent:mime-version
-         :content-type:sender;
-        bh=UodB93Xz6iKg8K4DtTY3vVFDedg0hQm0CDIKWUnpW98=;
-        b=preoJ8ylwZHpbgeOH7Dq1Jx+jRCQMl2MHE3bhVpDtEmhC2hz++j811JVgaWq/ErAGg
-         hW3V4vgFBgBHIKWKn4L/NRWZjtsgpeWYPihbR59jwFEImiPHPkoUOZaNSG4VamtURUaQ
-         N6KVnqLJ9LBDPSyFwxOkRgS2MQHqiS+7zcr0Y=
-In-Reply-To: <48AE4647.5060407@lougher.demon.co.uk> (Phillip Lougher's message of "Fri\, 22 Aug 2008 05\:53\:27 +0100")
+In-Reply-To: <6934efce0808210817h489bbeafyaf27217ca68bd31e@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Charles Manning <manningc2@actrix.gen.nz>, vb <vb@vsbe.com>, Paul Gortmaker <paul.gortmaker@gmail.com>, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, corbet@lwn.net
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, David Woodhouse <dwmw2@infradead.org>, carsteno@de.ibm.com, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>
 
->>>>> "Phillip" == Phillip Lougher <phillip@lougher.demon.co.uk> writes:
-
-Hi,
-
- Phillip> It only uses a relatively small subset of the VFS, and goes
- Phillip> nowhere near the MTD subsystem.  Recently dusting off an MTD
- Phillip> patch I wrote for Squashfs a couple of years ago, I found it
- Phillip> had to be completely rewritten for modern kernels.
-
-Can I see it? I've recently pondered patching squashfs to talk
-directly to MTD instead of through mtdblock as squashfs often is the
-only thing using the block layer on embedded systems.
-
-Compiling with CONFIG_BLOCK=n seems to save around 125kb here.
-
- Phillip> Having said that the bit of the VFS Squashfs is interested
- Phillip> in has changed in each of 2.6.23, 2.6.24, 2.6.25, 2.6.26 and
- Phillip> now 2.6.27, and so I wouldn't say it was immune anyway.
-
-Yeah, but it has always been pretty easy to fixup.
-
--- 
-Bye, Peter Korsgaard
+Jared Hulbert wrote:
+>> The profiling code has certainly been useful to you during development,
+>> and you should keep that code around for your own work on it,
+>> but maybe you should not push that upstream, because regular users
+>> are not going to need it.
+> 
+> Nope.  Profiling is absolutely fundamental to how AXFS works.  Read
+> the [PATCH 00/10] thread again.
+I agree, the profiling part is the sweet spot. Profiling should be in, 
+probably even selectable at runtime as opposed to a config-switch. 
+This way we could have it in enterprise distros that would'nt build 
+another kernel image for this.
