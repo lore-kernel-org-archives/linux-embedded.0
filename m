@@ -1,60 +1,210 @@
-From: Will Marone <wjmarone@gmail.com>
-Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Fri, 22 Aug 2008 15:09:09 -0700
-Message-ID: <48AF3905.70304@gmail.com>
-References: <48AD00C4.6060302@gmail.com> <Pine.LNX.4.64.0808221650500.17105@vixen.sonytel.be>
+From: "MinChan Kim" <minchan.kim@gmail.com>
+Subject: Re: [PATCH 07/10] AXFS: axfs_bdev.c
+Date: Sun, 24 Aug 2008 17:19:58 +0900
+Message-ID: <28c262360808240119x44aaa728tc55d2148d14ac3c2@mail.gmail.com>
+References: <48AD010B.6030209@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=cCgwYALbCsMbgywjU8Vd5g5jxFai+1QywsY3JPxHYiM=;
-        b=GauGMs37+TjhC1WYgcLsxU0M7v5lucNhEzOXFPeIe8aeh77DFCRFnXmQbtc2odA8pk
-         +P/NacSioSu+7bIU2Hs6DOBbkDanwNz6L4R+KJWeBr5vCRcexnwJ0yhwj7Xqblep83NY
-         x2fFfz/IrcAmW+IF2F6QK03j1k5ZDRXlE7QBA=
-In-Reply-To: <Pine.LNX.4.64.0808221650500.17105@vixen.sonytel.be>
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=74H1nPLSRPT0Ugsw5M4RcFqc3ibBckF9zPMU1R2oAVg=;
+        b=QaRbVnxPrKOtC9xkkD1/wVodpvbvICt5un1/FfxC1ewZRpT6lXWZxWBIYNKHwPgyvj
+         yacVk6SL6TgoiJnJjrxmGgCO9MOAh4NQZsHIPurLzduai6aLfHRf4GUlZ8+glhAyIvMv
+         dbRUg+SALEDImjhvaFdIF0fU48q7jO2T7zrgo=
+In-Reply-To: <48AD010B.6030209@gmail.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: Jared Hulbert <jaredeh@gmail.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>, tim.bird@AM.SONY.COM
+Content-Type: text/plain; charset="us-ascii"
+To: jaredeh@gmail.com
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-Geert Uytterhoeven wrote:
-> I gave AxFS a try on PS3 (ppc64, always use big-endian 64-bit for testing new
-> code ;-).
-> When mounting the image, I got the crash below:
+On Thu, Aug 21, 2008 at 2:45 PM, Jared Hulbert <jaredeh@gmail.com> wrote:
+> All the block device code goes here.
 >
-> | attempt to access beyond end of device
-> | loop0: rw=0, want=4920, limit=4912
-> | Unable to handle kernel paging request for data at address 0x00000028
-> | Faulting instruction address: 0xd000000000037988
-> | Oops: Kernel access of bad area, sig: 11 [#1]
-> | SMP NR_CPUS=2 PS3
+> Signed-off-by: Jared Hulbert <jaredeh@gmail.com>
+> ---
+> diff --git a/fs/axfs/axfs_bdev.c b/fs/axfs/axfs_bdev.c
+> new file mode 100644
+> index 0000000..4c6f83c
+> --- /dev/null
+> +++ b/fs/axfs/axfs_bdev.c
+> @@ -0,0 +1,158 @@
+> +/*
+> + * Advanced XIP File System for Linux - AXFS
+> + *   Readonly, compressed, and XIP filesystem for Linux systems big and small
+> + *
+> + * Copyright(c) 2008 Numonyx
+> + *
+> + * This program is free software; you can redistribute it and/or modify it
+> + * under the terms and conditions of the GNU General Public License,
+> + * version 2, as published by the Free Software Foundation.
+> + *
+> + * Authors:
+> + *  Jared Hulbert <jaredeh@gmail.com>
+> + *
+> + * Project url: http://axfs.sourceforge.net
+> + *
+> + * axfs_bdev.c -
+> + *   Allows axfs to use block devices or has dummy functions if block
+> + *   device support is compiled out of the kernel.
+> + *
+> + */
+> +
+> +#include <linux/axfs.h>
+> +#include <linux/mount.h>
+> +#ifdef CONFIG_BLOCK
+> +#include <linux/buffer_head.h>
+> +#include <linux/namei.h>
+> +
+> +int axfs_fill_super(struct super_block *sb, void *data, int silent);
+> +
+> +int axfs_get_sb_bdev(struct file_system_type *fs_type, int flags,
+> +                    const char *dev_name, struct axfs_super *sbi,
+> +                    struct vfsmount *mnt, int *err)
+> +{
+> +       *err = get_sb_bdev(fs_type, flags, dev_name, sbi, axfs_fill_super, mnt);
+> +
+> +       if (*err)
+> +               return FALSE;
+> +       return TRUE;
+> +}
+> +
+> +void axfs_kill_block_super(struct super_block *sb)
+> +{
+> +       kill_block_super(sb);
+> +}
+> +
+> +/******************************************************************************
+> + *
+> + * axfs_copy_block_data
+> + *
+> + * Description: Helper function to read data from block device
+> + *
+> + * Parameters:
+> + *    (IN) sb - pointer to super block structure.
+> + *
+> + *    (IN) dst_addr - pointer to buffer into which data is to be read.
+> + *
+> + *    (IN) boffset - offset within block device
+> + *
+> + *    (IN) len - length of data to be read
+> + *
+> + * Returns:
+> + *     0 or error number
+> + *
+> + *****************************************************************************/
+> +int axfs_copy_block(struct super_block *sb, void *dst_addr, u64 fsoffset,
+> +                   u64 len)
+> +{
+> +       struct axfs_super *sbi = AXFS_SB(sb);
+> +       u64 boffset = AXFS_FSOFFSET_2_DEVOFFSET(sbi, fsoffset);
+> +       u64 blocks;
+> +       u64 blksize = sb->s_blocksize;
+> +       unsigned long dst;
+> +       unsigned long src;
+> +       sector_t block;
+> +       size_t bytes;
+> +       struct buffer_head *bh;
+> +       u64 copied = 0;
+> +
+> +       if (len == 0)
+> +               return 0;
+> +
+> +       blocks = len / blksize;
+> +       if ((len % blksize) > 0)
+> +               blocks += 1;
+
+blocks ??
+You have to drop blocks variable since anyone don't use it.
+
+> +       while (copied < len) {
+> +               /* Explicit casting for ARM linker errors. */
+> +               block = (sector_t) boffset + (sector_t) copied;
+> +               block /= (sector_t) blksize;
+> +               bh = sb_bread(sb, block);
+> +               src = (unsigned long)bh->b_data;
+> +               dst = (unsigned long)dst_addr;
+> +               if (copied == 0) {
+> +                       /* Explicit casting for ARM linker errors. */
+> +                       bytes = (size_t) blksize;
+> +                       bytes -= (size_t) boffset % (size_t) blksize;
+> +                       if (bytes > len)
+> +                               bytes = len;
+> +                       /* Explicit casting for ARM linker errors. */
+> +                       src += (unsigned long)boffset % (unsigned long)blksize;
+> +               } else {
+> +                       dst += copied;
+> +                       if ((len - copied) < blksize) {
+> +                               bytes = len - copied;
+> +                       } else {
+> +                               bytes = blksize;
+> +                       }
+> +               }
+> +               memcpy((void *)dst, (void *)src, bytes);
+> +               copied += bytes;
+> +               brelse(bh);
+> +       }
+> +       return 0;
+> +}
+> +
+> +int axfs_is_dev_bdev(char *path)
+> +{
+> +       struct nameidata nd;
+> +       int ret = FALSE;
+> +
+> +       if (!path)
+> +               return FALSE;
+> +
+> +       if (path_lookup(path, LOOKUP_FOLLOW, &nd))
+> +               return FALSE;
+> +
+> +       if (S_ISBLK(nd.path.dentry->d_inode->i_mode))
+> +               ret = TRUE;
+> +
+> +       path_put(&nd.path);
+> +       return ret;
+> +}
+> +
+> +#else
+> +
+> +int axfs_get_sb_bdev(struct file_system_type *fs_type, int flags,
+> +                    const char *dev_name, struct axfs_super *sbi,
+> +                    struct vfsmount *mnt, int *err)
+> +{
+> +       return FALSE;
+> +}
+> +
+> +void axfs_kill_block_super(struct super_block *sb)
+> +{
+> +}
+> +
+> +int axfs_copy_block(struct super_block *sb, void *dst_addr, u64 fsoffset,
+> +                   u64 len)
+> +{
+> +       return -EINVAL;
+> +}
+> +
+> +int axfs_is_dev_bdev(char *path)
+> +{
+> +       return FALSE;
+> +}
+> +
+> +#endif /* CONFIG_BLOCK */
 >
-> When mounting (also on PS3) an image created on ia32, I get a different crash:
 >
-> | axfs: wrong magic
->   ^^^^^^^^^^^^^^^^^
-> | Unable to handle kernel paging request for data at address 0x000003a8
-> | Faulting instruction address: 0xd0000000000355f0
-> | Oops: Kernel access of bad area, sig: 11 [#1]
-> | SMP NR_CPUS=2 PS
-Geert,
-
-Thanks for giving it a spin, especially on a platform as different from 
-ours as the PS3.
-
-Before I dig more into what happened, I was wondering if you could tell 
-me a bit more
-about your environment, particularly how you supplied the filesystem to 
-the kernel and
-your mount commandline (also, if you used a boot commandline, what it was.)
-
-My first guess would be a ppc64 compiled UML session, but I'd like to be 
-a bit more sure.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 
-Will Marone
+
+-- 
+Kinds regards,
+MinChan Kim
