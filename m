@@ -1,38 +1,29 @@
-From: Jamie Lokier <jamie@shareable.org>
+From: David Woodhouse <dwmw2@infradead.org>
 Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Mon, 25 Aug 2008 12:43:47 +0100
-Message-ID: <20080825114346.GB20960@shareable.org>
-References: <48AD00C4.6060302@gmail.com> <20080821110749.GA1926@shareable.org> <6934efce0808210711t686a88eci6eb294dbb54d68fe@mail.gmail.com> <48AE0476.80109@snapgear.com> <6934efce0808211948kd12ba76k1ee847a0e08010e0@mail.gmail.com> <48B2529B.8030906@snapgear.com>
+Date: Mon, 25 Aug 2008 13:16:19 +0100
+Message-ID: <1219666579.21254.0.camel@pmac.infradead.org>
+References: <48AD00C4.6060302@gmail.com>
+	 <Pine.LNX.4.64.0808221650500.17105@vixen.sonytel.be>
+	 <6934efce0808220951i5a2cd6f9t70f9c522eae6f1d6@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <48B2529B.8030906@snapgear.com>
+In-Reply-To: <6934efce0808220951i5a2cd6f9t70f9c522eae6f1d6@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Greg Ungerer <gerg@snapgear.com>
-Cc: Jared Hulbert <jaredeh@gmail.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-Greg Ungerer wrote:
-> Sort of. It actually just uses a single ->read to bring in
-> the entire file contents. There is a few limitations on the use
-> of mmap() for non-mmu. Documentation/nommu-mmap.txt gives
-> more details. With no MMU it does rely on being able to kmalloc()
-> a single RAM region big enough to hold the entire file.
+On Fri, 2008-08-22 at 09:51 -0700, Jared Hulbert wrote:
+> Can you run mkfs.axfs on the same trivial directory on both ia32 and
+> PPC64 and then get me the resulting images?
 
-That's unfortunate, if you're using FDPIC-ELF or BFLT-XIP, you really want
-to kmalloc() one region for code (i.e. mmap not the whole file), and
-one separate for data.  Asking for a single larger region sometimes
-creates much higher memory pressure while kmalloc() attempts to
-defragment by evicting everything.
+git.infradead.org is a big-endian box, and I know you have an account
+there...
 
-But that's fiddly to do right in general.
+-- 
+David Woodhouse                            Open Source Technology Centre
+David.Woodhouse@intel.com                              Intel Corporation
 
-The natural thing for AXFS to do to support no-MMU FDPIC-ELF or
-BFLT-XIP is store the code segment uncompressed and contiguous, and
-the data segment however the filesystem prefers, and the profiling
-information to work out where these are is readily available from the
-mmap() calls, which are always the same when an executable is run.
 
--- Jamie
