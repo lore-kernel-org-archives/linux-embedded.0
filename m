@@ -1,92 +1,76 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Adrian Bunk <bunk-HeJ8Db2Gnd6zQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c -
- bisected
-Date: Tue, 26 Aug 2008 13:41:43 -0700 (PDT)
-Message-ID: <alpine.LFD.1.10.0808261332570.3363@nehalem.linux-foundation.org>
-References: <mzBsPw3QUOF.A.87F.wZGsIB@albercik> <48B313E0.1000501@hp.com> <alpine.LFD.1.10.0808251326500.3363@nehalem.linux-foundation.org> <200808261111.19205.rusty@rustcorp.com.au> <alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org>
- <20080826183051.GB10925@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261134530.3363@nehalem.linux-foundation.org> <20080826202134.GA11734@cs181140183.pp.htv.fi>
+	bisected
+Date: Tue, 26 Aug 2008 23:59:16 +0300
+Message-ID: <20080826205916.GB11734@cs181140183.pp.htv.fi>
+References: <mzBsPw3QUOF.A.87F.wZGsIB@albercik> <48B313E0.1000501@hp.com> <alpine.LFD.1.10.0808251326500.3363@nehalem.linux-foundation.org> <200808261111.19205.rusty@rustcorp.com.au> <alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org> <20080826183051.GB10925@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080826202134.GA11734@cs181140183.pp.htv.fi>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.1.10.0808261144510.3363-nfNrOhbfy2R17+2ddN/4kux8cNe9sq/dYPYVAmT7z5s@public.gmane.org>
+Sender: kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Adrian Bunk <bunk@kernel.org>
-Cc: Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunelle@hp.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kernel Testers List <kernel-testers@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Arjan van de Ven <arjan@linux.intel.com>, Ingo Molnar <mingo@elte.hu>, linux-embedded@vger.kernel.org
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, "Alan D. Brunelle" <Alan.Brunelle-VXdhtT5mjnY@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kernel Testers List <kernel-testers-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-
-
-On Tue, 26 Aug 2008, Adrian Bunk wrote:
+On Tue, Aug 26, 2008 at 11:47:01AM -0700, Linus Torvalds wrote:
 > 
-> I had in mind that we anyway have to support it for tiny kernels.
-
-I actually don't think that is true.
-
-If we really were to decide to be stricter about it, and it makes a big 
-size difference, we can probably also add a tool to warn about functions 
-that really should be inline.
-
-> > Inlining really isn't the great tool some people think it is. Especially 
-> > not since gcc stack allocation is so horrid that it won't re-use stack 
-> > slots etc (which I don't disagree with per se - it's _hard_ to re-use 
-> > stack slots while still allowing code scheduling).
 > 
-> gcc's stack allocation has become better
-> (that's why we disable unit-at-a-time only for gcc 3.4 on i386).
+> On Tue, 26 Aug 2008, Adrian Bunk wrote:
+> > 
+> > I added "-fno-inline-functions-called-once -fno-early-inlining" to 
+> > KBUILD_CFLAGS, and (with gcc 4.3) that increased the size of my kernel 
+> > image by 2%.
+> 
+> Btw, did you check with just "-fno-inline-functions-called-once"?
+> 
+> The -fearly-inlining decisions _should_ be mostly right. If gcc sees early 
+> that a function is so small (even without any constant propagation etc) 
+> that it can be inlined, it's probably right. 
+> 
+> The inline-functions-called-once thing is what causes even big functions 
+> to be inlined, and that's where you find the big downsides too (eg the 
+> stack usage).
+
+-fno-inline-functions-called-once alone costs me nearly 1% in code size.
+
+And I'd expect it to become more with "-fwhole-program --combine".
 
 
-I agree that it has become better. But it still absolutely *sucks*.
+If you think we have too many stacksize problems I'd suggest to consider 
+removing the choice of 4k stacks on i386, sh and m68knommu instead of 
+using -fno-inline-functions-called-once:
 
-For example, see the patch I just posted about e1000 stack usage. Even 
-though the variables were all in completely separate scopes, they all got 
-individual space on the stack over the whole lifetime of the function, 
-causing an explosion of stack-space. As such, gcc used 500 bytes too much 
-of stack, just because it didn't re-use the stackspace.
+Now that 32bit x86 is no longer used for extreme highend configurations 
+the only serious usecase for 4k stacks are AFAIK space savings on 
+embedded archs.
 
-That was with gcc-4.3.0, and no, there were hardly any inlining issues 
-involevd, although it is true that inlining actually did make it slightly 
-worse in that case too (but since it was essentially a leaf function, that 
-had little real life impact, since there were no deep callchains below it 
-to care).
+4k stacks have caused us much pain [1], and the cases where gcc inlined 
+too much were the easy ones.
 
-So the fact is, "better" simply is not "good enough". We still need to do 
-a lot of optimizations _manually_, because gcc cannot see that it can 
-re-use the stack-slots.
+I'm not saying that I'd like removing the choice of 4k stacks, but if we 
+want to reduce the number of stack related problems that's IMHO the 
+better alternative.
 
-And sometimes those "optimizations" are actually performance 
-pessimizations, because in order to make gcc not use all the stack at the 
-same time, you simply have to break things out and force-disable inlining.
 
-> Most LOCs of the kernel are not written by people like you or Al Viro or 
-> David Miller, and the average kernel developer is unlikely to do it as 
-> good as gcc.
+> 			Linus
 
-Sure. But we do have tools. We do have checkstack.pl, it's just that it 
-hasn't been an issue in a long time, so I suspect many people didn't even 
-_realize_ we have it, and I certainly can attest to the fact that even 
-people who remember it - like me - don't actually tend to run it all that 
-often.
+cu
+Adrian
 
-> For the average driver the choice is realistically between
-> "inline's randomly sprinkled across the driver" and
-> "no inline's, leave it to gcc".
+[1] AFAIR some callpaths in the kernel are still too big
 
-And neither is likely to be a big problem.
+BTW: In case anyone wonders about why I suggest removing 4k stacks:
+     My position is that 4k stacks should either be enabled 
+     unconditionally or no longer offered at all.
+     And if we remove 4k stacks from 32bit x86 it's no longer 
+     realistically maintainable for other architectures.
 
-> BTW:
-> I just ran checkstack on a (roughly) allyesconfig kernel, and we have a 
-> new driver that allocates "unsigned char recvbuf[1500];" on the stack...
+-- 
 
-Yeah, it's _way_ too easy to do bad things.
-
-> With the "gcc inline's static functions" you complain about we have
-> 4-5 years of experience.
-
-Sure. And most of it isn't all that great.
-
-But I do agree that lettign gcc make more decisions is _dangerous_. 
-However, in this case, at least, the decisions it makes would at least 
-make for less inlining, and thus less stack space explosion.
-
-			Linus
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
