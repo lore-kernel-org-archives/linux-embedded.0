@@ -1,73 +1,90 @@
-From: "Parag Warudkar" <parag.lkml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c - bisected
-Date: Wed, 27 Aug 2008 12:24:08 -0400
-Message-ID: <f7848160808270924v7ba4882bh45fc4cace51a2d77@mail.gmail.com>
-References: <mzBsPw3QUOF.A.87F.wZGsIB@albercik>
-	 <alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org>
-	 <20080826183051.GB10925@cs181140183.pp.htv.fi>
+From: Bernd Petrovitsch <bernd@firmix.at>
+Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c -
+	bisected
+Date: Wed, 27 Aug 2008 18:38:41 +0200
+Message-ID: <1219855121.30209.112.camel@spike.firmix.at>
+References: <20080826183051.GB10925@cs181140183.pp.htv.fi>
 	 <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org>
 	 <20080826205916.GB11734@cs181140183.pp.htv.fi>
 	 <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org>
-	 <20080826232411.GC11734@cs181140183.pp.htv.fi>
-	 <20080827092528.780916bd@lxorguk.ukuu.org.uk>
-	 <f7848160808270552u2ee66167x912a68e0bf8b25bf@mail.gmail.com>
-	 <20080827142142.303cdba8@lxorguk.ukuu.org.uk>
+	 <f7848160808261554j2f4eaaa6i1ee8801ae75ca7bf@mail.gmail.com>
+	 <alpine.LFD.1.10.0808261644260.3363@nehalem.linux-foundation.org>
+	 <f7848160808261758q7b84aab1m188c1ebb59304818@mail.gmail.com>
+	 <1219827609.30209.29.camel@spike.firmix.at>
+	 <f7848160808270556q54c36270ye6a465d2ca123cc@mail.gmail.com>
+	 <1219843032.30209.51.camel@spike.firmix.at>
+	 <20080827154805.GA25387@shareable.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=VJaK7kWDopuZBbF9g47uepTUlqtfeEQWbc1M3SJTkJQ=;
-        b=TKXxzP8LgHLz5IvAP3BJ3Y8XNoWCmck76yqMBhTtNfwKqsBP3lhitpYqvNJkyYJWf/
-         J7pgnEj6f0ZuTTXo7NcUYQDjHwLJx/huF+IEo9C7I5QFAZQaCEkTYBf8xF8SPe1VmDRm
-         U04Yaml6ZlY9shZrI2XgSfx+ZaveHtLFWcwqM=
-In-Reply-To: <20080827142142.303cdba8-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20080827154805.GA25387@shareable.org>
 Content-Disposition: inline
-Sender: kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Cc: Adrian Bunk <bunk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, "Alan D. Brunelle" <Alan.Brunelle-VXdhtT5mjnY@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kernel Testers List <kernel-testers-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Parag Warudkar <parag.lkml@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Adrian Bunk <bunk@stusta.de>, Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunelle@hp.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kernel Testers List <kernel-testers@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Arjan van de Ven <arjan@linux.intel.com>, Ingo Molnar <mingo@elte.hu>, linux-embedded@vger.kernel.org
 
-On Wed, Aug 27, 2008 at 9:21 AM, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org> wrote:
->> By your logic though, XFS on x86 should work fine with 4K stacks -
->> many will attest that it does not and blows up due to stack issues.
->>
->> I have first hand experiences of things blowing up with deep call
->> chains when using 4K stacks where 8K worked just fine on same
->> workload.
->>
->> So there is definitely some other problem with 4K stacks.
->
-> Nothing of the sort. If it blows up with a 4K stack it will almost
-> certainly blow up with an 8K stack *eventually* - when a heavy stack usage
-> coincides with a heavy stack using IRQ handler.
->
-> You won't catch it in simple testing, you won't catch it in trivial
-> simulation and it'll be incredibly hard to reproduce. Not the kind of bug
-> you want in a production system really. IRQ stacks make things much more
-> predictable.
+On Wed, 2008-08-27 at 16:48 +0100, Jamie Lokier wrote:
+> Bernd Petrovitsch wrote:
+> > If you "develop" an embedded system (which is partly system integration
+> > of existing apps) to be installed in the field, you don't have that many
+> > conceivable work loads compared to a desktop/server system. And you have
+> > a fixed list of drivers and applications.
+> 
+> Hah!  Not in my line of embedded device.
+> 
+> 32MB no-MMU ARM boards which people run new things and attach new
+> devices to rather often - without making new hardware.  Volume's too
+> low per individual application to get new hardware designed and made.
 
+Yes, you may have several products on the same hardware with somewhat
+differing requirements (or not). But that is much less than a general
+purpose system IMHO.
 
-I see - so if I end up having a workload on 8k where heavy stack using
-IRQs and deep kernel call chains come at the same time - even 8K will
-blow up.
-So 4K will blow too except that it doesn't require IRQs also to use
-heavy stack, just XFS is good enough :)
+> I'm seriously thinking of forwarding porting the 4 year old firmware
+> from 2.4.26 to 2.6.current, just to get new drivers and capabilities.
 
-It then seems like the IRQs using lot of stack is not so much of a
-problem in the current kernel as much as deeper call chains and stack
-usage of normal non-irq path code is.
-So 8k makes it possible for the deeper call chains of non-irq path to
-survive since they get better part of the 8K to themselves and IRQs
-can do with less almost always.
+That sounds reasonable (and I never meant maintaining the old system
+infinitely. Actually once the thing is shipped it usually enters deep
+maintenance mode and the next is more a fork from the old).
 
-At least that's what I can derive from the fact that we do not have
-lots of reports of 8K stack blowing up.
+> Backporting is tedious, so's feeling wretchedly far from the mainline
+> world.
 
-Thanks
+ACK. But that also depends on amount local changes (and sorry, but not
+all locally necessary patches would be accepted in mainline in any way).
 
-Parag
+> > A usual approach is to run stress tests on several (or all)
+> > subsystems/services/... in parallel and if the device survives it
+> > functioning correctly, it is at least good enough.
+> 
+> Per application.
+> 
+> Some little devices run hundreds of different applications and
+> customers expect to customise, script themselves, and attach different
+> devices (over USB).  The next customer in the chain expects the bits
+> you supplied to work in a variety of unexpected situations, even when
+> you advise that it probably won't do that.
+
+Basically their problem. Yes, "they" actually think they get a Linux
+system where they can do everything and it simply works.
+
+Oh, that's obviously not a usual "WLAN-router style" of product (where
+you are not expected to actually login on a console or per ssh).
+
+> Much like desktop/server Linux, but on a small device where silly
+> little things like 'create a process' are a stress for the dear little
+> thing.
+> 
+> (My biggest lesson: insist on an MMU next time!)
+
+ACK. We avoid MMU-less hardware too - especially since there is enough
+hardware with a MMU around.
+
+	Bernd
+-- 
+Firmix Software GmbH                   http://www.firmix.at/
+mobil: +43 664 4416156                 fax: +43 1 7890849-55
+          Embedded Linux Development and Services
+
