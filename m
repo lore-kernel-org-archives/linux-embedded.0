@@ -1,66 +1,45 @@
-From: Bernd Petrovitsch <bernd@firmix.at>
+From: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
 Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c -
-	bisected
-Date: Wed, 27 Aug 2008 15:17:12 +0200
-Message-ID: <1219843032.30209.51.camel@spike.firmix.at>
+ bisected
+Date: Wed, 27 Aug 2008 14:21:42 +0100
+Message-ID: <20080827142142.303cdba8@lxorguk.ukuu.org.uk>
 References: <mzBsPw3QUOF.A.87F.wZGsIB@albercik>
-	 <alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org>
-	 <20080826183051.GB10925@cs181140183.pp.htv.fi>
-	 <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org>
-	 <20080826205916.GB11734@cs181140183.pp.htv.fi>
-	 <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org>
-	 <f7848160808261554j2f4eaaa6i1ee8801ae75ca7bf@mail.gmail.com>
-	 <alpine.LFD.1.10.0808261644260.3363@nehalem.linux-foundation.org>
-	 <f7848160808261758q7b84aab1m188c1ebb59304818@mail.gmail.com>
-	 <1219827609.30209.29.camel@spike.firmix.at>
-	 <f7848160808270556q54c36270ye6a465d2ca123cc@mail.gmail.com>
+	<alpine.LFD.1.10.0808251326500.3363@nehalem.linux-foundation.org>
+	<200808261111.19205.rusty@rustcorp.com.au>
+	<alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org>
+	<20080826183051.GB10925@cs181140183.pp.htv.fi>
+	<alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org>
+	<20080826205916.GB11734@cs181140183.pp.htv.fi>
+	<alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org>
+	<20080826232411.GC11734@cs181140183.pp.htv.fi>
+	<20080827092528.780916bd@lxorguk.ukuu.org.uk>
+	<f7848160808270552u2ee66167x912a68e0bf8b25bf@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <f7848160808270556q54c36270ye6a465d2ca123cc@mail.gmail.com>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <f7848160808270552u2ee66167x912a68e0bf8b25bf-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Parag Warudkar <parag.lkml@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Adrian Bunk <bunk@stusta.de>, Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunelle@hp.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kernel Testers List <kernel-testers@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Arjan van de Ven <arjan@linux.intel.com>, Ingo Molnar <mingo@elte.hu>, linux-embedded@vger.kernel.org
+To: Parag Warudkar <parag.lkml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Adrian Bunk <bunk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, "Alan D. Brunelle" <Alan.Brunelle-VXdhtT5mjnY@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kernel Testers List <kernel-testers-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-
-On Wed, 2008-08-27 at 08:56 -0400, Parag Warudkar wrote:
-> On Wed, Aug 27, 2008 at 5:00 AM, Bernd Petrovitsch <bernd@firmix.at> wrote:
-> > They probably gave the idea pretty soon because you need to
-> > rework/improve large parts of the kernel + drivers (and that has two
-> > major problems - it consumes a lot of man power for "no new features and
-> > everything must be completely tested again"[0] and it adds new risks).
-> > And that is practically impossible if one sells "stable driver APIs" for
-> > 3rd party (commercial) drivers because these must be changed too.
+> By your logic though, XFS on x86 should work fine with 4K stacks -
+> many will attest that it does not and blows up due to stack issues.
 > 
-> But not many embedded Linux arches support 4K stacks like Adrian
+> I have first hand experiences of things blowing up with deep call
+> chains when using 4K stacks where 8K worked just fine on same
+> workload.
+> 
+> So there is definitely some other problem with 4K stacks.
 
-What is an "embedded Linux arch"?
-Personally I encountered i386, ARM, MIPS and PPC in the embedded world.
+Nothing of the sort. If it blows up with a 4K stack it will almost
+certainly blow up with an 8K stack *eventually* - when a heavy stack usage
+coincides with a heavy stack using IRQ handler.
 
-> pointed out earlier.
-> So the same (lot of man power requirement) would apply to Linux.
+You won't catch it in simple testing, you won't catch it in trivial
+simulation and it'll be incredibly hard to reproduce. Not the kind of bug
+you want in a production system really. IRQ stacks make things much more
+predictable.
 
-Of course. Look at the amount of work done by lots of people in that
-area (including stack frame size reductions) and on-going discussions.
-
-> Sure it will be good - but how reasonable it is to attempt it and how
-> reliably it will work under all conceived loads - those are the
-> questions.
-
-If you "develop" an embedded system (which is partly system integration
-of existing apps) to be installed in the field, you don't have that many
-conceivable work loads compared to a desktop/server system. And you have
-a fixed list of drivers and applications.
-A usual approach is to run stress tests on several (or all)
-subsystems/services/... in parallel and if the device survives it
-functioning correctly, it is at least good enough.
-
-	Bernd
--- 
-Firmix Software GmbH                   http://www.firmix.at/
-mobil: +43 664 4416156                 fax: +43 1 7890849-55
-          Embedded Linux Development and Services
-
+Alan
