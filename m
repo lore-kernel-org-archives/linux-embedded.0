@@ -1,53 +1,56 @@
-From: "Parag Warudkar" <parag.lkml@gmail.com>
+From: "Parag Warudkar" <parag.lkml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c - bisected
-Date: Wed, 27 Aug 2008 08:52:06 -0400
-Message-ID: <f7848160808270552u2ee66167x912a68e0bf8b25bf@mail.gmail.com>
+Date: Wed, 27 Aug 2008 08:56:19 -0400
+Message-ID: <f7848160808270556q54c36270ye6a465d2ca123cc@mail.gmail.com>
 References: <mzBsPw3QUOF.A.87F.wZGsIB@albercik>
-	 <alpine.LFD.1.10.0808251326500.3363@nehalem.linux-foundation.org>
-	 <200808261111.19205.rusty@rustcorp.com.au>
 	 <alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org>
 	 <20080826183051.GB10925@cs181140183.pp.htv.fi>
 	 <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org>
 	 <20080826205916.GB11734@cs181140183.pp.htv.fi>
 	 <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org>
-	 <20080826232411.GC11734@cs181140183.pp.htv.fi>
-	 <20080827092528.780916bd@lxorguk.ukuu.org.uk>
+	 <f7848160808261554j2f4eaaa6i1ee8801ae75ca7bf@mail.gmail.com>
+	 <alpine.LFD.1.10.0808261644260.3363@nehalem.linux-foundation.org>
+	 <f7848160808261758q7b84aab1m188c1ebb59304818@mail.gmail.com>
+	 <1219827609.30209.29.camel@spike.firmix.at>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from:to
          :subject:cc:in-reply-to:mime-version:content-type
          :content-transfer-encoding:content-disposition:references;
-        bh=eoxGcLTq0Epk6trynLnOd9oUrmMKPctUfrpwb6DJIno=;
-        b=D/ozRXJgveNWkKrSBStHywYB7Ci14H45ltRByi+hXdo1+q9u9xgL57Aoj1oa1xRX9d
-         heg/u1kg+6+Xlo1N3mqtDLoSwsB0EY4cAtLWVBmQk2It7hPaNWS5AUKm3PSFwGrFqkGH
-         Ee/KiCKwkTqMbnOa4iRNEI6nkmZ3wiE8z23W0=
-In-Reply-To: <20080827092528.780916bd@lxorguk.ukuu.org.uk>
+        bh=P4OmXGfUVTzESr38apKL0530v3lnr5k2ttKC9vuCPkQ=;
+        b=utrUrZESxilFhavw8fuihO+W9Be7eOwvYHQ0a4cjBWQpZ8TqNj1OXZb89On3AXHOwB
+         9qHwQrIWi+qGlJ5mlUW217GYI3Q9G4sYJ0y7OhEtcEun5386EeZy/AY9xYxCMLkop27C
+         YbVHpy+rH2YKy4+YOLWGbrZsFOCDsZ9panJEw=
+In-Reply-To: <1219827609.30209.29.camel-7sPfb3biEqGJZy4MaDjwDw@public.gmane.org>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Adrian Bunk <bunk@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunelle@hp.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kernel Testers List <kernel-testers@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Arjan van de Ven <arjan@linux.intel.com>, Ingo Molnar <mingo@elte.hu>, linux-embedded@vger.kernel.org
+To: Bernd Petrovitsch <bernd-GBwJepH+xoVeoWH0uzbU5w@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Adrian Bunk <bunk-HeJ8Db2Gnd6zQB+pC5nmwQ@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, "Alan D. Brunelle" <Alan.Brunelle-VXdhtT5mjnY@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kernel Testers List <kernel-testers-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-On Wed, Aug 27, 2008 at 4:25 AM, Alan Cox <alan@lxorguk.ukuu.org.uk> wrote:
->> You have a good point that aiming at 4kB makes 8kB a very safe choice.
+On Wed, Aug 27, 2008 at 5:00 AM, Bernd Petrovitsch <bernd-GBwJepH+xoVeoWH0uzbU5w@public.gmane.org> wrote:
+
 >
-> Not really no - we use separate IRQ stacks in 4K but not 8K mode on
-> x86-32. That means you've actually got no more space if you are unlucky
-> with the timing of events. The 8K mode is merely harder to debug.
+> They probably gave the idea pretty soon because you need to
+> rework/improve large parts of the kernel + drivers (and that has two
+> major problems - it consumes a lot of man power for "no new features and
+> everything must be completely tested again"[0] and it adds new risks).
+> And that is practically impossible if one sells "stable driver APIs" for
+> 3rd party (commercial) drivers because these must be changed too.
 >
 
-By your logic though, XFS on x86 should work fine with 4K stacks -
-many will attest that it does not and blows up due to stack issues.
+But not many embedded Linux arches support 4K stacks like Adrian
+pointed out earlier.
+So the same (lot of man power requirement) would apply to Linux.
 
-I have first hand experiences of things blowing up with deep call
-chains when using 4K stacks where 8K worked just fine on same
-workload.
-
-So there is definitely some other problem with 4K stacks.
+Sure it will be good - but how reasonable it is to attempt it and how
+reliably it will work under all conceived loads - those are the
+questions.
 
 Thanks
+
 Parag
