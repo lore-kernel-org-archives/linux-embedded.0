@@ -1,28 +1,43 @@
-From: Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c - bisected
-Date: Wed, 27 Aug 2008 03:58:58 -0700
-Message-ID: <48B53372.5060308@linux.intel.com>
-References: <mzBsPw3QUOF.A.87F.wZGsIB@albercik>	<alpine.LFD.1.10.0808251326500.3363@nehalem.linux-foundation.org>	<200808261111.19205.rusty@rustcorp.com.au>	<alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org>	<20080826183051.GB10925@cs181140183.pp.htv.fi>	<alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org>	<20080826205916.GB11734@cs181140183.pp.htv.fi>	<alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org>	<f7848160808261554j2f4eaaa6i1ee8801ae75ca7bf@mail.gmail.com>	<alpine.LFD.1.10.0808261644260.3363@nehalem.linux-foundation.org>	<f7848160808261758q7b84aab1m188c1ebb59304818@mail.gmail.com>	<alpine.LFD.1.10.0808261837530.3363@nehalem.linux-foundation.org> <18612.60878.887716.452936@drongo.ozlabs.ibm.com>
+From: Josh Boyer <jwboyer@linux.vnet.ibm.com>
+Subject: Re: "kernel access of bad area" while accessing flash
+Date: Wed, 27 Aug 2008 07:33:56 -0400
+Message-ID: <20080827113356.GA24166@yoda.jdub.homelinux.org>
+References: <425469.77736.qm@web63401.mail.re1.yahoo.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <18612.60878.887716.452936-nUko2b1QN/1kfgV4h6NXRTJtLkR7yuzc@public.gmane.org>
-Sender: kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:date:from:to:cc:subject
+         :message-id:references:mime-version:content-type:content-disposition
+         :in-reply-to:user-agent:sender;
+        bh=n0Vs9SCgQ7raH0boFkufgjR4axHsZdSjrF3BNgBSFaY=;
+        b=vfGPTj3r2rOiPW5d9zY3c1bNNegq9jwHP2M0LRiYjGGRyPxraNYPUG86f8wTiWU5IF
+         JaHz/mHQKEU7E9FKAPN7oWGvY0ubct8K3KK77zwE+tLV67b0y1vasYAU9AseH2TSz7Wf
+         f5z66F5Qq914WO2/1alJGewv5hA82+3h/yCbQ=
+Content-Disposition: inline
+In-Reply-To: <425469.77736.qm@web63401.mail.re1.yahoo.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Paul Mackerras <paulus-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>
-Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Parag Warudkar <parag.lkml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Adrian Bunk <bunk-HeJ8Db2Gnd6zQB+pC5nmwQ@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, "Alan D. Brunelle" <Alan.Brunelle-VXdhtT5mjnY@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kernel Testers List <kernel-testers-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Fundu <fundu_1999@yahoo.com>
+Cc: linux embedded <linux-embedded@vger.kernel.org>
 
-Paul Mackerras wrote:
-> Linus Torvalds writes:
-> 
->> 4kB used to be the _only_ choice. And no, there weren't even irq stacks. 
->> So that 4kB was not just the whole kernel call-chain, it was also all the 
->> irq nesting above it.
-> 
-> I think your memory is failing you.  In 2.4 and earlier, the kernel
-> stack was 8kB minus the size of the task_struct, which sat at the
-> start of the 8kB.  For instance, from include/asm-i386/processor.h for
-> 2.4.29:
+On Tue, Aug 26, 2008 at 08:13:39PM -0700, Fundu wrote:
+>I have a PPC440GX based board.
+>
+>Do I need to reinitialize Peripheral Bank Configuration Registers (EBC0_B0CR-EBC0_B7CR) from the kernel ?
+>I'm quite sure that we don't, but just want to make sure. Because the problem
+>that i'm seeing strongly suggest that it's probably not accessible. 
 
-but was shared with interrupts; so out of the 6Kb left, you had still really only 4Kb for user context stack
+Typically not.  The kernel tends to rely on the EBC registers being properly
+programmed by the bootloader/firmware for the devices contained in it's banks.
+
+>Here's the problem, i'm getting "kernel access of bad
+> area" when i erase any of the upper 64mb out of 128mb flash region, surprisingly i can easily erase (all of the flash) from u-boot. which makes me ask the earlier question.   
+>
+
+That sounds more like a mapping issue than an EBC config issue.  Make sure
+the kernel is calling ioremap on the entire flash memory region.
+
+josh
