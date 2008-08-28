@@ -1,42 +1,81 @@
-From: Paul Mundt <lethal-M7jkjyW5wf5g9hUCZPvPmw@public.gmane.org>
+From: Greg Ungerer <gerg@snapgear.com>
 Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c - bisected
-Date: Thu, 28 Aug 2008 10:02:26 +0900
-Message-ID: <20080828010226.GB18893@linux-sh.org>
-References: <20080827160052.GA15968@linux-sh.org> <20080827173544.GH11734@cs181140183.pp.htv.fi> <20080828003211.GA18893@linux-sh.org> <20080827.174605.85608276.davem@davemloft.net>
+Date: Thu, 28 Aug 2008 11:05:55 +1000
+Message-ID: <48B5F9F3.20505__23365.6648583294$1219885796$gmane$org@snapgear.com>
+References: <alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org> <20080826183051.GB10925@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org> <20080826205916.GB11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org> <20080826232411.GC11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261648140.3363@nehalem.linux-foundation.org> <20080827002316.GE11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261726560.3363@nehalem.linux-foundation.org> <20080827115829.GF11734@cs181140183.pp.htv.fi> <20080827160052.GA15968@linux-sh.org>
 Mime-Version: 1.0
-Return-path: <kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20080827.174605.85608276.davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
-Sender: kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: David Miller <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
-Cc: bunk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org, Alan.Brunelle-VXdhtT5mjnY@public.gmane.org, rjw-KKrjLPT3xs0@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-testers-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, mingo-X9Un+BFzKDI@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20080827160052.GA15968@linux-sh.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Paul Mundt <lethal@linux-sh.org>, Adrian Bunk <bunk@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunel>
 
-On Wed, Aug 27, 2008 at 05:46:05PM -0700, David Miller wrote:
-> From: Paul Mundt <lethal-M7jkjyW5wf5g9hUCZPvPmw@public.gmane.org>
-> Date: Thu, 28 Aug 2008 09:32:13 +0900
-> 
-> > On Wed, Aug 27, 2008 at 08:35:44PM +0300, Adrian Bunk wrote:
-> > > CONFIG_DEBUG_STACKOVERFLOW should give you the same information, and if
-> > > wanted with an arbitrary limit.
-> >
-> > In some cases, yes. In the CONFIG_DEBUG_STACKOVERFLOW case the check is
-> > only performed from do_IRQ(), which is sporadic at best, especially on
-> > tickless. While it catches some things, it's not a complete solution in
-> > and of iteslf.
-> 
-> BTW, on sparc64 we have a stack overflow checker that runs via
-> the profiling _mcount hook.  So every function call we check
-> if the stack is getting overused.
-> 
-> If so, we jump onto a special static debugging stack and print
-> the stack overflow message.
-> 
-> And yes it works with IRQ stacks which is all that sparc64 uses
-> nowadays.
-> 
-> Perhaps this is useful enough to make generic.
 
-Thanks for the pointer, I'll take a look at it!
+Paul Mundt wrote:
+> On Wed, Aug 27, 2008 at 02:58:30PM +0300, Adrian Bunk wrote:
+>> On Tue, Aug 26, 2008 at 05:28:37PM -0700, Linus Torvalds wrote:
+>>> On Wed, 27 Aug 2008, Adrian Bunk wrote:
+>>>> When did we get callpaths like like nfs+xfs+md+scsi reliably 
+>>>> working with 4kB stacks on x86-32?
+>>> XFS may never have been usable, but the rest, sure.
+>>>
+>>> And you seem to be making this whole argument an excuse to SUCK, adn an 
+>>> excuse to let gcc crap even more on our stack space.
+>>>
+>>> Why?
+>>>
+>>> Why aren't you saying that we should be able to do better? Instead, you 
+>>> seem to asking us to do even worse than we do now?
+>> My main point is:
+>> - getting 4kB stacks working reliably is a hard task
+>> - having an eye on gcc increasing the stack usage, and fixing it if
+>>   required, is relatively easy
+>>
+>> If we should be able to do better at getting (and keeping) 4kB stacks 
+>> working, then coping with possible inlining problems caused by gcc
+>> should not be a big problem for us.
+>>
+> Out of the architectures you've mentioned for 4k stacks, they also tend
+> to do IRQ stacks, which is something you seem to have overlooked.
+> 
+> In addition to that, debugging the runaway stack users on 4k tends to be
+> easier anyways since you end up blowing the stack a lot sooner. On sh
+> we've had pretty good luck with it, though most of our users are using
+> fairly deterministic workloads and continually profiling the footprint.
+> Anything that runs away or uses an insane amount of stack space needs to
+> be fixed well before that anyways, so catching it sooner is always
+> preferable. I imagine the same case is true for m68knommu (even sans IRQ
+> stacks).
+
+Yep, definitely true for m68knommu in my experience. I haven't had
+any problems with 4k stacks recently. But yes the workloads do tend
+to be constrained - and almost never use any of the more exotic
+filesystems or drivers.
+
+
+
+> Things might be more sensitive on x86, but it's certainly not something
+> that's a huge problem for the various embedded platforms to wire up,
+> whether they want to go the IRQ stack route or not.
+> 
+> In any event, lack of support for something on embedded architectures in
+> the kernel is more often due to apathy/utter indifference on the part of
+> the architecture maintainer rather than being indicative of any intrinsic
+> difficulty in supporting the thing in question. Most new "features" on the
+> lesser maintained architectures tend to end up there either out of peer
+> pressure or copying-and-pasting accidents rather than any sort of design.
+> ;-)
+
+Indeed :-)
+
+Regards
+Greg
+
+
+------------------------------------------------------------------------
+Greg Ungerer  --  Chief Software Dude       EMAIL:     gerg@snapgear.com
+Secure Computing Corporation                PHONE:       +61 7 3435 2888
+825 Stanley St,                             FAX:         +61 7 3891 3630
+Woolloongabba, QLD, 4102, Australia         WEB: http://www.SnapGear.com
