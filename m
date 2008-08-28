@@ -1,66 +1,89 @@
-From: Greg Ungerer <gerg-XXXsiaCtIV5Wk0Htik3J/w@public.gmane.org>
+From: Paul Mundt <lethal@linux-sh.org>
 Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c - bisected
-Date: Thu, 28 Aug 2008 10:11:24 +1000
-Message-ID: <48B5ED2C.60602@snapgear.com>
-References: <20080826183051.GB10925@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org> <20080826205916.GB11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org> <f7848160808261554j2f4eaaa6i1ee8801ae75ca7bf@mail.gmail.com> <alpine.LFD.1.10.0808261644260.3363@nehalem.linux-foundation.org> <f7848160808261758q7b84aab1m188c1ebb59304818@mail.gmail.com> <1219827609.30209.29.camel@spike.firmix.at> <f7848160808270556q54c36270ye6a465d2ca123cc@mail.gmail.com> <1219843032.30209.51.camel@spike.firmix.at> <20080827154805.GA25387@shareable.org>
+Date: Thu, 28 Aug 2008 09:32:13 +0900
+Message-ID: <20080828003211.GA18893@linux-sh.org>
+References: <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org> <20080826205916.GB11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org> <20080826232411.GC11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261648140.3363@nehalem.linux-foundation.org> <20080827002316.GE11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261726560.3363@nehalem.linux-foundation.org> <20080827115829.GF11734@cs181140183.pp.htv.fi> <20080827160052.GA15968@linux-sh.org> <20080827173544.GH11734@cs181140183.pp.htv.fi>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20080827154805.GA25387-yetKDKU6eevNLxjTenLetw@public.gmane.org>
-Sender: kernel-testers-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20080827173544.GH11734@cs181140183.pp.htv.fi>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Jamie Lokier <jamie-yetKDKU6eevNLxjTenLetw@public.gmane.org>
-Cc: Bernd Petrovitsch <bernd-GBwJepH+xoVeoWH0uzbU5w@public.gmane.org>, Parag Warudkar <parag.lkml-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Adrian Bunk <bunk-HeJ8Db2Gnd6zQB+pC5nmwQ@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, "Alan D. Brunelle" <Alan.Brunelle-VXdhtT5mjnY@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kernel Testers List <kernel-testers-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Adrian Bunk <bunk@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunelle@hp.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kernel Testers List <kernel-testers@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Arjan van de Ven <arjan@linux.intel.com>, Ingo Molnar <mingo@elte.hu>, linux-embedded@vger.kernel.org
 
+On Wed, Aug 27, 2008 at 08:35:44PM +0300, Adrian Bunk wrote:
+> On Thu, Aug 28, 2008 at 01:00:52AM +0900, Paul Mundt wrote:
+> > On Wed, Aug 27, 2008 at 02:58:30PM +0300, Adrian Bunk wrote:
+> > In addition to that, debugging the runaway stack users on 4k tends to be
+> > easier anyways since you end up blowing the stack a lot sooner. On sh
+> > we've had pretty good luck with it, though most of our users are using
+> > fairly deterministic workloads and continually profiling the footprint.
+> > Anything that runs away or uses an insane amount of stack space needs to
+> > be fixed well before that anyways, so catching it sooner is always
+> > preferable. I imagine the same case is true for m68knommu (even sans IRQ
+> > stacks).
+> 
+> CONFIG_DEBUG_STACKOVERFLOW should give you the same information, and if
+> wanted with an arbitrary limit.
+> 
+In some cases, yes. In the CONFIG_DEBUG_STACKOVERFLOW case the check is
+only performed from do_IRQ(), which is sporadic at best, especially on
+tickless. While it catches some things, it's not a complete solution in
+and of iteslf.
 
-Jamie Lokier wrote:
-> Bernd Petrovitsch wrote:
->> If you "develop" an embedded system (which is partly system integration
->> of existing apps) to be installed in the field, you don't have that many
->> conceivable work loads compared to a desktop/server system. And you have
->> a fixed list of drivers and applications.
-> 
-> Hah!  Not in my line of embedded device.
-> 
-> 32MB no-MMU ARM boards which people run new things and attach new
-> devices to rather often - without making new hardware.  Volume's too
-> low per individual application to get new hardware designed and made.
-> 
-> I'm seriously thinking of forwarding porting the 4 year old firmware
-> from 2.4.26 to 2.6.current, just to get new drivers and capabilities.
-> Backporting is tedious, so's feeling wretchedly far from the mainline
-> world.
-> 
->> A usual approach is to run stress tests on several (or all)
->> subsystems/services/... in parallel and if the device survives it
->> functioning correctly, it is at least good enough.
-> 
-> Per application.
-> 
-> Some little devices run hundreds of different applications and
-> customers expect to customise, script themselves, and attach different
-> devices (over USB).  The next customer in the chain expects the bits
-> you supplied to work in a variety of unexpected situations, even when
-> you advise that it probably won't do that.
-> 
-> Much like desktop/server Linux, but on a small device where silly
-> little things like 'create a process' are a stress for the dear little
-> thing.
-> 
-> (My biggest lesson: insist on an MMU next time!)
+In addition to this, there are even fewer platforms that support it than
+there are platforms that do 4k stacks. At first glance, it looks like
+it's only m32r, powerpc, sh, x86, and xtensa. Others support the Kconfig
+option, but don't seem to realize that it's not an option that the kernel
+does anything with by itself, and so don't actually do anything (ie,
+FRV).
 
-But given you have hardware you can't change would you choose
-to not run Linux, even with the limitations of non-MMU?
+> > Things might be more sensitive on x86, but it's certainly not something
+> > that's a huge problem for the various embedded platforms to wire up,
+> > whether they want to go the IRQ stack route or not.
+> 
+> How many platforms use 4kB stacks on sh?
+> 
+> Only 1 out of 34 defconfigs uses it.
+> 
+The defconfigs tend to enable as much random stuff as people are
+interested in for development and testing purposes. Most of these end up
+being reference boards and are the basis for products, rather than
+shipping products themselves. In the latter case, everything is gradually
+tightened down, and 4k stack utilization in that case is the norm, rather
+than the exception.
 
-Hell no :-)
+> > In any event, lack of support for something on embedded architectures in
+> > the kernel is more often due to apathy/utter indifference on the part of
+> > the architecture maintainer rather than being indicative of any intrinsic
+> > difficulty in supporting the thing in question. Most new "features" on the
+> > lesser maintained architectures tend to end up there either out of peer
+> > pressure or copying-and-pasting accidents rather than any sort of design.
+> > ;-)
+> 
+> arm or powerpc aren't exactly lesser maintained architectures.
+> 
+Indeed, which is why I find it bizarre that you would even bother
+applying what was said to those platforms. Specifically I was referring
+to the embedded platforms that don't do 4k stacks today. The fact they
+don't support them today has much less to do with 4k being an
+unattainable limit as it does with people simply not bothering to
+implement it on their platform.
 
-Regards
-Greg
+> IMHO there seems to currently be a mismatch between it's maintainance 
+> cost and the actual number of users. That's in my opinion the main 
+> problem with it, no matter in which direction it gets resolved.
+> 
+Perhaps that's true on x86, but in general I take issue with that. On sh
+we've had to do very little maintenance for it and most shipping products
+are using it today (at least on MMU-Linux, we don't bother with it on
+nommu). Most of the problems we ran in to with 4k stacks tended to be
+stuff that we wanted to fix for 8k anyways. I suspect that this case is
+true for the other embedded platforms also.
 
-
-------------------------------------------------------------------------
-Greg Ungerer  --  Chief Software Dude       EMAIL:     gerg-XXXsiaCtIV5Wk0Htik3J/w@public.gmane.org
-Secure Computing Corporation                PHONE:       +61 7 3435 2888
-825 Stanley St,                             FAX:         +61 7 3891 3630
-Woolloongabba, QLD, 4102, Australia         WEB: http://www.SnapGear.com
+Note that on sh we also conditionalize IRQ stacks separately, so while
+they are often used together, it's possible to use 4k stacks without
+resorting to IRQ stacks (as m68knommu also seems to do).
