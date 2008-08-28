@@ -1,84 +1,69 @@
-From: Adrian Bunk <bunk@kernel.org>
-Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c -
-	bisected
-Date: Thu, 28 Aug 2008 19:16:32 +0300
-Message-ID: <20080828161632.GA13609__42558.2327800386$1219940334$gmane$org@cs181140183.pp.htv.fi>
-References: <20080826205916.GB11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org> <20080826232411.GC11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261648140.3363@nehalem.linux-foundation.org> <20080827002316.GE11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261726560.3363@nehalem.linux-foundation.org> <20080827115829.GF11734@cs181140183.pp.htv.fi> <20080827160052.GA15968@linux-sh.org> <20080827173544.GH11734@cs181140183.pp.htv.fi> <20080828003211.GA18893@linux-sh.org>
-Mime-Version: 1.0
+From: Alexander Clouter <alex@digriz.org.uk>
+Subject: Re: [RFC] Remove more code when IP_MULTICAST=n
+Date: Thu, 28 Aug 2008 21:25:50 +0100
+Message-ID: <e7ejo5-lb9.ln1@woodchuck.wormnet.eu>
+References: <20080819150047.38f09acf@surf> <Pine.LNX.4.64.0808191618190.25348@vixen.sonytel.be> <20080825084826.19923151@surf> <20080826033345.GA30587@linux-sh.org> <48B432EF.1010403@am.sony.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080828003211.GA18893@linux-sh.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Paul Mundt <lethal@linux-sh.org>, Linus Torvalds <torvalds@linux-foundation.org>, Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunelle@hp.com>, Rafael J. Wysocki
+To: linux-embedded@vger.kernel.org
 
-On Thu, Aug 28, 2008 at 09:32:13AM +0900, Paul Mundt wrote:
-> On Wed, Aug 27, 2008 at 08:35:44PM +0300, Adrian Bunk wrote:
-> > On Thu, Aug 28, 2008 at 01:00:52AM +0900, Paul Mundt wrote:
-> > > On Wed, Aug 27, 2008 at 02:58:30PM +0300, Adrian Bunk wrote:
-> > > In addition to that, debugging the runaway stack users on 4k tends to be
-> > > easier anyways since you end up blowing the stack a lot sooner. On sh
-> > > we've had pretty good luck with it, though most of our users are using
-> > > fairly deterministic workloads and continually profiling the footprint.
-> > > Anything that runs away or uses an insane amount of stack space needs to
-> > > be fixed well before that anyways, so catching it sooner is always
-> > > preferable. I imagine the same case is true for m68knommu (even sans IRQ
-> > > stacks).
-> > 
-> > CONFIG_DEBUG_STACKOVERFLOW should give you the same information, and if
-> > wanted with an arbitrary limit.
-> > 
-> In some cases, yes. In the CONFIG_DEBUG_STACKOVERFLOW case the check is
-> only performed from do_IRQ(), which is sporadic at best, especially on
-> tickless. While it catches some things, it's not a complete solution in
-> and of iteslf.
+Hi,
+
+Tim Bird <tim.bird@am.sony.com> wrote:
+>
+> [snipped]
 > 
-> In addition to this, there are even fewer platforms that support it than
-> there are platforms that do 4k stacks. At first glance, it looks like
-> it's only m32r, powerpc, sh, x86, and xtensa.
->...
+> In this particular case, I think we need to show that
+> there are valid cases were an embedded product can use networking just
+> fine, without IGMP support but with support for multicast.  (I believe
+> that's  the slice that this particular patch makes).  IMHO, what's
+> needed is a test to show that this works.  This can then be presented
+> to the netdev guys, who are, after all much more experienced with the
+> networking stuff.  If they can show that multicast does indeed *need* IGMP
+> to work correctly, then we need to back off.  The last thing I want is
+> to find out in the field that some streaming feature I've built into a
+> Sony camera that relies on multicast won't work in lots of network
+> configurations.  If that's true, then David is doing me a favor by
+> saying No. (Note that I might still make the decision to forego
+> a feature for size reasons if the number of instances of non-workingness
+> was small.)
+> 
+As a networking sysadmin monkey I can tell you that:
+ * you _need_ IGMP to *join* multicast groups
+ * you do not need to know anything about multicast to send data to a
+	group (except to consider a sensible value for the TTL in your
+	IP header)[1]
+ * you need PIM support *route* multicast traffic[2]
 
-As far as I can see the only architectures that optionally offer 4kB 
-stacks today are m68knommu, s390, sh and x86.
+So as long as your embedded device does not need to route or *receive* a
+multicast stream then you do not need IGMP support.
 
-Did I miss some architectures or is 5 < 4 ;) ?
+A reasonable example of this is a IPTV (source) streaming device, such as a
+DVB->IP gateway.
 
-> Others support the Kconfig
-> option, but don't seem to realize that it's not an option that the kernel
-> does anything with by itself, and so don't actually do anything (ie,
-> FRV).
+To be honest, especially so in an embedded device, multicast is going to
+become more and more important.  Zero configuration along with DNS and
+even now a multicast enabled DHCP RFC are here.  Multicast is dead handy
+for devices to automatically discover each other without using dreadful
+broadcast traffic that of course is restricted to the same VLAN.
 
-Unless I miss anything these "others" include only FRV.
+Real PnP plus service discovery lives in the world of multicast, the lusers
+want it and it's the only way to provision such facilities.  My personal
+recommendation is that patches that affect 'net/' go to netdev@.
 
-> > IMHO there seems to currently be a mismatch between it's maintainance 
-> > cost and the actual number of users. That's in my opinion the main 
-> > problem with it, no matter in which direction it gets resolved.
-> > 
-> Perhaps that's true on x86, but in general I take issue with that. On sh
-> we've had to do very little maintenance for it and most shipping products
-> are using it today (at least on MMU-Linux, we don't bother with it on
-> nommu). Most of the problems we ran in to with 4k stacks tended to be
-> stuff that we wanted to fix for 8k anyways. I suspect that this case is
-> true for the other embedded platforms also.
->...
+Just the comments of a daytime networking sysadmin :)
 
-Most stack issues are not platform or architecture specific.
+Cheers
 
-The maintainance effort therefore mostly depends on whether a non-zero 
-number of architectures uses 4kB stacks.
+Alex
 
-And if something is considered to be important for small embedded 
-systems, but not supported on ARM, MIPS or PowerPC, then that's 
-a bit strange.
-
-cu
-Adrian
-
--- 
-
-       "Is there not promise of rain?" Ling Tan asked suddenly out
-        of the darkness. There had been need of rain for many days.
-       "Only a promise," Lao Er said.
-                                       Pearl S. Buck - Dragon Seed
+[1] an exception, iirc, is that you can speed up group creation with the
+	"Create Group Request" igmp message type, but I could be wrong;
+	this is most definiately optional though.
+[2] if your router/switch does not support multicast then you will find it
+	floods your switch ports with the traffic, effectively making it
+	broadcast traffic
