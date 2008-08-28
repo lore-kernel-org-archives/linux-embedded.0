@@ -1,81 +1,107 @@
-From: Greg Ungerer <gerg@snapgear.com>
-Subject: Re: [Bug #11342] Linux 2.6.27-rc3: kernel BUG at mm/vmalloc.c - bisected
-Date: Thu, 28 Aug 2008 11:05:55 +1000
-Message-ID: <48B5F9F3.20505__23365.6648583294$1219885796$gmane$org@snapgear.com>
-References: <alpine.LFD.1.10.0808261019450.3363@nehalem.linux-foundation.org> <20080826183051.GB10925@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261144510.3363@nehalem.linux-foundation.org> <20080826205916.GB11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261403360.3363@nehalem.linux-foundation.org> <20080826232411.GC11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261648140.3363@nehalem.linux-foundation.org> <20080827002316.GE11734@cs181140183.pp.htv.fi> <alpine.LFD.1.10.0808261726560.3363@nehalem.linux-foundation.org> <20080827115829.GF11734@cs181140183.pp.htv.fi> <20080827160052.GA15968@linux-sh.org>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
+Date: Thu, 28 Aug 2008 17:40:51 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0808281737150.28552@vixen.sonytel.be>
+References: <48AD00C4.6060302@gmail.com> <Pine.LNX.4.64.0808221650500.17105@vixen.sonytel.be>
+ <6934efce0808220951i5a2cd6f9t70f9c522eae6f1d6@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-776896427-1219938051=:28552"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080827160052.GA15968@linux-sh.org>
+In-Reply-To: <6934efce0808220951i5a2cd6f9t70f9c522eae6f1d6@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Paul Mundt <lethal@linux-sh.org>, Adrian Bunk <bunk@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Rusty Russell <rusty@rustcorp.com.au>, "Alan D. Brunelle" <Alan.Brunel>
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Paul Mundt wrote:
-> On Wed, Aug 27, 2008 at 02:58:30PM +0300, Adrian Bunk wrote:
->> On Tue, Aug 26, 2008 at 05:28:37PM -0700, Linus Torvalds wrote:
->>> On Wed, 27 Aug 2008, Adrian Bunk wrote:
->>>> When did we get callpaths like like nfs+xfs+md+scsi reliably 
->>>> working with 4kB stacks on x86-32?
->>> XFS may never have been usable, but the rest, sure.
->>>
->>> And you seem to be making this whole argument an excuse to SUCK, adn an 
->>> excuse to let gcc crap even more on our stack space.
->>>
->>> Why?
->>>
->>> Why aren't you saying that we should be able to do better? Instead, you 
->>> seem to asking us to do even worse than we do now?
->> My main point is:
->> - getting 4kB stacks working reliably is a hard task
->> - having an eye on gcc increasing the stack usage, and fixing it if
->>   required, is relatively easy
->>
->> If we should be able to do better at getting (and keeping) 4kB stacks 
->> working, then coping with possible inlining problems caused by gcc
->> should not be a big problem for us.
->>
-> Out of the architectures you've mentioned for 4k stacks, they also tend
-> to do IRQ stacks, which is something you seem to have overlooked.
+---584349381-776896427-1219938051=:28552
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+On Fri, 22 Aug 2008, Jared Hulbert wrote:
+> > The version in SVN seems to be slightly older than the one you submitted?
 > 
-> In addition to that, debugging the runaway stack users on 4k tends to be
-> easier anyways since you end up blowing the stack a lot sooner. On sh
-> we've had pretty good luck with it, though most of our users are using
-> fairly deterministic workloads and continually profiling the footprint.
-> Anything that runs away or uses an insane amount of stack space needs to
-> be fixed well before that anyways, so catching it sooner is always
-> preferable. I imagine the same case is true for m68knommu (even sans IRQ
-> stacks).
-
-Yep, definitely true for m68knommu in my experience. I haven't had
-any problems with 4k stacks recently. But yes the workloads do tend
-to be constrained - and almost never use any of the more exotic
-filesystems or drivers.
-
-
-
-> Things might be more sensitive on x86, but it's certainly not something
-> that's a huge problem for the various embedded platforms to wire up,
-> whether they want to go the IRQ stack route or not.
+> Oops.  Okay I must have neglected to sync at the very end.  Thanks.
 > 
-> In any event, lack of support for something on embedded architectures in
-> the kernel is more often due to apathy/utter indifference on the part of
-> the architecture maintainer rather than being indicative of any intrinsic
-> difficulty in supporting the thing in question. Most new "features" on the
-> lesser maintained architectures tend to end up there either out of peer
-> pressure or copying-and-pasting accidents rather than any sort of design.
-> ;-)
+> I forgot, there is also a git repo at
+> 
+> git://git.infradead.org/users/jehulber/axfs.git
+> 
+> > Which platform(s) do you use for testing?
+> 
+> ARM, x86
+> 
+> > I gave AxFS a try on PS3 (ppc64, always use big-endian 64-bit for testing new
+> > code ;-).
+> 
+> Smart.  Hmmm, If only I had a PS3....
 
-Indeed :-)
+I heard you got one? ;-)
 
-Regards
-Greg
+> > When mounting the image, I got the crash below:
+> >
+> > | attempt to access beyond end of device
+> > | loop0: rw=0, want=4920, limit=4912
 
+Interestingly, it also doesn't work on UserModeLinux (x86, 32-bit):
 
-------------------------------------------------------------------------
-Greg Ungerer  --  Chief Software Dude       EMAIL:     gerg@snapgear.com
-Secure Computing Corporation                PHONE:       +61 7 3435 2888
-825 Stanley St,                             FAX:         +61 7 3891 3630
-Woolloongabba, QLD, 4102, Australia         WEB: http://www.SnapGear.com
+| attempt to access beyond end of device
+| loop0: rw=0, want=24, limit=16
+| 
+| EIP: 0073:[<0811ec67>] CPU: 0 Not tainted ESP: 007b:19515c38 EFLAGS: 00210212
+|     Not tainted
+| EAX: 00000000 EBX: 00001000 ECX: 19484aa0 EDX: 190d9f0c
+| ESI: 195ee000 EDI: 19515cd0 EBP: 19515c6c DS: 007b ES: 007b
+| 08247af0:  [<08069ba3>] show_regs+0xb4/0xb9
+| 08247b1c:  [<080591ee>] segv+0x222/0x23a
+| 08247bbc:  [<08059296>] segv_handler+0x90/0x9a
+| 08247c68:  [<080649b8>] sig_handler_common+0x63/0x72
+| 08247ce0:  [<08064cac>] sig_handler+0x31/0x3d
+| 08247cec:  [<08064c0b>] handle_signal+0x4c/0x7a
+| 08247d0c:  [<08066327>] hard_handler+0xf/0x14
+| 08247d1c:  [<005c0420>] 0x5c0420
+| 
+| Kernel panic - not syncing: Kernel mode fault at addr 0x14, ip 0x811ec67
+| 
+| EIP: 0073:[<4010a44e>] CPU: 0 Not tainted ESP: 007b:bfa323a0 EFLAGS: 00200246
+|     Not tainted
+| EAX: ffffffda EBX: 080595f8 ECX: 080595c8 EDX: 080595d8
+| ESI: c0ed0000 EDI: 00000000 EBP: bfa323d8 DS: 007b ES: 007b
+| 08247a5c:  [<08069ba3>] show_regs+0xb4/0xb9
+| 08247a88:  [<08059462>] panic_exit+0x25/0x3b
+| 08247a9c:  [<08083642>] notifier_call_chain+0x27/0x4c
+| 08247ac4:  [<0808367e>] __atomic_notifier_call_chain+0x17/0x19
+| 08247ad4:  [<08083695>] atomic_notifier_call_chain+0x15/0x17
+| 08247af0:  [<0806fd87>] panic+0x52/0xd8
+| 08247b10:  [<080591fc>] segv+0x230/0x23a
+| 08247bbc:  [<08059296>] segv_handler+0x90/0x9a
+| 08247c68:  [<080649b8>] sig_handler_common+0x63/0x72
+| 08247ce0:  [<08064cac>] sig_handler+0x31/0x3d
+| 08247cec:  [<08064c0b>] handle_signal+0x4c/0x7a
+| 08247d0c:  [<08066327>] hard_handler+0xf/0x14
+| 08247d1c:  [<005c0420>] 0x5c0420
+
+Commandline is `mount image.axfs /mnt -o loop -t axfs'.
+
+Is there something wrong with the axfs version you submitted, or with
+mkfs.axfs?
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-776896427-1219938051=:28552--
