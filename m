@@ -1,62 +1,35 @@
-From: Herbert Xu <herbert@gondor.apana.org.au>
+From: David Woodhouse <dwmw2@infradead.org>
 Subject: Re: [patch 1/3] crypto: Add a zlib crypto module
-Date: Sat, 30 Aug 2008 16:23:15 +1000
-Message-ID: <20080830062315.GA18441@gondor.apana.org.au>
-References: <20080829134158.108976037@vixen.sonytel.be> <20080829134418.874948211@vixen.sonytel.be>
+Date: Sat, 30 Aug 2008 07:39:57 +0100
+Message-ID: <1220078397.7107.433.camel@pmac.infradead.org>
+References: <20080829134158.108976037@vixen.sonytel.be>
+	 <20080829134418.874948211@vixen.sonytel.be>
+	 <20080830062315.GA18441@gondor.apana.org.au>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-crypto-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20080829134418.874948211@vixen.sonytel.be>
+In-Reply-To: <20080830062315.GA18441@gondor.apana.org.au>
 Sender: linux-crypto-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="hz-gb-2312"
-Content-Transfer-Encoding: base64
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: linux-crypto@vger.kernel.org, squashfs-devel@lists.sourceforge.net, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, linux-crypto@vger.kernel.org, squashfs-devel@lists.sourceforge.net, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-T24gRnJpLCBBdWcgMjksIDIwMDggYXQgMDE6NDE6NTlQTSArMDAwMCwgR2VlcnQgVXl0dGVyaG9l
-dmVuIHdyb3RlOgo+IEZyb206IEdlZXJ0IFV5dHRlcmhvZXZlbiA8R2VlcnQuVXl0dGVyaG9ldmVu
-QHNvbnljb20uY29tPgo+IAo+IEFkZCBhIChkZSljb21wcmVzc2lvbiBtb2R1bGUgZm9yIHRoZSAi
-emxpYiIgZm9ybWF0IHVzaW5nIHRoZSBjcnlwdG8gQVBJLgoKSSB0aGluayB3ZSBjYW4gc2FmZWx5
-IGNvbmNsdWRlIHRoYXQgb3VyIGN1cnJlbnQgY29tcHJlc3Npb24KaW50ZXJmYWNlIHN1Y2tzIGZv
-ciB3aGF0IHlvdSdyZSB0cnlpbmcgdG8gYWNoaWV2ZSA6KQoKPiBXaGlsZSBib3RoIHRoZSAiemxp
-YiIgYW5kICJkZWZsYXRlIiBjcnlwdG8gbW9kdWxlcyBhcmUgaW1wbGVtZW50ZWQgb24gdG9wIG9m
-Cj4gdGhlIHpsaWIgbGlicmFyeSwgdGhleSBkaWZmZXIgaW4gdGhlIGZvbGxvd2luZyBhc3BlY3Rz
-Ogo+ICAgLSBUaGUgImRlZmxhdGUiIGNyeXB0byBtb2R1bGUgKHVzZWQgYnkgSVBTZWMgYW5kIFVC
-SUZTKSBkb2VzIG5vdCBzdXBwb3J0Cj4gICAgIHBhcnRpYWwgZGVjb21wcmVzc2lvbiwgaS5lLiBh
-bGwgY29tcHJlc3NlZCBkYXRhIGhhcyB0byBiZSBwYXNzZWQgYXQgb25jZS4KPiAgICAgVGhlICJ6
-bGliIiBjcnlwdG8gbW9kdWxlIGRvZXMgc3VwcG9ydCBwYXJ0aWFsIGRlY29tcHJlc3Npb247Cj4g
-ICAgIHpsaWJfZGVjb21wcmVzcygpIHdpbGwgcmV0dXJuIC1FQUdBSU4gaWYgbm90IGFsbCBjb21w
-cmVzc2VkIGRhdGEgaGFzIGJlZW4KPiAgICAgcGFzc2VkLgo+ICAgLSBUaGUgZGVmbGF0ZSBjcnlw
-dG8gbW9kdWxlIHVzZXMgdGhlIHJhdyBkZWZsYXRlIGRhdGEgZm9ybWF0ICh6bGliIGlzCj4gICAg
-IGluaXRpYWxpemVkIHdpdGggYSB3aW5kb3dCaXRzIHBhcmFtZXRlciBvZiAtREVGTEFURV9ERUZf
-V0lOQklUUyA9IC0xMSksCj4gICAgIHdoaWxlIGUuZy4gc3F1YXNoZnMgYW5kIGF4ZnMgdXNlIHRo
-ZSB6bGliIGRhdGEgZm9ybWF0LCB3aXRoIHRoZSBkZWZhdWx0Cj4gICAgIHdpbmRvd0JpdHMgcGFy
-YW1ldGVyIERFRl9XQklUUyA9IDE1Lgo+ICAgICBCb3RoIHBhcmFtZXRlcnMgYXJlIGluY29tcGF0
-aWJsZSB3aXRoIGVhY2ggb3RoZXIgZHVlIHRvIHRoZSBkaWZmZXJlbnQgZGF0YQo+ICAgICBmb3Jt
-YXRzLCBhcyBpbmRpY2F0ZWQgYnkgdGhlIHNpZ24gb2YgdGhlIHdpbmRvd2JpdHMgcGFyYW1ldGVy
-Lgo+ICAgICBUaGUgYWJzb2x1dGUgdmFsdWUgb2YgdGhpcyBwYXJhbWV0ZXIgaXMgdGhlIGJhc2Ug
-dHdvIGxvZ2FyaXRobSBvZiB0aGUKPiAgICAgbWF4aW11bSB3aW5kb3cgc2l6ZSwgYW5kIGxhcmdl
-ciB2YWx1ZXMgYXJlIGJhY2t3YXJkcyBjb21wYXRpYmxlIHdpdGgKPiAgICAgc21hbGxlciB2YWx1
-ZXMgKGFzIGZhciBhcyBkZWNvbXByZXNzaW9uIGlzIGNvbmNlcm5lZCkuCgpUaGVyZWZvcmUgSSBz
-dWdnZXN0IHRoYXQgd2UgY2hhbmdlIHRoZSBpbnRlcmZhY2UgcmF0aGVyIHRoYW4KbXV0aWxhdGUg
-dGhlIGltcGxlbWVudGF0aW9ucy4KClNvIGhlcmUgYXJlIGEgZmV3IHRoaW5ncyB3ZSBzaG91bGQg
-YWRkOgoKMSkgU2VwYXJhdGUgYWxsb2MgZnVuY3Rpb25zIGZvciBjb21wL2RlY29tcCB0byBhdm9p
-ZCB0aGUgbWVtb3J5CiAgIHdhc3RhZ2UgeW91J3ZlIGlkZW50aWZpZWQuCgoyKSBQcm92aWRlIHBh
-cmFtZXRlcnMgdG8gdGhlc2UgYWxsb2MgZnVuY3Rpb25zIHRocm91Z2ggYW4gb3BhcXVlCiAgIHBv
-aW50ZXIuICBUaGUgZm9ybWF0IG9mIHRoZSBwYXJhbXRlcnMgd2lsbCBiZSBkZXRlcm1pbmVkIGJ5
-IHRoZQogICBuYW1lIG9mIHRoZSBhbGdvcml0aG0sIGkuZS4sIGlmIHlvdSB3YW50IHRvIGNoYW5n
-ZSB0aGUgcGFyYW1ldGVycwogICB0aGVuIHlvdSBzaG91bGQgY2hhbmdlIHRoZSBuYW1lIGFzIHdl
-bGwgKGUuZy4sIGRlZmxhdGUgPT4gZGVmbGF0ZTIpLgoKICAgVGhpcyByZW1vdmVzIHRoZSBuZWVk
-IHRvIGR1cGxpYXRlIHRoZSBpbXBsZW1lbnRhdGlvbiBqdXN0IGJlY2F1c2UKICAgeW91IHdhbnQg
-MTUgaW5zdGVhZCBvZiAtMTEuCgozKSBQcm92aWRlIGluaXQvdXBkYXRlL2ZpbmFsIChvbmUgc2V0
-IGVhY2ggZm9yIGNvbXAgYW5kIGRlY29tcCkKICAgZnVuY3Rpb25zIHNpbWlsYXIgdG8gY3J5cHRv
-X2hhc2gsIGluIGFkZGl0aW9uIHRvIHRoZSBjdXJyZW50CiAgIGNvbXAvZGVjb21wIGZ1bmN0aW9u
-cy4KCkNoZWVycywKLS0gClZpc2l0IE9wZW5zd2FuIGF0IGh0dHA6Ly93d3cub3BlbnN3YW4ub3Jn
-LwpFbWFpbDogSGVyYmVydCBYdSB+e1BtVj5ISX59IDxoZXJiZXJ0QGdvbmRvci5hcGFuYS5vcmcu
-YXU+CkhvbWUgUGFnZTogaHR0cDovL2dvbmRvci5hcGFuYS5vcmcuYXUvfmhlcmJlcnQvClBHUCBL
-ZXk6IGh0dHA6Ly9nb25kb3IuYXBhbmEub3JnLmF1L35oZXJiZXJ0L3B1YmtleS50eHQKLS0KVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxp
-bnV4LWNyeXB0byIgaW4KdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
-cm5lbC5vcmcKTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
-YWpvcmRvbW8taW5mby5odG1sCg==
+On Sat, 2008-08-30 at 16:23 +1000, Herbert Xu wrote:
+> On Fri, Aug 29, 2008 at 01:41:59PM +0000, Geert Uytterhoeven wrote:
+> > From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+> > 
+> > Add a (de)compression module for the "zlib" format using the crypto API.
+> 
+> I think we can safely conclude that our current compression
+> interface sucks for what you're trying to achieve :)
+
+The main thing that's missing for JFFS2 is 
+ "Compress as much of this as you can into X bytes"
+
+-- 
+David Woodhouse                            Open Source Technology Centre
+David.Woodhouse@intel.com                              Intel Corporation
+
+
+
