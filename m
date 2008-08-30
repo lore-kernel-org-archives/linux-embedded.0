@@ -1,60 +1,62 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: [PATCH 10/10] AXFS: axfs_uncompress.c
-Date: Fri, 29 Aug 2008 15:48:07 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0808291547270.10397@vixen.sonytel.be>
-References: <48AD0126.1050609@gmail.com> <1219318838.18027.68.camel@sauron>
- <Pine.LNX.4.64.0808211423360.20704@vixen.sonytel.be>
- <6934efce0808210735w479075abga9f660e42ab8935d@mail.gmail.com>
+From: Herbert Xu <herbert@gondor.apana.org.au>
+Subject: Re: [patch 1/3] crypto: Add a zlib crypto module
+Date: Sat, 30 Aug 2008 16:23:15 +1000
+Message-ID: <20080830062315.GA18441@gondor.apana.org.au>
+References: <20080829134158.108976037@vixen.sonytel.be> <20080829134418.874948211@vixen.sonytel.be>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-2081338970-1220017657=:10397"
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <6934efce0808210735w479075abga9f660e42ab8935d@mail.gmail.com>
-Content-ID: <Pine.LNX.4.64.0808291547430.10397@vixen.sonytel.be>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-crypto-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20080829134418.874948211@vixen.sonytel.be>
+Sender: linux-crypto-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Artem Bityutskiy <dedekind@infradead.org>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Type: text/plain; charset="hz-gb-2312"
+Content-Transfer-Encoding: base64
+To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Cc: linux-crypto@vger.kernel.org, squashfs-devel@lists.sourceforge.net, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
----584349381-2081338970-1220017657=:10397
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Content-ID: <Pine.LNX.4.64.0808291547431.10397@vixen.sonytel.be>
-
-	Hi Jared,
-
-On Thu, 21 Aug 2008, Jared Hulbert wrote:
-> > If you want support for multiple decompression algorithms, you can switch
-> > from using zlib_inflate*() directly to calling zlib through the crypto API.
-> > Then you can call crypto_alloc_comp() with the correct decompression algorithm
-> > name.
-> >
-> > For squashfs, I had to modify only ca. 40 lines of code.
-> 
-> I definately want to support multiple formats.  I have a flag in the
-> superblock all ready to go for that.  One problem.  I'm not sure how
-> to do it.  Can you point us to some reference code?
-
-Please take a look at the email with subject
-
-    [patch 3/3] squashfs: Switch from zlib/inflate to "zlib" crypto module
-
-With kind regards,
-
-Geert Uytterhoeven
-Software Architect
-
-Sony Techsoft Centre Europe
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
-
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
-
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 · RPR Brussels
-Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-2081338970-1220017657=:10397--
+T24gRnJpLCBBdWcgMjksIDIwMDggYXQgMDE6NDE6NTlQTSArMDAwMCwgR2VlcnQgVXl0dGVyaG9l
+dmVuIHdyb3RlOgo+IEZyb206IEdlZXJ0IFV5dHRlcmhvZXZlbiA8R2VlcnQuVXl0dGVyaG9ldmVu
+QHNvbnljb20uY29tPgo+IAo+IEFkZCBhIChkZSljb21wcmVzc2lvbiBtb2R1bGUgZm9yIHRoZSAi
+emxpYiIgZm9ybWF0IHVzaW5nIHRoZSBjcnlwdG8gQVBJLgoKSSB0aGluayB3ZSBjYW4gc2FmZWx5
+IGNvbmNsdWRlIHRoYXQgb3VyIGN1cnJlbnQgY29tcHJlc3Npb24KaW50ZXJmYWNlIHN1Y2tzIGZv
+ciB3aGF0IHlvdSdyZSB0cnlpbmcgdG8gYWNoaWV2ZSA6KQoKPiBXaGlsZSBib3RoIHRoZSAiemxp
+YiIgYW5kICJkZWZsYXRlIiBjcnlwdG8gbW9kdWxlcyBhcmUgaW1wbGVtZW50ZWQgb24gdG9wIG9m
+Cj4gdGhlIHpsaWIgbGlicmFyeSwgdGhleSBkaWZmZXIgaW4gdGhlIGZvbGxvd2luZyBhc3BlY3Rz
+Ogo+ICAgLSBUaGUgImRlZmxhdGUiIGNyeXB0byBtb2R1bGUgKHVzZWQgYnkgSVBTZWMgYW5kIFVC
+SUZTKSBkb2VzIG5vdCBzdXBwb3J0Cj4gICAgIHBhcnRpYWwgZGVjb21wcmVzc2lvbiwgaS5lLiBh
+bGwgY29tcHJlc3NlZCBkYXRhIGhhcyB0byBiZSBwYXNzZWQgYXQgb25jZS4KPiAgICAgVGhlICJ6
+bGliIiBjcnlwdG8gbW9kdWxlIGRvZXMgc3VwcG9ydCBwYXJ0aWFsIGRlY29tcHJlc3Npb247Cj4g
+ICAgIHpsaWJfZGVjb21wcmVzcygpIHdpbGwgcmV0dXJuIC1FQUdBSU4gaWYgbm90IGFsbCBjb21w
+cmVzc2VkIGRhdGEgaGFzIGJlZW4KPiAgICAgcGFzc2VkLgo+ICAgLSBUaGUgZGVmbGF0ZSBjcnlw
+dG8gbW9kdWxlIHVzZXMgdGhlIHJhdyBkZWZsYXRlIGRhdGEgZm9ybWF0ICh6bGliIGlzCj4gICAg
+IGluaXRpYWxpemVkIHdpdGggYSB3aW5kb3dCaXRzIHBhcmFtZXRlciBvZiAtREVGTEFURV9ERUZf
+V0lOQklUUyA9IC0xMSksCj4gICAgIHdoaWxlIGUuZy4gc3F1YXNoZnMgYW5kIGF4ZnMgdXNlIHRo
+ZSB6bGliIGRhdGEgZm9ybWF0LCB3aXRoIHRoZSBkZWZhdWx0Cj4gICAgIHdpbmRvd0JpdHMgcGFy
+YW1ldGVyIERFRl9XQklUUyA9IDE1Lgo+ICAgICBCb3RoIHBhcmFtZXRlcnMgYXJlIGluY29tcGF0
+aWJsZSB3aXRoIGVhY2ggb3RoZXIgZHVlIHRvIHRoZSBkaWZmZXJlbnQgZGF0YQo+ICAgICBmb3Jt
+YXRzLCBhcyBpbmRpY2F0ZWQgYnkgdGhlIHNpZ24gb2YgdGhlIHdpbmRvd2JpdHMgcGFyYW1ldGVy
+Lgo+ICAgICBUaGUgYWJzb2x1dGUgdmFsdWUgb2YgdGhpcyBwYXJhbWV0ZXIgaXMgdGhlIGJhc2Ug
+dHdvIGxvZ2FyaXRobSBvZiB0aGUKPiAgICAgbWF4aW11bSB3aW5kb3cgc2l6ZSwgYW5kIGxhcmdl
+ciB2YWx1ZXMgYXJlIGJhY2t3YXJkcyBjb21wYXRpYmxlIHdpdGgKPiAgICAgc21hbGxlciB2YWx1
+ZXMgKGFzIGZhciBhcyBkZWNvbXByZXNzaW9uIGlzIGNvbmNlcm5lZCkuCgpUaGVyZWZvcmUgSSBz
+dWdnZXN0IHRoYXQgd2UgY2hhbmdlIHRoZSBpbnRlcmZhY2UgcmF0aGVyIHRoYW4KbXV0aWxhdGUg
+dGhlIGltcGxlbWVudGF0aW9ucy4KClNvIGhlcmUgYXJlIGEgZmV3IHRoaW5ncyB3ZSBzaG91bGQg
+YWRkOgoKMSkgU2VwYXJhdGUgYWxsb2MgZnVuY3Rpb25zIGZvciBjb21wL2RlY29tcCB0byBhdm9p
+ZCB0aGUgbWVtb3J5CiAgIHdhc3RhZ2UgeW91J3ZlIGlkZW50aWZpZWQuCgoyKSBQcm92aWRlIHBh
+cmFtZXRlcnMgdG8gdGhlc2UgYWxsb2MgZnVuY3Rpb25zIHRocm91Z2ggYW4gb3BhcXVlCiAgIHBv
+aW50ZXIuICBUaGUgZm9ybWF0IG9mIHRoZSBwYXJhbXRlcnMgd2lsbCBiZSBkZXRlcm1pbmVkIGJ5
+IHRoZQogICBuYW1lIG9mIHRoZSBhbGdvcml0aG0sIGkuZS4sIGlmIHlvdSB3YW50IHRvIGNoYW5n
+ZSB0aGUgcGFyYW1ldGVycwogICB0aGVuIHlvdSBzaG91bGQgY2hhbmdlIHRoZSBuYW1lIGFzIHdl
+bGwgKGUuZy4sIGRlZmxhdGUgPT4gZGVmbGF0ZTIpLgoKICAgVGhpcyByZW1vdmVzIHRoZSBuZWVk
+IHRvIGR1cGxpYXRlIHRoZSBpbXBsZW1lbnRhdGlvbiBqdXN0IGJlY2F1c2UKICAgeW91IHdhbnQg
+MTUgaW5zdGVhZCBvZiAtMTEuCgozKSBQcm92aWRlIGluaXQvdXBkYXRlL2ZpbmFsIChvbmUgc2V0
+IGVhY2ggZm9yIGNvbXAgYW5kIGRlY29tcCkKICAgZnVuY3Rpb25zIHNpbWlsYXIgdG8gY3J5cHRv
+X2hhc2gsIGluIGFkZGl0aW9uIHRvIHRoZSBjdXJyZW50CiAgIGNvbXAvZGVjb21wIGZ1bmN0aW9u
+cy4KCkNoZWVycywKLS0gClZpc2l0IE9wZW5zd2FuIGF0IGh0dHA6Ly93d3cub3BlbnN3YW4ub3Jn
+LwpFbWFpbDogSGVyYmVydCBYdSB+e1BtVj5ISX59IDxoZXJiZXJ0QGdvbmRvci5hcGFuYS5vcmcu
+YXU+CkhvbWUgUGFnZTogaHR0cDovL2dvbmRvci5hcGFuYS5vcmcuYXUvfmhlcmJlcnQvClBHUCBL
+ZXk6IGh0dHA6Ly9nb25kb3IuYXBhbmEub3JnLmF1L35oZXJiZXJ0L3B1YmtleS50eHQKLS0KVG8g
+dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxp
+bnV4LWNyeXB0byIgaW4KdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtl
+cm5lbC5vcmcKTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sCg==
