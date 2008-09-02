@@ -1,46 +1,52 @@
-From: "Jared Hulbert" <jaredeh@gmail.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
 Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Tue, 2 Sep 2008 10:47:45 -0700
-Message-ID: <6934efce0809021047h40127b72u5d35f457e0546635@mail.gmail.com>
-References: <48AD00C4.6060302@gmail.com>
-	 <Pine.LNX.4.64.0808221650500.17105@vixen.sonytel.be>
-	 <6934efce0808220951i5a2cd6f9t70f9c522eae6f1d6@mail.gmail.com>
-	 <Pine.LNX.4.64.0808281737150.28552@vixen.sonytel.be>
-	 <Pine.LNX.4.64.0809021725480.3986@vixen.sonytel.be>
-	 <6934efce0809020944s36dd7f82wec77c4189ef1b114@mail.gmail.com>
-	 <20080902171500.GC19618@logfs.org>
+Date: Tue, 2 Sep 2008 20:33:54 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0809022032310.17860@anakin>
+References: <48AD00C4.6060302@gmail.com> <Pine.LNX.4.64.0808221650500.17105@vixen.sonytel.be>
+ <6934efce0808220951i5a2cd6f9t70f9c522eae6f1d6@mail.gmail.com>
+ <Pine.LNX.4.64.0808281737150.28552@vixen.sonytel.be>
+ <Pine.LNX.4.64.0809021725480.3986@vixen.sonytel.be>
+ <6934efce0809020944s36dd7f82wec77c4189ef1b114@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="-1463808415-1548269925-1220380434=:17860"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=z2xjR2OtaVzlM2gnTEvvh5DhDm4SAq575foezUVbMkI=;
-        b=nKJFDkHvTiG8SLo0b22tEwO0PmgT4Gb/vazw281kD+OiVoHvG4yEer/HwxrrcMcnNT
-         oNnStfCvbxrcJe09ABBPSV9aJNp29FUO5HD5EfhjmtJQSYR1HOlMXoJKI5XlRysvTNgk
-         afkfXCidYQ1vYRq9eQ8cf8Mgq9jadsEH4N9zI=
-In-Reply-To: <20080902171500.GC19618@logfs.org>
-Content-Disposition: inline
+In-Reply-To: <6934efce0809020944s36dd7f82wec77c4189ef1b114@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>
-Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Linux Kernel Development <Linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, Tim Bird <tim.bird@am.sony.com>, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
->> How is one expected to read those last 4 bytes of a loopbacked file?
->> Are they unreadable?  We can add the padding.   I am just wondering if
->> this is a bug or a known limitation in the loopback handling or if
->> there is a different safer way of reading block devs with truncated
->> last blocks.
->
-> Can't you just include the final magic into the last block, thereby
-> making the size a clean multiple of 4k?  It looks as if you have some
-> padding before the magic anyway.  So you just have to make sure the
-> padding is at least 4 bytes and write the magic to the end of it.  Apart
-> from solving this bug, it should also save you some space. ;)
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I'm going to have to look into this n*4K thing.  The image doesn't
-need to be aligned.  There shouldn't be any last block to put the
-magic in.  But I haven't messed with the mkfs.axfs code for a while.
+---1463808415-1548269925-1220380434=:17860
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+On Tue, 2 Sep 2008, Jared Hulbert wrote:
+> > However, there still are weird things going on, like `find' not seeing all
+> > files and directories, or just aborting, and `ls -lR' showing actual file
+> > contents in its output.
+> 
+> Do you see this behavior for all builds for just the PS3?
+
+The `find' issue I saw on both PS3 (ppc64) and UML (ia32).
+The `ls -lR' I tried on UML (ia32) only for now.
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---1463808415-1548269925-1220380434=:17860--
