@@ -1,12 +1,13 @@
 From: "Jared Hulbert" <jaredeh@gmail.com>
 Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Fri, 12 Sep 2008 13:17:28 -0700
-Message-ID: <6934efce0809121317r418c80e8s4755669cc74975c4@mail.gmail.com>
+Date: Fri, 12 Sep 2008 14:52:17 -0700
+Message-ID: <6934efce0809121452kd20deb6m268715f6ed83a71e@mail.gmail.com>
 References: <48AD00C4.6060302@gmail.com> <20080821110749.GA1926@shareable.org>
 	 <6934efce0808210711t686a88eci6eb294dbb54d68fe@mail.gmail.com>
 	 <48AE0476.80109@snapgear.com> <20080822181314.GB24179@shareable.org>
 	 <6934efce0808221116w76a662b0t954b0922b69d3232@mail.gmail.com>
 	 <20080822183713.GC24179@shareable.org>
+	 <20080822184326.GE24179@shareable.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -15,11 +16,11 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from:to
          :subject:cc:in-reply-to:mime-version:content-type
          :content-transfer-encoding:content-disposition:references;
-        bh=bgqXEwgXShRfJAHLhRB4xbw2h/RUZZSNeF+uPH5IsTE=;
-        b=N2/8Wa7X+wtpFRS8gbRfWUsK9xlU18zuQqLN60+WTFPtQ94JsO2ZZvQoeF2szx0UoW
-         m9Ys0vZZ39/cIy5FlosEZBNhndhMYv+vADOui7J8ZM/2+Byqj40hGDTIw6Xnl0NeJPNJ
-         NcggLuoV/Vj6ppGQO4fb6qx9MFHRfGl11crDc=
-In-Reply-To: <20080822183713.GC24179@shareable.org>
+        bh=rw+bou6cT0q61lZqvcXPtsLL6RgCxOPgzNGHBWWm98U=;
+        b=dykwb3LaGpuYi0TAYXC57DHKwKhPcz2sEX7mEjq+p1MnyxxNLoIlZr1+2l7ZZAn6RF
+         KGLyWqLpjCBAOrfj5j+MpmpC9z64g53EB1mNv9uTUkNu3Xjhpt+Xta2rTTQ0EufIRDjo
+         5PP0kBzjYWz8JSnXtujwKid5w4pOinXC2ApdU=
+In-Reply-To: <20080822184326.GE24179@shareable.org>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -27,26 +28,68 @@ Content-Type: text/plain; charset="us-ascii"
 To: Jamie Lokier <jamie@shareable.org>
 Cc: Greg Ungerer <gerg@snapgear.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-> I think the "fast" in "fast synchronous" gives it away :-)
-
-Yes, I suppose it does.
-
-> I'm using Spansion MirrorBit S29GL128N, which reads at about 0.6 MByte/s.
-
-I think you should get more like an order of magnitude higher.... Get
-an expert to look at your timings in the bootloader.  Make sure things
-are cached too.  ioremap_cached()...
-
-> Not because they're good, but because that's what the board I'm coding
-> for has on it.  I presume they were cheap and familiar to the board
-> designers.  (There is 32MB of RAM to play with after all.)
+On Fri, Aug 22, 2008 at 11:43 AM, Jamie Lokier <jamie@shareable.org> wrote:
+> Jamie Lokier wrote:
+>> Jared Hulbert wrote:
+>> > What kind of NOR you using?  That is not what I measure with fast
+>> > synchronous burst NOR's.
+>>
+>> I think the "fast" in "fast synchronous" gives it away :-)
+>>
+>> I'm using Spansion MirrorBit S29GL128N, which reads at about 0.6 MByte/s.
 >
-> So start a sequence of Busybox processes from a shell script is noticable,
-> if it reads from NOR each time.
->
-> Oh, and it's a 166MHz ARM, so it's quite capable of decompressing
-> faster than the NOR can deliver.
+> By the way, what speeds do you get on fast synchronous burst NORs - and
+> which chips are those?
 
-Depends on how you are measuring it.   You ought to be able to get at
-least 2 orders of magnitude higher read speeds with a good sync Flash.
- Some of the newer stuff is even faster.
+I am only familiar with the Numonyx product line up.
+
+If you are using a GL, you'll probably find our P33 a good fit and at
+competitive prices to GL as I understand it.  That's I think 50Mhz.
+
+M18 is 100Mhz maybe a little higher.  And we just announced our LPDDR
+266 part, Velocity LP.
+
+A good way of making a rough estimate of read performance is to
+measure a cache miss latency and convert that to bandwidth.  It's
+usually fairly close.
+
+32Byte cache size / 16 bit bus = 16 word transfers
+
+memory controller latency (time from Load instruction to bus activity)
+= ~300ns (upto 450ns for some processors)
+initial latency (time to read first word) = ~100ns (60ns - 120ns)
+clock frequency (time between words) = 50Mhz = 20ns per word
+bus clean up = ~50ns
+
+32Bytes = 300ns + 100ns + (16 - 1) * 20ns + 50ns = 750ns
+
+= 32B/750ns
+
+= 40MB/s
+
+
+This is a very simple model and reality is much more nuanced.  You
+also need to check my assume numbers with the reality of your system.
+Also this doesn't take copying the data to RAM into account which is
+usually what you are really measuring.  That's easy to model though.
+A rule of thumb is to say that copying to RAM will reduce this value
+less than 50% because RAM should be at least a little faster than NOR.
+
+Nevertheless, If you can't use a simple calculation like this to
+explain the numbers then you have a poorly configured bus timings or
+have your cache off.  Cache is important because it would make the
+equation look like this, or worse.
+
+4Bytes = 300ns + 100ns + 1 * 20ns + 50ns = 470ns
+
+=4B/470ns
+
+=8MB/s
+
+For a PXA270 if you go with the defaults it can look like this.
+
+2Bytes = 300ns + 250ns + 250ns = 800ns
+
+= 2MB/s
+
+So, If you are only getting 0.6MB/s out of your NOR..... You're using it wrong.
