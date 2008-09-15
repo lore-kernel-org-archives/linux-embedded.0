@@ -1,95 +1,80 @@
-From: "Jared Hulbert" <jaredeh@gmail.com>
+From: Jamie Lokier <jamie@shareable.org>
 Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Fri, 12 Sep 2008 14:52:17 -0700
-Message-ID: <6934efce0809121452kd20deb6m268715f6ed83a71e@mail.gmail.com>
-References: <48AD00C4.6060302@gmail.com> <20080821110749.GA1926@shareable.org>
-	 <6934efce0808210711t686a88eci6eb294dbb54d68fe@mail.gmail.com>
-	 <48AE0476.80109@snapgear.com> <20080822181314.GB24179@shareable.org>
-	 <6934efce0808221116w76a662b0t954b0922b69d3232@mail.gmail.com>
-	 <20080822183713.GC24179@shareable.org>
-	 <20080822184326.GE24179@shareable.org>
+Date: Mon, 15 Sep 2008 17:34:21 +0100
+Message-ID: <20080915163421.GA13631@shareable.org>
+References: <6934efce0809121452kd20deb6m268715f6ed83a71e@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=rw+bou6cT0q61lZqvcXPtsLL6RgCxOPgzNGHBWWm98U=;
-        b=dykwb3LaGpuYi0TAYXC57DHKwKhPcz2sEX7mEjq+p1MnyxxNLoIlZr1+2l7ZZAn6RF
-         KGLyWqLpjCBAOrfj5j+MpmpC9z64g53EB1mNv9uTUkNu3Xjhpt+Xta2rTTQ0EufIRDjo
-         5PP0kBzjYWz8JSnXtujwKid5w4pOinXC2ApdU=
-In-Reply-To: <20080822184326.GE24179@shareable.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755927AbYIOQep@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <6934efce0809121452kd20deb6m268715f6ed83a71e@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Jamie Lokier <jamie@shareable.org>
-Cc: Greg Ungerer <gerg@snapgear.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
+Content-Transfer-Encoding: 7bit
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Greg Ungerer <gerg@snapgear.com>, Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?iso-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, tim.bird@am.sony.com, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Fri, Aug 22, 2008 at 11:43 AM, Jamie Lokier <jamie@shareable.org> wrote:
-> Jamie Lokier wrote:
->> Jared Hulbert wrote:
->> > What kind of NOR you using?  That is not what I measure with fast
->> > synchronous burst NOR's.
->>
->> I think the "fast" in "fast synchronous" gives it away :-)
->>
->> I'm using Spansion MirrorBit S29GL128N, which reads at about 0.6 MByte/s.
->
-> By the way, what speeds do you get on fast synchronous burst NORs - and
-> which chips are those?
+Jared Hulbert wrote:
+> >> > What kind of NOR you using?  That is not what I measure with fast
+> >> > synchronous burst NOR's.
+> >>
+> >> I think the "fast" in "fast synchronous" gives it away :-)
+> >>
+> >> I'm using Spansion MirrorBit S29GL128N, which reads at about 0.6 MByte/s.
+> >
+> > By the way, what speeds do you get on fast synchronous burst NORs - and
+> > which chips are those?
+> 
+> I am only familiar with the Numonyx product line up.
+> 
+> If you are using a GL, you'll probably find our P33 a good fit and at
+> competitive prices to GL as I understand it.  That's I think 50Mhz.
 
-I am only familiar with the Numonyx product line up.
+What's a GL?  Never heard of it - all I can think of is OpenGL :-)
 
-If you are using a GL, you'll probably find our P33 a good fit and at
-competitive prices to GL as I understand it.  That's I think 50Mhz.
+I'm using a Sigma Designs 862x media processor.  It clocks at 166MHz
+to main RAM, has an ARM internally to run Linux, and the intensive
+work happens in coprocessors.  The NOR is not on the RAM bus, it's on
+a "peripheral bus".  About the only thing I know about the bus is it's
+16 bits wide - I have the schematic, but only the board supplier has
+access to Sigma chip documentation.
 
-M18 is 100Mhz maybe a little higher.  And we just announced our LPDDR
-266 part, Velocity LP.
+> A rule of thumb is to say that copying to RAM will reduce this value
+> less than 50% because RAM should be at least a little faster than NOR.
 
-A good way of making a rough estimate of read performance is to
-measure a cache miss latency and convert that to bandwidth.  It's
-usually fairly close.
+In our case, RAM is at least 100x faster :-)
 
-32Byte cache size / 16 bit bus = 16 word transfers
+> Nevertheless, If you can't use a simple calculation like this to
+> explain the numbers then you have a poorly configured bus timings or
+> have your cache off.
 
-memory controller latency (time from Load instruction to bus activity)
-= ~300ns (upto 450ns for some processors)
-initial latency (time to read first word) = ~100ns (60ns - 120ns)
-clock frequency (time between words) = 50Mhz = 20ns per word
-bus clean up = ~50ns
+I'm not sure if cache is an option with this device - but would it
+make a difference anyway?  Launching executables like Busybox - those
+are much larger than the cache anyway, so launch time is dominated by
+bulk streaming copy speed.  Thanks for the idea, I'll look into
+whether it's possible to access this 'peripheral bus' through the
+ARM's cache and see if that speeds up streaming read time.
 
-32Bytes = 300ns + 100ns + (16 - 1) * 20ns + 50ns = 750ns
+> So, If you are only getting 0.6MB/s out of your NOR..... You're
+> using it wrong.
 
-= 32B/750ns
+Interesting, thanks.  I'm not sure it's possible to change the way NOR
+is being used with this chip, and it'll be a while before it's
+economical to replace the board with a new design.
 
-= 40MB/s
+This is all very interesting - I had no prior experience with NOR, so
+didn't know that 0.6MB/s was slow.  It's fast compared with older
+EEPROMs after all, and had imagined that people wanting fast flash
+would use NAND.
 
+On looking at the datasheet, I see it's quite a lot faster.  I'm
+suspecting the Sigma Designs perpheral bus and the way it's wired up
+not doing it any favours.  We already have the weirdness that we have
+to patch the Linux CFI-0002 MTD code: the CPU locks up when polling
+the erase status byte, until erase is finished.  Unfortunately this is
+difficult to change now - I'm programming hardware which is already
+out in the field and cannot be redesigned.
 
-This is a very simple model and reality is much more nuanced.  You
-also need to check my assume numbers with the reality of your system.
-Also this doesn't take copying the data to RAM into account which is
-usually what you are really measuring.  That's easy to model though.
-A rule of thumb is to say that copying to RAM will reduce this value
-less than 50% because RAM should be at least a little faster than NOR.
+Thanks for your thoughts.
 
-Nevertheless, If you can't use a simple calculation like this to
-explain the numbers then you have a poorly configured bus timings or
-have your cache off.  Cache is important because it would make the
-equation look like this, or worse.
-
-4Bytes = 300ns + 100ns + 1 * 20ns + 50ns = 470ns
-
-=4B/470ns
-
-=8MB/s
-
-For a PXA270 if you go with the defaults it can look like this.
-
-2Bytes = 300ns + 250ns + 250ns = 800ns
-
-= 2MB/s
-
-So, If you are only getting 0.6MB/s out of your NOR..... You're using it wrong.
+-- Jamie
