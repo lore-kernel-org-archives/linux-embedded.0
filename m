@@ -1,38 +1,36 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: ELBS mindshare
-Date: Wed, 17 Sep 2008 15:09:53 -0700
-Message-ID: <20080917220953.GB7453@secretlab.ca>
-References: <488FCF7D.5010005@websterwood.com> <20080810151435.GG15696@tamay-dogan.net> <48B188CE.1030006@websterwood.com> <20080917181323.GD7913@secretlab.ca> <20080917182333.GO9852@pengutronix.de>
+From: "Pawel Pastuszak" <pawelpastuszak@gmail.com>
+Subject: Re: Marvel 88E6063-RCJ1 driver
+Date: Wed, 17 Sep 2008 18:29:04 -0400
+Message-ID: <8ff29df80809171529o7b83dafft30edf4c7217a04e@mail.gmail.com>
+References: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
+	 <1EE62668-5A00-483F-9301-EB9AAAAE118F@kernel.crashing.org>
+	 <8ff29df80809171524k415583b1x62ee2106ec0b1bd8@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=Mbe+nnoP0zmECxzR0Vm+qb5H5/hfIu6QtizOog54Q0w=;
+        b=bJAaTQI2BEU0RyODW2WPY9i12O43PVnSa1j6dFOfrtcNzHcyhDeGf2u2nHfWcVOsb9
+         +MZsD9jd154SbQisfOBdUuTL7jIH8v4q4LuMYlZ6nRrvaWPHZrApz+T9jaKMn2JWrhBu
+         mGdKPDDbqIdertEgF7SopO/sJOTX/XaOA4Aeo=
+In-Reply-To: <8ff29df80809171524k415583b1x62ee2106ec0b1bd8@mail.gmail.com>
 Content-Disposition: inline
-In-Reply-To: <20080917182333.GO9852@pengutronix.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Robert Schwebel <r.schwebel@pengutronix.de>
-Cc: Behan Webster <behanw@websterwood.com>, Michelle Konzack <linux4michelle@tamay-dogan.net>, linux-embedded@vger.kernel.org
+To: linux-embedded@vger.kernel.org
+Cc: "<linux-embedded-owner@reliableembeddedsystems.com>" <linux-embedded-owner@reliableembeddedsystems.com>
 
-On Wed, Sep 17, 2008 at 08:23:33PM +0200, Robert Schwebel wrote:
-> On Wed, Sep 17, 2008 at 11:13:23AM -0700, Grant Likely wrote:
-> > BTW, I was talking with a guy from TI last night (Mike Turquette; works
-> > on the OMAP) and I asked him my standard question about what he thinks
-> > about the state of building root filesystems for embedded systems.
-> > 
-> > When he listed the toolkits he knows about and is interested in, ELBS
-> > was either the 2nd or 3rd tool that he mentioned.
-> > 
-> > Word is getting around dude.
-> 
-> What is ELBS? If it is somehow better than ptxdist, I'll have to apply a
-> few patches there 8-)
+You don't need any driver for the 88E6063 it uses phy id to talk to
+all its ports.. so all you have to do is make sure you set up your
+board to not to bind to any phy address then you can uses it as a
+switch..
 
-Oops, I forgot to remove the linux-embedded from the to: list.  I had
-intended to this to be a private email to Behan;  Oh well, now even more
-people have probably heard about it.  :-)
+Which Processor is this for...I created couple tool for the marvell
+switch i uses 3 different type in that family of switch's
 
-ELBS is a set of tools for bootstrapping an embedded root filesystem
-using existing Debian or Ubuntu packages.
-
-g.
+Pawel
