@@ -1,50 +1,56 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
-Subject: Re: ELBS mindshare
-Date: Wed, 17 Sep 2008 22:27:19 +0200
-Message-ID: <20080917202719.GR9852@pengutronix.de>
-References: <488FCF7D.5010005@websterwood.com> <20080810151435.GG15696@tamay-dogan.net> <48B188CE.1030006@websterwood.com> <20080917181323.GD7913@secretlab.ca> <20080917182333.GO9852@pengutronix.de> <5763a8949cead468dd505137165e8e65.squirrel@www.geekisp.com>
-Mime-Version: 1.0
+From: Kumar Gala <galak@kernel.crashing.org>
+Subject: Re: Marvel 88E6063-RCJ1 driver
+Date: Wed, 17 Sep 2008 17:02:07 -0500
+Message-ID: <1EE62668-5A00-483F-9301-EB9AAAAE118F@kernel.crashing.org>
+References: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
+Mime-Version: 1.0 (Apple Message framework v926)
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5763a8949cead468dd505137165e8e65.squirrel@www.geekisp.com>
+In-Reply-To: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Bill Traynor <wmat@naoi.ca>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
+To: "<linux-embedded-owner@reliableembeddedsystems.com>" <linux-embedded-owner@reliableembeddedsystems.com>
+Cc: Linux embedded <linux-embedded@vger.kernel.org>
 
-On Wed, Sep 17, 2008 at 03:48:57PM -0400, Bill Traynor wrote:
-> > On Wed, Sep 17, 2008 at 11:13:23AM -0700, Grant Likely wrote:
-> >> BTW, I was talking with a guy from TI last night (Mike Turquette; works
-> >> on the OMAP) and I asked him my standard question about what he thinks
-> >> about the state of building root filesystems for embedded systems.
-> >>
-> >> When he listed the toolkits he knows about and is interested in, ELBS
-> >> was either the 2nd or 3rd tool that he mentioned.
-> >>
-> >> Word is getting around dude.
-> >
-> > What is ELBS? If it is somehow better than ptxdist, I'll have to apply a
-> > few patches there 8-)
+One place to look is the WRT projects.. Some of them have drivers for  
+various switches.
+
+- k
+
+On Sep 16, 2008, at 11:33 PM, <linux-embedded-owner@reliableembeddedsystems.com 
+ > <linux-embedded-owner@reliableembeddedsystems.com> wrote:
+
+> Hi,
 >
-> Embedded Linux Build System
-> http://debian.websterwood.com/elbs/
+> I'm not sure, if my posting goes to the right list, but before I'll  
+> start
+> hacking away, I would like to ask if someone already has a driver  
+> for a
+> Marvel Linkstreet 88E6063 Integrated 7-Port QoS, 802.1Q 10/100  
+> Ethernet
+> Switch for a 2.6 kernel handy or can point me to where this can be  
+> found.
 >
-> Article on LinuxDevices:
-> http://www.linuxdevices.com/news/NS5894411715.html
-
-Ok, you do native building, that's not what we do for ptxdist's standard
-root filesystems.
-
-But note that ptxdist itself is only a system to manage configurable
-rules which are being executed in a dependency-defined order; so in the
-end, it can built whatever it likes.
-
-rsc
--- 
- Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
- Pengutronix - Linux Solutions for Science and Industry
-   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
-     Hannoversche Str. 2, 31134 Hildesheim, Germany
-   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
+> Regards,
+>
+> Robert
+>
+> -- 
+> Robert Berger
+> Embedded Software Specialist
+>
+> Reliable Embedded Systems
+> Consulting Training Engineering
+> Tel.: (+30) 697 593 3428
+> Fax.:(+30 210) 684 7881
+> URL: http://www.reliableembeddedsystems.com
+> --
+> ...One test is worth a thousand opinions.-Jack Ganssle
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux- 
+> embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
