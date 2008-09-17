@@ -1,56 +1,38 @@
-From: Kumar Gala <galak@kernel.crashing.org>
-Subject: Re: Marvel 88E6063-RCJ1 driver
-Date: Wed, 17 Sep 2008 17:02:07 -0500
-Message-ID: <1EE62668-5A00-483F-9301-EB9AAAAE118F@kernel.crashing.org>
-References: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
-Mime-Version: 1.0 (Apple Message framework v926)
-Content-Transfer-Encoding: 7bit
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: ELBS mindshare
+Date: Wed, 17 Sep 2008 15:09:53 -0700
+Message-ID: <20080917220953.GB7453@secretlab.ca>
+References: <488FCF7D.5010005@websterwood.com> <20080810151435.GG15696@tamay-dogan.net> <48B188CE.1030006@websterwood.com> <20080917181323.GD7913@secretlab.ca> <20080917182333.GO9852@pengutronix.de>
+Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
+Content-Disposition: inline
+In-Reply-To: <20080917182333.GO9852@pengutronix.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
-To: "<linux-embedded-owner@reliableembeddedsystems.com>" <linux-embedded-owner@reliableembeddedsystems.com>
-Cc: Linux embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: Behan Webster <behanw@websterwood.com>, Michelle Konzack <linux4michelle@tamay-dogan.net>, linux-embedded@vger.kernel.org
 
-One place to look is the WRT projects.. Some of them have drivers for  
-various switches.
+On Wed, Sep 17, 2008 at 08:23:33PM +0200, Robert Schwebel wrote:
+> On Wed, Sep 17, 2008 at 11:13:23AM -0700, Grant Likely wrote:
+> > BTW, I was talking with a guy from TI last night (Mike Turquette; works
+> > on the OMAP) and I asked him my standard question about what he thinks
+> > about the state of building root filesystems for embedded systems.
+> > 
+> > When he listed the toolkits he knows about and is interested in, ELBS
+> > was either the 2nd or 3rd tool that he mentioned.
+> > 
+> > Word is getting around dude.
+> 
+> What is ELBS? If it is somehow better than ptxdist, I'll have to apply a
+> few patches there 8-)
 
-- k
+Oops, I forgot to remove the linux-embedded from the to: list.  I had
+intended to this to be a private email to Behan;  Oh well, now even more
+people have probably heard about it.  :-)
 
-On Sep 16, 2008, at 11:33 PM, <linux-embedded-owner@reliableembeddedsystems.com 
- > <linux-embedded-owner@reliableembeddedsystems.com> wrote:
+ELBS is a set of tools for bootstrapping an embedded root filesystem
+using existing Debian or Ubuntu packages.
 
-> Hi,
->
-> I'm not sure, if my posting goes to the right list, but before I'll  
-> start
-> hacking away, I would like to ask if someone already has a driver  
-> for a
-> Marvel Linkstreet 88E6063 Integrated 7-Port QoS, 802.1Q 10/100  
-> Ethernet
-> Switch for a 2.6 kernel handy or can point me to where this can be  
-> found.
->
-> Regards,
->
-> Robert
->
-> -- 
-> Robert Berger
-> Embedded Software Specialist
->
-> Reliable Embedded Systems
-> Consulting Training Engineering
-> Tel.: (+30) 697 593 3428
-> Fax.:(+30 210) 684 7881
-> URL: http://www.reliableembeddedsystems.com
-> --
-> ...One test is worth a thousand opinions.-Jack Ganssle
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux- 
-> embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+g.
