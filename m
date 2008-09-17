@@ -1,36 +1,28 @@
-From: <linux-embedded-owner@reliableembeddedsystems.com>
-Subject: Marvel 88E6063-RCJ1 driver
-Date: Tue, 16 Sep 2008 23:33:18 -0500
-Message-ID: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: ELBS mindshare
+Date: Wed, 17 Sep 2008 11:13:23 -0700
+Message-ID: <20080917181323.GD7913@secretlab.ca>
+References: <488FCF7D.5010005@websterwood.com> <20080810151435.GG15696@tamay-dogan.net> <48B188CE.1030006@websterwood.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <48B188CE.1030006@websterwood.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Linux embedded <linux-embedded@vger.kernel.org>
-Cc: Linux embedded owner <linux-embedded-owner@reliableembeddedsystems.com>
+Content-Transfer-Encoding: 7bit
+To: Behan Webster <behanw@websterwood.com>
+Cc: Michelle Konzack <linux4michelle@tamay-dogan.net>, linux-embedded@vger.kernel.org
 
-Hi,
+Hey Behan,
 
-I'm not sure, if my posting goes to the right list, but before I'll start
-hacking away, I would like to ask if someone already has a driver for a
-Marvel Linkstreet 88E6063 Integrated 7-Port QoS, 802.1Q 10/100 Ethernet
-Switch for a 2.6 kernel handy or can point me to where this can be found.
+BTW, I was talking with a guy from TI last night (Mike Turquette; works
+on the OMAP) and I asked him my standard question about what he thinks
+about the state of building root filesystems for embedded systems.
 
-Regards,
+When he listed the toolkits he knows about and is interested in, ELBS
+was either the 2nd or 3rd tool that he mentioned.
 
-Robert
+Word is getting around dude.
 
--- 
-Robert Berger
-Embedded Software Specialist
-
-Reliable Embedded Systems
-Consulting Training Engineering
-Tel.: (+30) 697 593 3428
-Fax.:(+30 210) 684 7881
-URL: http://www.reliableembeddedsystems.com
---
-...One test is worth a thousand opinions.-Jack Ganssle
-
+g.
