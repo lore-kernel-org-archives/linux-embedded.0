@@ -1,37 +1,46 @@
-From: "Mike Frysinger" <vapier.adi@gmail.com>
+From: Fundu <fundu_1999@yahoo.com>
 Subject: Re: local_save_flags(flags)
-Date: Thu, 18 Sep 2008 18:07:37 -0400
-Message-ID: <8bd0f97a0809181507u265ec60eu597500ab6187e211@mail.gmail.com>
-References: <8bd0f97a0809181415y2def310h73d83a455615b8ff@mail.gmail.com>
-	 <732333.54005.qm@web63404.mail.re1.yahoo.com>
+Date: Thu, 18 Sep 2008 15:45:14 -0700 (PDT)
+Message-ID: <545834.68406.qm@web63405.mail.re1.yahoo.com>
+References: <8bd0f97a0809181507u265ec60eu597500ab6187e211@mail.gmail.com>
+Reply-To: fundu_1999@yahoo.com
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=uSCnmd6BpGvT60qPLMVjuJecybVNSzA77bL5b3aTRQw=;
-        b=PQatHVFGkyTY68fSuQHULQ9micFWZIaO6xTPA3nqcIg+itaMSXuczk5PDDlAsMzjAS
-         UJfhI1aTrumz6oQjcjmOAKAYcQtsVpFlt5X5zbICywRKKHnNXuDR4RBJtWlLFuwPQ9oV
-         xm8jiXiIeTtsQkZ6yEtMNh/kgPFUva0UYAdEw=
-In-Reply-To: <732333.54005.qm@web63404.mail.re1.yahoo.com>
-Content-Disposition: inline
+In-Reply-To: <8bd0f97a0809181507u265ec60eu597500ab6187e211@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: fundu_1999@yahoo.com
+Content-Transfer-Encoding: 7bit
+To: Mike Frysinger <vapier.adi@gmail.com>
 Cc: linux embedded <linux-embedded@vger.kernel.org>
 
-On Thu, Sep 18, 2008 at 18:05, Fundu wrote:
->> you really should just read a book on the topic.  LDD3
->> covers these
->> intricacies (and a lot more), as does Essential Linux
->> Device Drivers.
->
-> i'm actually reading essential linux device drivers. And to get some clarification i made the post.
 
-that book explicitly covers your question.  read chapter 2 where it
-covers these irq functions.
--mike
+
+> that book explicitly covers your question.  read chapter 2
+> where it
+> covers these irq functions.
+as i said i'm reading the book and actully i did read that chapter. 
+
+for me, here's the exact line that needs clarification,
+In chapter 2, page 42 last paragraph(starts with "However, if ..." )
+
+here's the code snippet he's talking about.
+Point A:
+local_irq_disable();
+/* critical section ...*/
+local_irq_enable();
+
+
+Author say, if irg are already disabled at Point A (see snippet above) then local_irq_enable() creates an unpleasant side effect of re-enabling interrupts rather than restoring interrupt state. 
+
+1) first what's the difference between re-enabling and restoring interrupt state. 
+2) so is disable interrupts twice a problem, or just enabling them when after they are diabled (which sounds like how it should be ) a problem.
+
+hope i have made myself clear enough for you to respond.
+
+TIA  
+
+
+
+
+      
