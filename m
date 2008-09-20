@@ -1,30 +1,70 @@
-From: Trent Piepho <tpiepho@freescale.com>
-Subject: Re: [PATCH 00/10] AXFS: Advanced XIP filesystem
-Date: Fri, 19 Sep 2008 12:20:38 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.0809191216450.3476@t2.domain.actdsltmp>
-References: <6934efce0809121452kd20deb6m268715f6ed83a71e@mail.gmail.com>
- <20080915163421.GA13631@shareable.org> <6934efce0809151243h60a6e48bpf0c7600d4badf3c4@mail.gmail.com>
+From: Michelle Konzack <linux4michelle@tamay-dogan.net>
+Subject: Re: ELBS mindshare
+Date: Sat, 20 Sep 2008 21:20:43 +0200
+Message-ID: <20080920192043.GU6606@tamay-dogan.net>
+References: <488FCF7D.5010005@websterwood.com> <20080810151435.GG15696@tamay-dogan.net> <48B188CE.1030006@websterwood.com> <20080917181323.GD7913@secretlab.ca> <20080917182333.GO9852@pengutronix.de> <20080917220953.GB7453@secretlab.ca>
 Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="muCgbjpVrpBl/HUE"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <6934efce0809151243h60a6e48bpf0c7600d4badf3c4@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20080917220953.GB7453@secretlab.ca>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"; format="flowed"
-Content-Transfer-Encoding: 7bit
-To: Jared Hulbert <jaredeh@gmail.com>
-Cc: Jamie Lokier <jamie@shareable.org>, cotte@de.ibm.com, Greg Ungerer <gerg@snapgear.com>, linux-embedded@vger.kernel.org, nickpiggin@yahoo.com.au, =?UTF-8?Q?J=C3=B6rn_Engel?= <joern@logfs.org>, Linux-kernel@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, tim.bird@am.sony.com
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Robert Schwebel <r.schwebel@pengutronix.de>, Behan Webster <behanw@websterwood.com>, linux-embedded@vger.kernel.org
 
-On Mon, 15 Sep 2008, Jared Hulbert wrote:
->>>>> I'm using Spansion MirrorBit S29GL128N, which reads at about 0.6 MByte/s.
->>>
->>> If you are using a GL, you'll probably find our P33 a good fit and at
->>> competitive prices to GL as I understand it.  That's I think 50Mhz.
->>
->> What's a GL?  Never heard of it - all I can think of is OpenGL :-)
->
-> S29_GL_128N
 
-I'm using a S29GL064N chip.  Going through linux and /dev/mtd I get 13.5
-MB/sec and reading directly from the chips give 15 MB/sec.  I've not mapped
-the chip cached and I'm not using the page burst mode.  That would help a lot
-certainly, but the current flash speed isn't much of a bottleneck.
+--muCgbjpVrpBl/HUE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Grand,
+
+Fortunateley you have forgoten to remove my E-Mail...
+                      ...otherwise I had to kill you!  ;-)
+
+
+Am 2008-09-17 15:09:53, schrieb Grant Likely:
+> Oops, I forgot to remove the linux-embedded from the to: list.  I had
+> intended to this to be a private email to Behan;  Oh well, now even more
+> people have probably heard about it.  :-)
+>=20
+> ELBS is a set of tools for bootstrapping an embedded root filesystem
+> using existing Debian or Ubuntu packages.
+
+Thanks for the Info.
+
+Since my Evaluation Kit for AT91SAM9G20 has 64 MByte SDRAM and 256 MByte
+NAND Flash I like to try it out...
+
+Thanks, Greetings and nice Day/Evening
+    Michelle Konzack
+    Systemadministrator
+    24V Electronic Engineer
+    Tamay Dogan Network
+    Debian GNU/Linux Consultant
+
+
+--=20
+Linux-User #280138 with the Linux Counter, http://counter.li.org/
+##################### Debian GNU/Linux Consultant #####################
+Michelle Konzack   Apt. 917                  ICQ #328449886
++49/177/9351947    50, rue de Soultz         MSN LinuxMichi
++33/6/61925193     67100 Strasbourg/France   IRC #Debian (irc.icq.com)
+
+--muCgbjpVrpBl/HUE
+Content-Type: application/pgp-signature; name="signature.pgp"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFI1U0KC0FPBMSS+BIRAp5UAJ96kzu2royqFZj+Z5622+lwno4I5ACg0nPu
+1HhJ2iTohP1ySfa/gDqUGrA=
+=2P5/
+-----END PGP SIGNATURE-----
+
+--muCgbjpVrpBl/HUE--
