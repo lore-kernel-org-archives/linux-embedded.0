@@ -1,31 +1,36 @@
-From: Kumar Gala <galak@kernel.crashing.org>
-Subject: Re: Merge linuxppc-embedded with linuxppc-dev
-Date: Mon, 22 Sep 2008 18:34:37 -0500
-Message-ID: <4078F175-8422-42CC-8145-333D1362CEFE@kernel.crashing.org>
-References: <fa686aa40809221508q22e23e53s2140b17de83bcb1a@mail.gmail.com> <200809230909.12785.jk@ozlabs.org>
-Mime-Version: 1.0 (Apple Message framework v929.2)
-Content-Transfer-Encoding: 7bit
+From: Fundu <fundu_1999@yahoo.com>
+Subject: Re: local_save_flags(flags)
+Date: Tue, 23 Sep 2008 13:01:09 -0700 (PDT)
+Message-ID: <903542.11891.qm@web63401.mail.re1.yahoo.com>
+References: <8bd0f97a0809181551u477911f6iccea3c74c6e6832d@mail.gmail.com>
+Reply-To: fundu_1999@yahoo.com
+Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200809230909.12785.jk@ozlabs.org>
+In-Reply-To: <8bd0f97a0809181551u477911f6iccea3c74c6e6832d@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Jeremy Kerr <jk@ozlabs.org>
-Cc: Grant Likely <grant.likely@secretlab.ca>, linuxppc-dev <linuxppc-dev@ozlabs.org>, Paul Mackerras <paulus@samba.org>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Mike Frysinger <vapier.adi@gmail.com>
+Cc: linux embedded <linux-embedded@vger.kernel.org>
+
+> > 2) so is disable interrupts twice is a problem, or just
+> enabling them after they are disabled (which sounds like
+> how it should be) a problem.
+> 
+> both are a problem.  the non-state saving version cannot be
+> used
+> recursively nor in parallel to the state-saving version.
+
+Much clear now, Thanks Mike! 
+
+here's a follow up question.
+
+what about Non maskable interrupts ? disabling interrupt won't have any effect on that right ? 
+
+thanks 
+Fundu. 
 
 
-On Sep 22, 2008, at 6:09 PM, Jeremy Kerr wrote:
 
-> Hi Grant,
->
->> Can we eliminate the linuxppc-embedded mailing list and merge it with
->> linuxppc-dev?
->
-> That's not really up to me - more of a community question I think. I
-> imagine Paul would have the final decision though.
-
-I'm pretty sure I saw paul gripe about this on irc just the other day.
-
-My vote is to kill linuxppc-embedded.
-
-- k
+      
