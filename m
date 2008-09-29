@@ -1,53 +1,63 @@
-From: Lennert Buytenhek <buytenh@wantstofly.org>
-Subject: Re: Marvel 88E6063-RCJ1 driver
-Date: Mon, 29 Sep 2008 04:51:48 +0200
-Message-ID: <20080929025148.GA22984@xi.wantstofly.org>
-References: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
+From: Robin Getz <rgetz@blackfin.uclinux.org>
+Subject: Re: local_save_flags(flags)
+Date: Sun, 28 Sep 2008 23:32:05 -0400
+Message-ID: <200809282332.05827.rgetz@blackfin.uclinux.org>
+References: <77566.7174.qm@web63401.mail.re1.yahoo.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <77566.7174.qm@web63401.mail.re1.yahoo.com>
 Content-Disposition: inline
-In-Reply-To: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded-owner@reliableembeddedsystems.com
-Cc: Linux embedded <linux-embedded@vger.kernel.org>
+To: fundu_1999@yahoo.com
+Cc: Mike Frysinger <vapier.adi@gmail.com>, linux embedded <linux-embedded@vger.kernel.org>
 
-On Tue, Sep 16, 2008 at 11:33:18PM -0500, linux-embedded-owner@reliableembeddedsystems.com wrote:
+On Wed 24 Sep 2008 13:06, Fundu pondered:
+> > >>> what about Non maskable interrupts ? disabling
+> > >>> interrupt won't have any effect on that
+> > right ?
+> > >>
+> > >> that really doesnt make sense by definition huh.
+> > >> non-maskable means
+> > >> they cant be masked.
+> > >
+> > > yeah thats the point. i should have elaborated more.
+> > > then there's no guarantee that your code wont be
+> > interrupted ?
 
-> I'm not sure, if my posting goes to the right list, but before I'll start
-> hacking away, I would like to ask if someone already has a driver for a
-> Marvel Linkstreet 88E6063 Integrated 7-Port QoS, 802.1Q 10/100 Ethernet
-> Switch for a 2.6 kernel handy or can point me to where this can be found.
+Disabling interrupts does not normally mask NMI, reset, exceptions
+and emulation. All can interrupt your code. Most do not return (except 
+exceptions) - so it is not a big deal.
 
-Jumping in late..  (please CC, not on the list)
+exceptions - also depend heavily on your processor type/architecture - but can 
+range from TLB miss/dirty - to unaligned access fixups.
 
-As the other posters have suggested, you _can_ use this switch without
-any special drivers.  Your boot loader should initialise it in such a
-way that the CPU port is treated as just another switch port (turn tag
-mode off, and force link/speed/duplex since there is no PHY), and then
-it'll be just as if your CPU is connected to a regular 7-port ethernet
-switch.
+On Blackfin - we don't do unaligned access fixups - this has the upside of 
+when your code does this - it crashes - so you tend to find it early :) The 
+downside is that the code which functions (slowly) on other architectures 
+does not run on Blackfin...
 
+> > design your system properly and it wont be an issue
+> 
+> could you elaborate more on this, as to what you mean by good design in
+> this context.
 
-If you want more control over the switch, I've just posted a patch
-series to the linux netdev mailing list for support for various DSA
-switches.  (There is no 88E6063 support yet, but there is support
-for the 88E6060, and 6063 shouldn't be hard to add.)
+If you have something that is timing critical - make sure - by design - that 
+you will not cause exception events.
 
-What that patch series does is to expose each port on the switch as
-a linux network interface, handling things like link state, PHY
-commands and hardware statistics transparently, as if the switch ports
-were individual NICs in the host system.
+In most Blackfin systems that is done by ensuring that the TLB for the kernel 
+is covered and locked. You never get a ITLB miss in kernel code, and a DTLB 
+miss only occurs on kmalloced data. (which you shouldn't be acessing)
 
-A forthcoming patch set will handle hardware bridging transparently,
-so if you do e.g. "brctl addif br0 lan1; brctl addif br0 lan2", the DSA
-driver will program the switch chip so that ports 1 and 2 will be
-bridged in hardware, etc.
+> > you about the Blackfin processor, but i doubt you're
+> > using that.
+>
+> sure i would like to know. i also have a 537 which i would work on for
+> the next project and don't mind more info on it.
 
+It really depends on what you are trying to do.
 
-From a software point of view, the only difference between the 88E6060
-and the 88E6063 is that the 6063 has hardware QoS and hardware stats
-counters.  If you'd like to give it a go, let me know and I'll whip up
-a 88E6063 support patch for you to try.
+If you are that timing critical - you want to put things into internal L1 
+memory - so you don't take the penalty of cache misses/flushes either...
