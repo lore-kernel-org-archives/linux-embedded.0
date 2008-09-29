@@ -1,77 +1,53 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [RFC] Remove more code when IP_MULTICAST=n
-Date: Wed, 24 Sep 2008 10:08:22 -0700
-Message-ID: <48DA7406.8050209@am.sony.com>
-References: <20080819150047.38f09acf@surf>	<Pine.LNX.4.64.0808191618190.25348@vixen.sonytel.be>	<20080825084826.19923151@surf>	<20080826033345.GA30587@linux-sh.org>	<48B432EF.1010403@am.sony.com> <20080924173333.4fa1e50d@surf>
+From: Lennert Buytenhek <buytenh@wantstofly.org>
+Subject: Re: Marvel 88E6063-RCJ1 driver
+Date: Mon, 29 Sep 2008 04:51:48 +0200
+Message-ID: <20080929025148.GA22984@xi.wantstofly.org>
+References: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20080924173333.4fa1e50d@surf>
+Content-Disposition: inline
+In-Reply-To: <d7555edbde4d54b0693fa7bddb894cfe@reliableembeddedsystems.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: Paul Mundt <lethal@linux-sh.org>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, linux-embedded@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, Michael Opdenacker <michael@free-electrons.com>
+Content-Transfer-Encoding: 7bit
+To: linux-embedded-owner@reliableembeddedsystems.com
+Cc: Linux embedded <linux-embedded@vger.kernel.org>
 
-Thomas Petazzoni wrote:
-> The patch doesn't try to get multicast support to work without IGMP,
-> but tries to remove as much code as possible when multicast support is
-> not needed.
+On Tue, Sep 16, 2008 at 11:33:18PM -0500, linux-embedded-owner@reliableembeddedsystems.com wrote:
 
-Ok, that's different than I thought.  Sorry I missed that in your
-original message. I thought this was making an
-extra slice (a'la approach one).  Instead it's just making the
-existing slice more accurate.
+> I'm not sure, if my posting goes to the right list, but before I'll start
+> hacking away, I would like to ask if someone already has a driver for a
+> Marvel Linkstreet 88E6063 Integrated 7-Port QoS, 802.1Q 10/100 Ethernet
+> Switch for a 2.6 kernel handy or can point me to where this can be found.
 
-> Two approaches have been tried :
-> 
->  * The first one, by Matt Mackall, was to add a new CONFIG_IGMP option
->    next to the existing CONFIG_MULTICAST option, to disable the parts
->    of the IGMP protocol support that were still compiled-in when
->    CONFIG_MULTICAST=n
-> 
->  * The second one, this patch, simply removes the IGMP protocol code
->    when CONFIG_MULTICAST=n, because my understanding is that the IGMP
->    protocol code is useless when multicast is not used.
+Jumping in late..  (please CC, not on the list)
 
-This is correct.  IGMP ONLY makes sense if you have multicast support!
+As the other posters have suggested, you _can_ use this switch without
+any special drivers.  Your boot loader should initialise it in such a
+way that the CPU port is treated as just another switch port (turn tag
+mode off, and force link/speed/duplex since there is no PHY), and then
+it'll be just as if your CPU is connected to a regular 7-port ethernet
+switch.
 
-> I might try to send this second approach to netdev, but it seems that
-> not everybody agrees on the approach of removing things for the kernel
-> by adding more and more configuration options.
 
-That would be irrelevant for this patch.
+If you want more control over the switch, I've just posted a patch
+series to the linux netdev mailing list for support for various DSA
+switches.  (There is no 88E6063 support yet, but there is support
+for the 88E6060, and 6063 shouldn't be hard to add.)
 
-> If the network
-> maintainers don't agree with this approach, then I'm not sure how we
-> can make this patch progress in any way (and this is not an accusation
-> towards the network maintainers, they also have valid and good
-> arguments against the addition of dozens of configuration options to
-> disable a few KB of code).
+What that patch series does is to expose each port on the switch as
+a linux network interface, handling things like link state, PHY
+commands and hardware statistics transparently, as if the switch ports
+were individual NICs in the host system.
 
-Well, if we're not adding a new config option, but just making
-the existing option better, I have a hard time seeing the problem,
-even if the savings are small.
+A forthcoming patch set will handle hardware bridging transparently,
+so if you do e.g. "brctl addif br0 lan1; brctl addif br0 lan2", the DSA
+driver will program the switch chip so that ports 1 and 2 will be
+bridged in hardware, etc.
 
-It's kind of dumb to have dead code lying around.  Since the new
-patch adds nothing to the configuration space, the only downside
-I can see is the possible increase in maintenance burden caused
-by conditional code.  But, then again, I'm not a networking guy.
-I think we should submit this.  If the networking
-guys want to see CONFIG_MULTICAST removed, that's a completely
-separate argument (and one I would disagree with).  But we
-shouldn't need to fight that fight here.
 
-My understanding is that the network guys have not see this new
-patch yet.  I think we should make sure they see it and get their
-response.  (Not in any confrontational way).
-They may yet have valid reasons why slicing this stuff
-out will hurt something.  But if their only complaint is that they
-don't like multicast going away, that's something else.
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+From a software point of view, the only difference between the 88E6060
+and the 88E6063 is that the 6063 has hardware QoS and hardware stats
+counters.  If you'd like to give it a go, let me know and I'll whip up
+a 88E6063 support patch for you to try.
