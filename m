@@ -1,40 +1,117 @@
-From: Daniel Walker <dwalker@mvista.com>
-Subject: Re: PRAMFS with XIP support
-Date: Wed, 08 Oct 2008 11:51:47 -0700
-Message-ID: <1223491907.10283.91.camel@laptop-eth>
-References: <48EB288C.9050002@coritel.it>
-	 <8bd0f97a0810070851g69ad4c3exf195e5d6a983f772@mail.gmail.com>
-	 <48EC5EB9.2050001@coritel.it>  <48ECFB26.2090808@am.sony.com>
+From: Chris Snook <csnook@redhat.com>
+Subject: Re: RFC - size tool for kernel build system
+Date: Wed, 08 Oct 2008 15:09:41 -0400
+Message-ID: <48ED0575.4060005@redhat.com>
+References: <48EBD268.50208@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48ECFB26.2090808@am.sony.com>
+In-Reply-To: <48EBD268.50208@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: Tim Bird <tim.bird@am.sony.com>
-Cc: Marco Stornelli <marco.stornelli@coritel.it>, Mike Frysinger <vapier.adi@gmail.com>, Linux-Embedded <linux-embedded@vger.kernel.org>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Wed, 2008-10-08 at 11:25 -0700, Tim Bird wrote:
-> Marco Stornelli wrote:
-> > Hi Mike,
-> > 
-> > I am not the PRAMFS mantainer, and I think he is in charge to do that
-> > (right?), I sent an email to Steve Longerbeam and to MontaVista support,
-> > but I haven't received any response. However, if you think it could be
-> > useful to submit it to lkml I could do it.
+Tim Bird wrote:
+> I've been thinking about a tool that might be useful
+> to track kernel size changes.  I'm posting this
+> Request For Comments to get feedback, and determine
+> if this is something that would be worthwhile to
+> pursue.
 > 
-> If you don't hear anything within 2 weeks, just submit it.
-> I've worked with PRAMFS in the past, and I think it's not
-> a high enough profile project at MontaVista that they'd
-> be upset if it got mainlined by someone besides Steve.
+> What I envision is some new kernel build targets, specifically
+> related to gathering size information and generating a size
+> comparison report.  Some small helper scripts would be written
+> to gather the necessary information, and generate the report.
 > 
-> IRRC, Steve Johnson of Panasonic tried to mainline it a
-> few years ago, and no one from MV complained.
+> A kernel developer would type:
+> 
+> 1) make size-baseline
+> 
+> And kernel size information would be recorded for the
+> current kernel (after a build, if needed).
+> I envision this saving off the .config and System.map, the
+> result of 'size vmlinux' and several of the 'size */builtin.o'
+> results.
+> 
+> Additionally (and optionally), a program could
+> be run to acquire some size information from a running
+> system (e.g. a newly booted system, or a system under
+> a particular load), to include in the baseline report.
+> 
+> All of the gathered information would be stored
+> as the "size baseline".
+> 
+> -------
+> 
+> After making some modifications, either to the source
+> or the configuration, the developer could type:
+> 
+> 2) make size-report
+> 
+> The kernel size information would be recorded again, and
+> compared with the size-baseline results.  A report of
+> differences (e.g. from bloat-o-meter and other comparison
+> tools) would be produced. Any differences exceeding some
+> threshhold (specified in a size-watch config file?)
+> could be highlighted.  The git commit IDs would be recorded,
+> as well as differences between the configs used
+> (e.g. diffconfig output).
+> 
+> If some designated size difference exceeds
+> a threshold (specified in the size-watch configuration)
+> then the make could return an error, while still producing
+> the report.  This would mean that this could be used
+> for git bisection to find a size regression.
+> 
+> Another way to look at this, would be that a developer
+> could pick a specific size value to monitor (for example,
+> the static size of the network sub-system, or the
+> size of a particular slab in the dynamic memory of a
+> newly booted kernel). They would specify that in the
+> size-watch config, and could monitor that size over time
+> and under various configurations.
+> 
+> I envision a couple of usages:
+>  1) A developer could use this to be able to see a
+>  report about the total size increases caused by a patch
+>  they are about to submit
+> 
+>  2) A developer could compare kernel versions for overall
+>  size changes
+> 
+>  3) A maintainer could examine the affect of a patch on the
+>  size of their subsystem.
+> 
+>  4) A developer could compare different kernel configs to
+>  see the impact of configuration option choices.
+> 
+>  5) An automated tool could generate size values to associate
+>  with different config option choices (at least, starting from
+>  a consistent config set).
+> 
+>  6) An automated tool could generate size values for each
+>  kernel version (this is what Bloatwatch does now).
+> 
+> Bloatwatch generates information on the static size information
+> for various kernel versions.  This would have a similar purpose,
+> but the intent would be to integrate it into the kernel build
+> system, to allow any developer to measure the size information,
+> and highlight and track the information of their choice.
+> 
+> Any comments?
+>  -- Tim
 
-/me looks up .. 
+The kernel build system is supposed to be stateless, and integrating this with 
+make would mess that up.  If your goal is to get more people to use Bloatwatch 
+so they don't make your job quite as difficult, it would probably be more 
+appropriate to put a size analysis script in scripts/ (like checkpatch.pl) that 
+looks at only the kernel you just built and generates thorough statistics in a 
+format readable by both humans and Bloatwatch, preferably something easily 
+diffed.  Then developers could use that output in mailing list discussions 
+without having to use Bloatwatch, but embedded developers who care about this 
+enough to use Bloatwatch can be confident that they're working with the same 
+numbers that the rest of us are discussing with the plain text on the lists.
 
-I'm not familiar with PRAMFS , but I'm sure any contribution or support
-is welcome.. I'd be happy to help if anyone wants it.
-
-Daniel
+-- Chris
