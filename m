@@ -1,8 +1,14 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: [RFC 0/6] Proposal for a Generic PWM Device API
-Date: Wed,  8 Oct 2008 11:43:12 -0500
-Message-ID: <cover.1223482372.git.bgat__16243.062230251$1223486435$gmane$org@billgatliff.com>
+Subject: [RFC 3/6] [PWM] Documentation
+Date: Wed,  8 Oct 2008 11:43:15 -0500
+Message-ID: <7b16004ca5f8030184c2de96cbcee38657d56252.1223482372.git.bgat__19694.3099647344$1223486439$gmane$org@billgatliff.com>
+References: <cover.1223482372.git.bgat@billgatliff.com>
+ <4b5c3aa2b1bc2b7efad834da49c2dec8c0a8726b.1223482372.git.bgat@billgatliff.com>
+ <88de40673cc33e014928c2ee3a86bdac566021c8.1223482372.git.bgat@billgatliff.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <88de40673cc33e014928c2ee3a86bdac566021c8.1223482372.git.bgat@billgatliff.com>
+In-Reply-To: <cover.1223482372.git.bgat@billgatliff.com>
+References: <cover.1223482372.git.bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
@@ -11,84 +17,276 @@ Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org
 Cc: Bill Gatliff <bgat@billgatliff.com>
 
-This series proposes a "generic PWM" driver API.
 
-This proposed API is motivated by the author's need to support
-pluggable devices; a secondary objective is to consolidate the
-existing PWM implementations behind an agreeable, consistent,
-redundancy-reducing interface.
-
-The code included in this patch draws heavily from the existing PWM
-infrastructure and driver for the AT91SAM9263 PWMC.  The author is
-grateful to Russell King, Eric Miao, David Brownell and others for
-providing such tall "shoulders" to stand upon.  The proposed updates
-to that code should not be interpreted as attempts to address
-shortcomings, but rather to extend functionality in ways that were not
-originally required.
-
-The implementation of the proposed API is structurally similar to the
-generic GPIO API, except that the PWM code uses platform bus_id
-strings instead of integers to identify devices.  A configuration
-structure is also provided, so that the API can be extended in a
-source-code-compatible way to accomodate devices with features not
-anticipated by the current code.
-
-Pulse width modulated signals are used in an astounding number and
-range of applications, and there is no "one true way" of either
-realizing them or employing them to accomplish real work.  The current
-proposal attempts to provide a useful feature set for the most basic
-users, packaged in such a way as to allow the API to be extended in a
-backwards-compatible way as new needs are identified.  Some of these
-needs have already been identified.
-
-The proposed code has been run-tested on a Cogent CSB737
-(AT91SAM9263), mated to a custom circuit that drives multiple DC
-motors and sensors.
-
-
-Feedback is welcome!
-
-
-
-b.g.
---
-Bill Gatliff
-<bgat@billgatliff.com>
-
-
-==========================================================================
-
-Bill Gatliff (6):
-  [PWM] Generic PWM API implementation
-  [PWM] Changes to existing pwm.h to adapt to generic PWM API
-  [PWM] Documentation
-  [PWM] Driver for Atmel PWMC peripheral
-  [PWM] Install new Atmel PWMC driver in Kconfig, expunge old one
-  [PWM] New LED driver and trigger that use PWM API
-
- Documentation/pwm.txt      |  258 +++++++++++++++++
- arch/arm/Kconfig           |    2 +
- drivers/Makefile           |    2 +
- drivers/leds/Kconfig       |   21 +-
- drivers/leds/Makefile      |    2 +
- drivers/leds/leds-pwm.c    |  141 ++++++++++
- drivers/leds/ledtrig-dim.c |   95 +++++++
- drivers/misc/Kconfig       |    9 -
- drivers/misc/Makefile      |    1 -
- drivers/misc/atmel_pwm.c   |  409 ---------------------------
- drivers/pwm/Kconfig        |   24 ++
- drivers/pwm/Makefile       |    6 +
- drivers/pwm/atmel-pwm.c    |  631 +++++++++++++++++++++++++++++++++++++++++
- drivers/pwm/pwm.c          |  667 ++++++++++++++++++++++++++++++++++++++++++++
- include/linux/pwm-led.h    |   34 +++
- include/linux/pwm.h        |  168 ++++++++++--
- 16 files changed, 2023 insertions(+), 447 deletions(-)
+Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
+---
+ Documentation/pwm.txt |  258 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 258 insertions(+), 0 deletions(-)
  create mode 100644 Documentation/pwm.txt
- create mode 100644 drivers/leds/leds-pwm.c
- create mode 100644 drivers/leds/ledtrig-dim.c
- delete mode 100644 drivers/misc/atmel_pwm.c
- create mode 100644 drivers/pwm/Kconfig
- create mode 100644 drivers/pwm/Makefile
- create mode 100644 drivers/pwm/atmel-pwm.c
- create mode 100644 drivers/pwm/pwm.c
- create mode 100644 include/linux/pwm-led.h
+
+diff --git a/Documentation/pwm.txt b/Documentation/pwm.txt
+new file mode 100644
+index 0000000..b8932dd
+--- /dev/null
++++ b/Documentation/pwm.txt
+@@ -0,0 +1,258 @@
++                       Generic PWM Device API
++
++                          October 8, 2008
++                           Bill Gatliff
++                       <bgat@billgatliff.com>
++
++
++
++The code in drivers/pwm and include/linux/pwm.h implements an API for
++applications involving pulse-width-modulation signals.  This document
++describes how the API implementation facilitates both PWM-generating
++devices, and users of those devices.
++
++
++
++Motivation
++
++The primary goals for implementing the "generic PWM API" are to
++consolidate the various PWM implementations within a consistent and
++redundancy-reducing framework, and to facilitate the use of
++hotpluggable PWM devices.
++
++Previous PWM-related implementations within the Linux kernel achieved
++their consistency via cut-and-paste, but did not need to (and didn't)
++facilitate more than one PWM-generating device within the system---
++hotplug or otherwise.  The Generic PWM Device API might be most
++appropriately viewed as an update to those implementations, rather
++than a complete rewrite.
++
++
++
++Challenges
++
++One of the difficulties in implementing a generic PWM framework is the
++fact that pulse-width-modulation applications involve real-world
++signals, which often must be carefully managed to prevent destruction
++of hardware that is linked to those signals.  A DC motor that
++experiences a brief interruption in the PWM signal controlling it
++might destructively overheat; it could change speed, losing
++synchronization with a sensor; it could even suddenly change direction
++or torque, breaking the mechanical device connected to it.
++
++(A generic PWM device framework is not directly responsible for
++preventing the above scenarios: that responsibility lies with the
++hardware designer and the application and driver authors.  But it must
++to the greatest extent possible make it easy to avoid such problems).
++
++A generic PWM device framework must accomodate the substantial
++differences between available PWM-generating hardware devices, without
++becoming sub-optimal for any of them.
++
++Finally, a generic PWM device framework must be relatively
++lightweight, computationally speaking.  Some PWM users demand
++high-speed outputs, plus the ability to regulate those outputs
++quickly.  A device framework must be able to "keep up" with such
++hardware, while still leaving time to do real work.
++
++The Generic PWM Device API is an attempt to meet all of the above
++requirements.  At its initial publication, the API was already in use
++managing small DC motors through a custom-designed, optically-isolated
++H-bridge driver.
++
++
++
++Functional Overview
++
++The Generic PWM Device API framework is implemented in
++include/linux/pwm.h and drivers/pwm/pwm.c.  The functions therein use
++information from pwm_device, pwm_channel and pwm_channel_config
++structures to invoke services in PWM peripheral device drivers.
++Consult drivers/pwm/atmel-pwm.c for an example driver.
++
++There are two classes of adopters of the PWM framework:
++
++  "Users" -- those wishing to employ the API merely to produce PWM
++  signals; once they have identified the appropriate physical output
++  on the platform in question, they don't care about the details of
++  the underlying hardware
++
++  "Driver authors" -- those wishing to bind devices that can generate
++  PWM signals to the Generic PWM Device API, so that the services of
++  those devices become available to users; assuming the hardware can
++  support the needs of a user, driver authors don't care about the
++  details of the user's application
++
++Generally speaking, users will first invoke pwm_request() to obtain a
++handle to a PWM device.  They will then pass that handle to functions
++like pwm_duty_ns() and pwm_period_ns() to set the duty cycle and
++period of the PWM signal, respectively.  They will also invoke
++pwm_start() and pwm_stop() to turn the signal on and off.
++
++The framework also provides a sysfs interface to PWM devices, which is
++adequate for basic needs and testing.
++
++Driver authors fill out a pwm_device structure, which describes the
++capabilities of the PWM hardware being driven--- including the number
++of distinct output "channels" the peripheral offers.  They then invoke
++pwm_register() (usually from within their device's probe() handler) to
++make the PWM API aware of their device.  The framework will call back
++to the methods described in the pwm_device structure to configure and
++use the hardware.
++
++Note that PWM signals can be produced by a variety of peripherals,
++beyond the true "PWM hardware" offered by many system-on-chip devices.
++Other possibilities include timer/counters with compare-match
++capabilities, carefully-programmed synchronous serial ports
++(e.g. SPI), and GPIO pins driven by kernel interval timers.  With a
++proper pwm_device structure, these devices and pseudo-devices can all
++be accomodated by the Generic PWM Device API framework.
++
++
++
++Using the API to Generate PWM Signals -- Basic Functions for Users
++
++
++pwm_request() -- Returns a pwm_channel pointer, which is subsequently
++passed to the other user-related PWM functions.  Once requested, a PWM
++channel is marked as in-use and subsequent requests prior to
++pwm_free() will fail.
++
++The names used to refer to PWM devices are defined by driver authors.
++Typically they are platform device bus identifiers, and this
++convention is encouraged for consistency.
++
++
++pwm_free() -- Marks a PWM channel as no longer in use.  The PWM device
++is stopped before it is released by the API.
++
++
++pwm_period_ns() -- Specifies the PWM signal's period, in nanoseconds.
++
++
++pwm_duty_ns() -- Specifies the PWM signal's active duration, in nanoseconds.
++
++
++pwm_duty_percent() -- Specifies the PWM signal's active duration, as a
++percentage of the current period of the signal.  NOTE: this value is
++not recalculated if the period of the signal is subsequently changed.
++
++
++pwm_start(), pwm_stop() -- Turns the PWM signal on and off.  Except
++where stated otherwise by a driver author, signals are stopped at the
++end of the current period, at which time the output is set to its
++inactive state.
++
++
++pwm_polarity() -- Defines whether the PWM signal output's active
++region is "1" or "0".  A 10% duty-cycle, polarity=1 signal will
++conventionally be at 5V (or 3.3V, or 1000V, or whatever the platform
++hardware does) for 10% of the period.  The same configuration of a
++polarity=0 signal will be at 5V (or 3.3V, or ...) for 90% of the
++period.
++
++
++
++Using the API to Generate PWM Signals -- Advanced Functions
++
++
++pwm_config() -- Passes a pwm_channel_config structure to the
++associated device driver.  This function is invoked by pwm_start(),
++pwm_duty_ns(), etc. and is one of two main entry points to the PWM
++driver for the hardware being used.  The configuration change is
++guaranteed atomic if multiple configuration changes are specified.
++This function might sleep, depending on what the device driver has to
++do to satisfy the request.  All PWM device drivers must support this
++entry point.
++
++
++pwm_config_nosleep() -- Passes a pwm_channel_config structure to the
++associated device driver.  If the driver must sleep in order to
++implement the requested configuration change, -EWOULDBLOCK is
++returned.  Users may call this function from interrupt handlers, for
++example.  This is the other main entry point into the PWM hardware
++driver, but not all device drivers support this entry point.
++
++
++pwm_synchronize(), pwm_unsynchronize() -- "Synchronizes" two or more
++PWM channels, if the underlying hardware permits.  (If it doesn't, the
++framework facilitates emulating this capability but it is not yet
++implemented).  Synchronized channels will start and stop
++simultaneously when any single channel in the group is started or
++stopped.  Use pwm_unsynchronize(..., NULL) to completely detach a
++channel from any other synchronized channels.
++
++
++pwm_set_handler() -- Defines an end-of-period callback.  The indicated
++function will be invoked in a worker thread at the end of each PWM
++period, and can subsequently invoke pwm_config(), etc.  Must be used
++with extreme care for high-speed PWM outputs.  Set the handler
++function to NULL to un-set the handler.
++
++
++
++Implementing a PWM Device API Driver -- Functions for Driver Authors
++
++
++Fill out the appropriate fields in a pwm_device structure, and submit
++to pwm_register():
++
++
++bus_id -- the plaintext name of the device.  Users will bind to a
++channel on the device using this name plus the channel number.  For
++example, the Atmel PWMC's bus_id is "atmel_pwmc", the same as used by
++the platform device driver (recommended).  The first device registered
++thereby receives bus_id "atmel_pwmc.0", which is what you put in
++pwm_device.bus_id.  Channels are then named "atmel_pwmc.0:[0-3]".
++(Hint: just use pdev->dev.bus_id in your probe() method).
++
++
++nchan -- the number of distinct output channels provided by the device.
++
++
++request -- (optional) Invoked each time a user requests a channel.
++Use to turn on clocks, clean up register states, etc.  The framework
++takes care of device locking/unlocking; you will see only successful
++requests.
++
++
++free -- (optional) Callback for each time a user relinquishes a
++channel.  The framework will have already stopped, unsynchronized and
++un-handled the channel.  Use to turn off clocks, etc. as necessary.
++
++
++synchronize, unsynchronize -- (optional) Callbacks to
++synchronize/unsynchronize channels.  Some devices provide this
++capability in hardware; for others, it can be emulated (see
++atmel_pwmc.c's sync_mask for an example).
++
++
++set_callback -- (optional) Invoked when a user requests a handler.  If
++the hardware supports an end-of-period interrupt, invoke the function
++indicated during your interrupt handler.  The callback function itself
++is always internal to the API, and does not map directly to the user's
++callback function.
++
++
++config -- Invoked to change the device configuration, always from a
++sleep-capable context.  All the changes indicated must be performed
++atomically, ideally synchronized to an end-of-period event (so that
++you avoid short or long output pulses).  You may sleep, etc. as
++necessary within this function.
++
++
++config_nosleep -- (optional) Invoked to change device configuration
++from within a context that is not allowed to sleep.  If you cannot
++perform the requested configuration changes without sleeping, return
++-EWOULDBLOCK.
++
++
++
++Acknowledgements
++
++
++The author expresses his gratitude to the countless developers who
++have reviewed and submitted feedback on the various versions of the
++Generic PWM Device API code, and those who have submitted drivers and
++applications that use the framework.  You know who you are.  ;)
++
+-- 
+1.5.6.5
