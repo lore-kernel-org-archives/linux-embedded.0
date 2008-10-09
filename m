@@ -1,68 +1,34 @@
-From: Marc Pignat <marc.pignat@hevs.ch>
-Subject: Re: [RFC 1/6] [PWM] Generic PWM API implementation
-Date: Thu, 9 Oct 2008 10:17:24 +0200
-Message-ID: <200810091017.25563.marc.pignat@hevs.ch>
-References: <cover.1223482372.git.bgat@billgatliff.com> <4b5c3aa2b1bc2b7efad834da49c2dec8c0a8726b.1223482372.git.bgat@billgatliff.com>
+From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Subject: Re: [RFC 5/6] [PWM] Install new Atmel PWMC driver in Kconfig,
+ expunge old one
+Date: Thu, 9 Oct 2008 14:16:01 +0200
+Message-ID: <20081009141601.6be979bc@hskinnemo-gx745.norway.atmel.com>
+References: <cover.1223482372.git.bgat@billgatliff.com>
+	<4b5c3aa2b1bc2b7efad834da49c2dec8c0a8726b.1223482372.git.bgat@billgatliff.com>
+	<88de40673cc33e014928c2ee3a86bdac566021c8.1223482372.git.bgat@billgatliff.com>
+	<7b16004ca5f8030184c2de96cbcee38657d56252.1223482372.git.bgat@billgatliff.com>
+	<5640f37b779f953c83e79c16b2a0466c0f5da702.1223482372.git.bgat@billgatliff.com>
+	<475b4a5985463015fdfa943b9835ab8136dbc06a.1223482372.git.bgat@billgatliff.com>
+	<20081009072126.1dd3898d@hcegtvedt>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4b5c3aa2b1bc2b7efad834da49c2dec8c0a8726b.1223482372.git.bgat@billgatliff.com>
-Content-Disposition: inline
+In-Reply-To: <20081009072126.1dd3898d@hcegtvedt>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org
+To: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+Cc: Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
 
-Cleanup implementation for __pwm_create_sysfs.
+Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com> wrote:
+> You know that there are other users of ATMEL_PWM ?
+> 
+> There is a atmel-pwm-bl driver in drivers/video/backlight which could
+> probably be converted to pwm-bl using the new pwm framework.
 
-Signed-off-by: Marc Pignat <marc.pignat@hevs.ch>
----
+There's already a pwm_bl driver there which I'm assuming is using the
+generic pwm API. Hopefully, we can simply delete the atmel-pwm-bl
+driver. Maybe some board code needs updating before that can happen
+though.
 
-Hi all!
-
-Here is a missing piece in the generic pwm implementation.
-
-Bill, the code is simpler that you was thinking ;)
-
-In facts, attributes are deleted by device_unregister -> there is nothing to
-worry about attributes (un-)successful creation.
-
-Finding which device was created is also trivial (thanks to class_find_device).
-
-Best regards
-
-Marc
-
-diff --git a/drivers/pwm/pwm.c b/drivers/pwm/pwm.c
-index 2f28c20..391f820 100644
---- a/drivers/pwm/pwm.c
-+++ b/drivers/pwm/pwm.c
-@@ -626,15 +626,23 @@ static int __pwm_create_sysfs(struct pwm_device *pwm)
- 			goto err_dev_create;
- 		ret = sysfs_create_group(&dev->kobj, &pwm_device_attr_group);
- 		if (ret)
--			goto err_dev_group_create;
-+			goto err_dev_create;
- 	}
- 
- 	return ret;
- 
--err_dev_group_create:
- err_dev_create:
--	/* TODO: undo all the successful device_create calls */
--	return -ENODEV;
-+	for (wchan = 0; wchan < pwm->nchan; wchan++) {
-+		dev = class_find_device(&pwm_class, NULL,
-+					&pwm->channels[wchan],
-+					__match_device);
-+		if (dev) {
-+			put_device(dev);
-+			device_unregister(dev);
-+		}
-+	}
-+
-+	return ret;
- }
- 
- 
+Haavard
