@@ -1,43 +1,59 @@
-From: Marco Stornelli <marco.stornelli@coritel.it>
-Subject: Re: PRAMFS with XIP support
-Date: Thu, 09 Oct 2008 17:08:29 +0200
-Message-ID: <48EE1E6D.7070403@coritel.it>
-References: <48EB288C.9050002@coritel.it>	 <8bd0f97a0810070851g69ad4c3exf195e5d6a983f772@mail.gmail.com>	 <48EC5EB9.2050001@coritel.it>  <48ECFB26.2090808@am.sony.com>	 <1223491907.10283.91.camel@laptop-eth>  <48EDAD3D.3040508@coritel.it> <1223564414.10283.108.camel@laptop-eth>
+From: Adrian Bunk <bunk@kernel.org>
+Subject: Re: RFC - size tool for kernel build system
+Date: Thu, 9 Oct 2008 18:21:51 +0300
+Message-ID: <20081009152151.GB17013@cs181140183.pp.htv.fi>
+References: <48EBD268.50208@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1223564414.10283.108.camel@laptop-eth>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1759212AbYJIPWs@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <48EBD268.50208@am.sony.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Daniel Walker <dwalker@mvista.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, Mike Frysinger <vapier.adi@gmail.com>, Linux-Embedded <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Ok, it's a good idea. Thanks.
+On Tue, Oct 07, 2008 at 02:19:36PM -0700, Tim Bird wrote:
+> I've been thinking about a tool that might be useful
+> to track kernel size changes.  I'm posting this
+> Request For Comments to get feedback, and determine
+> if this is something that would be worthwhile to
+> pursue.
+> 
+> What I envision is some new kernel build targets, specifically
+> related to gathering size information and generating a size
+> comparison report.  Some small helper scripts would be written
+> to gather the necessary information, and generate the report.
+>...
+> Any comments?
 
-Daniel Walker ha scritto:
-> On Thu, 2008-10-09 at 09:05 +0200, Marco Stornelli wrote:
->> Thanks Tim and Daniel. Daniel the first thing to do to submit the
->> patches is check them to verify that they are compliant to the kernel
->> standard, if you'd like to help you are welcome.
-> 
-> Since the feature was already submitted once (or twice even) I'd image
-> there is a record of people comments in the list archives .. That should
-> give a better idea of what needs to be changed ..
-> 
-> I looked at the code on the sourceforge page, and I saw a few clean ups
-> that could happen. Otherwise, it didn't look bad in terms of code
-> quality.
-> 
-> Daniel
-> 
-> 
+The building blocks that would be useful are IMHO:
+- a make target that generates a report for one kernel
+  (like the checkstack or export_report targets)
+- a script that compares two such reports and outputs the
+  size differences
+
+That's also easy to do, and if that's what's wanted I can send a patch 
+that does it.
+
+Everything else is IMHO overdesigned.
+
+The real problem is that dumping some scripts into the kernel sources 
+or publishing some data on a webpage doesn't make people use them.
+
+Like if you run "make checkstack" on the kernel today you can see that 
+drivers allocate arrays > 1 kB on the stack despite checkstack being 
+available...
+
+>  -- Tim
+
+cu
+Adrian
 
 -- 
-Marco Stornelli
-Embedded Software Engineer
-CoRiTeL - Consorzio di Ricerca sulle Telecomunicazioni
-http://www.coritel.it
 
-marco.stornelli@coritel.it
-+39 06 72582838
+       "Is there not promise of rain?" Ling Tan asked suddenly out
+        of the darkness. There had been need of rain for many days.
+       "Only a promise," Lao Er said.
+                                       Pearl S. Buck - Dragon Seed
