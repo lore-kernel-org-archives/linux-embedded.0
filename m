@@ -1,61 +1,53 @@
-From: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
-Subject: Re: [RFC 5/6] [PWM] Install new Atmel PWMC driver in Kconfig,
- expunge old one
-Date: Thu, 9 Oct 2008 07:21:26 +0200
-Message-ID: <20081009072126.1dd3898d@hcegtvedt>
-References: <cover.1223482372.git.bgat@billgatliff.com>
-	<4b5c3aa2b1bc2b7efad834da49c2dec8c0a8726b.1223482372.git.bgat@billgatliff.com>
-	<88de40673cc33e014928c2ee3a86bdac566021c8.1223482372.git.bgat@billgatliff.com>
-	<7b16004ca5f8030184c2de96cbcee38657d56252.1223482372.git.bgat@billgatliff.com>
-	<5640f37b779f953c83e79c16b2a0466c0f5da702.1223482372.git.bgat@billgatliff.com>
-	<475b4a5985463015fdfa943b9835ab8136dbc06a.1223482372.git.bgat@billgatliff.com>
+From: Marco Stornelli <marco.stornelli@coritel.it>
+Subject: Re: PRAMFS with XIP support
+Date: Thu, 09 Oct 2008 09:05:33 +0200
+Message-ID: <48EDAD3D.3040508@coritel.it>
+References: <48EB288C.9050002@coritel.it>	 <8bd0f97a0810070851g69ad4c3exf195e5d6a983f772@mail.gmail.com>	 <48EC5EB9.2050001@coritel.it>  <48ECFB26.2090808@am.sony.com> <1223491907.10283.91.camel@laptop-eth>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <475b4a5985463015fdfa943b9835ab8136dbc06a.1223482372.git.bgat@billgatliff.com>
+In-Reply-To: <1223491907.10283.91.camel@laptop-eth>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org, Bill Gatliff <bgat@billgatliff.com>
+To: Daniel Walker <dwalker@mvista.com>
+Cc: Tim Bird <tim.bird@am.sony.com>, Mike Frysinger <vapier.adi@gmail.com>, Linux-Embedded <linux-embedded@vger.kernel.org>
 
-On Wed,  8 Oct 2008 11:43:17 -0500
-Bill Gatliff <bgat@billgatliff.com> wrote:
+Thanks Tim and Daniel. Daniel the first thing to do to submit the
+patches is check them to verify that they are compliant to the kernel
+standard, if you'd like to help you are welcome.
 
-<snipp>
-
-> diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
-> index a726f3b..cdea0bb 100644
-> --- a/drivers/misc/Kconfig
-> +++ b/drivers/misc/Kconfig
-> @@ -13,15 +13,6 @@ menuconfig MISC_DEVICES
->  
->  if MISC_DEVICES
->  
-> -config ATMEL_PWM
-> -	tristate "Atmel AT32/AT91 PWM support"
-> -	depends on AVR32 || ARCH_AT91
-> -	help
-> -	  This option enables device driver support for the PWM
-> channels
-> -	  on certain Atmel prcoessors.  Pulse Width Modulation is
-> used for
-> -	  purposes including software controlled power-efficent
-> backlights
-> -	  on LCD displays, motor control, and waveform generation.
-> -
-
-You know that there are other users of ATMEL_PWM ?
-
-There is a atmel-pwm-bl driver in drivers/video/backlight which could
-probably be converted to pwm-bl using the new pwm framework.
-
->  config ATMEL_TCLIB
->  	bool "Atmel AT32/AT91 Timer/Counter Library"
->  	depends on (AVR32 || ARCH_AT91)
-
-<snipp>
+Daniel Walker ha scritto:
+> On Wed, 2008-10-08 at 11:25 -0700, Tim Bird wrote:
+>> Marco Stornelli wrote:
+>>> Hi Mike,
+>>>
+>>> I am not the PRAMFS mantainer, and I think he is in charge to do that
+>>> (right?), I sent an email to Steve Longerbeam and to MontaVista support,
+>>> but I haven't received any response. However, if you think it could be
+>>> useful to submit it to lkml I could do it.
+>> If you don't hear anything within 2 weeks, just submit it.
+>> I've worked with PRAMFS in the past, and I think it's not
+>> a high enough profile project at MontaVista that they'd
+>> be upset if it got mainlined by someone besides Steve.
+>>
+>> IRRC, Steve Johnson of Panasonic tried to mainline it a
+>> few years ago, and no one from MV complained.
+> 
+> /me looks up .. 
+> 
+> I'm not familiar with PRAMFS , but I'm sure any contribution or support
+> is welcome.. I'd be happy to help if anyone wants it.
+> 
+> Daniel
+> 
+> 
 
 -- 
-Best regards,
-Hans-Christian Egtvedt
+Marco Stornelli
+Embedded Software Engineer
+CoRiTeL - Consorzio di Ricerca sulle Telecomunicazioni
+http://www.coritel.it
+
+marco.stornelli@coritel.it
++39 06 72582838
