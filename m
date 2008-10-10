@@ -1,74 +1,64 @@
-From: Tom Cooksey <thomas.cooksey@trolltech.com>
-Subject: Re: Getting physical addresses of mmap'd pages from userspace
-Date: Mon, 13 Oct 2008 11:38:38 +0200
-Message-ID: <200810131138.40092.thomas.cooksey@trolltech.com>
-References: <200810101815.06249.thomas.cooksey@trolltech.com> <200810130833.26399.thomas.cooksey@trolltech.com> <48F31155.6090603@codefidence.com>
+From: Michelle Konzack <linux4michelle@tamay-dogan.net>
+Subject: Does the NAND-Flash MT29F4G08ABCWC-ET from Micron work with AT91SAM7SE and i.MX31?
+Date: Fri, 10 Oct 2008 21:30:57 +0200
+Message-ID: <20081010193057.GB3032@tamay-dogan.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="1LKvkjL3sHcu1TtY"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48F31155.6090603@codefidence.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Gilad Ben-Yossef <gilad@codefidence.com>
-Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded mailing list <linux-embedded@vger.kernel.org>
-
-On Monday 13 October 2008 11:13:57 Gilad Ben-Yossef wrote:
-> Tom Cooksey wrote:
-> 
-> 
-> > This library allows us to direct the graphics hardware to render to a specific physical memory region. The problem is that there's no way to find out what the physical addresses are which we need pass to the graphics hardware (via the user-space library). Allthough the library allows us to allocate emory, what I want to do is then blit that memory in a different process. So a client process renders into an off-screen buffer and the server process blits that buffer to the framebuffer. By allowing the server process to do the blit rather than the client process, we can get semi-transparent GL windows. 
-> >
-> > The synchronisation we can do, it's the memory allocation I'm struggling with. If we ask the library to allocate the memory for us, we don't get the physical address to pass to the server process. Instead, we need to allocate memory ourselves and pass the physical address to the library. But like I say, I can't find a way to get the physical address from the kernel.
-> >
-> >   
-> You lost me on why you can't have the library allocate the memory - I 
-> understand the library needs the physical address to render into, but 
-> why does your server needs the physical address to blit to the frame 
-> buffer? I assume it access the frame buffer in host memory so needs the 
-> virtual address, not the physical one...
-
-The reason is that the hardware blitter is exposed via the user-space library,
-but because the blit is done by hardware, it too needs the physical address of
-both the source and the destination of the blit. The destination is easy - the
-library provides an API to get the address of the framebuffer. It's the source
-that's the problem.
-
-> Anyways, ignoring that, it's pretty trivial to write  a character driver 
-> with an IOCTL that will get an mlocked virtual address of the processes, 
-> call virt_to_phys on it and return the result. Yes, it's an ugly as hell 
-> solution, but then again so is the problem (proprietary libraries etc.)
-
-I realise this is possible, but I'm trying to find a solution which doesn't
-require me to write a kernel driver. If I can't find a solution, I will follow
-your suggestion of using virt_to_phys - thanks!
-
-> You do realize do that the mlocked memory isn't contiguous in physical 
-> memory, right? unless your graphics engine has something like AGP GART 
-> or an IOMMU I think you might find that problematic.
-
-I had assumed that. Fortunatly the user-space library's API takes an array of
-physical page addresses. The hardware actually has it's own MMU (I guess
-that's an IOMMU?) with enough entries to address quite a lot of memory. I'm
-assuming the library programs the GPU's MMU with the addresses I pass in.
-
-I also think that I need to be careful with caching. The CPU (OMAP3) has both
-an L1 and L2 cache. I doubt there's any cache coherency logic in the hardware
-to make sure the CPU's cache is flushed before the GPU startsreading from it.
-
-The last thing I need is to write to the memory I want to blit (using a 
-software renderer running on the CPU), only to find the data I've written is
-sitting around in the CPU cache and has not been flushed to RAM (in which case
-I'll get garbage on the screen).
-
-I guess I'm going to need a way to not only get the physical address of the
-pages, but also set the cache policy or (ideally) have a way to flush the pages
-to RAM.
+To: Embedded <linux-embedded@vger.kernel.org>, ARM <linux-arm-kernel@lists.arm.linux.org.uk>
 
 
+--1LKvkjL3sHcu1TtY
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Cheers,
+Hello,
 
-Tom
+Today I have gotten two NAND-Flash Chips from a friend and like to know,
+whether the above chips are working with AT91SAM7SE and i.MX31?
 
+Please note: I have studied Electronic for over  15 years,  worked  only=20
+             @army and this is  my  first  experience  building  my  OWN
+             computer.  Mean I have to read 10.000th of Datasheet pages.
+
+2nd Quest: Can someone recommend bigger NAND-Flash  for  the  i.MX31?  I
+           like to have 4 GByte to store the OS and important  data  but
+           since the i.MX support two (Micro)SD cards, I  do  not  know,
+           whether it is better to use the (Micro)SD stuff.
+
+Any suggestions welcome...
+
+Thanks, Greetings and nice Day/Evening
+    Michelle Konzack
+    Systemadministrator
+    24V Electronic Engineer
+    Tamay Dogan Network
+    Debian GNU/Linux Consultant
+
+
+--=20
+Linux-User #280138 with the Linux Counter, http://counter.li.org/
+##################### Debian GNU/Linux Consultant #####################
+Michelle Konzack   Apt. 917                  ICQ #328449886
++49/177/9351947    50, rue de Soultz         MSN LinuxMichi
++33/6/61925193     67100 Strasbourg/France   IRC #Debian (irc.icq.com)
+
+--1LKvkjL3sHcu1TtY
+Content-Type: application/pgp-signature; name="signature.pgp"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFI761xC0FPBMSS+BIRAuI4AKC6R3NNZWo7QCSwbuJa8Hh0/CqOUQCeJrhF
+v/29W544S+De0cnsHbWHye8=
+=0LFB
+-----END PGP SIGNATURE-----
+
+--1LKvkjL3sHcu1TtY--
