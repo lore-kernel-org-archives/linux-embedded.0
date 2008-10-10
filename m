@@ -1,32 +1,47 @@
-From: "Bart Van Assche" <bart.vanassche@gmail.com>
-Subject: Re: Getting physical addresses of mmap'd pages from userspace
-Date: Fri, 10 Oct 2008 18:37:06 +0200
-Message-ID: <e2e108260810100937tfa294e3u179d15f538df15a5@mail.gmail.com>
-References: <200810101815.06249.thomas.cooksey@trolltech.com>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [RFC 0/6] Proposal for a Generic PWM Device API
+Date: Sat, 11 Oct 2008 02:28:37 +0900
+Message-ID: <20081010172837.GB10579@linux-sh.org>
+References: <cover.1223482372.git.bgat@billgatliff.com>
+	<1223608819.8157.127.camel@pasglop>
+	<48EED4D1.2040506@billgatliff.com>
+	<Pine.LNX.4.64.0810101054140.12257@vixen.sonytel.be>
+	<20081010093642.GA10579@linux-sh.org>
+	<48EF60B6.20409@billgatliff.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=rDsp1R7aJ+7dvbm7tE7UoES++h/P5bZri11F42RIlyE=;
-        b=PsYH2PfXNXKc+lF2ZQub9702S62GR7kVRKYqzuKd88lBkb2K65yyVmU/Wf+EXuL4IG
-         Ux09X8tcKhCd/CqPjTyWq3taeQ7bVC/IywXdiQ0Qi56u/Ug+gzzqY2EP6IBJQoYUhgNP
-         cUqG2c2vaHfVXVaSJnHdItUwdLPBsLsR+uOLE=
-In-Reply-To: <200810101815.06249.thomas.cooksey@trolltech.com>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tom Cooksey <thomas.cooksey@trolltech.com>
-Cc: linux-embedded mailing list <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org>
+Content-Disposition: inline
+In-Reply-To: <48EF60B6.20409@billgatliff.com>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://ozlabs.org/mailman/options/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@ozlabs.org?subject=unsubscribe>
+List-Archive: <http://ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@ozlabs.org?subject=help>
+List-Subscribe: <https://ozlabs.org/mailman/listinfo/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@ozlabs.org?subject=subscribe>
+Sender: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
+Errors-To: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-embedded@vger.kernel.org
 
-On Fri, Oct 10, 2008 at 6:15 PM, Tom Cooksey
-<thomas.cooksey@trolltech.com> wrote:
-> Is there any way to get the physical address of mlock()'d memory from userspace?
-
-Why do you need this information ?
-
-Bart.
+On Fri, Oct 10, 2008 at 09:03:34AM -0500, Bill Gatliff wrote:
+> Paul Mundt wrote:
+> > This is likely because some of those lists are subscribers only, so cross
+> > posting is poor form. It makes sense to keep the discussion in one place,
+> > and to send notification messages with a pointer to the list archives to
+> > the other lists so folks can jump in if they really care. Splitting it
+> > out doesn't help matters in the least, but unfortunately this is what
+> > seems to happen the most when subscribers only lists are involved.
+> 
+> Alright, then maybe I can do this when I post the "final" changeset for review:
+> cross-post to lkml and linux-embedded, and then post one short note on l-a-k,
+> linuxppc-dev and elsewhere that refers those interested to the actual content.
+> I can live with that.
+> 
+linux-arm-kernel is the only one that is subscribers only out of that
+list, according to MAINTAINERS. If rmk wants to mandate a broken policy,
+that's perfectly fine, just don't expect the rest of the kernel community
+to tolerate it.
