@@ -1,30 +1,44 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
-Subject: Re: Getting physical addresses of mmap'd pages from userspace
-Date: Fri, 10 Oct 2008 21:12:13 +0200
-Message-ID: <20081010191213.GC9852@pengutronix.de>
-References: <200810101815.06249.thomas.cooksey@trolltech.com>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: Re: [RFC 0/6] Proposal for a Generic PWM Device API
+Date: Fri, 10 Oct 2008 14:15:10 -0500
+Message-ID: <48EFA9BE.1070806@billgatliff.com>
+References: <cover.1223482372.git.bgat@billgatliff.com> <1223608819.8157.127.camel@pasglop> <48EED4D1.2040506@billgatliff.com> <Pine.LNX.4.64.0810101054140.12257@vixen.sonytel.be> <20081010093642.GA10579@linux-sh.org> <48EF60B6.20409@billgatliff.com> <20081010172837.GB10579@linux-sh.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <200810101815.06249.thomas.cooksey@trolltech.com>
+In-Reply-To: <20081010172837.GB10579@linux-sh.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tom Cooksey <thomas.cooksey@trolltech.com>
-Cc: linux-embedded mailing list <linux-embedded@vger.kernel.org>
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, linux-embedded@vger.kernel.org, Linux/PPC Development <linuxppc-dev@ozlabs.org>
 
-On Fri, Oct 10, 2008 at 06:15:05PM +0200, Tom Cooksey wrote:
-> Is there any way to get the physical address of mlock()'d memory from
-> userspace?
+Paul Mundt wrote:
+> On Fri, Oct 10, 2008 at 09:03:34AM -0500, Bill Gatliff wrote:
+>> Paul Mundt wrote:
+>>> This is likely because some of those lists are subscribers only, so cross
+>>> posting is poor form. It makes sense to keep the discussion in one place,
+>>> and to send notification messages with a pointer to the list archives to
+>>> the other lists so folks can jump in if they really care. Splitting it
+>>> out doesn't help matters in the least, but unfortunately this is what
+>>> seems to happen the most when subscribers only lists are involved.
+>> Alright, then maybe I can do this when I post the "final" changeset for review:
+>> cross-post to lkml and linux-embedded, and then post one short note on l-a-k,
+>> linuxppc-dev and elsewhere that refers those interested to the actual content.
+>> I can live with that.
+>>
+> linux-arm-kernel is the only one that is subscribers only out of that
+> list, according to MAINTAINERS. If rmk wants to mandate a broken policy,
+> that's perfectly fine, just don't expect the rest of the kernel community
+> to tolerate it.
 
-What do you want to do? I don't really see a reason to do such strange
-things any more these days.
+Problem is, the rest of the kernel community is the one who takes it in the,
+ahem, server when I cross-post.  And since my reference platform is currently
+ARM, I can't leave l-a-k out.
 
-rsc
+
+
+b.g.
 -- 
- Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
- Pengutronix - Linux Solutions for Science and Industry
-   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
-     Hannoversche Str. 2, 31134 Hildesheim, Germany
-   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
+Bill Gatliff
+bgat@billgatliff.com
