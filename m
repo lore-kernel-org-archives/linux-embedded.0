@@ -1,48 +1,62 @@
-From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [RFC 0/6] Proposal for a Generic PWM Device API
-Date: Fri, 10 Oct 2008 18:36:42 +0900
-Message-ID: <20081010093642.GA10579@linux-sh.org>
-References: <cover.1223482372.git.bgat@billgatliff.com> <1223608819.8157.127.camel@pasglop> <48EED4D1.2040506@billgatliff.com> <Pine.LNX.4.64.0810101054140.12257@vixen.sonytel.be>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: RFC - size tool for kernel build system
+Date: Fri, 10 Oct 2008 11:42:35 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0810101141340.12257@vixen.sonytel.be>
+References: <48EBD268.50208@am.sony.com> <20081009152151.GB17013@cs181140183.pp.htv.fi>
+ <48EE9A1C.8040301@am.sony.com>
 Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-231544204-1223631755=:12257"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.0810101054140.12257@vixen.sonytel.be>
+In-Reply-To: <48EE9A1C.8040301@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: Bill Gatliff <bgat@billgatliff.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-embedded@vger.kernel.org
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Adrian Bunk <bunk@kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Fri, Oct 10, 2008 at 11:00:09AM +0200, Geert Uytterhoeven wrote:
-> On Thu, 9 Oct 2008, Bill Gatliff wrote:
-> > Benjamin Herrenschmidt wrote:
-> > > On Wed, 2008-10-08 at 11:43 -0500, Bill Gatliff wrote:
-> > >> This series proposes a "generic PWM" driver API.
-> > >>
-> > >> This proposed API is motivated by the author's need to support
-> > >> pluggable devices; a secondary objective is to consolidate the
-> > >> existing PWM implementations behind an agreeable, consistent,
-> > >> redundancy-reducing interface.
-> > > 
-> > >  .../...
-> > > 
-> > > You should send your patches to the main linux kernel list !
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+---584349381-231544204-1223631755=:12257
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+On Thu, 9 Oct 2008, Tim Bird wrote:
+> Adrian Bunk wrote:
+> > The building blocks that would be useful are IMHO:
+> > - a make target that generates a report for one kernel
+> >   (like the checkstack or export_report targets)
+> > - a script that compares two such reports and outputs the
+> >   size differences
 > > 
-> > Perhaps.  But it seemed more relevant to this crowd, and the linux-embedded
-> > crowd, and the linux-arm-kernel crowd.
+> > That's also easy to do, and if that's what's wanted I can send a patch 
+> > that does it.
 > 
-> Were did you actually sent them to?  Apparently you sent them to each mailing
-> list (at least linux-embedded and linuxppc-dev) _separately_ (or using bcc).
+> I took a stab at this with the attached two scripts.  These are
+> not quite ready for prime time, but show the basic idea.
+> I only have a partial list of subsystems, and am skipping the
+> runtime data collection, for now.
 > 
-> Hence different people may give the same comments without knowing about each
-> other, and you may have to explain everything multiple times.
-> 
-> I would go for lkml and linux-embedded, _together_.
-> 
-This is likely because some of those lists are subscribers only, so cross
-posting is poor form. It makes sense to keep the discussion in one place,
-and to send notification messages with a pointer to the list archives to
-the other lists so folks can jump in if they really care. Splitting it
-out doesn't help matters in the least, but unfortunately this is what
-seems to happen the most when subscribers only lists are involved.
+> I have only made the scripts, not any make targets for them.
+
+Seems to work fine, after I hacked my $CROSS_COMPILE prefix into the hardcoded
+nm launch.
+
+Thanks!
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-231544204-1223631755=:12257--
