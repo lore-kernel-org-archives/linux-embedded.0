@@ -1,49 +1,25 @@
 From: Bill Gatliff <bgat@billgatliff.com>
 Subject: Re: Getting physical addresses of mmap'd pages from userspace
-Date: Mon, 13 Oct 2008 07:48:06 -0500
-Message-ID: <48F34386.8040205@billgatliff.com>
-References: <200810101815.06249.thomas.cooksey@trolltech.com> <20081010191213.GC9852@pengutronix.de> <200810130833.26399.thomas.cooksey@trolltech.com>
+Date: Mon, 13 Oct 2008 07:50:08 -0500
+Message-ID: <48F34400.4000404@billgatliff.com>
+References: <200810101815.06249.thomas.cooksey@trolltech.com> <20081010191213.GC9852@pengutronix.de> <200810130833.26399.thomas.cooksey@trolltech.com> <20081013070017.GH9852@pengutronix.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200810130833.26399.thomas.cooksey@trolltech.com>
+In-Reply-To: <20081013070017.GH9852@pengutronix.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tom Cooksey <thomas.cooksey@trolltech.com>
-Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded mailing list <linux-embedded@vger.kernel.org>
+To: Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: Tom Cooksey <thomas.cooksey@trolltech.com>, linux-embedded mailing list <linux-embedded@vger.kernel.org>, Denis Olvier Kropp <dok@pengutronix.de>
 
-Tom Cooksey wrote:
-> On Friday 10 October 2008 21:12:13 Robert Schwebel wrote:
->> On Fri, Oct 10, 2008 at 06:15:05PM +0200, Tom Cooksey wrote:
->>> Is there any way to get the physical address of mlock()'d memory from
->>> userspace?
->> What do you want to do? I don't really see a reason to do such strange
->> things any more these days.
-> 
-> It's quite an annoying problem actually. Basically I have binary drivers for Imagination Technologies's PowerVR graphics drivers. We have tried very hard to get the source code for these drivers and have failed. Eventually ImgTec allowed us to sign an NDA to get the headers for one of their user-space libraries. This library allows us to direct the graphics hardware to render to a specific physical memory region. The problem is that there's no way to find out what the physical addresses are which we need pass to the graphics hardware (via the user-space library). Allthough the library allows us to allocate emory, what I want to do is then blit that memory in a different process. So a client process renders into an off-screen buffer and the server process blits that buffer to the framebuf
- fer. By allowing the server process to do the blit rather than the client process, we can get semi-transparent GL windows. 
-> 
-> The synchronisation we can do, it's the memory allocation I'm struggling with. If we ask the library to allocate the memory for us, we don't get the physical address to pass to the server process. Instead, we need to allocate memory ourselves and pass the physical address to the library. But like I say, I can't find a way to get the physical address from the kernel.
-> 
-> I realise getting round closed-source drivers isn't exactly encoraged, but sadly, we really have no choice. :-(
+Robert Schwebel wrote:
+> In reality, there are no real alternatives for accelerates chips.
 
-Not that this would help, but what if the blitting process was working with a
-shared memory area with the, er, main process?  Could the allocation be done in
-the library, then?
+Would the Silicon Motion SM50x chips qualify as an alternative?
 
-Reading your post carefully, it sounds like either the library in question is
-designed to run in kernel space (where you can get the physical address), isn't
-a Linux library, or there's some more code somewhere that can do the address
-translation--- you said that "This library allows us to direct the graphics
-hardware to render to a specific physical memory region".  How are other users
-of the library getting the parameters that the library needs?
-
-What about writing a hacky little module that just does virtual-to-physical
-translation, and returns the result?
-
-Ugh, I think I need to shower.  :)
-
+They can do the blitting, at least.  No OpenGL, tho.  So, I guess it depends on
+your definition of "accelerated"...
 
 
 b.g.
