@@ -1,64 +1,52 @@
-From: Michelle Konzack <linux4michelle@tamay-dogan.net>
-Subject: Does the NAND-Flash MT29F4G08ABCWC-ET from Micron work with AT91SAM7SE and i.MX31?
-Date: Fri, 10 Oct 2008 21:30:57 +0200
-Message-ID: <20081010193057.GB3032@tamay-dogan.net>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: Re: Getting physical addresses of mmap'd pages from userspace
+Date: Mon, 13 Oct 2008 07:48:06 -0500
+Message-ID: <48F34386.8040205@billgatliff.com>
+References: <200810101815.06249.thomas.cooksey@trolltech.com> <20081010191213.GC9852@pengutronix.de> <200810130833.26399.thomas.cooksey@trolltech.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="1LKvkjL3sHcu1TtY"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
+In-Reply-To: <200810130833.26399.thomas.cooksey@trolltech.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Embedded <linux-embedded@vger.kernel.org>, ARM <linux-arm-kernel@lists.arm.linux.org.uk>
+Content-Type: text/plain; charset="us-ascii"
+To: Tom Cooksey <thomas.cooksey@trolltech.com>
+Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded mailing list <linux-embedded@vger.kernel.org>
+
+Tom Cooksey wrote:
+> On Friday 10 October 2008 21:12:13 Robert Schwebel wrote:
+>> On Fri, Oct 10, 2008 at 06:15:05PM +0200, Tom Cooksey wrote:
+>>> Is there any way to get the physical address of mlock()'d memory from
+>>> userspace?
+>> What do you want to do? I don't really see a reason to do such strange
+>> things any more these days.
+> 
+> It's quite an annoying problem actually. Basically I have binary drivers for Imagination Technologies's PowerVR graphics drivers. We have tried very hard to get the source code for these drivers and have failed. Eventually ImgTec allowed us to sign an NDA to get the headers for one of their user-space libraries. This library allows us to direct the graphics hardware to render to a specific physical memory region. The problem is that there's no way to find out what the physical addresses are which we need pass to the graphics hardware (via the user-space library). Allthough the library allows us to allocate emory, what I want to do is then blit that memory in a different process. So a client process renders into an off-screen buffer and the server process blits that buffer to the framebuf
+ fer. By allowing the server process to do the blit rather than the client process, we can get semi-transparent GL windows. 
+> 
+> The synchronisation we can do, it's the memory allocation I'm struggling with. If we ask the library to allocate the memory for us, we don't get the physical address to pass to the server process. Instead, we need to allocate memory ourselves and pass the physical address to the library. But like I say, I can't find a way to get the physical address from the kernel.
+> 
+> I realise getting round closed-source drivers isn't exactly encoraged, but sadly, we really have no choice. :-(
+
+Not that this would help, but what if the blitting process was working with a
+shared memory area with the, er, main process?  Could the allocation be done in
+the library, then?
+
+Reading your post carefully, it sounds like either the library in question is
+designed to run in kernel space (where you can get the physical address), isn't
+a Linux library, or there's some more code somewhere that can do the address
+translation--- you said that "This library allows us to direct the graphics
+hardware to render to a specific physical memory region".  How are other users
+of the library getting the parameters that the library needs?
+
+What about writing a hacky little module that just does virtual-to-physical
+translation, and returns the result?
+
+Ugh, I think I need to shower.  :)
 
 
---1LKvkjL3sHcu1TtY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-Hello,
-
-Today I have gotten two NAND-Flash Chips from a friend and like to know,
-whether the above chips are working with AT91SAM7SE and i.MX31?
-
-Please note: I have studied Electronic for over  15 years,  worked  only=20
-             @army and this is  my  first  experience  building  my  OWN
-             computer.  Mean I have to read 10.000th of Datasheet pages.
-
-2nd Quest: Can someone recommend bigger NAND-Flash  for  the  i.MX31?  I
-           like to have 4 GByte to store the OS and important  data  but
-           since the i.MX support two (Micro)SD cards, I  do  not  know,
-           whether it is better to use the (Micro)SD stuff.
-
-Any suggestions welcome...
-
-Thanks, Greetings and nice Day/Evening
-    Michelle Konzack
-    Systemadministrator
-    24V Electronic Engineer
-    Tamay Dogan Network
-    Debian GNU/Linux Consultant
-
-
---=20
-Linux-User #280138 with the Linux Counter, http://counter.li.org/
-##################### Debian GNU/Linux Consultant #####################
-Michelle Konzack   Apt. 917                  ICQ #328449886
-+49/177/9351947    50, rue de Soultz         MSN LinuxMichi
-+33/6/61925193     67100 Strasbourg/France   IRC #Debian (irc.icq.com)
-
---1LKvkjL3sHcu1TtY
-Content-Type: application/pgp-signature; name="signature.pgp"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (GNU/Linux)
-
-iD8DBQFI761xC0FPBMSS+BIRAuI4AKC6R3NNZWo7QCSwbuJa8Hh0/CqOUQCeJrhF
-v/29W544S+De0cnsHbWHye8=
-=0LFB
------END PGP SIGNATURE-----
-
---1LKvkjL3sHcu1TtY--
+b.g.
+-- 
+Bill Gatliff
+bgat@billgatliff.com
