@@ -1,40 +1,43 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
+From: "George G. Davis" <gdavis@mvista.com>
 Subject: Re: Getting physical addresses of mmap'd pages from userspace
-Date: Mon, 13 Oct 2008 18:09:27 +0200
-Message-ID: <20081013160927.GC9852@pengutronix.de>
-References: <200810101815.06249.thomas.cooksey@trolltech.com> <20081010191213.GC9852@pengutronix.de> <200810130833.26399.thomas.cooksey@trolltech.com> <20081013070017.GH9852@pengutronix.de> <48F34400.4000404@billgatliff.com> <20081013132303.GU9852@pengutronix.de> <20081013155820.GE2556@mvista.com>
+Date: Mon, 13 Oct 2008 13:21:24 -0400
+Message-ID: <20081013172124.GF2556@mvista.com>
+References: <200810101815.06249.thomas.cooksey@trolltech.com> <200810130833.26399.thomas.cooksey@trolltech.com> <48F34386.8040205@billgatliff.com> <200810131645.32805.thomas.cooksey@trolltech.com> <48F364B0.2060407@st.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20081013155820.GE2556@mvista.com>
+In-Reply-To: <48F364B0.2060407@st.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: "George G. Davis" <gdavis@mvista.com>
-Cc: Bill Gatliff <bgat@billgatliff.com>, Tom Cooksey <thomas.cooksey@trolltech.com>, linux-embedded mailing list <linux-embedded@vger.kernel.org>, Denis Olvier Kropp <dok@pengutronix.de>
+To: Daniel THOMPSON <daniel.thompson@st.com>
+Cc: Tom Cooksey <thomas.cooksey@trolltech.com>, Bill Gatliff <bgat@billgatliff.com>, Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-On Mon, Oct 13, 2008 at 11:58:20AM -0400, George G. Davis wrote:
-> It comes down to decisions of bill-of-materials and performance, the
-> MBX/SGX options mentioned already are part of the SoCs and have high
-> bandwidth connections to the processor. External options increase cost
-> and won't match bandwidth of on chip options, but that's just my
-> ignorant opinion w/o looking at the low-level detail comparisons.
-> Unless you intend to encourage the SoC vendors to use the SM50x
-> instead?  : )  Of course, that won't help for the current and planned
-> generation(s) of devices...
+On Mon, Oct 13, 2008 at 04:09:36PM +0100, Daniel THOMPSON wrote:
+> Tom Cooksey wrote:
+> > Yup, I think that's what I'm going to end up having to do. Even if I can get
+> > the physical address, I need some way to flush the CPU cache to RAM before I
+> > ask the GPU to blit. I doubt there's any way to do that from userspace. :-( I'm
+> > not even sure of the kernel API to do it. Any ideas?
+> 
+> MIPS has it: http://www.linux-mips.org/wiki/Cacheflush_Syscall
+> and so does SH. I'm afraid I don't know about ARM though.
 
-The BoM argument is probably true for high volume consumer or automotive
-use cases. For industrial usage, long term maintainability and thus
-availability of documentation and code is usually a more important
-argument.
+ARM also implements sys_cacheflush(start, end /* exclusive */, 0) but
+does not provide separate methods for I or D cache as in the MIPS docs
+above, ARM sys_cacheflush'es both I+D caches.
 
-Just my 0.02 ct. I'm just a poor open source guy :)
-
-rsc
--- 
- Dipl.-Ing. Robert Schwebel | http://www.pengutronix.de
- Pengutronix - Linux Solutions for Science and Industry
-   Handelsregister:  Amtsgericht Hildesheim, HRA 2686
-     Hannoversche Str. 2, 31134 Hildesheim, Germany
-   Phone: +49-5121-206917-0 |  Fax: +49-5121-206917-9
+--
+Regards,
+George
+> 
+> -- 
+> Daniel Thompson (STMicroelectronics) <daniel.thompson@st.com>
+> 1000 Aztec West, Almondsbury, Bristol, BS32 4SQ. 01454 462659
+> 
+> If a car is a horseless carriage then is a motorcycle a horseless horse?
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
