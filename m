@@ -1,42 +1,39 @@
 From: Tom Cooksey <thomas.cooksey@trolltech.com>
 Subject: Re: Getting physical addresses of mmap'd pages from userspace
-Date: Tue, 14 Oct 2008 08:36:26 +0200
-Message-ID: <200810140836.27710.thomas.cooksey@trolltech.com>
-References: <200810101815.06249.thomas.cooksey@trolltech.com> <20081013155820.GE2556@mvista.com> <20081013160927.GC9852@pengutronix.de>
+Date: Tue, 14 Oct 2008 08:46:11 +0200
+Message-ID: <200810140846.11121.thomas.cooksey@trolltech.com>
+References: <200810101815.06249.thomas.cooksey@trolltech.com> <200810130833.26399.thomas.cooksey@trolltech.com> <48F38592.4030207@2net.co.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20081013160927.GC9852@pengutronix.de>
+In-Reply-To: <48F38592.4030207@2net.co.uk>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-On Monday 13 October 2008 18:09:27 Robert Schwebel wrote:
-> On Mon, Oct 13, 2008 at 11:58:20AM -0400, George G. Davis wrote:
-> > It comes down to decisions of bill-of-materials and performance, the
-> > MBX/SGX options mentioned already are part of the SoCs and have high
-> > bandwidth connections to the processor. External options increase cost
-> > and won't match bandwidth of on chip options, but that's just my
-> > ignorant opinion w/o looking at the low-level detail comparisons.
-> > Unless you intend to encourage the SoC vendors to use the SM50x
-> > instead?  : )  Of course, that won't help for the current and planned
-> > generation(s) of devices...
-> 
-> The BoM argument is probably true for high volume consumer or automotive
-> use cases. For industrial usage, long term maintainability and thus
-> availability of documentation and code is usually a more important
-> argument.
-> 
-> Just my 0.02 ct. I'm just a poor open source guy :)
+On Monday 13 October 2008 19:29:54 Chris wrote:
+> Could you reserve memory for the intermediate blit buffer at the end of 
+> system memory by passing a mem=xxx in the kernel command line and then 
+> use mmap /dev/mem to read it back? One advantage is that mmapping 
+> /dev/mem disables the processor cache on those pages (by calling
+> pgprot_noncached(), see drivers/char/mem.c).
 
-<RANT>
-What I don't understand is that I'm trying to do some pretty interesting & cool
-stuff with their processors (of course I would say that!), which will probably
-help them sell more units. Why then do they make it so difficult to work with
-them? It feels like they're shooting themselves in the foot. Madness.
-</RANT>
+I'm not sure if disabling the processor cache completely is what I want to do.
+Although if I think about it, I doubt I'll end up using our software rasterizer
+too much. In which case, I guess it's only the GPU which will ever be rendering
+so the cache problem goes away.
+
+I think I might try a little test application and see if I can get away with
+the mem= trick. It's just feels a shame to "reserve" memory & potentially not
+use it when it's such a precious resource. I guess it's that or write a kernel
+module.
+
+
+Thanks for everyone's help.
+
+
 
 Cheers,
 
