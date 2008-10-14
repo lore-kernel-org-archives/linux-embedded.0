@@ -1,37 +1,58 @@
-From: Tom Cooksey <thomas.cooksey@trolltech.com>
-Subject: Re: Getting physical addresses of mmap'd pages from userspace
-Date: Tue, 14 Oct 2008 08:46:11 +0200
-Message-ID: <200810140846.11121.thomas.cooksey@trolltech.com>
-References: <200810101815.06249.thomas.cooksey@trolltech.com> <200810130833.26399.thomas.cooksey@trolltech.com> <48F38592.4030207@2net.co.uk>
+From: Daniel J Laird <daniel.j.laird@nxp.com>
+Subject: RE: Getting physical addresses of mmap'd pages from userspace
+Date: Tue, 14 Oct 2008 09:31:51 +0200
+Message-ID: <C13DBBE85AD6974B85C118C35890CA5F13B1B2F0AB@EU1RDCRDC1WX029.exi.nxp.com>
+References: <200810101815.06249.thomas.cooksey@trolltech.com>
+ <20081010191213.GC9852@pengutronix.de>
+ <200810130833.26399.thomas.cooksey@trolltech.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48F38592.4030207@2net.co.uk>
-Content-Disposition: inline
+In-Reply-To: <200810130833.26399.thomas.cooksey@trolltech.com>
+Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded mailing list <linux-embedded@vger.kernel.org>
+To: Tom Cooksey <thomas.cooksey@trolltech.com>, Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-On Monday 13 October 2008 19:29:54 Chris wrote:
-> Could you reserve memory for the intermediate blit buffer at the end of 
-> system memory by passing a mem=xxx in the kernel command line and then 
-> use mmap /dev/mem to read it back? One advantage is that mmapping 
-> /dev/mem disables the processor cache on those pages (by calling
-> pgprot_noncached(), see drivers/char/mem.c).
+We have a 2D chip on board with our silicon.
+It too had a driver in kernel space and a queue in user space that allowed us to post jobs to it like Blit/Fill etc.
 
-I'm not sure if disabling the processor cache completely is what I want to do.
-Although if I think about it, I doubt I'll end up using our software rasterizer
-too much. In which case, I guess it's only the GPU which will ever be rendering
-so the cache problem goes away.
+We run DirectFB on the platform and we too needed to get Physical addresses etc.
 
-I think I might try a little test application and see if I can get away with
-the mem= trick. It's just feels a shame to "reserve" memory & potentially not
-use it when it's such a precious resource. I guess it's that or write a kernel
-module.
+In the end what we did was use Linux FB device to allocate our memory.
 
+We allocate more than we need in the FB device when it is created.
+The Double buffered FB comes first and what is left over we use as scratch memory.
+This allows us to create surfaces etc in this 'scratch' memory.
+When we need the physical address we use the offset from FB base in virtual memory (user space) and add that the physical base address of FB device.
+This then allows us to post the job to the 2D hardware.
 
-Thanks for everyone's help.
+This approach has worked on 2 different chips now.  Maybe this might help for you?
+Daniel Laird
+
+-----Original Message-----
+From: linux-embedded-owner@vger.kernel.org [mailto:linux-embedded-owner@vger.kernel.org] On Behalf Of Tom Cooksey
+Sent: 2008 Oct 13 07:33
+To: Robert Schwebel
+Cc: linux-embedded mailing list
+Subject: Re: Getting physical addresses of mmap'd pages from userspace
+
+On Friday 10 October 2008 21:12:13 Robert Schwebel wrote:
+> On Fri, Oct 10, 2008 at 06:15:05PM +0200, Tom Cooksey wrote:
+> > Is there any way to get the physical address of mlock()'d memory from
+> > userspace?
+>
+> What do you want to do? I don't really see a reason to do such strange
+> things any more these days.
+
+It's quite an annoying problem actually. Basically I have binary drivers for Imagination Technologies's PowerVR graphics drivers. We have tried very hard to get the source code for these drivers and have failed. Eventually ImgTec allowed us to sign an NDA to get the headers for one of their user-space libraries. This library allows us to direct the graphics hardware to render to a specific physical memory region. The problem is that there's no way to find out what the physical addresses are which we need pass to the graphics hardware (via the user-space library). Allthough the library allows us to allocate emory, what I want to do is then blit that memory in a different process. So a client process renders into an off-screen buffer and the server process blits that buffer to the framebuffe
+ r. By allowing the server process to do the blit rather than the client process, we can get semi-transparent GL windows.
+
+The synchronisation we can do, it's the memory allocation I'm struggling with. If we ask the library to allocate the memory for us, we don't get the physical address to pass to the server process. Instead, we need to allocate memory ourselves and pass the physical address to the library. But like I say, I can't find a way to get the physical address from the kernel.
+
+I realise getting round closed-source drivers isn't exactly encoraged, but sadly, we really have no choice. :-(
 
 
 
