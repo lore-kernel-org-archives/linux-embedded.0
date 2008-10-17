@@ -1,94 +1,111 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Subject: [PATCH 00/16] Squashfs: compressed read-only filesystem
-Date: Fri, 17 Oct 2008 16:42:50 +0100
-Message-ID: <E1KqrTW-0001x8-3h@dylan>
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Subject: Subject: [PATCH 09/16] Squashfs: uid/gid lookup operations
+Date: Fri, 17 Oct 2008 16:42:51 +0100
+Message-ID: <E1KqrTX-0001xo-4N@dylan>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-This is a second attempt at mainlining Squashfs.  The first attempt was way
-way back in early 2005 :-)  Since then the filesystem layout has undergone
-two major revisions, and the kernel code has almost been completely
-rewritten.  Both of these were to address the criticisms made at the original
-attempt.
 
-Summary of changes:
-	1. Filesystem layout is now 64-bit, in theory filesystems and
-	   files can be 2^64 in size.
+Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
+---
+ fs/squashfs/id.c |   84 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 84 insertions(+), 0 deletions(-)
 
-	2. Filesystem is now fixed little-endian.
+diff --git a/fs/squashfs/id.c b/fs/squashfs/id.c
+new file mode 100644
+index 0000000..b4881d7
+--- /dev/null
++++ b/fs/squashfs/id.c
+@@ -0,0 +1,84 @@
++/*
++ * Squashfs - a compressed read only filesystem for Linux
++ *
++ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
++ * Phillip Lougher <phillip@lougher.demon.co.uk>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2,
++ * or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
++ *
++ * id.c
++ */
++
++/*
++ * This file implements code to handle uids and gids.
++ *
++ * For space efficiency inodes store uid and gid indexes, which are
++ * converted to 32-bit uids/gids using an id look up table.  This table is
++ * stored compressed into metadata blocks.  A second index table is used to
++ * locate these.  This second index table for speed of access (and because it
++ * is small) is read at mount time and cached in memory.
++ */
++
++#include <linux/fs.h>
++#include <linux/vfs.h>
++#include <linux/slab.h>
++#include <linux/zlib.h>
++#include <linux/squashfs_fs.h>
++#include <linux/squashfs_fs_sb.h>
++#include <linux/squashfs_fs_i.h>
++
++#include "squashfs.h"
++
++int squashfs_get_id(struct super_block *s, unsigned int index, unsigned int *id)
++{
++	struct squashfs_sb_info *msblk = s->s_fs_info;
++	int block = SQUASHFS_ID_BLOCK(index);
++	int offset = SQUASHFS_ID_BLOCK_OFFSET(index);
++	long long start_block = le64_to_cpu(msblk->id_table[block]);
++	__le32 disk_id;
++
++	if (!squashfs_read_metadata(s, &disk_id, start_block, offset,
++				 sizeof(disk_id), &start_block, &offset))
++		return 0;
++
++	*id = le32_to_cpu(disk_id);
++	return 1;
++}
++
++
++__le64 *read_id_index_table(struct super_block *s, long long id_table_start,
++	unsigned short no_ids)
++{
++	unsigned int length = SQUASHFS_ID_BLOCK_BYTES(no_ids);
++	__le64 *id_table;
++
++	TRACE("In read_id_index_table, length %d\n", length);
++
++	/* Allocate id index table */
++	id_table = kmalloc(length, GFP_KERNEL);
++	if (id_table == NULL) {
++		ERROR("Failed to allocate id index table\n");
++		return NULL;
++	}
++
++	if (!squashfs_read_data(s, id_table, id_table_start, length |
++			SQUASHFS_COMPRESSED_BIT_BLOCK, NULL, length)) {
++		ERROR("unable to read id index table\n");
++		kfree(id_table);
++		return NULL;
++	}
++
++	return id_table;
++}
+-- 
+1.5.2.5
 
-	3. "." and ".." are now returned by readdir.
-
-	4. Sparse files are now supported.
-
-	5. Filesystem is now exportable (NFS etc.).
-
-	6. Datablocks up to 1 Mbyte are now supported.
-
-Codewise all of the packed bit-fields and the swap macros have been removed in
-favour of aligned structures and in-line swapping using leXX_to_cpu().  The
-code has also been extensively restructured, reformatted to kernel coding
-standards and commented.
-
-Previously there was resistance to the inclusion of another compressed
-filesystem when Linux already had cramfs.  There was pressure for a strong
-case to be made for the inclusion of Squashfs.  Hopefully the case for
-the inclusion of other compressed filesystems has now already been answered
-over the last couple of years, however, it is worth listing the
-features of Squashfs over cramfs, which is still the only read-only
-compressed filesystem in mainline.
-
-Max filesystem size: cramfs 16 Mbytes, Squashfs 64-bit filesystem
-Max filesize: cramfs 16 Mbytes, Squashfs 64-bit filesystem
-Block size: cramfs 4K, Squashfs default 128K, max 1Mbyte
-Tail-end packing: cramfs no, Squashfs yes
-Directory indexes: cramfs no, Squashfs yes
-Compressed metadata: cramfs no, Squashfs yes
-Hard link support: cramfs no, Squashfs yes
-Support for "." and ".." in readdir: cramfs no, Squashfs yes
-Real inode numbers: cramfs no, Squashfs yes.  Cramfs gives device inodes,
-	fifo and empty directories the same inode of 1!
-Exportable filesystem (NFS, etc.): cramfs no, Squashfs yes
-Active maintenance: cramfs no (it is listed as orphaned, probably no active
-	work for years), Squashfs yes
-
-Sorry for the list formatting, but many email readers are very unforgiving
-displaying tabbed lists and so I avoided them.
-
-For those that want hard performance statistics
-http://tree.celinuxforum.org/CelfPubWiki/SquashFsComparisons gives
-a full comparison of the performance of Squashfs against cramfs, zisofs,
-cloop and ext3.  I made these tests a number of years ago using Squashfs 2.1,
-but they are still valid.  In fact the performance should now be better.
-
-Cramfs is a limited filesystem, it's good for some embedded users but not now
-much else, its layout and features hasn't changed in the eight years+ since
-its release.  Squashfs, despite never being in mainline, has been actively
-developed for over six years, and in that time has gone through four
-layout revisions, each revision improving compression and performance where
-limitations were found.  For an often dismissed filesystem, Squashfs has
-advanced features such as metadata compression and tail-end packing for greater
-compression, and directory indexes for faster dentry operations.
-
-Despite not being in mainline, it is widely used.  It is packaged
-by all major distributions (Ubuntu, Fedora, Debian, SUSE, Gentoo), it is used
-on most LiveCDs, it is extensively used in embedded systems (STBs, routers,
-mobile phones), and notably is used in such things as Splashtop and the
-Amazon Kindle.
-
-Anyway that's my case for inclusion.  If any readers want Squashfs
-mainlined it's probably now a good time to offer support!
-
-There are 16 patches in the patch set, and the patches are against the
-latest linux-next tree (linux 2.6.27-next-20081016).
-
-Finally, I would like to acknowledge the financial support of the Consumer
-Embedded Linux Forum (CELF).  They've made it possible for me to spend the
-last four months working full time on this mainlining attempt.
-
-Phillip
