@@ -1,35 +1,145 @@
-From: "Mike Frysinger" <vapier.adi@gmail.com>
-Subject: Re: [PATCH 1/6] [PWM] Generic PWM API implementation
-Date: Fri, 17 Oct 2008 11:59:55 -0400
-Message-ID: <8bd0f97a0810170859k72dc1bc5o34ed2388f95c3bc8@mail.gmail.com>
-References: <cover.1224093510.git.bgat@billgatliff.com>
-	 <c928e59670824f959a46ea77512d6dabbf9b46cc.1224093510.git.bgat@billgatliff.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+From: Phillip Lougher <phillip@lougher.demon.co.uk>
+Subject: Subject: [PATCH 05/16] Squashfs: Symlink file operations
+Date: Fri, 17 Oct 2008 16:42:50 +0100
+Message-ID: <E1KqrTW-0001xU-NY@dylan>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=6F3ADBN5sEQQHiM/+U2i34LgxtBYNWz5BdJB2qJPWIo=;
-        b=OXEVs7uo/kJRSfrXv5t/Oc2hcWreXc2YeZ6/Vlj6pSwPvbt7XYKjTvr35qCDDVvZZO
-         wMJQRzKavR2/0DCJl7QihWIdnTISkH/wRAbcWsVBydzB55UhpsT5j7HIliTPUKehsrHZ
-         nv7qPCQcOTETbGqA+xGs0R53/LaJaYhgbHasE=
-In-Reply-To: <c928e59670824f959a46ea77512d6dabbf9b46cc.1224093510.git.bgat@billgatliff.com>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-On Wed, Oct 15, 2008 at 14:14, Bill Gatliff wrote:
-> +int pwm_register(struct pwm_device *pwm)
-> +{
-> +       struct pwm_channel *p;
-> +       int wchan;
-> +       int ret = 0;
 
-the initialization to 0 here isnt needed
--mike
+Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
+---
+ fs/squashfs/symlink.c |  119 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 119 insertions(+), 0 deletions(-)
+
+diff --git a/fs/squashfs/symlink.c b/fs/squashfs/symlink.c
+new file mode 100644
+index 0000000..c6d8b1a
+--- /dev/null
++++ b/fs/squashfs/symlink.c
+@@ -0,0 +1,119 @@
++/*
++ * Squashfs - a compressed read only filesystem for Linux
++ *
++ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
++ * Phillip Lougher <phillip@lougher.demon.co.uk>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2,
++ * or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
++ *
++ * symlink.c
++ */
++
++/*
++ * This file implements code to handle symbolic links.
++ *
++ * The data contents of symbolic links are stored inside the symbolic
++ * link inode within the inode table.  This allows the normally small symbolic
++ * link to be compressed as part of the inode table, achieving much greater
++ * compression than if the symbolic link was compressed individually.
++ */
++
++#include <linux/fs.h>
++#include <linux/vfs.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/string.h>
++#include <linux/pagemap.h>
++#include <linux/zlib.h>
++#include <linux/squashfs_fs.h>
++#include <linux/squashfs_fs_sb.h>
++#include <linux/squashfs_fs_i.h>
++
++#include "squashfs.h"
++
++static int squashfs_symlink_readpage(struct file *file, struct page *page)
++{
++	struct inode *inode = page->mapping->host;
++	struct super_block *s = inode->i_sb;
++	struct squashfs_sb_info *msblk = s->s_fs_info;
++	int index = page->index << PAGE_CACHE_SHIFT;
++	long long block = SQUASHFS_I(inode)->start_block;
++	int offset = SQUASHFS_I(inode)->offset;
++	int length = min_t(int, i_size_read(inode) - index, PAGE_CACHE_SIZE);
++	int avail, bytes;
++	void *pageaddr;
++	struct squashfs_cache_entry *entry;
++
++	TRACE("Entered squashfs_symlink_readpage, page index %ld, start block "
++			"%llx, offset %x\n", page->index, block, offset);
++
++	/*
++	 * Skip index bytes into symlink metadata.
++	 */
++	if (index) {
++		bytes = squashfs_read_metadata(s, NULL, block, offset, index,
++			&block, &offset);
++		if (bytes == 0) {
++			ERROR("Unable to read symlink [%llx:%x]\n",
++				SQUASHFS_I(inode)->start_block,
++				SQUASHFS_I(inode)->offset);
++			goto error_out;
++		}
++	}
++
++	/*
++	 * Read length bytes from symlink metadata.  Squashfs_read_metadata
++	 * is not used here because it can sleep and we want to use
++	 * kmap_atomic to map the page.  Instead call the underlying
++	 * squashfs_cache_get routine.  As length bytes may overlap metadata
++	 * blocks, we may need to call squashfs_cache_get multiple times.
++	 */
++	for (bytes = 0; bytes < length; offset = 0, bytes += avail) {
++		entry = squashfs_cache_get(s, msblk->block_cache, block, 0);
++		avail = min(entry->length - offset, length - bytes);
++
++		if (entry->error) {
++			ERROR("Unable to read symlink [%llx:%x]\n",
++				SQUASHFS_I(inode)->start_block,
++				SQUASHFS_I(inode)->offset);
++			squashfs_cache_put(msblk->block_cache, entry);
++			goto error_out;
++		}
++
++		pageaddr = kmap_atomic(page, KM_USER0);
++		memcpy(pageaddr + bytes, entry->data + offset, avail);
++		if (avail == length - bytes)
++			memset(pageaddr + length, 0, PAGE_CACHE_SIZE - length);
++		else
++			block = entry->next_index;
++		kunmap_atomic(pageaddr, KM_USER0);
++		squashfs_cache_put(msblk->block_cache, entry);
++	}
++
++	flush_dcache_page(page);
++	SetPageUptodate(page);
++	unlock_page(page);
++	return 0;
++
++error_out:
++	SetPageError(page);
++	unlock_page(page);
++	return 0;
++}
++
++
++const struct address_space_operations squashfs_symlink_aops = {
++	.readpage = squashfs_symlink_readpage
++};
+-- 
+1.5.2.5
