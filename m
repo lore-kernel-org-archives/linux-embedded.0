@@ -1,89 +1,72 @@
 From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
-Subject: Re: Subject: [PATCH 01/16] Squashfs: inode operations
-Date: Fri, 17 Oct 2008 18:53:00 +0200
-Message-ID: <20081017165300.GA8076@logfs.org>
-References: <E1KqrTW-0001xC-9M@dylan>
+Subject: Re: Subject: [PATCH 00/16] Squashfs: compressed read-only filesystem
+Date: Fri, 17 Oct 2008 19:34:55 +0200
+Message-ID: <20081017173455.GB8076@logfs.org>
+References: <E1KqrTW-0001x8-3h@dylan>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <E1KqrTW-0001xC-9M@dylan>
-Sender: linux-fsdevel-owner@vger.kernel.org
+In-Reply-To: <E1KqrTW-0001x8-3h@dylan>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
 Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-None of the comments below are a reason against mainline inclusion, imo=
-=2E
-They should get handled, but whether that happens before or after a
-merge doesn't really matter.
-
 On Fri, 17 October 2008 16:42:50 +0100, Phillip Lougher wrote:
 >=20
-> +#include <linux/squashfs_fs.h>
-> +#include <linux/squashfs_fs_sb.h>
-> +#include <linux/squashfs_fs_i.h>
+> Codewise all of the packed bit-fields and the swap macros have been r=
+emoved in
+> favour of aligned structures and in-line swapping using leXX_to_cpu()=
+=2E  The
+> code has also been extensively restructured, reformatted to kernel co=
+ding
+> standards and commented.
 
-Current verdict seems to be that these files should live in fs/squashfs=
-/,
-not include/linux/.  No kernel code beside squashfs needs the headers
-and userspace tools should have a private copy.
+Excellent!  The data structures look good and I don't see a reason for
+another format change.  Which means the main reason against merging the
+code has gone.  Your style differs from other kernel code and in a
+number of cases it would be nice to be more consistent with existing
+conventions.  It would certainly help others when reading the code.  An=
+d
+of course, one way to do so it to just merge and wait for some janitors
+to notice squashfs and send patches. :)
 
-> +static int squashfs_new_inode(struct super_block *s, struct inode *i=
-,
-> +				struct squashfs_base_inode *inodeb)
-> +{
-> +	if (squashfs_get_id(s, le16_to_cpu(inodeb->uid), &i->i_uid) =3D=3D =
-0)
-> +		goto out;
-> +	if (squashfs_get_id(s, le16_to_cpu(inodeb->guid), &i->i_gid) =3D=3D=
- 0)
-> +		goto out;
-> +
-> +	i->i_ino =3D le32_to_cpu(inodeb->inode_number);
-> +	i->i_mtime.tv_sec =3D le32_to_cpu(inodeb->mtime);
-> +	i->i_atime.tv_sec =3D i->i_mtime.tv_sec;
-> +	i->i_ctime.tv_sec =3D i->i_mtime.tv_sec;
-> +	i->i_mode =3D le16_to_cpu(inodeb->mode);
-> +	i->i_size =3D 0;
-> +
-> +	return 1;
-> +
-> +out:
-> +	return 0;
-> +}
+I have to admit I am scared of this function:
++int squashfs_read_metadata(struct super_block *s, void *buffer,
++                               long long block, unsigned int offset,
++                               int length, long long *next_block,
++                               unsigned int *next_offset)
 
-Most code uses "sb" and "inode", which I consider easier to read - if
-only for consistency.
+It takes seven parameters, five of which look deceptively similar to me=
+=2E
+Almost every time I see a call to this function, my mind goes blank.
 
-> +int squashfs_read_inode(struct inode *i, long long inode)
+There must be some way to make this function a bit more agreeable.  One
+option is to fuse the "block" and "offset" parameters into a struct and
+just pass two sets of this struct.  Another would be to combine the two
+sets of addresses into a single one.  A quick look at some of the
+callers shows seems to favor that approach.
 
-Is your "long long inode" what most filesystems call "inode->i_ino"?  I=
-t
-seems to be.
+	squashfs_read_metadata(..., block, offset, ..., &block, &offset)
+Could become
+	squashfs_read_metadata(..., &block, &offset, ...)
 
-> +	if (squashfs_new_inode(s, i, inodeb) =3D=3D 0)
-> +			goto failed_read;
+But again, such a change is no showstopper for mainline inclusion.
 
-Most linux functions return 0 on success and -ESOMETHING on error.  You
-return 0 on error and 1 on success.  That makes it likely for someone
-else to do something like
+> Anyway that's my case for inclusion.  If any readers want Squashfs
+> mainlined it's probably now a good time to offer support!
 
-	err =3D squashfs_foo(bar);
-	if (err)
-		goto fail;
+Please no.  A large amount of popular support would only bring you into
+the reiser4 league.  Bad arguments don't improve when repeated.
 
-Oops.
+Support in the form of patches would be a different matter, though.
 
 J=C3=B6rn
 
 --=20
-Measure. Don't tune for speed until you've measured, and even then
-don't unless one part of the code overwhelms the rest.
--- Rob Pike
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Mac is for working,
+Linux is for Networking,
+Windows is for Solitaire!
+-- stolen from dc
