@@ -1,145 +1,89 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Subject: [PATCH 05/16] Squashfs: Symlink file operations
-Date: Fri, 17 Oct 2008 16:42:50 +0100
-Message-ID: <E1KqrTW-0001xU-NY@dylan>
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
+From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
+Subject: Re: Subject: [PATCH 01/16] Squashfs: inode operations
+Date: Fri, 17 Oct 2008 18:53:00 +0200
+Message-ID: <20081017165300.GA8076@logfs.org>
+References: <E1KqrTW-0001xC-9M@dylan>
+Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <E1KqrTW-0001xC-9M@dylan>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
+Content-Type: text/plain; charset="iso-8859-1"
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
+None of the comments below are a reason against mainline inclusion, imo=
+=2E
+They should get handled, but whether that happens before or after a
+merge doesn't really matter.
 
-Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
----
- fs/squashfs/symlink.c |  119 +++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 119 insertions(+), 0 deletions(-)
+On Fri, 17 October 2008 16:42:50 +0100, Phillip Lougher wrote:
+>=20
+> +#include <linux/squashfs_fs.h>
+> +#include <linux/squashfs_fs_sb.h>
+> +#include <linux/squashfs_fs_i.h>
 
-diff --git a/fs/squashfs/symlink.c b/fs/squashfs/symlink.c
-new file mode 100644
-index 0000000..c6d8b1a
---- /dev/null
-+++ b/fs/squashfs/symlink.c
-@@ -0,0 +1,119 @@
-+/*
-+ * Squashfs - a compressed read only filesystem for Linux
-+ *
-+ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
-+ * Phillip Lougher <phillip@lougher.demon.co.uk>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version 2,
-+ * or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-+ *
-+ * symlink.c
-+ */
-+
-+/*
-+ * This file implements code to handle symbolic links.
-+ *
-+ * The data contents of symbolic links are stored inside the symbolic
-+ * link inode within the inode table.  This allows the normally small symbolic
-+ * link to be compressed as part of the inode table, achieving much greater
-+ * compression than if the symbolic link was compressed individually.
-+ */
-+
-+#include <linux/fs.h>
-+#include <linux/vfs.h>
-+#include <linux/kernel.h>
-+#include <linux/slab.h>
-+#include <linux/string.h>
-+#include <linux/pagemap.h>
-+#include <linux/zlib.h>
-+#include <linux/squashfs_fs.h>
-+#include <linux/squashfs_fs_sb.h>
-+#include <linux/squashfs_fs_i.h>
-+
-+#include "squashfs.h"
-+
-+static int squashfs_symlink_readpage(struct file *file, struct page *page)
-+{
-+	struct inode *inode = page->mapping->host;
-+	struct super_block *s = inode->i_sb;
-+	struct squashfs_sb_info *msblk = s->s_fs_info;
-+	int index = page->index << PAGE_CACHE_SHIFT;
-+	long long block = SQUASHFS_I(inode)->start_block;
-+	int offset = SQUASHFS_I(inode)->offset;
-+	int length = min_t(int, i_size_read(inode) - index, PAGE_CACHE_SIZE);
-+	int avail, bytes;
-+	void *pageaddr;
-+	struct squashfs_cache_entry *entry;
-+
-+	TRACE("Entered squashfs_symlink_readpage, page index %ld, start block "
-+			"%llx, offset %x\n", page->index, block, offset);
-+
-+	/*
-+	 * Skip index bytes into symlink metadata.
-+	 */
-+	if (index) {
-+		bytes = squashfs_read_metadata(s, NULL, block, offset, index,
-+			&block, &offset);
-+		if (bytes == 0) {
-+			ERROR("Unable to read symlink [%llx:%x]\n",
-+				SQUASHFS_I(inode)->start_block,
-+				SQUASHFS_I(inode)->offset);
-+			goto error_out;
-+		}
-+	}
-+
-+	/*
-+	 * Read length bytes from symlink metadata.  Squashfs_read_metadata
-+	 * is not used here because it can sleep and we want to use
-+	 * kmap_atomic to map the page.  Instead call the underlying
-+	 * squashfs_cache_get routine.  As length bytes may overlap metadata
-+	 * blocks, we may need to call squashfs_cache_get multiple times.
-+	 */
-+	for (bytes = 0; bytes < length; offset = 0, bytes += avail) {
-+		entry = squashfs_cache_get(s, msblk->block_cache, block, 0);
-+		avail = min(entry->length - offset, length - bytes);
-+
-+		if (entry->error) {
-+			ERROR("Unable to read symlink [%llx:%x]\n",
-+				SQUASHFS_I(inode)->start_block,
-+				SQUASHFS_I(inode)->offset);
-+			squashfs_cache_put(msblk->block_cache, entry);
-+			goto error_out;
-+		}
-+
-+		pageaddr = kmap_atomic(page, KM_USER0);
-+		memcpy(pageaddr + bytes, entry->data + offset, avail);
-+		if (avail == length - bytes)
-+			memset(pageaddr + length, 0, PAGE_CACHE_SIZE - length);
-+		else
-+			block = entry->next_index;
-+		kunmap_atomic(pageaddr, KM_USER0);
-+		squashfs_cache_put(msblk->block_cache, entry);
-+	}
-+
-+	flush_dcache_page(page);
-+	SetPageUptodate(page);
-+	unlock_page(page);
-+	return 0;
-+
-+error_out:
-+	SetPageError(page);
-+	unlock_page(page);
-+	return 0;
-+}
-+
-+
-+const struct address_space_operations squashfs_symlink_aops = {
-+	.readpage = squashfs_symlink_readpage
-+};
--- 
-1.5.2.5
+Current verdict seems to be that these files should live in fs/squashfs=
+/,
+not include/linux/.  No kernel code beside squashfs needs the headers
+and userspace tools should have a private copy.
+
+> +static int squashfs_new_inode(struct super_block *s, struct inode *i=
+,
+> +				struct squashfs_base_inode *inodeb)
+> +{
+> +	if (squashfs_get_id(s, le16_to_cpu(inodeb->uid), &i->i_uid) =3D=3D =
+0)
+> +		goto out;
+> +	if (squashfs_get_id(s, le16_to_cpu(inodeb->guid), &i->i_gid) =3D=3D=
+ 0)
+> +		goto out;
+> +
+> +	i->i_ino =3D le32_to_cpu(inodeb->inode_number);
+> +	i->i_mtime.tv_sec =3D le32_to_cpu(inodeb->mtime);
+> +	i->i_atime.tv_sec =3D i->i_mtime.tv_sec;
+> +	i->i_ctime.tv_sec =3D i->i_mtime.tv_sec;
+> +	i->i_mode =3D le16_to_cpu(inodeb->mode);
+> +	i->i_size =3D 0;
+> +
+> +	return 1;
+> +
+> +out:
+> +	return 0;
+> +}
+
+Most code uses "sb" and "inode", which I consider easier to read - if
+only for consistency.
+
+> +int squashfs_read_inode(struct inode *i, long long inode)
+
+Is your "long long inode" what most filesystems call "inode->i_ino"?  I=
+t
+seems to be.
+
+> +	if (squashfs_new_inode(s, i, inodeb) =3D=3D 0)
+> +			goto failed_read;
+
+Most linux functions return 0 on success and -ESOMETHING on error.  You
+return 0 on error and 1 on success.  That makes it likely for someone
+else to do something like
+
+	err =3D squashfs_foo(bar);
+	if (err)
+		goto fail;
+
+Oops.
+
+J=C3=B6rn
+
+--=20
+Measure. Don't tune for speed until you've measured, and even then
+don't unless one part of the code overwhelms the rest.
+-- Rob Pike
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
