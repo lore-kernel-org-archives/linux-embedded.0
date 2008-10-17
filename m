@@ -1,9 +1,9 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Subject: [PATCH 07/16] Squashfs: export operations
+Subject: Subject: [PATCH 03/16] Squashfs: directory readdir operations
 Date: Fri, 17 Oct 2008 16:42:50 +0100
-Message-ID: <E1KqrTW-0001xe-UG@dylan>
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Message-ID: <E1KqrTW-0001xL-HQ@dylan>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -13,15 +13,15 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/squashfs/export.c |  146 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 146 insertions(+), 0 deletions(-)
+ fs/squashfs/dir.c |  230 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 230 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/export.c b/fs/squashfs/export.c
+diff --git a/fs/squashfs/dir.c b/fs/squashfs/dir.c
 new file mode 100644
-index 0000000..0a7a98a
+index 0000000..c27c9c4
 --- /dev/null
-+++ b/fs/squashfs/export.c
-@@ -0,0 +1,146 @@
++++ b/fs/squashfs/dir.c
+@@ -0,0 +1,230 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -42,27 +42,18 @@ index 0000000..0a7a98a
 + * along with this program; if not, write to the Free Software
 + * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 + *
-+ * export.c
++ * dir.c
 + */
 +
 +/*
-+ * This file implements code to make Squashfs filesystems exportable (NFS etc.)
++ * This file implements code to read directories from disk.
 + *
-+ * The export code uses an inode lookup table to map inode numbers passed in
-+ * filehandles to an inode location on disk.  This table is stored compressed
-+ * into metadata blocks.  A second index table is used to locate these.  This
-+ * second index table for speed of access (and because it is small) is read at
-+ * mount time and cached in memory.
-+ *
-+ * The inode lookup table is used only by the export code, inode disk
-+ * locations are directly encoded in directories, enabling direct access
-+ * without an intermediate lookup for all operations except the export ops.
++ * See namei.c for a description of directory organisation on disk.
 + */
 +
 +#include <linux/fs.h>
 +#include <linux/vfs.h>
-+#include <linux/dcache.h>
-+#include <linux/exportfs.h>
++#include <linux/slab.h>
 +#include <linux/zlib.h>
 +#include <linux/squashfs_fs.h>
 +#include <linux/squashfs_fs_sb.h>
@@ -70,103 +61,197 @@ index 0000000..0a7a98a
 +
 +#include "squashfs.h"
 +
++static const unsigned char squashfs_filetype_table[] = {
++	DT_UNKNOWN, DT_DIR, DT_REG, DT_LNK, DT_BLK, DT_CHR, DT_FIFO, DT_SOCK
++};
++
 +/*
-+ * Look-up inode number (ino) in table, returning the inode location.
++ * Lookup offset (f_pos) in the directory index, returning the
++ * metadata block containing it.
 + */
-+static long long squashfs_inode_lookup(struct super_block *s, int ino)
++static int get_dir_index_using_offset(struct super_block *s,
++	long long *next_block, unsigned int *next_offset,
++	long long index_start, unsigned int index_offset, int i_count,
++	long long f_pos)
 +{
 +	struct squashfs_sb_info *msblk = s->s_fs_info;
-+	int blk = SQUASHFS_LOOKUP_BLOCK(ino - 1);
-+	int offset = SQUASHFS_LOOKUP_BLOCK_OFFSET(ino - 1);
-+	long long start = le64_to_cpu(msblk->inode_lookup_table[blk]);
-+	__le64 inode;
++	int i, index, length = 0;
++	struct squashfs_dir_index dir_index;
 +
-+	TRACE("Entered squashfs_inode_lookup, inode_number = %d\n", ino);
++	TRACE("Entered get_dir_index_using_offset, i_count %d, f_pos %lld\n",
++					i_count, f_pos);
 +
-+	if (!squashfs_read_metadata(s, &inode, start, offset,
-+					sizeof(inode), &start, &offset))
-+		return SQUASHFS_INVALID_BLK;
++	/*
++	 * Translate from external f_pos to the internal f_pos.  This
++	 * is offset by 3 because we invent "." and ".." entries which are
++	 * not actually stored in the directory.
++	 */
++	f_pos -= 3;
++	if (f_pos == 0)
++		goto finish;
 +
-+	TRACE("squashfs_inode_lookup, inode = 0x%llx\n", le64_to_cpu(inode));
-+	return le64_to_cpu(inode);
-+}
++	for (i = 0; i < i_count; i++) {
++		squashfs_read_metadata(s, &dir_index, index_start,
++					index_offset, sizeof(dir_index),
++					&index_start, &index_offset);
 +
++		index = le32_to_cpu(dir_index.index);
++		if (index > f_pos)
++			break;
 +
-+static struct dentry *squashfs_export_iget(struct super_block *s,
-+	unsigned int inode_number)
-+{
-+	long long inode;
-+	struct dentry *dentry = ERR_PTR(-ENOENT);
++		squashfs_read_metadata(s, NULL, index_start, index_offset,
++					le32_to_cpu(dir_index.size) + 1,
++					&index_start, &index_offset);
 +
-+	TRACE("Entered squashfs_export_iget\n");
-+
-+	inode = squashfs_inode_lookup(s, inode_number);
-+	if (inode != SQUASHFS_INVALID_BLK)
-+		dentry = d_obtain_alias(squashfs_iget(s, inode, inode_number));
-+
-+	return dentry;
-+}
-+
-+
-+static struct dentry *squashfs_fh_to_dentry(struct super_block *s,
-+		struct fid *fid, int fh_len, int fh_type)
-+{
-+	if ((fh_type != FILEID_INO32_GEN && fh_type != FILEID_INO32_GEN_PARENT)
-+			|| fh_len < 2)
-+		return NULL;
-+
-+	return squashfs_export_iget(s, fid->i32.ino);
-+}
-+
-+
-+static struct dentry *squashfs_fh_to_parent(struct super_block *s,
-+		struct fid *fid, int fh_len, int fh_type)
-+{
-+	if (fh_type != FILEID_INO32_GEN_PARENT || fh_len < 4)
-+		return NULL;
-+
-+	return squashfs_export_iget(s, fid->i32.parent_ino);
-+}
-+
-+
-+static struct dentry *squashfs_get_parent(struct dentry *child)
-+{
-+	struct inode *i = child->d_inode;
-+
-+	return squashfs_export_iget(i->i_sb, SQUASHFS_I(i)->parent_inode);
-+}
-+
-+
-+__le64 *read_inode_lookup_table(struct super_block *s,
-+		long long lookup_table_start, unsigned int inodes)
-+{
-+	unsigned int length = SQUASHFS_LOOKUP_BLOCK_BYTES(inodes);
-+	__le64 *inode_lookup_table;
-+
-+	TRACE("In read_inode_lookup_table, length %d\n", length);
-+
-+	/* Allocate inode lookup table */
-+	inode_lookup_table = kmalloc(length, GFP_KERNEL);
-+	if (inode_lookup_table == NULL) {
-+		ERROR("Failed to allocate inode lookup table\n");
-+		return NULL;
++		length = index;
++		*next_block = le32_to_cpu(dir_index.start_block) +
++					msblk->directory_table_start;
 +	}
 +
-+	if (!squashfs_read_data(s, inode_lookup_table, lookup_table_start,
-+			length | SQUASHFS_COMPRESSED_BIT_BLOCK, NULL, length)) {
-+		ERROR("unable to read inode lookup table\n");
-+		kfree(inode_lookup_table);
-+		return NULL;
-+	}
++	*next_offset = (length + *next_offset) % SQUASHFS_METADATA_SIZE;
 +
-+	return inode_lookup_table;
++finish:
++	/*
++	 * Translate back from internal f_pos to external f_pos.
++	 */
++	return length + 3;
 +}
 +
 +
-+const struct export_operations squashfs_export_ops = {
-+	.fh_to_dentry = squashfs_fh_to_dentry,
-+	.fh_to_parent = squashfs_fh_to_parent,
-+	.get_parent = squashfs_get_parent
++static int squashfs_readdir(struct file *file, void *dirent, filldir_t filldir)
++{
++	struct inode *i = file->f_dentry->d_inode;
++	struct squashfs_sb_info *msblk = i->i_sb->s_fs_info;
++	long long next_block = SQUASHFS_I(i)->start_block +
++				msblk->directory_table_start;
++	int next_offset = SQUASHFS_I(i)->offset, length = 0, dir_count, size,
++				type;
++	unsigned int inode_number;
++	struct squashfs_dir_header dirh;
++	struct squashfs_dir_entry *dire;
++
++	TRACE("Entered squashfs_readdir [%llx:%x]\n", next_block, next_offset);
++
++	dire = kmalloc(sizeof(*dire) + SQUASHFS_NAME_LEN + 1, GFP_KERNEL);
++	if (dire == NULL) {
++		ERROR("Failed to allocate squashfs_dir_entry\n");
++		goto finish;
++	}
++
++	/*
++	 * Return "." and  ".." entries as the first two filenames in the
++	 * directory.  To maximise compression these two entries are not
++	 * stored in the directory, and so we invent them here.
++	 *
++	 * It also means that the external f_pos is offset by 3 from the
++	 * on-disk directory f_pos.
++	 */
++	while (file->f_pos < 3) {
++		char *name;
++		int size, i_ino;
++
++		if (file->f_pos == 0) {
++			name = ".";
++			size = 1;
++			i_ino = i->i_ino;
++		} else {
++			name = "..";
++			size = 2;
++			i_ino = SQUASHFS_I(i)->parent_inode;
++		}
++
++		TRACE("Calling filldir(%p, %s, %d, %lld, %d, %d)\n",
++				dirent, name, size, file->f_pos, i_ino,
++				squashfs_filetype_table[1]);
++
++		if (filldir(dirent, name, size, file->f_pos, i_ino,
++				squashfs_filetype_table[1]) < 0) {
++				TRACE("Filldir returned less than 0\n");
++			goto finish;
++		}
++
++		file->f_pos += size;
++	}
++
++	length = get_dir_index_using_offset(i->i_sb, &next_block, &next_offset,
++				SQUASHFS_I(i)->dir_index_start,
++				SQUASHFS_I(i)->dir_index_offset,
++				SQUASHFS_I(i)->dir_index_count,
++				file->f_pos);
++
++	while (length < i_size_read(i)) {
++		/*
++		 * Read directory header
++		 */
++		if (!squashfs_read_metadata(i->i_sb, &dirh, next_block,
++				next_offset, sizeof(dirh), &next_block,
++				&next_offset))
++			goto failed_read;
++
++		length += sizeof(dirh);
++
++		dir_count = le32_to_cpu(dirh.count) + 1;
++		while (dir_count--) {
++			/*
++			 * Read directory entry.
++			 */
++			if (!squashfs_read_metadata(i->i_sb, dire, next_block,
++					next_offset, sizeof(*dire),
++					&next_block, &next_offset))
++				goto failed_read;
++
++			size = le16_to_cpu(dire->size) + 1;
++
++			if (!squashfs_read_metadata(i->i_sb, dire->name,
++					next_block, next_offset, size,
++					&next_block, &next_offset))
++				goto failed_read;
++
++			length += sizeof(*dire) + size;
++
++			if (file->f_pos >= length)
++				continue;
++
++			dire->name[size] = '\0';
++			inode_number = le32_to_cpu(dirh.inode_number) +
++				((short) le16_to_cpu(dire->inode_number));
++			type = le16_to_cpu(dire->type);
++
++			TRACE("Calling filldir(%p, %s, %d, %lld, %x:%x, %d, %d)"
++					"\n", dirent, dire->name, size,
++					file->f_pos,
++					le32_to_cpu(dirh.start_block),
++					le16_to_cpu(dire->offset),
++					inode_number,
++					squashfs_filetype_table[type]);
++
++			if (filldir(dirent, dire->name, size, file->f_pos,
++					inode_number,
++					squashfs_filetype_table[type]) < 0) {
++				TRACE("Filldir returned less than 0\n");
++				goto finish;
++			}
++
++			file->f_pos = length;
++		}
++	}
++
++finish:
++	kfree(dire);
++	return 0;
++
++failed_read:
++	ERROR("Unable to read directory block [%llx:%x]\n", next_block,
++		next_offset);
++	kfree(dire);
++	return 0;
++}
++
++
++const struct file_operations squashfs_dir_ops = {
++	.read = generic_read_dir,
++	.readdir = squashfs_readdir
 +};
 -- 
 1.5.2.5
+
