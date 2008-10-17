@@ -1,7 +1,7 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Subject: [PATCH 03/16] Squashfs: directory readdir operations
-Date: Fri, 17 Oct 2008 16:42:50 +0100
-Message-ID: <E1KqrTW-0001xL-HQ@dylan>
+Subject: Subject: [PATCH 11/16] Squashfs: block operations
+Date: Fri, 17 Oct 2008 16:42:51 +0100
+Message-ID: <E1KqrTX-0001xx-Bz@dylan>
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -13,15 +13,15 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/squashfs/dir.c |  230 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 230 insertions(+), 0 deletions(-)
+ fs/squashfs/block.c |  257 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 257 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/dir.c b/fs/squashfs/dir.c
+diff --git a/fs/squashfs/block.c b/fs/squashfs/block.c
 new file mode 100644
-index 0000000..c27c9c4
+index 0000000..0d1a74d
 --- /dev/null
-+++ b/fs/squashfs/dir.c
-@@ -0,0 +1,230 @@
++++ b/fs/squashfs/block.c
+@@ -0,0 +1,257 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -42,18 +42,20 @@ index 0000000..c27c9c4
 + * along with this program; if not, write to the Free Software
 + * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 + *
-+ * dir.c
++ * block.c
 + */
 +
 +/*
-+ * This file implements code to read directories from disk.
-+ *
-+ * See namei.c for a description of directory organisation on disk.
++ * This file implements the low-level routines to read and decompress
++ * datablocks and metadata blocks.
 + */
 +
 +#include <linux/fs.h>
 +#include <linux/vfs.h>
 +#include <linux/slab.h>
++#include <linux/mutex.h>
++#include <linux/string.h>
++#include <linux/buffer_head.h>
 +#include <linux/zlib.h>
 +#include <linux/squashfs_fs.h>
 +#include <linux/squashfs_fs_sb.h>
@@ -61,197 +63,222 @@ index 0000000..c27c9c4
 +
 +#include "squashfs.h"
 +
-+static const unsigned char squashfs_filetype_table[] = {
-+	DT_UNKNOWN, DT_DIR, DT_REG, DT_LNK, DT_BLK, DT_CHR, DT_FIFO, DT_SOCK
-+};
-+
 +/*
-+ * Lookup offset (f_pos) in the directory index, returning the
-+ * metadata block containing it.
++ * Read the metadata block length, this is stored in the first two
++ * bytes of the metadata block.
 + */
-+static int get_dir_index_using_offset(struct super_block *s,
-+	long long *next_block, unsigned int *next_offset,
-+	long long index_start, unsigned int index_offset, int i_count,
-+	long long f_pos)
++static struct buffer_head *get_block_length(struct super_block *s,
++			int *cur_index, int *offset, unsigned int *length)
 +{
 +	struct squashfs_sb_info *msblk = s->s_fs_info;
-+	int i, index, length = 0;
-+	struct squashfs_dir_index dir_index;
++	struct buffer_head *bh;
 +
-+	TRACE("Entered get_dir_index_using_offset, i_count %d, f_pos %lld\n",
-+					i_count, f_pos);
++	bh = sb_bread(s, *cur_index);
++	if (bh == NULL)
++		goto out;
 +
-+	/*
-+	 * Translate from external f_pos to the internal f_pos.  This
-+	 * is offset by 3 because we invent "." and ".." entries which are
-+	 * not actually stored in the directory.
-+	 */
-+	f_pos -= 3;
-+	if (f_pos == 0)
-+		goto finish;
-+
-+	for (i = 0; i < i_count; i++) {
-+		squashfs_read_metadata(s, &dir_index, index_start,
-+					index_offset, sizeof(dir_index),
-+					&index_start, &index_offset);
-+
-+		index = le32_to_cpu(dir_index.index);
-+		if (index > f_pos)
-+			break;
-+
-+		squashfs_read_metadata(s, NULL, index_start, index_offset,
-+					le32_to_cpu(dir_index.size) + 1,
-+					&index_start, &index_offset);
-+
-+		length = index;
-+		*next_block = le32_to_cpu(dir_index.start_block) +
-+					msblk->directory_table_start;
++	if (msblk->devblksize - *offset == 1) {
++		*length = (unsigned char) bh->b_data[*offset];
++		brelse(bh);
++		bh = sb_bread(s, ++(*cur_index));
++		if (bh == NULL)
++			goto out;
++		*length |= (unsigned char) bh->b_data[0] << 8;
++		*offset = 1;
++	} else {
++		*length = (unsigned char) bh->b_data[*offset] |
++			(unsigned char) bh->b_data[*offset + 1] << 8;
++		*offset += 2;
 +	}
 +
-+	*next_offset = (length + *next_offset) % SQUASHFS_METADATA_SIZE;
-+
-+finish:
-+	/*
-+	 * Translate back from internal f_pos to external f_pos.
-+	 */
-+	return length + 3;
++out:
++	return bh;
 +}
 +
 +
-+static int squashfs_readdir(struct file *file, void *dirent, filldir_t filldir)
++/*
++ * Read and decompress a metadata block or datablock.  Length is non-zero
++ * if a datablock is being read (the size is stored elsewhere in the
++ * filesystem), otherwise the length is obtained from the first two bytes of
++ * the metadata block.  A bit in the length field indicates if the block
++ * is stored uncompressed in the filesystem (usually because compression
++ * generated a larger block - this does occasionally happen with zlib).
++ */
++unsigned int squashfs_read_data(struct super_block *s, void *buffer,
++			long long index, unsigned int length,
++			long long *next_index, int srclength)
 +{
-+	struct inode *i = file->f_dentry->d_inode;
-+	struct squashfs_sb_info *msblk = i->i_sb->s_fs_info;
-+	long long next_block = SQUASHFS_I(i)->start_block +
-+				msblk->directory_table_start;
-+	int next_offset = SQUASHFS_I(i)->offset, length = 0, dir_count, size,
-+				type;
-+	unsigned int inode_number;
-+	struct squashfs_dir_header dirh;
-+	struct squashfs_dir_entry *dire;
++	struct squashfs_sb_info *msblk = s->s_fs_info;
++	struct buffer_head **bh;
++	unsigned int offset = index & ((1 << msblk->devblksize_log2) - 1);
++	unsigned int cur_index = index >> msblk->devblksize_log2;
++	int bytes, avail, b = 0, k = 0;
++	unsigned int compressed;
++	unsigned int c_byte = length;
 +
-+	TRACE("Entered squashfs_readdir [%llx:%x]\n", next_block, next_offset);
++	bh = kcalloc((msblk->block_size >> msblk->devblksize_log2) + 1,
++				sizeof(*bh), GFP_KERNEL);
++	if (bh == NULL)
++		goto read_failure;
 +
-+	dire = kmalloc(sizeof(*dire) + SQUASHFS_NAME_LEN + 1, GFP_KERNEL);
-+	if (dire == NULL) {
-+		ERROR("Failed to allocate squashfs_dir_entry\n");
-+		goto finish;
-+	}
-+
-+	/*
-+	 * Return "." and  ".." entries as the first two filenames in the
-+	 * directory.  To maximise compression these two entries are not
-+	 * stored in the directory, and so we invent them here.
-+	 *
-+	 * It also means that the external f_pos is offset by 3 from the
-+	 * on-disk directory f_pos.
-+	 */
-+	while (file->f_pos < 3) {
-+		char *name;
-+		int size, i_ino;
-+
-+		if (file->f_pos == 0) {
-+			name = ".";
-+			size = 1;
-+			i_ino = i->i_ino;
-+		} else {
-+			name = "..";
-+			size = 2;
-+			i_ino = SQUASHFS_I(i)->parent_inode;
-+		}
-+
-+		TRACE("Calling filldir(%p, %s, %d, %lld, %d, %d)\n",
-+				dirent, name, size, file->f_pos, i_ino,
-+				squashfs_filetype_table[1]);
-+
-+		if (filldir(dirent, name, size, file->f_pos, i_ino,
-+				squashfs_filetype_table[1]) < 0) {
-+				TRACE("Filldir returned less than 0\n");
-+			goto finish;
-+		}
-+
-+		file->f_pos += size;
-+	}
-+
-+	length = get_dir_index_using_offset(i->i_sb, &next_block, &next_offset,
-+				SQUASHFS_I(i)->dir_index_start,
-+				SQUASHFS_I(i)->dir_index_offset,
-+				SQUASHFS_I(i)->dir_index_count,
-+				file->f_pos);
-+
-+	while (length < i_size_read(i)) {
++	if (c_byte) {
 +		/*
-+		 * Read directory header
++		 * Datablock.
 +		 */
-+		if (!squashfs_read_metadata(i->i_sb, &dirh, next_block,
-+				next_offset, sizeof(dirh), &next_block,
-+				&next_offset))
-+			goto failed_read;
++		bytes = -offset;
++		compressed = SQUASHFS_COMPRESSED_BLOCK(c_byte);
++		c_byte = SQUASHFS_COMPRESSED_SIZE_BLOCK(c_byte);
 +
-+		length += sizeof(dirh);
++		TRACE("Block @ 0x%llx, %scompressed size %d, src size %d\n",
++			index, compressed ? "" : "un", c_byte, srclength);
 +
-+		dir_count = le32_to_cpu(dirh.count) + 1;
-+		while (dir_count--) {
-+			/*
-+			 * Read directory entry.
-+			 */
-+			if (!squashfs_read_metadata(i->i_sb, dire, next_block,
-+					next_offset, sizeof(*dire),
-+					&next_block, &next_offset))
-+				goto failed_read;
++		if (c_byte > srclength || index < 0 ||
++				(index + c_byte) > msblk->bytes_used)
++			goto read_failure;
 +
-+			size = le16_to_cpu(dire->size) + 1;
++		for (b = 0; bytes < (int) c_byte; b++, cur_index++) {
++			bh[b] = sb_getblk(s, cur_index);
++			if (bh[b] == NULL)
++				goto block_release;
++			bytes += msblk->devblksize;
++		}
++		ll_rw_block(READ, b, bh);
++	} else {
++		/*
++		 * Metadata block.
++		 */
++		if (index < 0 || (index + 2) > msblk->bytes_used)
++			goto read_failure;
 +
-+			if (!squashfs_read_metadata(i->i_sb, dire->name,
-+					next_block, next_offset, size,
-+					&next_block, &next_offset))
-+				goto failed_read;
++		bh[0] = get_block_length(s, &cur_index, &offset, &c_byte);
++		if (bh[0] == NULL)
++			goto read_failure;
++		b = 1;
 +
-+			length += sizeof(*dire) + size;
++		bytes = msblk->devblksize - offset;
++		compressed = SQUASHFS_COMPRESSED(c_byte);
++		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
 +
-+			if (file->f_pos >= length)
-+				continue;
++		TRACE("Block @ 0x%llx, %scompressed size %d\n", index,
++				compressed ? "" : "un", c_byte);
 +
-+			dire->name[size] = '\0';
-+			inode_number = le32_to_cpu(dirh.inode_number) +
-+				((short) le16_to_cpu(dire->inode_number));
-+			type = le16_to_cpu(dire->type);
++		if (c_byte > srclength || (index + c_byte) > msblk->bytes_used)
++			goto block_release;
 +
-+			TRACE("Calling filldir(%p, %s, %d, %lld, %x:%x, %d, %d)"
-+					"\n", dirent, dire->name, size,
-+					file->f_pos,
-+					le32_to_cpu(dirh.start_block),
-+					le16_to_cpu(dire->offset),
-+					inode_number,
-+					squashfs_filetype_table[type]);
++		for (; bytes < c_byte; b++) {
++			bh[b] = sb_getblk(s, ++cur_index);
++			if (bh[b] == NULL)
++				goto block_release;
++			bytes += msblk->devblksize;
++		}
++		ll_rw_block(READ, b - 1, bh + 1);
++	}
 +
-+			if (filldir(dirent, dire->name, size, file->f_pos,
-+					inode_number,
-+					squashfs_filetype_table[type]) < 0) {
-+				TRACE("Filldir returned less than 0\n");
-+				goto finish;
++	if (compressed) {
++		int zlib_err = 0;
++
++		/*
++		 * Uncompress block.
++		 */
++
++		mutex_lock(&msblk->read_data_mutex);
++
++		msblk->stream.next_out = buffer;
++		msblk->stream.avail_out = srclength;
++
++		for (bytes = 0; k < b; k++) {
++			avail = min(c_byte - bytes, msblk->devblksize - offset);
++
++			wait_on_buffer(bh[k]);
++			if (!buffer_uptodate(bh[k]))
++				goto release_mutex;
++
++			msblk->stream.next_in = bh[k]->b_data + offset;
++			msblk->stream.avail_in = avail;
++
++			if (k == 0) {
++				zlib_err = zlib_inflateInit(&msblk->stream);
++				if (zlib_err != Z_OK) {
++					ERROR("zlib_inflateInit returned"
++						" unexpected result 0x%x,"
++						" srclength %d\n", zlib_err,
++						srclength);
++					goto release_mutex;
++				}
++
++				if (avail == 0) {
++					offset = 0;
++					brelse(bh[k]);
++					continue;
++				}
 +			}
 +
-+			file->f_pos = length;
++			zlib_err = zlib_inflate(&msblk->stream, Z_NO_FLUSH);
++			if (zlib_err != Z_OK && zlib_err != Z_STREAM_END) {
++				ERROR("zlib_inflate returned unexpected result"
++					" 0x%x, srclength %d, avail_in %d,"
++					" avail_out %d\n", zlib_err, srclength,
++					msblk->stream.avail_in,
++					msblk->stream.avail_out);
++				goto release_mutex;
++			}
++
++			bytes += avail;
++			offset = 0;
++			brelse(bh[k]);
++		}
++
++		if (zlib_err != Z_STREAM_END)
++			goto release_mutex;
++
++		zlib_err = zlib_inflateEnd(&msblk->stream);
++		if (zlib_err != Z_OK) {
++			ERROR("zlib_inflateEnd returned unexpected result 0x%x,"
++				" srclength %d\n", zlib_err, srclength);
++			goto release_mutex;
++		}
++		bytes = msblk->stream.total_out;
++		mutex_unlock(&msblk->read_data_mutex);
++	} else {
++		/*
++		 * Block is uncompressed.
++		 */
++		int i;
++
++		for (i = 0; i < b; i++) {
++			wait_on_buffer(bh[i]);
++			if (!buffer_uptodate(bh[i]))
++				goto block_release;
++		}
++
++		for (bytes = 0; k < b; k++) {
++			avail = min(c_byte - bytes, msblk->devblksize - offset);
++
++			memcpy(buffer + bytes, bh[k]->b_data + offset, avail);
++			bytes += avail;
++			offset = 0;
++			brelse(bh[k]);
 +		}
 +	}
 +
-+finish:
-+	kfree(dire);
-+	return 0;
++	if (next_index)
++		*next_index = index + c_byte + (length ? 0 : 2);
 +
-+failed_read:
-+	ERROR("Unable to read directory block [%llx:%x]\n", next_block,
-+		next_offset);
-+	kfree(dire);
++	kfree(bh);
++	return bytes;
++
++release_mutex:
++	mutex_unlock(&msblk->read_data_mutex);
++
++block_release:
++	for (; k < b; k++)
++		brelse(bh[k]);
++
++read_failure:
++	ERROR("sb_bread failed reading block 0x%x\n", cur_index);
++	kfree(bh);
 +	return 0;
 +}
-+
-+
-+const struct file_operations squashfs_dir_ops = {
-+	.read = generic_read_dir,
-+	.readdir = squashfs_readdir
-+};
 -- 
 1.5.2.5
 
