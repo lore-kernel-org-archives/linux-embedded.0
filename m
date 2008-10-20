@@ -1,45 +1,88 @@
-From: Bill Gatliff <bgat@billgatliff.com>
+From: Ben Nizette <bn@niasdigital.com>
 Subject: Re: UIO - interrupt performance
-Date: Mon, 20 Oct 2008 11:25:40 -0500
-Message-ID: <48FCB104.7040901@billgatliff.com>
-References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com> <20081020144858.1f074d7b@surf>
+Date: Tue, 21 Oct 2008 09:12:37 +1100
+Message-ID: <1224540757.3954.59.camel@moss.renham>
+References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com>
+	 <1224498501.3954.50.camel@moss.renham>
+	 <Pine.LNX.4.58.0810200258210.2562@vlab.hofr.at>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20081020144858.1f074d7b@surf>
+In-Reply-To: <Pine.LNX.4.58.0810200258210.2562@vlab.hofr.at>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: linux-embedded@vger.kernel.org
+To: Nicholas Mc Guire <hofrat@hofr.at>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-Thomas Petazzoni wrote:
+
+On Mon, 2008-10-20 at 03:06 -0800, Nicholas Mc Guire wrote:
+> >
+> > On Mon, 2008-10-20 at 10:55 +0100, Douglas, Jim (Jim) wrote:
+> > > We are contemplating porting a large number of device drivers to Linux.
+> > > The pragmatic solution is to keep them in user mode (using the UIO
+> > > framework) where possible ... they are written in C++ for a start.
+> > >
+> > > The obvious disadvantages of user mode device drivers are security /
+> > > isolation.  The main benefit is ease of development.
+> > >
+> > > Do you know what the *technical* disadvantages of this approach might
+> > > be? I am most concerned about possible impact on interrupt handling.
+> > >
+> > > For example, I assume the context switching overhead is higher, and that
+> > > interrupt latency is more difficult to predict?
+> >
+> > Userspace drivers certainly aren't first class citizens; uio and kernel
+> > mode drivers generally aren't really interchangeable.
+> >
+> > The technical disadvantages of userspace drivers are that you don't have
+> > access to kernel subsystems, you can't run any userspace content in irq
+> > context so everything needs to be scheduled before it can be dealt with.
+> > A UIO driver still needs a kernel component to do acknowledge the
+> > interrupt.  As such when you say "interrupt latency" you need to define
+> > the end point.  A UIO driver will have it's in-kernel handler called
+> > just as quickly as any other driver but the userspace app will need to
+> > be scheduled before it receives notification that the IRQ has fired.
+> >
+> > The technical advantage of a UIO driver is that devices which only need
+> > to shift data don't have to double-handle it.  e.g. an ADC card doesn't
+> > need to move ADC results from hardware to kernel, kernel to userspace,
+> > it's just one fluid movement.
+> >
+> > What kind of device drivers are you talking about?  They have to be of a
+> > fairly specific flavour to fit in to a UIO model.  Linux isn't a
+> > microkernel, userspace drivers are quite restricted in their power.
+> >
 > 
-> There was a presentation on UIO in embedded systems at the latest
-> Embedded Linux Conference in April. The presentation includes a small
-> analysis of UIO's overhead with regard to interrupt latency. See
-> http://www.celinux.org/elc08_presentations/uio080417celfelc08.pdf
+> are these claims based on benchmarks of a specific driver ? I only know
+> of a singe UIO driver for a Hilscher CIF card and one for a SMX
+> Cryptengine (I guess thats yours any way) but none for a AD/DIO card - if
+> you know of such a driver I would be interested in seeing its performance.
 
-Bummer, on p. 20 it doesn't describe how the latency was measured.  It also
-doesn't compare in-kernel measurements with equivalent UIO measurements.
+When UIO was being discussed for inclusion, the example case being
+thrown around was for such an ADC card.  They claimed to have seen
+significant improvements in speed by avoiding the double-handling of
+data.  Come to think of it, I can't see that this specific driver has
+shown up...
 
-I don't particularly care what the interrupt latency is, if what is being
-measured is the time between when the interrupt is signaled to the CPU and the
-point at which the request_irq()-registered handler runs.
+But what kind of benchmarks do you want?  When I say "restricted in
+their power" I mean more in a feature-set kind of way than a raw speed
+way.  Userspace drivers can't plug in to kernel subsystems so can't, for
+example, be SPI hosts or terminal devices or network hardware or
+anything else which sits in the middle of a standard stack.  All they
+can do is be notified of an interrupt and have direct access to a lump
+of memory.
 
-Rather, most of the time I care more about how long it takes the kernel to wake
-up the process that's blocked in a wait_for_completion(), because I do most of
-my work outside of interrupt handlers (a characteristic of the devices and
-workloads I deal with, ymmv).  In that case, the difference between in-kernel
-and UIO gets pretty small because the kernel activities at each interrupt are
-very similar, perhaps differing only by some cache activity.
+As I asked before, what's your use-case?  It tends to be fairly obvious
+whether the hardware is suitable for a UIO-based driver or whether it's
+going to have to live in kernel.
 
-Glad they mention SCHED_[FIFO|RR], though.  Without those, you're in for a
-pretty unpleasant UIO experience.
+> 
+> Also if you know of any simple UIO sample drivers that would also help.
 
+As in examples of the userspace half?  Unfortunately uio-smx isn't ready
+to fly thanks to some significant production delays but the userspace
+half of the Hilscher CIF driver can be found at
+http://www.osadl.org/projects/downloads/UIO/user/
 
-
-b.g.
--- 
-Bill Gatliff
-bgat@billgatliff.com
+	--Ben.
