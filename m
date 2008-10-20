@@ -1,39 +1,36 @@
-From: Paul Mundt <lethal@linux-sh.org>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 Subject: Re: UIO - interrupt performance
-Date: Mon, 20 Oct 2008 22:20:56 +0900
-Message-ID: <20081020132056.GD20548@linux-sh.org>
-References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com> <48FC71BD.9070703@coritel.it>
+Date: Mon, 20 Oct 2008 14:48:58 +0200
+Message-ID: <20081020144858.1f074d7b@surf>
+References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <48FC71BD.9070703@coritel.it>
+In-Reply-To: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Marco Stornelli <marco.stornelli@coritel.it>
-Cc: "Douglas, Jim (Jim)" <jdouglas@avaya.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: linux-embedded@vger.kernel.org
 
-On Mon, Oct 20, 2008 at 01:55:41PM +0200, Marco Stornelli wrote:
-> I quite agree with Ben and Christian. I think UIO drivers are usable for
-> simple devices, I think they aren't mature (will it ever be?) to use it
-> with complicated devices or with strict requirement.
-> 
-This is a party line that has been parroted around a lot but doesn't
-really have a lot of validity. UIO drivers are usable for situations
-where the kernel-side handling of the device can be trivialized but still
-remains a necessary component in the device support (other than IRQ
-control, there is also the issue of setting up buffers and so on).
+Le Mon, 20 Oct 2008 10:55:17 +0100,
+"Douglas, Jim (Jim)" <jdouglas@avaya.com> a =C3=A9crit :
 
-A good example of this is platforms that push their multimedia codecs and
-blocks down through UIO. The reason for this is that there is a lot of
-complexity, requisite support code, and general overhead associated with
-supporting these blocks, most of which simply does not belong anywhere in
-the kernel, even though the kernel still has to do some degree of device
-support. UIO drivers are second class citizens in general, but the
-argument that they only apply to simple devices is simply incorrect.
+> Do you know what the *technical* disadvantages of this approach might
+> be? I am most concerned about possible impact on interrupt handling.=20
+>=20
+> For example, I assume the context switching overhead is higher, and
+> that interrupt latency is more difficult to predict? =20
 
-Things like uio_pdrv_genirq exist today which already allow for interrupt
-control through userspace, for example. You can grep for the uio_pdrv_genirq
-in-tree users to see examples of how this is used in the aforementioned
-case today.
+There was a presentation on UIO in embedded systems at the latest
+Embedded Linux Conference in April. The presentation includes a small
+analysis of UIO's overhead with regard to interrupt latency. See
+http://www.celinux.org/elc08_presentations/uio080417celfelc08.pdf
+
+Sincerly,
+
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
