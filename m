@@ -1,35 +1,71 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: Subject: [PATCH 00/16] Squashfs: compressed read-only filesystem
-Date: Wed, 22 Oct 2008 00:15:44 +0100
-Message-ID: <48FE62A0.7080202@lougher.demon.co.uk>
-References: <E1KqrTW-0001x8-3h@dylan> <81b0412b0810211529x3fc85567yc34fd369ff7c8518@mail.gmail.com>
+Subject: Re: Subject: [PATCH 00/16] Squashfs: compressed	read-only	filesystem
+Date: Wed, 22 Oct 2008 00:42:33 +0100
+Message-ID: <48FE68E9.2020401@lougher.demon.co.uk>
+References: <E1KqrTW-0001x8-3h@dylan>	 <1224268027.18940.78.camel@moss-terrapins.epoch.ncsc.mil>	 <48FD2C74.2070608@lougher.demon.co.uk> <1224605348.31157.67.camel@moss-terrapins.epoch.ncsc.mil>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <81b0412b0810211529x3fc85567yc34fd369ff7c8518@mail.gmail.com>
+In-Reply-To: <1224605348.31157.67.camel@moss-terrapins.epoch.ncsc.mil>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Alex Riesen <raa.lkml@gmail.com>
+To: "David P. Quigley" <dpquigl@tycho.nsa.gov>
 Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-Alex Riesen wrote:
-> 2008/10/17 Phillip Lougher <phillip@lougher.demon.co.uk>:
->> There are 16 patches in the patch set, and the patches are against the
->> latest linux-next tree (linux 2.6.27-next-20081016).
+David P. Quigley wrote:
+
 > 
-> You better don't base anything off linux-next. These are not stable: there
-> can be even something in the tree you mentioned which will never end
-> up in the mainline and if your patches depend on it they wont apply to
-> something like v2.6.26.2.
+> Looking through the code I noticed that you give certain object types
+> the same inode number for all instances of it (devices, fifo/sockets).
+> How is this done internally? Do these types of objects occupy the same
+> position on the inode table? If so how do you differentiate between a
+> device and a socket?
+> 
 
-Definately, there's some d_obtain_alias stuff in linux-next which has 
-been there since linux-2.6.27-rc4-next.  I thought it would make it into 
-the final 2.6.27 but it didn't.
+No, devices and fifo/sockets get their own unique inode numbers:
 
-I thought linux-next *was* the tree that new patches should be based 
-off.  However, the relationship between linux-2.6.git, linux-next.git, 
-and the  -mm patch series seems to be a little vague to me, not to 
-mention where the linux-staging tree fits into all this.
+root@slackware:/mnt# mount -t squashfs test.sqsh /mnt2 -o loop
+root@slackware:/mnt# ls -li /mnt2
+total 0
+2 crw-r--r-- 1 root root 1, 1 2008-10-22 00:31 device
+4 prw-r--r-- 1 root root    0 2008-10-22 00:31 fifo
+3 srwxr-xr-x 1 root root    0 2008-10-17 16:25 socket
+
+struct squashfs_ipc_inode {
+         __le16                  inode_type;
+         __le16                  mode;
+         __le16                  uid;
+         __le16                  guid;
+         __le32                  mtime;
+         __le32                  inode_number;
+         __le32                  nlink;
+};
+
+struct squashfs_dev_inode {
+         __le16                  inode_type;
+         __le16                  mode;
+         __le16                  uid;
+         __le16                  guid;
+         __le32                  mtime;
+         __le32                  inode_number;
+         __le32                  nlink;
+         __le32                  rdev;
+};
+
+
+> I use to work on Unionfs and we used CVS initially for our SCM. When we
+> started working on mainlining Unionfs we moved over to a GIT based
+> system and we found it worked a lot better. You might want to consider
+> moving your patches to a GIT tree that you make publically available so
+> people can just clone, compile, and test them. I don't see anything that
+> stops Squashfs from being compiled and loaded as a module so it might
+> not be necessary but it makes it easier for people who want to test the
+> code or even contribute patches.
+
+
+Yeah, Git is much better than CVS, however, I've got nowhere to host a 
+public Git repository.  If someone were to offer hosting I'd be only too 
+happy to move over to Git.
 
 Phillip
