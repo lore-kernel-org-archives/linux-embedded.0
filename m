@@ -1,75 +1,117 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: Subject: [PATCH 12/16] Squashfs: header files
-Date: Tue, 21 Oct 2008 19:17:30 +0100
-Message-ID: <48FE1CBA.8080805@lougher.demon.co.uk>
-References: <E1KqrTX-0001y4-JE@dylan> <1224606318.31157.80.camel@moss-terrapins.epoch.ncsc.mil>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v2 RESEND] gpiolib: Add pin change notification
+Date: Tue, 21 Oct 2008 13:31:06 -0700
+Message-ID: <20081021133106.be5cc01c.akpm@linux-foundation.org>
+References: <1224543007.3954.71.camel@moss.renham>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1224606318.31157.80.camel@moss-terrapins.epoch.ncsc.mil>
+In-Reply-To: <1224543007.3954.71.camel@moss.renham>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: "David P. Quigley" <dpquigl@tycho.nsa.gov>
-Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
+Content-Type: text/plain; charset="us-ascii"
+To: Ben Nizette <bn@niasdigital.com>
+Cc: david-b@pacbell.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-David P. Quigley wrote:
+On Tue, 21 Oct 2008 09:50:06 +1100
+Ben Nizette <bn@niasdigital.com> wrote:
 
 > 
-> Something that seems weird is the inconsistency in the ordering of these
-> structs. The base part is the same across all inodes but for your
-> reg/lreg dir/ldir pairs you seem to shuffle the order of the added
-> parts. Is there a reason for this? Is their layout the same on disk
-> (baring the extra data in the l versions)? If so they probably should be
-> the same in the struct.
+> This adds pin change notification to the gpiolib sysfs interface. It
+> requires 16 extra bytes in gpio_desc iff CONFIG_GPIO_SYSFS which in turn
+> means, eg, 4k of .bss usage on AVR32.  Due to limitations in sysfs, this
+> patch makes poll(2) and friends work as expected on the "value"
+> attribute, though reads on "value" will never block and there is no
+> facility for async reads and writes.
 > 
-> 
+>
+> ...
+>
+> +struct poll_desc *work_to_poll(struct work_struct *ws)
 
-They're deliberately shuffled about to eliminate holes (due to alignment 
-contraints), and to maximise compression.  Shifting to cluster similar 
-fields can get better compression, and the current layout is the result 
-of a lot of work to to get the best ordering.
+static
 
-For example:
+> +{
+> +	return container_of((struct delayed_work *)ws, struct poll_desc, work);
+> +}
+> +
+> +void gpio_poll_work(struct work_struct *ws)
 
- >> +struct squashfs_reg_inode {
- >> +	__le16			inode_type;
- >> +	__le16			mode;
- >> +	__le16			uid;
- >> +	__le16			guid;
- >> +	__le32			mtime;
- >> +	__le32	 		inode_number;
- >> +	__le32			start_block;
- >> +	__le32			fragment;
- >> +	__le32			offset;
- >> +	__le32			file_size;
- >> +	__le16			block_list[0];
- >> +};
+static
 
-Inode_number, start_block, fragment clustered together because in most 
-filesystems they'll contain a lot of zero bits (filesystems mainly being 
-small).  Better compression.
+> +{
+> +	struct poll_desc	*poll = work_to_poll(ws);
+> +
+> +	unsigned		gpio = poll->gpio;
+> +	struct gpio_desc	*desc = &gpio_desc[gpio];
+> +
+> +	int new = gpio_get_value_cansleep(gpio);
+> +	int old = desc->val;
+> +
+> +	if ((new && !old && test_bit(ASYNC_RISING, &desc->flags)) ||
+> +	    (!new && old && test_bit(ASYNC_FALLING, &desc->flags)))
+> +		sysfs_notify(&desc->dev->kobj, NULL, "value");
+> +
+> +	desc->val = new;
+> +	schedule_delayed_work(&poll->work, desc->timeout);
+> +}
+> +
+> +static irqreturn_t gpio_irq_handler(int irq, void *dev_id)
+> +{
+> +	struct gpio_desc *desc = dev_id;
+> +	int gpio = desc - gpio_desc;
+> +	int new, old;
+> +
+> +	if (!gpio_is_valid(gpio))
+> +		return IRQ_NONE;
+> +
+> +	new = gpio_get_value(gpio);
+> +	old = desc->val;
+> +
+> +	if ((new && !old && test_bit(ASYNC_RISING, &desc->flags)) ||
+> +	    (!new && old && test_bit(ASYNC_FALLING, &desc->flags)))
+> +		sysfs_notify(&desc->dev->kobj, NULL, "value");
 
- >> +
- >> +struct squashfs_lreg_inode {
- >> +	__le16			inode_type;
- >> +	__le16			mode;
- >> +	__le16			uid;
- >> +	__le16			guid;
- >> +	__le32			mtime;
- >> +	__le32	 		inode_number;
- >> +	__le64			start_block;
- >> +	__le64			file_size;
- >> +	__le64			sparse;
- >> +	__le32			nlink;
- >> +	__le32			fragment;
- >> +	__le32			offset;
- >> +	__le32			xattr;
- >> +	__le16			block_list[0];
- >> +};
+eekeekeek!  sysfs_notify() does mutex_lock() and will die horridly if
+called from an interrupt handler.
 
-Start_block, file_size have been doubled, and the fragment field 
-consequently moved to preserve 64-bit alignment constraints on 64-bit 
-quantities (no holes).  Plus moving fragment means it can be grouped 
-with the new nlink field giving a nice run of zero bits (non-extended 
-regular files have an implicit nlink of 1).
+You should have got a storm of warnings when runtime testing this code.
+Please ensure that all debug options are enabled when testing code. 
+Documentation/SubmitChecklist has help.
+
+> +	desc->val = new;
+> +
+> +	return IRQ_HANDLED;
+> +}
+> +
+>  static ssize_t gpio_direction_show(struct device *dev,
+>  		struct device_attribute *attr, char *buf)
+>  {
+> @@ -284,9 +351,162 @@ static ssize_t gpio_value_store(struct d
+>  static /*const*/ DEVICE_ATTR(value, 0644,
+>  		gpio_value_show, gpio_value_store);
+>  
+> +static ssize_t gpio_notify_show(struct device *dev,
+> +		struct device_attribute *attr, char *buf)
+> +{
+> +	const struct gpio_desc	*desc = dev_get_drvdata(dev);
+> +	ssize_t ret;
+> +
+> +	mutex_lock(&sysfs_lock);
+> +
+> +	if (test_bit(ASYNC_MODE_IRQ, &desc->flags))
+> +		ret = sprintf(buf, "irq\n");
+> +	else if (test_bit(ASYNC_MODE_POLL, &desc->flags))
+> +		ret = sprintf(buf, "%ld\n", desc->timeout * 1000 / HZ);
+> +	else
+> +		ret = sprintf(buf, "none\n");
+> +
+> +	mutex_unlock(&sysfs_lock);
+> +	return ret;
+> +}
+
+<panics>
+
+oh, sysfs_lock is a gpiolib-local thing, not a sysfs-core thing. 
+Crappy name.
+
