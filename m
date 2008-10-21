@@ -1,44 +1,61 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: UIO - interrupt performance
-Date: Tue, 21 Oct 2008 06:39:58 -0500
-Message-ID: <48FDBF8E.3060700@billgatliff.com>
-References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com>	 <48FC71BD.9070703@coritel.it> <48FCAE16.70509@billgatliff.com>	 <48FD94AA.8070900@coritel.it>	 <63a49ef40810210201x36249476tcc75141d87a610f2@mail.gmail.com>	 <48FDA13F.3030303@coritel.it> <1224581853.3954.127.camel@moss.renham> <48FDAEE1.9080503@grandegger.com>
+From: Stephen Smalley <sds@tycho.nsa.gov>
+Subject: Re: Subject: [PATCH 00/16] Squashfs: compressed
+	read-only	filesystem
+Date: Tue, 21 Oct 2008 08:07:32 -0400
+Message-ID: <1224590852.15821.6.camel@moss-spartans.epoch.ncsc.mil>
+References: <E1KqrTW-0001x8-3h@dylan>
+	 <1224268027.18940.78.camel@moss-terrapins.epoch.ncsc.mil>
+	 <48FD2C74.2070608@lougher.demon.co.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48FDAEE1.9080503@grandegger.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754315AbYJUMJ6@vger.kernel.org>
+In-Reply-To: <48FD2C74.2070608@lougher.demon.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Wolfgang Grandegger <wg@grandegger.com>
-Cc: Ben Nizette <bn@niasdigital.com>, Marco Stornelli <marco.stornelli@coritel.it>, Alessio Igor Bogani <abogani@texware.it>, "Douglas, Jim (Jim)" <jdouglas@avaya.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: "David P. Quigley" <dpquigl@tycho.nsa.gov>, akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-Wolfgang Grandegger wrote:
-> Ben Nizette wrote:
->> On Tue, 2008-10-21 at 11:30 +0200, Marco Stornelli wrote:
->>> I could agree, but "the facto" due to UIO license condition, a company
->>> often uses UIO drivers, regardless performance, debug, etc, only as not
->>> to public the code under GPL.
->> It sounds to me like you think that driver authors can sit down and
->> decide whether they want to implement their driver in userspace or
->> kernel space.  For 99% of drivers that's simply not true.  You  *cannot*
->> write userspace drivers for most hardware, the hooks just aren't
->> available.  UIO is Userspace I/O, not a set of general hooks for
->> userspace drivers.
+On Tue, 2008-10-21 at 02:12 +0100, Phillip Lougher wrote:
+> David P. Quigley wrote:
+> > Looking through the code I see two references to xattrs, one is the
+> > index of the xattr table in the superblock and there seems to be struct
+> > member in one of the inode structures that is an index into this table.
+> > Looking through the code I don't see either of these used at all. Do you
+> > intend to add xattr support at some point? I saw reference to the desire
+> > to add xattr support in an email from 2004 but you said that the code
+> > has been rewritten since then. If you are going to add xattr support you
+> > probably want to add it to more than just regular files. In SELinux and
+> > other LSMs symlinks and directories are also labeled so they will need
+> > xattr entries.
 > 
-> I known, fortunately it's not that simple or even feasible. Image a
-> network driver with I/O multiplexing used by various processes.
+> Yes and yes.  I am intending to add xattr support, something that's been 
+> on my to-do list for a long time (since 2004 as you said), but it's been 
+> something which I've never got the time to do.  Once (if) Squashfs is 
+> mainlined, it will be the next thing.
+> 
+> The xattr references in the layout is my attempt at forward planning to 
+> avoid making an incompatible layout change when I finally get around to 
+> implementing it.  My plan is to put xattrs in a table (referenced by the 
+>   superblock), and then put indexes in "extended" inodes which index 
+> into the table (as you noticed).  The general idea in Squashfs is that 
+> inodes get optimised for normally occurring cases, and less common cases 
+> (that  would need a bigger inode) get to use an extended inode. 
+> Squashfs currently has an extended regular file inode, which is where 
+> the xattr index will sit, and so this has had an xattr index added.  The 
+> other inodes don't currently have extended inodes, these will be defined 
+> when I implement xattrs (which is why they're missing).
+> 
+> Having said that, I've fscked up and forgotten to add an xattr field to 
+> the extended directory inode which is currently defined :)
+> 
+> Thanks for spotting this.
 
-Actually, UIO is pretty useful for that when combined with tun/tap.
+Just to clarify:  When using a labeled MAC solution like SELinux or
+SMACK, every file (of every type, including device nodes, symlinks,
+fifos, etc) will have a security attribute on it.  In the case of ext3,
+we have benefited from inlining of small attributes into the inode.
 
-> That's *not* an option, please read the GPL license conditions. At least
-> it's legal gray area. Note that it's not my intention to start a
-> discussion on that.
-
-Then I will only contradict you, and not cite my supporting evidence.  :)
-
-
-b.g.
 -- 
-Bill Gatliff
-bgat@billgatliff.com
+Stephen Smalley
+National Security Agency
