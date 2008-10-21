@@ -1,85 +1,77 @@
-From: Wolfgang Grandegger <wg@grandegger.com>
+From: Marco Stornelli <marco.stornelli@coritel.it>
 Subject: Re: UIO - interrupt performance
-Date: Tue, 21 Oct 2008 08:57:41 +0200
-Message-ID: <48FD7D65.1070409@grandegger.com>
-References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com>	 <1224498501.3954.50.camel@moss.renham>	 <Pine.LNX.4.58.0810200258210.2562@vlab.hofr.at> <1224540757.3954.59.camel@moss.renham>
+Date: Tue, 21 Oct 2008 10:36:58 +0200
+Message-ID: <48FD94AA.8070900@coritel.it>
+References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com> <48FC71BD.9070703@coritel.it> <48FCAE16.70509@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1224540757.3954.59.camel@moss.renham>
+In-Reply-To: <48FCAE16.70509@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Ben Nizette <bn@niasdigital.com>
-Cc: Nicholas Mc Guire <hofrat@hofr.at>, linux-embedded <linux-embedded@vger.kernel.org>
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: "Douglas, Jim (Jim)" <jdouglas@avaya.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-Ben Nizette wrote:
-> On Mon, 2008-10-20 at 03:06 -0800, Nicholas Mc Guire wrote:
->>> On Mon, 2008-10-20 at 10:55 +0100, Douglas, Jim (Jim) wrote:
->>>> We are contemplating porting a large number of device drivers to Linux.
->>>> The pragmatic solution is to keep them in user mode (using the UIO
->>>> framework) where possible ... they are written in C++ for a start.
->>>>
->>>> The obvious disadvantages of user mode device drivers are security /
->>>> isolation.  The main benefit is ease of development.
->>>>
->>>> Do you know what the *technical* disadvantages of this approach might
->>>> be? I am most concerned about possible impact on interrupt handling.
->>>>
->>>> For example, I assume the context switching overhead is higher, and that
->>>> interrupt latency is more difficult to predict?
->>> Userspace drivers certainly aren't first class citizens; uio and kernel
->>> mode drivers generally aren't really interchangeable.
->>>
->>> The technical disadvantages of userspace drivers are that you don't have
->>> access to kernel subsystems, you can't run any userspace content in irq
->>> context so everything needs to be scheduled before it can be dealt with.
->>> A UIO driver still needs a kernel component to do acknowledge the
->>> interrupt.  As such when you say "interrupt latency" you need to define
->>> the end point.  A UIO driver will have it's in-kernel handler called
->>> just as quickly as any other driver but the userspace app will need to
->>> be scheduled before it receives notification that the IRQ has fired.
->>>
->>> The technical advantage of a UIO driver is that devices which only need
->>> to shift data don't have to double-handle it.  e.g. an ADC card doesn't
->>> need to move ADC results from hardware to kernel, kernel to userspace,
->>> it's just one fluid movement.
->>>
->>> What kind of device drivers are you talking about?  They have to be of a
->>> fairly specific flavour to fit in to a UIO model.  Linux isn't a
->>> microkernel, userspace drivers are quite restricted in their power.
->>>
->> are these claims based on benchmarks of a specific driver ? I only know
->> of a singe UIO driver for a Hilscher CIF card and one for a SMX
->> Cryptengine (I guess thats yours any way) but none for a AD/DIO card - if
->> you know of such a driver I would be interested in seeing its performance.
-> 
-> When UIO was being discussed for inclusion, the example case being
-> thrown around was for such an ADC card.  They claimed to have seen
-> significant improvements in speed by avoiding the double-handling of
-> data.  Come to think of it, I can't see that this specific driver has
-> shown up...
-> 
-> But what kind of benchmarks do you want?  When I say "restricted in
-> their power" I mean more in a feature-set kind of way than a raw speed
-> way.  Userspace drivers can't plug in to kernel subsystems so can't, for
-> example, be SPI hosts or terminal devices or network hardware or
-> anything else which sits in the middle of a standard stack.  All they
-> can do is be notified of an interrupt and have direct access to a lump
-> of memory.
-> 
-> As I asked before, what's your use-case?  It tends to be fairly obvious
-> whether the hardware is suitable for a UIO-based driver or whether it's
-> going to have to live in kernel.
-> 
->> Also if you know of any simple UIO sample drivers that would also help.
-> 
-> As in examples of the userspace half?  Unfortunately uio-smx isn't ready
-> to fly thanks to some significant production delays but the userspace
-> half of the Hilscher CIF driver can be found at
-> http://www.osadl.org/projects/downloads/UIO/user/
+As I said I think UIO drivers are a "young feature" from kernel point of
+view but I haven't problems to use it. Jim, however, was talking about
+to do a complete porting of drivers. I don't know if it'd be a good
+idea. UIO drivers, however, has been inserted mainly for one reason: the
+problem with GPL, so I prefer, but it's only my opinion, at least for
+now, to write a "classic" driver if there aren't GPL problems.
 
-As I see it, mainly the license conditions attract people to use UIO.
-Performance is not that important.
+Bill Gatliff ha scritto:
+> Marco Stornelli wrote:
+>> I quite agree with Ben and Christian. I think UIO drivers are usable for
+>> simple devices, I think they aren't mature (will it ever be?) to use it
+>> with complicated devices or with strict requirement.
+> 
+> I disagree.  Completely.
+> 
+> I recall seeing a report from the Gelato project, where they reimplemented an
+> IDE driver under UIO.  IIRC, their test results showed at least 80% of the
+> in-kernel performance--- and this was a very early UIO implementation, I would
+> guess that things are much improved since then.  I know that IDE isn't a USBH,
+> but it isn't a GPIO LED, either.  :)
+> 
+> If you are concerned about timeliness of execution, then if you have never heard
+> of POSIX.1b then you shouldn't be writing Linux code anyway.  But if you do use
+> the features that POSIX.1b gives you, then I haven't found UIO to be objectionable.
+> 
+>>From a performance standpoint, the major differences between UIO vs. in-kernel
+> are (a) a _possible_ additional context switch at each interrupt, to transfer
+> control back to the userspace responder, and (b) the elimination of a syscall to
+> push data through an in-kernel interface back to the device.  Only your own
+> testing with your own hardware and application can tell you if that's a net
+> improvement or regression and where--- if anywhere--- you take the hit.
+> 
+> The general upsides with UIO are huge: you can debug your driver with gdb, and
+> you can bind your driver tightly to your application if it makes sense to do so.
+>  Every i/o action is potentially zero-copy straight into the correct data
+> structures, for example.  For some workloads, that puts UIO way ahead of an
+> in-kernel driver without the complexity of mmap().
+> 
+> As an aside, if you really need an interface that resembles a device node then
+> you can emulate that in userspace with a FIFO.  That lets you put the driver in
+> a standalone program if you like, and other user applications can't tell the
+> difference between that and a true device node.  (They can figure it out if they
+> need to, but if they just are using open/close/read/write then they don't care).
+> 
+> The social downside to UIO is that you'll never get your driver(s) mainlined,
+> since Linux-the-kernel doesn't run in userspace.  :)
+> 
+> Put simply, you can't dismiss UIO lightly unless you haven't worked with or
+> reviewed the code behind it.
+> 
+> 
+> 
+> b.g.
 
-Wolfgang.
+-- 
+Marco Stornelli
+Embedded Software Engineer
+CoRiTeL - Consorzio di Ricerca sulle Telecomunicazioni
+http://www.coritel.it
+
+marco.stornelli@coritel.it
++39 06 72582838
