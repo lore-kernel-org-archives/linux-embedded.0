@@ -1,77 +1,49 @@
-From: Marco Stornelli <marco.stornelli@coritel.it>
+From: "Alessio Igor Bogani" <abogani@texware.it>
 Subject: Re: UIO - interrupt performance
-Date: Tue, 21 Oct 2008 10:36:58 +0200
-Message-ID: <48FD94AA.8070900@coritel.it>
-References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com> <48FC71BD.9070703@coritel.it> <48FCAE16.70509@billgatliff.com>
+Date: Tue, 21 Oct 2008 11:01:19 +0200
+Message-ID: <63a49ef40810210201x36249476tcc75141d87a610f2@mail.gmail.com>
+References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com>
+	 <48FC71BD.9070703@coritel.it> <48FCAE16.70509@billgatliff.com>
+	 <48FD94AA.8070900@coritel.it>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48FCAE16.70509@billgatliff.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:sender
+         :to:subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references
+         :x-google-sender-auth;
+        bh=4E26I46SmvncDg3wI5uy2GlCMhVx3+o83nBtXLgOumg=;
+        b=OYvPU5Nyjd0m6+4hk3jEwzHv6ASMBUDZEB6WN6WUpS7YnhivAuAZZmlviqzuC7shNP
+         lhGhZdDy0A8qEpS4S8tqypzCv+gbKLuvc1NOCnzSAx6obaWNE9SUY+Ndmu7Wzo5H05q2
+         TJld2dmAV2W/q32Z1ubabBkS5qaDNB7vKOyoM=
+In-Reply-To: <48FD94AA.8070900@coritel.it>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: "Douglas, Jim (Jim)" <jdouglas@avaya.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+To: Marco Stornelli <marco.stornelli@coritel.it>
+Cc: Bill Gatliff <bgat@billgatliff.com>, "Douglas, Jim (Jim)" <jdouglas@avaya.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-As I said I think UIO drivers are a "young feature" from kernel point of
-view but I haven't problems to use it. Jim, however, was talking about
-to do a complete porting of drivers. I don't know if it'd be a good
-idea. UIO drivers, however, has been inserted mainly for one reason: the
-problem with GPL, so I prefer, but it's only my opinion, at least for
-now, to write a "classic" driver if there aren't GPL problems.
+Hi All,
 
-Bill Gatliff ha scritto:
-> Marco Stornelli wrote:
->> I quite agree with Ben and Christian. I think UIO drivers are usable for
->> simple devices, I think they aren't mature (will it ever be?) to use it
->> with complicated devices or with strict requirement.
-> 
-> I disagree.  Completely.
-> 
-> I recall seeing a report from the Gelato project, where they reimplemented an
-> IDE driver under UIO.  IIRC, their test results showed at least 80% of the
-> in-kernel performance--- and this was a very early UIO implementation, I would
-> guess that things are much improved since then.  I know that IDE isn't a USBH,
-> but it isn't a GPIO LED, either.  :)
-> 
-> If you are concerned about timeliness of execution, then if you have never heard
-> of POSIX.1b then you shouldn't be writing Linux code anyway.  But if you do use
-> the features that POSIX.1b gives you, then I haven't found UIO to be objectionable.
-> 
->>From a performance standpoint, the major differences between UIO vs. in-kernel
-> are (a) a _possible_ additional context switch at each interrupt, to transfer
-> control back to the userspace responder, and (b) the elimination of a syscall to
-> push data through an in-kernel interface back to the device.  Only your own
-> testing with your own hardware and application can tell you if that's a net
-> improvement or regression and where--- if anywhere--- you take the hit.
-> 
-> The general upsides with UIO are huge: you can debug your driver with gdb, and
-> you can bind your driver tightly to your application if it makes sense to do so.
->  Every i/o action is potentially zero-copy straight into the correct data
-> structures, for example.  For some workloads, that puts UIO way ahead of an
-> in-kernel driver without the complexity of mmap().
-> 
-> As an aside, if you really need an interface that resembles a device node then
-> you can emulate that in userspace with a FIFO.  That lets you put the driver in
-> a standalone program if you like, and other user applications can't tell the
-> difference between that and a true device node.  (They can figure it out if they
-> need to, but if they just are using open/close/read/write then they don't care).
-> 
-> The social downside to UIO is that you'll never get your driver(s) mainlined,
-> since Linux-the-kernel doesn't run in userspace.  :)
-> 
-> Put simply, you can't dismiss UIO lightly unless you haven't worked with or
-> reviewed the code behind it.
-> 
-> 
-> 
-> b.g.
+Sorry for my (very) bad english.
 
--- 
-Marco Stornelli
-Embedded Software Engineer
-CoRiTeL - Consorzio di Ricerca sulle Telecomunicazioni
-http://www.coritel.it
+2008/10/21 Marco Stornelli <marco.stornelli@coritel.it>:
+[...]
+> idea. UIO drivers, however, has been inserted mainly for one reason: the
+> problem with GPL, so I prefer, but it's only my opinion, at least for
+> now, to write a "classic" driver if there aren't GPL problems.
 
-marco.stornelli@coritel.it
-+39 06 72582838
+No, that isn't the main objective of the UIO Authors.
+
+AFAIK They want achieve:
+
+1) Fast prototyping for device drivers
+2) Easy and fast debug
+3) Avoid "fast and furious" changes of the internal kernel interfaces
+for their drivers
+
+Ciao,
+Alessio
