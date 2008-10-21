@@ -1,20 +1,20 @@
-From: Stephen Smalley <sds@tycho.nsa.gov>
+From: "David P. Quigley" <dpquigl@tycho.nsa.gov>
 Subject: Re: Subject: [PATCH 00/16] Squashfs: compressed
 	read-only	filesystem
-Date: Tue, 21 Oct 2008 08:07:32 -0400
-Message-ID: <1224590852.15821.6.camel@moss-spartans.epoch.ncsc.mil>
+Date: Tue, 21 Oct 2008 12:09:08 -0400
+Message-ID: <1224605348.31157.67.camel@moss-terrapins.epoch.ncsc.mil>
 References: <E1KqrTW-0001x8-3h@dylan>
 	 <1224268027.18940.78.camel@moss-terrapins.epoch.ncsc.mil>
 	 <48FD2C74.2070608@lougher.demon.co.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754315AbYJUMJ6@vger.kernel.org>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 In-Reply-To: <48FD2C74.2070608@lougher.demon.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: "David P. Quigley" <dpquigl@tycho.nsa.gov>, akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
+Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
 On Tue, 2008-10-21 at 02:12 +0100, Phillip Lougher wrote:
 > David P. Quigley wrote:
@@ -50,12 +50,30 @@ On Tue, 2008-10-21 at 02:12 +0100, Phillip Lougher wrote:
 > the extended directory inode which is currently defined :)
 > 
 > Thanks for spotting this.
+> 
+> Phillip
+> 
+> > Dave
+> > 
+> > 
 
-Just to clarify:  When using a labeled MAC solution like SELinux or
-SMACK, every file (of every type, including device nodes, symlinks,
-fifos, etc) will have a security attribute on it.  In the case of ext3,
-we have benefited from inlining of small attributes into the inode.
+Looking through the code I noticed that you give certain object types
+the same inode number for all instances of it (devices, fifo/sockets).
+How is this done internally? Do these types of objects occupy the same
+position on the inode table? If so how do you differentiate between a
+device and a socket?
 
--- 
-Stephen Smalley
-National Security Agency
+I have some other comments but I'll post them under the specific
+patches.
+
+I use to work on Unionfs and we used CVS initially for our SCM. When we
+started working on mainlining Unionfs we moved over to a GIT based
+system and we found it worked a lot better. You might want to consider
+moving your patches to a GIT tree that you make publically available so
+people can just clone, compile, and test them. I don't see anything that
+stops Squashfs from being compiled and loaded as a module so it might
+not be necessary but it makes it easier for people who want to test the
+code or even contribute patches.
+
+Dave
+
