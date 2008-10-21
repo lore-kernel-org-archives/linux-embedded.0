@@ -1,42 +1,42 @@
 From: Ben Nizette <bn@niasdigital.com>
 Subject: Re: UIO - interrupt performance
-Date: Tue, 21 Oct 2008 20:32:07 +1100
-Message-ID: <1224581527.3954.123.camel@moss.renham>
+Date: Tue, 21 Oct 2008 20:37:33 +1100
+Message-ID: <1224581853.3954.127.camel@moss.renham>
 References: <5958B8D7916AB84781FE0E7B57C218CB75AB98@306900ANEX2.global.avaya.com>
-	 <1224498501.3954.50.camel@moss.renham>
-	 <Pine.LNX.4.58.0810200258210.2562@vlab.hofr.at>
-	 <1224540757.3954.59.camel@moss.renham>  <48FD7D65.1070409@grandegger.com>
+	 <48FC71BD.9070703@coritel.it> <48FCAE16.70509@billgatliff.com>
+	 <48FD94AA.8070900@coritel.it>
+	 <63a49ef40810210201x36249476tcc75141d87a610f2@mail.gmail.com>
+	 <48FDA13F.3030303@coritel.it>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <48FD7D65.1070409@grandegger.com>
+In-Reply-To: <48FDA13F.3030303@coritel.it>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Wolfgang Grandegger <wg@grandegger.com>
-Cc: Nicholas Mc Guire <hofrat@hofr.at>, linux-embedded <linux-embedded@vger.kernel.org>
+To: Marco Stornelli <marco.stornelli@coritel.it>
+Cc: Alessio Igor Bogani <abogani@texware.it>, Bill Gatliff <bgat@billgatliff.com>, "Douglas, Jim (Jim)" <jdouglas@avaya.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
 
-On Tue, 2008-10-21 at 08:57 +0200, Wolfgang Grandegger wrote:
-> Ben Nizette wrote:
-> > 
-> > As in examples of the userspace half?  Unfortunately uio-smx isn't ready
-> > to fly thanks to some significant production delays but the userspace
-> > half of the Hilscher CIF driver can be found at
-> > http://www.osadl.org/projects/downloads/UIO/user/
-> 
-> As I see it, mainly the license conditions attract people to use UIO.
-> Performance is not that important.
-> 
+On Tue, 2008-10-21 at 11:30 +0200, Marco Stornelli wrote:
+> I could agree, but "the facto" due to UIO license condition, a company
+> often uses UIO drivers, regardless performance, debug, etc, only as not
+> to public the code under GPL.
 
-Ohw god I hope not.  If people want to keep their stuff proprietary they
-can supply binary-only modules a la nvidia.  Thankfully such nonsense is
-fairly uncommon these days.
+It sounds to me like you think that driver authors can sit down and
+decide whether they want to implement their driver in userspace or
+kernel space.  For 99% of drivers that's simply not true.  You  *cannot*
+write userspace drivers for most hardware, the hooks just aren't
+available.  UIO is Userspace I/O, not a set of general hooks for
+userspace drivers.
 
-UIO is not a set of hooks for general userspace drivers, it can't
-replace 99% of kernel drivers.  It exists to allow easy and
-high-performance interfacing to a particular family of devices - those
-which simply need to shift data around and have an interrupt telling you
-when they're done.
+If people want drivers not under the GPL then they can distribute a
+binary-only module (though thank $DEITY there aren't many of those
+left).  Userspace I/O exists to provide good performance interfacing to
+a family of devices - those which exist just to shuffle data around and
+have an interrupt to tell you when they're done.
+
+Do you have any example of a userspace i/o driver which exists to get
+around licencing constraints?
 
 	--Ben.
