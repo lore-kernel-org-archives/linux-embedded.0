@@ -1,13 +1,13 @@
 From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: Subject: [PATCH 04/16] Squashfs: regular file operations
-Date: Wed, 22 Oct 2008 18:35:18 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0810221833360.5634@vixen.sonytel.be>
-References: <E1KqrTW-0001xQ-Kx@dylan>
+Subject: Re: Subject: [PATCH 09/16] Squashfs: uid/gid lookup operations
+Date: Wed, 22 Oct 2008 18:38:34 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0810221838020.5634@vixen.sonytel.be>
+References: <E1KqrTX-0001xo-4N@dylan>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-429055810-1224693318=:5634"
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <E1KqrTW-0001xQ-Kx@dylan>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-983614544-1224693514=:5634"
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <E1KqrTX-0001xo-4N@dylan>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
 Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
@@ -15,43 +15,26 @@ Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
----584349381-429055810-1224693318=:5634
+---584349381-983614544-1224693514=:5634
 Content-Type: TEXT/PLAIN; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
 On Fri, 17 Oct 2008, Phillip Lougher wrote:
 > --- /dev/null
-> +++ b/fs/squashfs/file.c
-> +static long long read_blocklist(struct inode *inode, int index,
-> +				unsigned int *bsize)
+> +++ b/fs/squashfs/id.c
+
+> +__le64 *read_id_index_table(struct super_block *s, long long id_table_start,
+> +	unsigned short no_ids)
 > +{
-> +	long long start, block, blks;
-> +	int offset;
-> +	__le32 size;
-> +	int res = fill_meta_index(inode, index, &start, &offset, &block);
+> +	unsigned int length = SQUASHFS_ID_BLOCK_BYTES(no_ids);
+> +	__le64 *id_table;
 > +
-> +	TRACE("read_blocklist: res %d, index %d, start 0x%llx, offset"
-> +		       " 0x%x, block 0x%llx\n", res, index, start, offset,
-> +			block);
+> +	TRACE("In read_id_index_table, length %d\n", length);
 > +
-> +	if (res == -1)
-> +		goto failure;
-                ^^^^^^^^^^^^^
-
-> +		if (blks == -1)
-> +			goto failure;
-			^^^^^^^^^^^^^
-
-> +	if (res == 0)
-> +		goto failure;
-                ^^^^^^^^^^^^^
-
-> +failure:
-> +	return -1;
-> +}
-
-As there's nothing to clean up, you can just use `return -1' instead of `goto
-failure', and save a few lines.
+> +	/* Allocate id index table */
+> +	id_table = kmalloc(length, GFP_KERNEL);
+                           ^^^^^^
+Can this ever be larger than 64 KiB?
 
 With kind regards,
 
@@ -69,4 +52,4 @@ Internet: http://www.sony-europe.com/
 A division of Sony Europe (Belgium) N.V.
 VAT BE 0413.825.160 · RPR Brussels
 Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-429055810-1224693318=:5634--
+---584349381-983614544-1224693514=:5634--
