@@ -1,13 +1,13 @@
 From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: Subject: [PATCH 09/16] Squashfs: uid/gid lookup operations
-Date: Wed, 22 Oct 2008 18:38:34 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0810221838020.5634@vixen.sonytel.be>
-References: <E1KqrTX-0001xo-4N@dylan>
+Subject: Re: Subject: [PATCH 01/16] Squashfs: inode operations
+Date: Wed, 22 Oct 2008 19:13:21 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0810221907080.20919@vixen.sonytel.be>
+References: <E1KqrTW-0001xC-9M@dylan>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-983614544-1224693514=:5634"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <E1KqrTX-0001xo-4N@dylan>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1797153628-1224695601=:20919"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <E1KqrTW-0001xC-9M@dylan>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
 Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
@@ -15,26 +15,59 @@ Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
----584349381-983614544-1224693514=:5634
+---584349381-1797153628-1224695601=:20919
 Content-Type: TEXT/PLAIN; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
 On Fri, 17 Oct 2008, Phillip Lougher wrote:
 > --- /dev/null
-> +++ b/fs/squashfs/id.c
+> +++ b/fs/squashfs/inode.c
 
-> +__le64 *read_id_index_table(struct super_block *s, long long id_table_start,
-> +	unsigned short no_ids)
-> +{
-> +	unsigned int length = SQUASHFS_ID_BLOCK_BYTES(no_ids);
-> +	__le64 *id_table;
+> +	case SQUASHFS_BLKDEV_TYPE:
+> +	case SQUASHFS_CHRDEV_TYPE: {
+> +		struct squashfs_dev_inode *inodep = &id.dev;
+> +		unsigned int rdev;
 > +
-> +	TRACE("In read_id_index_table, length %d\n", length);
+> +		if (!squashfs_read_metadata(s, inodep, block, offset,
+> +				sizeof(*inodep), &next_block, &next_offset))
+> +			goto failed_read;
 > +
-> +	/* Allocate id index table */
-> +	id_table = kmalloc(length, GFP_KERNEL);
-                           ^^^^^^
-Can this ever be larger than 64 KiB?
+> +		i->i_nlink = le32_to_cpu(inodep->nlink);
+> +		i->i_mode |= (type == SQUASHFS_CHRDEV_TYPE) ? S_IFCHR : S_IFBLK;
+> +		rdev = le32_to_cpu(inodep->rdev);
+> +		init_special_inode(i, le16_to_cpu(i->i_mode),
+                                      ^^^^^^^^^^^
+> +					new_decode_dev(rdev));
+> +
+> +		TRACE("Device inode %x:%x, rdev %x\n",
+> +				SQUASHFS_INODE_BLK(inode), offset, rdev);
+> +		break;
+> +	}
+> +	case SQUASHFS_FIFO_TYPE:
+> +	case SQUASHFS_SOCKET_TYPE: {
+> +		struct squashfs_ipc_inode *inodep = &id.ipc;
+> +
+> +		if (!squashfs_read_metadata(s, inodep, block, offset,
+> +				sizeof(*inodep), &next_block, &next_offset))
+> +			goto failed_read;
+> +
+> +		i->i_nlink = le32_to_cpu(inodep->nlink);
+> +		i->i_mode |= (type == SQUASHFS_FIFO_TYPE) ? S_IFIFO : S_IFSOCK;
+> +		init_special_inode(i, le16_to_cpu(i->i_mode), 0);
+                                      ^^^^^^^^^^^
+> +		break;
+
+Sparse with endian checking (make C=2 CHECKFLAGS="-D__CHECK_ENDIAN__") complains
+about these:
+
+| fs/squashfs/inode.c:306:25: warning: cast to restricted __le16
+| fs/squashfs/inode.c:324:25: warning: cast to restricted __le16
+
+and it seems to be right, as inode.i_mode is not __le16. I think the le16_to_cpu()
+should be removed.
+
+BTW, there are also a few sparse warnings about different signednesses, so you
+probably want to run sparse yourself, too.
 
 With kind regards,
 
@@ -52,4 +85,4 @@ Internet: http://www.sony-europe.com/
 A division of Sony Europe (Belgium) N.V.
 VAT BE 0413.825.160 · RPR Brussels
 Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-983614544-1224693514=:5634--
+---584349381-1797153628-1224695601=:20919--
