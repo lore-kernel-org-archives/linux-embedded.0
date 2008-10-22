@@ -1,13 +1,13 @@
 From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: Subject: [PATCH 01/16] Squashfs: inode operations
-Date: Wed, 22 Oct 2008 19:13:21 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0810221907080.20919@vixen.sonytel.be>
-References: <E1KqrTW-0001xC-9M@dylan>
+Subject: Re: Subject: [PATCH 00/16] Squashfs: compressed read-only filesystem
+Date: Wed, 22 Oct 2008 19:14:39 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0810221913330.20919@vixen.sonytel.be>
+References: <E1KqrTW-0001x8-3h@dylan>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1797153628-1224695601=:20919"
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <E1KqrTW-0001xC-9M@dylan>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1009736283-1224695679=:20919"
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757183AbYJVRO6@vger.kernel.org>
+In-Reply-To: <E1KqrTW-0001x8-3h@dylan>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
 Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
@@ -15,59 +15,22 @@ Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
----584349381-1797153628-1224695601=:20919
+---584349381-1009736283-1224695679=:20919
 Content-Type: TEXT/PLAIN; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
+	Hi Phillip,
+
 On Fri, 17 Oct 2008, Phillip Lougher wrote:
-> --- /dev/null
-> +++ b/fs/squashfs/inode.c
+> This is a second attempt at mainlining Squashfs.  The first attempt was way
 
-> +	case SQUASHFS_BLKDEV_TYPE:
-> +	case SQUASHFS_CHRDEV_TYPE: {
-> +		struct squashfs_dev_inode *inodep = &id.dev;
-> +		unsigned int rdev;
-> +
-> +		if (!squashfs_read_metadata(s, inodep, block, offset,
-> +				sizeof(*inodep), &next_block, &next_offset))
-> +			goto failed_read;
-> +
-> +		i->i_nlink = le32_to_cpu(inodep->nlink);
-> +		i->i_mode |= (type == SQUASHFS_CHRDEV_TYPE) ? S_IFCHR : S_IFBLK;
-> +		rdev = le32_to_cpu(inodep->rdev);
-> +		init_special_inode(i, le16_to_cpu(i->i_mode),
-                                      ^^^^^^^^^^^
-> +					new_decode_dev(rdev));
-> +
-> +		TRACE("Device inode %x:%x, rdev %x\n",
-> +				SQUASHFS_INODE_BLK(inode), offset, rdev);
-> +		break;
-> +	}
-> +	case SQUASHFS_FIFO_TYPE:
-> +	case SQUASHFS_SOCKET_TYPE: {
-> +		struct squashfs_ipc_inode *inodep = &id.ipc;
-> +
-> +		if (!squashfs_read_metadata(s, inodep, block, offset,
-> +				sizeof(*inodep), &next_block, &next_offset))
-> +			goto failed_read;
-> +
-> +		i->i_nlink = le32_to_cpu(inodep->nlink);
-> +		i->i_mode |= (type == SQUASHFS_FIFO_TYPE) ? S_IFIFO : S_IFSOCK;
-> +		init_special_inode(i, le16_to_cpu(i->i_mode), 0);
-                                      ^^^^^^^^^^^
-> +		break;
+This is great news!
 
-Sparse with endian checking (make C=2 CHECKFLAGS="-D__CHECK_ENDIAN__") complains
-about these:
+I ran a quick test of squashfs 4.0 (the CVS version) on UML/ia32 and ppc64, and it
+seems to work fine!  Great job! Let's hope we'll see it in mainline soon...
 
-| fs/squashfs/inode.c:306:25: warning: cast to restricted __le16
-| fs/squashfs/inode.c:324:25: warning: cast to restricted __le16
-
-and it seems to be right, as inode.i_mode is not __le16. I think the le16_to_cpu()
-should be removed.
-
-BTW, there are also a few sparse warnings about different signednesses, so you
-probably want to run sparse yourself, too.
+BTW, one minor gripe is that the current mksquashfs doesn't want to run on big
+endian yet, as there's no byteswapping support.
 
 With kind regards,
 
@@ -85,4 +48,4 @@ Internet: http://www.sony-europe.com/
 A division of Sony Europe (Belgium) N.V.
 VAT BE 0413.825.160 · RPR Brussels
 Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-1797153628-1224695601=:20919--
+---584349381-1009736283-1224695679=:20919--
