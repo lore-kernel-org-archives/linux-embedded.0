@@ -1,12 +1,12 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: Subject: [PATCH 01/16] Squashfs: inode operations
-Date: Thu, 23 Oct 2008 09:42:17 +0100
-Message-ID: <490038E9.7050902@lougher.demon.co.uk>
-References: <E1KqrTW-0001xC-9M@dylan> <Pine.LNX.4.64.0810221907080.20919@vixen.sonytel.be>
+Subject: Re: Subject: [PATCH 12/16] Squashfs: header files
+Date: Thu, 23 Oct 2008 09:56:21 +0100
+Message-ID: <49003C35.1090301@lougher.demon.co.uk>
+References: <E1KqrTX-0001y4-JE@dylan> <Pine.LNX.4.64.0810221801570.5634@vixen.sonytel.be>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.0810221907080.20919@vixen.sonytel.be>
+In-Reply-To: <Pine.LNX.4.64.0810221801570.5634@vixen.sonytel.be>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
@@ -14,22 +14,43 @@ To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
 Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
 Geert Uytterhoeven wrote:
+> On Fri, 17 Oct 2008, Phillip Lougher wrote:
 
-> Sparse with endian checking (make C=2 CHECKFLAGS="-D__CHECK_ENDIAN__") complains
-> aibout these:
+>> +#ifdef SQUASHFS_TRACE
+>> +#define TRACE(s, args...)	printk(KERN_NOTICE "SQUASHFS: "s, ## args)
+>> +#else
+>> +#define TRACE(s, args...)	{}
+>> +#endif
 > 
-> | fs/squashfs/inode.c:306:25: warning: cast to restricted __le16
-> | fs/squashfs/inode.c:324:25: warning: cast to restricted __le16
+> Just use
 > 
-> and it seems to be right, as inode.i_mode is not __le16. I think the le16_to_cpu()
-> should be removed.
+>     #define TRACE(s, args...)	pr_debug("SQUASHFS: "s, ## args)
 
-Yes, you're right.  Fixed thanks.
+OK.
+
+>> +
+>> +#define WARNING(s, args...)	printk(KERN_WARNING "SQUASHFS: "s, ## args)
+>                                 ^^^^^^^^^^^^^^^^
+> 				pr_warning(
+> 
+
+OK.
 
 > 
-> BTW, there are also a few sparse warnings about different signednesses, so you
-> probably want to run sparse yourself, too.
+> SQUASHFS_MKFLAGS() isn't used by the kernel, only by the tools (mksquashfs)?
+> 
 
-I'll do that.
+Only used by mksquashfs.  I pulled out the user-space only stuff into a 
+separate include, but must have missed this one.
+
+>> +/* meta index cache */
+>> +#define SQUASHFS_META_INDEXES	(SQUASHFS_METADATA_SIZE / sizeof(unsigned int))
+>                                                                          ^^^^^^^^^^^^
+> I was wondering whether a meta index is an `unsigned int' or an `__le32', but I
+> couldn't find it easily.
+> 
+
+Unsigned int, it's used internally by the index cache code (file.c).  It 
+works out how many block indexes can fit into one compressed metadata block.
 
 Phillip
