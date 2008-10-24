@@ -1,56 +1,47 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: Subject: [PATCH 12/16] Squashfs: header files
-Date: Thu, 23 Oct 2008 09:56:21 +0100
-Message-ID: <49003C35.1090301@lougher.demon.co.uk>
-References: <E1KqrTX-0001y4-JE@dylan> <Pine.LNX.4.64.0810221801570.5634@vixen.sonytel.be>
+From: Ben Nizette <bn@niasdigital.com>
+Subject: Re: [PATCH v2 RESEND] gpiolib: Add pin change notification
+Date: Fri, 24 Oct 2008 11:28:17 +1100
+Message-ID: <1224808097.7082.3.camel@moss.renham>
+References: <1224543007.3954.71.camel@moss.renham>
+	 <20081021133106.be5cc01c.akpm@linux-foundation.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.0810221801570.5634@vixen.sonytel.be>
+In-Reply-To: <20081021133106.be5cc01c.akpm@linux-foundation.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
+Content-Type: text/plain; charset="us-ascii"
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: david-b@pacbell.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Geert Uytterhoeven wrote:
-> On Fri, 17 Oct 2008, Phillip Lougher wrote:
 
->> +#ifdef SQUASHFS_TRACE
->> +#define TRACE(s, args...)	printk(KERN_NOTICE "SQUASHFS: "s, ## args)
->> +#else
->> +#define TRACE(s, args...)	{}
->> +#endif
+On Tue, 2008-10-21 at 13:31 -0700, Andrew Morton wrote:
+> On Tue, 21 Oct 2008 09:50:06 +1100
+> Ben Nizette <bn@niasdigital.com> wrote:
+> > +static irqreturn_t gpio_irq_handler(int irq, void *dev_id)
+> > +{
+> > +	struct gpio_desc *desc = dev_id;
+> > +	int gpio = desc - gpio_desc;
+> > +	int new, old;
+> > +
+> > +	if (!gpio_is_valid(gpio))
+> > +		return IRQ_NONE;
+> > +
+> > +	new = gpio_get_value(gpio);
+> > +	old = desc->val;
+> > +
+> > +	if ((new && !old && test_bit(ASYNC_RISING, &desc->flags)) ||
+> > +	    (!new && old && test_bit(ASYNC_FALLING, &desc->flags)))
+> > +		sysfs_notify(&desc->dev->kobj, NULL, "value");
 > 
-> Just use
+> eekeekeek!  sysfs_notify() does mutex_lock() and will die horridly if
+> called from an interrupt handler.
 > 
->     #define TRACE(s, args...)	pr_debug("SQUASHFS: "s, ## args)
+> You should have got a storm of warnings when runtime testing this code.
+> Please ensure that all debug options are enabled when testing code. 
+> Documentation/SubmitChecklist has help.
 
-OK.
+0_o yea that isn't great...  Thanks - shall respin and repost shortly.
 
->> +
->> +#define WARNING(s, args...)	printk(KERN_WARNING "SQUASHFS: "s, ## args)
->                                 ^^^^^^^^^^^^^^^^
-> 				pr_warning(
-> 
 
-OK.
-
-> 
-> SQUASHFS_MKFLAGS() isn't used by the kernel, only by the tools (mksquashfs)?
-> 
-
-Only used by mksquashfs.  I pulled out the user-space only stuff into a 
-separate include, but must have missed this one.
-
->> +/* meta index cache */
->> +#define SQUASHFS_META_INDEXES	(SQUASHFS_METADATA_SIZE / sizeof(unsigned int))
->                                                                          ^^^^^^^^^^^^
-> I was wondering whether a meta index is an `unsigned int' or an `__le32', but I
-> couldn't find it easily.
-> 
-
-Unsigned int, it's used internally by the index cache code (file.c).  It 
-works out how many block indexes can fit into one compressed metadata block.
-
-Phillip
+	--Ben.
