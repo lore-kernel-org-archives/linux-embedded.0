@@ -1,47 +1,41 @@
-From: Ben Nizette <bn@niasdigital.com>
-Subject: Re: [PATCH v2 RESEND] gpiolib: Add pin change notification
-Date: Fri, 24 Oct 2008 11:28:17 +1100
-Message-ID: <1224808097.7082.3.camel@moss.renham>
-References: <1224543007.3954.71.camel@moss.renham>
-	 <20081021133106.be5cc01c.akpm@linux-foundation.org>
+From: "Fredrik Johansson" <frejo242@gmail.com>
+Subject: USB, Host and Device on the same machine
+Date: Fri, 24 Oct 2008 09:18:48 +0200
+Message-ID: <53e45cc30810240018w1c3c73c2nf9a9b606e0e7dea4@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20081021133106.be5cc01c.akpm@linux-foundation.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:mime-version:content-type:content-transfer-encoding
+         :content-disposition;
+        bh=+RzbM4kyc09sdtx6tuJQQYMlx07ZYInUm+ibT5+D7v8=;
+        b=tcth4dtIZH3xvXs7anGmu5HK5+NTuyxpNYyEGFA9dGPUoYS+PVsrpCMT0Hb1Wi+0US
+         VtjzL/FCkfQ0kRXPOQ4bd3gGM5AYrgiTdiBWeiWVUUkjWWYfVkI5vzLTiOGNSJnFuFrt
+         R19R3vyc3SEAcYBykwsU9UNw6/NgAIwVroyoY=
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: david-b@pacbell.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: linux-embedded@vger.kernel.org
 
+Hello
 
-On Tue, 2008-10-21 at 13:31 -0700, Andrew Morton wrote:
-> On Tue, 21 Oct 2008 09:50:06 +1100
-> Ben Nizette <bn@niasdigital.com> wrote:
-> > +static irqreturn_t gpio_irq_handler(int irq, void *dev_id)
-> > +{
-> > +	struct gpio_desc *desc = dev_id;
-> > +	int gpio = desc - gpio_desc;
-> > +	int new, old;
-> > +
-> > +	if (!gpio_is_valid(gpio))
-> > +		return IRQ_NONE;
-> > +
-> > +	new = gpio_get_value(gpio);
-> > +	old = desc->val;
-> > +
-> > +	if ((new && !old && test_bit(ASYNC_RISING, &desc->flags)) ||
-> > +	    (!new && old && test_bit(ASYNC_FALLING, &desc->flags)))
-> > +		sysfs_notify(&desc->dev->kobj, NULL, "value");
-> 
-> eekeekeek!  sysfs_notify() does mutex_lock() and will die horridly if
-> called from an interrupt handler.
-> 
-> You should have got a storm of warnings when runtime testing this code.
-> Please ensure that all debug options are enabled when testing code. 
-> Documentation/SubmitChecklist has help.
+I am working on an embedded machine that has two USB controllers, one
+is a OTG and the other is a pure host.
 
-0_o yea that isn't great...  Thanks - shall respin and repost shortly.
+I have succesfully used g_serial driver on the OTG controller in
+device mode and talked to my pc using the cdc-acm driver.
+With the g_serial unloaded I have also enabled the ehci-hcd and
+cdc-acm drivers and connected the host port to another serial device.
 
+The problem I have now is that I want to be able to have my embedded
+machine work as a device on the OTG port and a host on the host port,
+but if I load the ehci-hcd driver with g_serial already loaded it
+screws everything up since ehci-hcd driver attaches to both the OTG
+and the host controller, how can i prevent it from using the OTG
+controller?
 
-	--Ben.
+Best regards
+Fredrik Johansson
