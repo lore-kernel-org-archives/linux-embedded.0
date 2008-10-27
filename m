@@ -1,201 +1,89 @@
-From: Grant Likely <grant.likely@secretlab.ca>
+From: "Mike Frysinger" <vapier.adi@gmail.com>
 Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v2)
-Date: Mon, 27 Oct 2008 08:37:34 -0600
-Message-ID: <20081027143734.GA13565@secretlab.ca>
+Date: Mon, 27 Oct 2008 10:52:28 -0400
+Message-ID: <8bd0f97a0810270752p5fb6e560m6ddcf07df8f689f5@mail.gmail.com>
 References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=Logygtlbg6pW0KWIjO5czNN19AXNGErMOJErD3bDfjI=;
+        b=MDBdWzkq7JQYnNqJxPKyUgy8OKdaWKcuwyl2j2xHacUvGWAy0elNqZIbSqU/FLMObq
+         FvhoN6cjkoZcCQEixOWPIaSNp0RKztAeDGaGMgkE8vQ0QlhN2XAA5RTcrGiJVfH5HtXY
+         ODgWhAx/9ronaICECrwRJa2mLWjmCE/wVQ6Oc=
 In-Reply-To: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
 Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
 
-On Mon, Oct 27, 2008 at 12:53:22PM +0200, Paulius Zaleckas wrote:
-> Useful for machines where PHY control is connected to GPIO.
-> This driver also supports interrupts from PHY.
-> 
-> Changes since v1:
-> - fixed releasing of gpio (thanks to Sascha Hauer)
-> - fixed compiling due to bus->dev to bus->parent change
-> 
-> Signed-off-by: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-> ---
+On Mon, Oct 27, 2008 at 06:53, Paulius Zaleckas wrote:
+> +config MDIO_GPIO
+> +       tristate "Support for GPIO bitbanged MDIO buses"
+> +       depends on MDIO_BITBANG && GENERIC_GPIO
+> +       help
+> +         Supports MDIO busses connected to GPIO.
 
-Well structured driver.  Comments below.
+please add a line stating the name of the module if it is built as such
 
-> diff --git a/drivers/net/phy/mdio-gpio.c b/drivers/net/phy/mdio-gpio.c
-> new file mode 100644
-> index 0000000..585897b
-> --- /dev/null
-> +++ b/drivers/net/phy/mdio-gpio.c
-> @@ -0,0 +1,187 @@
-> +/*
-> + * GPIO based MDIO bitbang driver.
-> + *
-> + * Copyright (C) 2008, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-> + *
-> + * Based on mdio-ofgpio.c:
-> + *
-> + * Copyright (c) 2008 CSE Semaphore Belgium.
-> + *  by Laurent Pinchart <laurentp@cse-semaphore.com>
-> + *
-> + * Copyright (c) 2003 Intracom S.A.
-> + *  by Pantelis Antoniou <panto@intracom.gr>
-> + *
-> + * 2005 (c) MontaVista Software, Inc.
-> + * Vitaly Bordug <vbordug@ru.mvista.com>
-> + *
-> + * This file is licensed under the terms of the GNU General Public License
-> + * version 2. This program is licensed "as is" without any warranty of any
-> + * kind, whether express or implied.
-> + */
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/init.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/gpio.h>
-> +#include <linux/mdio-bitbang.h>
-> +#include <linux/mdio-gpio.h>
+> +static struct mdiobb_ops mdio_gpio_ops = {
+> +       .owner = THIS_MODULE,
+> +       .set_mdc = mdc,
+> +       .set_mdio_dir = mdio_dir,
+> +       .set_mdio_data = mdio,
+> +       .get_mdio_data = mdio_read,
+> +};
 
-Missing:
-
-MODULE_AUTHOR()
-MODULE_LICENSE()
-MODULE_DESCRIPTION()
+shouldnt the function names match the gpio_ops ?  things like "mdc"
+and "mdio" are a little obscure ...
 
 > +static int __devinit mdio_gpio_probe(struct platform_device *pdev)
 > +{
-> +	struct mii_bus *new_bus;
-> +	struct mdio_gpio_info *bitbang;
-> +	struct mdio_gpio_platform_data *pdata;
-> +	int ret = -ENOMEM;
-> +	int i;
+> +       struct mii_bus *new_bus;
+> +       struct mdio_gpio_info *bitbang;
+> +       struct mdio_gpio_platform_data *pdata;
+> +       int ret = -ENOMEM;
+> +       int i;
 > +
-> +	pdata = pdev->dev.platform_data;
-> +	if (pdata == NULL)
-> +		goto out;
+> +       pdata = pdev->dev.platform_data;
+> +       if (pdata == NULL)
+> +               goto out;
 > +
-> +	bitbang = kzalloc(sizeof(struct mdio_gpio_info), GFP_KERNEL);
-> +	if (!bitbang)
-> +		goto out;
-> +
-> +	bitbang->ctrl.ops = &mdio_gpio_ops;
-> +	bitbang->mdc = pdata->mdc;
-> +	bitbang->mdio = pdata->mdio;
-> +
-> +	if (gpio_request(bitbang->mdc, "mdc"))
-> +		goto out_free_bitbang;
-> +
-> +	if (gpio_request(bitbang->mdio, "mdio"))
-> +		goto out_free_mdc;
-> +
-> +	new_bus = alloc_mdio_bitbang(&bitbang->ctrl);
-> +	if (!new_bus)
-> +		goto out_free_gpio;
-> +
-> +	new_bus->name = "GPIO Bitbanged MII",
-> +	snprintf(new_bus->id, MII_BUS_ID_SIZE, "phy%i", pdev->id);
-> +
-> +	new_bus->phy_mask = ~0;
-> +	new_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
-> +	if (!new_bus->irq)
-> +		goto out_free_bus;
+> +       bitbang = kzalloc(sizeof(struct mdio_gpio_info), GFP_KERNEL);
 
-The IRQ array is fixed size.  You can add it to the mdio_gpio_info
-structure and then just set the pointer here so that only one kzalloc
-is needed.
+sizeof(*bitbang) tends to read better and be more resistant to bitrot
 
+> +       if (gpio_request(bitbang->mdc, "mdc"))
+> +               goto out_free_bitbang;
 > +
-> +	for (i = 0; i < PHY_MAX_ADDR; i++)
-> +		new_bus->irq[i] = PHY_POLL;
-> +
-> +	for (i = 0; i < pdata->nr_phys; i++) {
-> +		unsigned int phy_addr = pdata->phys[i].addr;
-> +
-> +		BUG_ON(phy_addr >= PHY_MAX_ADDR);
+> +       if (gpio_request(bitbang->mdio, "mdio"))
+> +               goto out_free_mdc;
 
-Is it really worth bringing down the whole kernel when too many phys are
-specified in pdata?
+maybe include driver name and/or the platform id ?  if you have
+multiple mdio-gpio's running at the same time, coordinating may get a
+little messy ...
 
-> +
-> +		new_bus->phy_mask &= ~(1 << phy_addr);
-> +		new_bus->irq[phy_addr] = pdata->phys[i].irq;
-> +	}
-> +
-> +	new_bus->parent = &pdev->dev;
-> +	platform_set_drvdata(pdev, new_bus);
-> +
-> +	ret = mdiobus_register(new_bus);
-> +	if (ret)
-> +		goto out_free_all;
-> +
-> +	return 0;
-> +
-> +out_free_all:
-> +	platform_set_drvdata(pdev, NULL);
-> +	kfree(new_bus->irq);
-> +out_free_bus:
-> +	free_mdio_bitbang(new_bus);
-> +out_free_gpio:
-> +	gpio_free(bitbang->mdio);
-> +out_free_mdc:
-> +	gpio_free(bitbang->mdc);
-> +out_free_bitbang:
-> +	kfree(bitbang);
-> +out:
-> +	return ret;
+> +       new_bus->name = "GPIO Bitbanged MII",
 
-Nit:  labels in column 0 will confuse diff when it tries to put the
-function name in the diff hunk header.  If you indent the labels by 1
-space then future diffs will show the function name instead of the label
-name in diff hunk headers.
+platform id here too ?
 
-> +}
-> +
-> +static int __devexit mdio_gpio_remove(struct platform_device *pdev)
-> +{
-> +	struct mii_bus *bus = platform_get_drvdata(pdev);
-> +	struct mdio_gpio_info *bitbang = bus->priv;
-> +
-> +	mdiobus_unregister(bus);
-> +	kfree(bus->irq);
-> +	free_mdio_bitbang(bus);
-> +	platform_set_drvdata(pdev, NULL);
-> +	gpio_free(bitbang->mdc);
-> +	gpio_free(bitbang->mdio);
-> +	kfree(bitbang);
-> +
-> +	return 0;
-> +}
-> +
-> +static struct platform_driver mdio_gpio_driver = {
-> +	.probe = mdio_gpio_probe,
-> +	.remove = __devexit_p(mdio_gpio_remove),
-> +	.driver		= {
-> +		.name	= "mdio-gpio",
-> +		.owner	= THIS_MODULE,
-> +	},
-> +};
-> +
 > +static int mdio_gpio_init(void)
-
-static int __init mdio_gpio_init(void)
-
 > +{
-> +	return platform_driver_register(&mdio_gpio_driver);
+> +       return platform_driver_register(&mdio_gpio_driver);
 > +}
-> +
+
+needs __init markings
+
 > +static void mdio_gpio_exit(void)
-
-static void __exit mdio_gpio_exit(void)
-
 > +{
-> +	platform_driver_unregister(&mdio_gpio_driver);
+> +       platform_driver_unregister(&mdio_gpio_driver);
 > +}
-> +
-> +module_init(mdio_gpio_init);
-> +module_exit(mdio_gpio_exit);
+
+needs __exit markings
+-mike
