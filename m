@@ -1,91 +1,28 @@
 From: David Brownell <david-b@pacbell.net>
-Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v2)
-Date: Mon, 27 Oct 2008 09:41:02 -0700
-Message-ID: <200810270941.03258.david-b@pacbell.net>
-References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <20081027143734.GA13565@secretlab.ca>
+Subject: Re: USB, Host and Device on the same machine
+Date: Mon, 27 Oct 2008 09:44:47 -0700
+Message-ID: <200810270944.47246.david-b@pacbell.net>
+References: <53e45cc30810240018w1c3c73c2nf9a9b606e0e7dea4@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20081027143734.GA13565@secretlab.ca>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <53e45cc30810240018w1c3c73c2nf9a9b606e0e7dea4@mail.gmail.com>
 Content-Disposition: inline
-Sender: netdev-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Grant Likely <grant.likely@secretlab.ca>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
+To: Fredrik Johansson <frejo242@gmail.com>
+Cc: linux-embedded@vger.kernel.org
 
-On Monday 27 October 2008, Grant Likely wrote:
-> On Mon, Oct 27, 2008 at 12:53:22PM +0200, Paulius Zaleckas wrote:
-> > Useful for machines where PHY control is connected to GPIO.
-> > This driver also supports interrupts from PHY.
+On Friday 24 October 2008, Fredrik Johansson wrote:
+> if I load the ehci-hcd driver with g_serial already loaded it
+> screws everything up since ehci-hcd driver attaches to both the OTG
+> and the host controller, how can i prevent it from using the OTG
+> controller?
 
-I get a kick out of seeing each new generic driver using
-the generic GPIO interface.  I *should* have expected it,
-obviously.  ;)
+If the OTG controller exposes EHCI as its host interface, it
+sure *ought* to be managed by the EHCI driver.  Maybe you
+should be submitting a patch adding OTG glue to EHCI?
 
-With a few exceptions I'll second Grant's comments, and
-pick a few more nits.
-
-
-> > +#include <linux/kernel.h>
-> > +#include <linux/init.h>
-> > +#include <linux/platform_device.h>
-> > +#include <linux/gpio.h>
-> > +#include <linux/mdio-bitbang.h>
-> > +#include <linux/mdio-gpio.h>
-> 
-> Missing:
-> 
-> MODULE_AUTHOR()
-> MODULE_LICENSE()
-> MODULE_DESCRIPTION()
-
-... which many of us like to see at the *end* of the driver,
-with other module housekeeping (driver registration), instead
-of duplicating the header contents we just saw.
-
-
-> > +static int __devinit mdio_gpio_probe(struct platform_device *pdev)
-
-There are a few cases where platform drivers can't use __init
-and platform_driver_probe(), instead of __devinit paired with
-platform_driver_register().  Does this need to be one of them?
-
-That is, are these platform devices going to be hotplugged?
-(Usually because they are driver model children of other devices
-which get hotplugged.)
- 
-
-> > +out:
-> > +	return ret;
-> 
-> Nit:  labels in column 0 will confuse diff when it tries to put the
-> function name in the diff hunk header.  If you indent the labels by 1
-> space then future diffs will show the function name instead of the label
-> name in diff hunk headers.
-
-... but please don't change drivers to work around cosmitic diff bugs ...
-
-
-> > +static int __devexit mdio_gpio_remove(struct platform_device *pdev)
-
-As above:  if these devices are really hotpluggable, so be it.
-But that's the exception for platform_device nodes, not the rule,
-so I'd normally use __exit here (and __exit_p in the driver
-structure, later) to shrink the runtime code footprint.
-
-
-> > +static void mdio_gpio_exit(void)
-> 
-> static void __exit mdio_gpio_exit(void)
-> 
-> > +{
-> > +	platform_driver_unregister(&mdio_gpio_driver);
-> > +}
-> > +
-> > +module_init(mdio_gpio_init);
-> > +module_exit(mdio_gpio_exit);
-
-Also, snug the module_init()/module_exit() up against the
-functions they affect, just as with EXPORT_SYMBOL().
-
+If it's not exposing EHCI as its host interface, then it seems
+your OTG driver is quite buggy...
