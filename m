@@ -1,75 +1,80 @@
 From: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
 Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v2)
-Date: Tue, 28 Oct 2008 10:30:39 +0200
-Message-ID: <4906CDAF.2070000@teltonika.lt>
-References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <8bd0f97a0810270752p5fb6e560m6ddcf07df8f689f5@mail.gmail.com>
+Date: Tue, 28 Oct 2008 10:55:37 +0200
+Message-ID: <4906D389.5050706@teltonika.lt>
+References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <20081027143734.GA13565@secretlab.ca> <200810270941.03258.david-b@pacbell.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8bd0f97a0810270752p5fb6e560m6ddcf07df8f689f5@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <200810270941.03258.david-b@pacbell.net>
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
+To: David Brownell <david-b@pacbell.net>
+Cc: Grant Likely <grant.likely@secretlab.ca>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
 
-Thanks for review. Comments below.
+David Brownell wrote:
+> On Monday 27 October 2008, Grant Likely wrote:
+>> On Mon, Oct 27, 2008 at 12:53:22PM +0200, Paulius Zaleckas wrote:
+>>> Useful for machines where PHY control is connected to GPIO.
+>>> This driver also supports interrupts from PHY.
+> 
+> I get a kick out of seeing each new generic driver using
+> the generic GPIO interface.  I *should* have expected it,
+> obviously.  ;)
+> 
+> With a few exceptions I'll second Grant's comments, and
+> pick a few more nits.
 
-Mike Frysinger wrote:
-> On Mon, Oct 27, 2008 at 06:53, Paulius Zaleckas wrote:
+Thanks for review!
 
-[...]
+> 
+>>> +#include <linux/kernel.h>
+>>> +#include <linux/init.h>
+>>> +#include <linux/platform_device.h>
+>>> +#include <linux/gpio.h>
+>>> +#include <linux/mdio-bitbang.h>
+>>> +#include <linux/mdio-gpio.h>
+>> Missing:
+>>
+>> MODULE_AUTHOR()
+>> MODULE_LICENSE()
+>> MODULE_DESCRIPTION()
+> 
+> ... which many of us like to see at the *end* of the driver,
+> with other module housekeeping (driver registration), instead
+> of duplicating the header contents we just saw.
+> 
+> 
+>>> +static int __devinit mdio_gpio_probe(struct platform_device *pdev)
+> 
+> There are a few cases where platform drivers can't use __init
+> and platform_driver_probe(), instead of __devinit paired with
+> platform_driver_register().  Does this need to be one of them?
+> 
+> That is, are these platform devices going to be hotplugged?
+> (Usually because they are driver model children of other devices
+> which get hotplugged.)
 
->> +static int __devinit mdio_gpio_probe(struct platform_device *pdev)
->> +{
->> +       struct mii_bus *new_bus;
->> +       struct mdio_gpio_info *bitbang;
->> +       struct mdio_gpio_platform_data *pdata;
->> +       int ret = -ENOMEM;
->> +       int i;
->> +
->> +       pdata = pdev->dev.platform_data;
->> +       if (pdata == NULL)
->> +               goto out;
->> +
->> +       bitbang = kzalloc(sizeof(struct mdio_gpio_info), GFP_KERNEL);
-> 
-> sizeof(*bitbang) tends to read better and be more resistant to bitrot
-> 
->> +       if (gpio_request(bitbang->mdc, "mdc"))
->> +               goto out_free_bitbang;
->> +
->> +       if (gpio_request(bitbang->mdio, "mdio"))
->> +               goto out_free_mdc;
-> 
-> maybe include driver name and/or the platform id ?  if you have
-> multiple mdio-gpio's running at the same time, coordinating may get a
-> little messy ...
+I think there is possibility that this driver will be hotplugged...
+I agree that all devices that are explicitly on the SoC itself
+have to use __init and platform_driver_probe(), but it is not
+the case for this one... I will add MODULE_ALIAS for udev.
 
-Well... this is mostly for debugging only... I don't like the idea
-to add additional char[..] variable and use sprintf...
-IMO this would be just a bloat...
-
->> +       new_bus->name = "GPIO Bitbanged MII",
 > 
-> platform id here too ?
-
-If you take a look one line below you would see that bus ID is formed
-using platform id. Does this really need to be duplicated also in the
-name?
-
->> +static int mdio_gpio_init(void)
->> +{
->> +       return platform_driver_register(&mdio_gpio_driver);
->> +}
+>>> +out:
+>>> +	return ret;
+>> Nit:  labels in column 0 will confuse diff when it tries to put the
+>> function name in the diff hunk header.  If you indent the labels by 1
+>> space then future diffs will show the function name instead of the label
+>> name in diff hunk headers.
 > 
-> needs __init markings
+> ... but please don't change drivers to work around cosmitic diff bugs ...
 > 
->> +static void mdio_gpio_exit(void)
->> +{
->> +       platform_driver_unregister(&mdio_gpio_driver);
->> +}
 > 
-> needs __exit markings
-> -mike
+>>> +static int __devexit mdio_gpio_remove(struct platform_device *pdev)
 > 
+> As above:  if these devices are really hotpluggable, so be it.
+> But that's the exception for platform_device nodes, not the rule,
+> so I'd normally use __exit here (and __exit_p in the driver
+> structure, later) to shrink the runtime code footprint.
