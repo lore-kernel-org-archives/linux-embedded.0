@@ -1,111 +1,75 @@
 From: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
 Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v2)
-Date: Tue, 28 Oct 2008 09:46:00 +0200
-Message-ID: <4906C338.6010300@teltonika.lt>
-References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <20081027143734.GA13565@secretlab.ca>
+Date: Tue, 28 Oct 2008 10:30:39 +0200
+Message-ID: <4906CDAF.2070000@teltonika.lt>
+References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <8bd0f97a0810270752p5fb6e560m6ddcf07df8f689f5@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20081027143734.GA13565@secretlab.ca>
-Sender: netdev-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <8bd0f97a0810270752p5fb6e560m6ddcf07df8f689f5@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Grant Likely <grant.likely@secretlab.ca>
+To: Mike Frysinger <vapier.adi@gmail.com>
 Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
 
-Grant Likely wrote:
-> On Mon, Oct 27, 2008 at 12:53:22PM +0200, Paulius Zaleckas wrote:
->> Useful for machines where PHY control is connected to GPIO.
->> This driver also supports interrupts from PHY.
->>
->> Changes since v1:
->> - fixed releasing of gpio (thanks to Sascha Hauer)
->> - fixed compiling due to bus->dev to bus->parent change
->>
->> Signed-off-by: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
->> ---
-> 
-> Well structured driver.  Comments below.
+Thanks for review. Comments below.
 
-Thanks for review.
-
->> diff --git a/drivers/net/phy/mdio-gpio.c b/drivers/net/phy/mdio-gpio.c
->> new file mode 100644
->> index 0000000..585897b
->> --- /dev/null
->> +++ b/drivers/net/phy/mdio-gpio.c
+Mike Frysinger wrote:
+> On Mon, Oct 27, 2008 at 06:53, Paulius Zaleckas wrote:
 
 [...]
 
-> 
 >> +static int __devinit mdio_gpio_probe(struct platform_device *pdev)
 >> +{
->> +	struct mii_bus *new_bus;
->> +	struct mdio_gpio_info *bitbang;
->> +	struct mdio_gpio_platform_data *pdata;
->> +	int ret = -ENOMEM;
->> +	int i;
+>> +       struct mii_bus *new_bus;
+>> +       struct mdio_gpio_info *bitbang;
+>> +       struct mdio_gpio_platform_data *pdata;
+>> +       int ret = -ENOMEM;
+>> +       int i;
 >> +
->> +	pdata = pdev->dev.platform_data;
->> +	if (pdata == NULL)
->> +		goto out;
+>> +       pdata = pdev->dev.platform_data;
+>> +       if (pdata == NULL)
+>> +               goto out;
 >> +
->> +	bitbang = kzalloc(sizeof(struct mdio_gpio_info), GFP_KERNEL);
->> +	if (!bitbang)
->> +		goto out;
->> +
->> +	bitbang->ctrl.ops = &mdio_gpio_ops;
->> +	bitbang->mdc = pdata->mdc;
->> +	bitbang->mdio = pdata->mdio;
->> +
->> +	if (gpio_request(bitbang->mdc, "mdc"))
->> +		goto out_free_bitbang;
->> +
->> +	if (gpio_request(bitbang->mdio, "mdio"))
->> +		goto out_free_mdc;
->> +
->> +	new_bus = alloc_mdio_bitbang(&bitbang->ctrl);
->> +	if (!new_bus)
->> +		goto out_free_gpio;
->> +
->> +	new_bus->name = "GPIO Bitbanged MII",
->> +	snprintf(new_bus->id, MII_BUS_ID_SIZE, "phy%i", pdev->id);
->> +
->> +	new_bus->phy_mask = ~0;
->> +	new_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
->> +	if (!new_bus->irq)
->> +		goto out_free_bus;
+>> +       bitbang = kzalloc(sizeof(struct mdio_gpio_info), GFP_KERNEL);
 > 
-> The IRQ array is fixed size.  You can add it to the mdio_gpio_info
-> structure and then just set the pointer here so that only one kzalloc
-> is needed.
+> sizeof(*bitbang) tends to read better and be more resistant to bitrot
+> 
+>> +       if (gpio_request(bitbang->mdc, "mdc"))
+>> +               goto out_free_bitbang;
+>> +
+>> +       if (gpio_request(bitbang->mdio, "mdio"))
+>> +               goto out_free_mdc;
+> 
+> maybe include driver name and/or the platform id ?  if you have
+> multiple mdio-gpio's running at the same time, coordinating may get a
+> little messy ...
 
-It can be put in mdio_gpio_info, but please note that mdio_gpio_info is
-allocated with kzalloc() and irq with kmalloc(), because there is no need
-to fill this array with zeros(see below).
+Well... this is mostly for debugging only... I don't like the idea
+to add additional char[..] variable and use sprintf...
+IMO this would be just a bloat...
 
->> +
->> +	for (i = 0; i < PHY_MAX_ADDR; i++)
->> +		new_bus->irq[i] = PHY_POLL;
->> +
->> +	for (i = 0; i < pdata->nr_phys; i++) {
->> +		unsigned int phy_addr = pdata->phys[i].addr;
->> +
->> +		BUG_ON(phy_addr >= PHY_MAX_ADDR);
+>> +       new_bus->name = "GPIO Bitbanged MII",
 > 
-> Is it really worth bringing down the whole kernel when too many phys are
-> specified in pdata?
+> platform id here too ?
+
+If you take a look one line below you would see that bus ID is formed
+using platform id. Does this really need to be duplicated also in the
+name?
+
+>> +static int mdio_gpio_init(void)
+>> +{
+>> +       return platform_driver_register(&mdio_gpio_driver);
+>> +}
 > 
->> +
->> +		new_bus->phy_mask &= ~(1 << phy_addr);
->> +		new_bus->irq[phy_addr] = pdata->phys[i].irq;
->> +	}
->> +
->> +	new_bus->parent = &pdev->dev;
->> +	platform_set_drvdata(pdev, new_bus);
->> +
->> +	ret = mdiobus_register(new_bus);
->> +	if (ret)
->> +		goto out_free_all;
->> +
->> +	return 0;
+> needs __init markings
+> 
+>> +static void mdio_gpio_exit(void)
+>> +{
+>> +       platform_driver_unregister(&mdio_gpio_driver);
+>> +}
+> 
+> needs __exit markings
+> -mike
+> 
