@@ -1,53 +1,138 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v2)
-Date: Tue, 28 Oct 2008 16:16:42 +0000
-Message-ID: <20081028161642.GL1034@flint.arm.linux.org.uk>
-References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <20081027143734.GA13565@secretlab.ca> <4906C338.6010300@teltonika.lt> <fa686aa40810280608q1c58e07cq7c5f2cc9feeb8ef6@mail.gmail.com> <20081028151755.GA1034@flint.arm.linux.org.uk> <fa686aa40810280830i1a5a7b84u1dfa8cd97c6b1420@mail.gmail.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: Subject: [PATCH 02/16] Squashfs: directory lookup operations
+Date: Tue, 28 Oct 2008 18:42:36 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.0810281835150.23080@vixen.sonytel.be>
+References: <E1KqrTW-0001xG-Cl@dylan>
 Mime-Version: 1.0
-Return-path: <netdev-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=arm.linux.org.uk; s=caramon; h=Date:From:To:Cc:Subject:
-	Message-ID:References:Mime-Version:Content-Type:In-Reply-To:
-	Sender; bh=W8nzV1BysPkU0felVr/M3vUVZzuHl9a88j+aghrDjdQ=; b=RCt91
-	Wcn33/a3btShEwBfzU1xkjo8AIcWagGqh2z36wac2hYDu91I2PwuKQCp34GPFS3B
-	pWbY4eBz7oKUzOaCHeG1pLpomOe4nBLY3tQCGmXaqcmATZACG9HE9RqH7xr7Esgp
-	nJ7uSSPgvmL5M348KTlF7GqS066gtMmU01mt54=
-Content-Disposition: inline
-In-Reply-To: <fa686aa40810280830i1a5a7b84u1dfa8cd97c6b1420@mail.gmail.com>
-Sender: netdev-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-2120149839-1225215365=:23080"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <E1KqrTW-0001xG-Cl@dylan>
+Content-ID: <Pine.LNX.4.64.0810281836180.23080@vixen.sonytel.be>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-On Tue, Oct 28, 2008 at 09:30:10AM -0600, Grant Likely wrote:
-> On Tue, Oct 28, 2008 at 9:17 AM, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
-> > On Tue, Oct 28, 2008 at 07:08:06AM -0600, Grant Likely wrote:
-> >> On Tue, Oct 28, 2008 at 1:46 AM, Paulius Zaleckas
-> >> <paulius.zaleckas@teltonika.lt> wrote:
-> >> > Grant Likely wrote:
-> >> >> The IRQ array is fixed size.  You can add it to the mdio_gpio_info
-> >> >> structure and then just set the pointer here so that only one kzalloc
-> >> >> is needed.
-> >> >
-> >> > It can be put in mdio_gpio_info, but please note that mdio_gpio_info is
-> >> > allocated with kzalloc() and irq with kmalloc(), because there is no need
-> >> > to fill this array with zeros(see below).
-> >>
-> >> Adding an additional 32 words to be zeroed in the mdio_gpio_info
-> >> kzalloc is considerably cheaper than doing an additional kmalloc.
-> >> Plus, once the array is zeroed it is then in the cache and so the
-> >> filling it with -1 also becomes cheaper.
-> >
-> > Actually no, it doesn't become cheaper.  You're making the assumption
-> > that cache lines are allocated when memory is written to.  This isn't
-> > the case with the vast majority of ARM CPUs.
-> 
-> Okay, I wasn't aware of that on ARM.
-> 
-> However it is still true that increasing the size of the kzalloc is
-> cheaper than doing 2 allocs.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Yes, that 'irq' array might as well be part of the same structure.
+---584349381-2120149839-1225215365=:23080
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Content-ID: <Pine.LNX.4.64.0810281836181.23080@vixen.sonytel.be>
+
+On Fri, 17 Oct 2008, Phillip Lougher wrote:
+> --- /dev/null
+> +++ b/fs/squashfs/namei.c
+
+> +static int get_dir_index_using_name(struct super_block *s,
+> +			long long *next_block, unsigned int *next_offset,
+> +			long long index_start, unsigned int index_offset,
+> +			int i_count, const char *name, int len)
+> +{
+> +	struct squashfs_sb_info *msblk = s->s_fs_info;
+> +	int i, size, length = 0;
+> +	struct squashfs_dir_index *index;
+> +	char *str;
+> +
+> +	TRACE("Entered get_dir_index_using_name, i_count %d\n", i_count);
+> +
+> +	str = kmalloc(sizeof(*index) + (SQUASHFS_NAME_LEN + 1) * 2, GFP_KERNEL);
+> +	if (str == NULL) {
+> +		ERROR("Failed to allocate squashfs_dir_index\n");
+> +		goto out;
+> +	}
+> +
+> +	index = (struct squashfs_dir_index *) (str + SQUASHFS_NAME_LEN + 1);
+
+As str has been returned by kmalloc(), and SQUASHFS_NAME_LEN is equal to 256,
+`str + SQUASHFS_NAME_LEN + 1` is an odd address.
+
+> +	strncpy(str, name, len);
+> +	str[len] = '\0';
+> +
+> +	for (i = 0; i < i_count; i++) {
+> +		squashfs_read_metadata(s, index, index_start, index_offset,
+> +					sizeof(*index), &index_start,
+> +					&index_offset);
+> +
+> +		size = le32_to_cpu(index->size) + 1;
+                                   ^^^^^^^^^^^
+> +
+> +		squashfs_read_metadata(s, index->name, index_start,
+> +					index_offset, size, &index_start,
+> +					&index_offset);
+> +
+> +		index->name[size] = '\0';
+> +
+> +		if (strcmp(index->name, str) > 0)
+> +			break;
+> +
+> +		length = le32_to_cpu(index->index);
+				     ^^^^^^^^^^^
+> +		*next_block = le32_to_cpu(index->start_block) +
+					  ^^^^^^^^^^^^^^^^^^
+> +					msblk->directory_table_start;
+> +	}
+
+Hence accessing multi-byte fields in struct squashfs_dir_index causes unaligned
+accesses, which are emulated on some architectures (e.g. on MIPS).
+
+Use get_unaligned_le32() for unaligned accesses.
+
+Signed-off-by: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+---
+Actual patch is against current squashfs4.
+
+ fs/squashfs/namei.c |    8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+--- a/fs/squashfs/namei.c
++++ b/fs/squashfs/namei.c
+@@ -59,6 +59,8 @@
+ #include <linux/dcache.h>
+ #include <linux/zlib.h>
+ 
++#include <asm/unaligned.h>
++
+ #include "squashfs_fs.h"
+ #include "squashfs_fs_sb.h"
+ #include "squashfs_fs_i.h"
+@@ -101,7 +103,7 @@ static int get_dir_index_using_name(stru
+ 			break;
+ 
+ 
+-		size = le32_to_cpu(index->size) + 1;
++		size = get_unaligned_le32(&index->size) + 1;
+ 
+ 		err = squashfs_read_metadata(sb, index->name, &index_start,
+ 					&index_offset, size);
+@@ -113,8 +115,8 @@ static int get_dir_index_using_name(stru
+ 		if (strcmp(index->name, str) > 0)
+ 			break;
+ 
+-		length = le32_to_cpu(index->index);
+-		*next_block = le32_to_cpu(index->start_block) +
++		length = get_unaligned_le32(&index->index);
++		*next_block = get_unaligned_le32(&index->start_block) +
+ 					msblk->directory_table;
+ 	}
+ 
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-2120149839-1225215365=:23080--
