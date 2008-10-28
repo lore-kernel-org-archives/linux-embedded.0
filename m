@@ -1,39 +1,38 @@
-From: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v3)
-Date: Tue, 28 Oct 2008 13:31:35 +0200
-Message-ID: <4906F817.4050306@teltonika.lt>
-References: <20081028103537.28951.4804.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <8bd0f97a0810280350j385a0239if7a33928f7bb11f1@mail.gmail.com>
+From: "Grant Likely" <grant.likely@secretlab.ca>
+Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v2)
+Date: Tue, 28 Oct 2008 07:08:06 -0600
+Message-ID: <fa686aa40810280608q1c58e07cq7c5f2cc9feeb8ef6@mail.gmail.com>
+References: <20081027105318.21923.24436.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
+	 <20081027143734.GA13565@secretlab.ca> <4906C338.6010300@teltonika.lt>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8bd0f97a0810280350j385a0239if7a33928f7bb11f1@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <4906C338.6010300@teltonika.lt>
+Content-Disposition: inline
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
+To: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
 Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
 
-Mike Frysinger wrote:
-> On Tue, Oct 28, 2008 at 06:35, Paulius Zaleckas wrote:
->> +config MDIO_GPIO
->> +       tristate "Support for GPIO bitbanged MDIO buses"
->>  config MDIO_OF_GPIO
->>        tristate "Support for GPIO lib-based bitbanged MDIO buses"
-> 
-> seems to me these drivers have the same description ...
+On Tue, Oct 28, 2008 at 1:46 AM, Paulius Zaleckas
+<paulius.zaleckas@teltonika.lt> wrote:
+> Grant Likely wrote:
+>> The IRQ array is fixed size.  You can add it to the mdio_gpio_info
+>> structure and then just set the pointer here so that only one kzalloc
+>> is needed.
+>
+> It can be put in mdio_gpio_info, but please note that mdio_gpio_info is
+> allocated with kzalloc() and irq with kmalloc(), because there is no need
+> to fill this array with zeros(see below).
 
-Yes... but it is MDIO_OF_GPIO description that needs changing...
-Should I make patch for it?
+Adding an additional 32 words to be zeroed in the mdio_gpio_info
+kzalloc is considerably cheaper than doing an additional kmalloc.
+Plus, once the array is zeroed it is then in the cache and so the
+filling it with -1 also becomes cheaper.
 
->> +++ b/include/linux/mdio-gpio.h
->> + * You should have received a copy of the GNU General Public License
->> + * along with this program; if not, write to the Free Software
->> + * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-> 
-> this is why short GPL notices are nice ... you dont end up with
-> outdated contact information like this ...
+g.
 
-It came from mdio-ofgpio driver... If you can mail suitable short GPL notice
-I will put it there instead of updating address.
-
-> -mike
+-- 
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
