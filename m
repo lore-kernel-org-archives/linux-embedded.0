@@ -1,7 +1,7 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V2 11/16] Squashfs: block operations
+Subject: [PATCH V2 07/16] Squashfs: export operations
 Date: Wed, 29 Oct 2008 01:49:56 +0000
-Message-ID: <E1Kv0C4-0006HV-DN@dylan>
+Message-ID: <E1Kv0C4-0006H6-2E@dylan>
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -13,15 +13,15 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/squashfs/block.c |  256 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 256 insertions(+), 0 deletions(-)
+ fs/squashfs/export.c |  152 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 152 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/block.c b/fs/squashfs/block.c
+diff --git a/fs/squashfs/export.c b/fs/squashfs/export.c
 new file mode 100644
-index 0000000..da5f88b
+index 0000000..6ba8724
 --- /dev/null
-+++ b/fs/squashfs/block.c
-@@ -0,0 +1,256 @@
++++ b/fs/squashfs/export.c
+@@ -0,0 +1,152 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -42,20 +42,27 @@ index 0000000..da5f88b
 + * along with this program; if not, write to the Free Software
 + * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 + *
-+ * block.c
++ * export.c
 + */
 +
 +/*
-+ * This file implements the low-level routines to read and decompress
-+ * datablocks and metadata blocks.
++ * This file implements code to make Squashfs filesystems exportable (NFS etc.)
++ *
++ * The export code uses an inode lookup table to map inode numbers passed in
++ * filehandles to an inode location on disk.  This table is stored compressed
++ * into metadata blocks.  A second index table is used to locate these.  This
++ * second index table for speed of access (and because it is small) is read at
++ * mount time and cached in memory.
++ *
++ * The inode lookup table is used only by the export code, inode disk
++ * locations are directly encoded in directories, enabling direct access
++ * without an intermediate lookup for all operations except the export ops.
 + */
 +
 +#include <linux/fs.h>
 +#include <linux/vfs.h>
-+#include <linux/slab.h>
-+#include <linux/mutex.h>
-+#include <linux/string.h>
-+#include <linux/buffer_head.h>
++#include <linux/dcache.h>
++#include <linux/exportfs.h>
 +#include <linux/zlib.h>
 +
 +#include "squashfs_fs.h"
@@ -64,220 +71,109 @@ index 0000000..da5f88b
 +#include "squashfs.h"
 +
 +/*
-+ * Read the metadata block length, this is stored in the first two
-+ * bytes of the metadata block.
++ * Look-up inode number (ino) in table, returning the inode location.
 + */
-+static struct buffer_head *get_block_length(struct super_block *sb,
-+			long long *cur_index, int *offset, int *length)
++static long long squashfs_inode_lookup(struct super_block *sb, int ino_num)
 +{
 +	struct squashfs_sb_info *msblk = sb->s_fs_info;
-+	struct buffer_head *bh;
++	int blk = SQUASHFS_LOOKUP_BLOCK(ino_num - 1);
++	int offset = SQUASHFS_LOOKUP_BLOCK_OFFSET(ino_num - 1);
++	long long start = le64_to_cpu(msblk->inode_lookup_table[blk]);
++	__le64 ino;
++	int err;
 +
-+	bh = sb_bread(sb, *cur_index);
-+	if (bh == NULL)
++	TRACE("Entered squashfs_inode_lookup, inode_number = %d\n", ino_num);
++
++	err = squashfs_read_metadata(sb, &ino, &start, &offset, sizeof(ino));
++	if (err < 0)
++		return err;
++
++	TRACE("squashfs_inode_lookup, inode = 0x%llx\n",
++		(unsigned long long) le64_to_cpu(ino));
++
++	return le64_to_cpu(ino);
++}
++
++
++static struct dentry *squashfs_export_iget(struct super_block *sb,
++	unsigned int ino_num)
++{
++	long long ino;
++	struct dentry *dentry = ERR_PTR(-ENOENT);
++
++	TRACE("Entered squashfs_export_iget\n");
++
++	ino = squashfs_inode_lookup(sb, ino_num);
++	if (ino >= 0)
++		dentry = d_obtain_alias(squashfs_iget(sb, ino, ino_num));
++
++	return dentry;
++}
++
++
++static struct dentry *squashfs_fh_to_dentry(struct super_block *sb,
++		struct fid *fid, int fh_len, int fh_type)
++{
++	if ((fh_type != FILEID_INO32_GEN && fh_type != FILEID_INO32_GEN_PARENT)
++			|| fh_len < 2)
 +		return NULL;
 +
-+	if (msblk->devblksize - *offset == 1) {
-+		*length = (unsigned char) bh->b_data[*offset];
-+		brelse(bh);
-+		bh = sb_bread(sb, ++(*cur_index));
-+		if (bh == NULL)
-+			return NULL;
-+		*length |= (unsigned char) bh->b_data[0] << 8;
-+		*offset = 1;
-+	} else {
-+		*length = (unsigned char) bh->b_data[*offset] |
-+			(unsigned char) bh->b_data[*offset + 1] << 8;
-+		*offset += 2;
-+	}
-+
-+	return bh;
++	return squashfs_export_iget(sb, fid->i32.ino);
 +}
 +
 +
-+/*
-+ * Read and decompress a metadata block or datablock.  Length is non-zero
-+ * if a datablock is being read (the size is stored elsewhere in the
-+ * filesystem), otherwise the length is obtained from the first two bytes of
-+ * the metadata block.  A bit in the length field indicates if the block
-+ * is stored uncompressed in the filesystem (usually because compression
-+ * generated a larger block - this does occasionally happen with zlib).
-+ */
-+int squashfs_read_data(struct super_block *sb, void *buffer,
-+			long long index, int length, long long *next_index,
-+			int srclength)
++static struct dentry *squashfs_fh_to_parent(struct super_block *sb,
++		struct fid *fid, int fh_len, int fh_type)
 +{
-+	struct squashfs_sb_info *msblk = sb->s_fs_info;
-+	struct buffer_head **bh;
-+	int offset = index & ((1 << msblk->devblksize_log2) - 1);
-+	long long cur_index = index >> msblk->devblksize_log2;
-+	int avail, bytes, compressed, b = 0, k = 0;
-+	int c_byte = length;
++	if (fh_type != FILEID_INO32_GEN_PARENT || fh_len < 4)
++		return NULL;
 +
-+	bh = kcalloc((msblk->block_size >> msblk->devblksize_log2) + 1,
-+				sizeof(*bh), GFP_KERNEL);
-+	if (bh == NULL)
-+		return -ENOMEM;
-+
-+	if (c_byte) {
-+		/*
-+		 * Datablock.
-+		 */
-+		bytes = -offset;
-+		compressed = SQUASHFS_COMPRESSED_BLOCK(c_byte);
-+		c_byte = SQUASHFS_COMPRESSED_SIZE_BLOCK(c_byte);
-+
-+		TRACE("Block @ 0x%llx, %scompressed size %d, src size %d\n",
-+			index, compressed ? "" : "un", c_byte, srclength);
-+
-+		if (c_byte < 0 || c_byte > srclength || index < 0 ||
-+				(index + c_byte) > msblk->bytes_used)
-+			goto read_failure;
-+
-+		for (b = 0; bytes < c_byte; b++, cur_index++) {
-+			bh[b] = sb_getblk(sb, cur_index);
-+			if (bh[b] == NULL)
-+				goto block_release;
-+			bytes += msblk->devblksize;
-+		}
-+		ll_rw_block(READ, b, bh);
-+	} else {
-+		/*
-+		 * Metadata block.
-+		 */
-+		if (index < 0 || (index + 2) > msblk->bytes_used)
-+			goto read_failure;
-+
-+		bh[0] = get_block_length(sb, &cur_index, &offset, &c_byte);
-+		if (bh[0] == NULL)
-+			goto read_failure;
-+		b = 1;
-+
-+		bytes = msblk->devblksize - offset;
-+		compressed = SQUASHFS_COMPRESSED(c_byte);
-+		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
-+
-+		TRACE("Block @ 0x%llx, %scompressed size %d\n", index,
-+				compressed ? "" : "un", c_byte);
-+
-+		if (c_byte < 0 || c_byte > srclength ||
-+					(index + c_byte) > msblk->bytes_used)
-+			goto block_release;
-+
-+		for (; bytes < c_byte; b++) {
-+			bh[b] = sb_getblk(sb, ++cur_index);
-+			if (bh[b] == NULL)
-+				goto block_release;
-+			bytes += msblk->devblksize;
-+		}
-+		ll_rw_block(READ, b - 1, bh + 1);
-+	}
-+
-+	if (compressed) {
-+		int zlib_err = 0;
-+
-+		/*
-+		 * Uncompress block.
-+		 */
-+
-+		mutex_lock(&msblk->read_data_mutex);
-+
-+		msblk->stream.next_out = buffer;
-+		msblk->stream.avail_out = srclength;
-+
-+		for (bytes = 0; k < b; k++) {
-+			avail = min(c_byte - bytes, msblk->devblksize - offset);
-+
-+			wait_on_buffer(bh[k]);
-+			if (!buffer_uptodate(bh[k]))
-+				goto release_mutex;
-+
-+			msblk->stream.next_in = bh[k]->b_data + offset;
-+			msblk->stream.avail_in = avail;
-+
-+			if (k == 0) {
-+				zlib_err = zlib_inflateInit(&msblk->stream);
-+				if (zlib_err != Z_OK) {
-+					ERROR("zlib_inflateInit returned"
-+						" unexpected result 0x%x,"
-+						" srclength %d\n", zlib_err,
-+						srclength);
-+					goto release_mutex;
-+				}
-+
-+				if (avail == 0) {
-+					offset = 0;
-+					brelse(bh[k]);
-+					continue;
-+				}
-+			}
-+
-+			zlib_err = zlib_inflate(&msblk->stream, Z_NO_FLUSH);
-+			if (zlib_err != Z_OK && zlib_err != Z_STREAM_END) {
-+				ERROR("zlib_inflate returned unexpected result"
-+					" 0x%x, srclength %d, avail_in %d,"
-+					" avail_out %d\n", zlib_err, srclength,
-+					msblk->stream.avail_in,
-+					msblk->stream.avail_out);
-+				goto release_mutex;
-+			}
-+
-+			bytes += avail;
-+			offset = 0;
-+			brelse(bh[k]);
-+		}
-+
-+		if (zlib_err != Z_STREAM_END)
-+			goto release_mutex;
-+
-+		zlib_err = zlib_inflateEnd(&msblk->stream);
-+		if (zlib_err != Z_OK) {
-+			ERROR("zlib_inflateEnd returned unexpected result 0x%x,"
-+				" srclength %d\n", zlib_err, srclength);
-+			goto release_mutex;
-+		}
-+		bytes = msblk->stream.total_out;
-+		mutex_unlock(&msblk->read_data_mutex);
-+	} else {
-+		/*
-+		 * Block is uncompressed.
-+		 */
-+		int i;
-+
-+		for (i = 0; i < b; i++) {
-+			wait_on_buffer(bh[i]);
-+			if (!buffer_uptodate(bh[i]))
-+				goto block_release;
-+		}
-+
-+		for (bytes = 0; k < b; k++) {
-+			avail = min(c_byte - bytes, msblk->devblksize - offset);
-+
-+			memcpy(buffer + bytes, bh[k]->b_data + offset, avail);
-+			bytes += avail;
-+			offset = 0;
-+			brelse(bh[k]);
-+		}
-+	}
-+
-+	if (next_index)
-+		*next_index = index + c_byte + (length ? 0 : 2);
-+
-+	kfree(bh);
-+	return bytes;
-+
-+release_mutex:
-+	mutex_unlock(&msblk->read_data_mutex);
-+
-+block_release:
-+	for (; k < b; k++)
-+		brelse(bh[k]);
-+
-+read_failure:
-+	ERROR("sb_bread failed reading block 0x%llx\n", cur_index);
-+	kfree(bh);
-+	return -EIO;
++	return squashfs_export_iget(sb, fid->i32.parent_ino);
 +}
++
++
++static struct dentry *squashfs_get_parent(struct dentry *child)
++{
++	struct inode *inode = child->d_inode;
++	unsigned int parent_ino = SQUASHFS_I(inode)->parent;
++
++	return squashfs_export_iget(inode->i_sb, parent_ino);
++}
++
++
++__le64 *read_inode_lookup_table(struct super_block *sb,
++		long long lookup_table_start, unsigned int inodes)
++{
++	unsigned int length = SQUASHFS_LOOKUP_BLOCK_BYTES(inodes);
++	__le64 *inode_lookup_table;
++	int err;
++
++	TRACE("In read_inode_lookup_table, length %d\n", length);
++
++	/* Allocate inode lookup table */
++	inode_lookup_table = kmalloc(length, GFP_KERNEL);
++	if (inode_lookup_table == NULL) {
++		ERROR("Failed to allocate inode lookup table\n");
++		return ERR_PTR(-ENOMEM);
++	}
++
++	err = squashfs_read_data(sb, inode_lookup_table, lookup_table_start,
++			length | SQUASHFS_COMPRESSED_BIT_BLOCK, NULL, length);
++	if (err < 0) {
++		ERROR("unable to read inode lookup table\n");
++		kfree(inode_lookup_table);
++		return ERR_PTR(err);
++	}
++
++	return inode_lookup_table;
++}
++
++
++const struct export_operations squashfs_export_ops = {
++	.fh_to_dentry = squashfs_fh_to_dentry,
++	.fh_to_parent = squashfs_fh_to_parent,
++	.get_parent = squashfs_get_parent
++};
 -- 
 1.5.2.5
 
