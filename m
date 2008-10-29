@@ -1,7 +1,7 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V2 16/16] MAINTAINERS: squashfs entry
+Subject: [PATCH V2 15/16] Squashfs: initrd support
 Date: Wed, 29 Oct 2008 01:49:56 +0000
-Message-ID: <E1Kv0C4-0006Hx-O7@dylan>
+Message-ID: <E1Kv0C4-0006Hs-M3@dylan>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -13,26 +13,61 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- MAINTAINERS |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
+ init/do_mounts_rd.c |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 16202c8..bc5b063 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -3951,6 +3951,13 @@ L:	cbe-oss-dev@ozlabs.org
- W:	http://www.ibm.com/developerworks/power/cell/
- S:	Supported
+diff --git a/init/do_mounts_rd.c b/init/do_mounts_rd.c
+index a7c748f..0f0f0cf 100644
+--- a/init/do_mounts_rd.c
++++ b/init/do_mounts_rd.c
+@@ -9,6 +9,7 @@
+ #include <linux/string.h>
  
-+SQUASHFS FILE SYSTEM
-+P:	Phillip Lougher
-+M:	phillip@lougher.demon.co.uk
-+L:	squashfs-devel@lists.sourceforge.net (subscribers-only)
-+W:	http://squashfs.org.uk
-+S:	Maintained
+ #include "do_mounts.h"
++#include "../fs/squashfs/squashfs_fs.h"
+ 
+ int __initdata rd_prompt = 1;/* 1 = prompt for RAM disk, 0 = don't prompt */
+ 
+@@ -41,6 +42,7 @@ static int __init crd_load(int in_fd, int out_fd);
+  * 	ext2
+  *	romfs
+  *	cramfs
++ *	squashfs
+  * 	gzip
+  */
+ static int __init 
+@@ -51,6 +53,7 @@ identify_ramdisk_image(int fd, int start_block)
+ 	struct ext2_super_block *ext2sb;
+ 	struct romfs_super_block *romfsb;
+ 	struct cramfs_super *cramfsb;
++	struct squashfs_super_block *squashfsb;
+ 	int nblocks = -1;
+ 	unsigned char *buf;
+ 
+@@ -62,6 +65,7 @@ identify_ramdisk_image(int fd, int start_block)
+ 	ext2sb = (struct ext2_super_block *) buf;
+ 	romfsb = (struct romfs_super_block *) buf;
+ 	cramfsb = (struct cramfs_super *) buf;
++	squashfsb = (struct squashfs_super_block *) buf;
+ 	memset(buf, 0xe5, size);
+ 
+ 	/*
+@@ -99,6 +103,16 @@ identify_ramdisk_image(int fd, int start_block)
+ 		goto done;
+ 	}
+ 
++	/* squashfs is at block zero too */
++	if (le32_to_cpu(squashfsb->s_magic) == SQUASHFS_MAGIC) {
++		printk(KERN_NOTICE
++		       "RAMDISK: squashfs filesystem found at block %d\n",
++		       start_block);
++		nblocks = (le64_to_cpu(squashfsb->bytes_used) + BLOCK_SIZE - 1)
++			 >> BLOCK_SIZE_BITS;
++		goto done;
++	}
 +
- SRM (Alpha) environment access
- P:	Jan-Benedict Glaw
- M:	jbglaw@lug-owl.de
+ 	/*
+ 	 * Read block 1 to test for minix and ext2 superblock
+ 	 */
 -- 
 1.5.2.5
