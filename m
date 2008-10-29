@@ -1,35 +1,110 @@
-From: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v3)
-Date: Wed, 29 Oct 2008 10:44:20 +0200
-Message-ID: <49082264.7060302@teltonika.lt>
-References: <20081028103537.28951.4804.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>	 <8bd0f97a0810280350j385a0239if7a33928f7bb11f1@mail.gmail.com>	 <4906F817.4050306@teltonika.lt> <fa686aa40810280726s338c739bl24ee53d3193292ba@mail.gmail.com>
+From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
+Subject: Re: [PATCH V2 10/16] Squashfs: cache operations
+Date: Wed, 29 Oct 2008 10:32:18 +0100
+Message-ID: <20081029093218.GA26456@logfs.org>
+References: <E1Kv0C4-0006HO-BC@dylan>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <fa686aa40810280726s338c739bl24ee53d3193292ba@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <E1Kv0C4-0006HO-BC@dylan>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Mike Frysinger <vapier.adi@gmail.com>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-Grant Likely wrote:
-> On Tue, Oct 28, 2008 at 5:31 AM, Paulius Zaleckas
-> <paulius.zaleckas@teltonika.lt> wrote:
->> Mike Frysinger wrote:
->>> On Tue, Oct 28, 2008 at 06:35, Paulius Zaleckas wrote:
->>>> +config MDIO_GPIO
->>>> +       tristate "Support for GPIO bitbanged MDIO buses"
->>>>  config MDIO_OF_GPIO
->>>>        tristate "Support for GPIO lib-based bitbanged MDIO buses"
->>> seems to me these drivers have the same description ...
->> Yes... but it is MDIO_OF_GPIO description that needs changing...
->> Should I make patch for it?
-> 
-> Wait a minute....  This is the same driver and it's just been
-> duplicated.  NAK.  Please don't do this.  Instead add a platform bus
-> binding to the existing driver.  Most of the code can be shared.
+On Wed, 29 October 2008 01:49:56 +0000, Phillip Lougher wrote:
+> +/*
+> + * Blocks in Squashfs are compressed.  To avoid repeatedly decompres=
+sing
+> + * recently accessed data Squashfs uses two small metadata and fragm=
+ent caches.
+> + *
+> + * This file implements a generic cache implementation used for both=
+ caches,
+> + * plus functions layered ontop of the generic cache implementation =
+to
+> + * access the metadata and fragment caches.
+> + */
 
-It is very similar. If highly #ifdef'ed driver is OK then I can merge
-these driver to single one, but mdio-ofgpio driver name will have to
-change to mdio-gpio. OK?
+I tend to agree with Andrew that a lot of this should be done by the
+page cache instead.  One of the problems seems to be that your blocksiz=
+e
+can exceed page size and there really isn't any infrastructure to deal
+with such cases yet.  Bufferheads deal with blocks smaller than a page,
+not the other way around.
+
+Another is that address spaces are limited ot 16TB on 32bit
+architectures.  I guess that should be good enough for a while.  I've
+heard some rumors that btrfs actually uses multiple address spaces to
+handle this problem, so a good strategy may be to sit back, wait and
+simply copy what btrfs does once the issue becomes pressing.
+
+To deal with large blocks, you most likely want to keep you struct
+squashfs_cache_entry around and have page->private point to it.  But be
+warned, as the whole page->private business is - shall we say - fragile=
+=2E
+You need to supply a number of methods to make things work.  And if you
+fail to set any one of them, core code will assume a default, which is
+to call into the bufferhead code.  And the backtrace you will receive
+some time later has little or no indication that you actually only
+missed one method.  I've been meaning to clean this up, but never found
+the courage to actually do it.
+
+> +/*
+> + * Look-up block in cache, and increment usage count.  If not in cac=
+he, read
+> + * and decompress it from disk.
+> + */
+> +struct squashfs_cache_entry *squashfs_cache_get(struct super_block *=
+sb,
+> +	struct squashfs_cache *cache, long long block, int length)
+
+I personally prefer u64 instead of long long.  It is a device address
+for a 64bit filesystem after all.  Same for next_index.
+
+> +		if (i =3D=3D cache->entries) {
+> +			/*
+> +			 * Block not in cache, if all cache entries are locked
+> +			 * go to sleep waiting for one to become available.
+> +			 */
+> +			if (cache->unused =3D=3D 0) {
+> +				cache->waiting++;
+> +				spin_unlock(&cache->lock);
+> +				wait_event(cache->wait_queue, cache->unused);
+> +				spin_lock(&cache->lock);
+> +				cache->waiting--;
+
+Maybe rename to no_waiters?  "waiting" looks more like a boolean.
+
+> +			entry->length =3D squashfs_read_data(sb, entry->data,
+> +				block, length, &entry->next_index,
+> +				cache->block_size);
+> +
+> +			spin_lock(&cache->lock);
+> +
+> +			if (entry->length < 0)
+> +				entry->error =3D entry->length;
+
+entry->error is of type char.  We actually have errno's defined up to
+131, so if by whatever freak chance the error is -ENOTRECOVERABLE, this
+will convert it to a positive number.  I wouldn't want to debug that.
+
+> +void squashfs_cache_put(struct squashfs_cache *cache,
+> +				struct squashfs_cache_entry *entry)
+> +{
+> +	spin_lock(&cache->lock);
+> +	entry->locked--;
+> +	if (entry->locked =3D=3D 0) {
+
+You might want to rename this to "refcount", just to make the name matc=
+h
+the behaviour.
+
+J=C3=B6rn
+
+--=20
+Measure. Don't tune for speed until you've measured, and even then
+don't unless one part of the code overwhelms the rest.
+-- Rob Pike
