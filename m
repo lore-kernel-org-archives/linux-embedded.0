@@ -1,53 +1,120 @@
-From: "Grant Likely" <grant.likely@secretlab.ca>
-Subject: Re: [PATCH] phylib: add mdio-gpio bus driver (v3)
-Date: Wed, 29 Oct 2008 07:24:04 -0600
-Message-ID: <fa686aa40810290624h272b9095hd56414c433ef832a@mail.gmail.com>
-References: <20081028103537.28951.4804.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
-	 <8bd0f97a0810280350j385a0239if7a33928f7bb11f1@mail.gmail.com>
-	 <4906F817.4050306@teltonika.lt>
-	 <fa686aa40810280726s338c739bl24ee53d3193292ba@mail.gmail.com>
-	 <49082264.7060302@teltonika.lt>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: [PATCH 06/10] AXFS: axfs_super.c
+Date: Wed, 29 Oct 2008 14:59:46 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.0810291456320.17174@vixen.sonytel.be>
+References: <48AD0101.4020505@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <49082264.7060302@teltonika.lt>
-Content-Disposition: inline
-Sender: netdev-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1773774162-1225288786=:17174"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <48AD0101.4020505@gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Cc: Mike Frysinger <vapier.adi@gmail.com>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
+To: Jared Hulbert <jaredeh@gmail.com>
+Cc: Linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@logfs.org>, tim.bird@AM.SONY.COM, cotte@de.ibm.com, nickpiggin@yahoo.com.au
 
-On Wed, Oct 29, 2008 at 2:44 AM, Paulius Zaleckas
-<paulius.zaleckas@teltonika.lt> wrote:
-> Grant Likely wrote:
->> On Tue, Oct 28, 2008 at 5:31 AM, Paulius Zaleckas
->> <paulius.zaleckas@teltonika.lt> wrote:
->>> Mike Frysinger wrote:
->>>> On Tue, Oct 28, 2008 at 06:35, Paulius Zaleckas wrote:
->>>>> +config MDIO_GPIO
->>>>> +       tristate "Support for GPIO bitbanged MDIO buses"
->>>>>  config MDIO_OF_GPIO
->>>>>        tristate "Support for GPIO lib-based bitbanged MDIO buses"
->>>> seems to me these drivers have the same description ...
->>> Yes... but it is MDIO_OF_GPIO description that needs changing...
->>> Should I make patch for it?
->>
->> Wait a minute....  This is the same driver and it's just been
->> duplicated.  NAK.  Please don't do this.  Instead add a platform bus
->> binding to the existing driver.  Most of the code can be shared.
->
-> It is very similar. If highly #ifdef'ed driver is OK then I can merge
-> these driver to single one, but mdio-ofgpio driver name will have to
-> change to mdio-gpio. OK?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Absolutely, change the name.  Also, I don't think you'll need as many
-#ifdefs as you fear you do.  :-)  Mostly you'll need two #ifdef
-sections; one for the of_platform binding and one for the platform
-binding.  drivers/video/xilinxfb.c is a good example of how to do it.
+---584349381-1773774162-1225288786=:17174
+Content-Type: TEXT/PLAIN; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-g.
+On Wed, 20 Aug 2008, Jared Hulbert wrote:
+> --- /dev/null
+> +++ b/fs/axfs/axfs_super.c
 
--- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+> +static int axfs_fill_region_data(struct super_block *sb,
+> +				 struct axfs_region_desc *region, int force)
+> +{
+> +	struct axfs_super *sbi = AXFS_SB(sb);
+> +	unsigned long addr;
+> +	void *buff = NULL;
+> +	void *vaddr;
+> +	int err = -ENOMEM;
+> +	u64 size = region->size;
+> +	u64 fsoffset = region->fsoffset;
+> +	u64 end = fsoffset + size;
+> +	u64 c_size = region->compressed_size;
+> +
+> +	if (size == 0)
+> +		return 0;
+> +
+> +	if (AXFS_IS_REGION_INCORE(region))
+> +		goto incore;
+> +
+> +	if (AXFS_IS_REGION_COMPRESSED(region))
+> +		goto incore;
+> +
+> +	if (AXFS_IS_REGION_XIP(sbi, region)) {
+> +		if ((end > sbi->mmap_size) && (force))
+> +			goto incore;
+> +		addr = sbi->virt_start_addr;
+> +		addr += (unsigned long)fsoffset;
+> +		region->virt_addr = (void *)addr;
+> +		return 0;
+> +	}
+> +
+> +	if (force)
+> +		goto incore;
+> +
+> +	region->virt_addr = NULL;
+> +	return 0;
+> +
+> +incore:
+> +	region->virt_addr = vmalloc(size);
+> +	if (!region->virt_addr)
+> +		goto out;
+> +	vaddr = region->virt_addr;
+> +
+> +	if (AXFS_IS_REGION_COMPRESSED(region)) {
+> +		buff = vmalloc(c_size);
+> +		if (!buff)
+> +			goto out;
+> +		axfs_copy_metadata(sb, buff, fsoffset, c_size);
+> +		err = axfs_uncompress_block(vaddr, size, buff, c_size);
+                ^^^
+axfs_uncompress_block() doesn't return an error code, so `err' is a bit of a
+misnomer.
+
+> +		if (!err)
+                    ^^^^
+Instead, it returns zero for error, hence this check is correct...
+
+> +			goto out;
+> +		vfree(buff);
+> +	} else {
+> +		axfs_copy_metadata(sb, vaddr, fsoffset, size);
+> +	}
+> +
+> +	return 0;
+> +
+> +out:
+> +	if (buff)
+> +		vfree(buff);
+> +	if (region->virt_addr)
+> +		vfree(region->virt_addr);
+> +	return err;
+               ^^^
+... but it will also return zero here, which is not correct.
+
+Probably it's better to let axfs_uncompress_block() return an (negative) error
+code (e.g. -EINVAL or -EIO) in case of failure, which you can just let
+propagate.
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+
+Sony Techsoft Centre Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 · RPR Brussels
+Fortis · BIC GEBABEBB · IBAN BE41293037680010
+---584349381-1773774162-1225288786=:17174--
