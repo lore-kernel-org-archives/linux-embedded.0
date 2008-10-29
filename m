@@ -1,7 +1,7 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V2 14/16] Squashfs: Kconfig entry
+Subject: [PATCH V2 13/16] Squashfs: Makefiles
 Date: Wed, 29 Oct 2008 01:49:56 +0000
-Message-ID: <E1Kv0C4-0006Hm-Jz@dylan>
+Message-ID: <E1Kv0C4-0006Hg-Hr@dylan>
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -13,72 +13,36 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/Kconfig |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 52 insertions(+), 0 deletions(-)
+ fs/Makefile          |    1 +
+ fs/squashfs/Makefile |    8 ++++++++
+ 2 files changed, 9 insertions(+), 0 deletions(-)
 
-diff --git a/fs/Kconfig b/fs/Kconfig
-index 522469a..1d7a5f9 100644
---- a/fs/Kconfig
-+++ b/fs/Kconfig
-@@ -931,6 +931,58 @@ config CRAMFS
- 
- 	  If unsure, say N.
- 
-+config SQUASHFS
-+	tristate "SquashFS 4.0 - Squashed file system support"
-+	depends on BLOCK
-+	select ZLIB_INFLATE
-+	help
-+	  Saying Y here includes support for SquashFS 4.0 (a Compressed
-+	  Read-Only File System).  Squashfs is a highly compressed read-only
-+	  filesystem for Linux.  It uses zlib compression to compress both
-+	  files, inodes and directories.  Inodes in the system are very small
-+	  and all blocks are packed to minimise data overhead. Block sizes
-+	  greater than 4K are supported up to a maximum of 1 Mbytes (default
-+	  block size 128K).  SquashFS 4.0 supports 64 bit filesystems and files
-+	  (larger than 4GB), full uid/gid information, hard links and
-+	  timestamps.  
+diff --git a/fs/Makefile b/fs/Makefile
+index 2168c90..90c1eee 100644
+--- a/fs/Makefile
++++ b/fs/Makefile
+@@ -76,6 +76,7 @@ obj-$(CONFIG_JBD)		+= jbd/
+ obj-$(CONFIG_JBD2)		+= jbd2/
+ obj-$(CONFIG_EXT2_FS)		+= ext2/
+ obj-$(CONFIG_CRAMFS)		+= cramfs/
++obj-$(CONFIG_SQUASHFS)		+= squashfs/
+ obj-y				+= ramfs/
+ obj-$(CONFIG_HUGETLBFS)		+= hugetlbfs/
+ obj-$(CONFIG_CODA_FS)		+= coda/
+diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
+new file mode 100644
+index 0000000..8258cf9
+--- /dev/null
++++ b/fs/squashfs/Makefile
+@@ -0,0 +1,8 @@
++#
++# Makefile for the linux squashfs routines.
++#
 +
-+	  Squashfs is intended for general read-only filesystem use, for
-+	  archival use (i.e. in cases where a .tar.gz file may be used), and in
-+	  embedded systems where low overhead is needed.  Further information
-+	  and tools are available from http://squashfs.sourceforge.net.
-+
-+	  If you want to compile this as a module ( = code which can be
-+	  inserted in and removed from the running kernel whenever you want),
-+	  say M here and read <file:Documentation/modules.txt>.  The module
-+	  will be called squashfs.  Note that the root file system (the one
-+	  containing the directory /) cannot be compiled as a module.
-+
-+	  If unsure, say N.
-+
-+config SQUASHFS_EMBEDDED
-+
-+	bool "Additional option for memory-constrained systems" 
-+	depends on SQUASHFS
-+	default n
-+	help
-+	  Saying Y here allows you to specify cache size.
-+
-+	  If unsure, say N.
-+
-+config SQUASHFS_FRAGMENT_CACHE_SIZE
-+	int "Number of fragments cached" if SQUASHFS_EMBEDDED
-+	depends on SQUASHFS
-+	default "3"
-+	help
-+	  By default SquashFS caches the last 3 fragments read from
-+	  the filesystem.  Increasing this amount may mean SquashFS
-+	  has to re-read fragments less often from disk, at the expense
-+	  of extra system memory.  Decreasing this amount will mean
-+	  SquashFS uses less memory at the expense of extra reads from disk.
-+
-+	  Note there must be at least one cached fragment.  Anything
-+	  much more than three will probably not make much difference.
-+
- config VXFS_FS
- 	tristate "FreeVxFS file system support (VERITAS VxFS(TM) compatible)"
- 	depends on BLOCK
++obj-$(CONFIG_SQUASHFS) += squashfs.o
++squashfs-y += block.o cache.o dir.o export.o file.o fragment.o id.o inode.o
++squashfs-y += namei.o super.o symlink.o
++#squashfs-y += squashfs2_0.o
 -- 
 1.5.2.5
 
