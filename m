@@ -1,95 +1,127 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: Subject: [PATCH 02/16] Squashfs: directory lookup operations
-Date: Tue, 28 Oct 2008 21:19:33 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.0810282118360.25466@vixen.sonytel.be>
-References: <E1KqrTW-0001xG-Cl@dylan> <Pine.LNX.4.64.0810281835150.23080@vixen.sonytel.be>
- <4907566D.9040003@msgid.tls.msk.ru>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-435637623-1225225173=:25466"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <4907566D.9040003@msgid.tls.msk.ru>
-Sender: linux-fsdevel-owner@vger.kernel.org
+From: Phillip Lougher <phillip@lougher.demon.co.uk>
+Subject: [PATCH V2 00/16] Squashfs: compressed read-only filesystem
+Date: Wed, 29 Oct 2008 01:49:55 +0000
+Message-ID: <E1Kv0C3-0006GU-ES@dylan>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Michael Tokarev <mjt@tls.msk.ru>
-Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
 
----584349381-435637623-1225225173=:25466
-Content-Type: TEXT/PLAIN; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+This a respin of the Squashfs patches incorporating the review comments
+received.  Thanks to everyone who have sent comments.
 
-On Tue, 28 Oct 2008, Michael Tokarev wrote:
-> Geert Uytterhoeven wrote:
-> > On Fri, 17 Oct 2008, Phillip Lougher wrote:
-> > > --- /dev/null
-> > > +++ b/fs/squashfs/namei.c
-> > 
-> > > +static int get_dir_index_using_name(struct super_block *s,
-> > > +			long long *next_block, unsigned int *next_offset,
-> > > +			long long index_start, unsigned int index_offset,
-> > > +			int i_count, const char *name, int len)
-> > > +{
-> > > +	struct squashfs_sb_info *msblk = s->s_fs_info;
-> > > +	int i, size, length = 0;
-> > > +	struct squashfs_dir_index *index;
-> > > +	char *str;
-> > > +
-> > > +	TRACE("Entered get_dir_index_using_name, i_count %d\n", i_count);
-> > > +
-> > > +	str = kmalloc(sizeof(*index) + (SQUASHFS_NAME_LEN + 1) * 2,
-> > > GFP_KERNEL);
-> > > +	if (str == NULL) {
-> > > +		ERROR("Failed to allocate squashfs_dir_index\n");
-> > > +		goto out;
-> > > +	}
-> > > +
-> > > +	index = (struct squashfs_dir_index *) (str + SQUASHFS_NAME_LEN + 1);
-> > 
-> > As str has been returned by kmalloc(), and SQUASHFS_NAME_LEN is equal to
-> > 256,
-> > `str + SQUASHFS_NAME_LEN + 1` is an odd address.
-> > 
-> [..]
-> > > +		size = le32_to_cpu(index->size) + 1;
-> >                                    ^^^^^^^^^^^
-> [.]
-> > Hence accessing multi-byte fields in struct squashfs_dir_index causes
-> > unaligned
-> > accesses, which are emulated on some architectures (e.g. on MIPS).
-> > 
-> > Use get_unaligned_le32() for unaligned accesses.
-> 
-> How about aligning it properly in the first place instead?
-> Three ways:
-> 
->   1) reordering index and str here, so that index comes first,
->      str next.
-> 
->   2) using another constant instead of +1
-> 
->   3) using separate allocations for separate objects.
+Summary of changes in patch respin:
 
-You're right.
+1. Functions changed to return 0 on success and -ESOMETHING on error
+2. Header files moved from include/linux to fs/squashfs
+3. Variables changed to use sb and inode
+4. Number of squashfs_read_metadata() parameters reduced
+5. Xattr placeholder code tweaked
+6. TRACE and ERROR macros fixed to use pr_debug and pr_warning
+7. Some obsolete macros in squashfs_fs.h removed
+8. A number of gotos to return statements replaced with direct returns
+9. Sparse with endian checking (make C=2 CHECKFLAGS="-D__CHECK_ENDIAN__")
+   errors fixed
+10. get_dir_index_using_name() misaligned access fixed
+11. Fix a couple of printk warnings on PPC64
+12. Shorten a number of variable names
 
-Somehow I was convinced this was part of the on-disk layout, so it could not be
-changed. But that's not the case...
+There is now a public git repository on kernel.org. Pull/clone from
+git://git.kernel.org/pub/scm/linux/kernel/git/pkl/squashfs-2.6.git
 
-With kind regards,
+These 16 patches are against 2.6.28-rc2.
 
-Geert Uytterhoeven
-Software Architect
+Following is the original re-submission oveview, detailing the major
+changes since the original 2005 submission, and a case for its inclusion.
 
-Sony Techsoft Centre Europe
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+Thanks
 
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
+Phillip
 
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 · RPR Brussels
-Fortis · BIC GEBABEBB · IBAN BE41293037680010
----584349381-435637623-1225225173=:25466--
+This is a second attempt at mainlining Squashfs.  The first attempt was way
+way back in early 2005 :-)  Since then the filesystem layout has undergone
+two major revisions, and the kernel code has almost been completely
+rewritten.  Both of these were to address the criticisms made at the original
+attempt.
+
+Summary of changes:
+	1. Filesystem layout is now 64-bit, in theory filesystems and
+	   files can be 2^64 in size.
+
+	2. Filesystem is now fixed little-endian.
+
+	3. "." and ".." are now returned by readdir.
+
+	4. Sparse files are now supported.
+
+	5. Filesystem is now exportable (NFS etc.).
+
+	6. Datablocks up to 1 Mbyte are now supported.
+
+Codewise all of the packed bit-fields and the swap macros have been removed in
+favour of aligned structures and in-line swapping using leXX_to_cpu().  The
+code has also been extensively restructured, reformatted to kernel coding
+standards and commented.
+
+Previously there was resistance to the inclusion of another compressed
+filesystem when Linux already had cramfs.  There was pressure for a strong
+case to be made for the inclusion of Squashfs.  Hopefully the case for
+the inclusion of other compressed filesystems has now already been answered
+over the last couple of years, however, it is worth listing the
+features of Squashfs over cramfs, which is still the only read-only
+compressed filesystem in mainline.
+
+Max filesystem size: cramfs 16 Mbytes, Squashfs 64-bit filesystem
+Max filesize: cramfs 16 Mbytes, Squashfs 64-bit filesystem
+Block size: cramfs 4K, Squashfs default 128K, max 1Mbyte
+Tail-end packing: cramfs no, Squashfs yes
+Directory indexes: cramfs no, Squashfs yes
+Compressed metadata: cramfs no, Squashfs yes
+Hard link support: cramfs no, Squashfs yes
+Support for "." and ".." in readdir: cramfs no, Squashfs yes
+Real inode numbers: cramfs no, Squashfs yes.  Cramfs gives device inodes,
+	fifo and empty directories the same inode of 1!
+Exportable filesystem (NFS, etc.): cramfs no, Squashfs yes
+Active maintenance: cramfs no (it is listed as orphaned, probably no active
+	work for years), Squashfs yes
+
+Sorry for the list formatting, but many email readers are very unforgiving
+displaying tabbed lists and so I avoided them.
+
+For those that want hard performance statistics
+http://tree.celinuxforum.org/CelfPubWiki/SquashFsComparisons gives
+a full comparison of the performance of Squashfs against cramfs, zisofs,
+cloop and ext3.  I made these tests a number of years ago using Squashfs 2.1,
+but they are still valid.  In fact the performance should now be better.
+
+Cramfs is a limited filesystem, it's good for some embedded users but not now
+much else, its layout and features hasn't changed in the eight years+ since
+its release.  Squashfs, despite never being in mainline, has been actively
+developed for over six years, and in that time has gone through four
+layout revisions, each revision improving compression and performance where
+limitations were found.  For an often dismissed filesystem, Squashfs has
+advanced features such as metadata compression and tail-end packing for greater
+compression, and directory indexes for faster dentry operations.
+
+Despite not being in mainline, it is widely used.  It is packaged
+by all major distributions (Ubuntu, Fedora, Debian, SUSE, Gentoo), it is used
+on most LiveCDs, it is extensively used in embedded systems (STBs, routers,
+mobile phones), and notably is used in such things as Splashtop and the
+Amazon Kindle.
+
+Anyway that's my case for inclusion.  If any readers want Squashfs
+mainlined it's probably now a good time to offer support!
+
+There are 16 patches in the patch set, and the patches are against the
+latest linux-next tree (linux 2.6.27-next-20081016).
+
+Finally, I would like to acknowledge the financial support of the Consumer
+Embedded Linux Forum (CELF).  They've made it possible for me to spend the
+last four months working full time on this mainlining attempt.
+
+Phillip
