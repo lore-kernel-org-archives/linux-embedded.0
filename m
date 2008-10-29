@@ -1,7 +1,7 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V2 10/16] Squashfs: cache operations
+Subject: [PATCH V2 11/16] Squashfs: block operations
 Date: Wed, 29 Oct 2008 01:49:56 +0000
-Message-ID: <E1Kv0C4-0006HO-BC@dylan>
+Message-ID: <E1Kv0C4-0006HV-DN@dylan>
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -13,15 +13,15 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/squashfs/cache.c |  315 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 315 insertions(+), 0 deletions(-)
+ fs/squashfs/block.c |  256 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 256 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/cache.c b/fs/squashfs/cache.c
+diff --git a/fs/squashfs/block.c b/fs/squashfs/block.c
 new file mode 100644
-index 0000000..d121f31
+index 0000000..da5f88b
 --- /dev/null
-+++ b/fs/squashfs/cache.c
-@@ -0,0 +1,315 @@
++++ b/fs/squashfs/block.c
+@@ -0,0 +1,256 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -42,25 +42,20 @@ index 0000000..d121f31
 + * along with this program; if not, write to the Free Software
 + * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 + *
-+ * cache.c
++ * block.c
 + */
 +
 +/*
-+ * Blocks in Squashfs are compressed.  To avoid repeatedly decompressing
-+ * recently accessed data Squashfs uses two small metadata and fragment caches.
-+ *
-+ * This file implements a generic cache implementation used for both caches,
-+ * plus functions layered ontop of the generic cache implementation to
-+ * access the metadata and fragment caches.
++ * This file implements the low-level routines to read and decompress
++ * datablocks and metadata blocks.
 + */
 +
 +#include <linux/fs.h>
 +#include <linux/vfs.h>
 +#include <linux/slab.h>
-+#include <linux/vmalloc.h>
-+#include <linux/sched.h>
-+#include <linux/spinlock.h>
-+#include <linux/wait.h>
++#include <linux/mutex.h>
++#include <linux/string.h>
++#include <linux/buffer_head.h>
 +#include <linux/zlib.h>
 +
 +#include "squashfs_fs.h"
@@ -69,274 +64,220 @@ index 0000000..d121f31
 +#include "squashfs.h"
 +
 +/*
-+ * Look-up block in cache, and increment usage count.  If not in cache, read
-+ * and decompress it from disk.
++ * Read the metadata block length, this is stored in the first two
++ * bytes of the metadata block.
 + */
-+struct squashfs_cache_entry *squashfs_cache_get(struct super_block *sb,
-+	struct squashfs_cache *cache, long long block, int length)
++static struct buffer_head *get_block_length(struct super_block *sb,
++			long long *cur_index, int *offset, int *length)
 +{
-+	int i, n;
-+	struct squashfs_cache_entry *entry;
++	struct squashfs_sb_info *msblk = sb->s_fs_info;
++	struct buffer_head *bh;
 +
-+	spin_lock(&cache->lock);
-+
-+	while (1) {
-+		for (i = 0; i < cache->entries; i++)
-+			if (cache->entry[i].block == block)
-+				break;
-+
-+		if (i == cache->entries) {
-+			/*
-+			 * Block not in cache, if all cache entries are locked
-+			 * go to sleep waiting for one to become available.
-+			 */
-+			if (cache->unused == 0) {
-+				cache->waiting++;
-+				spin_unlock(&cache->lock);
-+				wait_event(cache->wait_queue, cache->unused);
-+				spin_lock(&cache->lock);
-+				cache->waiting--;
-+				continue;
-+			}
-+
-+			/*
-+			 * At least one unlocked cache entry.  A simple
-+			 * round-robin strategy is used to choose the entry to
-+			 * be evicted from the cache.
-+			 */
-+			i = cache->next_blk;
-+			for (n = 0; n < cache->entries; n++) {
-+				if (cache->entry[i].locked == 0)
-+					break;
-+				i = (i + 1) % cache->entries;
-+			}
-+
-+			cache->next_blk = (i + 1) % cache->entries;
-+			entry = &cache->entry[i];
-+
-+			/*
-+			 * Initialise choosen cache entry, and fill it in from
-+			 * disk.
-+			 */
-+			cache->unused--;
-+			entry->block = block;
-+			entry->locked = 1;
-+			entry->pending = 1;
-+			entry->waiting = 0;
-+			entry->error = 0;
-+			spin_unlock(&cache->lock);
-+
-+			entry->length = squashfs_read_data(sb, entry->data,
-+				block, length, &entry->next_index,
-+				cache->block_size);
-+
-+			spin_lock(&cache->lock);
-+
-+			if (entry->length < 0)
-+				entry->error = entry->length;
-+
-+			entry->pending = 0;
-+			spin_unlock(&cache->lock);
-+
-+			/*
-+			 * While filling this entry one or more other processes
-+			 * have looked it up in the cache, and have slept
-+			 * waiting for it to become available.
-+			 */
-+			if (entry->waiting)
-+				wake_up_all(&entry->wait_queue);
-+			goto out;
-+		}
-+
-+		/*
-+		 * Block already in cache.  Increment lock so it doesn't
-+		 * get reused until we're finished with it, if it was
-+		 * previously unlocked there's one less cache entry available
-+		 * for reuse.
-+		 */
-+		entry = &cache->entry[i];
-+		if (entry->locked == 0)
-+			cache->unused--;
-+		entry->locked++;
-+
-+		/*
-+		 * If the entry is currently being filled in by another process
-+		 * go to sleep waiting for it to become available.
-+		 */
-+		if (entry->pending) {
-+			entry->waiting++;
-+			spin_unlock(&cache->lock);
-+			wait_event(entry->wait_queue, !entry->pending);
-+			goto out;
-+		}
-+
-+		spin_unlock(&cache->lock);
-+		goto out;
-+	}
-+
-+out:
-+	TRACE("Got %s %d, start block %lld, locked %d, error %d\n", cache->name,
-+		i, entry->block, entry->locked, entry->error);
-+
-+	if (entry->error)
-+		ERROR("Unable to read %s cache entry [%llx]\n", cache->name,
-+							block);
-+	return entry;
-+}
-+
-+
-+/*
-+ * Release block, once usage count is zero it can be reused.
-+ */
-+void squashfs_cache_put(struct squashfs_cache *cache,
-+				struct squashfs_cache_entry *entry)
-+{
-+	spin_lock(&cache->lock);
-+	entry->locked--;
-+	if (entry->locked == 0) {
-+		cache->unused++;
-+		spin_unlock(&cache->lock);
-+		/*
-+		 * If there's any processes waiting for a block to become
-+		 * available, wake one up.
-+		 */
-+		if (cache->waiting)
-+			wake_up(&cache->wait_queue);
-+	} else {
-+		spin_unlock(&cache->lock);
-+	}
-+}
-+
-+
-+void squashfs_cache_delete(struct squashfs_cache *cache)
-+{
-+	int i;
-+
-+	if (cache == NULL)
-+		return;
-+
-+	for (i = 0; i < cache->entries; i++)
-+		if (cache->entry[i].data) {
-+			if (cache->use_vmalloc)
-+				vfree(cache->entry[i].data);
-+			else
-+				kfree(cache->entry[i].data);
-+		}
-+
-+	kfree(cache);
-+}
-+
-+
-+struct squashfs_cache *squashfs_cache_init(char *name, int entries,
-+	int block_size, int use_vmalloc)
-+{
-+	int i;
-+	struct squashfs_cache *cache = kzalloc(sizeof(*cache) + entries *
-+			sizeof(*(cache->entry)), GFP_KERNEL);
-+
-+	if (cache == NULL) {
-+		ERROR("Failed to allocate %s cache\n", name);
++	bh = sb_bread(sb, *cur_index);
++	if (bh == NULL)
 +		return NULL;
++
++	if (msblk->devblksize - *offset == 1) {
++		*length = (unsigned char) bh->b_data[*offset];
++		brelse(bh);
++		bh = sb_bread(sb, ++(*cur_index));
++		if (bh == NULL)
++			return NULL;
++		*length |= (unsigned char) bh->b_data[0] << 8;
++		*offset = 1;
++	} else {
++		*length = (unsigned char) bh->b_data[*offset] |
++			(unsigned char) bh->b_data[*offset + 1] << 8;
++		*offset += 2;
 +	}
 +
-+	cache->next_blk = 0;
-+	cache->unused = entries;
-+	cache->entries = entries;
-+	cache->block_size = block_size;
-+	cache->use_vmalloc = use_vmalloc;
-+	cache->name = name;
-+	cache->waiting = 0;
-+	spin_lock_init(&cache->lock);
-+	init_waitqueue_head(&cache->wait_queue);
-+
-+	for (i = 0; i < entries; i++) {
-+		init_waitqueue_head(&cache->entry[i].wait_queue);
-+		cache->entry[i].block = SQUASHFS_INVALID_BLK;
-+		cache->entry[i].data = use_vmalloc ? vmalloc(block_size) :
-+				kmalloc(block_size, GFP_KERNEL);
-+		if (cache->entry[i].data == NULL) {
-+			ERROR("Failed to allocate %s cache entry\n", name);
-+			goto cleanup;
-+		}
-+	}
-+
-+	return cache;
-+
-+cleanup:
-+	squashfs_cache_delete(cache);
-+	return NULL;
++	return bh;
 +}
 +
 +
 +/*
-+ * Read length bytes from metadata position <block, offset> (block is the
-+ * start of the compressed block on disk, and offset is the offset into
-+ * the block once decompressed).  Data is packed into consecutive blocks,
-+ * and length bytes may require reading more than one block.
++ * Read and decompress a metadata block or datablock.  Length is non-zero
++ * if a datablock is being read (the size is stored elsewhere in the
++ * filesystem), otherwise the length is obtained from the first two bytes of
++ * the metadata block.  A bit in the length field indicates if the block
++ * is stored uncompressed in the filesystem (usually because compression
++ * generated a larger block - this does occasionally happen with zlib).
 + */
-+int squashfs_read_metadata(struct super_block *sb, void *buffer,
-+		long long *block, int *offset, int length)
++int squashfs_read_data(struct super_block *sb, void *buffer,
++			long long index, int length, long long *next_index,
++			int srclength)
 +{
 +	struct squashfs_sb_info *msblk = sb->s_fs_info;
-+	int bytes, return_length = length;
-+	struct squashfs_cache_entry *entry;
++	struct buffer_head **bh;
++	int offset = index & ((1 << msblk->devblksize_log2) - 1);
++	long long cur_index = index >> msblk->devblksize_log2;
++	int avail, bytes, compressed, b = 0, k = 0;
++	int c_byte = length;
 +
-+	TRACE("Entered squashfs_read_metadata [%llx:%x]\n", *block, *offset);
++	bh = kcalloc((msblk->block_size >> msblk->devblksize_log2) + 1,
++				sizeof(*bh), GFP_KERNEL);
++	if (bh == NULL)
++		return -ENOMEM;
 +
-+	while (1) {
-+		entry = squashfs_cache_get(sb, msblk->block_cache, *block, 0);
-+		bytes = entry->length - *offset;
++	if (c_byte) {
++		/*
++		 * Datablock.
++		 */
++		bytes = -offset;
++		compressed = SQUASHFS_COMPRESSED_BLOCK(c_byte);
++		c_byte = SQUASHFS_COMPRESSED_SIZE_BLOCK(c_byte);
 +
-+		if (entry->error) {
-+			return_length = entry->error;
-+			goto finish;
-+		} else if (bytes < 1) {
-+			return_length = -EIO;
-+			goto finish;
-+		} else if (bytes >= length) {
-+			if (buffer)
-+				memcpy(buffer, entry->data + *offset, length);
-+			if (entry->length - *offset == length) {
-+				*block = entry->next_index;
-+				*offset = 0;
-+			} else {
-+				*offset += length;
++		TRACE("Block @ 0x%llx, %scompressed size %d, src size %d\n",
++			index, compressed ? "" : "un", c_byte, srclength);
++
++		if (c_byte < 0 || c_byte > srclength || index < 0 ||
++				(index + c_byte) > msblk->bytes_used)
++			goto read_failure;
++
++		for (b = 0; bytes < c_byte; b++, cur_index++) {
++			bh[b] = sb_getblk(sb, cur_index);
++			if (bh[b] == NULL)
++				goto block_release;
++			bytes += msblk->devblksize;
++		}
++		ll_rw_block(READ, b, bh);
++	} else {
++		/*
++		 * Metadata block.
++		 */
++		if (index < 0 || (index + 2) > msblk->bytes_used)
++			goto read_failure;
++
++		bh[0] = get_block_length(sb, &cur_index, &offset, &c_byte);
++		if (bh[0] == NULL)
++			goto read_failure;
++		b = 1;
++
++		bytes = msblk->devblksize - offset;
++		compressed = SQUASHFS_COMPRESSED(c_byte);
++		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
++
++		TRACE("Block @ 0x%llx, %scompressed size %d\n", index,
++				compressed ? "" : "un", c_byte);
++
++		if (c_byte < 0 || c_byte > srclength ||
++					(index + c_byte) > msblk->bytes_used)
++			goto block_release;
++
++		for (; bytes < c_byte; b++) {
++			bh[b] = sb_getblk(sb, ++cur_index);
++			if (bh[b] == NULL)
++				goto block_release;
++			bytes += msblk->devblksize;
++		}
++		ll_rw_block(READ, b - 1, bh + 1);
++	}
++
++	if (compressed) {
++		int zlib_err = 0;
++
++		/*
++		 * Uncompress block.
++		 */
++
++		mutex_lock(&msblk->read_data_mutex);
++
++		msblk->stream.next_out = buffer;
++		msblk->stream.avail_out = srclength;
++
++		for (bytes = 0; k < b; k++) {
++			avail = min(c_byte - bytes, msblk->devblksize - offset);
++
++			wait_on_buffer(bh[k]);
++			if (!buffer_uptodate(bh[k]))
++				goto release_mutex;
++
++			msblk->stream.next_in = bh[k]->b_data + offset;
++			msblk->stream.avail_in = avail;
++
++			if (k == 0) {
++				zlib_err = zlib_inflateInit(&msblk->stream);
++				if (zlib_err != Z_OK) {
++					ERROR("zlib_inflateInit returned"
++						" unexpected result 0x%x,"
++						" srclength %d\n", zlib_err,
++						srclength);
++					goto release_mutex;
++				}
++
++				if (avail == 0) {
++					offset = 0;
++					brelse(bh[k]);
++					continue;
++				}
 +			}
-+			goto finish;
-+		} else {
-+			if (buffer) {
-+				memcpy(buffer, entry->data + *offset, bytes);
-+				buffer += bytes;
++
++			zlib_err = zlib_inflate(&msblk->stream, Z_NO_FLUSH);
++			if (zlib_err != Z_OK && zlib_err != Z_STREAM_END) {
++				ERROR("zlib_inflate returned unexpected result"
++					" 0x%x, srclength %d, avail_in %d,"
++					" avail_out %d\n", zlib_err, srclength,
++					msblk->stream.avail_in,
++					msblk->stream.avail_out);
++				goto release_mutex;
 +			}
-+			*block = entry->next_index;
-+			squashfs_cache_put(msblk->block_cache, entry);
-+			length -= bytes;
-+			*offset = 0;
++
++			bytes += avail;
++			offset = 0;
++			brelse(bh[k]);
++		}
++
++		if (zlib_err != Z_STREAM_END)
++			goto release_mutex;
++
++		zlib_err = zlib_inflateEnd(&msblk->stream);
++		if (zlib_err != Z_OK) {
++			ERROR("zlib_inflateEnd returned unexpected result 0x%x,"
++				" srclength %d\n", zlib_err, srclength);
++			goto release_mutex;
++		}
++		bytes = msblk->stream.total_out;
++		mutex_unlock(&msblk->read_data_mutex);
++	} else {
++		/*
++		 * Block is uncompressed.
++		 */
++		int i;
++
++		for (i = 0; i < b; i++) {
++			wait_on_buffer(bh[i]);
++			if (!buffer_uptodate(bh[i]))
++				goto block_release;
++		}
++
++		for (bytes = 0; k < b; k++) {
++			avail = min(c_byte - bytes, msblk->devblksize - offset);
++
++			memcpy(buffer + bytes, bh[k]->b_data + offset, avail);
++			bytes += avail;
++			offset = 0;
++			brelse(bh[k]);
 +		}
 +	}
 +
-+finish:
-+	squashfs_cache_put(msblk->block_cache, entry);
-+	return return_length;
++	if (next_index)
++		*next_index = index + c_byte + (length ? 0 : 2);
++
++	kfree(bh);
++	return bytes;
++
++release_mutex:
++	mutex_unlock(&msblk->read_data_mutex);
++
++block_release:
++	for (; k < b; k++)
++		brelse(bh[k]);
++
++read_failure:
++	ERROR("sb_bread failed reading block 0x%llx\n", cur_index);
++	kfree(bh);
++	return -EIO;
 +}
-+
-+
-+struct squashfs_cache_entry *get_cached_fragment(struct super_block *sb,
-+				long long start_block, int length)
-+{
-+	struct squashfs_sb_info *msblk = sb->s_fs_info;
-+
-+	return squashfs_cache_get(sb, msblk->fragment_cache, start_block,
-+		length);
-+}
-+
-+
-+void release_cached_fragment(struct squashfs_sb_info *msblk,
-+				struct squashfs_cache_entry *fragment)
-+{
-+	squashfs_cache_put(msblk->fragment_cache, fragment);
-+}
-+
 -- 
 1.5.2.5
 
