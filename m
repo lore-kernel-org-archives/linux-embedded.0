@@ -1,9 +1,9 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V2 12/16] Squashfs: header files
-Date: Wed, 29 Oct 2008 01:49:56 +0000
-Message-ID: <E1Kv0C4-0006Ha-Fc@dylan>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Subject: [PATCH V2 04/16] Squashfs: regular file operations
+Date: Wed, 29 Oct 2008 01:49:55 +0000
+Message-ID: <E1Kv0C3-0006Go-QQ@dylan>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -13,18 +13,15 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/squashfs/squashfs.h       |   89 ++++++++++
- fs/squashfs/squashfs_fs.h    |  380 ++++++++++++++++++++++++++++++++++++++++++
- fs/squashfs/squashfs_fs_i.h  |   45 +++++
- fs/squashfs/squashfs_fs_sb.h |   76 +++++++++
- 4 files changed, 590 insertions(+), 0 deletions(-)
+ fs/squashfs/file.c |  512 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 512 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/squashfs.h b/fs/squashfs/squashfs.h
+diff --git a/fs/squashfs/file.c b/fs/squashfs/file.c
 new file mode 100644
-index 0000000..b852934
+index 0000000..136663c
 --- /dev/null
-+++ b/fs/squashfs/squashfs.h
-@@ -0,0 +1,89 @@
++++ b/fs/squashfs/file.c
+@@ -0,0 +1,512 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -45,594 +42,497 @@ index 0000000..b852934
 + * along with this program; if not, write to the Free Software
 + * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 + *
-+ * squashfs.h
++ * file.c
 + */
-+
-+#define TRACE(s, args...)	pr_debug("SQUASHFS: "s, ## args)
-+
-+#define ERROR(s, args...)	pr_err("SQUASHFS error: "s, ## args)
-+
-+#define WARNING(s, args...)	pr_warning("SQUASHFS: "s, ## args)
-+
-+static inline struct squashfs_inode_info *SQUASHFS_I(struct inode *inode)
-+{
-+	return list_entry(inode, struct squashfs_inode_info, vfs_inode);
-+}
-+
-+/* block.c */
-+extern int squashfs_read_data(struct super_block *, void *,
-+				long long, int, long long *, int);
-+
-+/* cache.c */
-+extern struct squashfs_cache *squashfs_cache_init(char *, int, int, int);
-+extern void squashfs_cache_delete(struct squashfs_cache *);
-+struct squashfs_cache_entry *squashfs_cache_get(struct super_block *,
-+				struct squashfs_cache *, long long, int);
-+void squashfs_cache_put(struct squashfs_cache *, struct squashfs_cache_entry *);
-+extern int squashfs_read_metadata(struct super_block *, void *,
-+				long long *, int *, int);
-+extern struct squashfs_cache_entry *get_cached_fragment(struct super_block *,
-+				long long, int);
-+extern void release_cached_fragment(struct squashfs_sb_info *,
-+				struct squashfs_cache_entry *);
-+
-+/* export.c */
-+extern __le64 *read_inode_lookup_table(struct super_block *, long long,
-+			unsigned int);
-+
-+/* fragment.c */
-+extern int get_fragment_location(struct super_block *, unsigned int,
-+				long long *);
-+extern __le64 *read_fragment_index_table(struct super_block *, long long,
-+				unsigned int);
-+
-+/* id.c */
-+extern int squashfs_get_id(struct super_block *, unsigned int, unsigned int *);
-+extern __le64 *read_id_index_table(struct super_block *, long long,
-+			unsigned short);
-+
-+/* inode.c */
-+extern struct inode *squashfs_iget(struct super_block *, long long,
-+			unsigned int);
-+extern int squashfs_read_inode(struct inode *, long long);
 +
 +/*
-+ * Inodes and files operations
++ * This file contains code for handling regular files.  A regular file
++ * consists of a sequence of contiguous compressed blocks, and/or a
++ * compressed fragment block (tail-end packed block).   The compressed size
++ * of each datablock is stored in a block list contained within the
++ * file inode (itself stored in one or more compressed metadata blocks).
++ *
++ * To speed up access to datablocks when reading 'large' files (256 Mbytes or
++ * larger), the code implements an index cache that caches the mapping from
++ * block index to datablock location on disk.
++ *
++ * The index cache allows Squashfs to handle large files (up to 1.75 TiB) while
++ * retaining a simple and space-efficient block list on disk.  The cache
++ * is split into slots, caching up to eight 224 GiB files (128 KiB blocks).
++ * Larger files use multiple slots, with 1.75 TiB files using all 8 slots.
++ * The index cache is designed to be memory efficient, and by default uses
++ * 16 KiB.
 + */
 +
-+/* dir.c */
-+extern const struct file_operations squashfs_dir_ops;
-+
-+/* export.c */
-+extern const struct export_operations squashfs_export_ops;
-+
-+/* file.c */
-+extern const struct address_space_operations squashfs_aops;
-+
-+/* namei.c */
-+extern const struct inode_operations squashfs_dir_inode_ops;
-+
-+/* symlink.c */
-+extern const struct address_space_operations squashfs_symlink_aops;
-diff --git a/fs/squashfs/squashfs_fs.h b/fs/squashfs/squashfs_fs.h
-new file mode 100644
-index 0000000..eef85b1
---- /dev/null
-+++ b/fs/squashfs/squashfs_fs.h
-@@ -0,0 +1,380 @@
-+#ifndef SQUASHFS_FS
-+#define SQUASHFS_FS
-+/*
-+ * Squashfs
-+ *
-+ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
-+ * Phillip Lougher <phillip@lougher.demon.co.uk>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version 2,
-+ * or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-+ *
-+ * squashfs_fs.h
-+ */
-+
-+#define SQUASHFS_CACHED_FRAGMENTS	CONFIG_SQUASHFS_FRAGMENT_CACHE_SIZE
-+#define SQUASHFS_MAJOR			4
-+#define SQUASHFS_MINOR			0
-+#define SQUASHFS_MAGIC			0x73717368
-+#define SQUASHFS_START			0
-+
-+/* size of metadata (inode and directory) blocks */
-+#define SQUASHFS_METADATA_SIZE		8192
-+#define SQUASHFS_METADATA_LOG		13
-+
-+/* default size of data blocks */
-+#define SQUASHFS_FILE_SIZE		131072
-+#define SQUASHFS_FILE_LOG		17
-+
-+#define SQUASHFS_FILE_MAX_SIZE		1048576
-+
-+/* Max number of uids and gids */
-+#define SQUASHFS_IDS			65536
-+
-+/* Max length of filename (not 255) */
-+#define SQUASHFS_NAME_LEN		256
-+
-+#define SQUASHFS_INVALID_FRAG		(0xffffffffU)
-+#define SQUASHFS_INVALID_BLK		(-1LL)
-+
-+/* Filesystem flags */
-+#define SQUASHFS_NOI			0
-+#define SQUASHFS_NOD			1
-+#define SQUASHFS_NOF			3
-+#define SQUASHFS_NO_FRAG		4
-+#define SQUASHFS_ALWAYS_FRAG		5
-+#define SQUASHFS_DUPLICATE		6
-+#define SQUASHFS_EXPORT			7
-+
-+#define SQUASHFS_BIT(flag, bit)		((flag >> bit) & 1)
-+
-+#define SQUASHFS_UNCOMPRESSED_INODES(flags)	SQUASHFS_BIT(flags, \
-+						SQUASHFS_NOI)
-+
-+#define SQUASHFS_UNCOMPRESSED_DATA(flags)	SQUASHFS_BIT(flags, \
-+						SQUASHFS_NOD)
-+
-+#define SQUASHFS_UNCOMPRESSED_FRAGMENTS(flags)	SQUASHFS_BIT(flags, \
-+						SQUASHFS_NOF)
-+
-+#define SQUASHFS_NO_FRAGMENTS(flags)		SQUASHFS_BIT(flags, \
-+						SQUASHFS_NO_FRAG)
-+
-+#define SQUASHFS_ALWAYS_FRAGMENTS(flags)	SQUASHFS_BIT(flags, \
-+						SQUASHFS_ALWAYS_FRAG)
-+
-+#define SQUASHFS_DUPLICATES(flags)		SQUASHFS_BIT(flags, \
-+						SQUASHFS_DUPLICATE)
-+
-+#define SQUASHFS_EXPORTABLE(flags)		SQUASHFS_BIT(flags, \
-+						SQUASHFS_EXPORT)
-+
-+/* Max number of types and file types */
-+#define SQUASHFS_DIR_TYPE		1
-+#define SQUASHFS_REG_TYPE		2
-+#define SQUASHFS_SYMLINK_TYPE		3
-+#define SQUASHFS_BLKDEV_TYPE		4
-+#define SQUASHFS_CHRDEV_TYPE		5
-+#define SQUASHFS_FIFO_TYPE		6
-+#define SQUASHFS_SOCKET_TYPE		7
-+#define SQUASHFS_LDIR_TYPE		8
-+#define SQUASHFS_LREG_TYPE		9
-+#define SQUASHFS_LSYMLINK_TYPE		10
-+#define SQUASHFS_LBLKDEV_TYPE		11
-+#define SQUASHFS_LCHRDEV_TYPE		12
-+#define SQUASHFS_LFIFO_TYPE		13
-+#define SQUASHFS_LSOCKET_TYPE		14
-+
-+/* Flag whether block is compressed or uncompressed, bit is set if block is
-+ * uncompressed */
-+#define SQUASHFS_COMPRESSED_BIT		(1 << 15)
-+
-+#define SQUASHFS_COMPRESSED_SIZE(B)	(((B) & ~SQUASHFS_COMPRESSED_BIT) ? \
-+		(B) & ~SQUASHFS_COMPRESSED_BIT :  SQUASHFS_COMPRESSED_BIT)
-+
-+#define SQUASHFS_COMPRESSED(B)		(!((B) & SQUASHFS_COMPRESSED_BIT))
-+
-+#define SQUASHFS_COMPRESSED_BIT_BLOCK	(1 << 24)
-+
-+#define SQUASHFS_COMPRESSED_SIZE_BLOCK(B)	((B) & \
-+						~SQUASHFS_COMPRESSED_BIT_BLOCK)
-+
-+#define SQUASHFS_COMPRESSED_BLOCK(B)	(!((B) & SQUASHFS_COMPRESSED_BIT_BLOCK))
-+
-+/*
-+ * Inode number ops.  Inodes consist of a compressed block number, and an
-+ * uncompressed offset within that block
-+ */
-+#define SQUASHFS_INODE_BLK(A)		((unsigned int) ((A) >> 16))
-+
-+#define SQUASHFS_INODE_OFFSET(A)	((unsigned int) ((A) & 0xffff))
-+
-+#define SQUASHFS_MKINODE(A, B)		((long long)(((long long) (A)\
-+					<< 16) + (B)))
-+
-+/* Translate between VFS mode and squashfs mode */
-+#define SQUASHFS_MODE(A)		((A) & 0xfff)
-+
-+/* fragment and fragment table defines */
-+#define SQUASHFS_FRAGMENT_BYTES(A)	\
-+				((A) * sizeof(struct squashfs_fragment_entry))
-+
-+#define SQUASHFS_FRAGMENT_INDEX(A)	(SQUASHFS_FRAGMENT_BYTES(A) / \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_FRAGMENT_INDEX_OFFSET(A)	(SQUASHFS_FRAGMENT_BYTES(A) % \
-+						SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_FRAGMENT_INDEXES(A)	((SQUASHFS_FRAGMENT_BYTES(A) + \
-+					SQUASHFS_METADATA_SIZE - 1) / \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_FRAGMENT_INDEX_BYTES(A)	(SQUASHFS_FRAGMENT_INDEXES(A) *\
-+						sizeof(long long))
-+
-+/* inode lookup table defines */
-+#define SQUASHFS_LOOKUP_BYTES(A)	((A) * sizeof(long long))
-+
-+#define SQUASHFS_LOOKUP_BLOCK(A)	(SQUASHFS_LOOKUP_BYTES(A) / \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_LOOKUP_BLOCK_OFFSET(A)	(SQUASHFS_LOOKUP_BYTES(A) % \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_LOOKUP_BLOCKS(A)	((SQUASHFS_LOOKUP_BYTES(A) + \
-+					SQUASHFS_METADATA_SIZE - 1) / \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_LOOKUP_BLOCK_BYTES(A)	(SQUASHFS_LOOKUP_BLOCKS(A) *\
-+					sizeof(long long))
-+
-+/* uid/gid lookup table defines */
-+#define SQUASHFS_ID_BYTES(A)		((A) * sizeof(unsigned int))
-+
-+#define SQUASHFS_ID_BLOCK(A)		(SQUASHFS_ID_BYTES(A) / \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_ID_BLOCK_OFFSET(A)	(SQUASHFS_ID_BYTES(A) % \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_ID_BLOCKS(A)		((SQUASHFS_ID_BYTES(A) + \
-+					SQUASHFS_METADATA_SIZE - 1) / \
-+					SQUASHFS_METADATA_SIZE)
-+
-+#define SQUASHFS_ID_BLOCK_BYTES(A)	(SQUASHFS_ID_BLOCKS(A) *\
-+					sizeof(long long))
-+
-+/* cached data constants for filesystem */
-+#define SQUASHFS_CACHED_BLKS		8
-+
-+#define SQUASHFS_MAX_FILE_SIZE_LOG	64
-+
-+#define SQUASHFS_MAX_FILE_SIZE		(1LL << \
-+					(SQUASHFS_MAX_FILE_SIZE_LOG - 2))
-+
-+#define SQUASHFS_MARKER_BYTE		0xff
-+
-+/* meta index cache */
-+#define SQUASHFS_META_INDEXES	(SQUASHFS_METADATA_SIZE / sizeof(unsigned int))
-+#define SQUASHFS_META_ENTRIES	127
-+#define SQUASHFS_META_SLOTS	8
-+
-+struct meta_entry {
-+	long long		data_block;
-+	unsigned int		index_block;
-+	unsigned short		offset;
-+	unsigned short		pad;
-+};
-+
-+struct meta_index {
-+	unsigned int		inode_number;
-+	unsigned int		offset;
-+	unsigned short		entries;
-+	unsigned short		skip;
-+	unsigned short		locked;
-+	unsigned short		pad;
-+	struct meta_entry	meta_entry[SQUASHFS_META_ENTRIES];
-+};
-+
-+
-+/*
-+ * definitions for structures on disk
-+ */
-+#define ZLIB_COMPRESSION	 1
-+
-+struct squashfs_super_block {
-+	__le32			s_magic;
-+	__le32			inodes;
-+	__le32			mkfs_time;
-+	__le32			block_size;
-+	__le32			fragments;
-+	__le16			compression;
-+	__le16			block_log;
-+	__le16			flags;
-+	__le16			no_ids;
-+	__le16			s_major;
-+	__le16			s_minor;
-+	__le64			root_inode;
-+	__le64			bytes_used;
-+	__le64			id_table_start;
-+	__le64			xattr_table_start;
-+	__le64			inode_table_start;
-+	__le64			directory_table_start;
-+	__le64			fragment_table_start;
-+	__le64			lookup_table_start;
-+};
-+
-+struct squashfs_dir_index {
-+	__le32			index;
-+	__le32			start_block;
-+	__le32			size;
-+	unsigned char		name[0];
-+};
-+
-+struct squashfs_base_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+};
-+
-+struct squashfs_ipc_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+	__le32			nlink;
-+};
-+
-+struct squashfs_dev_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+	__le32			nlink;
-+	__le32			rdev;
-+};
-+
-+struct squashfs_symlink_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+	__le32			nlink;
-+	__le32			symlink_size;
-+	char			symlink[0];
-+};
-+
-+struct squashfs_reg_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+	__le32			start_block;
-+	__le32			fragment;
-+	__le32			offset;
-+	__le32			file_size;
-+	__le16			block_list[0];
-+};
-+
-+struct squashfs_lreg_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+	__le64			start_block;
-+	__le64			file_size;
-+	__le64			sparse;
-+	__le32			nlink;
-+	__le32			fragment;
-+	__le32			offset;
-+	__le32			xattr;
-+	__le16			block_list[0];
-+};
-+
-+struct squashfs_dir_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+	__le32			start_block;
-+	__le32			nlink;
-+	__le16			file_size;
-+	__le16			offset;
-+	__le32			parent_inode;
-+};
-+
-+struct squashfs_ldir_inode {
-+	__le16			inode_type;
-+	__le16			mode;
-+	__le16			uid;
-+	__le16			guid;
-+	__le32			mtime;
-+	__le32	 		inode_number;
-+	__le32			nlink;
-+	__le32			file_size;
-+	__le32			start_block;
-+	__le32			parent_inode;
-+	__le16			i_count;
-+	__le16			offset;
-+	__le32			xattr;
-+	struct squashfs_dir_index	index[0];
-+};
-+
-+union squashfs_inode {
-+	struct squashfs_base_inode		base;
-+	struct squashfs_dev_inode		dev;
-+	struct squashfs_symlink_inode		symlink;
-+	struct squashfs_reg_inode		reg;
-+	struct squashfs_lreg_inode		lreg;
-+	struct squashfs_dir_inode		dir;
-+	struct squashfs_ldir_inode		ldir;
-+	struct squashfs_ipc_inode		ipc;
-+};
-+
-+struct squashfs_dir_entry {
-+	__le16			offset;
-+	__le16			inode_number;
-+	__le16			type;
-+	__le16			size;
-+	char			name[0];
-+};
-+
-+struct squashfs_dir_header {
-+	__le32			count;
-+	__le32			start_block;
-+	__le32			inode_number;
-+};
-+
-+struct squashfs_fragment_entry {
-+	__le64			start_block;
-+	__le32			size;
-+	unsigned int		unused;
-+};
-+
-+#endif
-diff --git a/fs/squashfs/squashfs_fs_i.h b/fs/squashfs/squashfs_fs_i.h
-new file mode 100644
-index 0000000..f78e6f8
---- /dev/null
-+++ b/fs/squashfs/squashfs_fs_i.h
-@@ -0,0 +1,45 @@
-+#ifndef SQUASHFS_FS_I
-+#define SQUASHFS_FS_I
-+/*
-+ * Squashfs
-+ *
-+ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
-+ * Phillip Lougher <phillip@lougher.demon.co.uk>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version 2,
-+ * or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-+ *
-+ * squashfs_fs_i.h
-+ */
-+
-+struct squashfs_inode_info {
-+	long long	start;
-+	int		offset;
-+	union {
-+		struct {
-+			long long	fragment_block;
-+			int		fragment_size;
-+			int		fragment_offset;
-+			long long	block_list_start;
-+		};
-+		struct {
-+			long long	dir_idx_start;
-+			int		dir_idx_offset;
-+			int		dir_idx_cnt;
-+			int		parent;
-+		};
-+	};
-+	struct inode	vfs_inode;
-+};
-+#endif
-diff --git a/fs/squashfs/squashfs_fs_sb.h b/fs/squashfs/squashfs_fs_sb.h
-new file mode 100644
-index 0000000..cc9fd5d
---- /dev/null
-+++ b/fs/squashfs/squashfs_fs_sb.h
-@@ -0,0 +1,76 @@
-+#ifndef SQUASHFS_FS_SB
-+#define SQUASHFS_FS_SB
-+/*
-+ * Squashfs
-+ *
-+ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
-+ * Phillip Lougher <phillip@lougher.demon.co.uk>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version 2,
-+ * or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-+ *
-+ * squashfs_fs_sb.h
-+ */
++#include <linux/fs.h>
++#include <linux/vfs.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/string.h>
++#include <linux/pagemap.h>
++#include <linux/mutex.h>
++#include <linux/zlib.h>
 +
 +#include "squashfs_fs.h"
++#include "squashfs_fs_sb.h"
++#include "squashfs_fs_i.h"
++#include "squashfs.h"
 +
-+struct squashfs_cache_entry {
-+	long long		block;
-+	int			length;
-+	int			locked;
-+	long long		next_index;
-+	char			pending;
-+	char			error;
-+	int			waiting;
-+	wait_queue_head_t	wait_queue;
-+	char			*data;
-+};
++/*
++ * Locate cache slot in range [offset, index] for specified inode.  If
++ * there's more than one return the slot closest to index.
++ */
++static struct meta_index *locate_meta_index(struct inode *inode, int offset,
++				int index)
++{
++	struct meta_index *meta = NULL;
++	struct squashfs_sb_info *msblk = inode->i_sb->s_fs_info;
++	int i;
 +
-+struct squashfs_cache {
-+	char			*name;
-+	int			entries;
-+	int			block_size;
-+	int			next_blk;
-+	int			waiting;
-+	int			unused;
-+	int			use_vmalloc;
-+	spinlock_t		lock;
-+	wait_queue_head_t	wait_queue;
-+	struct squashfs_cache_entry entry[0];
-+};
++	mutex_lock(&msblk->meta_index_mutex);
 +
-+struct squashfs_sb_info {
-+	int			devblksize;
-+	int			devblksize_log2;
-+	struct squashfs_cache	*block_cache;
-+	struct squashfs_cache	*fragment_cache;
-+	int			next_meta_index;
-+	__le64			*id_table;
-+	__le64			*fragment_index;
-+	unsigned int		*fragment_index_2;
-+	char			*read_page;
-+	struct mutex		read_data_mutex;
-+	struct mutex		read_page_mutex;
-+	struct mutex		meta_index_mutex;
-+	struct meta_index	*meta_index;
-+	z_stream		stream;
-+	__le64			*inode_lookup_table;
-+	long long		inode_table;
-+	long long		directory_table;
-+	unsigned int		block_size;
-+	unsigned short		block_log;
-+	long long		bytes_used;
-+	unsigned int		inodes;
++	TRACE("locate_meta_index: index %d, offset %d\n", index, offset);
++
++	if (msblk->meta_index == NULL)
++		goto not_allocated;
++
++	for (i = 0; i < SQUASHFS_META_SLOTS; i++) {
++		if (msblk->meta_index[i].inode_number == inode->i_ino &&
++				msblk->meta_index[i].offset >= offset &&
++				msblk->meta_index[i].offset <= index &&
++				msblk->meta_index[i].locked == 0) {
++			TRACE("locate_meta_index: entry %d, offset %d\n", i,
++					msblk->meta_index[i].offset);
++			meta = &msblk->meta_index[i];
++			offset = meta->offset;
++		}
++	}
++
++	if (meta)
++		meta->locked = 1;
++
++not_allocated:
++	mutex_unlock(&msblk->meta_index_mutex);
++
++	return meta;
++}
++
++
++/*
++ * Find and initialise an empty cache slot for index offset.
++ */
++static struct meta_index *empty_meta_index(struct inode *inode, int offset,
++				int skip)
++{
++	struct squashfs_sb_info *msblk = inode->i_sb->s_fs_info;
++	struct meta_index *meta = NULL;
++	int i;
++
++	mutex_lock(&msblk->meta_index_mutex);
++
++	TRACE("empty_meta_index: offset %d, skip %d\n", offset, skip);
++
++	if (msblk->meta_index == NULL) {
++		/*
++		 * First time cache index has been used, allocate and
++		 * initialise.  The cache index could be allocated at
++		 * mount time but doing it here means it is allocated only
++		 * if a 'large' file is read.
++		 */
++		msblk->meta_index = kcalloc(SQUASHFS_META_SLOTS,
++			sizeof(*(msblk->meta_index)), GFP_KERNEL);
++		if (msblk->meta_index == NULL) {
++			ERROR("Failed to allocate meta_index\n");
++			goto failed;
++		}
++		for (i = 0; i < SQUASHFS_META_SLOTS; i++) {
++			msblk->meta_index[i].inode_number = 0;
++			msblk->meta_index[i].locked = 0;
++		}
++		msblk->next_meta_index = 0;
++	}
++
++	for (i = SQUASHFS_META_SLOTS; i &&
++			msblk->meta_index[msblk->next_meta_index].locked; i--)
++		msblk->next_meta_index = (msblk->next_meta_index + 1) %
++			SQUASHFS_META_SLOTS;
++
++	if (i == 0) {
++		TRACE("empty_meta_index: failed!\n");
++		goto failed;
++	}
++
++	TRACE("empty_meta_index: returned meta entry %d, %p\n",
++			msblk->next_meta_index,
++			&msblk->meta_index[msblk->next_meta_index]);
++
++	meta = &msblk->meta_index[msblk->next_meta_index];
++	msblk->next_meta_index = (msblk->next_meta_index + 1) %
++			SQUASHFS_META_SLOTS;
++
++	meta->inode_number = inode->i_ino;
++	meta->offset = offset;
++	meta->skip = skip;
++	meta->entries = 0;
++	meta->locked = 1;
++
++failed:
++	mutex_unlock(&msblk->meta_index_mutex);
++	return meta;
++}
++
++
++static void release_meta_index(struct inode *inode, struct meta_index *meta)
++{
++	struct squashfs_sb_info *msblk = inode->i_sb->s_fs_info;
++	mutex_lock(&msblk->meta_index_mutex);
++	meta->locked = 0;
++	mutex_unlock(&msblk->meta_index_mutex);
++}
++
++
++/*
++ * Read the next n blocks from the block list, starting from
++ * metadata block <start_block, offset>.
++ */
++static long long read_indexes(struct super_block *sb, int n,
++				long long *start_block, int *offset)
++{
++	int err, i;
++	long long block = 0;
++	__le32 *blist = kmalloc(PAGE_CACHE_SIZE, GFP_KERNEL);
++
++	if (blist == NULL) {
++		ERROR("read_indexes: Failed to allocate block_list\n");
++		return -ENOMEM;
++	}
++
++	while (n) {
++		int blocks = min_t(int, n, PAGE_CACHE_SIZE >> 2);
++
++		err = squashfs_read_metadata(sb, blist, start_block,
++				offset, blocks << 2);
++		if (err < 0) {
++			ERROR("read_indexes: reading block [%llx:%x]\n",
++				*start_block, *offset);
++			goto failure;
++		}
++
++		for (i = 0; i < blocks; i++) {
++			int size = le32_to_cpu(blist[i]);
++			block += SQUASHFS_COMPRESSED_SIZE_BLOCK(size);
++		}
++		n -= blocks;
++	}
++
++	kfree(blist);
++	return block;
++
++failure:
++	kfree(blist);
++	return err;
++}
++
++
++/*
++ * Each cache index slot has SQUASHFS_META_ENTRIES, each of which
++ * can cache one index -> datablock/blocklist-block mapping.  We wish
++ * to distribute these over the length of the file, entry[0] maps index x,
++ * entry[1] maps index x + skip, entry[2] maps index x + 2 * skip, and so on.
++ * The larger the file, the greater the skip factor.  The skip factor is
++ * limited to the size of the metadata cache (SQUASHFS_CACHED_BLKS) to ensure
++ * the number of metadata blocks that need to be read fits into the cache.
++ * If the skip factor is limited in this way then the file will use multiple
++ * slots.
++ */
++static inline int calculate_skip(int blocks)
++{
++	int skip = (blocks - 1) / ((SQUASHFS_META_ENTRIES + 1)
++		 * SQUASHFS_META_INDEXES);
++	return min(SQUASHFS_CACHED_BLKS - 1, skip + 1);
++}
++
++
++/*
++ * Search and grow the index cache for the specified inode, returning the
++ * on-disk locations of the datablock and block list metadata block
++ * <index_block, index_offset> for index (scaled to nearest cache index).
++ */
++static int fill_meta_index(struct inode *inode, int index,
++		long long *index_block, int *index_offset,
++		long long *data_block)
++{
++	struct squashfs_sb_info *msblk = inode->i_sb->s_fs_info;
++	int skip = calculate_skip(i_size_read(inode) >> msblk->block_log);
++	int offset = 0;
++	struct meta_index *meta;
++	struct meta_entry *meta_entry;
++	long long cur_index_block = SQUASHFS_I(inode)->block_list_start;
++	int cur_offset = SQUASHFS_I(inode)->offset;
++	long long cur_data_block = SQUASHFS_I(inode)->start;
++	int err, i;
++
++	/*
++	 * Scale index to cache index (cache slot entry)
++	 */
++	index /= SQUASHFS_META_INDEXES * skip;
++
++	while (offset < index) {
++		meta = locate_meta_index(inode, offset + 1, index);
++
++		if (meta == NULL) {
++			meta = empty_meta_index(inode, offset + 1, skip);
++			if (meta == NULL)
++				goto all_done;
++		} else {
++			offset = index < meta->offset + meta->entries ? index :
++				meta->offset + meta->entries - 1;
++			meta_entry = &meta->meta_entry[offset - meta->offset];
++			cur_index_block = meta_entry->index_block +
++				msblk->inode_table;
++			cur_offset = meta_entry->offset;
++			cur_data_block = meta_entry->data_block;
++			TRACE("get_meta_index: offset %d, meta->offset %d, "
++				"meta->entries %d\n", offset, meta->offset,
++				meta->entries);
++			TRACE("get_meta_index: index_block 0x%llx, offset 0x%x"
++				" data_block 0x%llx\n", cur_index_block,
++				cur_offset, cur_data_block);
++		}
++
++		/*
++		 * If necessary grow cache slot by reading block list.  Cache
++		 * slot is extended up to index or to the end of the slot, in
++		 * which case further slots will be used.
++		 */
++		for (i = meta->offset + meta->entries; i <= index &&
++				i < meta->offset + SQUASHFS_META_ENTRIES; i++) {
++			int blocks = skip * SQUASHFS_META_INDEXES;
++			long long res = read_indexes(inode->i_sb, blocks,
++					&cur_index_block, &cur_offset);
++
++			if (res < 0) {
++				if (meta->entries == 0)
++					/*
++					 * Don't leave an empty slot on read
++					 * error allocated to this inode...
++					 */
++					meta->inode_number = 0;
++					err = res;
++				goto failed;
++			}
++
++			cur_data_block += res;
++			meta_entry = &meta->meta_entry[i - meta->offset];
++			meta_entry->index_block = cur_index_block -
++				msblk->inode_table;
++			meta_entry->offset = cur_offset;
++			meta_entry->data_block = cur_data_block;
++			meta->entries++;
++			offset++;
++		}
++
++		TRACE("get_meta_index: meta->offset %d, meta->entries %d\n",
++				meta->offset, meta->entries);
++
++		release_meta_index(inode, meta);
++	}
++
++all_done:
++	*index_block = cur_index_block;
++	*index_offset = cur_offset;
++	*data_block = cur_data_block;
++
++	/*
++	 * Scale cache index (cache slot entry) to index
++	 */
++	return offset * SQUASHFS_META_INDEXES * skip;
++
++failed:
++	release_meta_index(inode, meta);
++	return err;
++}
++
++
++/*
++ * Get the on-disk location and compressed size of the datablock
++ * specified by index.  Fill_meta_index() does most of the work.
++ */
++static long long read_blocklist(struct inode *inode, int index,
++				unsigned int *bsize)
++{
++	long long start, block = 0, blks;
++	int offset;
++	__le32 size;
++	int res = fill_meta_index(inode, index, &start, &offset, &block);
++
++	TRACE("read_blocklist: res %d, index %d, start 0x%llx, offset"
++		       " 0x%x, block 0x%llx\n", res, index, start, offset,
++			block);
++
++	if (res < 0)
++		return res;
++
++	/*
++	 * res contains the index of the mapping returned by fill_meta_index(),
++	 * this will likely be less than the desired index (because the
++	 * meta_index cache works at a higher granularity).  Read any
++	 * extra block indexes needed.
++	 */
++	if (res < index) {
++		blks = read_indexes(inode->i_sb, index - res, &start, &offset);
++		if (blks < 0)
++			return blks;
++		block += blks;
++	}
++
++	/*
++	 * Read length of block specified by index.
++	 */
++	res = squashfs_read_metadata(inode->i_sb, &size, &start, &offset,
++			sizeof(size));
++	if (res < 0)
++		return res;
++	*bsize = le32_to_cpu(size);
++
++	return block;
++}
++
++
++static int squashfs_readpage(struct file *file, struct page *page)
++{
++	struct inode *inode = page->mapping->host;
++	struct squashfs_sb_info *msblk = inode->i_sb->s_fs_info;
++	long long block;
++	unsigned int bsize = 0, i;
++	int bytes, index = page->index >> (msblk->block_log - PAGE_CACHE_SHIFT);
++	struct squashfs_cache_entry *fragment = NULL;
++	void *pageaddr, *data_ptr = msblk->read_page;
++
++	int mask = (1 << (msblk->block_log - PAGE_CACHE_SHIFT)) - 1;
++	int start_index = page->index & ~mask;
++	int end_index = start_index | mask;
++	int file_end = i_size_read(inode) >> msblk->block_log;
++	int sparse = 0;
++
++	TRACE("Entered squashfs_readpage, page index %lx, start block %llx\n",
++				page->index, SQUASHFS_I(inode)->start);
++
++	if (page->index >= ((i_size_read(inode) + PAGE_CACHE_SIZE - 1) >>
++					PAGE_CACHE_SHIFT))
++		goto out;
++
++	if (index < file_end || SQUASHFS_I(inode)->fragment_block ==
++					SQUASHFS_INVALID_BLK) {
++		/*
++		 * Reading a datablock from disk.  Need to read block list
++		 * to get location and block size.
++		 */
++		block = read_blocklist(inode, index, &bsize);
++		if (block < 0)
++			goto error_out;
++
++		if (bsize == 0) { /* hole */
++			bytes = index == file_end ?
++				(i_size_read(inode) & (msblk->block_size - 1)) :
++				 msblk->block_size;
++			sparse = 1;
++		} else {
++			mutex_lock(&msblk->read_page_mutex);
++
++			/*
++			 * Read and decompress datablock.
++			 */
++			bytes = squashfs_read_data(inode->i_sb,
++				msblk->read_page, block, bsize, NULL,
++				msblk->block_size);
++
++			if (bytes < 0) {
++				ERROR("Unable to read page, block %llx, size %x"
++					"\n", block, bsize);
++				mutex_unlock(&msblk->read_page_mutex);
++				goto error_out;
++			}
++		}
++	} else {
++		/*
++		 * Datablock is stored inside a fragment (tail-end packed
++		 * block).
++		 */
++		fragment = get_cached_fragment(inode->i_sb,
++				SQUASHFS_I(inode)->fragment_block,
++				SQUASHFS_I(inode)->fragment_size);
++
++		if (fragment->error) {
++			ERROR("Unable to read page, block %llx, size %x\n",
++				SQUASHFS_I(inode)->fragment_block,
++				SQUASHFS_I(inode)->fragment_size);
++			release_cached_fragment(msblk, fragment);
++			goto error_out;
++		}
++		bytes = i_size_read(inode) & (msblk->block_size - 1);
++		data_ptr = fragment->data + SQUASHFS_I(inode)->fragment_offset;
++	}
++
++	/*
++	 * Loop copying datablock into pages.  As the datablock likely covers
++	 * many PAGE_CACHE_SIZE pages (default block size is 128 KiB) explicitly
++	 * grab the pages from the page cache, except for the page that we've
++	 * been called to fill.
++	 */
++	for (i = start_index; i <= end_index && bytes > 0; i++,
++			bytes -= PAGE_CACHE_SIZE, data_ptr += PAGE_CACHE_SIZE) {
++		struct page *push_page;
++		int avail = sparse ? 0 : min_t(unsigned int, bytes,
++			PAGE_CACHE_SIZE);
++
++		TRACE("bytes %d, i %d, available_bytes %d\n", bytes, i, avail);
++
++		push_page = (i == page->index) ? page :
++			grab_cache_page_nowait(page->mapping, i);
++
++		if (!push_page)
++			continue;
++
++		if (PageUptodate(push_page))
++			goto skip_page;
++
++		pageaddr = kmap_atomic(push_page, KM_USER0);
++		memcpy(pageaddr, data_ptr, avail);
++		memset(pageaddr + avail, 0, PAGE_CACHE_SIZE - avail);
++		kunmap_atomic(pageaddr, KM_USER0);
++		flush_dcache_page(push_page);
++		SetPageUptodate(push_page);
++skip_page:
++		unlock_page(push_page);
++		if (i != page->index)
++			page_cache_release(push_page);
++	}
++
++	if (fragment)
++		release_cached_fragment(msblk, fragment);
++	else if (!sparse)
++		mutex_unlock(&msblk->read_page_mutex);
++
++	return 0;
++
++error_out:
++	SetPageError(page);
++out:
++	pageaddr = kmap_atomic(page, KM_USER0);
++	memset(pageaddr, 0, PAGE_CACHE_SIZE);
++	kunmap_atomic(pageaddr, KM_USER0);
++	flush_dcache_page(page);
++	if (!PageError(page))
++		SetPageUptodate(page);
++	unlock_page(page);
++
++	return 0;
++}
++
++
++const struct address_space_operations squashfs_aops = {
++	.readpage = squashfs_readpage
 +};
-+#endif
 -- 
 1.5.2.5
-
