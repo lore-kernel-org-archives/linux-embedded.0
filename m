@@ -1,35 +1,74 @@
-From: "Mike Frysinger" <vapier.adi@gmail.com>
-Subject: Re: [PATCH 2/2] phylib: make mdio-gpio work without OF
-Date: Fri, 31 Oct 2008 18:07:55 -0400
-Message-ID: <8bd0f97a0810311507o1c5a371dn57ea813275f11e6b@mail.gmail.com>
-References: <20081031164132.20490.27608.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
-	 <20081031164934.20490.67539.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
+From: Evgeniy Polyakov <zbr@ioremap.net>
+Subject: Re: [PATCH V2 10/16] Squashfs: cache operations
+Date: Mon, 3 Nov 2008 17:11:02 +0300
+Message-ID: <20081103141102.GA27263@ioremap.net>
+References: <E1Kv0C4-0006HO-BC@dylan>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=uV7rznCunZ6ZZhhtPnLUP6BL8og/z7lFWU4boz5AaMo=;
-        b=v7afUkdThROBBW1CdiHxFySQ9U1rd2ztmKigrl80dxp1uzofQhCCtqNR1adBs5hpfI
-         ui434VcJXiLFjg7vLxa5dZuns05d6vfkFIghFo7dXSBK3Q97Cjsn4IN2kuRSM/Amv3vw
-         UwIAX6DVz0ZAyib0ELnGcSNX/xhTUwY14ZdRc=
-In-Reply-To: <20081031164934.20490.67539.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <E1Kv0C4-0006HO-BC@dylan>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>, Grant Likely <grant.likely@secretlab.ca>
+Content-Transfer-Encoding: 7bit
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com
 
-On Fri, Oct 31, 2008 at 12:49, Paulius Zaleckas wrote:
-> +#ifndef NO_IRQ
-> +#define NO_IRQ  0
-> +#endif
+Hi.
 
-discussions elsewhere indicate this should die.
--if (irq != NO_IRQ)
-+if (irq)
--mike
+Couple comments below.
+
+On Wed, Oct 29, 2008 at 01:49:56AM +0000, Phillip Lougher (phillip@lougher.demon.co.uk) wrote:
+> +struct squashfs_cache_entry *squashfs_cache_get(struct super_block *sb,
+> +	struct squashfs_cache *cache, long long block, int length)
+> +{
+> +	int i, n;
+> +	struct squashfs_cache_entry *entry;
+> +
+> +	spin_lock(&cache->lock);
+> +
+> +	while (1) {
+> +		for (i = 0; i < cache->entries; i++)
+> +			if (cache->entry[i].block == block)
+> +				break;
+> +
+> +		if (i == cache->entries) {
+> +			/*
+> +			 * Block not in cache, if all cache entries are locked
+> +			 * go to sleep waiting for one to become available.
+> +			 */
+> +			if (cache->unused == 0) {
+> +				cache->waiting++;
+> +				spin_unlock(&cache->lock);
+> +				wait_event(cache->wait_queue, cache->unused);
+> +				spin_lock(&cache->lock);
+> +				cache->waiting--;
+> +				continue;
+> +			}
+> +
+> +			/*
+> +			 * At least one unlocked cache entry.  A simple
+> +			 * round-robin strategy is used to choose the entry to
+> +			 * be evicted from the cache.
+> +			 */
+> +			i = cache->next_blk;
+> +			for (n = 0; n < cache->entries; n++) {
+> +				if (cache->entry[i].locked == 0)
+> +					break;
+> +				i = (i + 1) % cache->entries;
+> +			}
+> +
+> +			cache->next_blk = (i + 1) % cache->entries;
+> +			entry = &cache->entry[i];
+
+This is invoked for every read when cache is filled, if I understood
+correctly, and having a modulo in this path is an additional overhead.
+This may be hidden on behalf of compression overhead, but stil.
+
+Also what happens when there are no unlocked entries? I.e. you will try
+to work with existing one, while it is already locked and processed by
+another thread?
+
+
+-- 
+	Evgeniy Polyakov
