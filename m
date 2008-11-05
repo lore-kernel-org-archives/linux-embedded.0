@@ -1,81 +1,53 @@
-From: David Brownell <david-b@pacbell.net>
-Subject: Re: [PATCH 1/6] [PWM] Generic PWM API implementation
-Date: Tue, 4 Nov 2008 22:08:45 -0700
-Message-ID: <200811042108.45735.david-b@pacbell.net>
-References: <cover.1224093510.git.bgat@billgatliff.com> <200811041555.18234.david-b@pacbell.net> <8bd0f97a0811041617k6761866bn20e0c8b6e415cd9a@mail.gmail.com>
+From: "Mike Frysinger" <vapier.adi@gmail.com>
+Subject: Re: [PATCH] phylib: make mdio-gpio work without OF (v2)
+Date: Wed, 5 Nov 2008 00:34:56 -0500
+Message-ID: <8bd0f97a0811042134n3c5543bbwed7a8ebfd0e3f77e@mail.gmail.com>
+References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
+	 <200811041604.22947.david-b@pacbell.net>
+	 <8bd0f97a0811041609l3bd474afh7e526be368d4c5cf@mail.gmail.com>
+	 <200811042045.41052.david-b@pacbell.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8bd0f97a0811041617k6761866bn20e0c8b6e415cd9a@mail.gmail.com>
+Return-path: <netdev-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=hQtld9gsJrmNcSPaBi9HP1n2uMlCJsRTGYvdiT+Zj5c=;
+        b=nKs7M5sw/j/4ip5fQlpSLONcNzQ0TfIEMUsb/B1bY4RuLepLg8+ERcjlh7hgwIw+qE
+         LX/cmStOarwEBdyfz1JCLRMU/g6uteIj2XZXX2o1gZabcSfu5BYwtmZTp+eXFEAKjxb2
+         L4cUYbYYD/pG7rQARCLGPhOoPGrviS1feXzTQ=
+In-Reply-To: <200811042045.41052.david-b@pacbell.net>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
+To: David Brownell <david-b@pacbell.net>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>
 
-On Tuesday 04 November 2008, Mike Frysinger wrote:
-> On Tue, Nov 4, 2008 at 18:55, David Brownell wrote:
-> > On Tuesday 04 November 2008, Bill Gatliff wrote:
-> >> So, what's the next step?  How do I advocate for getting
-> >> this API into mainline?
-> >
-> > The number of backing implementations seemed a bit low ...
-> > just one.  And that's switching Atmel's dedicated PWM, but
-> > not the other PWM driver in the tree (for PXA); so it's
-> > not terrifically accessible.
-> >
-> > My rule of thumb is that it's not worth considering a
-> > framework as being general enough until it's got three
-> > fairly different backing implementations.  Two is enough
-> > to consider merging, especially with complicated drivers.
-> 
-> every Blackfin processor so far has had dedicated PWM hardware in it,
-> so a backend driver for that arch would show up ...
+On Tue, Nov 4, 2008 at 23:45, David Brownell wrote:
+> On Tuesday 04 November 2008, Mike Frysinger wrote:
+>> > That's generally the preferred way to handle #ifdeffery.
+>> > But I could imagine OF isn't (yet?) set up to handle it.
+>>
+>> i agree completely with the inclination to do it all in C as you've
+>> suggested and let the compiler do dead code elimination, but that only
+>> works if the functions in question are defined everywhere (in other
+>> words, there's a linux/ api for it).  i dont think that's the case for
+>> OF (which is what you were implying?) ...
+>
+> Only works if the functions are "declared" everywhere;
+> the stuff that's included in header files.
+>
+> A "definition" would be available at link time (except
+> for inlined functions, in headers).  Actual C functions.
+>
+> If indeed OF functions don't have declarations which are
+> available on all platforms, that might be worth fixing
+> to enable this approach to #ifdef elimination.
 
-I'm not questioning the notion that more generic PWM support
-would be useful, note!  Just pointing out my rule of thumb,
-which has proven to be a good one.
-
-A variety of implementations shakes out portability issues,
-and highlights (what *WE* already know!) that this stuff is
-actually generally useful.  And when there's no test harness,
-having most of a 3-providers vs 3-users matrix known to work
-is a good stand-in.
-
-
-> > Plus the number of framework users is an issue. ...
-> 
-> there is an lcd driver or two in the tree (probably Blackfin specific)
-> that uses the PWM hardware as an output to drive the hsync/vsync
-> signals.
-
-... Right, but not through *this* framework.  The proof that
-the framework is sufficient for that application too would be
-the code.  And hsync/vsync seems like a usefully "different" app
-context to me.  Certainly not one that came quickly to my mind!
-
-But as we know, PWM gets used in all kinds of ways.  :)
-
- 
-> and while LIRC is still out-of-tree for mainline, i wrote a driver
-> using the PWM hardware as an input ... but there wasnt anything else
-> Blackfin specific in said driver other than the PWM stuff ...
-> 
-> i'm guessing you'd prefer to see those implemented before moving to
-> mainline though ?
-
-Well, more than just Bill's single implementation and client, yes.
-Maybe the Blackfin PWM provider, and one more API client ... though
-more of each would be fine too.
-
-I'd imagine Bill would be glad to have more active hands on the
-code too ... a few issues always seem to turn up with the first
-users, and it's better to sort them out with "early adopters"
-before the floodgates open.
-
-Plus:  more users provides some evidence to folk like Andrew and
-Linus that the code is useful enough to merge.  Embedded Linux
-isn't as visible to them as x86.
-
-- Dave
+OF is open firmware right ?  no way there's going to be OF for every
+port that supports GPIO, so filling out the stubs in linux/of_gpio.h
+will need to be done.
+-mike
