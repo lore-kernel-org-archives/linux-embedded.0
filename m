@@ -1,56 +1,27 @@
-From: "Grant Likely" <grant.likely@secretlab.ca>
+From: David Brownell <david-b@pacbell.net>
 Subject: Re: [PATCH] phylib: make mdio-gpio work without OF (v2)
-Date: Wed, 5 Nov 2008 08:04:00 -0700
-Message-ID: <fa686aa40811050704s2775fba8nc957a23cb81bb21d@mail.gmail.com>
-References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
-	 <200811042045.41052.david-b@pacbell.net>
-	 <8bd0f97a0811042134n3c5543bbwed7a8ebfd0e3f77e@mail.gmail.com>
-	 <200811050011.56804.david-b@pacbell.net>
-	 <8bd0f97a0811050032i206214a6r8d30a58f354995b4@mail.gmail.com>
-	 <49116000.7000005@teltonika.lt>
+Date: Wed, 5 Nov 2008 15:03:50 -0800
+Message-ID: <200811051503.51040.david-b@pacbell.net>
+References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <8bd0f97a0811050032i206214a6r8d30a58f354995b4@mail.gmail.com> <200811050957.25821.marc.pignat@hevs.ch>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <49116000.7000005@teltonika.lt>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <200811050957.25821.marc.pignat@hevs.ch>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Cc: Mike Frysinger <vapier.adi@gmail.com>, David Brownell <david-b@pacbell.net>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>
+To: Marc Pignat <marc.pignat@hevs.ch>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, Grant Likely <grant.likely@secretlab.ca>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>
 
-On Wed, Nov 5, 2008 at 1:57 AM, Paulius Zaleckas
-<paulius.zaleckas@teltonika.lt> wrote:
-> Mike Frysinger wrote:
->> On Wed, Nov 5, 2008 at 03:11, David Brownell wrote:
->>> On Tuesday 04 November 2008, Mike Frysinger wrote:
->>>>> If indeed OF functions don't have declarations which are
->>>>> available on all platforms, that might be worth fixing
->>>>> to enable this approach to #ifdef elimination.
->>>> OF is open firmware right ?  no way there's going to be OF for every
->>>> port that supports GPIO, so filling out the stubs in linux/of_gpio.h
->>>> will need to be done.
->>> In which case the boolean "we don't have OF" would be "false" and
->>> any code referencing the declared functions would be compiled out
->>> (being dead code/data).  So there would be no link-time references
->>> to any OF routines... standard technique.
->>
->> i understand the compiler side just fine.  my point is that the
->> current linux/of_gpio.h only defines the OF structure and related
->> prototypes when CONFIG_OF_GPIO is defined.  so it needs updating
->> first.
->
-> This is small problem compared to what you will find in linux/of_device.h
-> It includes <asm/of_device.h> which contains main of_device structure
-> and this won't work with any non OF platform.  Maybe the best solution is
-> to write separate driver for OF which will be just wrapper for platform
-> driver... Just like you suggested.
+On Wednesday 05 November 2008, Marc Pignat wrote:
+> This is why I proposed to split the driver in two parts (gpio only mdio
+> driver + OF platform device). Just treating OF GPIO as any other GPIO.
 
-More complex than necessary.  Just give the driver 2 blocks of binding
-code; one for OF, one for non-OF.  No need to split up the driver.
+I think that's overall a much cleaner approach too.  Keeps
+OF's hardware abstraction layer out of drivers.
 
-g.
+But for some reason the OF folk don't like that model.
+It comes up repeatedly, with lots of frameworks and their
+drivers.
 
--- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
