@@ -1,64 +1,54 @@
 From: David Brownell <david-b@pacbell.net>
-Subject: Re: [PATCH 1/6] [PWM] Generic PWM API implementation
-Date: Tue, 4 Nov 2008 16:55:17 -0700
-Message-ID: <200811041555.18234.david-b@pacbell.net>
-References: <cover.1224093510.git.bgat@billgatliff.com> <8bd0f97a0810170859k72dc1bc5o34ed2388f95c3bc8@mail.gmail.com> <4910AD88.2000200@billgatliff.com>
+Subject: Re: [PATCH] phylib: make mdio-gpio work without OF (v2)
+Date: Tue, 4 Nov 2008 17:04:22 -0700
+Message-ID: <200811041604.22947.david-b@pacbell.net>
+References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <fa686aa40811040824x52dab7fel9f76567cb6d49c8@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4910AD88.2000200@billgatliff.com>
+In-Reply-To: <fa686aa40811040824x52dab7fel9f76567cb6d49c8@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>, Mike Frysinger <vapier.adi@gmail.com>
 
-On Tuesday 04 November 2008, Bill Gatliff wrote:
-> This is literally the only feedback I have received.=20
+On Tuesday 04 November 2008, Grant Likely wrote:
+> At this point, instead of #ifdeffing the function signature, I would
+> much rather see this generalized as something like
+> 'mdio_gpio_setup()'. =A0Then move the OF and non-OF specific bits int=
+o
+> two new functions; mdio_ofgpio_probe() and mdio_gpio_probe(). =A0The =
+two
+> new functions should be placed with the appropriate bus binding in th=
+e
+> #ifdef/#else block at the bottom of the file.
 
-I was waiting for followup too.  I finally get onto this
-list (for some reason the list management software dropped
-several previous "please add me" requests) and ... nothing!!
+Or if possible something that creates a single #ifdef that
+ensures dead code elimination will remove the "other" branch,
+but ensures all platforms will build both versions:
 
+    #ifdef OF
+    #define using_of	true
+    #else
+    #define using_of	false
+    #endif
 
-Patches #1 and #2 seem to be in the wrong order ... and
-#2 shouldn't give the header's full pathname.  I'd have
-merged the two, myself.
+    ...
 
-Patch #6 seems to remove LEDS_ATMEL_PWM from Kconfig but
-leave the driver around ... and restore the now-deleted
-LEDS_CORGI support (leds-gpio suffices).  If you're going
-to remove LEDS_ATMEL_PWM you should update the code in
-mach-at91/leds.c which sets up for that driver...
+    static int __init mdio_gpio_init(void)
+    {
+	if (using_of)
+		return register mdio_ofgpio driver;
+	else
+		return register mdio_gpio driver;
+    }
+    subsys_initcall(mdio_gpio_init);
 
+    ...
 
-> So, what's the next step? =A0How do I advocate for getting
-> this API into mainline?=20
-
-The number of backing implementations seemed a bit low ...
-just one.  And that's switching Atmel's dedicated PWM, but
-not the other PWM driver in the tree (for PXA); so it's
-not terrifically accessible.=09
-
-And even for Atmel's SOC's it seemed a bit light:  the TC
-blocks will do PWM quite happily, and are found on many
-more chips than the dedicated PWM hardware.
-
-My rule of thumb is that it's not worth considering a
-framework as being general enough until it's got three
-fairly different backing implementations.  Two is enough
-to consider merging, especially with complicated drivers.
-
-Plus the number of framework users is an issue.  The
-PWM led driver is a good demo for two basic features,
-and it's useful:  brightness (duty cycle beyond visual
-perception) and blink rate (duty cycle easily seen with
-the eye).  But it's still only really one API customer,
-even given that new LED trigger...
-
-So I'd suggest fleshing it out a bit more, so it works
-on some non-Atmel hardware as well as more Atmel SOCs.
-And fix the goofs I noted above.  :)
+That's generally the preferred way to handle #ifdeffery.
+But I could imagine OF isn't (yet?) set up to handle it.
 
 - Dave
