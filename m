@@ -1,27 +1,43 @@
 From: David Brownell <david-b@pacbell.net>
 Subject: Re: [PATCH] phylib: make mdio-gpio work without OF (v2)
-Date: Wed, 5 Nov 2008 15:03:50 -0800
-Message-ID: <200811051503.51040.david-b@pacbell.net>
-References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <8bd0f97a0811050032i206214a6r8d30a58f354995b4@mail.gmail.com> <200811050957.25821.marc.pignat@hevs.ch>
+Date: Wed, 5 Nov 2008 14:59:08 -0800
+Message-ID: <200811051459.08777.david-b@pacbell.net>
+References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <49116000.7000005@teltonika.lt> <fa686aa40811050704s2775fba8nc957a23cb81bb21d@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <200811050957.25821.marc.pignat@hevs.ch>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <fa686aa40811050704s2775fba8nc957a23cb81bb21d@mail.gmail.com>
 Content-Disposition: inline
-Sender: netdev-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Marc Pignat <marc.pignat@hevs.ch>
-Cc: Mike Frysinger <vapier.adi@gmail.com>, Grant Likely <grant.likely@secretlab.ca>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Mike Frysinger <vapier.adi@gmail.com>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>
 
-On Wednesday 05 November 2008, Marc Pignat wrote:
-> This is why I proposed to split the driver in two parts (gpio only mdio
-> driver + OF platform device). Just treating OF GPIO as any other GPIO.
+On Wednesday 05 November 2008, Grant Likely wrote:
+> > 	=A0Maybe the best solution is
+> > to write separate driver for OF which will be just wrapper for plat=
+form
+> > driver... Just like you suggested.
 
-I think that's overall a much cleaner approach too.  Keeps
-OF's hardware abstraction layer out of drivers.
+I'd certainly prefer that:  packaging all the OF glue in
+a small bit of OF glue code, which doesn't need to affect
+the majority of platforms (which don't and won't use OF).
 
-But for some reason the OF folk don't like that model.
-It comes up repeatedly, with lots of frameworks and their
-drivers.
 
+> More complex than necessary. =A0Just give the driver 2 blocks of bind=
+ing
+> code; one for OF, one for non-OF. =A0No need to split up the driver.
+
+The preceding discussion pointed out ways the "2 blocks"
+approach doesn't currently work well ... minimally, there
+is currently no way to do that without much ugly #ifdeffing.
+
+And clearly, you and I view this a bit differently.  I'm
+happier to think of these kinds of configuration as one
+driver plus *separate* platform glue, while you want to be
+modifying every driver to accomodate OF.  Or, by extension,
+ACPI and any other hardware abstraction layer that comes
+along.
+
+- Dave
