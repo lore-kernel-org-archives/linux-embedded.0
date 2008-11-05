@@ -1,35 +1,40 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PATCH 1/6] [PWM] Generic PWM API implementation
-Date: Tue, 04 Nov 2008 20:59:11 -0600
-Message-ID: <49110BFF.4060402@billgatliff.com>
-References: <cover.1224093510.git.bgat@billgatliff.com>	 <8bd0f97a0810170859k72dc1bc5o34ed2388f95c3bc8@mail.gmail.com>	 <4910AD88.2000200@billgatliff.com>	 <200811041555.18234.david-b@pacbell.net> <8bd0f97a0811041617k6761866bn20e0c8b6e415cd9a@mail.gmail.com>
+From: David Brownell <david-b@pacbell.net>
+Subject: Re: [PATCH] phylib: make mdio-gpio work without OF (v2)
+Date: Tue, 4 Nov 2008 21:45:40 -0700
+Message-ID: <200811042045.41052.david-b@pacbell.net>
+References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <200811041604.22947.david-b@pacbell.net> <8bd0f97a0811041609l3bd474afh7e526be368d4c5cf@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8bd0f97a0811041617k6761866bn20e0c8b6e415cd9a@mail.gmail.com>
+In-Reply-To: <8bd0f97a0811041609l3bd474afh7e526be368d4c5cf@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="iso-8859-1"
 To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: David Brownell <david-b@pacbell.net>, linux-embedded@vger.kernel.org
+Cc: Grant Likely <grant.likely@secretlab.ca>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>
 
-Mike Frysinger wrote:
-> every Blackfin processor so far has had dedicated PWM hardware in it,
-> so a backend driver for that arch would show up ...
+On Tuesday 04 November 2008, Mike Frysinger wrote:
+> > That's generally the preferred way to handle #ifdeffery.
+> > But I could imagine OF isn't (yet?) set up to handle it.
+>=20
+> i agree completely with the inclination to do it all in C as you've
+> suggested and let the compiler do dead code elimination, but that onl=
+y
+> works if the functions in question are defined everywhere (in other
+> words, there's a linux/ api for it). =A0i dont think that's the case =
+for
+> OF (which is what you were implying?) ...
 
-From who?  I don't have that hardware.  I'm happy to hear that someone is
-working on it, though, and I would be happy to help review.
+Only works if the functions are "declared" everywhere;
+the stuff that's included in header files.
 
-> i'm guessing you'd prefer to see those implemented before moving to
-> mainline though ?
+A "definition" would be available at link time (except
+for inlined functions, in headers).  Actual C functions.
 
-Sounds like if we can get a git tree on kernel.org, then the first stop would be
-my pulling the code into the tree, and then asking Linus to do a pull.
+If indeed OF functions don't have declarations which are
+available on all platforms, that might be worth fixing
+to enable this approach to #ifdef elimination.
 
-To which is response will probably be: "Bill who?"  :)
+- Dave
 
-
-b.g.
--- 
-Bill Gatliff
-bgat@billgatliff.com
