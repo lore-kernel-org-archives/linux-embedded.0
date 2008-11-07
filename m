@@ -1,43 +1,50 @@
-From: David Brownell <david-b@pacbell.net>
-Subject: Re: [PATCH] phylib: make mdio-gpio work without OF (v2)
-Date: Wed, 5 Nov 2008 14:59:08 -0800
-Message-ID: <200811051459.08777.david-b@pacbell.net>
-References: <20081104144518.4429.37325.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <49116000.7000005@teltonika.lt> <fa686aa40811050704s2775fba8nc957a23cb81bb21d@mail.gmail.com>
+From: Marcus Tangermann <Marcus.Tangermann@web.de>
+Subject: Alignment on XScale ARM
+Date: Fri, 07 Nov 2008 23:52:29 +0100
+Message-ID: <1733787858@web.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <fa686aa40811050704s2775fba8nc957a23cb81bb21d@mail.gmail.com>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Mike Frysinger <vapier.adi@gmail.com>, netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Laurent Pinchart <laurentp@cse-semaphore.com>
+To: linux-embedded@vger.kernel.org
 
-On Wednesday 05 November 2008, Grant Likely wrote:
-> > 	=A0Maybe the best solution is
-> > to write separate driver for OF which will be just wrapper for plat=
-form
-> > driver... Just like you suggested.
+Hi,
 
-I'd certainly prefer that:  packaging all the OF glue in
-a small bit of OF glue code, which doesn't need to affect
-the majority of platforms (which don't and won't use OF).
+we use an XScale 422 (ARM) with a big endian Linux system based on the =
+buildroot environment. It seems there is an alignment problem we have. =
+I've tracked down the problem to the following.=20
+1. The data received via a netlink communication from the kernel is sto=
+red into a buffer buf. The data is correct.
+2. The address of the buffer is converted to a pointer to nlmsghdr:
+         struct nlmsghdr *h;
+         h =3D (struct nlmsghdr*) buf;=20
+         printf("IPSECTOOLS: Length  %04d\n", h->nlmsg_len);
+         printf("IPSECTOOLS: Type %02d\n", h->nlmsg_type);
+   The results of printf are nonsens. The first fields seem to have an =
+offset of 2 bytes, at the end there also seem to be swapped bytes.
+3. To test what might happen, I've created an own struct
+       struct aligntest{
+                __u32 first;
+                __u32 int second;
+                __u32 third;
+                __u32 fourth;
+       };
+     When you now set a point to a buffer, again the values are wrong:
+         s1 =3D (struct aligntest*) buf;
+         printf("1: %08X\n", s1->first);
+         printf("2: %08X\n", s1->second);
+         printf("3: %08X\n", s1->third);
+         printf("4: %08X\n", s1->fourth);
 
+It seems, that there is a problem with the unsigned int values. When yo=
+u add the attribute "packed" to the definition of struct aligntest ( __=
+attribute__(__packed__) ), all values are displayed correctly.=20
+So, any hints what the problem can be?
 
-> More complex than necessary. =A0Just give the driver 2 blocks of bind=
-ing
-> code; one for OF, one for non-OF. =A0No need to split up the driver.
-
-The preceding discussion pointed out ways the "2 blocks"
-approach doesn't currently work well ... minimally, there
-is currently no way to do that without much ugly #ifdeffing.
-
-And clearly, you and I view this a bit differently.  I'm
-happier to think of these kinds of configuration as one
-driver plus *separate* platform glue, while you want to be
-modifying every driver to accomodate OF.  Or, by extension,
-ACPI and any other hardware abstraction layer that comes
-along.
-
-- Dave
+Regards
+Marcus
+____________________________________________________________________
+Psssst! Schon vom neuen WEB.DE MultiMessenger geh=F6rt?=20
+Der kann`s mit allen: http://www.produkte.web.de/messenger/?did=3D3123
