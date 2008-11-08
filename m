@@ -1,58 +1,42 @@
-From: Nicolas Pitre <nico@cam.org>
+From: David Brownell <david-b@pacbell.net>
 Subject: Re: Alignment on XScale ARM
-Date: Sat, 08 Nov 2008 10:37:27 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.0811081029500.13034@xanadu.home>
-References: <1733787858@web.de>
+Date: Sat, 8 Nov 2008 10:02:48 -0800
+Message-ID: <200811081002.48890.david-b@pacbell.net>
+References: <1733787858@web.de> <alpine.LFD.2.00.0811081029500.13034@xanadu.home>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: <1733787858@web.de>
+In-Reply-To: <alpine.LFD.2.00.0811081029500.13034@xanadu.home>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
-To: Marcus Tangermann <Marcus.Tangermann@web.de>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Nicolas Pitre <nico@cam.org>, Marcus Tangermann <Marcus.Tangermann@web.de>
 Cc: linux-embedded@vger.kernel.org
 
-On Fri, 7 Nov 2008, Marcus Tangermann wrote:
+On Saturday 08 November 2008, Nicolas Pitre wrote:
+> The ARM processor traditionally cannot access misaligned short and in=
+t=20
+> values in memory. =A0By using the packed attribute you tell the compi=
+ler=20
+> that the structure should not have inserted padding to align its=20
+> members, and that accesses are to be performed wth byte accesses and =
+the=20
+> value reconstructed that way.
 
-> Hi,
-> 
-> we use an XScale 422 (ARM) with a big endian Linux system based on the 
-> buildroot environment. It seems there is an alignment problem we have. 
-> I've tracked down the problem to the following. 1. The data received 
-> via a netlink communication from the kernel is stored into a buffer 
-> buf. The data is correct. 2. The address of the buffer is converted to 
-> a pointer to nlmsghdr:
->          struct nlmsghdr *h;
->          h = (struct nlmsghdr*) buf; 
->          printf("IPSECTOOLS: Length  %04d\n", h->nlmsg_len);
->          printf("IPSECTOOLS: Type %02d\n", h->nlmsg_type);
-> The results of printf are nonsens. The first fields seem to have an 
-> offset of 2 bytes, at the end there also seem to be swapped bytes. 3. 
-> To test what might happen, I've created an own struct
->        struct aligntest{
->                 __u32 first;
->                 __u32 int second;
->                 __u32 third;
->                 __u32 fourth;
->        };
-> When you now set a point to a buffer, again the values are wrong:
->          s1 = (struct aligntest*) buf;
->          printf("1: %08X\n", s1->first);
->          printf("2: %08X\n", s1->second);
->          printf("3: %08X\n", s1->third);
->          printf("4: %08X\n", s1->fourth);
-> 
-> It seems, that there is a problem with the unsigned int values. When 
-> you add the attribute "packed" to the definition of struct aligntest ( 
-> __attribute__(__packed__) ), all values are displayed correctly. So, 
-> any hints what the problem can be?
+=2E.. but then when you pass "&misaligned_ptr->member" to some other
+function, that other function generally won't know it needs to use
+byte access.  So, be careful.  The "packed" struct attribute isn't
+a panacea.
 
-The ARM processor traditionally cannot access misaligned short and int 
-values in memory.  By using the packed attribute you tell the compiler 
-that the structure should not have inserted padding to align its 
-members, and that accesses are to be performed wth byte accesses and the 
-value reconstructed that way.
+General Linux kernel policy is to use <asm/unaligned.h> accessors,
+but obviously "packed" has advantages when you've got to pull
+structures out of protocol buffers.  The userspace headers don't
+seem to support such accessors though.
 
+Also, the network stack is known for making assumptions about its
+data being properly aligned.  See how NET_IP_ALIGN is used inside
+the kernel; you might be happier aligning your RX buffers before
+reading data into them from the kernel.
 
-Nicolas
+- Dave
