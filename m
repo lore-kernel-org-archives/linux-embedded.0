@@ -1,42 +1,81 @@
-From: David Brownell <david-b@pacbell.net>
+From: Marcus Tangermann <Marcus.Tangermann@web.de>
 Subject: Re: Alignment on XScale ARM
-Date: Sat, 8 Nov 2008 10:02:48 -0800
-Message-ID: <200811081002.48890.david-b@pacbell.net>
-References: <1733787858@web.de> <alpine.LFD.2.00.0811081029500.13034@xanadu.home>
+Date: Sat, 08 Nov 2008 19:37:17 +0100
+Message-ID: <1734891834@web.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <alpine.LFD.2.00.0811081029500.13034@xanadu.home>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Nicolas Pitre <nico@cam.org>, Marcus Tangermann <Marcus.Tangermann@web.de>
-Cc: linux-embedded@vger.kernel.org
+To: linux-embedded@vger.kernel.org
 
-On Saturday 08 November 2008, Nicolas Pitre wrote:
-> The ARM processor traditionally cannot access misaligned short and in=
-t=20
-> values in memory. =A0By using the packed attribute you tell the compi=
-ler=20
-> that the structure should not have inserted padding to align its=20
-> members, and that accesses are to be performed wth byte accesses and =
-the=20
-> value reconstructed that way.
+Hello,
 
-=2E.. but then when you pass "&misaligned_ptr->member" to some other
-function, that other function generally won't know it needs to use
-byte access.  So, be careful.  The "packed" struct attribute isn't
-a panacea.
+due to your hints I've found a solution. The problem was simple: The bu=
+ffer was not word aligned as the Xscale requires.=20
+With
+char buffer[8192] __attribute__((aligned(4)));
+things are working.  Sometimes you don't see the wood for the trees.
+So thanks to all for the good hints!
 
-General Linux kernel policy is to use <asm/unaligned.h> accessors,
-but obviously "packed" has advantages when you've got to pull
-structures out of protocol buffers.  The userspace headers don't
-seem to support such accessors though.
+Marcus
 
-Also, the network stack is known for making assumptions about its
-data being properly aligned.  See how NET_IP_ALIGN is used inside
-the kernel; you might be happier aligning your RX buffers before
-reading data into them from the kernel.
+> -----Urspr=FCngliche Nachricht-----
+> Von: "Marcus Tangermann" <Marcus.Tangermann@web.de>
+> Gesendet: 07.11.08 23:52:43
+> An: linux-embedded@vger.kernel.org
+> Betreff: Alignment on XScale ARM
 
-- Dave
+> Hi,
+>=20
+> we use an XScale 422 (ARM) with a big endian Linux system based on th=
+e buildroot environment. It seems there is an alignment problem we have=
+=2E I've tracked down the problem to the following.=20
+> 1. The data received via a netlink communication from the kernel is s=
+tored into a buffer buf. The data is correct.
+> 2. The address of the buffer is converted to a pointer to nlmsghdr:
+>          struct nlmsghdr *h;
+>          h =3D (struct nlmsghdr*) buf;=20
+>          printf("IPSECTOOLS: Length  %04d\n", h->nlmsg_len);
+>          printf("IPSECTOOLS: Type %02d\n", h->nlmsg_type);
+>    The results of printf are nonsens. The first fields seem to have a=
+n offset of 2 bytes, at the end there also seem to be swapped bytes.
+> 3. To test what might happen, I've created an own struct
+>        struct aligntest{
+>                 __u32 first;
+>                 __u32 int second;
+>                 __u32 third;
+>                 __u32 fourth;
+>        };
+>      When you now set a point to a buffer, again the values are wrong=
+:
+>          s1 =3D (struct aligntest*) buf;
+>          printf("1: %08X\n", s1->first);
+>          printf("2: %08X\n", s1->second);
+>          printf("3: %08X\n", s1->third);
+>          printf("4: %08X\n", s1->fourth);
+>=20
+> It seems, that there is a problem with the unsigned int values. When =
+you add the attribute "packed" to the definition of struct aligntest ( =
+__attribute__(__packed__) ), all values are displayed correctly.=20
+> So, any hints what the problem can be?
+>=20
+> Regards
+> Marcus
+> ____________________________________________________________________
+> Psssst! Schon vom neuen WEB.DE MultiMessenger geh=F6rt?=20
+> Der kann`s mit allen: http://www.produkte.web.de/messenger/?did=3D312=
+3
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embed=
+ded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+
+__________________________________________________________________
+"Run, Fatboy, Run" sowie "Rails & Ties" kostenlos anschauen!
+Blockbuster-Gutscheine sichern unter http://www.blockbuster.web.de
