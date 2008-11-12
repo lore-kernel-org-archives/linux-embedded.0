@@ -1,68 +1,123 @@
-From: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Subject: Re: [PATCH] phylib: make mdio-gpio work without OF (v3)
-Date: Tue, 11 Nov 2008 11:03:52 +0200
-Message-ID: <49194A78.8040202@teltonika.lt>
-References: <20081110151145.12986.45668.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <200811101815.54126.laurentp@cse-semaphore.com>
+From: Neil Armstrong <narmstrong@neotion.com>
+Subject: [PATCH] uio: add ioctl callback
+Date: Wed, 12 Nov 2008 15:11:03 +0100
+Message-ID: <491AE3F7.4050202@neotion.com>
+Reply-To: narmstrong@neotion.com
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig709096C2EB3F758246E68B8E"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200811101815.54126.laurentp@cse-semaphore.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Laurent Pinchart <laurentp@cse-semaphore.com>
-Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, Mike Frysinger <vapier.adi@gmail.com>
+To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-Laurent Pinchart wrote:
-> Hi Paulius,
-> 
-> sorry for the late reply. I've been busy at work with a release and had no 
-> time to test the patch. Comments follow.
-> 
-> On Monday 10 November 2008, Paulius Zaleckas wrote:
->> make mdio-gpio work with non OpenFirmware gpio implementation.
->>
->> Aditional changes to mdio-gpio:
->> - use gpio_request() and gpio_free()
->> - place irq[] array in struct mdio_gpio_info
->> - add module description, author and license
->> - add note about compiling this driver as module
->> - rename mdc and mdio function (were ugly names)
->> - change MII to MDIO in bus name
->> - add __init __exit to module (un)loading functions
->> - probe fails if no phys added to the bus
->> - kzalloc bitbang with sizeof(*bitbang)
->>
->> Changes since v2:
->> - more #ifdefs reduction
->> - platform driver will be registered on OF platforms also
->> - unified platform and OF bus_id to phy%i
->>
->> Changes since v1:
->> - removed NO_IRQ
->> - reduced #idefs
->>
->> Laurent, please test this driver under OF.
-> 
-> Unfortunately this breaks on OF platforms (at least on mine):
-> 
-> ~ # ifconfig eth0 up
-> [  258.886051] eb:01 not found
-> [  258.887409] eth0: Could not attach to phy
-> 
-> The bus id was "%x"...
->
-> And you renamed it to phy%i. Ethernet drivers relying on the id should be 
-> updated as well.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig709096C2EB3F758246E68B8E
+Content-Type: multipart/mixed;
+ boundary="------------030508070504070201000505"
 
-I done this to be closer to what phylib documentation says...
-I did search over drivers and found out that almost all of them uses "%x"...
+This is a multi-part message in MIME format.
+--------------030508070504070201000505
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-> Updating drivers/net/fs_enet/fs_enet-main.c (in find_phy) fixed the problem 
-> for my platform. Please not that this requires a change to 
-> drivers/net/fs_enet/mii-bitbang.c (in fs_mii_bitbang_init) as well.
+Add an ioctl callback to the UIO device class.
+This can be useful when status and data are needed after an interrupt
+occurs.
 
-A lot more than that...
-So actually it is better to just change it back to "%x".
+Changes :
+ - Add an uio_ioctl method
+ - Add en ioctl entry in uio_info
 
-Waiting for comments from other people and I will respin patch with this change.
+Neil Armstrong <narmstrong@neotion.com>
+
+Index: drivers/uio/uio.c
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+--- drivers/uio/uio.c    (revision 80)
++++ drivers/uio/uio.c    (working copy)
+@@ -378,6 +378,17 @@
+     return 0;
+ }
+=20
++static int uio_ioctl(struct inode *inode, struct file *filep, unsigned
+int cmd, unsigned long arg)
++{
++    struct uio_listener *listener =3D filep->private_data;
++    struct uio_device *idev =3D listener->dev;
++  =20
++    if (idev->info->ioctl)
++        return idev->info->ioctl(idev->info, cmd, arg);
++  =20
++    return -ENOSYS;
++}
++
+ static ssize_t uio_read(struct file *filep, char __user *buf,
+             size_t count, loff_t *ppos)
+ {
+@@ -575,6 +586,7 @@
+     .mmap        =3D uio_mmap,
+     .poll        =3D uio_poll,
+     .fasync        =3D uio_fasync,
++   .ioctl      =3D uio_ioctl,
+ };
+=20
+ static int uio_major_init(void)
+Index: include/linux/uio_driver.h
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+--- include/linux/uio_driver.h    (revision 80)
++++ include/linux/uio_driver.h    (working copy)
+@@ -68,6 +68,7 @@
+     int (*open)(struct uio_info *info, struct inode *inode);
+     int (*release)(struct uio_info *info, struct inode *inode);
+     int (*irqcontrol)(struct uio_info *info, s32 irq_on);
++    int (*ioctl)(struct uio_info *info, unsigned int cmd, unsigned long
+arg);
+ };
+=20
+ extern int __must_check
+
+
+--------------030508070504070201000505
+Content-Type: text/x-vcard; charset=utf-8;
+ name="narmstrong.vcf"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: attachment;
+ filename="narmstrong.vcf"
+
+begin:vcard
+fn:Neil Armstrong
+n:Armstrong;Neil
+org:Neotion;Neotion Sophia Antipolis
+adr:;;;Sophia Antipolis;;;France
+email;internet:narmstrong@neotion.com
+title:Embedded Linux Software Engineer
+tel;cell:0667474169
+note:PGP 0x1166F485
+x-mozilla-html:FALSE
+url:http://www.neotion.com
+version:2.1
+end:vcard
+
+
+--------------030508070504070201000505--
+
+--------------enig709096C2EB3F758246E68B8E
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFJGuP6b5rmahFm9IURArcEAJ4s0X5Vb/4koyuoQWhhGAZi+N2RTACgtbtE
+Zez/07PZBhRu8Ei7yqA38n4=
+=MN+0
+-----END PGP SIGNATURE-----
+
+--------------enig709096C2EB3F758246E68B8E--
