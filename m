@@ -1,82 +1,38 @@
-From: Marco Stornelli <marco.stornelli@coritel.it>
-Subject: Re: [PATCH] uio: add ioctl callback
-Date: Wed, 12 Nov 2008 15:33:03 +0100
-Message-ID: <491AE91F.1000104@coritel.it>
-References: <491AE3F7.4050202@neotion.com>
+From: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
+Subject: [PATCH 0/2] phylib: mdio-ofgpio ---> mdio-gpio (v3)
+Date: Fri, 14 Nov 2008 12:24:22 +0200
+Message-ID: <20081114102336.11513.67767.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <491AE3F7.4050202@neotion.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: narmstrong@neotion.com
-Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+To: netdev@vger.kernel.org
+Cc: linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
 
-Read the file SubmittingPatches in your kernel documentation folder
-before sending a patch. In addition, check the patch with checkpatch
-script. You can find the script in the script kernel folder. Send the
-patch with the right destination. You can know the names (and emails) of
-the maintainers in the MAINTAINER file in the kernel source.
+I think these patches are ready for merging to netdev-next.
+If there is need I can merge these two patches to single.
 
-Regards,
+Changes since v2:
+- finished with rework patch
 
-Marco
+Changes since v1:
+- broken to rename patch and mdio-gpio rework
+
+---
+
+Paulius Zaleckas (2):
+      phylib: make mdio-gpio work without OF (v4)
+      phylib: rename mdio-ofgpio to mdio-gpio
 
 
-Neil Armstrong wrote:
-> Add an ioctl callback to the UIO device class.
-> This can be useful when status and data are needed after an interrupt
-> occurs.
-> 
-> Changes :
->  - Add an uio_ioctl method
->  - Add en ioctl entry in uio_info
-> 
-> Neil Armstrong <narmstrong@neotion.com>
-> 
-> Index: drivers/uio/uio.c
-> ===================================================================
-> --- drivers/uio/uio.c    (revision 80)
-> +++ drivers/uio/uio.c    (working copy)
-> @@ -378,6 +378,17 @@
->      return 0;
->  }
->  
-> +static int uio_ioctl(struct inode *inode, struct file *filep, unsigned
-> int cmd, unsigned long arg)
-> +{
-> +    struct uio_listener *listener = filep->private_data;
-> +    struct uio_device *idev = listener->dev;
-> +   
-> +    if (idev->info->ioctl)
-> +        return idev->info->ioctl(idev->info, cmd, arg);
-> +   
-> +    return -ENOSYS;
-> +}
-> +
->  static ssize_t uio_read(struct file *filep, char __user *buf,
->              size_t count, loff_t *ppos)
->  {
-> @@ -575,6 +586,7 @@
->      .mmap        = uio_mmap,
->      .poll        = uio_poll,
->      .fasync        = uio_fasync,
-> +   .ioctl      = uio_ioctl,
->  };
->  
->  static int uio_major_init(void)
-> Index: include/linux/uio_driver.h
-> ===================================================================
-> --- include/linux/uio_driver.h    (revision 80)
-> +++ include/linux/uio_driver.h    (working copy)
-> @@ -68,6 +68,7 @@
->      int (*open)(struct uio_info *info, struct inode *inode);
->      int (*release)(struct uio_info *info, struct inode *inode);
->      int (*irqcontrol)(struct uio_info *info, s32 irq_on);
-> +    int (*ioctl)(struct uio_info *info, unsigned int cmd, unsigned long
-> arg);
->  };
->  
->  extern int __must_check
-> 
+ drivers/net/phy/Kconfig       |    7 +
+ drivers/net/phy/Makefile      |    2 
+ drivers/net/phy/mdio-gpio.c   |  296 +++++++++++++++++++++++++++++++++++++++++
+ drivers/net/phy/mdio-ofgpio.c |  204 ----------------------------
+ include/linux/mdio-gpio.h     |   25 +++
+ 5 files changed, 327 insertions(+), 207 deletions(-)
+ create mode 100644 drivers/net/phy/mdio-gpio.c
+ delete mode 100644 drivers/net/phy/mdio-ofgpio.c
+ create mode 100644 include/linux/mdio-gpio.h
