@@ -1,47 +1,40 @@
-From: Wolfgang Denk <wd@denx.de>
+From: David Brownell <david-b@pacbell.net>
 Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk Messages
-Date: Tue, 25 Nov 2008 22:05:02 +0100
-Message-ID: <20081125210502.92402834B020@gemini.denx.de>
-References: <20081125135519.038abf23@zod.rchland.ibm.com>
-	<C5518C2F.13137%gerickson@nuovations.com>
-	<b5e2fc790811251131g63ea9444x57ec0829ca0b069e@mail.gmail.com>
+Date: Tue, 25 Nov 2008 13:45:10 -0800
+Message-ID: <200811251345.11350.david-b@pacbell.net>
+References: <20081125135519.038abf23@zod.rchland.ibm.com> <492C5DC2.9040402@billgatliff.com> <1227646490.5404.5.camel@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org>
-In-reply-to: <b5e2fc790811251131g63ea9444x57ec0829ca0b069e@mail.gmail.com>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://ozlabs.org/mailman/options/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@ozlabs.org?subject=unsubscribe>
-List-Archive: <http://ozlabs.org/pipermail/linuxppc-dev>
-List-Post: <mailto:linuxppc-dev@ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@ozlabs.org?subject=help>
-List-Subscribe: <https://ozlabs.org/mailman/listinfo/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@ozlabs.org?subject=subscribe>
-Sender: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
-Errors-To: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
-To: Matt Sealey <matt@genesi-usa.com>
-Cc: linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, linux-embedded@vger.kernel.org, Grant Erickson <gerickson@nuovations.com>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <1227646490.5404.5.camel@cuplxvomd02.corp.sa.net>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: dvomlehn@cisco.com, Grant Erickson <gerickson@nuovations.com>
+Cc: Bill Gatliff <bgat@billgatliff.com>, Matt Sealey <matt@genesi-usa.com>, linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org
 
-Dear Matt,
+No comment from me on $SUBJECT beyond "it seems plausible", but ...
 
-In message <b5e2fc790811251131g63ea9444x57ec0829ca0b069e@mail.gmail.com> you wrote:
->
-> There is also no reason you can't hard-code the locations into the device
-> tree, to support older U-Boots that don't know about
-> /chosen/linux,log-metadata and /chosen/linux,log-buffer*.
+On Tuesday 25 November 2008, David VomLehn wrote:
+> The important point, though, is that device tree is the only
+> thing approaching a standard on any non-x86-based platform for passing
+> structured information from the bootloader to the kernel. The command
+> line is just not sufficient for this.
 
-Actually there is such reason - U-Boot traditionally allocates the log
-buffer close to the upper end of system memory, so the start address
-depends on the memory size on the board, which may vary.
+Me, I'll be happier if I don't have to try using that device tree.
+Having board-specific code in the kernel is a more complete solution,
+and makes it a lot easier to cope with all the hardware goofage.
 
-Best regards,
+Recall that the *original* notion behind OpenBoot (now "OpenFirmware")
+was to have tables for the stuff that was table-friendly, and call
+out to FORTH code (possibly not just at boot time) for the rest.
+(Given the choice of FORTH vs ACPI bytecodes, I'd go for FORTH; but
+the better option is "neither".)
 
-Wolfgang Denk
+Right now I see an awful lot of work going into trying to force lots
+of stuff into table format.  Even when it's the sort of one-off or
+board-specific quirkery that was an original motivation for having
+FORTH escapes (tasks that were not table-friendly).
 
--- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-The human mind  ordinarily  operates  at  only  ten  percent  of  its
-capacity. The rest is overhead for the operating system.
+- Dave
