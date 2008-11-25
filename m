@@ -1,122 +1,66 @@
-From: "Matt Sealey" <matt@genesi-usa.com>
-Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk Messages
-Date: Tue, 25 Nov 2008 14:46:45 -0600
-Message-ID: <b5e2fc790811251246r201a9f4anad308e9a8ff7960d@mail.gmail.com>
+From: David VomLehn <dvomlehn@cisco.com>
+Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk
+	Messages
+Date: Tue, 25 Nov 2008 12:54:50 -0800
+Message-ID: <1227646490.5404.5.camel@cuplxvomd02.corp.sa.net>
 References: <20081125135519.038abf23@zod.rchland.ibm.com>
-	<C5518C2F.13137%gerickson@nuovations.com>
-	<b5e2fc790811251131g63ea9444x57ec0829ca0b069e@mail.gmail.com>
-	<492C573E.9030309@billgatliff.com>
-	<b5e2fc790811251207g38d429f3q4eb698b92162d6@mail.gmail.com>
-	<fa686aa40811251217g6dcbef77u29e3d6ee6ad6d99f@mail.gmail.com>
+	 <C5518C2F.13137%gerickson@nuovations.com>
+	 <b5e2fc790811251131g63ea9444x57ec0829ca0b069e@mail.gmail.com>
+	 <492C573E.9030309@billgatliff.com>
+	 <b5e2fc790811251207g38d429f3q4eb698b92162d6@mail.gmail.com>
+	 <492C5DC2.9040402@billgatliff.com>
+Reply-To: dvomlehn@cisco.com
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0953351060=="
-Return-path: <linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org>
-In-Reply-To: <fa686aa40811251217g6dcbef77u29e3d6ee6ad6d99f@mail.gmail.com>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://ozlabs.org/mailman/options/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@ozlabs.org?subject=unsubscribe>
-List-Archive: <http://ozlabs.org/pipermail/linuxppc-dev>
-List-Post: <mailto:linuxppc-dev@ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@ozlabs.org?subject=help>
-List-Subscribe: <https://ozlabs.org/mailman/listinfo/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@ozlabs.org?subject=subscribe>
-Mime-version: 1.0
-Sender: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
-Errors-To: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Bill Gatliff <bgat@billgatliff.com>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org, linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Grant Erickson <gerickson@nuovations.com>
-
---===============0953351060==
-Content-Type: multipart/alternative; 
-	boundary="----=_Part_16821_30450542.1227646005950"
-
-------=_Part_16821_30450542.1227646005950
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-On Tue, Nov 25, 2008 at 2:17 PM, Grant Likely <grant.likely@secretlab.ca>wrote:
-
-> On Tue, Nov 25, 2008 at 1:07 PM, Matt Sealey <matt@genesi-usa.com> wrote:
->
-> > But here's the real question; why do you need an opensource
-> implementation?
-> > Curiosity?
->
-> Umm, so that it can be ported to new boards perhaps?  So that
-> developers can work with it?
->
-
-You can port closed-source firmwares to new boards just as easily as with
-open source ones.
-
-For companies who have larger production requirements than Bill Gatliff,
-porting an open source firmware may not be a task they want to get into.
-Linux support is a big enough moving target without adding firmware
-development to it and tying up programmers implementing the same drivers
-twice (even if it is practically copy&paste in U-Boot).
-
-In this case they may just buy one in. If everything had to be open source
-and freely downloadable there would be no industry at all. And if paying for
-someone else to write code for you is the issue, then we wouldn't have asked
-you for a quote last week, and you certainly wouldn't have given us a price
-:D
-
-Bill, as for ARM etc. support, you can imagine that most of the guts of the
-firmware are fairly well abstracted. Vast portions of the same code work on
-most platforms with the same peripherals - USB, Ethernet controllers & PHYs,
-PCI, SDIO, etc. The device tree is how hardware designers (note; not OS
-designers) are meant to abstract the differences in hardware and programming
-model so that an OS can load the right drivers and Do The Right Thing. It
-doesn't matter if the device tree was generated as a flattened
-representation, or by an open-source firmware or closed-source firmware.
-
-However the IEEE 1275 standard is not as big a moving target as U-Boot. It
-has an ABI and a client interface which hasn't been moved around or modified
-since 1994. And when your board doesn't provide a device tree entry for
-something, well, you just write some Forth and can edit entries in the
-device tree in-place (no recompiles required). If you're so inclined you can
-even write things like scsi host controller drivers in Forth and present
-them such that they are then working - no reboots or recompiles required,
-just load the script - and ready to use to boot the system. You can poke
-around in the FirmWorks code for how powerful this can be, or poke around
-http://www.powerdeveloper.org/platforms/efika/devicetree for how mundane and
-simple it can be just fixing up some entries and making sure the chip is
-configured right..
-
--- 
-Matt Sealey <matt@genesi-usa.com>
-Genesi, Manager, Developer Relations
-
-------=_Part_16821_30450542.1227646005950
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-<br><br><div class="gmail_quote">On Tue, Nov 25, 2008 at 2:17 PM, Grant Likely <span dir="ltr">&lt;<a href="mailto:grant.likely@secretlab.ca">grant.likely@secretlab.ca</a>&gt;</span> wrote:<br><blockquote class="gmail_quote" style="border-left: 1px solid rgb(204, 204, 204); margin: 0pt 0pt 0pt 0.8ex; padding-left: 1ex;">
-<div class="Ih2E3d">On Tue, Nov 25, 2008 at 1:07 PM, Matt Sealey &lt;<a href="mailto:matt@genesi-usa.com">matt@genesi-usa.com</a>&gt; wrote:<br>
-<br>
-&gt; But here&#39;s the real question; why do you need an opensource implementation?<br>
-&gt; Curiosity?<br>
-<br>
-</div>Umm, so that it can be ported to new boards perhaps? &nbsp;So that<br>
-developers can work with it?<br></blockquote><div><br>You can port closed-source firmwares to new boards just as easily as with open source ones. <br></div></div><br>For companies who have larger production requirements than Bill Gatliff, porting an open source firmware may not be a task they want to get into. Linux support is a big enough moving target without adding firmware development to it and tying up programmers implementing the same drivers twice (even if it is practically copy&amp;paste in U-Boot).<br>
-<br>In this case they may just buy one in. If everything had to be open source and freely downloadable there would be no industry at all. And if paying for someone else to write code for you is the issue, then we wouldn&#39;t have asked you for a quote last week, and you certainly wouldn&#39;t have given us a price :D<br clear="all">
-<br>Bill, as for ARM etc. support, you can imagine that most of the guts of the firmware are fairly well abstracted. Vast portions of the same code work on most platforms with the same peripherals - USB, Ethernet controllers &amp; PHYs, PCI, SDIO, etc. The device tree is how hardware designers (note; not OS designers) are meant to abstract the differences in hardware and programming model so that an OS can load the right drivers and Do The Right Thing. It doesn&#39;t matter if the device tree was generated as a flattened representation, or by an open-source firmware or closed-source firmware.<br>
-<br>However the IEEE 1275 standard is not as big a moving target as U-Boot. It has an ABI and a client interface which hasn&#39;t been moved around or modified since 1994. And when your board doesn&#39;t provide a device tree entry for something, well, you just write some Forth and can edit entries in the device tree in-place (no recompiles required). If you&#39;re so inclined you can even write things like scsi host controller drivers in Forth and present them such that they are then working - no reboots or recompiles required, just load the script - and ready to use to boot the system. You can poke around in the FirmWorks code for how powerful this can be, or poke around <a href="http://www.powerdeveloper.org/platforms/efika/devicetree">http://www.powerdeveloper.org/platforms/efika/devic
- etree</a> for how mundane and simple it can be just fixing up some entries and making sure the chip is configured right..<br>
-<br>-- <br>Matt Sealey &lt;<a href="mailto:matt@genesi-usa.com">matt@genesi-usa.com</a>&gt;<br>Genesi, Manager, Developer Relations<br>
-
-------=_Part_16821_30450542.1227646005950--
-
---===============0953351060==
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <492C5DC2.9040402@billgatliff.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1623; t=1227646709; x=1228510709;
+	c=relaxed/simple; s=rtpdkim1001;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=dvomlehn@cisco.com;
+	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	|Subject:=20Re=3A=20[PATCH/RFC]=20Add=20Alternative=20Log=2
+	0Buffer=20Support=20for=20printk=0A=09Messages
+	|Sender:=20
+	|To:=20Bill=20Gatliff=20<bgat@billgatliff.com>;
+	bh=cyolMCBkV3voA0BcBKs0sTYIe10ngkX2Wr2W7hdCkWc=;
+	b=Q5drCjaiPsJ7ptGaHbMFPl2tSK4nK6Eb+d2XJViHE62eRBNQb53m43wYa+
+	HpYmx573WTAv5+2rdsX2ZeKV5wzn3hthD0p1Qo9FKn4Hbvr7aYJOsDcuP8dZ
+	pyB9j84ncq;
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Matt Sealey <matt@genesi-usa.com>, Grant Erickson <gerickson@nuovations.com>, linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org
 
-_______________________________________________
-Linuxppc-dev mailing list
-Linuxppc-dev@ozlabs.org
-https://ozlabs.org/mailman/listinfo/linuxppc-dev
---===============0953351060==--
+
+On Tue, 2008-11-25 at 14:19 -0600, Bill Gatliff wrote:
+
+> Just trying to figure out where the walls of this "sandbox" are.  I've
+> been aware of the concept of Open Firmware for a while, but haven't
+> really looked into it before now--- mostly because my impression until
+> now was that the available implementations were both closed-source,
+> and not supporting embedded, non-PPC targets like ARM.
+
+FWIW, at the last OLS there was interest expressed by at least one
+ARM-based platform and I'm working on a set of patches to add the device
+tree for MIPS. It's going very slowly and is dependent on a patchset to
+add support for our platform, so it will take a while to make it
+available. The important point, though, is that device tree is the only
+thing approaching a standard on any non-x86-based platform for passing
+structured information from the bootloader to the kernel. The command
+line is just not sufficient for this.
+--
+David VomLehn
+
+
+
+
+     - - - - -                              Cisco                            - - - - -         
+This e-mail and any attachments may contain information which is confidential, 
+proprietary, privileged or otherwise protected by law. The information is solely 
+intended for the named addressee (or a person responsible for delivering it to 
+the addressee). If you are not the intended recipient of this message, you are 
+not authorized to read, print, retain, copy or disseminate this message or any 
+part of it. If you have received this e-mail in error, please notify the sender 
+immediately by return e-mail and delete it from your computer.
