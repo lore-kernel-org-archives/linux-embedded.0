@@ -1,63 +1,42 @@
-From: Laurent Pinchart <laurentp@cse-semaphore.com>
-Subject: Re: [PATCH 2/2] phylib: make mdio-gpio work without OF (v4)
-Date: Thu, 20 Nov 2008 17:24:18 +0100
-Message-ID: <200811201724.18731.laurentp@cse-semaphore.com>
-References: <20081114102336.11513.67767.stgit@Programuotojas.82-135-208-232.ip.zebra.lt> <20081114102433.11513.2557.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
+From: Gregers Petersen <glp@openwrt.org>
+Subject: LZMA inclusion
+Date: Tue, 25 Nov 2008 08:06:34 +0100
+Message-ID: <492BA3FA.9010204@openwrt.org>
+Reply-To: glp@openwrt.org
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20081114102433.11513.2557.stgit@Programuotojas.82-135-208-232.ip.zebra.lt>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Cc: netdev@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, Mike Frysinger <vapier.adi@gmail.com>
+To: linux-embedded@vger.kernel.org
 
-On Friday 14 November 2008 11:24:34 Paulius Zaleckas wrote:
-> make mdio-gpio work with non OpenFirmware gpio implementation.
->
-> Aditional changes to mdio-gpio:
-> - use gpio_request() and gpio_free()
-> - place irq[] array in struct mdio_gpio_info
-> - add module description, author and license
-> - add note about compiling this driver as module
-> - rename mdc and mdio function (were ugly names)
-> - change MII to MDIO in bus name
-> - add __init __exit to module (un)loading functions
-> - probe fails if no phys added to the bus
-> - kzalloc bitbang with sizeof(*bitbang)
->
-> Changes since v3:
-> - keep bus naming "%x" to be compatible with existing drivers.
->
-> Changes since v2:
-> - more #ifdefs reduction
-> - platform driver will be registered on OF platforms also
-> - unified platform and OF bus_id to phy%i
->
-> Changes since v1:
-> - removed NO_IRQ
-> - reduced #idefs
->
-> Laurent, please test this driver under OF.
+Hello
 
-No obvious issue found.
+There was a small talk a few days ago involving a few of the OpenWrt
+developers and David Woodhouse. One of the topics discussed, was a
+question about the potential of including LZMA in the kernel.
+Such an inclusion would be quite benefitial in terms of embedded
+systems, but the major hurdle seems to be the code quality of LZMA itself.
+This leads to the question I would like to raise; are there ongoing
+plans (or considerations) to rewrite and merge LZMA, and has anyone
+started working on it in practical terms?
 
-Acked-by: Laurent Pinchart <laurent.pinchart@skynet.be>
-
-> Signed-off-by: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-> Cc: Laurent Pinchart <laurent.pinchart@skynet.be>
-> Cc: Grant Likely <grant.likely@secretlab.ca>
-> Cc: Mike Frysinger <vapier.adi@gmail.com>
+Sincerely
 
 -- 
-Laurent Pinchart
-CSE Semaphore Belgium
+Gregers Petersen
+People-stuff, layer 8 and anthropology
+glp on irc
 
-Chaussee de Bruxelles, 732A
-B-1410 Waterloo
-Belgium
+   _______                     ________        __
+  |       |.-----.-----.-----.|  |  |  |.----.|  |_
+  |   -   ||  _  |  -__|     ||  |  |  ||   _||   _|
+  |_______||   __|_____|__|__||________||__|  |____|
+           |__| W I R E L E S S   F R E E D O M
+  KAMIKAZE (bleeding edge) -----------------------
+   * 10 oz Vodka       Shake well with ice and strain
+   * 10 oz Triple sec  mixture into 10 shot glasses.
+   * 10 oz lime juice  Salute!
+  ---------------------------------------------------
 
-T +32 (2) 387 42 59
-F +32 (2) 387 42 75
