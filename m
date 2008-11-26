@@ -1,185 +1,115 @@
-From: "Jaya Kumar" <jayakumar.lkml@gmail.com>
-Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for batch set of pins
-Date: Wed, 26 Nov 2008 00:51:27 -0500
-Message-ID: <45a44e480811252151q54580e07xfa73d69596fbfaac@mail.gmail.com>
-References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com>
-	 <f17812d70811251720u47bec50dt3734f5b2bb0d339@mail.gmail.com>
-	 <200811252015.57870.david-b@pacbell.net>
+From: "Matt Sealey" <matt@genesi-usa.com>
+Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk Messages
+Date: Wed, 26 Nov 2008 14:57:13 -0600
+Message-ID: <b5e2fc790811261257x3309e4b1n242d99c6248775d@mail.gmail.com>
+References: <20081125135519.038abf23@zod.rchland.ibm.com>
+	 <492C5DC2.9040402@billgatliff.com>
+	 <1227646490.5404.5.camel@cuplxvomd02.corp.sa.net>
+	 <200811251345.11350.david-b@pacbell.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=+aXJmWc1oiq23ARndIcvyHW09nMneFR9jjQkJscaBkI=;
-        b=FUnRnGef22WVq1TsMrO1vX3J5+BfJa+QrupYXylal7QaJF3woiTm40toXALEUNwOIR
-         ecFO0aLX8VkbE25V1WZ1i3t6mjbtXQVGvupX4rs05sDbTpeuUYyGr9igTs9a8I6lBUKV
-         +66HHM/ge/ojhUiiQPLSokrXoV0NHDc0d1els=
-In-Reply-To: <200811252015.57870.david-b@pacbell.net>
+In-Reply-To: <200811251345.11350.david-b@pacbell.net>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: David Brownell <david-b@pacbell.net>
-Cc: Eric Miao <eric.y.miao@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Jean Delvare <khali@linux-fr.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: dvomlehn@cisco.com, Grant Erickson <gerickson@nuovations.com>, Bill Gatliff <bgat@billgatliff.com>, linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org
 
-On Tue, Nov 25, 2008 at 11:15 PM, David Brownell <david-b@pacbell.net> wrote:
-> On Tuesday 25 November 2008, Eric Miao wrote:
->> Using a bit mask will be more generic if the GPIOs are not contiguous.
->> Yet I still doubt this will be generic enough to be added to gpiolib.
+On Tue, Nov 25, 2008 at 3:45 PM, David Brownell <david-b@pacbell.net> wrote:
+> No comment from me on $SUBJECT beyond "it seems plausible", but ...
 >
-> My expectation for this kind of mechanism was that systems who need
-> to craft another parallel bus out of GPIO pins would be doing this
-> with some system-specific utility functions.
+> On Tuesday 25 November 2008, David VomLehn wrote:
+>> The important point, though, is that device tree is the only
+>> thing approaching a standard on any non-x86-based platform for passing
+>> structured information from the bootloader to the kernel. The command
+>> line is just not sufficient for this.
 >
-> So my "is it generic enough" question is more at the level of "Are
-> there enough Linux systems that need this sort of thing to justify
-> generic support?".  I happen not to have come across the need for
-> such ganged access from Linux (yet).  Whereas I've yet to use non-x86
-> Linux systems that don't need to manipulate individual GPIO pins...
+> Me, I'll be happier if I don't have to try using that device tree.
+> Having board-specific code in the kernel is a more complete solution,
+> and makes it a lot easier to cope with all the hardware goofage.
 
-I have come across the following scenarios where a bus set of gpio is useful:
-- Broadsheet E-Ink controller (uses 16-bit data bus over GPIO)
-framebuffer device (this patch is for this)
-- Apollo/Hecuba E-Ink controller (uses 8-bit data bus over GPIO)
-framebuffer device
-- 8-bit parallel IO matrix LCD controllers, such as the Samsung KS108,
-also Hitachi, etc
+I disagree.
 
-In the area of framebuffers for lower end display devices, I find this
-to be quite common.
+> Recall that the *original* notion behind OpenBoot (now "OpenFirmware")
+> was to have tables for the stuff that was table-friendly, and call
+> out to FORTH code (possibly not just at boot time) for the rest.
+> (Given the choice of FORTH vs ACPI bytecodes, I'd go for FORTH; but
+> the better option is "neither".)
 
-I have also seen this in systems such as 8-bit A2D devices, also with
-various coprocessor solutions where a smaller CPU like a msp430 or
-HC05 would clock data to the host using 8-bit gpio data.
+The problem really is that Linux never really cared to run Forth code or even
+keep the client interface for OF and 99% of the devices with real device
+trees and real client interfaces, have really bad hardware support or methods
+implemented that just don't work - not to mention the evil that happens on the
+difference between Linux ABI and the OF ABI, the client interface context
+switch, real-mode or virtual-mode firmwares.
 
->
->
->> The user of this gpio_set_value_bus() may assume too much about
->> the internal, e.g. how many GPIOs on the chip and whether these GPIOs
->> are contiguous or not, and whether this GPIO chip support bitwise
->> operations.
->
-> Actually I would expect that to be addressed by the hardware designer.
+The most useful thing is the representation of the devices in the device-tree.
 
-I agree that the gpio's are always contiguous. It would be very
-unusual (I've never seen it yet) where a hardware designer picked
-non-consecutive pins to be used for a bus. In the case of AM300, the
-board designer picked the xscale's 58 - 73 gpio pins.
+I do however agree that sometimes FAR too much is being put into the
+device trees,
+the massive amount of overly verbose information about devices which do not need
+the information there is just redundant. Reading processor registers out of the
+device tree (such as the system version register on SoCs) is totally dumb, but
+this was suggested at one time.
 
->
-> As in, if you're bitbanging a 16-bit parallel bus (plus several
-> control signals -- chip select lines, address latch, r/w, etc) the
-> board would be designed for efficient bitbanging, by taking care
-> that the software bus ops aren't stupidly complex.  So I guess I'm
-> agreeing with Eric there:  wanting this kind of stuff at all seems
-> to imply being fairly low-down'n'dirty.
+Once you match the driver with a compatible property, you're set; you know which
+driver you're on. You can read out quirks and make inferences from
+other parts of
+the tree (this is something that most drivers do NOT do since people
+think reading
+outside the node just matched is some evil) where these are truly board-level
+problems.
 
-Yes, agreed, handling the contiguous bus case turned out to be quite
-straightforward and the core is just about 30 lines of code.
+For instance where the ATA DMA lines are not connected on a 5200B board, this
+must be described. Of course whether you decide this from the root
+"model" property
+and make a guess (all boards of fsl,broken5200  might have the bug) or
+specifically
+say in /soc/ata that "dma-is-broken" is the big question. In this
+event, Grant came
+up with a more fun solution which is to specify the maximum modes in
+the device tree
+therefore not bringing ANY board specific properties into it and
+making sure you do not
+clutter the driver with board specifics! This is exactly how device
+trees should be designed.
 
-+       do {
-+               chip = gpio_to_chip(gpio + i);
-+               WARN_ON(extra_checks && chip->can_sleep);
-+
-+               if (!chip->set_bus) {
-+                       while (((gpio + i) < (chip->base + chip->ngpio))
-+                               && bitwidth) {
-+                               value = values & (1 << i);
-+                               chip->set(chip, gpio + i - chip->base, value);
-+                               i++;
-+                               bitwidth--;
-+                       }
-+               } else {
-+                       value = values >> i; /* shift off the used stuff */
-+                       remwidth = ((chip->base + (int) chip->ngpio) -
-+                                       ((int) gpio + i));
-+                       width = min(bitwidth, remwidth);
-+
-+                       chip->set_bus(chip, gpio + i - chip->base, value,
-+                                       width);
-+                       i += width;
-+                       bitwidth -= width;
-+               }
-+       } while (bitwidth);
+Properties such as "fsl5200-clocking" in i2c nodes, is NOT. The
+compatible property
+of the node has fsl,mpc5200b-i2c, this implies 5200 clocking for the
+i2c bus anyway. I
+really don't get why this property even exists. It's not like there is
+some alternative way
+on the chip.. :D
 
+> Right now I see an awful lot of work going into trying to force lots
+> of stuff into table format.  Even when it's the sort of one-off or
+> board-specific quirkery that was an original motivation for having
+> FORTH escapes (tasks that were not table-friendly).
 
->
->
-> Example, assuming a 32 bit GPIO bank, the data lines would probably
-> be all adjacent and politely ordered by the board designer so that
+What about drivers where there is no binding for OF or Forth and never was and
+never would/will be? There is no Forth escape for that.
 
-A typical board designer will ensure that the selected pins are
-consecutive. But I think given today's rapid development time, I'd be
-hard pressed to ensure that they're also register consecutive. In the
-case of AM300, the designer picked a pin sequence that spans 2 32-bit
-registers since it starts at 58 and ends at 73. So it spans the 32-63
-and 64-95 registers. The code handles that case fine.
+Forth - and the client interface - should be used where necessary to
+bring the system
+up. This be modifying the device tree, implementing methods to boot
+(it makes some
+sense that if the ATA methods in the client interface work, then Linux
+could load it's
+own initrd without the help of Yaboot or GRUB, for example, right in
+the boot wrapper,
+and to the location it sees best to load it, and not what Yaboot
+decides for it, and there
+would be no need to maintain 4 different filesystem codes in 3
+alternative loaders and
+the kernel).
 
->
->        /* write a 16 bit value on the specfied data lines,
->         * assuming the intermediate state doesn't matter...
->         */
->        writew(0xffff << N, &bank->clear_bits);
->        writew(value << N, &bank->set_bits);
->
-> instead of needing to compute some complex permutation of those
-> bits ... and similarly
->
->        /* read a 16 bit value from the specified data lines */
->        value = 0xffff & (readw(&bank->read_bits) >> N);
->
-> possibly after handshaking with the device on the other side
-> about changing signal direction, again without permutation.
->
-> But heck, maybe there just aren't that many adjacent GPIOs free,
-> because of alternate functions that are used... ugh.
->
->
-> Note also that this proposal only includes
->
->> > +       void                    (*set_bus)(struct gpio_chip *chip,
->> > +                                          unsigned offset, int values,
->> > +                                          int bitwidth);
->
-> not its sibling read operation.
->
+But unfortunately most systems have crap CIF support (ours included)
+which do not
+come up to the task.
 
-Yes, I figured I'd start with the most basic approach. Also, the
-costliest operation in am300epd is the the actual framebuffer transfer
-to the device which is just a lot of writes. If people want me to do
-it, I can also implement get_bus.
-
->
->> Let's have a concrete example: what if the user gives a bunch of GPIOs
->> that crosses the chip boundary, say, GPIO29 - GPIO35 (with each chip
->> covering 32 GPIOs).
->
-> I'd care more about the upper level operation being performed ... like the
-> control protocol for passing the address of a word being read or written
-> and then switching the bus from address to data read (or write) mode to
-> get the word, then yielding the bus access.
-
-The upper level protocol in this case is from broadsheetfb (also
-posted). Here's the relevant code:
-
-+static void broadsheet_issue_data(struct broadsheetfb_par *par, u16 data)
-+{
-+       par->board->set_ctl(par, BS_WR, 0);
-+       par->board->set_hdb(par, data);
-+       par->board->set_ctl(par, BS_WR, 1);
-+}
-...
-which is called to transfer the fb via:
-+static void broadsheet_burst_write(struct broadsheetfb_par *par, int size,
-+                                       u16 *data)
-+{
-...
-+       for (i = 0; i < size; i++) {
-...
-+               par->board->set_hdb(par, tmp);
-
-Thanks,
-jaya
+-- 
+Matt Sealey <matt@genesi-usa.com>
+Genesi, Manager, Developer Relations
