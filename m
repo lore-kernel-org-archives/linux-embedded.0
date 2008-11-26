@@ -1,40 +1,44 @@
-From: David Brownell <david-b@pacbell.net>
+From: "Mike Frysinger" <vapier.adi@gmail.com>
 Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk Messages
-Date: Tue, 25 Nov 2008 13:45:10 -0800
-Message-ID: <200811251345.11350.david-b@pacbell.net>
-References: <20081125135519.038abf23@zod.rchland.ibm.com> <492C5DC2.9040402@billgatliff.com> <1227646490.5404.5.camel@cuplxvomd02.corp.sa.net>
+Date: Tue, 25 Nov 2008 20:23:33 -0500
+Message-ID: <8bd0f97a0811251723j7bac6964u237aa6c1228a7d89@mail.gmail.com>
+References: <1227638045-12862-1-git-send-email-gerickson@nuovations.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1227646490.5404.5.camel@cuplxvomd02.corp.sa.net>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=WvHta/HyO6l7+NiwzMlnRAz3oVneAaor8Jt0q0A5lcg=;
+        b=g91ta7CLUOeCmp+hQW+xvKEzjwkdS6BVJosZjEqy/wux4mgGa8Gy2pLtAgJeTdVAYL
+         bxzUdrMwHhkYtSUf8RPs2MYfiOClFDn8UnW8E3aDAqhCjY/DFMsBDvxIoQvQuFTTeJ6K
+         WFAvPRDISfrANafFV1wBiTSpZzmJAEuZIrWGY=
+In-Reply-To: <1227638045-12862-1-git-send-email-gerickson@nuovations.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: dvomlehn@cisco.com, Grant Erickson <gerickson@nuovations.com>
-Cc: Bill Gatliff <bgat@billgatliff.com>, Matt Sealey <matt@genesi-usa.com>, linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org
+To: Grant Erickson <gerickson@nuovations.com>
+Cc: linuxppc-dev@ozlabs.org, linux-embedded@vger.kernel.org, Wolfgang Denx <wd@denx.de>, Stefan Roese <sr@denx.de>
 
-No comment from me on $SUBJECT beyond "it seems plausible", but ...
+On Tue, Nov 25, 2008 at 13:34, Grant Erickson wrote:
+> This merges support for the previously DENX-only kernel feature of
+> specifying an alternative, "external" buffer for kernel printk
+> messages and their associated metadata. In addition, this ports
+> architecture support for this feature from arch/ppc to arch/powerpc.
+>
+> Signed-off-by: Grant Erickson <gerickson@nuovations.com>
+> ---
+>
+> When this option is enabled, an architecture- or machine-specific log
+> buffer is used for all printk messages. This allows entities such as
+> boot loaders (e.g. U-Boot) to place printk-compatible messages into
+> this buffer and for the kernel to coalesce them with its normal
+> messages.
+> <snip>
 
-On Tuesday 25 November 2008, David VomLehn wrote:
-> The important point, though, is that device tree is the only
-> thing approaching a standard on any non-x86-based platform for passing
-> structured information from the bootloader to the kernel. The command
-> line is just not sufficient for this.
-
-Me, I'll be happier if I don't have to try using that device tree.
-Having board-specific code in the kernel is a more complete solution,
-and makes it a lot easier to cope with all the hardware goofage.
-
-Recall that the *original* notion behind OpenBoot (now "OpenFirmware")
-was to have tables for the stuff that was table-friendly, and call
-out to FORTH code (possibly not just at boot time) for the rest.
-(Given the choice of FORTH vs ACPI bytecodes, I'd go for FORTH; but
-the better option is "neither".)
-
-Right now I see an awful lot of work going into trying to force lots
-of stuff into table format.  Even when it's the sort of one-off or
-board-specific quirkery that was an original motivation for having
-FORTH escapes (tasks that were not table-friendly).
-
-- Dave
+this extended info should be part of the changelog and thus above the
+--- marker ...
+-mike
