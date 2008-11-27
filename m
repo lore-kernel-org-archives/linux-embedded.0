@@ -1,115 +1,46 @@
-From: "Matt Sealey" <matt@genesi-usa.com>
-Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk Messages
-Date: Wed, 26 Nov 2008 14:57:13 -0600
-Message-ID: <b5e2fc790811261257x3309e4b1n242d99c6248775d@mail.gmail.com>
-References: <20081125135519.038abf23@zod.rchland.ibm.com>
-	 <492C5DC2.9040402@billgatliff.com>
-	 <1227646490.5404.5.camel@cuplxvomd02.corp.sa.net>
-	 <200811251345.11350.david-b@pacbell.net>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for batch set of pins
+Date: Thu, 27 Nov 2008 21:01:02 +0100
+Message-ID: <20081127200102.GB20443@uranus.ravnborg.org>
+References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com> <f17812d70811251720u47bec50dt3734f5b2bb0d339@mail.gmail.com> <200811252015.57870.david-b@pacbell.net> <45a44e480811252151q54580e07xfa73d69596fbfaac@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200811251345.11350.david-b@pacbell.net>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754396AbYK0T7w@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <45a44e480811252151q54580e07xfa73d69596fbfaac@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Brownell <david-b@pacbell.net>
-Cc: dvomlehn@cisco.com, Grant Erickson <gerickson@nuovations.com>, Bill Gatliff <bgat@billgatliff.com>, linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Jaya Kumar <jayakumar.lkml@gmail.com>
+Cc: David Brownell <david-b@pacbell.net>, Eric Miao <eric.y.miao@gmail.com>, Jean Delvare <khali@linux-fr.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Tue, Nov 25, 2008 at 3:45 PM, David Brownell <david-b@pacbell.net> wrote:
-> No comment from me on $SUBJECT beyond "it seems plausible", but ...
->
-> On Tuesday 25 November 2008, David VomLehn wrote:
->> The important point, though, is that device tree is the only
->> thing approaching a standard on any non-x86-based platform for passing
->> structured information from the bootloader to the kernel. The command
->> line is just not sufficient for this.
->
-> Me, I'll be happier if I don't have to try using that device tree.
-> Having board-specific code in the kernel is a more complete solution,
-> and makes it a lot easier to cope with all the hardware goofage.
+On Wed, Nov 26, 2008 at 12:51:27AM -0500, Jaya Kumar wrote:
+> On Tue, Nov 25, 2008 at 11:15 PM, David Brownell <david-b@pacbell.net> wrote:
+> > On Tuesday 25 November 2008, Eric Miao wrote:
+> >> Using a bit mask will be more generic if the GPIOs are not contiguous.
+> >> Yet I still doubt this will be generic enough to be added to gpiolib.
+> >
+> > My expectation for this kind of mechanism was that systems who need
+> > to craft another parallel bus out of GPIO pins would be doing this
+> > with some system-specific utility functions.
+> >
+> > So my "is it generic enough" question is more at the level of "Are
+> > there enough Linux systems that need this sort of thing to justify
+> > generic support?".  I happen not to have come across the need for
+> > such ganged access from Linux (yet).  Whereas I've yet to use non-x86
+> > Linux systems that don't need to manipulate individual GPIO pins...
+> 
+> I have come across the following scenarios where a bus set of gpio is useful:
+> - Broadsheet E-Ink controller (uses 16-bit data bus over GPIO)
+> framebuffer device (this patch is for this)
+> - Apollo/Hecuba E-Ink controller (uses 8-bit data bus over GPIO)
+> framebuffer device
+> - 8-bit parallel IO matrix LCD controllers, such as the Samsung KS108,
+> also Hitachi, etc
 
-I disagree.
+We have such a system at work. And we need fast acces to the gpio pins
+when updating the LCD.
+I have not written/looked to deep at the code I just recall it was
+a bit messy and not something I would be proud of submitting to any ML.
 
-> Recall that the *original* notion behind OpenBoot (now "OpenFirmware")
-> was to have tables for the stuff that was table-friendly, and call
-> out to FORTH code (possibly not just at boot time) for the rest.
-> (Given the choice of FORTH vs ACPI bytecodes, I'd go for FORTH; but
-> the better option is "neither".)
-
-The problem really is that Linux never really cared to run Forth code or even
-keep the client interface for OF and 99% of the devices with real device
-trees and real client interfaces, have really bad hardware support or methods
-implemented that just don't work - not to mention the evil that happens on the
-difference between Linux ABI and the OF ABI, the client interface context
-switch, real-mode or virtual-mode firmwares.
-
-The most useful thing is the representation of the devices in the device-tree.
-
-I do however agree that sometimes FAR too much is being put into the
-device trees,
-the massive amount of overly verbose information about devices which do not need
-the information there is just redundant. Reading processor registers out of the
-device tree (such as the system version register on SoCs) is totally dumb, but
-this was suggested at one time.
-
-Once you match the driver with a compatible property, you're set; you know which
-driver you're on. You can read out quirks and make inferences from
-other parts of
-the tree (this is something that most drivers do NOT do since people
-think reading
-outside the node just matched is some evil) where these are truly board-level
-problems.
-
-For instance where the ATA DMA lines are not connected on a 5200B board, this
-must be described. Of course whether you decide this from the root
-"model" property
-and make a guess (all boards of fsl,broken5200  might have the bug) or
-specifically
-say in /soc/ata that "dma-is-broken" is the big question. In this
-event, Grant came
-up with a more fun solution which is to specify the maximum modes in
-the device tree
-therefore not bringing ANY board specific properties into it and
-making sure you do not
-clutter the driver with board specifics! This is exactly how device
-trees should be designed.
-
-Properties such as "fsl5200-clocking" in i2c nodes, is NOT. The
-compatible property
-of the node has fsl,mpc5200b-i2c, this implies 5200 clocking for the
-i2c bus anyway. I
-really don't get why this property even exists. It's not like there is
-some alternative way
-on the chip.. :D
-
-> Right now I see an awful lot of work going into trying to force lots
-> of stuff into table format.  Even when it's the sort of one-off or
-> board-specific quirkery that was an original motivation for having
-> FORTH escapes (tasks that were not table-friendly).
-
-What about drivers where there is no binding for OF or Forth and never was and
-never would/will be? There is no Forth escape for that.
-
-Forth - and the client interface - should be used where necessary to
-bring the system
-up. This be modifying the device tree, implementing methods to boot
-(it makes some
-sense that if the ATA methods in the client interface work, then Linux
-could load it's
-own initrd without the help of Yaboot or GRUB, for example, right in
-the boot wrapper,
-and to the location it sees best to load it, and not what Yaboot
-decides for it, and there
-would be no need to maintain 4 different filesystem codes in 3
-alternative loaders and
-the kernel).
-
-But unfortunately most systems have crap CIF support (ours included)
-which do not
-come up to the task.
-
--- 
-Matt Sealey <matt@genesi-usa.com>
-Genesi, Manager, Developer Relations
+	Sam
