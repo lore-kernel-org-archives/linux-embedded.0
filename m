@@ -1,93 +1,62 @@
-From: David Brownell <david-b@pacbell.net>
-Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for
-	batch set of pins
-Date: Sat, 29 Nov 2008 14:54:15 -0800
-Message-ID: <200811291454.17110.david-b@pacbell.net>
+From: "Jaya Kumar" <jayakumar.lkml@gmail.com>
+Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for batch set of pins
+Date: Sun, 30 Nov 2008 07:33:50 +0800
+Message-ID: <45a44e480811291533ve0218dcvf07666064cb94d47@mail.gmail.com>
 References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com>
-	<200811252015.57870.david-b@pacbell.net>
-	<45a44e480811252151q54580e07xfa73d69596fbfaac@mail.gmail.com>
+	 <45a44e480811252151q54580e07xfa73d69596fbfaac@mail.gmail.com>
+	 <20081127200102.GB20443@uranus.ravnborg.org>
+	 <200811291448.52483.david-b@pacbell.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-fbdev-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <45a44e480811252151q54580e07xfa73d69596fbfaac@mail.gmail.com>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=PYBeAiuUc0rmSUS9llAhchokUX+GXL6f93PK7M+T5L0=;
+        b=rbCC92CfaJbwBTRPK01vqo26f0WGs4gful2fShJ0alD3C7t0fG0pqjfaEubDJFPlFv
+         p6ImOTeW+eOeXu+RSHXJKavBpQo/BbSIPXRZQVPkS1Nu/oiR+euW5p87cJRsOhUN67MR
+         uYKoJFGk8OMFitZOytSt8vMxPnf7sgGCandfo=
+In-Reply-To: <200811291448.52483.david-b@pacbell.net>
 Content-Disposition: inline
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/linux-fbdev-devel>,
-	<mailto:linux-fbdev-devel-request@lists.sourceforge.net?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=linux-fbdev-devel>
-List-Post: <mailto:linux-fbdev-devel@lists.sourceforge.net>
-List-Help: <mailto:linux-fbdev-devel-request@lists.sourceforge.net?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-fbdev-devel>,
-	<mailto:linux-fbdev-devel-request@lists.sourceforge.net?subject=subscribe>
-Errors-To: linux-fbdev-devel-bounces@lists.sourceforge.net
-To: Jaya Kumar <jayakumar.lkml@gmail.com>
-Cc: Eric Miao <eric.y.miao@gmail.com>, linux-embedded@vger.kernel.org, Haavard Skinnemoen <hskinnemoen@atmel.com>, Greg KH <greg@kroah.com>, linux-kernel@vger.kernel.org, Ben Gardner <bgardner@wabtec.com>, Eric Miao <eric.miao@marvell.com>, Philipp Zabel <philipp.zabel@gmail.com>, Jean Delvare <khali@linux-fr.org>, linux-fbdev-devel@lists.sourceforge.net, Sam Ravnborg <sam@ravnborg.org>, linux-arm-kernel@lists.arm.linux.org.uk, Russell King <rmk@arm.linux.org.uk>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: David Brownell <david-b@pacbell.net>
+Cc: Sam Ravnborg <sam@ravnborg.org>, Eric Miao <eric.y.miao@gmail.com>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Tuesday 25 November 2008, Jaya Kumar wrote:
-> In the area of framebuffers for lower end display devices, I find this
-> to be quite common.
+Jean emailed me saying he didn't want to be CCed.
 
-I'd have said "display modules" myself, although I don't
-currently have any Linux systems using them.  Some of
-those modules use SPI, since it tends support DMA for
-downloading the image data ... although admittedly those
-are not the very lowest end devices.
+On Sun, Nov 30, 2008 at 6:48 AM, David Brownell <david-b@pacbell.net> wrote:
+> On Thursday 27 November 2008, Sam Ravnborg wrote:
+>> > > So my "is it generic enough" question is more at the level of "Are
+>> > > there enough Linux systems that need this sort of thing to justify
+>> > > generic support?".  I happen not to have come across the need for
+>> > > such ganged access from Linux (yet).  Whereas I've yet to use non-x86
+>> > > Linux systems that don't need to manipulate individual GPIO pins...
+>> >
+>> > I have come across the following scenarios where a bus set of gpio is useful:
+>> > - Broadsheet E-Ink controller (uses 16-bit data bus over GPIO)
+>> >   framebuffer device (this patch is for this)
+>> > - Apollo/Hecuba E-Ink controller (uses 8-bit data bus over GPIO)
+>> >   framebuffer device
+>> > - 8-bit parallel IO matrix LCD controllers, such as the Samsung KS108,
+>> >   also Hitachi, etc
+>
+> All of those can also be handled with traditional parallel data
+> busses too, of course.  Are you saying you've seen these used
+> with Linux systems?  Enough to justify generic support?
 
+Assuming I've understood you correctly about generic support, yes. I
+used the 3 above with Linux arm systems that were interfaced to them
+via gpio. The matrix displays had just 128x64 so the 8x gpio_set_value
+penalty wasn't a biggie. The E-Ink displays range from 800x600 to
+1200x826 so the 16x gpio_set_value became a bottleneck. In terms of
+generic support, the Broadsheet display controller is also used on
+i.MX31 and SC2410/2440 boards so those platform drivers (assuming
+those good folks submit them, (i've only written and submitted
+am300epd.c)) should also benefit.
 
-> I have also seen this in systems such as 8-bit A2D devices, also with
-> various coprocessor solutions where a smaller CPU like a msp430 or
-> HC05 would clock data to the host using 8-bit gpio data.
-
-When I hear "coprocessor" I think more like Video DSPs.  ;)
-
-And for microcontrollers (msp430, avr8, etc) hooking up,
-I've usually seen them use a serial bus (I2C, SPI, etc).
-
-But it's also true that when data transfer rates matter,
-it's faster to talk to microcontrollers using a parallel
-bus than such a serial bus.  The Linux SOC it's talking
-to can probably clock SPI an order of magnitude faster
-than the microcontroller tolerates.  And the reason you
-want a dedicated microcontroller is for predictable
-(a.k.a. "realtime") monitoring tasks, which they can't
-do if they're spending all their time talking to Linux.
-
-Sounds like you're working with a bunch of semicustom
-monitoring/control designs?
-
-
-If you want to pursue this, I'd like to get the gpio_chip
-proposal in place first:  bitmask read and write, without
-forcing an "all bits are contiguous" policy.  Lightweight.
-
-Maybe it should suffice to have a gpio_chip support the
-bitmask ops, instead of just bit-at-a-time ones... so it'd
-be practical to incorporate this by itself, given patches
-to convert a couple gpio_chip implementations.
-
-Then separately two more things:
-
- - A gpio_* interface proposal for higher-level bitmask calls.
-   This is worth some discussion; the calls should clearly
-   be optional (not everything will implement them), and I
-   can't help but suspect <linux/bitmap.h> interfaces should
-   interoperate smoothly.
-
- - A gpiolib based implementation, using those new gpio_chip
-   methods as accelerators if they're present.  This should
-   probably also be optional, even at the Kconfig level; many
-   systems won't need to spend memory on these calls.
-
-Right now you seem to have smooshed together those three
-things, which probably helped get your sample driver going
-faster but isn't a very good way to move forward.  Don't
-assume gpiolib when defining the interface.
-
-- Dave
-
--------------------------------------------------------------------------
-This SF.Net email is sponsored by the Moblin Your Move Developer's challenge
-Build the coolest Linux based applications with Moblin SDK & win great prizes
-Grand prize is a trip for two to an Open Source event anywhere in the world
-http://moblin-contest.org/redirect.php?banner_id=100&url=/
+Thanks,
+jaya
