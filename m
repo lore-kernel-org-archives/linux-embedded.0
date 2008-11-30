@@ -1,32 +1,50 @@
-From: "Greg Lee" <greg@gregandsarah.org>
-Subject: Linux SBC recommendations
-Date: Sun, 30 Nov 2008 15:50:49 -0500
-Message-ID: <f7cd29ea0811301250r3070ed4fq9816ddcfcfe0cbaa@mail.gmail.com>
+From: "Belisko Marek" <marek.belisko@gmail.com>
+Subject: Re: Linux SBC recommendations
+Date: Sun, 30 Nov 2008 22:37:02 +0100
+Message-ID: <e7c6a05e0811301337r7939d0edv297bde1d67da77e7@mail.gmail.com>
+References: <f7cd29ea0811301250r3070ed4fq9816ddcfcfe0cbaa@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=z6BUdO3c3BtWJ0CeRFUYxLXSe/OuJmeEFQD6jIw6a7U=;
+        b=HCuRkSuwb+X9i4WqR/5UDM1X5S1VFU2QKUkjTM1gja9bGSboAXn3uSRmaIOHvtxRXU
+         HJvgVEfAZXdupwe5aGGV/0d6HzTfMLXBYckxMVGJN/yhUQTSTWc9DLggnK2vyVL8Q2df
+         CWi7gcVb2JCTFXjdEcQDUcn6nDBQW1MPCBy/w=
+In-Reply-To: <f7cd29ea0811301250r3070ed4fq9816ddcfcfe0cbaa@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="johab"
+To: Greg Lee <greg@gregandsarah.org>
+Cc: linux-embedded@vger.kernel.org
 
-I'm in the process of selecting a single-board computer (SBC) for a
-project and I'd like to hear what others are using sucessfully.  My
-requirements for the SBC are:
-
-1) Low cost (<$100)
-2) Runs Linux
-3) Has an Ethernet and USB host connection
-4) Has sufficient storage capacity to run an small HTTP server such as
-mini httpd and a few MB left over for custom applications
-5) Mechanical packaging suitable for a server room environment
-6) Processing capacity requirement is not very large, low-power processor okay
-
-I previously assumed that I would use the Gumstix Vertex-Pro boards,
-but cost is a limiting factor on this project and precludes using
-these boards.
-
-What low-cost SBCs has the Linux Embedded community used with success?
-
-Greg
+SGksCgoKT24gU3VuLCBOb3YgMzAsIDIwMDggYXQgOTo1MCBQTSwgR3JlZyBMZWUgPGdyZWdAZ3Jl
+Z2FuZHNhcmFoLm9yZz4gd3JvdGU6Cj4gSSdtIGluIHRoZSBwcm9jZXNzIG9mIHNlbGVjdGluZyBh
+IHNpbmdsZS1ib2FyZCBjb21wdXRlciAoU0JDKSBmb3IgYQo+IHByb2plY3QgYW5kIEknZCBsaWtl
+IHRvIGhlYXIgd2hhdCBvdGhlcnMgYXJlIHVzaW5nIHN1Y2Vzc2Z1bGx5LiAgTXkKPiByZXF1aXJl
+bWVudHMgZm9yIHRoZSBTQkMgYXJlOgo+Cj4gMSkgTG93IGNvc3QgKDwkMTAwKQo+IDIpIFJ1bnMg
+TGludXgKPiAzKSBIYXMgYW4gRXRoZXJuZXQgYW5kIFVTQiBob3N0IGNvbm5lY3Rpb24KPiA0KSBI
+YXMgc3VmZmljaWVudCBzdG9yYWdlIGNhcGFjaXR5IHRvIHJ1biBhbiBzbWFsbCBIVFRQIHNlcnZl
+ciBzdWNoIGFzCj4gbWluaSBodHRwZCBhbmQgYSBmZXcgTUIgbGVmdCBvdmVyIGZvciBjdXN0b20g
+YXBwbGljYXRpb25zCj4gNSkgTWVjaGFuaWNhbCBwYWNrYWdpbmcgc3VpdGFibGUgZm9yIGEgc2Vy
+dmVyIHJvb20gZW52aXJvbm1lbnQKPiA2KSBQcm9jZXNzaW5nIGNhcGFjaXR5IHJlcXVpcmVtZW50
+IGlzIG5vdCB2ZXJ5IGxhcmdlLCBsb3ctcG93ZXIgcHJvY2Vzc29yIG9rYXkKPgo+IEkgcHJldmlv
+dXNseSBhc3N1bWVkIHRoYXQgSSB3b3VsZCB1c2UgdGhlIEd1bXN0aXggVmVydGV4LVBybyBib2Fy
+ZHMsCj4gYnV0IGNvc3QgaXMgYSBsaW1pdGluZyBmYWN0b3Igb24gdGhpcyBwcm9qZWN0IGFuZCBw
+cmVjbHVkZXMgdXNpbmcKPiB0aGVzZSBib2FyZHMuCk15IGZhdm91cml0ZSBmb3IgbG93IGNvc3Qg
+Ym9hcmRzOiBodHRwOi8vZ2xvbWF0aW9uaW5jLmNvbS8KCllvdSBjYW4gZmluZCBtYW55IG90aGVy
+IGF0OiBodHRwOi8vZWxpbnV4Lm9yZy9Cb2FyZF9hbmRfQ2hpcF9WZW5kb3JzCgo+Cj4gV2hhdCBs
+b3ctY29zdCBTQkNzIGhhcyB0aGUgTGludXggRW1iZWRkZWQgY29tbXVuaXR5IHVzZWQgd2l0aCBz
+dWNjZXNzPwo+Cj4gR3JlZwo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNl
+bmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LWVtYmVkZGVkIiBpbgo+IHRoZSBib2R5IG9m
+IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8g
+aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4KCnRo
+YW5rcywKCk1hcmVrCgotLSAKYXMgc2ltcGxlIGFzIHByaW1pdGl2ZSBhcyBwb3NzaWJsZQotLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCk1hcmVrIEJlbGnFoWtv
+IC0gb3Blbi1uYW5kcmEKUnVza8OhIE5vdsOhIFZlcyAyMTkKMDgwMDUgUHJlxaFvdgpTbG92YWtp
+YQpodHRwOi8vb3Blbi1uYW5kcmEuY29tCg==
