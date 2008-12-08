@@ -1,45 +1,51 @@
-From: Jamie Lokier <jamie@shareable.org>
+From: Lasse Collin <lasse.collin@tukaani.org>
 Subject: Re: LZMA inclusion
-Date: Mon, 8 Dec 2008 13:46:40 +0000
-Message-ID: <20081208134640.GC16354@shareable.org>
-References: <492BA3FA.9010204@openwrt.org> <200812032348.36921.lasse.collin@tukaani.org> <Pine.LNX.4.64.0812050914380.8749@vixen.sonytel.be> <200812062356.50734.lasse.collin@tukaani.org> <20081207160140.GA13387@logfs.org> <493C5D10.1040604@lougher.demon.co.uk>
+Date: Mon, 8 Dec 2008 20:23:23 +0200
+Message-ID: <200812082023.23450.lasse.collin@tukaani.org>
+References: <492BA3FA.9010204@openwrt.org> <20081207160140.GA13387@logfs.org> <493C5D10.1040604@lougher.demon.co.uk>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <493C5D10.1040604@lougher.demon.co.uk>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: =?iso-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>, Lasse Collin <lasse.collin@tukaani.org>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
+Cc: =?utf-8?q?J=C3=B6rn_Engel?= <joern@logfs.org>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
 
 Phillip Lougher wrote:
-> One-shot LZMA decoding therefore isn't going to work very well with 
-> future versions of Squashfs, obviously a solution (as is currently done 
-> with the Squashfs-LZMA patches) is to use separately allocated 
-> contiguous input/output buffers, and memcpy into and out of them, but 
-> this isn't particularly ideal.
-> 
-> The discussion about using the output buffer as the temporary workspace 
-> (as it isn't touched until after decompression is completely finished) 
-> will work with the current version of Squashfs, but it isn't going to 
-> work with later versions unless the LZMA code can be changed to work 
-> with a list of discontiguous output buffers (i.e. a scatter-gather type 
-> list).
-> 
-> So it looks inevitable that a separately vmalloced workspace buffer will 
-> be required.
+> Currently, as mentioned above, Squashfs decompresses into a single
+> contiguous output buffer.  But, due to the linux kernel mailing
+> list's dislike of vmalloc, this is being changed.  In future Squashfs
+> will decompress into a sequence of 4 KiB output buffers (possibly in
+> the page cache).
 
-If the kernel has trouble even vmallocing 1MiB, the LZMA algorithm
-will need reworking to explicitly use discontiguous workspace buffers
-anyway, regardless of whether the output buffer is used as workspace.
+To my understanding, using 4 KiB output buffers can make sense only if 
+the dictionary size is significantly smaller than the Squashfs block 
+size. This is because an output buffer scattered to 4 KiB pieces means 
+that the the dictionary has to be vmalloced as part of the LZMA decoder 
+state.
 
-If the kernel can vmalloc 1MiB easily, then in principle it could map
-the discontiguous output buffer temporarily into a contiguous region
-of vmalloc address space, avoiding the allocation.
+For example, if the dictionary size is equal to the Squashfs block size, 
+the same amount of memory that earlier Squashfs versions vmalloced for 
+the output buffer is now vmalloced by the uncompression code for the 
+dictionary. Plus, memcpy is needed to get the data from the dictionary 
+to the 4 KiB output buffers.
 
-Instead of memcpy, you'd have some cache coherency fun on some
-architectures.
+LZMA decoder accesses the dictionary contents quite randomly, copying 
+1-273 bytes at a time from some unpredictable offset to the end of the 
+dictionary. The offsets are relative to the end of the dictionary (i.e. 
+the current write position). I suppose the dictionary buffer has to be 
+contiguous in the virtual address space. Otherwise the decoder needs to 
+emulate it to find the offsets in the dictionary. That would probably 
+make things very slow.
 
--- Jamie
+Naturally it might be OK to decrease the maximum dictionary size allowed 
+in multi-call decoder. I'm not sure if going from 1 MiB to e.g. 128 KiB 
+dictionary while keeping the 1 MiB Squashfs block size affects 
+compression ratio too much. I guess it means 2-8 % bigger result, but 
+someone should test it with real-world file system data. 
+
+-- 
+Lasse Collin  |  IRC: Larhzu @ IRCnet & Freenode
