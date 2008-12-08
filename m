@@ -1,47 +1,49 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
+From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
 Subject: Re: LZMA inclusion
-Date: Mon, 08 Dec 2008 19:00:09 +0000
-Message-ID: <493D6EB9.4040907@lougher.demon.co.uk>
-References: <492BA3FA.9010204@openwrt.org> <20081207160140.GA13387@logfs.org> <493C5D10.1040604@lougher.demon.co.uk> <200812082023.23450.lasse.collin@tukaani.org>
+Date: Mon, 8 Dec 2008 21:17:34 +0100
+Message-ID: <20081208201734.GA4069@logfs.org>
+References: <492BA3FA.9010204@openwrt.org> <200812032348.36921.lasse.collin@tukaani.org> <Pine.LNX.4.64.0812050914380.8749@vixen.sonytel.be> <200812062356.50734.lasse.collin@tukaani.org> <20081207160140.GA13387@logfs.org> <493C5D10.1040604@lougher.demon.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200812082023.23450.lasse.collin@tukaani.org>
+Content-Disposition: inline
+In-Reply-To: <493C5D10.1040604@lougher.demon.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Lasse Collin <lasse.collin@tukaani.org>
-Cc: =?UTF-8?B?SsO2cm4gRW5nZWw=?= <joern@logfs.org>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: Lasse Collin <lasse.collin@tukaani.org>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
 
-Lasse Collin wrote:
-> Phillip Lougher wrote:
->> Currently, as mentioned above, Squashfs decompresses into a single
->> contiguous output buffer.  But, due to the linux kernel mailing
->> list's dislike of vmalloc, this is being changed.  In future Squashfs
->> will decompress into a sequence of 4 KiB output buffers (possibly in
->> the page cache).
-> 
-> To my understanding, using 4 KiB output buffers can make sense only if 
-> the dictionary size is significantly smaller than the Squashfs block 
-> size. This is because an output buffer scattered to 4 KiB pieces means 
-> that the the dictionary has to be vmalloced as part of the LZMA decoder 
-> state.
-> 
-> For example, if the dictionary size is equal to the Squashfs block size, 
-> the same amount of memory that earlier Squashfs versions vmalloced for 
-> the output buffer is now vmalloced by the uncompression code for the 
-> dictionary. Plus, memcpy is needed to get the data from the dictionary 
-> to the 4 KiB output buffers.
-> 
+On Sun, 7 December 2008 23:32:32 +0000, Phillip Lougher wrote:
+>=20
+> Currently, as mentioned above, Squashfs decompresses into a single=20
+> contiguous output buffer.  But, due to the linux kernel mailing list'=
+s=20
+> dislike of vmalloc, this is being changed.
 
-The issue that moving to 4 KiB output buffers solves is it reduces 
-significantly the number of 1 MiB (or 128 KiB for the default block 
-size) buffers that need to be vmalloced.  Squashfs caches the last 3 
-fragment buffers read, and moving to 4 KiB buffers eliminates these 
-vmallocs.
+Don't blame lkml, blame Intel and IBM.  Back in the days of the 386, a
+beefy machine had 8MB of physical memory and 4GB of virtual memory
+space.  Noone had to worry about fragmentation anymore.  If you needed =
+a
+1MB buffer, you'd just round up some 256 pages and instruct the mmu to
+map them into a large contiguous address range in the virtual address
+space.  Life was good indeed.
 
-Obviously moving to 4 KiB output buffers will require a 1 MiB dictionary 
-workspace to be vmalloced, but this is still much less than the 3 
-buffers that currently need to be vmalloced.
+But physical memory has constantly grown since, while the virtual memor=
+y
+space has for a long time stagnated.  Intel even introduced some
+hardware hacks to use up to 64GB of physical memory with a measly 4GB o=
+f
+virtual memory.  Now it was _virtual_ memory fragmentation that you had
+to worry about.
 
-Phillip
+These days most CPUs you'd buy are 64bit, so virtual memory space has
+become useful again.  But as a kernel hacker, you have little control
+over what hardware everyone is using.  And those weird systems with
+more physical than virtual memory are still around. :(
+
+J=C3=B6rn
+
+--=20
+Don't patch bad code, rewrite it.
+-- Kernigham and Pike, according to Rusty
