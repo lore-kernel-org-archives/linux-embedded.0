@@ -1,36 +1,38 @@
-From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
+From: Lasse Collin <lasse.collin@tukaani.org>
 Subject: Re: LZMA inclusion
-Date: Mon, 8 Dec 2008 23:15:30 +0100
-Message-ID: <20081208221530.GB4069@logfs.org>
-References: <492BA3FA.9010204@openwrt.org> <200812032348.36921.lasse.collin@tukaani.org> <Pine.LNX.4.64.0812050914380.8749@vixen.sonytel.be> <200812062356.50734.lasse.collin@tukaani.org> <20081207160140.GA13387@logfs.org> <493C5D10.1040604@lougher.demon.co.uk> <20081208201734.GA4069@logfs.org> <493D95F9.7080004@lougher.demon.co.uk>
+Date: Tue, 9 Dec 2008 12:20:29 +0200
+Message-ID: <200812091220.29616.lasse.collin@tukaani.org>
+References: <492BA3FA.9010204@openwrt.org> <200812082023.23450.lasse.collin@tukaani.org> <493D6EB9.4040907@lougher.demon.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <493D6EB9.4040907@lougher.demon.co.uk>
 Content-Disposition: inline
-In-Reply-To: <493D95F9.7080004@lougher.demon.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="us-ascii"
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Lasse Collin <lasse.collin@tukaani.org>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
+Cc: =?utf-8?q?J=C3=B6rn_Engel?= <joern@logfs.org>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
 
-On Mon, 8 December 2008 21:47:37 +0000, Phillip Lougher wrote:
->=20
-> Yes, I'm aware of the issues with vmalloc on older hardware.
+Phillip Lougher wrote:
+> The issue that moving to 4 KiB output buffers solves is it reduces
+> significantly the number of 1 MiB (or 128 KiB for the default block
+> size) buffers that need to be vmalloced.  Squashfs caches the last 3
+> fragment buffers read, and moving to 4 KiB buffers eliminates these
+> vmallocs.
+>
+> Obviously moving to 4 KiB output buffers will require a 1 MiB
+> dictionary workspace to be vmalloced, but this is still much less
+> than the 3 buffers that currently need to be vmalloced.
 
-It's not even limited to older hardware.  Blue Gene supercomputers are
-large clusters of ppc440 machines.  Iirc each node consists of two 32bi=
-t
-cpus and up to 4GB of RAM.  Not likely to run squashfs, but hardly old
-hardware either.
+Thanks for explaining.
 
-Or for a living room example, take a barebone with a VIA C7.  And maybe
-fairly soon a large number of mobile phones will have close to 4GB RAM,
-yet still run on 32bit ARM processors.  I fear those troubles are far
-from gone.
+Is it OK that the decoder allocates memory in the middle of decoding, or 
+must all the memory be preallocated when the decoder is initialized? If 
+everything has to be preallocated, then the initialization function 
+needs an argument to specify how big dictionary must be supported. It 
+doesn't make sense to allocate 1 MiB just in case if the caller knows 
+that 128 KiB dictionary is the maximum that will ever be needed.
 
-J=C3=B6rn
-
---=20
-All art is but imitation of nature.
--- Lucius Annaeus Seneca
+-- 
+Lasse Collin  |  IRC: Larhzu @ IRCnet & Freenode
