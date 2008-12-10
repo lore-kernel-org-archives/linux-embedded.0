@@ -1,65 +1,68 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: LZMA inclusion
-Date: Tue, 9 Dec 2008 11:37:46 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.0812091136080.7244@vixen.sonytel.be>
-References: <492BA3FA.9010204@openwrt.org> <200812082023.23450.lasse.collin@tukaani.org>
- <493D6EB9.4040907@lougher.demon.co.uk> <200812091220.29616.lasse.collin@tukaani.org>
+From: "Grant Likely" <grant.likely@secretlab.ca>
+Subject: How to handle device drivers depending on another device.
+Date: Tue, 9 Dec 2008 22:45:36 -0700
+Message-ID: <fa686aa40812092145h72c29ea8o7b55ab6bc0ce52ff@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200812091220.29616.lasse.collin@tukaani.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755172AbYLJFpu@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="utf-8"
-To: Lasse Collin <lasse.collin@tukaani.org>
-Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, =?utf-8?q?J=C3=B6rn_Engel?= <joern@logfs.org>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
 
-On Tue, 9 Dec 2008, Lasse Collin wrote:
-> Phillip Lougher wrote:
-> > The issue that moving to 4 KiB output buffers solves is it reduces
-> > significantly the number of 1 MiB (or 128 KiB for the default block
-> > size) buffers that need to be vmalloced.  Squashfs caches the last =
-3
-> > fragment buffers read, and moving to 4 KiB buffers eliminates these
-> > vmallocs.
-> >
-> > Obviously moving to 4 KiB output buffers will require a 1 MiB
-> > dictionary workspace to be vmalloced, but this is still much less
-> > than the 3 buffers that currently need to be vmalloced.
->=20
-> Thanks for explaining.
->=20
-> Is it OK that the decoder allocates memory in the middle of decoding,=
- or=20
-> must all the memory be preallocated when the decoder is initialized? =
-If=20
-> everything has to be preallocated, then the initialization function=20
-> needs an argument to specify how big dictionary must be supported. It=
-=20
-> doesn't make sense to allocate 1 MiB just in case if the caller knows=
-=20
-> that 128 KiB dictionary is the maximum that will ever be needed.
+Scenario: I have an Ethernet device whose driver is probed via the
+of_platform bus.  The PHY device is attached to an MDIO bus, but the
+MDIO controller hardware is not integrated into the Ethernet device
+(separate hardware).  The MDIO bus driver uses phylib.  At probe time,
+the Ethernet driver must get a reference to the phy_device structure
+in order to set it up and control it.  (Actually, I've got this exact
+scenario with 3 different devices on various embedded boards except
+using I2C or SPI bus connections.  For simplicity sake I'll stick to
+the ETH->MDIO case)
 
-If you want to make it available through the crypto API, you cannot all=
-ocate
-memory in the (de)compression routines theirselves, only in the initial=
-ization
-function.
+Problem: There are no guarantees that the MDIO bus controller will be
+probed before the Ethernet device.
+  - If the MDIO bus is probed first, the there is no problem.  The
+Ethernet driver can use something like bus_find_device() to locate the
+PHY.
+  - If the MDIO bus is not probed first, then the PHY is not ready,
+and the Ethernet probe function must in some way defer locating the
+phy_device until after the MDIO bus is probed.
 
-With kind regards,
+I'm looking at making the Eth driver register a bus notifier callback
+so that it can check each new phy device as it gets registered, but
+this is only half a solution because it doesn't get notifications for
+PHY devices that are already registered.  To solve this, the driver
+could use a use both a notifier and a call to bus_find_device().
+However, I'm concerned about a race condition between the two
+activities.  If bus_find_device() is called before registering the
+notifier, then it theoretically possible for the PHY to be registered
+between the two calls and the Eth driver not getting notified.  If the
+notifier is registered before the bus_find_device() call, then it is
+possible that the Eth driver will get told about a PHY device more
+than once if the phy is registered after the notifier, but before
+bus_find_device().  I can certainly handle this condition in my
+driver, but it seems ugly to me.  Especially so if this is a common
+case which would be useful to other drivers (see below).
 
-Geert Uytterhoeven
-Software Architect
+Here are my questions:
+First, is this race condition something I should even be concerned
+about (ie. is it more theoretical than practical).  Am I being overly
+paranoid in being concerned about it?
 
-Sony Techsoft Centre Europe
-The Corporate Village =C2=B7 Da Vincilaan 7-D1 =C2=B7 B-1935 Zaventem =C2=
-=B7 Belgium
+Second, does this sound like a common case that would be useful for
+more than just a handful of driver that I'm working on?  Specifically,
+would it be useful to have an alternate bus_register_notifier()
+function which also generated ADD_DEVICE and BOUND_DRIVER
+notifications for devices already present?  If others see value in it
+then I'll code something up.
 
-Phone:    +32 (0)2 700 8453
-=46ax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
+Third, let me know if it seems like I'm looking at this problem in the
+wrong way.
 
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 =C2=B7 RPR Brussels
-=46ortis =C2=B7 BIC GEBABEBB =C2=B7 IBAN BE41293037680010
+g.
+
+-- 
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
