@@ -1,68 +1,46 @@
-From: "Grant Likely" <grant.likely@secretlab.ca>
-Subject: How to handle device drivers depending on another device.
-Date: Tue, 9 Dec 2008 22:45:36 -0700
-Message-ID: <fa686aa40812092145h72c29ea8o7b55ab6bc0ce52ff@mail.gmail.com>
+From: "Dave Hylands" <dhylands@gmail.com>
+Subject: Re: How to handle device drivers depending on another device.
+Date: Tue, 9 Dec 2008 22:09:03 -0800
+Message-ID: <c32efac40812092209v52c3b425i9aede2f096a13bfa@mail.gmail.com>
+References: <fa686aa40812092145h72c29ea8o7b55ab6bc0ce52ff@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755172AbYLJFpu@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=tCjtgFC9MOmwhgecEGN4MqdFjbS9k2sRbn3HpFnPPX4=;
+        b=u9rAJA0bHX5Cu4gHfuRJVoT8Vz8Z8BOYE97Bi3dnpWZ8eXFIss1XLNqEbDFrnDL8sp
+         5YfOPazKaW6U6PRZLNV3XdEg6NBXh2bxgMGHNcBDty45aAQJE6WsJo3kn4654shHndH5
+         EVRTUEoayAltCVEfoRNo6nRwJAusFX5dagXPs=
+In-Reply-To: <fa686aa40812092145h72c29ea8o7b55ab6bc0ce52ff@mail.gmail.com>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: linux-embedded@vger.kernel.org
 
-Scenario: I have an Ethernet device whose driver is probed via the
-of_platform bus.  The PHY device is attached to an MDIO bus, but the
-MDIO controller hardware is not integrated into the Ethernet device
-(separate hardware).  The MDIO bus driver uses phylib.  At probe time,
-the Ethernet driver must get a reference to the phy_device structure
-in order to set it up and control it.  (Actually, I've got this exact
-scenario with 3 different devices on various embedded boards except
-using I2C or SPI bus connections.  For simplicity sake I'll stick to
-the ETH->MDIO case)
+Whoops - Replying to the list this time.
 
-Problem: There are no guarantees that the MDIO bus controller will be
-probed before the Ethernet device.
-  - If the MDIO bus is probed first, the there is no problem.  The
-Ethernet driver can use something like bus_find_device() to locate the
-PHY.
-  - If the MDIO bus is not probed first, then the PHY is not ready,
-and the Ethernet probe function must in some way defer locating the
-phy_device until after the MDIO bus is probed.
+Hi Grant,
 
-I'm looking at making the Eth driver register a bus notifier callback
-so that it can check each new phy device as it gets registered, but
-this is only half a solution because it doesn't get notifications for
-PHY devices that are already registered.  To solve this, the driver
-could use a use both a notifier and a call to bus_find_device().
-However, I'm concerned about a race condition between the two
-activities.  If bus_find_device() is called before registering the
-notifier, then it theoretically possible for the PHY to be registered
-between the two calls and the Eth driver not getting notified.  If the
-notifier is registered before the bus_find_device() call, then it is
-possible that the Eth driver will get told about a PHY device more
-than once if the phy is registered after the notifier, but before
-bus_find_device().  I can certainly handle this condition in my
-driver, but it seems ugly to me.  Especially so if this is a common
-case which would be useful to other drivers (see below).
+> Problem: There are no guarantees that the MDIO bus controller will be
+> probed before the Ethernet device.
 
-Here are my questions:
-First, is this race condition something I should even be concerned
-about (ie. is it more theoretical than practical).  Am I being overly
-paranoid in being concerned about it?
+I believe that what you're supposed to do is to have "bus" controllers
+initilize themselves using subsys_initcall rather than module_init. If
+you look in include/linux/init.h you can see the various initcall
+definitions. module_init is at the same level as device_initcall. All
+of the initcalls at one "level" are completed before moving onto the
+next level.
 
-Second, does this sound like a common case that would be useful for
-more than just a handful of driver that I'm working on?  Specifically,
-would it be useful to have an alternate bus_register_notifier()
-function which also generated ADD_DEVICE and BOUND_DRIVER
-notifications for devices already present?  If others see value in it
-then I'll code something up.
-
-Third, let me know if it seems like I'm looking at this problem in the
-wrong way.
-
-g.
+Of course, if you're using loadable modules, then the dependencies
+should take care of things for you.
 
 -- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+Dave Hylands
+Shuswap, BC, Canada
+http://www.DaveHylands.com/
