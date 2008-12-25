@@ -1,40 +1,73 @@
-From: "Oguz Yarimtepe" <comp.ogz@gmail.com>
-Subject: animated graphics on embedded linux systems
-Date: Thu, 25 Dec 2008 16:14:22 +0200
-Message-ID: <20831c740812250614w5525f248kffd6a6a5151afec1@mail.gmail.com>
+From: "Gustavo Sverzut Barbieri" <barbieri@profusion.mobi>
+Subject: Re: [Celinux-dev] animated graphics on embedded linux systems
+Date: Thu, 25 Dec 2008 21:59:57 -0200
+Message-ID: <b1f2b8c40812251559v203d324fmdbf297a183751b74@mail.gmail.com>
+References: <20831c740812250614w5525f248kffd6a6a5151afec1@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:mime-version:content-type:content-transfer-encoding
-         :content-disposition;
-        bh=P7+Qsp/XL3Y98zDjqVhMyoxAPylZ7898VzWQUL3IS9g=;
-        b=E4CzzvRs0oqCEsBRWk1INSZhWXJw2b8Z22IqlDDw9Rn8hajJ2KzAGEZKyhjs4bJdOe
-         xaKDnF9fIKaFtL9yMZsSkQJ3XPKiRtsWwFbSuaznuQTeyZNDm1O9G4KKQCnyT69cWOaB
-         vCYIbVOhXwuhCzRJ8LrHrQeF7YU9qbD0/zHWY=
+In-Reply-To: <20831c740812250614w5525f248kffd6a6a5151afec1@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Oguz Yarimtepe <comp.ogz@gmail.com>
+Cc: celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
 
-SGksCgpJIGFtIHNlYXJjaGluZyBncmFwaGljcyBsaWJyYXJpZXMgdGhhdCBlbmFibGVzIGFuaW1h
-dGVkIGdyYXBoaWNzIG9uCmVtYmVkZGVkIGxpbnV4IHN5c3RlbXMuIEhlcmUgYXJlIHRoZSByZXF1
-aXJlbWVudHMgZm9yIHRoZSBncmFwaGljcwpsaWJyYXJ5OgoKKiBTaG91bGQgd29yayBvciBhYmxl
-IHRvIHdvcmsgd2l0aCBEaXJlY3RGQgoqIExpZ2h0d2VpZ2h0CiogRG9lc24ndCBjb25zdW1lIG1l
-bW9yeSBhbmQgY3B1IHBvd2VyIG11Y2gKClNvIGl0IGNhbiBiZSB0aG91Z2h0IHRoYXQgdGhlIGxp
-YnJhcnkgd2lsbCBiZSB1c2VkIGZvciBhIG1lZGlhIGNlbnRlcgp0eXBlIGFwcGxpY2F0aW9uLiBB
-dCB0aGF0IGFwcGxpY2F0aW9uIGkgd2FudCB0byBiZSBhYmxlIHRvIHdyaXRlIHNvbWUKYW5pbWF0
-aW9uIGVmZmVjdHMgZm9yIGV4IGZvciB0aGUgd2luZG93IHBhcnQgdGhhdCBzaG93cyB2aWRlbyBj
-b3ZlcnMKYW5kIHBhc3NpbmcgZnJvbSBvbmUgdG8gYW5vdGhlciB3aWxsIGJlIHdpdGggc29tZSBh
-bmltYXRpb24gb3IKcHJlc3NpbmcgYSBjbG9zZSBidXR0b24gd2lsbCBiZSB3aXRoIHNvbWUgYW5p
-bWF0aW9uIG9yIHdpbGwgY2F1c2UgdGhlCmN1cnJlbnQgd2luZG93IGNsb3NlZCB3aXRoIHNvbWUg
-YW5pbWF0aW9uLi4uCgpJIEdvb2dsZWQgYSBsaXR0bGUgYnV0IGkgd2FudCB0byBoZWFyIHNvbWUg
-ZXhwZXJpZW5jZXMgYWxzbywgaWYgYW55LgpUaGVyZSBhcmUgc29tZSBncmFwaGljcyBsaWJyYXJp
-ZXMgc3VnZ2VzdGVkIGZvciBlbWJlZGRlZCBlbnZpcm9ubWVudHMKbGlrZSBRdCBFbWJlZGRlZCBv
-ciBTREwuIEkgYW0gbm90IHN1cmUgd2hldGhlciB0aGV5IGFyZSBzdWl0YWJsZSBkb3IKc3VjaCBh
-cHBsaWNhdGlvbnMgb3Igd2hldGhlciB0aGV5IGFyZSBtZW1vcnkgZWZmaWNpZW50LgoKSSB3b3Vs
-ZCBsaWtlIHRvIGhlYXIgc29tZSBzdWdnZXN0aW9ucwoKVGhhbnguCgotLSAKT/B1eiBZYXL9bXRl
-cGUKd3d3Lmxvb3BiYWNraW5nLmluZm8K
+2008/12/25 Oguz Yarimtepe <comp.ogz@gmail.com>:
+> Hi,
+>
+> I am searching graphics libraries that enables animated graphics on
+> embedded linux systems. Here are the requirements for the graphics
+> library:
+>
+> * Should work or able to work with DirectFB
+> * Lightweight
+> * Doesn't consume memory and cpu power much
+>
+> So it can be thought that the library will be used for a media center
+> type application. At that application i want to be able to write some
+> animation effects for ex for the window part that shows video covers
+> and passing from one to another will be with some animation or
+> pressing a close button will be with some animation or will cause the
+> current window closed with some animation...
+>
+> I Googled a little but i want to hear some experiences also, if any.
+> There are some graphics libraries suggested for embedded environments
+> like Qt Embedded or SDL. I am not sure whether they are suitable dor
+> such applications or whether they are memory efficient.
+
+
+I use and recommend Enlightenment Foundation Libraries (EFL,
+http://enlightenment.org), specially Evas (canvas) and Edje (theme,
+with animations and transitions). It is very lightweight and can use
+hardware acceleration when possible, with optimized (sse, mmx,
+altivec) C replacement.
+
+I wrote DirectFB engine some time ago and Denis did a review of it.
+Denis said to make fully use of hardware acceleration for blits we
+need to change image allocation to hardware, then paint it with
+pixels, not hard to do, but I'm not doing it now... patches are
+welcome or you can consider hiring our company to do such work.
+
+Compared to SDL, EFL offers much more primitives and thus can provide
+many optimizations, like occlusion culling and dirty area/movement.
+Compared to Qt 4.x, it provides a bit less canvas primitives (no
+vectors, for instance), but it provides Edje, a very helpful piece of
+EFL. Also, EFL is BSD with one piece in LGPL, while Qt is GPL or
+commercial.
+
+You can find lots of information about EFL on my blog
+(http://blog.gustavobarbieri.com.br/) or company news
+(http://profusion.mobi/taxonomy/term/2). If you want to hire
+consulting, training or development, feel free to contact us.
+
+Regards,
+
+-- 
+Gustavo Sverzut Barbieri
+http://profusion.mobi embedded systems
+--------------------------------------
+MSN: barbieri@gmail.com
+Skype: gsbarbieri
+Mobile: +55 (19) 9225-2202
