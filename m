@@ -1,39 +1,40 @@
-From: Lasse Collin <lasse.collin@tukaani.org>
-Subject: Re: LZMA inclusion
-Date: Tue, 16 Dec 2008 10:55:30 +0200
-Message-ID: <200812161055.30590.lasse.collin@tukaani.org>
-References: <492BA3FA.9010204@openwrt.org> <200812091220.29616.lasse.collin@tukaani.org> <Pine.LNX.4.64.0812091136080.7244@vixen.sonytel.be>
+From: "Oguz Yarimtepe" <comp.ogz@gmail.com>
+Subject: animated graphics on embedded linux systems
+Date: Thu, 25 Dec 2008 16:14:22 +0200
+Message-ID: <20831c740812250614w5525f248kffd6a6a5151afec1@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.0812091136080.7244@vixen.sonytel.be>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:mime-version:content-type:content-transfer-encoding
+         :content-disposition;
+        bh=P7+Qsp/XL3Y98zDjqVhMyoxAPylZ7898VzWQUL3IS9g=;
+        b=E4CzzvRs0oqCEsBRWk1INSZhWXJw2b8Z22IqlDDw9Rn8hajJ2KzAGEZKyhjs4bJdOe
+         xaKDnF9fIKaFtL9yMZsSkQJ3XPKiRtsWwFbSuaznuQTeyZNDm1O9G4KKQCnyT69cWOaB
+         vCYIbVOhXwuhCzRJ8LrHrQeF7YU9qbD0/zHWY=
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, =?utf-8?q?J=C3=B6rn_Engel?= <joern@logfs.org>, Bernhard Reutner-Fischer <rep.dot.nop@gmail.com>, Tim Bird <tim.bird@am.sony.com>, glp@openwrt.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
 
-Geert Uytterhoeven wrote:
-> On Tue, 9 Dec 2008, Lasse Collin wrote:
-> > Is it OK that the decoder allocates memory in the middle of
-> > decoding, or must all the memory be preallocated when the decoder
-> > is initialized? If everything has to be preallocated, then the
-> > initialization function needs an argument to specify how big
-> > dictionary must be supported. It doesn't make sense to allocate 1
-> > MiB just in case if the caller knows that 128 KiB dictionary is the
-> > maximum that will ever be needed.
->
-> If you want to make it available through the crypto API, you cannot
-> allocate memory in the (de)compression routines theirselves, only in
-> the initialization function.
-
-OK, thanks.
-
-My work on the upcoming xz package has been progressing quite OK in the 
-past two weeks. I suppose that I could start working on the kernel .xz 
-decoder at some point in January 2009. I will post to linux-embedded 
-once I have some working code to show (hopefully in February).
-
--- 
-Lasse Collin  |  IRC: Larhzu @ IRCnet & Freenode
+SGksCgpJIGFtIHNlYXJjaGluZyBncmFwaGljcyBsaWJyYXJpZXMgdGhhdCBlbmFibGVzIGFuaW1h
+dGVkIGdyYXBoaWNzIG9uCmVtYmVkZGVkIGxpbnV4IHN5c3RlbXMuIEhlcmUgYXJlIHRoZSByZXF1
+aXJlbWVudHMgZm9yIHRoZSBncmFwaGljcwpsaWJyYXJ5OgoKKiBTaG91bGQgd29yayBvciBhYmxl
+IHRvIHdvcmsgd2l0aCBEaXJlY3RGQgoqIExpZ2h0d2VpZ2h0CiogRG9lc24ndCBjb25zdW1lIG1l
+bW9yeSBhbmQgY3B1IHBvd2VyIG11Y2gKClNvIGl0IGNhbiBiZSB0aG91Z2h0IHRoYXQgdGhlIGxp
+YnJhcnkgd2lsbCBiZSB1c2VkIGZvciBhIG1lZGlhIGNlbnRlcgp0eXBlIGFwcGxpY2F0aW9uLiBB
+dCB0aGF0IGFwcGxpY2F0aW9uIGkgd2FudCB0byBiZSBhYmxlIHRvIHdyaXRlIHNvbWUKYW5pbWF0
+aW9uIGVmZmVjdHMgZm9yIGV4IGZvciB0aGUgd2luZG93IHBhcnQgdGhhdCBzaG93cyB2aWRlbyBj
+b3ZlcnMKYW5kIHBhc3NpbmcgZnJvbSBvbmUgdG8gYW5vdGhlciB3aWxsIGJlIHdpdGggc29tZSBh
+bmltYXRpb24gb3IKcHJlc3NpbmcgYSBjbG9zZSBidXR0b24gd2lsbCBiZSB3aXRoIHNvbWUgYW5p
+bWF0aW9uIG9yIHdpbGwgY2F1c2UgdGhlCmN1cnJlbnQgd2luZG93IGNsb3NlZCB3aXRoIHNvbWUg
+YW5pbWF0aW9uLi4uCgpJIEdvb2dsZWQgYSBsaXR0bGUgYnV0IGkgd2FudCB0byBoZWFyIHNvbWUg
+ZXhwZXJpZW5jZXMgYWxzbywgaWYgYW55LgpUaGVyZSBhcmUgc29tZSBncmFwaGljcyBsaWJyYXJp
+ZXMgc3VnZ2VzdGVkIGZvciBlbWJlZGRlZCBlbnZpcm9ubWVudHMKbGlrZSBRdCBFbWJlZGRlZCBv
+ciBTREwuIEkgYW0gbm90IHN1cmUgd2hldGhlciB0aGV5IGFyZSBzdWl0YWJsZSBkb3IKc3VjaCBh
+cHBsaWNhdGlvbnMgb3Igd2hldGhlciB0aGV5IGFyZSBtZW1vcnkgZWZmaWNpZW50LgoKSSB3b3Vs
+ZCBsaWtlIHRvIGhlYXIgc29tZSBzdWdnZXN0aW9ucwoKVGhhbnguCgotLSAKT/B1eiBZYXL9bXRl
+cGUKd3d3Lmxvb3BiYWNraW5nLmluZm8K
