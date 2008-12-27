@@ -1,73 +1,174 @@
-From: "Gustavo Sverzut Barbieri" <barbieri@profusion.mobi>
-Subject: Re: [Celinux-dev] animated graphics on embedded linux systems
-Date: Thu, 25 Dec 2008 21:59:57 -0200
-Message-ID: <b1f2b8c40812251559v203d324fmdbf297a183751b74@mail.gmail.com>
-References: <20831c740812250614w5525f248kffd6a6a5151afec1@mail.gmail.com>
+From: "Jaya Kumar" <jayakumar.lkml@gmail.com>
+Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for batch set of pins
+Date: Sat, 27 Dec 2008 22:55:20 +0800
+Message-ID: <45a44e480812270655u10bde0d2mc7f429cf47ed7bc6@mail.gmail.com>
+References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com>
+	 <200811291454.17110.david-b@pacbell.net>
+	 <45a44e480811291552i77878bcdn5fe33f48fc4236eb@mail.gmail.com>
+	 <200811300955.30180.david-b@pacbell.net>
+	 <45a44e480811301710v78875425p75dedd850728cbec@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20831c740812250614w5525f248kffd6a6a5151afec1@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=ZsreqEIpoEYCTwrerIyWsO+b8NSccjyp3gm7mynbo0w=;
+        b=jpHL5EV2yM+lj9KiDK34sfPcxAgA6ziHNA/+W+draPagotyoEGq597Y3w9dN4sCYHw
+         JTnT9f/5nMH9Jsx6nRY4Y08pLGHA6G3NT54Gsrv4V6GGAk51elyyIhEneIu6q6sMQWKe
+         Q4AgjFyqrakLbfAa5SI5tW3KjnfVF3rSlqtkA=
+In-Reply-To: <45a44e480811301710v78875425p75dedd850728cbec@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Oguz Yarimtepe <comp.ogz@gmail.com>
-Cc: celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
+To: David Brownell <david-b@pacbell.net>
+Cc: Eric Miao <eric.y.miao@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-2008/12/25 Oguz Yarimtepe <comp.ogz@gmail.com>:
-> Hi,
+On Mon, Dec 1, 2008 at 9:10 AM, Jaya Kumar <jayakumar.lkml@gmail.com> wrote:
+> On Mon, Dec 1, 2008 at 1:55 AM, David Brownell <david-b@pacbell.net> wrote:
+>>
+>> They wouldn't want names so easily confused with the current set
+>> of GPIO calls, no.
+>>
 >
-> I am searching graphics libraries that enables animated graphics on
-> embedded linux systems. Here are the requirements for the graphics
-> library:
+> Okay, how does gpio_set/get_values_batch() sound?
 >
-> * Should work or able to work with DirectFB
-> * Lightweight
-> * Doesn't consume memory and cpu power much
+>>
+>>> >
+>>> > Then separately two more things:
+>>> >
+>>> >  - A gpio_* interface proposal for higher-level bitmask calls.
+>>> >   This is worth some discussion; the calls should clearly
+>>> >   be optional (not everything will implement them), and I
+>>> >   can't help but suspect <linux/bitmap.h> interfaces should
+>>> >   interoperate smoothly.
+>>
+>> ... including probably ganged request/free, and direction updates.
+>> When bitbanging a multiplexed parallel databus, you'll often need
+>> to change directions.
 >
-> So it can be thought that the library will be used for a media center
-> type application. At that application i want to be able to write some
-> animation effects for ex for the window part that shows video covers
-> and passing from one to another will be with some animation or
-> pressing a close button will be with some animation or will cause the
-> current window closed with some animation...
+> Okay, so I'll also add gpio_direction_output/input_batch and request/free_batch.
 >
-> I Googled a little but i want to hear some experiences also, if any.
-> There are some graphics libraries suggested for embedded environments
-> like Qt Embedded or SDL. I am not sure whether they are suitable dor
-> such applications or whether they are memory efficient.
+>>
+>>
+>>> >
+>>> >  - A gpiolib based implementation, using those new gpio_chip
+>>> >   methods as accelerators if they're present.  This should
+>>> >   probably also be optional, even at the Kconfig level; many
+>>> >   systems won't need to spend memory on these calls.
+>>>
+>>> Understood. I will make it optional. Does
+>>> CONFIG_GPIOLIB_MULTIBIT_ACCESS sound okay?
+>>
+>> Kind of verbose for my taste, and it's already "multibit" (one
+>> at a time, but still multiple) ... let's see some more mergeable
+>> proposals and code first.  Different C file too, I suspect.
+>
+> Ok, CONFIG_GPIOLIB_BATCH and I'll add this code in
+> drivers/gpio/gpiolib_batch.c. I hope I have understood that suggestion
+> correctly.
+>
+>>
+>>
+>>> > Don't assume gpiolib when defining the interface.
+>>>
+>>> Ok, I didn't understand this part. I think you mentioned a higher
+>>> level interface before but I didn't fully understand, if not gpiolib,
+>>> then at what level do you recommend?
+>>
+>> The gpio_*() interfaces are how system glue code and drivers
+>> access GPIOs, unless they roll their own chip-specific calls.
+>>
+>> Whereas gpiolib (and gpio_chip) are an *optional* framework
+>> for implementing those calls.  Platforms can (and do!) use
+>> other frameworks ... maybe they don't want to pay its costs,
+>> and don't need the various GPIO expander drivers.
+>>
+>> So to repeat:  don't assume the interface is implemented in
+>> one particular way (using gpiolib).  It has to make sense
+>> with other implementation strategies too.  Standard split
+>> between interface and implementation, that's all.  (Some folk
+>> have been heard to talk about "gpiolib" as the interface to
+>> drivers ... it's not, it's a provider-only interface library.)
+>>
+>
+> Okay, I read above several times and I read Documentation/gpio.txt.
+> But... I'm not confident I've understood your meanings above in terms
+> of how it should change the code. What I know so far is:
+>
+> a)
+> arch/arm/mach-pxa/include/mach/gpio.h is where the pxa GPIO api
+> interface is defined. So that's where I will put the
+> gpio_get/set_values_batch functions. This will match the existing
+> gpio_set/get_value code there.
+>
+> b)
+> arch/arm/mach-pxa/gpio.c is where the implementation is.
+> So I'll put the pxa_gpio_direction_input/output_batch and
+> pxa_gpio_set/get_batch there.
+>
+> c)
+> drivers/gpio/gpiolib_batch.c
+>
+> This is where I'd put the generic platform independent implementations
+> of __gpio_set/get_values_batch
+>
+> Does this sound consistent with your recommendation? If not, I need
+> more help to understand what changes you are recommending.
+>
+>
+>> Doesn't necessarily need to be *you* doing that, but if it only
+>> works on older gumstix boards it'd not be general enough.  Which
+>> is part of why I say to get the lowest level proposal out there
+>> first.  If done right, it'll be easy to support on other chips.
+>
+> Yes, I completely agree that it must work on a wide range of
+> architectures. But I don't understand what you mean when you say get
+> the lowest level proposal out there first. I see the RFC code that I
+> posted as being the lowest level proposal (albeit needing better name
+> and bitmask support) and one that is sufficiently general that it can
+> be implemented on other architectures. If it can't, can you help me
+> understand by pointing to which portion would break on other archs?
+>
 
+Oh, gosh darn it, how time has flown. My email above was to make sure
+I have understood the feedback. I assume I should just get started on
+implementing. Just to double check, the plan is:
+- add bitmask support.
+- add get_batch support
+- improve naming. I think gpio_get_batch/gpio_set_batch sounds good. I
+plan to have something like:
 
-I use and recommend Enlightenment Foundation Libraries (EFL,
-http://enlightenment.org), specially Evas (canvas) and Edje (theme,
-with animations and transitions). It is very lightweight and can use
-hardware acceleration when possible, with optimized (sse, mmx,
-altivec) C replacement.
+void gpio_set_batch(unsigned gpio, u32 values, u32 bitmask, int bitwidth);
+u32 gpio_get_batch(unsigned gpio, u32 bitmask, int bitwidth);
 
-I wrote DirectFB engine some time ago and Denis did a review of it.
-Denis said to make fully use of hardware acceleration for blits we
-need to change image allocation to hardware, then paint it with
-pixels, not hard to do, but I'm not doing it now... patches are
-welcome or you can consider hiring our company to do such work.
+I think I should explain the bitmask and bitwidth choice. The intended
+use case is:
+for (i=0; i < 800*600; i++) {
+ gpio_set_batch(...)
+}
 
-Compared to SDL, EFL offers much more primitives and thus can provide
-many optimizations, like occlusion culling and dirty area/movement.
-Compared to Qt 4.x, it provides a bit less canvas primitives (no
-vectors, for instance), but it provides Edje, a very helpful piece of
-EFL. Also, EFL is BSD with one piece in LGPL, while Qt is GPL or
-commercial.
+bitwidth (needed to iterate and map to chip ngpios) could be
+calculated from bitmask, but that involves iteratively counting bits
+from the mask, so we would have to do 800*600 bit counts. Unless, we
+do ugly things like cache the previous bitwidth/mask and compare
+against the current caller arguments. Given that the bitwidth would
+typically be a fixed value, I believe it is more intuitive for the
+caller to provide it, eg:
 
-You can find lots of information about EFL on my blog
-(http://blog.gustavobarbieri.com.br/) or company news
-(http://profusion.mobi/taxonomy/term/2). If you want to hire
-consulting, training or development, feel free to contact us.
+gpio_set_batch(DB0, value, 0xFFFF, 16)
 
-Regards,
+which has the nice performance benefit of skipping all the bit
+counting in the most common use case scenario.
 
--- 
-Gustavo Sverzut Barbieri
-http://profusion.mobi embedded systems
---------------------------------------
-MSN: barbieri@gmail.com
-Skype: gsbarbieri
-Mobile: +55 (19) 9225-2202
+While we are here, I was thinking about it, and its better if I give
+gpio_request/free/direction_batch a miss for now. Nothing prevents
+those features being added at a later point. That way I can focus on
+getting gpio_set/get_batch implemented correctly and merged as the
+first step.
+
+Thanks,
+jaya
