@@ -1,174 +1,144 @@
-From: "Jaya Kumar" <jayakumar.lkml@gmail.com>
+From: Robin Getz <rgetz@blackfin.uclinux.org>
 Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for batch set of pins
-Date: Sat, 27 Dec 2008 22:55:20 +0800
-Message-ID: <45a44e480812270655u10bde0d2mc7f429cf47ed7bc6@mail.gmail.com>
-References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com>
-	 <200811291454.17110.david-b@pacbell.net>
-	 <45a44e480811291552i77878bcdn5fe33f48fc4236eb@mail.gmail.com>
-	 <200811300955.30180.david-b@pacbell.net>
-	 <45a44e480811301710v78875425p75dedd850728cbec@mail.gmail.com>
+Date: Sun, 28 Dec 2008 13:46:56 -0500
+Message-ID: <200812281346.56703.rgetz@blackfin.uclinux.org>
+References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com> <45a44e480811301710v78875425p75dedd850728cbec@mail.gmail.com> <45a44e480812270655u10bde0d2mc7f429cf47ed7bc6@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=ZsreqEIpoEYCTwrerIyWsO+b8NSccjyp3gm7mynbo0w=;
-        b=jpHL5EV2yM+lj9KiDK34sfPcxAgA6ziHNA/+W+draPagotyoEGq597Y3w9dN4sCYHw
-         JTnT9f/5nMH9Jsx6nRY4Y08pLGHA6G3NT54Gsrv4V6GGAk51elyyIhEneIu6q6sMQWKe
-         Q4AgjFyqrakLbfAa5SI5tW3KjnfVF3rSlqtkA=
-In-Reply-To: <45a44e480811301710v78875425p75dedd850728cbec@mail.gmail.com>
+In-Reply-To: <45a44e480812270655u10bde0d2mc7f429cf47ed7bc6@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Brownell <david-b@pacbell.net>
-Cc: Eric Miao <eric.y.miao@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Jaya Kumar <jayakumar.lkml@gmail.com>
+Cc: David Brownell <david-b@pacbell.net>, Eric Miao <eric.y.miao@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Mon, Dec 1, 2008 at 9:10 AM, Jaya Kumar <jayakumar.lkml@gmail.com> wrote:
-> On Mon, Dec 1, 2008 at 1:55 AM, David Brownell <david-b@pacbell.net> wrote:
->>
->> They wouldn't want names so easily confused with the current set
->> of GPIO calls, no.
->>
->
-> Okay, how does gpio_set/get_values_batch() sound?
->
->>
->>> >
->>> > Then separately two more things:
->>> >
->>> >  - A gpio_* interface proposal for higher-level bitmask calls.
->>> >   This is worth some discussion; the calls should clearly
->>> >   be optional (not everything will implement them), and I
->>> >   can't help but suspect <linux/bitmap.h> interfaces should
->>> >   interoperate smoothly.
->>
->> ... including probably ganged request/free, and direction updates.
->> When bitbanging a multiplexed parallel databus, you'll often need
->> to change directions.
->
-> Okay, so I'll also add gpio_direction_output/input_batch and request/free_batch.
->
->>
->>
->>> >
->>> >  - A gpiolib based implementation, using those new gpio_chip
->>> >   methods as accelerators if they're present.  This should
->>> >   probably also be optional, even at the Kconfig level; many
->>> >   systems won't need to spend memory on these calls.
->>>
->>> Understood. I will make it optional. Does
->>> CONFIG_GPIOLIB_MULTIBIT_ACCESS sound okay?
->>
->> Kind of verbose for my taste, and it's already "multibit" (one
->> at a time, but still multiple) ... let's see some more mergeable
->> proposals and code first.  Different C file too, I suspect.
->
-> Ok, CONFIG_GPIOLIB_BATCH and I'll add this code in
-> drivers/gpio/gpiolib_batch.c. I hope I have understood that suggestion
-> correctly.
->
->>
->>
->>> > Don't assume gpiolib when defining the interface.
->>>
->>> Ok, I didn't understand this part. I think you mentioned a higher
->>> level interface before but I didn't fully understand, if not gpiolib,
->>> then at what level do you recommend?
->>
->> The gpio_*() interfaces are how system glue code and drivers
->> access GPIOs, unless they roll their own chip-specific calls.
->>
->> Whereas gpiolib (and gpio_chip) are an *optional* framework
->> for implementing those calls.  Platforms can (and do!) use
->> other frameworks ... maybe they don't want to pay its costs,
->> and don't need the various GPIO expander drivers.
->>
->> So to repeat:  don't assume the interface is implemented in
->> one particular way (using gpiolib).  It has to make sense
->> with other implementation strategies too.  Standard split
->> between interface and implementation, that's all.  (Some folk
->> have been heard to talk about "gpiolib" as the interface to
->> drivers ... it's not, it's a provider-only interface library.)
->>
->
-> Okay, I read above several times and I read Documentation/gpio.txt.
-> But... I'm not confident I've understood your meanings above in terms
-> of how it should change the code. What I know so far is:
->
-> a)
-> arch/arm/mach-pxa/include/mach/gpio.h is where the pxa GPIO api
-> interface is defined. So that's where I will put the
-> gpio_get/set_values_batch functions. This will match the existing
-> gpio_set/get_value code there.
->
-> b)
-> arch/arm/mach-pxa/gpio.c is where the implementation is.
-> So I'll put the pxa_gpio_direction_input/output_batch and
-> pxa_gpio_set/get_batch there.
->
-> c)
-> drivers/gpio/gpiolib_batch.c
->
-> This is where I'd put the generic platform independent implementations
-> of __gpio_set/get_values_batch
->
-> Does this sound consistent with your recommendation? If not, I need
-> more help to understand what changes you are recommending.
->
->
->> Doesn't necessarily need to be *you* doing that, but if it only
->> works on older gumstix boards it'd not be general enough.  Which
->> is part of why I say to get the lowest level proposal out there
->> first.  If done right, it'll be easy to support on other chips.
->
-> Yes, I completely agree that it must work on a wide range of
-> architectures. But I don't understand what you mean when you say get
-> the lowest level proposal out there first. I see the RFC code that I
-> posted as being the lowest level proposal (albeit needing better name
-> and bitmask support) and one that is sufficiently general that it can
-> be implemented on other architectures. If it can't, can you help me
-> understand by pointing to which portion would break on other archs?
->
+On Sat 27 Dec 2008 09:55, Jaya Kumar pondered:
+> Oh, gosh darn it, how time has flown. My email above was to make sure
+> I have understood the feedback. I assume I should just get started on
+> implementing. Just to double check, the plan is:
+> - add bitmask support.
+> - add get_batch support
+> - improve naming. I think gpio_get_batch/gpio_set_batch sounds good.
 
-Oh, gosh darn it, how time has flown. My email above was to make sure
-I have understood the feedback. I assume I should just get started on
-implementing. Just to double check, the plan is:
-- add bitmask support.
-- add get_batch support
-- improve naming. I think gpio_get_batch/gpio_set_batch sounds good. I
-plan to have something like:
+for what it is worth - I don't like 'batch'.
 
-void gpio_set_batch(unsigned gpio, u32 values, u32 bitmask, int bitwidth);
-u32 gpio_get_batch(unsigned gpio, u32 bitmask, int bitwidth);
+According to wikipedia[1] - in computer science, batch typically refers to:
+  * Batch (Unix), a command to queue jobs for later execution
+  * Batch file, in DOS, OS/2, and Microsoft Windows, a text file containing
+    a series of commands intended to be executed
+  * Batch processing, execution of a series of programs on a computer 
+    without human interaction
+  * Batch renaming, the process of renaming multiple computer files 
+    and folders in an automated fashion
 
-I think I should explain the bitmask and bitwidth choice. The intended
-use case is:
-for (i=0; i < 800*600; i++) {
- gpio_set_batch(...)
-}
+None of these are really what you are talking about. Batch normally only 
+refers to a group when taking about baking - A batch of cookies - at least 
+where I grew up....
 
-bitwidth (needed to iterate and map to chip ngpios) could be
-calculated from bitmask, but that involves iteratively counting bits
-from the mask, so we would have to do 800*600 bit counts. Unless, we
-do ugly things like cache the previous bitwidth/mask and compare
-against the current caller arguments. Given that the bitwidth would
-typically be a fixed value, I believe it is more intuitive for the
-caller to provide it, eg:
+I think that I would prefer 'group' or 'collection' to use some of the words 
+that David described things as 'ganged' or 'bus' or 'bank' or 'adjacent'. 
+(but I think 'adjacent' or 'bank' really is an implementation convention).
 
-gpio_set_batch(DB0, value, 0xFFFF, 16)
+I think I would also prefer to name things like gpio_bus_* as a rather than 
+gpio_*_bus - so the operation always is on the end...
 
-which has the nice performance benefit of skipping all the bit
-counting in the most common use case scenario.
+> I 
+> plan to have something like:
+> 
+> void gpio_set_batch(unsigned gpio, u32 values, u32 bitmask, int bitwidth);
 
-While we are here, I was thinking about it, and its better if I give
-gpio_request/free/direction_batch a miss for now. Nothing prevents
-those features being added at a later point. That way I can focus on
-getting gpio_set/get_batch implemented correctly and merged as the
-first step.
+Shouldn't the write return an error code (if the data was not written)?
 
-Thanks,
-jaya
+> u32 gpio_get_batch(unsigned gpio, u32 bitmask, int bitwidth);
+
+Both assume specific SoC and board level impmentation details (which I ask 
+below).
+
+> I think I should explain the bitmask and bitwidth choice. The intended
+> use case is:
+> for (i=0; i < 800*600; i++) {
+>  gpio_set_batch(...)
+> }
+> 
+> bitwidth (needed to iterate and map to chip ngpios) could be
+> calculated from bitmask, but that involves iteratively counting bits
+> from the mask, so we would have to do 800*600 bit counts. Unless, we
+> do ugly things like cache the previous bitwidth/mask and compare
+> against the current caller arguments. Given that the bitwidth would
+> typically be a fixed value, I believe it is more intuitive for the
+> caller to provide it, eg:
+> 
+> gpio_set_batch(DB0, value, 0xFFFF, 16)
+> 
+> which has the nice performance benefit of skipping all the bit
+> counting in the most common use case scenario.
+
+but has the requirement that the driver know exactly the board level 
+impmentation details (something that doesn't sound generic).
+
+> While we are here, I was thinking about it, and its better if I give
+> gpio_request/free/direction_batch a miss for now. Nothing prevents
+> those features being added at a later point.
+
+I don't think that request/free are optional.
+
+For example - in most SoC implementations - gpios are implemented as banks of 
+16 or 32. (a 16 or 32 bit register).
+
+Are there facilities to span these registers? 
+ - can you request 64 gpios as a 'bank'?
+ - can you request gpio_8 -> gpio_40 as a 'bank' on a 32-bit system?
+
+Are non-adjacent/non-contiguous gpios avaliable to be put into 
+a 'bank/batch/bus'? can you use gpio_8 -> 11 &  28 -> 31 as a 8-bit 'bus'? 
+
+How do you know what is avaliable to be talked to as a bank/bus/batch without 
+the request/free operation?
+
+
+I have seen various hardware designs (both at the PCB and SoC level) require 
+all of these options, and would like to see common infrastructure which 
+handles this.
+
+The issue is that on many SoC implementations - dedicated peripherals can also 
+be GPIOs - so it someone wants to use SPI (for example) GPIO's 3->7 might be 
+removed from the avaliable 'gpio' resources. This is determined by the 
+silicon designer - and even the PCB designer has little to no flexibility on 
+this. It gets worse as multiple SPI or I2C are used on the PCB (which can 
+have lots of small (less than 5) dedicated pins in the middle of the larger 
+gpio resources)....
+
+I would think that a 'bank' / 'bus' (whatever) would be a collection of 
+random/multiple GPIOs (a struct of gpio_port_t) rather than a start/length 
+(as you described) - or better yet - the request function takes a list (of 
+individual GPIO's - defined in the platform data), and creates the struct 
+itself.
+
+Something like the way gpio_keys are defined...
+
+static struct gpio_bus bfin_gpio_bus_table[] = {
+        {BIT_0, GPIO_PB8, 1, "gpio-bus: BIT0"},
+        {BIT_1, GPIO_PB9, 1, "gpio-bus: BIT1"},
+        {BIT_2, GPIO_PB10, 1, "gpio-bus: BIT2"},
+        {BIT_3, GPIO_PB11, 1, "gpio-bus: BIT3"},
+};
+
+static struct gpio_bus_data bfin_gpio_bus_data = {
+        .bits        = bfin_gpio_bus_table, 
+        .width       = ARRAY_SIZE(bfin_gpio_keys_table),
+};
+
+static struct platform_device bfin_device_gpiobus = {
+        .name      = "gpio-bus",
+        .dev = {
+                .platform_data = &bfin_gpio_bus_data,
+        },
+};
+
+The request function builds up the bus/masks/shifts from that...
+
+-Robin
+
+[1] http://en.wikipedia.org/wiki/Batch
