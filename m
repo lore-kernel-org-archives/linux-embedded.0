@@ -1,43 +1,38 @@
-From: David Brownell <david-b@pacbell.net>
+From: Jamie Lokier <jamie@shareable.org>
 Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for batch set of pins
-Date: Mon, 29 Dec 2008 12:32:08 -0800
-Message-ID: <200812291232.09174.david-b@pacbell.net>
-References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com> <1230501634.16910.57.camel@linux-51e8.site> <45a44e480812281628j214a9efvd19e4647fe30582c@mail.gmail.com>
+Date: Tue, 30 Dec 2008 00:20:23 +0000
+Message-ID: <20081230002023.GA5309@shareable.org>
+References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com> <45a44e480812270655u10bde0d2mc7f429cf47ed7bc6@mail.gmail.com> <200812281346.56703.rgetz@blackfin.uclinux.org> <200812291156.12230.david-b@pacbell.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <45a44e480812281628j214a9efvd19e4647fe30582c@mail.gmail.com>
 Content-Disposition: inline
+In-Reply-To: <200812291156.12230.david-b@pacbell.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Jaya Kumar <jayakumar.lkml@gmail.com>
-Cc: Ben Nizette <bn@niasdigital.com>, Robin Getz <rgetz@blackfin.uclinux.org>, Eric Miao <eric.y.miao@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: David Brownell <david-b@pacbell.net>
+Cc: Robin Getz <rgetz@blackfin.uclinux.org>, Jaya Kumar <jayakumar.lkml@gmail.com>, Eric Miao <eric.y.miao@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Sunday 28 December 2008, Jaya Kumar wrote:
-> I'd like to get the start/length approach out there and in-play to
-> find out if other people want to use it and how they end up using it.
+David Brownell wrote:
+> The reason single-bit operations don't provide error paths is twofold.
+> First, they started as wrappers for can't-fail register accessors.
+> Second, it's extremely unrealisitic to expect much code to handle any
+> kind of faults in the middle of bitbanging loops ... or even just in
+> classic "set this bit and continue" configuration code.
 
-As an *implementation* constraint, I might agree ... so
-long as it's easily changed later.
+That's interesting.  I'm not sure it's a good idea not to return an
+error code.  The caller can just ignore it if they don't care, and
+it's extremely cheap to "return 0" in GPIO drivers which can't error.
 
-As an *interface* constraint, I don't ... interfaces are
-rarely easy to change.
+If I were bit-banging on GPIOs reached via some peripheral chip (such
+a GPIO-fanout chip over I2C/SPI, where that chip is itself feeding a
+secondary I2C or similar bit-banging bus), I probably would like to
+check for errors and take emergency action if the peripheral chip
+isn't responding, or just report to userspace.
 
-However, in terms of implementation, most gpio chips have
-primitives that work in terms of bitmasks rather than any
-kind of start/length primitive.  Example:
+This has actually happened on a board I worked with, where the primary
+I2C failed due to a plugged in peripheral loading it too much, and a
+secondary bit-banging bus was not then reachable.
 
- - To set bits in "u32 mask":
-	iowrite32(mask, bank_base + SET_REG)
- - To clear bits in "u32 mask"
-	iowrite32(mask, bank_base + CLR_REG)
- - To read bits in "u32 mask",
-	return mask & ioread32(bank_base + VALUE_REG)
-
-In short, start/length looks most like a policy, of the
-"keep them out of interfaces!" flavor, than something
-appropriate for an interface.  As noted above, gpio_chip
-interfaces would more naturally use masks.
-
-- Dave
+-- Jamie
