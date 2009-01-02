@@ -1,212 +1,183 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with kernel/timeconst.sh
-Date: Fri, 2 Jan 2009 06:00:47 -0600
-Message-ID: <200901020600.47847.rob@landley.net>
-References: <200901020207.30359.rob@landley.net> <200901020213.30658.rob@landley.net> <20090102090439.GA3057@uranus.ravnborg.org>
-Mime-Version: 1.0
+From: Mark Miller <mark@mirell.org>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Fri, 2 Jan 2009 06:11:37 -0600
+Message-ID: <B33CBA13-D2A7-44D1-89C8-47178064A3A7@mirell.org>
+References: <200901020207.30359.rob@landley.net> <20090102095023.GA28078@linux-sh.org> <2D4EECE3-784E-4853-BF6E-B0915C15EC02@mirell.org> <20090102105742.GB28078@linux-sh.org>
+Mime-Version: 1.0 (Apple Message framework v930.3)
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090102090439.GA3057@uranus.ravnborg.org>
-Content-Disposition: inline
+In-Reply-To: <20090102105742.GB28078@linux-sh.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: Rob Landley <rob@landley.net>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
 
-On Friday 02 January 2009 03:04:39 Sam Ravnborg wrote:
-> Hi Rob.
+On Jan 2, 2009, at 4:57 AM, Paul Mundt wrote:
+
+> On Fri, Jan 02, 2009 at 04:32:42AM -0600, Mark Miller wrote:
+>> On Jan 2, 2009, at 3:50 AM, Paul Mundt wrote:
+>>> Misguided rhetoric aside, what does this actually accomplish? If  
+>>> folks
+>>> add meaningful tools in to the kernel that require python, and it is
+>>> generally regarded as being fairly ubiquitous, I can't imagine there
+>>> being any substantiated objections against it.
+>>
+>> And if the said meaningful tools introduce complex dependencies, then
+>> there should be an open discussion as to why exactly we need those
+>> tools as opposed to a simpler implementation.
+>>
+> Complex is relative, something that is fairly ubiquitious can hardly  
+> be
+> labelled as complex, regardless of whether historically people have  
+> had
+> issues with that dependency in certain spaces. In any event,  
+> simplifying
+> things is always good, but this open discussion thing is pure fancy,
+> since when was the kernel a democracy?
+
+I'm ignoring the bait.
+
+>>> Your main reasons against inclusion of perl seem to be that there is
+>>> no realistic expectation for target systems that will be self- 
+>>> hosting
+>>> will have perl included, or the inherent complexity in maintaining a
+>>> coherent cross compiling environment. Both of these things are  
+>>> issues
+>>> with your own environment, and in no way are these representative of
+>>> the  embedded development community at large.
+>>
+>> I feel that if you attempted to look for discussions on "cross-
+>> compiling perl", you will meet with a variety of complaints on what a
+>> nightmare it is to do so in a sandboxed environment.
+>>
+> I've had to deal with cross compiling perl for over a decade, in all  
+> of
+> its various forms, in all manner of embedded applications, so please  
+> tell
+> someone who cares.
+
+Ignoring this as well.
+
+> There are various options around this headache today,
+> as there have been for ages (though the options these days are rather
+> less painful), and if you felt like attempting to look for  
+> discussions on
+> those rather than trying to push this silly matter perhaps you might  
+> come
+> up with something.
+
+And ignoring this too.
+
+> The key thing you hit on is that there are a variety of complaints,  
+> and
+> that is all they have ever been. If your system is so constrained, you
+> shouldn't be doing builds on it in the first place. You certainly  
+> won't
+> be able to build anything in your crippled environment outside of some
+> simple applications anyways, this isn't a valid technical reason for
+> keeping the kernel a policy stranglehold.
+
+I merely don't like seeing another dependency added when there's no  
+logical reason to do it, other than "why not". And there have been  
+reasons given for the "not". Your reply, seems merely to be, "Because."
+
+
+>>> Now with that out of the way, this entire series fundamentally fails
+>>> to convert half of the perl scripts shipped with the kernel today,
+>>> some that are required for build depending on Kconfig options,
+>>
+> [snip]
 >
-> On Fri, Jan 02, 2009 at 02:13:30AM -0600, Rob Landley wrote:
-> > From: Rob Landley <rob@landley.net>
-> >
-> > Replace kernel/timeconst.pl with kernel/timeconst.sh.  The new shell
-> > script is much simpler, about 1/4 the size, and runs on Red Hat 9 from
-> > 2003.
+>> From what I can tell, it allows one to fully build the Linux kernel
+>> without Perl.
 >
-> This part of the changelog is OK except that is fails to
-> address why we want to get away from perl.
+> Wrong, re-read what I said and try again.
 
-You mean "The new shell script is much simpler, about 1/4 the size, runs on 
-Red Hat 9 from 2003, and isn't perl?" :)
+I have done so. And I restate, without these patches, Perl is required  
+*for any install*. Your logic seems to be, if Perl is required for any  
+part of doing something with the Linux kernel, then there is no reason  
+it should not be allowed in all parts.
 
-> Please drop the remining part of the changelog (but not the s-o-b).
+With this logic, soon the Linux kernel will require so many  
+dependencies, that even a minimal system to rebuild itself under  
+itself will comprise 200MB for stripped binaries. Right now, it's down  
+to about 20ish.
 
-ok.
+With that, you also require more expertise in maintaing these variety  
+of tools. You have given no logical reason on why we need to add more  
+complexity to the kernel, when previous tools have managed to deal  
+with this task for over ten years without requiring Perl.
 
-> > Peter Anvin added this perl to 2.6.25.  Before that, the kernel had never
-> > required perl to build.
-> >
-> > Signed-off-by: Rob Landley <rob@landley.net>
-> > ---
-> >
-> >  kernel/Makefile     |    4
-> >  kernel/timeconst.pl |  378 ------------------------------------------
-> >  kernel/timeconst.sh |   91 ++++++++++
-> >  3 files changed, 93 insertions(+), 380 deletions(-)
-> >
-> > diff -r d0c7611dcfd6 kernel/Makefile
-> > --- a/kernel/Makefile	Tue Dec 30 17:48:25 2008 -0800
-> > +++ b/kernel/Makefile	Fri Jan 02 00:10:44 2009 -0600
-> > @@ -115,7 +115,7 @@
-> >  $(obj)/time.o: $(obj)/timeconst.h
-> >
-> >  quiet_cmd_timeconst  = TIMEC   $@
-> > -      cmd_timeconst  = $(PERL) $< $(CONFIG_HZ) > $@
-> > +      cmd_timeconst  = $(CONFIG_SHELL) $< $(CONFIG_HZ) > $@
-> >  targets += timeconst.h
-> > -$(obj)/timeconst.h: $(src)/timeconst.pl FORCE
-> > +$(obj)/timeconst.h: $(src)/timeconst.sh FORCE
-> >  	$(call if_changed,timeconst)
+>>> Ignoring the compile-time dependencies that you overlooked, what you
+>>> define as "development and debugging" scripts are still an integral
+>>> part of the system, unless you are trying to argue that embedded
+>>> developers have no interest in things like checkstack due to the
+>>> trouble of trying to get perl built.
+>>
+>> Do I need that to compile a kernel? No.
+>>
+> Compile-time dependencies you do, yes.
 >
-> OK
+>> Perl was not required to build the Linux kernel. Now it is. It adds
+>> another dependency to the Linux kernel. Requiring bash is far less a
+>> dependency that Perl is.
+>>
+> Perhaps so, but that is largely irrelevant. Moving off of the bash
+> dependency is a lot more trivial than moving off of the perl one. The
+> kernel bashisms are fairly marginal, and if someone were to do the leg
+> work for that, it might even be accepted. Getting rid of perl is an
+> uphill battle for no visible gain. People will continue to write and  
+> add
+> scripts both in bash and perl on a routine basis regardless.
 >
-> > --- /dev/null	1969-12-31 00:00:00.000000000 -0600
-> > +++ hg/kernel/timeconst.sh	2009-01-01 23:53:17.000000000 -0600
-> > @@ -0,0 +1,91 @@
-> > +#!/bin/bash
-> > +
-> > +if [ $# -ne 1 ]
-> > +then
-> > +	echo "Usage: timeconst.sh HZ"
-> > +	exit 1
-> > +fi
+>>> The kernel is and always has been about using the right tool for the
+>>> job, not a matter of dictating what tools you must use in order to
+>>> accomplish a task you are interested in. Common sense does apply  
+>>> here
+>>> though, so this might be a more daunting task for some than others.
+>>
+>> How is Perl a better tool for the job than what currently bash and
+>> other standard utilities already offer?
+>>
+> How is bash a better tool for than job than what sed and posix shell
+> already offer? Yes, we can reduce our dependencies to the bare  
+> minimum,
+> but that is not constructive for the folks that are actually writing  
+> the
+> scripts in the first place.
 >
-> That usage is useless. Either extend it or spend a few lines
-> in the shell script explainign what the shell script is supposed to do.
+> Likewise, this is not even a real problem in the embedded developer
+> demographic, the only place this is a problem is in specially stripped
+> distributions or people that don't want to go through the pain of  
+> cross
+> compiling perl. None of which is of any concern.
 
-Do you mean something more like:
+Yet again, you have a habit of writing off a large segment of the  
+embedded development population that you seem to think doesn't exist.
 
-echo "Usage: timeconst.sh HZ"
-echo
-echo "Generates a header file of constants for converting between decimal"
-echo "HZ timer ticks and milisecond or microsecond delays"
+> If people are going to write useful things that are reasonably  
+> expected
+> to be standard on build machines, there is no reason to restrict what
+> tools they are permitted to use.
 
-I'm happy turning it into a comment instead, I just found a quick check that 
-I'd remembered to type an argument useful during debugging. :)
+> If you have a personal vendetta against
+> something that is fairly standard, that is entirely your own personal
+> problem, you can choose to deal with it or patch out of tree for  
+> your own
+> crippled environment (assuming patch isn't too much of an obscure
+> dependency).
 
-> > +
-> > +HZ=$1
-> > +
-> > +# Sanity test: even the shell in Red Hat 9 (circa 2003) supported 64 bit
-> > math. +
-> > +[ $((1<<32)) -lt 0 ] && exit 1
-> > +
->
-> If it fails then add an error message explaining why. So if we get reports
-> that this fails then we at least can see something like:
-> "timeconst noticed that the shell did not support 64 bit math - stop"
+Last I checked, patch was a part of busybox. Or is that yet another  
+realm of embedded development that you are casting off into the depths  
+of nowhere?
 
-Ok.
+Honestly, it seems you have a personal vendetta against those not  
+wanting to add another dependency.
 
-> > +# Output start of header file
-> > +
-> > +cat << EOF
-> > +/* Automatically generated by kernel/timeconst.sh */
-> > +/* Conversion constants for HZ == $HZ */
-> > +
-> > +#ifndef KERNEL_TIMECONST_H
-> > +#define KERNEL_TIMECONST_H
->
-> Please use __KERNEL_TIMECONST_H. The two underscores are standard.
+--
+Mark Miller
+mark@mirell.org
 
-Sure thing.  (I was just copying the perl there, I'll post an updated patch 
-after I get some sleep.)
 
-> > +
-> > +#include <linux/param.h>
-> > +#include <linux/types.h>
-> > +
-> > +#if HZ != $HZ
-> > +#error "kernel/timeconst.h has the wrong HZ value!"
-> > +#endif
-> > +
-> > +EOF
-> > +
-> > +# For both Miliseconds and Microseconds
-> > +
-> > +for i in "MSEC 1000" "USEC 1000000"
-> > +do
-> > +	NAME=$(echo $i | awk '{print $1}')
-> > +	PERIOD=$(echo $i | awk '{print $2}')
-> > +
-> > +	# Find greatest common denominator (using Euclid's algorithm)
-> > +
-> > +	A=$HZ
-> > +	B=$PERIOD
-> > +
-> > +	while [ $B -ne 0 ]
-> > +	do
-> > +		C=$(($A%$B))
-> > +		A=$B
-> > +		B=$C
-> > +	done
-> > +
-> > +	GCD=$A
-> > +
-> > +	# Do this for each direction (HZ_TO_PERIOD and PERIOD_TO_HZ)
-> > +
-> > +	for DIRECTION in 0 1
-> > +	do
-> > +		if [ $DIRECTION -eq 0 ]
-> > +		then
-> > +			CONVERT="HZ_TO_${NAME}"
-> > +			FROM=$HZ
-> > +			TO=$PERIOD
-> > +		else
-> > +			CONVERT="${NAME}_TO_HZ"
-> > +			FROM=$PERIOD
-> > +			TO=$HZ
-> > +		fi
-> > +
-> > +		# How many shift bits give 32 bits of significant data?
-> > +
-> > +		SHIFT=0
-> > +		while [ $(( (($TO<<$SHIFT)+$FROM-1)/$FROM )) -lt $((1<<31)) ]
-> > +		do
-> > +			SHIFT=$(( $SHIFT+1 ))
-> > +		done
-> > +
-> > +		MUL32=$(( (($TO<<$SHIFT)+$FROM-1)/$FROM ))
-> > +		MUL32=$(printf %x $MUL32)
-> > +		echo "#define ${CONVERT}_MUL32	U64_C(0x$MUL32)"
-> > +		ADJ32=$(($FROM/$GCD))
-> > +		ADJ32=$(( (($ADJ32-1)<<$SHIFT)/$ADJ32 ))
-> > +		ADJ32=$(printf %x $ADJ32)
-> > +		echo "#define ${CONVERT}_ADJ32	U64_C(0x$ADJ32)"
-> > +		echo "#define ${CONVERT}_SHR32	$SHIFT"
-> > +		echo "#define ${CONVERT}_NUM		U64_C($(($TO/$GCD)))"
-> > +		echo "#define ${CONVERT}_DEN		U64_C($(($FROM/$GCD)))"
-> > +	done
-> > +done
->
-> Is it a shell limitation that all spaces around operators are missing?
-> Makes it hard to read..
 
-No, I was just trying to make sure I didn't go over the 80 char limit.  
-(Several temporary variables are there primarily because the style guide says 
-indentation should be via 8 space tabs.)
-
-I'll add some more spaces on the respin.
-
->
-> You should use trap in your shell script so we do not end up with a
-> partially generated file.
-> Or you should change the rule in the Makefile to use
-> a temperary file and then rename it.
->
-> We have similar bugs in other places - but no need to add
-> in more places.
-
-Well, preserve in this case. :)
-
-I can add an "EXIT" trap and then disarm it later, but the output is 
-redirected in the makefile, so generating an error won't remove the output if 
-you run again.  Perhaps the file to create should be fed in as a second 
-argument to the script, so the trap can "rm" the output file if it triggers?
-
-I'll poke at it in the morning.
-
-Thanks for the feedback,
-
-Rob
