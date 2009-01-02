@@ -1,74 +1,171 @@
-From: Rob Landley <rob@landley.net>
-Subject: [PATCH 3/3]: Convert mkcapflags.pl to mkcapflags.sh
-Date: Fri, 2 Jan 2009 02:15:36 -0600
-Message-ID: <200901020215.37223.rob@landley.net>
-References: <200901020207.30359.rob@landley.net>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with kernel/timeconst.sh
+Date: Fri, 2 Jan 2009 10:04:39 +0100
+Message-ID: <20090102090439.GA3057@uranus.ravnborg.org>
+References: <200901020207.30359.rob@landley.net> <200901020213.30658.rob@landley.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756270AbZABIPz@vger.kernel.org>
-In-Reply-To: <200901020207.30359.rob@landley.net>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <200901020213.30658.rob@landley.net>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
-Cc: linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+Content-Transfer-Encoding: 7bit
+To: Rob Landley <rob@landley.net>
+Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
 
-RnJvbTogUm9iIExhbmRsZXkgPHJvYkBsYW5kbGV5Lm5ldD4KCkNvbnZlcnQga2VybmVsL2NwdS9t
-a2NhcGZsYWdzLnBsIHRvIGtlcm5lbC9jcHUvbWtjYXBmbGFncy5zaC4KClRoaXMgc2NyaXB0IGdl
-bmVyYXRlcyBrZXJuZWwvY3B1L2NhcGZsYWdzLmMgZnJvbSBpbmNsdWRlL2FzbS9jcHVmZWF0dXJl
-LmguCgpQZXRlciBBbnZpbiBhZGRlZCB0aGlzIHBlcmwgdG8gMi42LjI4LgoKU2lnbmVkLW9mZi1i
-eTogUm9iIExhbmRsZXkgPHJvYkBsYW5kbGV5Lm5ldD4KLS0tCgogYXJjaC94ODYva2VybmVsL2Nw
-dS9NYWtlZmlsZSAgICAgIHwgICAgNCArLS0KIGFyY2gveDg2L2tlcm5lbC9jcHUvbWtjYXBmbGFn
-cy5wbCB8ICAgMzIgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogYXJjaC94ODYva2VybmVs
-L2NwdS9ta2NhcGZsYWdzLnNoIHwgICAyOCArKysrKysrKysrKysrKysrKysrKysrKysKIDMgZmls
-ZXMgY2hhbmdlZCwgMzAgaW5zZXJ0aW9ucygrKSwgMzQgZGVsZXRpb25zKC0pCgpkaWZmIC1ydU4g
-YWx0LWxpbnV4L2FyY2gveDg2L2tlcm5lbC9jcHUvTWFrZWZpbGUgYWx0LWxpbnV4Mi9hcmNoL3g4
-Ni9rZXJuZWwvY3B1L01ha2VmaWxlCi0tLSBhbHQtbGludXgvYXJjaC94ODYva2VybmVsL2NwdS9N
-YWtlZmlsZQkyMDA4LTEyLTI0IDE3OjI2OjM3LjAwMDAwMDAwMCAtMDYwMAorKysgYWx0LWxpbnV4
-Mi9hcmNoL3g4Ni9rZXJuZWwvY3B1L01ha2VmaWxlCTIwMDgtMTItMjggMTg6MTA6NTEuMDAwMDAw
-MDAwIC0wNjAwCkBAIC0yMywxMCArMjMsMTAgQEAKIG9iai0kKENPTkZJR19YODZfTE9DQUxfQVBJ
-QykgKz0gcGVyZmN0ci13YXRjaGRvZy5vCiAKIHF1aWV0X2NtZF9ta2NhcGZsYWdzID0gTUtDQVAg
-ICAkQAotICAgICAgY21kX21rY2FwZmxhZ3MgPSAkKFBFUkwpICQoc3JjdHJlZSkvJChzcmMpL21r
-Y2FwZmxhZ3MucGwgJDwgJEAKKyAgICAgIGNtZF9ta2NhcGZsYWdzID0gJChDT05GSUdfU0hFTEwp
-ICQoc3JjdHJlZSkvJChzcmMpL21rY2FwZmxhZ3Muc2ggJDwgJEAKIAogY3B1ZmVhdHVyZSA9ICQo
-c3JjKS8uLi8uLi9pbmNsdWRlL2FzbS9jcHVmZWF0dXJlLmgKIAogdGFyZ2V0cyArPSBjYXBmbGFn
-cy5jCi0kKG9iaikvY2FwZmxhZ3MuYzogJChjcHVmZWF0dXJlKSAkKHNyYykvbWtjYXBmbGFncy5w
-bCBGT1JDRQorJChvYmopL2NhcGZsYWdzLmM6ICQoY3B1ZmVhdHVyZSkgJChzcmMpL21rY2FwZmxh
-Z3Muc2ggRk9SQ0UKIAkkKGNhbGwgaWZfY2hhbmdlZCxta2NhcGZsYWdzKQpkaWZmIC1ydU4gYWx0
-LWxpbnV4L2FyY2gveDg2L2tlcm5lbC9jcHUvbWtjYXBmbGFncy5wbCBhbHQtbGludXgyL2FyY2gv
-eDg2L2tlcm5lbC9jcHUvbWtjYXBmbGFncy5wbAotLS0gYWx0LWxpbnV4L2FyY2gveDg2L2tlcm5l
-bC9jcHUvbWtjYXBmbGFncy5wbAkyMDA4LTEyLTI0IDE3OjI2OjM3LjAwMDAwMDAwMCAtMDYwMAor
-KysgYWx0LWxpbnV4Mi9hcmNoL3g4Ni9rZXJuZWwvY3B1L21rY2FwZmxhZ3MucGwJMTk2OS0xMi0z
-MSAxODowMDowMC4wMDAwMDAwMDAgLTA2MDAKQEAgLTEsMzIgKzAsMCBAQAotIyEvdXNyL2Jpbi9w
-ZXJsCi0jCi0jIEdlbmVyYXRlIHRoZSB4ODZfY2FwX2ZsYWdzW10gYXJyYXkgZnJvbSBpbmNsdWRl
-L2FzbS14ODYvY3B1ZmVhdHVyZS5oCi0jCi0KLSgkaW4sICRvdXQpID0gQEFSR1Y7Ci0KLW9wZW4o
-SU4sICI8ICRpblwwIikgICBvciBkaWUgIiQwOiBjYW5ub3Qgb3BlbjogJGluOiAkIVxuIjsKLW9w
-ZW4oT1VULCAiPiAkb3V0XDAiKSBvciBkaWUgIiQwOiBjYW5ub3QgY3JlYXRlOiAkb3V0OiAkIVxu
-IjsKLQotcHJpbnQgT1VUICIjaW5jbHVkZSA8YXNtL2NwdWZlYXR1cmUuaD5cblxuIjsKLXByaW50
-IE9VVCAiY29uc3QgY2hhciAqIGNvbnN0IHg4Nl9jYXBfZmxhZ3NbTkNBUElOVFMqMzJdID0ge1xu
-IjsKLQotd2hpbGUgKGRlZmluZWQoJGxpbmUgPSA8SU4+KSkgewotCWlmICgkbGluZSA9fiAvXlxz
-KlwjXHMqZGVmaW5lXHMrKFg4Nl9GRUFUVVJFXyhcUyspKVxzKyguKikkLykgewotCQkkbWFjcm8g
-PSAkMTsKLQkJJGZlYXR1cmUgPSAkMjsKLQkJJHRhaWwgPSAkMzsKLQkJaWYgKCR0YWlsID1+IC9c
-L1wqXHMqXCIoW14iXSopXCIuKlwqXC8vKSB7Ci0JCQkkZmVhdHVyZSA9ICQxOwotCQl9Ci0KLQkJ
-aWYgKCRmZWF0dXJlIG5lICcnKSB7Ci0JCQlwcmludGYgT1VUICJcdCUtMzJzID0gXCIlc1wiLFxu
-IiwKLQkJCQkiWyRtYWNyb10iLCAiXEwkZmVhdHVyZSI7Ci0JCX0KLQl9Ci19Ci1wcmludCBPVVQg
-In07XG4iOwotCi1jbG9zZShJTik7Ci1jbG9zZShPVVQpOwpkaWZmIC1ydU4gYWx0LWxpbnV4L2Fy
-Y2gveDg2L2tlcm5lbC9jcHUvbWtjYXBmbGFncy5zaCBhbHQtbGludXgyL2FyY2gveDg2L2tlcm5l
-bC9jcHUvbWtjYXBmbGFncy5zaAotLS0gYWx0LWxpbnV4L2FyY2gveDg2L2tlcm5lbC9jcHUvbWtj
-YXBmbGFncy5zaAkxOTY5LTEyLTMxIDE4OjAwOjAwLjAwMDAwMDAwMCAtMDYwMAorKysgYWx0LWxp
-bnV4Mi9hcmNoL3g4Ni9rZXJuZWwvY3B1L21rY2FwZmxhZ3Muc2gJMjAwOC0xMi0yOCAxODowODo1
-MC4wMDAwMDAwMDAgLTA2MDAKQEAgLTAsMCArMSwyOCBAQAorIyEvYmluL2Jhc2gKKyMKKyMgR2Vu
-ZXJhdGUgdGhlIHg4Nl9jYXBfZmxhZ3NbXSBhcnJheSBmcm9tIGluY2x1ZGUvYXNtL2NwdWZlYXR1
-cmUuaAorIworCitJTj0kMQorT1VUPSQyCisKKygKKwllY2hvICIjaW5jbHVkZSA8YXNtL2NwdWZl
-YXR1cmUuaD4iCisJZWNobyAiIgorCWVjaG8gImNvbnN0IGNoYXIgKiBjb25zdCB4ODZfY2FwX2Zs
-YWdzW05DQVBJTlRTKjMyXSA9IHsiCisKKwkjIEl0ZXJhdGUgdGhyb3VnaCBhbnkgaW5wdXQgbGlu
-ZXMgc3RhcnRpbmcgd2l0aCAjZGVmaW5lIFg4Nl9GRUFUVVJFXworCXNlZCAtbiAtZSAncy9cdC8g
-L2cnIC1lICdzL14gKiMgKmRlZmluZSAqWDg2X0ZFQVRVUkVfLy9wJyAkSU4gfAorCXdoaWxlIHJl
-YWQgaQorCWRvCisJCSMgTmFtZSBpcyBldmVyeXRoaW5nIHVwIHRvIHRoZSBmaXJzdCB3aGl0ZXNw
-YWNlCisJCU5BTUU9IiQoZWNobyAiJGkiIHwgc2VkICdzLyAuKi8vJykiCisKKwkJIyBJZiB0aGUg
-LyogY29tbWVudCAqLyBzdGFydHMgd2l0aCBhIHF1b3RlIHN0cmluZywgZ3JhYiB0aGF0LgorCQlW
-QUxVRT0iJChlY2hvICIkaSIgfCBzZWQgLW4gJ3NALiovXCogKlwoIlteIl0qIlwpLipcKi9AXDFA
-cCcpIgorCQlbIC16ICIkVkFMVUUiIF0gJiYgVkFMVUU9IlwiJChlY2hvICIkTkFNRSIgfCB0ciBB
-LVogYS16KVwiIgorCisJCVsgIiRWQUxVRSIgIT0gJyIiJyBdICYmIGVjaG8gIglbWDg2X0ZFQVRV
-UkVfJE5BTUVdID0gJFZBTFVFLCIKKwlkb25lCisJZWNobyAifTsiCispID4gJE9VVAoACg==
+Hi Rob.
+
+On Fri, Jan 02, 2009 at 02:13:30AM -0600, Rob Landley wrote:
+> From: Rob Landley <rob@landley.net>
+> 
+> Replace kernel/timeconst.pl with kernel/timeconst.sh.  The new shell script
+> is much simpler, about 1/4 the size, and runs on Red Hat 9 from 2003.
+
+This part of the changelog is OK except that is fails to
+address why we want to get away from perl.
+
+Please drop the remining part of the changelog (but not the s-o-b).
+
+> Peter Anvin added this perl to 2.6.25.  Before that, the kernel had never
+> required perl to build.
+> 
+> Signed-off-by: Rob Landley <rob@landley.net>
+> ---
+> 
+>  kernel/Makefile     |    4 
+>  kernel/timeconst.pl |  378 ------------------------------------------
+>  kernel/timeconst.sh |   91 ++++++++++
+>  3 files changed, 93 insertions(+), 380 deletions(-)
+> 
+> diff -r d0c7611dcfd6 kernel/Makefile
+> --- a/kernel/Makefile	Tue Dec 30 17:48:25 2008 -0800
+> +++ b/kernel/Makefile	Fri Jan 02 00:10:44 2009 -0600
+> @@ -115,7 +115,7 @@
+>  $(obj)/time.o: $(obj)/timeconst.h
+>  
+>  quiet_cmd_timeconst  = TIMEC   $@
+> -      cmd_timeconst  = $(PERL) $< $(CONFIG_HZ) > $@
+> +      cmd_timeconst  = $(CONFIG_SHELL) $< $(CONFIG_HZ) > $@
+>  targets += timeconst.h
+> -$(obj)/timeconst.h: $(src)/timeconst.pl FORCE
+> +$(obj)/timeconst.h: $(src)/timeconst.sh FORCE
+>  	$(call if_changed,timeconst)
+OK
+
+> --- /dev/null	1969-12-31 00:00:00.000000000 -0600
+> +++ hg/kernel/timeconst.sh	2009-01-01 23:53:17.000000000 -0600
+> @@ -0,0 +1,91 @@
+> +#!/bin/bash
+> +
+> +if [ $# -ne 1 ]
+> +then
+> +	echo "Usage: timeconst.sh HZ"
+> +	exit 1
+> +fi
+That usage is useless. Either extend it or spend a few lines
+in the shell script explainign what the shell script is supposed to do.
+
+> +
+> +HZ=$1
+> +
+> +# Sanity test: even the shell in Red Hat 9 (circa 2003) supported 64 bit math.
+> +
+> +[ $((1<<32)) -lt 0 ] && exit 1
+> +
+If it fails then add an error message explaining why. So if we get reports that this
+fails then we at least can see something like:
+"timeconst noticed that the shell did not support 64 bit math - stop"
+
+
+> +# Output start of header file
+> +
+> +cat << EOF
+> +/* Automatically generated by kernel/timeconst.sh */
+> +/* Conversion constants for HZ == $HZ */
+> +
+> +#ifndef KERNEL_TIMECONST_H
+> +#define KERNEL_TIMECONST_H
+
+Please use __KERNEL_TIMECONST_H. The two underscores are standard.
+
+> +
+> +#include <linux/param.h>
+> +#include <linux/types.h>
+> +
+> +#if HZ != $HZ
+> +#error "kernel/timeconst.h has the wrong HZ value!"
+> +#endif
+> +
+> +EOF
+> +
+> +# For both Miliseconds and Microseconds
+> +
+> +for i in "MSEC 1000" "USEC 1000000"
+> +do
+> +	NAME=$(echo $i | awk '{print $1}')
+> +	PERIOD=$(echo $i | awk '{print $2}')
+> +
+> +	# Find greatest common denominator (using Euclid's algorithm)
+> +
+> +	A=$HZ
+> +	B=$PERIOD
+> +
+> +	while [ $B -ne 0 ]
+> +	do
+> +		C=$(($A%$B))
+> +		A=$B
+> +		B=$C
+> +	done
+> +
+> +	GCD=$A
+> +
+> +	# Do this for each direction (HZ_TO_PERIOD and PERIOD_TO_HZ)
+> +
+> +	for DIRECTION in 0 1
+> +	do
+> +		if [ $DIRECTION -eq 0 ]
+> +		then
+> +			CONVERT="HZ_TO_${NAME}"
+> +			FROM=$HZ
+> +			TO=$PERIOD
+> +		else
+> +			CONVERT="${NAME}_TO_HZ"
+> +			FROM=$PERIOD
+> +			TO=$HZ
+> +		fi
+> +
+> +		# How many shift bits give 32 bits of significant data?
+> +
+> +		SHIFT=0
+> +		while [ $(( (($TO<<$SHIFT)+$FROM-1)/$FROM )) -lt $((1<<31)) ]
+> +		do
+> +			SHIFT=$(( $SHIFT+1 ))
+> +		done
+> +
+> +		MUL32=$(( (($TO<<$SHIFT)+$FROM-1)/$FROM ))
+> +		MUL32=$(printf %x $MUL32)
+> +		echo "#define ${CONVERT}_MUL32	U64_C(0x$MUL32)"
+> +		ADJ32=$(($FROM/$GCD))
+> +		ADJ32=$(( (($ADJ32-1)<<$SHIFT)/$ADJ32 ))
+> +		ADJ32=$(printf %x $ADJ32)
+> +		echo "#define ${CONVERT}_ADJ32	U64_C(0x$ADJ32)"
+> +		echo "#define ${CONVERT}_SHR32	$SHIFT"
+> +		echo "#define ${CONVERT}_NUM		U64_C($(($TO/$GCD)))"
+> +		echo "#define ${CONVERT}_DEN		U64_C($(($FROM/$GCD)))"
+> +	done
+> +done
+
+Is it a shell limitation that all spaces around operators are missing?
+Makes it hard to read..
+
+You should use trap in your shell script so we do not end up with a
+partially generated file.
+Or you should change the rule in the Makefile to use
+a temperary file and then rename it.
+
+We have similar bugs in other places - but no need to add
+in more places.
+
+
+	Sam
