@@ -1,94 +1,71 @@
-From: Matt Keenan <tank.en.mate@gmail.com>
+From: Sam Ravnborg <sam@ravnborg.org>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Fri, 02 Jan 2009 11:18:52 +0000
-Message-ID: <1230895132.1023.4.camel@bazbox>
-References: <200901020207.30359.rob@landley.net>
-	 <200901021026.37905.a.miskiewicz@gmail.com>
-	 <20090102094934.GB17841@infradead.org> <495DE995.1070002@opensde.org>
-	 <865953A9-E699-45E1-A726-F3F4EE41A0C9@mirell.org>
+Date: Fri, 2 Jan 2009 12:44:30 +0100
+Message-ID: <20090102114430.GA4883@uranus.ravnborg.org>
+References: <200901020207.30359.rob@landley.net> <20090102094934.GB17841@infradead.org> <495DE995.1070002@opensde.org> <200901020515.33703.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <865953A9-E699-45E1-A726-F3F4EE41A0C9@mirell.org>
+Content-Disposition: inline
+In-Reply-To: <200901020515.33703.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Mark Miller <mark@mirell.org>
-Cc: Alejandro Mery <amery@opensde.org>, Christoph Hellwig <hch@infradead.org>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Rob Landley <rob@landley.net>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+To: Rob Landley <rob@landley.net>
+Cc: Alejandro Mery <amery@opensde.org>, Christoph Hellwig <hch@infradead.org>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
 
-On Fri, 2009-01-02 at 04:30 -0600, Mark Miller wrote:
-> On Jan 2, 2009, at 4:16 AM, Alejandro Mery wrote:
->=20
-> > Christoph Hellwig escribi=C3=B3:
-> >> On Fri, Jan 02, 2009 at 10:26:37AM +0100, Arkadiusz Miskiewicz wro=
-te:
-> >>
-> >>> On Friday 02 of January 2009, Rob Landley wrote:
-> >>>
-> >>>> Before 2.6.25 (specifically git =20
-> >>>> bdc807871d58285737d50dc6163d0feb72cb0dc2 )
-> >>>> building a Linux kernel never required perl to be installed on =20
-> >>>> the build
-> >>>> system.  (Various development and debugging scripts were written=
- =20
-> >>>> in perl
-> >>>> and python and such, but they weren't involved in actually =20
-> >>>> building a
-> >>>> kernel.) Building a kernel before 2.6.25 could be done with a =20
-> >>>> minimal
-> >>>> system built from gcc, binutils, bash, make, busybox, uClibc, an=
-d =20
-> >>>> the Linux
-> >>>> kernel, and nothing else.
-> >>>>
-> >>> And now bash is going to be required... while some distros don't =
-=20
-> >>> need/have
-> >>> bash. /bin/sh should be enough.
-> >>>
-> >>
-> >> *nod*  bash is in many ways a worse requirement than perl.  strict=
- =20
-> >> posix
-> >> /bin/sh + awk + sed would be nicest, but if that's too much work p=
-erl
-> >> seems reasonable.
->=20
-> >>
+On Fri, Jan 02, 2009 at 05:15:32AM -0600, Rob Landley wrote:
+> On Friday 02 January 2009 04:16:53 Alejandro Mery wrote:
+> > Christoph Hellwig escribi=F3:
+> > > On Fri, Jan 02, 2009 at 10:26:37AM +0100, Arkadiusz Miskiewicz wr=
+ote:
+> > >> On Friday 02 of January 2009, Rob Landley wrote:
+> > >>> Before 2.6.25 (specifically git
+> > >>> bdc807871d58285737d50dc6163d0feb72cb0dc2 ) building a Linux ker=
+nel
+> > >>> never required perl to be installed on the build system.  (Vari=
+ous
+> > >>> development and debugging scripts were written in perl and pyth=
+on and
+> > >>> such, but they weren't involved in actually building a kernel.)
+> > >>> Building a kernel before 2.6.25 could be done with a minimal sy=
+stem
+> > >>> built from gcc, binutils, bash, make, busybox, uClibc, and the =
+Linux
+> > >>> kernel, and nothing else.
+> > >>
+> > >> And now bash is going to be required... while some distros don't
+> > >> need/have bash. /bin/sh should be enough.
+> > >
+> > > *nod*  bash is in many ways a worse requirement than perl.  stric=
+t posix
+> > > /bin/sh + awk + sed would be nicest, but if that's too much work =
+perl
+> > > seems reasonable.
+> >
 > > well, bash is not worse as bash is trivial to cross-compile to run =
-=20
-> > on a
+on a
 > > constrained sandbox and perl is a nightmare, but I agree bash shoul=
-d =20
-> > be
+d be
 > > avoided too.
 > >
-> > I think the $(( ... )) bash-ism can be replaced with a simple .c =20
-> > helper toy.
-> >
-> > Thank Rob for reopening the topic.
-> >
-> > Alejandro Mery
+> > I think the $(( ... )) bash-ism can be replaced with a simple .c he=
+lper
+> > toy.
 >=20
-> And actually, one of the things that I just recalled, is that several=
- =20
-> of the Perl configure scripts in order to actually build itself, rely=
- =20
-> on Bourne shell calls. So the argument to require a strict POSIX+sed=20
-> +awk implementation rather than Perl to build the kernel, fails, sinc=
-e =20
-> you already require some variant of shell greater than strict POSIX /=
-=20
-> bin/sh to build Perl. So this is one less dependency.
+> No, $[ ] is the bashism, $(( )) is susv3:
+> http://www.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.ht=
+ml#tag_18_06_04
 >=20
-> Also, attempting to cross-compile Perl, is indeed a nightmare.
->=20
+> I intentionally switched from $[ ] to $(( )) to make dash work.
+The focus on this patch is to create a minimal set of
+dependencies so please document what dependencies / compatibility
+this patch introduces.
 
-Having cross compiled Perl, on to a Unix with a brain dead third party
-TCP/IP no less, only 4 years after starting to use Unix / Linux I can
-attest that it is not that difficult to cross compile. Heck it even run=
-s
-on those weird Crays that don't know which byte sex they are.
+It is not obvious for me for example if the script
+requires sh, bash or dash or whatever.
 
-Matt
+The shebang is so often wrong that this is not docuemnting such
+things.
 
+	Sam
