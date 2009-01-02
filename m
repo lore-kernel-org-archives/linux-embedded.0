@@ -1,71 +1,212 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Fri, 2 Jan 2009 12:44:30 +0100
-Message-ID: <20090102114430.GA4883@uranus.ravnborg.org>
-References: <200901020207.30359.rob@landley.net> <20090102094934.GB17841@infradead.org> <495DE995.1070002@opensde.org> <200901020515.33703.rob@landley.net>
+From: Rob Landley <rob@landley.net>
+Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with kernel/timeconst.sh
+Date: Fri, 2 Jan 2009 06:00:47 -0600
+Message-ID: <200901020600.47847.rob@landley.net>
+References: <200901020207.30359.rob@landley.net> <200901020213.30658.rob@landley.net> <20090102090439.GA3057@uranus.ravnborg.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090102090439.GA3057@uranus.ravnborg.org>
 Content-Disposition: inline
-In-Reply-To: <200901020515.33703.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Rob Landley <rob@landley.net>
-Cc: Alejandro Mery <amery@opensde.org>, Christoph Hellwig <hch@infradead.org>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
 
-On Fri, Jan 02, 2009 at 05:15:32AM -0600, Rob Landley wrote:
-> On Friday 02 January 2009 04:16:53 Alejandro Mery wrote:
-> > Christoph Hellwig escribi=F3:
-> > > On Fri, Jan 02, 2009 at 10:26:37AM +0100, Arkadiusz Miskiewicz wr=
-ote:
-> > >> On Friday 02 of January 2009, Rob Landley wrote:
-> > >>> Before 2.6.25 (specifically git
-> > >>> bdc807871d58285737d50dc6163d0feb72cb0dc2 ) building a Linux ker=
-nel
-> > >>> never required perl to be installed on the build system.  (Vari=
-ous
-> > >>> development and debugging scripts were written in perl and pyth=
-on and
-> > >>> such, but they weren't involved in actually building a kernel.)
-> > >>> Building a kernel before 2.6.25 could be done with a minimal sy=
-stem
-> > >>> built from gcc, binutils, bash, make, busybox, uClibc, and the =
-Linux
-> > >>> kernel, and nothing else.
-> > >>
-> > >> And now bash is going to be required... while some distros don't
-> > >> need/have bash. /bin/sh should be enough.
-> > >
-> > > *nod*  bash is in many ways a worse requirement than perl.  stric=
-t posix
-> > > /bin/sh + awk + sed would be nicest, but if that's too much work =
-perl
-> > > seems reasonable.
+On Friday 02 January 2009 03:04:39 Sam Ravnborg wrote:
+> Hi Rob.
+>
+> On Fri, Jan 02, 2009 at 02:13:30AM -0600, Rob Landley wrote:
+> > From: Rob Landley <rob@landley.net>
 > >
-> > well, bash is not worse as bash is trivial to cross-compile to run =
-on a
-> > constrained sandbox and perl is a nightmare, but I agree bash shoul=
-d be
-> > avoided too.
+> > Replace kernel/timeconst.pl with kernel/timeconst.sh.  The new shell
+> > script is much simpler, about 1/4 the size, and runs on Red Hat 9 from
+> > 2003.
+>
+> This part of the changelog is OK except that is fails to
+> address why we want to get away from perl.
+
+You mean "The new shell script is much simpler, about 1/4 the size, runs on 
+Red Hat 9 from 2003, and isn't perl?" :)
+
+> Please drop the remining part of the changelog (but not the s-o-b).
+
+ok.
+
+> > Peter Anvin added this perl to 2.6.25.  Before that, the kernel had never
+> > required perl to build.
 > >
-> > I think the $(( ... )) bash-ism can be replaced with a simple .c he=
-lper
-> > toy.
->=20
-> No, $[ ] is the bashism, $(( )) is susv3:
-> http://www.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.ht=
-ml#tag_18_06_04
->=20
-> I intentionally switched from $[ ] to $(( )) to make dash work.
-The focus on this patch is to create a minimal set of
-dependencies so please document what dependencies / compatibility
-this patch introduces.
+> > Signed-off-by: Rob Landley <rob@landley.net>
+> > ---
+> >
+> >  kernel/Makefile     |    4
+> >  kernel/timeconst.pl |  378 ------------------------------------------
+> >  kernel/timeconst.sh |   91 ++++++++++
+> >  3 files changed, 93 insertions(+), 380 deletions(-)
+> >
+> > diff -r d0c7611dcfd6 kernel/Makefile
+> > --- a/kernel/Makefile	Tue Dec 30 17:48:25 2008 -0800
+> > +++ b/kernel/Makefile	Fri Jan 02 00:10:44 2009 -0600
+> > @@ -115,7 +115,7 @@
+> >  $(obj)/time.o: $(obj)/timeconst.h
+> >
+> >  quiet_cmd_timeconst  = TIMEC   $@
+> > -      cmd_timeconst  = $(PERL) $< $(CONFIG_HZ) > $@
+> > +      cmd_timeconst  = $(CONFIG_SHELL) $< $(CONFIG_HZ) > $@
+> >  targets += timeconst.h
+> > -$(obj)/timeconst.h: $(src)/timeconst.pl FORCE
+> > +$(obj)/timeconst.h: $(src)/timeconst.sh FORCE
+> >  	$(call if_changed,timeconst)
+>
+> OK
+>
+> > --- /dev/null	1969-12-31 00:00:00.000000000 -0600
+> > +++ hg/kernel/timeconst.sh	2009-01-01 23:53:17.000000000 -0600
+> > @@ -0,0 +1,91 @@
+> > +#!/bin/bash
+> > +
+> > +if [ $# -ne 1 ]
+> > +then
+> > +	echo "Usage: timeconst.sh HZ"
+> > +	exit 1
+> > +fi
+>
+> That usage is useless. Either extend it or spend a few lines
+> in the shell script explainign what the shell script is supposed to do.
 
-It is not obvious for me for example if the script
-requires sh, bash or dash or whatever.
+Do you mean something more like:
 
-The shebang is so often wrong that this is not docuemnting such
-things.
+echo "Usage: timeconst.sh HZ"
+echo
+echo "Generates a header file of constants for converting between decimal"
+echo "HZ timer ticks and milisecond or microsecond delays"
 
-	Sam
+I'm happy turning it into a comment instead, I just found a quick check that 
+I'd remembered to type an argument useful during debugging. :)
+
+> > +
+> > +HZ=$1
+> > +
+> > +# Sanity test: even the shell in Red Hat 9 (circa 2003) supported 64 bit
+> > math. +
+> > +[ $((1<<32)) -lt 0 ] && exit 1
+> > +
+>
+> If it fails then add an error message explaining why. So if we get reports
+> that this fails then we at least can see something like:
+> "timeconst noticed that the shell did not support 64 bit math - stop"
+
+Ok.
+
+> > +# Output start of header file
+> > +
+> > +cat << EOF
+> > +/* Automatically generated by kernel/timeconst.sh */
+> > +/* Conversion constants for HZ == $HZ */
+> > +
+> > +#ifndef KERNEL_TIMECONST_H
+> > +#define KERNEL_TIMECONST_H
+>
+> Please use __KERNEL_TIMECONST_H. The two underscores are standard.
+
+Sure thing.  (I was just copying the perl there, I'll post an updated patch 
+after I get some sleep.)
+
+> > +
+> > +#include <linux/param.h>
+> > +#include <linux/types.h>
+> > +
+> > +#if HZ != $HZ
+> > +#error "kernel/timeconst.h has the wrong HZ value!"
+> > +#endif
+> > +
+> > +EOF
+> > +
+> > +# For both Miliseconds and Microseconds
+> > +
+> > +for i in "MSEC 1000" "USEC 1000000"
+> > +do
+> > +	NAME=$(echo $i | awk '{print $1}')
+> > +	PERIOD=$(echo $i | awk '{print $2}')
+> > +
+> > +	# Find greatest common denominator (using Euclid's algorithm)
+> > +
+> > +	A=$HZ
+> > +	B=$PERIOD
+> > +
+> > +	while [ $B -ne 0 ]
+> > +	do
+> > +		C=$(($A%$B))
+> > +		A=$B
+> > +		B=$C
+> > +	done
+> > +
+> > +	GCD=$A
+> > +
+> > +	# Do this for each direction (HZ_TO_PERIOD and PERIOD_TO_HZ)
+> > +
+> > +	for DIRECTION in 0 1
+> > +	do
+> > +		if [ $DIRECTION -eq 0 ]
+> > +		then
+> > +			CONVERT="HZ_TO_${NAME}"
+> > +			FROM=$HZ
+> > +			TO=$PERIOD
+> > +		else
+> > +			CONVERT="${NAME}_TO_HZ"
+> > +			FROM=$PERIOD
+> > +			TO=$HZ
+> > +		fi
+> > +
+> > +		# How many shift bits give 32 bits of significant data?
+> > +
+> > +		SHIFT=0
+> > +		while [ $(( (($TO<<$SHIFT)+$FROM-1)/$FROM )) -lt $((1<<31)) ]
+> > +		do
+> > +			SHIFT=$(( $SHIFT+1 ))
+> > +		done
+> > +
+> > +		MUL32=$(( (($TO<<$SHIFT)+$FROM-1)/$FROM ))
+> > +		MUL32=$(printf %x $MUL32)
+> > +		echo "#define ${CONVERT}_MUL32	U64_C(0x$MUL32)"
+> > +		ADJ32=$(($FROM/$GCD))
+> > +		ADJ32=$(( (($ADJ32-1)<<$SHIFT)/$ADJ32 ))
+> > +		ADJ32=$(printf %x $ADJ32)
+> > +		echo "#define ${CONVERT}_ADJ32	U64_C(0x$ADJ32)"
+> > +		echo "#define ${CONVERT}_SHR32	$SHIFT"
+> > +		echo "#define ${CONVERT}_NUM		U64_C($(($TO/$GCD)))"
+> > +		echo "#define ${CONVERT}_DEN		U64_C($(($FROM/$GCD)))"
+> > +	done
+> > +done
+>
+> Is it a shell limitation that all spaces around operators are missing?
+> Makes it hard to read..
+
+No, I was just trying to make sure I didn't go over the 80 char limit.  
+(Several temporary variables are there primarily because the style guide says 
+indentation should be via 8 space tabs.)
+
+I'll add some more spaces on the respin.
+
+>
+> You should use trap in your shell script so we do not end up with a
+> partially generated file.
+> Or you should change the rule in the Makefile to use
+> a temperary file and then rename it.
+>
+> We have similar bugs in other places - but no need to add
+> in more places.
+
+Well, preserve in this case. :)
+
+I can add an "EXIT" trap and then disarm it later, but the output is 
+redirected in the makefile, so generating an error won't remove the output if 
+you run again.  Perhaps the file to create should be fed in as a second 
+argument to the script, so the trap can "rm" the output file if it triggers?
+
+I'll poke at it in the morning.
+
+Thanks for the feedback,
+
+Rob
