@@ -1,50 +1,46 @@
-From: "Jaya Kumar" <jayakumar.lkml@gmail.com>
-Subject: Re: [RFC 2.6.27 1/1] gpiolib: add support for batch set of pins
-Date: Thu, 1 Jan 2009 02:05:50 +0800
-Message-ID: <45a44e480812311005k709c410ao1116187e9427e452@mail.gmail.com>
-References: <12276535632759-git-send-email-jayakumar.lkml@gmail.com>
-	 <200812302355.45193.rgetz@blackfin.uclinux.org>
-	 <45a44e480812302058k365eddcfxf902095657b78534@mail.gmail.com>
-	 <200812311238.13810.rgetz@blackfin.uclinux.org>
+From: Rob Landley <rob@landley.net>
+Subject: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Fri, 2 Jan 2009 02:07:28 -0600
+Message-ID: <200901020207.30359.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=mg8Eyd+ppOqYKVST9e1yX3nzHVWR+5eOuxvglO1RwSU=;
-        b=VOAXY5B0YIo7f/nd/6P0Ow+dvefoKp/6WO6jTUNQ69zWjbcpQ4AF/OX/FKd2penIzR
-         LIY0c9eIn/rhhOvJgtCzkGab1OyOme7N3Aq3wqEMB1ZlA19tqKmhSEOnWyLS+MLKQ7vr
-         25dEZECmBa3DKRVScv3bPbSfnbfNXQIfVCAcQ=
-In-Reply-To: <200812311238.13810.rgetz@blackfin.uclinux.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757281AbZABIH4@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Robin Getz <rgetz@blackfin.uclinux.org>
-Cc: David Brownell <david-b@pacbell.net>, Eric Miao <eric.y.miao@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Eric Miao <eric.miao@marvell.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Philipp Zabel <philipp.zabel@gmail.com>, Russell King <rmk@arm.linux.org.uk>, Ben Gardner <bgardner@wabtec.com>, Greg KH <greg@kroah.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+Cc: linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
 
-On Thu, Jan 1, 2009 at 1:38 AM, Robin Getz <rgetz@blackfin.uclinux.org> wrote:
-> On Tue 30 Dec 2008 23:58, Jaya Kumar pondered:
->> On Tue, Dec 30, 2008 at 11:55 PM, Robin Getz <rgetz@blackfin.uclinux.org> wrote:
->> > Yeah, I hadn't thought about spanning more than one gpio_chip. That's a good
->> > point.
->>
->> The currently posted code already supports spanning more than one gpio_chip.
->>
->
-> But doesn't do all the other things that David suggested/requested.
->
+Before 2.6.25 (specifically git bdc807871d58285737d50dc6163d0feb72cb0dc2 ) 
+building a Linux kernel never required perl to be installed on the build 
+system.  (Various development and debugging scripts were written in perl and 
+python and such, but they weren't involved in actually building a kernel.)  
+Building a kernel before 2.6.25 could be done with a minimal system built from 
+gcc, binutils, bash, make, busybox, uClibc, and the Linux kernel, and nothing 
+else.  (Embedded developers creating clean cross compile environments that 
+won't leak bits of the host system into the target, or bootstrapping native 
+development environments to run on target hardware or under emulators, tend to 
+care about this sort of thing.)
 
-Hi Robin,
+The perl checkin for 2.6.25 was the camel's nose under the tent flap, and 
+since then two more instances of perl have shown up in the core kernel build.  
+This patch series removes the three required to build a basic kernel for qemu 
+for the targets I've tested (arm, mips, powerpc, sparc, m68k, sh4, and of 
+course x86 and x86-64), replacing them with shell scripts.
 
-Yes, you are right. My implementation does not support a driver that
-needs to set/get more than 32-bits of gpio in a single call. I'm okay
-with that restriction as I don't see a concrete use case for that. I
-understand that you're saying that's not satisfactory. I guess we'll
-have to agree to differ.
+Historically the kernel has gone out of its way to minimize environmental 
+dependencies for the build.  For example, the plethora of *_shipped files mean 
+we don't need lex and yacc to build the kernel.  The kconfig infrastructure 
+once required curses to run "make oldconfig", but that requirement was 
+restricted to just menuconfig so the kernel could build on systems without 
+ncurses.
 
-Thanks,
-jaya
+That was a very nice policy.  Kernel development already requires an in-depth 
+knowledge of C, make, and shell, plus things like the kconfig language.  A 
+similarly in-depth knowledge of perl is bigger than all that combined (even 
+Larry Wall probably doesn't know all of Perl anymore), and then what's the 
+excuse _not_ to add Python to the core build?  And after that why not java, or 
+lua?  Where does it end?  What's the criteria to say "no" here?
+
+This patch series saves time and says no now.
