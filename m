@@ -1,39 +1,33 @@
-From: Wookey <wookey@wookware.org>
+From: Sam Ravnborg <sam@ravnborg.org>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Fri, 2 Jan 2009 17:25:41 +0000
-Message-ID: <20090102172540.GE8858@knossos.aleph1.co.uk>
-References: <200901020207.30359.rob@landley.net> <20090102095023.GA28078@linux-sh.org>
+Date: Fri, 2 Jan 2009 19:01:34 +0100
+Message-ID: <20090102180134.GB5818@uranus.ravnborg.org>
+References: <200901020207.30359.rob@landley.net> <20090102095023.GA28078@linux-sh.org> <20090102172540.GE8858@knossos.aleph1.co.uk>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20090102095023.GA28078@linux-sh.org>
+In-Reply-To: <20090102172540.GE8858@knossos.aleph1.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
-Cc: Paul Mundt <lethal@linux-sh.org>, Rob Landley <rob@landley.net>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Paul Mundt <lethal@linux-sh.org>, Rob Landley <rob@landley.net>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux->
 
-On 2009-01-02 18:50 +0900, Paul Mundt wrote:
-> Your main reasons against inclusion of perl seem to be that there is no
-> realistic expectation for target systems that will be self-hosting will
-> have perl included, or the inherent complexity in maintaining a coherent
-> cross compiling environment. Both of these things are issues with your
-> own environment, and in no way are these representative of the embedded
-> development community at large.
+Hi Wookey.
 
-It may well be true that most embedded people cross-build kernels and
-use native perl on a fat build box, but there are plenty of situations
-where being able to build kernels without perl is useful. Given the
-simplicitly of these patches I can't see any reason not to put them
-in, and appreciate Rob's work on this.
+> Given the
+> simplicitly of these patches I can't see any reason not to put them
+> in
 
-And if cross-building perl is really easy, as some in this thread
-claim, can someone fix the Debian packages to do it, because that
-would be really useful (it appears to be of similar complexity to
-cross-building gcc, requiring a 2-stage self-referential build). 
+Please do NOT do the mistake and think this the same thing.
 
-Wookey
--- 
-Principal hats:  Balloonz - Toby Churchill - Aleph One - Debian
-http://wookware.org/
+Rob's patch simplyfy the timecost stuff - and will be applied on
+this merit alone assuming comments will be addressed.
+
+But the serie rased anohter topic: shall we ban use of perl
+for generating a kernel.
+And this is what primary is discussed and the outcome of
+that discussion will not prevent patches that stands on their
+own to be applied.
+
+	Sam
