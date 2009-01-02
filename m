@@ -1,77 +1,128 @@
 From: Mark Miller <mark@mirell.org>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Fri, 2 Jan 2009 04:30:06 -0600
-Message-ID: <865953A9-E699-45E1-A726-F3F4EE41A0C9@mirell.org>
-References: <200901020207.30359.rob@landley.net> <200901021026.37905.a.miskiewicz@gmail.com> <20090102094934.GB17841@infradead.org> <495DE995.1070002@opensde.org>
+Date: Fri, 2 Jan 2009 04:32:42 -0600
+Message-ID: <2D4EECE3-784E-4853-BF6E-B0915C15EC02@mirell.org>
+References: <200901020207.30359.rob@landley.net> <20090102095023.GA28078@linux-sh.org>
 Mime-Version: 1.0 (Apple Message framework v930.3)
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <495DE995.1070002@opensde.org>
+In-Reply-To: <20090102095023.GA28078@linux-sh.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"; format="flowed	delsp=yes"
-To: Alejandro Mery <amery@opensde.org>
-Cc: Christoph Hellwig <hch@infradead.org>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Rob Landley <rob@landley.net>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: Rob Landley <rob@landley.net>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
 
+On Jan 2, 2009, at 3:50 AM, Paul Mundt wrote:
 
-On Jan 2, 2009, at 4:16 AM, Alejandro Mery wrote:
-
-> Christoph Hellwig escribi=F3:
->> On Fri, Jan 02, 2009 at 10:26:37AM +0100, Arkadiusz Miskiewicz wrote=
-:
+> On Fri, Jan 02, 2009 at 02:07:28AM -0600, Rob Landley wrote:
+>> Before 2.6.25 (specifically git  
+>> bdc807871d58285737d50dc6163d0feb72cb0dc2 )
+>> building a Linux kernel never required perl to be installed on the  
+>> build
+>> system.  (Various development and debugging scripts were written in  
+>> perl and
+>> python and such, but they weren't involved in actually building a  
+>> kernel.)
+>> Building a kernel before 2.6.25 could be done with a minimal system  
+>> built from
+>> gcc, binutils, bash, make, busybox, uClibc, and the Linux kernel,  
+>> and nothing
+>> else.  (Embedded developers creating clean cross compile  
+>> environments that
+>> won't leak bits of the host system into the target, or  
+>> bootstrapping native
+>> development environments to run on target hardware or under  
+>> emulators, tend to
+>> care about this sort of thing.)
 >>
->>> On Friday 02 of January 2009, Rob Landley wrote:
->>>
->>>> Before 2.6.25 (specifically git =20
->>>> bdc807871d58285737d50dc6163d0feb72cb0dc2 )
->>>> building a Linux kernel never required perl to be installed on =20
->>>> the build
->>>> system.  (Various development and debugging scripts were written =20
->>>> in perl
->>>> and python and such, but they weren't involved in actually =20
->>>> building a
->>>> kernel.) Building a kernel before 2.6.25 could be done with a =20
->>>> minimal
->>>> system built from gcc, binutils, bash, make, busybox, uClibc, and =
-=20
->>>> the Linux
->>>> kernel, and nothing else.
->>>>
->>> And now bash is going to be required... while some distros don't =20
->>> need/have
->>> bash. /bin/sh should be enough.
->>>
->>
->> *nod*  bash is in many ways a worse requirement than perl.  strict =20
->> posix
->> /bin/sh + awk + sed would be nicest, but if that's too much work per=
-l
->> seems reasonable.
-
->>
-> well, bash is not worse as bash is trivial to cross-compile to run =20
-> on a
-> constrained sandbox and perl is a nightmare, but I agree bash should =
-=20
-> be
-> avoided too.
+>> The perl checkin for 2.6.25 was the camel's nose under the tent  
+>> flap, and
+>> since then two more instances of perl have shown up in the core  
+>> kernel build.
+>> This patch series removes the three required to build a basic  
+>> kernel for qemu
+>> for the targets I've tested (arm, mips, powerpc, sparc, m68k, sh4,  
+>> and of
+>> course x86 and x86-64), replacing them with shell scripts.
 >
-> I think the $(( ... )) bash-ism can be replaced with a simple .c =20
-> helper toy.
->
-> Thank Rob for reopening the topic.
->
-> Alejandro Mery
+> Misguided rhetoric aside, what does this actually accomplish? If folks
+> add meaningful tools in to the kernel that require python, and it is
+> generally regarded as being fairly ubiquitous, I can't imagine there
+> being any substantiated objections against it.
 
-And actually, one of the things that I just recalled, is that several =20
-of the Perl configure scripts in order to actually build itself, rely =20
-on Bourne shell calls. So the argument to require a strict POSIX+sed=20
-+awk implementation rather than Perl to build the kernel, fails, since =
-=20
-you already require some variant of shell greater than strict POSIX /=20
-bin/sh to build Perl. So this is one less dependency.
+And if the said meaningful tools introduce complex dependencies, then  
+there should be an open discussion as to why exactly we need those  
+tools as opposed to a simpler implementation.
 
-Also, attempting to cross-compile Perl, is indeed a nightmare.
+> Your main reasons against inclusion of perl seem to be that there is  
+> no
+> realistic expectation for target systems that will be self-hosting  
+> will
+> have perl included, or the inherent complexity in maintaining a  
+> coherent
+> cross compiling environment. Both of these things are issues with your
+> own environment, and in no way are these representative of the  
+> embedded
+> development community at large.
+
+I feel that if you attempted to look for discussions on "cross- 
+compiling perl", you will meet with a variety of complaints on what a  
+nightmare it is to do so in a sandboxed environment.
+
+> Now with that out of the way, this entire series fundamentally fails  
+> to
+> convert half of the perl scripts shipped with the kernel today, some  
+> that
+> are required for build depending on Kconfig options, and others that  
+> are
+> simply useful tools for self-hosted environments. Simply converting a
+> couple of scripts over you find objectionable is certainly fine if  
+> there
+> is a real benefit in doing so, but this doesn't actually accomplish  
+> your
+> goal of removing the perl dependency.
+
+ From what I can tell, it allows one to fully build the Linux kernel  
+without Perl. Without these series of patches, to actually *build* the  
+kernel, one requires Perl. Unless there is an alternate way to do  
+"make headers_install" that I am not seeing, that appears to now be  
+done in Perl. All the other Perl scripts were merely nice to have, not  
+necessary to build a Linux kernel.
+
+> Ignoring the compile-time dependencies that you overlooked, what you
+> define as "development and debugging" scripts are still an integral  
+> part
+> of the system, unless you are trying to argue that embedded developers
+> have no interest in things like checkstack due to the trouble of  
+> trying
+> to get perl built.
+
+Do I need that to compile a kernel? No.
+
+> Until you can post a series that converts all of scripts/*.pl in its
+> entirety, you have failed to address the fundamental reason why perl  
+> is
+> used in the first place. Trying to toss bizarre policy statements  
+> around
+> regarding things you personally find objectionable without any  
+> coherent
+> technical argument to the contrary is of no constructive use  
+> whatsoever.
+
+Perl was not required to build the Linux kernel. Now it is. It adds  
+another dependency to the Linux kernel. Requiring bash is far less a  
+dependency that Perl is.
+
+> The kernel is and always has been about using the right tool for the  
+> job,
+> not a matter of dictating what tools you must use in order to  
+> accomplish
+> a task you are interested in. Common sense does apply here though, so
+> this might be a more daunting task for some than others.
+
+How is Perl a better tool for the job than what currently bash and  
+other standard utilities already offer?
 
 --
 Mark Miller
