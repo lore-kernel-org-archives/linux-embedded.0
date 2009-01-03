@@ -1,33 +1,30 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with kernel/timeconst.sh
-Date: Fri, 02 Jan 2009 11:33:02 -0800
-Message-ID: <495E6BEE.1000805@zytor.com>
-References: <200901020207.30359.rob@landley.net> <200901020213.30658.rob@landley.net> <20090102090439.GA3057@uranus.ravnborg.org> <200901020600.47847.rob@landley.net>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Sat, 3 Jan 2009 03:22:42 +0000
+Message-ID: <20090103032242.GA2872@shareable.org>
+References: <200901020207.30359.rob@landley.net> <200901021026.37905.a.miskiewicz@gmail.com> <20090102094934.GB17841@infradead.org> <200901020656.32013.rob@landley.net> <20090102140409.GA4758@mit.edu>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200901020600.47847.rob@landley.net>
+Content-Disposition: inline
+In-Reply-To: <20090102140409.GA4758@mit.edu>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Rob Landley <rob@landley.net>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Content-Transfer-Encoding: 7bit
+To: Theodore Tso <tytso@mit.edu>, Rob Landley <rob@landley.net>, Christoph Hellwig <hch@infradead.org>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embed
 
-Rob Landley wrote:
-> 
-> You mean "The new shell script is much simpler, about 1/4 the size, runs on 
-> Red Hat 9 from 2003, and isn't perl?" :)
-> 
+Theodore Tso wrote:
+> perl is actually quite portable.
 
-And introduces unclear environment dependencies depending on how
-external utilities are implemented.
+Portability aside, Perl has another fun issue.  The number of times
+I've had a Perl script break when copied to a newer system which had a
+newer version of Perl is... noticable.
 
-The whole point of why that script was written in Perl was to have
-access to arbitrary-precision arithmetic -- after it was shown that bc
-would simply lock up on some systems.
+> I'd also suggest explicitly add a reminder to the shell scripts'
+> comments to avoid bashisms for maximum portability, to remind
+> developers in the future who might try to change the shell scripts
+> to watch out for portability issues.
 
-	-hpa
+You can force Bash into POSIX mode if that's helpful.
 
--- 
-H. Peter Anvin, Intel Open Source Technology Center
-I work for Intel.  I don't speak on their behalf.
+-- Jamie
