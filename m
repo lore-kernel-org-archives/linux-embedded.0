@@ -1,60 +1,42 @@
 From: Rob Landley <rob@landley.net>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Sat, 3 Jan 2009 20:53:59 -0600
-Message-ID: <200901032054.00018.rob@landley.net>
-References: <200901020207.30359.rob@landley.net> <495FEEAF.5020005@zytor.com> <c384c5ea0901031637k3b571313m934c8881dce1c81@mail.gmail.com>
+Date: Sat, 3 Jan 2009 21:05:00 -0600
+Message-ID: <200901032105.00779.rob@landley.net>
+References: <200901020207.30359.rob@landley.net> <200901031346.01325.rob@landley.net> <4960068A.3040109@shaw.ca>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <c384c5ea0901031637k3b571313m934c8881dce1c81@mail.gmail.com>
+In-Reply-To: <4960068A.3040109@shaw.ca>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Leon Woestenberg <leon.woestenberg@gmail.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
+To: Robert Hancock <hancockr@shaw.ca>
+Cc: Matthieu CASTET <matthieu.castet@parrot.com>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
 
-On Saturday 03 January 2009 18:37:12 Leon Woestenberg wrote:
-> Hello,
+On Saturday 03 January 2009 18:44:58 Robert Hancock wrote:
+> Rob Landley wrote:
+> > For the record, the reason I can't just pregenerate all these suckers on
+> > a system that's got an arbitrary precision calculator (ala dc) and then
+> > just ship the resulting header files (more or less the what the first
+> > version of that first patch did) is that some architectures (arm omap and
+> > and arm at91) allow you to enter arbitrary HZ values in kconfig.  (Their
+> > help text says that in many cases values that aren't powers of two won't
+> > work, but nothing enforces this.)  So if we didn't have the capability to
+> > dynamically generate these, you could enter a .config value that would
+> > break the build.
 >
-> On Sun, Jan 4, 2009 at 12:03 AM, H. Peter Anvin <hpa@zytor.com> wrote:
-> >> Dependencies very quickly become dependency hell. If A requires B,
-> >> then A also inherits all (future) requirements of B, etc. etc.
-> >>
-> >> In my daily software development work with Linux and GNU software in
-> >> general, 10% of it is spent fighting/removing these extremely "thin"
-> >> or false depencies, so that it is usuable in embedded devices.
-> >
-> > First of all, I largely consider this a joke.  All real-life embedded
-> > kernel builds take place on hosted platforms; anything else seems to be
-> > done "just because it can be done", as a kind of show-off art project.
-> > Cute, but hardly worth impeding the rest of the kernel community for.
->
-> Let me explain why it is not a joke for me, although yes I agree it's
-> a funny way of how software engineering works.
->
-> My argument on thin dependencies indeed mostly holds for run-time
-> dependencies (to reduce size) but also for build dependency (to reduce
-> complexity)*.
+> Is there a good reason that these archs allow you enter arbitrary HZ
+> values?
 
-I usually just point to the gnucash 1.6 release as where this sort of thing 
-leads if you ignore it long enough:
-http://lwn.net/2001/0614/
+Not that I've noticed, no.  But you should ask Thomas Gleixner about that 
+about that, I'm not a domain expert...
 
-These days, a more modern example is the way that after even the gentoo folks 
-gave up on trying to build openoffice (and shipped prebuilt binaries of it in 
-their "build everything from source code" OS), Open Office's own developers 
-described that project "profoundly sick" and "stagnating" ( 
-http://developers.slashdot.org/article.pl?sid=08/12/28/0124230 ).
+> The use case for using custom HZ values at all nowadays seems
+> fairly low now that dynticks is around (if that arch supports it
+> anyway), let alone being able to specify wierd obscure values for it.
 
-Neither project _started_ with an inbred development community that presented 
-a brick wall to new developers.  Complexity grew because they didn't fight 
-against it, and because they didn't have good rules by which they could say 
-"no" to any.
-
-Environmental dependencies in your build environment are a cost, and as with 
-all costs it's ok if you get enough in return for it.  The Linux kernel has 
-historically been extremely lean in this regard, and discarding that strength 
-should at the very least come with commensurate concrete benefits.
+And high performance event timers.  A kernel can have more than one time 
+source these days...
 
 Rob
