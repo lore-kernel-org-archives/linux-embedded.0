@@ -1,61 +1,90 @@
-From: Valdis.Kletnieks@vt.edu
-Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with kernel/timeconst.sh
-Date: Sun, 04 Jan 2009 00:07:55 -0500
-Message-ID: <25035.1231045675@turing-police.cc.vt.edu>
-References: <200901020207.30359.rob@landley.net> <200901020213.30658.rob@landley.net> <200901031328.23079.ioe-lkml@rameria.de>
-            <200901031936.04642.rob@landley.net>
+From: Rob Landley <rob@landley.net>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Sun, 4 Jan 2009 00:29:02 -0600
+Message-ID: <200901040029.03396.rob@landley.net>
+References: <200901020207.30359.rob@landley.net> <200901032006.47652.rob@landley.net> <49601B94.3060408@zytor.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="==_Exmh_1231045675_3941P";
-	 micalg=pgp-sha1; protocol="application/pgp-signature"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: Your message of "Sat, 03 Jan 2009 19:36:04 CST."
-             <200901031936.04642.rob@landley.net>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752881AbZADG3U@vger.kernel.org>
+In-Reply-To: <49601B94.3060408@zytor.com>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Rob Landley <rob@landley.net>
-Cc: Ingo Oeser <ioe-lkml@rameria.de>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+Content-Type: text/plain; charset="us-ascii"
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Leon Woestenberg <leon.woestenberg@gmail.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
 
---==_Exmh_1231045675_3941P
-Content-Type: text/plain; charset=us-ascii
-
-On Sat, 03 Jan 2009 19:36:04 CST, Rob Landley said:
-> On Saturday 03 January 2009 06:28:22 Ingo Oeser wrote:
-> > > +for i in "MSEC 1000" "USEC 1000000"
-> > > +do
-> > > +	NAME=$(echo $i | awk '{print $1}')
+On Saturday 03 January 2009 20:14:44 H. Peter Anvin wrote:
+> Rob Landley wrote:
+> >> The new patches have *more* environmental
+> >> dependencies than that ever did.
 > >
-> > cut -d' ' -f1  does the same
+> > Could you please be a little more specific?
+>
+> In this case, you're assuming that every version of every shell this is
+> going to get involved with is going to do math correctly with the
+> requisite precision, which is nowhere guaranteed, I'm pretty sure.
+
+Well, SUSv3 requires that the shell support signed long arithmetic:
+http://www.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06_04
+
+And the LP64 standard says that on 64 bit systems, long must be 64 bit:
+http://www.unix.org/whitepapers/64bit.html
+
+Now the potential weakness there is that on 32 bit systems, shells might only 
+support 32 bit math instead of 64 bit math.  (You'll notice I have a test for 
+that.)  However, bash has supported 64 bit math on 32 bit systems since at 
+least 2003.  (I keep a Red Hat 9 test image around because it had 50% market 
+share when it shipped, so the majority of "old" Linux systems still in use 
+_are_ RH9 or similar.  It also has the oldest gcc version the kernel still 
+claims to build under.)  Busybox ash can also support 64 bit math on 32 bit 
+hosts, and I just confirmed that the dash in the 32 bit xubuntu 8.10 supports 
+64 bit math as well.
+
+(It would also be possible to do a similar overflow avoiding trick to do the 
+lot entirely in 32 bit math, but given that the three main shells in use on 
+Linux _do_ support 64 bit math on 32 bit hosts and are _required_ to support 
+it on 64 bit hosts according to SUSv3, the extra complexity really doesn't 
+seem worth it.)
+
+> >> Third, if someone actually cares to do it right, I have a smallish
+> >> bignum library at http://git.zytor.com/?p=lib/pbn.git;a=summary that
+> >> might be a starting point.
 > >
-> > > +	PERIOD=$(echo $i | awk '{print $2}')
+> > This doesn't _need_ bignum support.  It maxes out around 72 bits and the
+> > _result_ can't use more than about $SHIFT bits because you're dividing by
+> > the amount you shifted, so just chop off the bottom 32 bits, do a normal
+> > 64 bit division on the top (it has to fit), and then do the same division
+> > on the appropriate shifted remainder, and combine the results.  This is
+> > easy because when the shift _is_ 32 bits or more, the bottom 32 bits all
+> > have to be zeroes so you don't even have to mask and add, just shift the
+> > remainder left 32 bits so you can continue the divide.
 > >
-> > cut -d' ' -f2  does the same
+> > Pulling out perl isn't always a good alternative to thinking about the
+> > problem.
+>
+> Neither is open-coding a bignum operation instead of relying on an
+> existing, validated implementation.
 
-Close, but no cee-gar.  cut does something counter-intuitive with multiple
-blanks:
+Implementing something by hand isn't _always_ a good alternative, sure.  That 
+would be the "thinking about the problem" part.  In this instance, avoiding 
+overflow is trivial.  (If 1<<-1 didn't wrap around, it wouldn't even need the 
+if statement.)
 
-% echo 'a    b' | awk '{print $2}'
-b
-% echo 'a    b' | cut -d' ' -f2
+I'm curious, would the "existing, validated implementation" in this instance 
+be the perl implementation, or the library you wrote and pointed me to above 
+as a potential replacement for it?
 
-% echo 'a    b' | sed -r 's/[ ]+/ /g' | cut -d' ' -f2
-b
+I suppose there's a certain amount of style in accusing me of reinventing the 
+wheel while pointing me at your reinvention of the wheel.  (Are you aiming to 
+replace Gnu's gmplib.org, the perhaps the BSD licensed one in openssh?  
+Dropbear uses Libtommath.  A quick google for C open source big number 
+libraries also found Libimath, MPI, NTL, BigDigits, decNumber, and MPI.  The 
+last time I personally wrote my own arbitrary precision math package from 
+scratch was in 1998, and that was in Java, so I'm a little rusty...)  But I 
+don't personally consider avoiding the need for an arbitrary precision math 
+library to be the same as reimplementing one.
 
-Unfortunately, 'sed -r' isn't in the opengroup.org list of required options,
-and sed 's/  / /g' doesn't DTRT for 3 or more blanks (as it won't recursively
-apply the change to a *new* double blank formed by the previous change).
+> 	-hpa
 
-
---==_Exmh_1231045675_3941P
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-Comment: Exmh version 2.5 07/13/2001
-
-iD8DBQFJYEQrcC3lWbTT17ARAjSfAJsFWvd16dO8/vFBSogpBUGHIGVVuQCdGYxs
-DB0Qw6+Ms3XwxrCB1klRqyo=
-=Eg7u
------END PGP SIGNATURE-----
-
---==_Exmh_1231045675_3941P--
+Rob
