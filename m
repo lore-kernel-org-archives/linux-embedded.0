@@ -1,58 +1,61 @@
-From: "Leon Woestenberg" <leon.woestenberg@gmail.com>
-Subject: Re: [PATCH V2 00/16] Squashfs: compressed read-only filesystem
-Date: Sun, 4 Jan 2009 20:04:49 +0100
-Message-ID: <c384c5ea0901041104m31363264qd17d0181865c276@mail.gmail.com>
-References: <E1Kv0C3-0006GU-ES@dylan>
-	 <20081028192919.94def38b.akpm@linux-foundation.org>
-	 <49606B7C.7050403@lougher.demon.co.uk>
+From: Rob Landley <rob@landley.net>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Sun, 4 Jan 2009 14:19:11 -0600
+Message-ID: <200901041419.11569.rob@landley.net>
+References: <200901020207.30359.rob@landley.net> <200901031945.35163.rob@landley.net> <20090104080931.GA31198@uranus.ravnborg.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1760447AbZADTFT@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:to
-         :subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references;
-        bh=l5W+jarIHgxckxE4jAofNViFuX3g01OiERCBSB2FC40=;
-        b=feCdCb5WVSYl3CuzWu/cUkfd/oBvP7mOi/Zu8EVURWe2FzlqJyYG3F8FPkhGuSqm/Y
-         CiYoJgnq3qJN71Yf3bImUJOqhlgqNTlBwhRfd/25Q8wMKxIdNdM3gEgvoRrmCavzdoUL
-         S0E2C5Naa2ELSq+8qAPRQuZocGpAGN0c87XFE=
-In-Reply-To: <49606B7C.7050403@lougher.demon.co.uk>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090104080931.GA31198@uranus.ravnborg.org>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com, linux-next@vger.kernel.org, sfr@canb.auug.org.au
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Matthieu CASTET <matthieu.castet@parrot.com>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
 
-Hello,
-
-On Sun, Jan 4, 2009 at 8:55 AM, Phillip Lougher
-<phillip@lougher.demon.co.uk> wrote:
->> - what are the limitations of squashfs (please add this to the
->>  changelog of patch #1 or something).  Does it support nfsd? (yes, it
->>  does!)  xatrs and acls?  File size limits, entries-per-directory,
->>  etc, etc?
+On Sunday 04 January 2009 02:09:31 Sam Ravnborg wrote:
+> On Sat, Jan 03, 2009 at 07:45:34PM -0600, Rob Landley wrote:
+> > Since you're turning down an existing patch in favor of a theoretical
+> > patch, I assume you have plans to do this yourself?
 >
-> Xattrs and acls are not supported, this is a todo.
-> Filesize limits are in theory 2^64.  In practice about 2 TiB.
+> If noone else beats me I will do so - yes.
+
+Ok.
+
+> > >   And this must be in a single program that can process
+> > >   all headers in one go so the install process becomes so fast
+> > >   that we do not worry about if it was done before or not.
+> > >   Then we can avoid all the .* files in the directory
+> > >   where we isntall the headers.
+> >
+> > What if they run out of disk space halfway through writing a file and
+> > thus it creates a short file (or a 0 length file where the dentry was
+> > created but no blocks could be allocated for the write)?
 >
-...
+> Then they fail and make will know. Then may leave a file or 100
+> but it still failed. At next run everything will be done right
+> assuming the culprint has been fixed.
+
+Ok, so the important thing is propagating failures up to the exit code, then?
+
+When making this patch I hit a problem that the exit code of "unifdef" seems 
+to depend on whether it found anything to remove within the file it was 
+processing, so when I changed the caller to actually care about its exit code 
+it spontaneously aborted.
+
+Fixing that probably does require changing unifdef.c.
+
+> > I can try to make the shell version more readable, and more powerful. 
+> > It's already noticeably faster than the perl version.  I have no
+> > objections to making unifdef do all of this, I just haven't got any
+> > interest either.
 >
-> Ok.  I'll re-spin the patches against 2.6.28 tomorrow (Sunday), and I'll
-> prepare a tree for linux-next.
->
+> I have no interest in merging a shell version.
 
-For use cases such as embedded firmware, the limitations are
-non-interesting, and the compression savings are very interesting.
-Especially where the resulting filesystem has to creep through slow
-wires such as half duplex serial links etc.
+*shrug*  Ok.  I await your C version, and have a workable patch meeting my own 
+needs in the meantime.
 
-Have been using squashfs 2.2 up to 3.4 without problems for years, for
-distribution of Linux based firmwares into embedded devices.
+Thanks,
 
-Many thanks for your continued efforts on mainlining squashfs,
-
-Regards,
--- 
-Leon
+Rob
