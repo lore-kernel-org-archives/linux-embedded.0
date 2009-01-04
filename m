@@ -1,39 +1,41 @@
-From: Jamie Lokier <jamie@shareable.org>
+From: "H. Peter Anvin" <hpa@zytor.com>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Sun, 4 Jan 2009 02:36:09 +0000
-Message-ID: <20090104023609.GA20929@shareable.org>
-References: <200901020207.30359.rob@landley.net> <c384c5ea0901031454n451bc899w166bb146c96f6164@mail.gmail.com> <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net>
+Date: Sat, 03 Jan 2009 18:39:27 -0800
+Message-ID: <4960215F.8040804@zytor.com>
+References: <200901020207.30359.rob@landley.net> <c384c5ea0901031454n451bc899w166bb146c96f6164@mail.gmail.com> <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net> <20090104023609.GA20929@shareable.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <200901032006.47652.rob@landley.net>
+In-Reply-To: <20090104023609.GA20929@shareable.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Rob Landley <rob@landley.net>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Leon Woestenberg <leon.woestenberg@gmail.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Rob Landley <rob@landley.net>, Leon Woestenberg <leon.woestenberg@gmail.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
 
-Rob Landley wrote:
-> This doesn't _need_ bignum support.  It maxes out around 72 bits and
-> the _result_ can't use more than about $SHIFT bits because you're
-> dividing by the amount you shifted, so just chop off the bottom 32
-> bits, do a normal 64 bit division on the top (it has to fit), and
-> then do the same division on the appropriate shifted remainder, and
-> combine the results.  This is easy because when the shift _is_ 32
-> bits or more, the bottom 32 bits all have to be zeroes so you don't
-> even have to mask and add, just shift the remainder left 32 bits so
-> you can continue the divide.
+Jamie Lokier wrote:
 > 
-> Pulling out perl isn't always a good alternative to thinking about
-> the problem.
+> Related query:
+> 
+> Does the Perl script being replaced use 64-bit arithmetic?  Because
+> many Perl installations only do 32-bit arithmetic.
+> 
+> If the Perl version works in 32-bit arithmetic, why does the shell
+> version not do the same thing?
+> 
 
-Related query:
+The Perl version uses Math::BigInt, a Perl standard module (with a
+canned-values fallback for ancient or minimal Perl installations) to do
+arbitrary precision arithmetic.
 
-Does the Perl script being replaced use 64-bit arithmetic?  Because
-many Perl installations only do 32-bit arithmetic.
+The original version also produced constants that could be used with
+64-bit values, but since gcc doesn't support 128-bit arithmetic on
+32-bit platforms (gcc *does* support 128-bit arithmetic on 64-bit
+platforms) we didn't end up using it and removed them, although the code
+to generate them can still be activated.
 
-If the Perl version works in 32-bit arithmetic, why does the shell
-version not do the same thing?
+	-hpa
 
--- Jamie
+-- 
+H. Peter Anvin, Intel Open Source Technology Center
+I work for Intel.  I don't speak on their behalf.
