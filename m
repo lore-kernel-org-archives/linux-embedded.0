@@ -1,76 +1,50 @@
 From: Rob Landley <rob@landley.net>
-Subject: PATCH [3/3]: Convert kernel/cpu/mkcapflags.pl to kernel/cpu/mkcapflags.sh
-Date: Sat, 3 Jan 2009 19:29:31 -0600
-Message-ID: <200901031929.32074.rob@landley.net>
-References: <200901020207.30359.rob@landley.net> <200901031924.15869.rob@landley.net>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Sat, 3 Jan 2009 19:32:32 -0600
+Message-ID: <200901031932.33003.rob@landley.net>
+References: <200901020207.30359.rob@landley.net> <200901020513.19593.rob@landley.net> <495E3AF8.6000006@parrot.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200901031924.15869.rob@landley.net>
+In-Reply-To: <495E3AF8.6000006@parrot.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
-Cc: linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Matthieu CASTET <matthieu.castet@parrot.com>
+Cc: Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
 
-RnJvbTogUm9iIExhbmRsZXkgPHJvYkBsYW5kbGV5Lm5ldD4KCkNvbnZlcnQga2VybmVsL2NwdS9t
-a2NhcGZsYWdzLnBsIHRvIGtlcm5lbC9jcHUvbWtjYXBmbGFncy5zaC4KClRoaXMgc2NyaXB0IGdl
-bmVyYXRlcyBrZXJuZWwvY3B1L2NhcGZsYWdzLmMgZnJvbSBpbmNsdWRlL2FzbS9jcHVmZWF0dXJl
-LmguCgpDaGFuZ2VzIGZyb20gbGFzdCB0aW1lOiBjaGFuZ2VkIHNoZWJhbmcgdG8gIyEvYmluL3No
-IGFuZCB0ZXN0ZWQgdW5kZXIgYmFzaAphbmQgZGFzaC4KClNpZ25lZC1vZmYtYnk6IFJvYiBMYW5k
-bGV5IDxyb2JAbGFuZGxleS5uZXQ+Ci0tLQoKIGFyY2gveDg2L2tlcm5lbC9jcHUvTWFrZWZpbGUg
-ICAgICB8ICAgIDQgKy0tCiBhcmNoL3g4Ni9rZXJuZWwvY3B1L21rY2FwZmxhZ3MucGwgfCAgIDMy
-IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIGFyY2gveDg2L2tlcm5lbC9jcHUvbWtjYXBm
-bGFncy5zaCB8ICAgMjggKysrKysrKysrKysrKysrKysrKysrKysrCiAzIGZpbGVzIGNoYW5nZWQs
-IDMwIGluc2VydGlvbnMoKyksIDM0IGRlbGV0aW9ucygtKQoKZGlmZiAtcnVOIGxpbnV4LTIuNi4y
-OC9hcmNoL3g4Ni9rZXJuZWwvY3B1L01ha2VmaWxlIGxpbnV4LTIuNi4yOC1uZXcvYXJjaC94ODYv
-a2VybmVsL2NwdS9NYWtlZmlsZQotLS0gbGludXgtMi42LjI4L2FyY2gveDg2L2tlcm5lbC9jcHUv
-TWFrZWZpbGUJMjAwOC0xMi0yNCAxNzoyNjozNy4wMDAwMDAwMDAgLTA2MDAKKysrIGxpbnV4LTIu
-Ni4yOC1uZXcvYXJjaC94ODYva2VybmVsL2NwdS9NYWtlZmlsZQkyMDA5LTAxLTAyIDAxOjEwOjAw
-LjAwMDAwMDAwMCAtMDYwMApAQCAtMjMsMTAgKzIzLDEwIEBACiBvYmotJChDT05GSUdfWDg2X0xP
-Q0FMX0FQSUMpICs9IHBlcmZjdHItd2F0Y2hkb2cubwogCiBxdWlldF9jbWRfbWtjYXBmbGFncyA9
-IE1LQ0FQICAgJEAKLSAgICAgIGNtZF9ta2NhcGZsYWdzID0gJChQRVJMKSAkKHNyY3RyZWUpLyQo
-c3JjKS9ta2NhcGZsYWdzLnBsICQ8ICRACisgICAgICBjbWRfbWtjYXBmbGFncyA9ICQoQ09ORklH
-X1NIRUxMKSAkKHNyY3RyZWUpLyQoc3JjKS9ta2NhcGZsYWdzLnNoICQ8ICRACiAKIGNwdWZlYXR1
-cmUgPSAkKHNyYykvLi4vLi4vaW5jbHVkZS9hc20vY3B1ZmVhdHVyZS5oCiAKIHRhcmdldHMgKz0g
-Y2FwZmxhZ3MuYwotJChvYmopL2NhcGZsYWdzLmM6ICQoY3B1ZmVhdHVyZSkgJChzcmMpL21rY2Fw
-ZmxhZ3MucGwgRk9SQ0UKKyQob2JqKS9jYXBmbGFncy5jOiAkKGNwdWZlYXR1cmUpICQoc3JjKS9t
-a2NhcGZsYWdzLnNoIEZPUkNFCiAJJChjYWxsIGlmX2NoYW5nZWQsbWtjYXBmbGFncykKZGlmZiAt
-cnVOIGxpbnV4LTIuNi4yOC9hcmNoL3g4Ni9rZXJuZWwvY3B1L21rY2FwZmxhZ3MucGwgbGludXgt
-Mi42LjI4LW5ldy9hcmNoL3g4Ni9rZXJuZWwvY3B1L21rY2FwZmxhZ3MucGwKLS0tIGxpbnV4LTIu
-Ni4yOC9hcmNoL3g4Ni9rZXJuZWwvY3B1L21rY2FwZmxhZ3MucGwJMjAwOC0xMi0yNCAxNzoyNjoz
-Ny4wMDAwMDAwMDAgLTA2MDAKKysrIGxpbnV4LTIuNi4yOC1uZXcvYXJjaC94ODYva2VybmVsL2Nw
-dS9ta2NhcGZsYWdzLnBsCTE5NjktMTItMzEgMTg6MDA6MDAuMDAwMDAwMDAwIC0wNjAwCkBAIC0x
-LDMyICswLDAgQEAKLSMhL3Vzci9iaW4vcGVybAotIwotIyBHZW5lcmF0ZSB0aGUgeDg2X2NhcF9m
-bGFnc1tdIGFycmF5IGZyb20gaW5jbHVkZS9hc20teDg2L2NwdWZlYXR1cmUuaAotIwotCi0oJGlu
-LCAkb3V0KSA9IEBBUkdWOwotCi1vcGVuKElOLCAiPCAkaW5cMCIpICAgb3IgZGllICIkMDogY2Fu
-bm90IG9wZW46ICRpbjogJCFcbiI7Ci1vcGVuKE9VVCwgIj4gJG91dFwwIikgb3IgZGllICIkMDog
-Y2Fubm90IGNyZWF0ZTogJG91dDogJCFcbiI7Ci0KLXByaW50IE9VVCAiI2luY2x1ZGUgPGFzbS9j
-cHVmZWF0dXJlLmg+XG5cbiI7Ci1wcmludCBPVVQgImNvbnN0IGNoYXIgKiBjb25zdCB4ODZfY2Fw
-X2ZsYWdzW05DQVBJTlRTKjMyXSA9IHtcbiI7Ci0KLXdoaWxlIChkZWZpbmVkKCRsaW5lID0gPElO
-PikpIHsKLQlpZiAoJGxpbmUgPX4gL15ccypcI1xzKmRlZmluZVxzKyhYODZfRkVBVFVSRV8oXFMr
-KSlccysoLiopJC8pIHsKLQkJJG1hY3JvID0gJDE7Ci0JCSRmZWF0dXJlID0gJDI7Ci0JCSR0YWls
-ID0gJDM7Ci0JCWlmICgkdGFpbCA9fiAvXC9cKlxzKlwiKFteIl0qKVwiLipcKlwvLykgewotCQkJ
-JGZlYXR1cmUgPSAkMTsKLQkJfQotCi0JCWlmICgkZmVhdHVyZSBuZSAnJykgewotCQkJcHJpbnRm
-IE9VVCAiXHQlLTMycyA9IFwiJXNcIixcbiIsCi0JCQkJIlskbWFjcm9dIiwgIlxMJGZlYXR1cmUi
-OwotCQl9Ci0JfQotfQotcHJpbnQgT1VUICJ9O1xuIjsKLQotY2xvc2UoSU4pOwotY2xvc2UoT1VU
-KTsKZGlmZiAtcnVOIGxpbnV4LTIuNi4yOC9hcmNoL3g4Ni9rZXJuZWwvY3B1L21rY2FwZmxhZ3Mu
-c2ggbGludXgtMi42LjI4LQpuZXcvYXJjaC94ODYva2VybmVsL2NwdS9ta2NhcGZsYWdzLnNoCi0t
-LSBsaW51eC0yLjYuMjgvYXJjaC94ODYva2VybmVsL2NwdS9ta2NhcGZsYWdzLnNoCTE5NjktMTIt
-MzEgMTg6MDA6MDAuMDAwMDAwMDAwIC0wNjAwCisrKyBsaW51eC0yLjYuMjgtbmV3L2FyY2gveDg2
-L2tlcm5lbC9jcHUvbWtjYXBmbGFncy5zaAkyMDA5LTAxLTAyIDAxOjEwOjAwLjAwMDAwMDAwMCAt
-MDYwMApAQCAtMCwwICsxLDI4IEBACisjIS9iaW4vc2gKKyMKKyMgR2VuZXJhdGUgdGhlIHg4Nl9j
-YXBfZmxhZ3NbXSBhcnJheSBmcm9tIGluY2x1ZGUvYXNtL2NwdWZlYXR1cmUuaAorIworCitJTj0k
-MQorT1VUPSQyCisKKygKKwllY2hvICIjaW5jbHVkZSA8YXNtL2NwdWZlYXR1cmUuaD4iCisJZWNo
-byAiIgorCWVjaG8gImNvbnN0IGNoYXIgKiBjb25zdCB4ODZfY2FwX2ZsYWdzW05DQVBJTlRTKjMy
-XSA9IHsiCisKKwkjIEl0ZXJhdGUgdGhyb3VnaCBhbnkgaW5wdXQgbGluZXMgc3RhcnRpbmcgd2l0
-aCAjZGVmaW5lIFg4Nl9GRUFUVVJFXworCXNlZCAtbiAtZSAncy9cdC8gL2cnIC1lICdzL14gKiMg
-KmRlZmluZSAqWDg2X0ZFQVRVUkVfLy9wJyAkSU4gfAorCXdoaWxlIHJlYWQgaQorCWRvCisJCSMg
-TmFtZSBpcyBldmVyeXRoaW5nIHVwIHRvIHRoZSBmaXJzdCB3aGl0ZXNwYWNlCisJCU5BTUU9IiQo
-ZWNobyAiJGkiIHwgc2VkICdzLyAuKi8vJykiCisKKwkJIyBJZiB0aGUgLyogY29tbWVudCAqLyBz
-dGFydHMgd2l0aCBhIHF1b3RlIHN0cmluZywgZ3JhYiB0aGF0LgorCQlWQUxVRT0iJChlY2hvICIk
-aSIgfCBzZWQgLW4gJ3NALiovXCogKlwoIlteIl0qIlwpLipcKi9AXDFAcCcpIgorCQlbIC16ICIk
-VkFMVUUiIF0gJiYgVkFMVUU9IlwiJChlY2hvICIkTkFNRSIgfCB0ciBBLVogYS16KVwiIgorCisJ
-CVsgIiRWQUxVRSIgIT0gJyIiJyBdICYmIGVjaG8gIglbWDg2X0ZFQVRVUkVfJE5BTUVdID0gJFZB
-TFVFLCIKKwlkb25lCisJZWNobyAifTsiCispID4gJE9VVAoACg==
+On Friday 02 January 2009 10:04:08 Matthieu CASTET wrote:
+> Rob Landley a =C3=A9crit :
+> > On Friday 02 January 2009 03:26:37 Arkadiusz Miskiewicz wrote:
+> >> On Friday 02 of January 2009, Rob Landley wrote:
+> >>
+> >> Heh,
+> >
+> > I believe all three scripts run under dash and busybox ash.  (The
+> > timeconst.sh one needs 64 bit math which dash only provides on 64 b=
+it
+> > hosts, which is a regression from Red Hat 9 in 2003 by the way.
+>
+> With dash 0.5.4-12 (from debian sid), I seems I got the 64 bit math f=
+or
+> 32 bit hosts :
+> $ uname -m
+> i686
+> $ dash -c 'echo $((1<<32))'
+> 4294967296
+>
+>
+> Matthieu
+
+Alas, my attempt to install a 32 bit version of xubuntu 8.10 under qemu=
+ hung=20
+at "Scanning files: 15%", and has been there for an hour now.  I'll hav=
+e to=20
+take your word for it.  (All three scripts work fine under 64 bit dash.=
+)
+
+I encountered one bug in busybox, which I pinged that list about, but=20
+otherwise busybox ash works on 'em all too.
+
+Rob
