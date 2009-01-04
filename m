@@ -1,98 +1,43 @@
-From: Paul Mundt <lethal@linux-sh.org>
+From: Markus Heidelberg <markus.heidelberg@web.de>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Sun, 4 Jan 2009 12:06:20 +0900
-Message-ID: <20090104030619.GA21466@linux-sh.org>
-References: <200901020207.30359.rob@landley.net> <c384c5ea0901031454n451bc899w166bb146c96f6164@mail.gmail.com> <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net>
+Date: Sun, 4 Jan 2009 04:38:13 +0100
+Message-ID: <200901040438.14610.markus.heidelberg@web.de>
+References: <200901020207.30359.rob@landley.net> <c384c5ea0901031637k3b571313m934c8881dce1c81@mail.gmail.com> <200901032054.00018.rob@landley.net>
+Reply-To: markus.heidelberg@web.de
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <200901032054.00018.rob@landley.net>
 Content-Disposition: inline
-In-Reply-To: <200901032006.47652.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Rob Landley <rob@landley.net>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Leon Woestenberg <leon.woestenberg@gmail.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
+Cc: Leon Woestenberg <leon.woestenberg@gmail.com>, "H. Peter Anvin" <hpa@zytor.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
 
-On Sat, Jan 03, 2009 at 08:06:47PM -0600, Rob Landley wrote:
-> On Saturday 03 January 2009 17:03:11 H. Peter Anvin wrote:
-> > Leon Woestenberg wrote:
-> > > I agree with Rob that the amount of required dependencies should be
-> > > kept to a minimum.
-> > >
-> > > If we only use 0.5% of a certain language (or: dependent package),
-> > > then rather implement that 0.5% in the existing language.
-> > >
-> > > Dependencies very quickly become dependency hell. If A requires B,
-> > > then A also inherits all (future) requirements of B, etc. etc.
-> > >
-> > > In my daily software development work with Linux and GNU software in
-> > > general, 10% of it is spent fighting/removing these extremely "thin"
-> > > or false depencies, so that it is usuable in embedded devices.
-> >
-> > First of all, I largely consider this a joke.
+Rob Landley, 04.01.2009:
+> On Saturday 03 January 2009 18:37:12 Leon Woestenberg wrote:
+> > My argument on thin dependencies indeed mostly holds for run-time
+> > dependencies (to reduce size) but also for build dependency (to reduce
+> > complexity)*.
 > 
-> Yes, I've noticed this.  The fact multiple other people do _not_ consider this 
-> a joke doesn't seem to have sunk in yet.
+> I usually just point to the gnucash 1.6 release as where this sort of thing 
+> leads if you ignore it long enough:
+> http://lwn.net/2001/0614/
 > 
-Let's look at the rationale presented so far in this thread:
+> These days, a more modern example is the way that after even the gentoo folks 
+> gave up on trying to build openoffice (and shipped prebuilt binaries of it in 
+> their "build everything from source code" OS), Open Office's own developers 
+> described that project "profoundly sick" and "stagnating" ( 
+> http://developers.slashdot.org/article.pl?sid=08/12/28/0124230 ).
 
-	1 - Being able to build the kernel natively on a constrained
-	target is useful, regardless of whether it is being used for
-	regression/stress testing or for headers installation or whatever
-	else.
+Now that you mention this the second time, I have to ask where you have
+this information from. Since I use Gentoo, I was always able to compile
+OpenOffice (version 1, 2 and now 3) myself.
 
-	2 - Cross-compiling perl is hard.
+At the same time, it was always possible to use prebuilt packages as an
+alternative - the same way as it is possible for a few other packages
+(Firefox, Thunderbird, Seamonkey, maybe more). But AFAIK compiling from
+source is still the preferred method.
 
-	3 - Some oddly constrained target distributions manage to ship
-	with an entire toolchain yet fail to provide any implementation
-	of perl.
-
-	4 - It wasn't required before.
-
-If there is anything I missed, feel free to add it to the list. It was
-difficult to extract even those 4 from the ranting.
-
-#1 is a logical fallacy. If you have enough space and CPU power and
-complete build environment to crunch away at the kernel for stress
-testing natively, you can do the same with building perl and negating
-point #2. This is especially true for NFS root filesystems where one is
-not space constrained during the development phase.
-
-#2 is another byproduct of your environment and generally a non-issue.
-There are plenty of options around having to cross-compile perl, and for
-those that still insist on doing so, people have been doing it long
-enough to be aware of the pitfalls involved. It is not a pleasant
-experience, but that is again entire your problem and entirely
-constrained to your environment.
-
-#3 seems to have come up a surprising number of times, and again seems to
-originate from the fact that no one wants to be bothered with #2 whilst
-putting together their oddly constrained rootfs. So far no one has
-actually posted any coherent rationale as to why these distributions are
-shipping with a full gcc/binutils/etc. environment yet are unable to
-supply perl. Obviously size is not a factor if it ships with a full build
-environment otherwise, so this suggests that the only logical objection
-to fixing up the distributions stems from #4.
-
-As far as #4 goes, I have a hard time seeing why this should be anyone's
-problem. Progress is not made by restricting people to the way things
-were, progress is made by adapting to new things as they come along. In
-the case of the perl scripts provided, perl was picked by the developer
-in question as the right tool for the job, and things generally went
-along pretty smoothly. Given that one has a reasonable expectation of
-perl being available on the vast majority of systems today, this is
-hardly an unrealistic tool to leverage for use within the kernel scripts.
-
-The perl dependency has never been an issue for me on any of the
-platforms I routinely work on, ranging from tiny microcontrollers to
-multi-node NUMA and SMP configurations and everything in between. In
-places where the target is capable of building natively, I have no qualms
-with building a reasonable development environment. And in places where
-builds are unrealistic, I will do them on the host instead. This has
-always been the way things were, and I find the implication that the
-majority of the embedded development community sits fixedly on #3 to be
-completely ridiculous. I will repeat again that no one has provided a
-_single_ reason for why they are unable to provide perl within their
-constrained environment. Until that happens, this entire thread is a
-joke.
+Markus
