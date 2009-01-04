@@ -1,54 +1,55 @@
-From: Michal Jaegermann <michal@ellpspace.math.ualberta.ca>
-Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with
-	kernel/timeconst.sh
-Date: Sun, 4 Jan 2009 00:15:55 -0700
-Message-ID: <20090104071555.GA1074@ellpspace.math.ualberta.ca>
-References: <200901020207.30359.rob@landley.net> <200901020213.30658.rob@landley.net> <200901031328.23079.ioe-lkml@rameria.de> <200901031936.04642.rob@landley.net>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Sun, 4 Jan 2009 09:09:31 +0100
+Message-ID: <20090104080931.GA31198@uranus.ravnborg.org>
+References: <200901020207.30359.rob@landley.net> <200901031346.01325.rob@landley.net> <20090103201059.GA4875@uranus.ravnborg.org> <200901031945.35163.rob@landley.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <200901031936.04642.rob@landley.net>
+In-Reply-To: <200901031945.35163.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="macroman"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 To: Rob Landley <rob@landley.net>
-Cc: Ingo Oeser <ioe-lkml@rameria.de>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+Cc: Matthieu CASTET <matthieu.castet@parrot.com>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
 
-On Sat, Jan 03, 2009 at 07:36:04PM -0600, Rob Landley wrote:
-> On Saturday 03 January 2009 06:28:22 Ingo Oeser wrote:
-> > > +for i in "MSEC 1000" "USEC 1000000"
-> > > +do
-> > > +	NAME=3D$(echo $i | awk '{print $1}')
+On Sat, Jan 03, 2009 at 07:45:34PM -0600, Rob Landley wrote:
+> > With respect to your three patches the plan is to:
+> > - add the updated timeconst patch to kbuild-next
+> > - add the updated cpu-feature patch to kbuild-next
 > >
-> > cut -d' ' -f1  does the same
-> >
-> > > +	PERIOD=3D$(echo $i | awk '{print $2}')
-> >
-> > cut -d' ' -f2  does the same
->=20
-> From a standards perspective=20
-> http://www.opengroup.org/onlinepubs/9699919799/utilities/cut.html vs=20
-> http://www.opengroup.org/onlinepubs/9699919799/utilities/awk.html is =
-probably=20
-> a wash, but from a simplicity perspective using the tool that _isn't_=
- its own=20
-> programming language is probably a win. :)
+> > - the patch touching headers_install will not be merged.
+> >   The way forward for headers_install is to combine the
+> >   unifdef feature and the header modifications.
+> 
+> Since you're turning down an existing patch in favor of a theoretical patch, I 
+> assume you have plans to do this yourself?
 
-Vagaries of 'cut' aside you can limit yourself here to just shell:
+If noone else beats me I will do so - yes.
+> 
+> >   And this must be in a single program that can process
+> >   all headers in one go so the install process becomes so fast
+> >   that we do not worry about if it was done before or not.
+> >   Then we can avoid all the .* files in the directory
+> >   where we isntall the headers.
+> 
+> What if they run out of disk space halfway through writing a file and thus it 
+> creates a short file (or a 0 length file where the dentry was created but no 
+> blocks could be allocated for the write)?
 
-set_name_period () {
-   NAME=3D$1 ; PERIOD=3D$2
-}
-for i in "MSEC 1000" "USEC 1000000"
-do
-   set_name_period $i
-=2E...
-done
+Then they fail and make will know. Then may leave a file or 100
+but it still failed. At next run everything will be done right
+assuming the culprint has been fixed.
 
-or you may skip a shell function and do 'set $i' within a loop plus
-assignments of $1 and $2 to NAME and PERIOD but that overwrites origina=
-l
-positional parameters (which may be already not important).
+> I can try to make the shell version more readable, and more powerful.  It's 
+> already noticeably faster than the perl version.  I have no objections to 
+> making unifdef do all of this, I just haven't got any interest either.
 
-   Micha=C5=82
+I have no interest in merging a shell version.
+I clearly expressed above that we need a _single_ program doing
+all of the preparations and we do not need a reimplmentatio of the
+current headers_install.
+I also explained why.
+
+	Sam
