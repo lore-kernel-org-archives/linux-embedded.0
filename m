@@ -1,55 +1,60 @@
-From: Sam Ravnborg <sam@ravnborg.org>
+From: "Leon Woestenberg" <leon.woestenberg@gmail.com>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Sun, 4 Jan 2009 09:09:31 +0100
-Message-ID: <20090104080931.GA31198@uranus.ravnborg.org>
-References: <200901020207.30359.rob@landley.net> <200901031346.01325.rob@landley.net> <20090103201059.GA4875@uranus.ravnborg.org> <200901031945.35163.rob@landley.net>
+Date: Sun, 4 Jan 2009 11:23:39 +0100
+Message-ID: <c384c5ea0901040223l6e53f041s9f7cdea20c9d1d8d@mail.gmail.com>
+References: <200901020207.30359.rob@landley.net>
+	 <c384c5ea0901031454n451bc899w166bb146c96f6164@mail.gmail.com>
+	 <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net>
+	 <20090104030619.GA21466@linux-sh.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=22DZXhM/Uqi6Kk28mjdtCh1K7G9pJelDgG1grXlpnPc=;
+        b=UlSpzLMX1t9ouha6aHzKSK9r94odM7+r3rjZgwZ3BRTMdkkJ3buOKw5aOluvGfsfh/
+         GPODg43pI8eFyv6FDrvua7QmQtk8SaHZ8r/i4HBZJ7U9pJLfgBp/fMm4iITteL8v0njt
+         lUfVXxQlwPh6rG3qLHN5c2MKjuCykPF2V2Cuc=
+In-Reply-To: <20090104030619.GA21466@linux-sh.org>
 Content-Disposition: inline
-In-Reply-To: <200901031945.35163.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Rob Landley <rob@landley.net>
-Cc: Matthieu CASTET <matthieu.castet@parrot.com>, Arkadiusz Miskiewicz <a.miskiewicz@gmail.com>, linux-kernel@vger.kernel.org, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
+To: Paul Mundt <lethal@linux-sh.org>, Rob Landley <rob@landley.net>, "H. Peter Anvin" <hpa@zytor.com>, Leon Woestenberg <leon.woestenberg@gmail.com>, Embedded Linux mailing list <>
 
-On Sat, Jan 03, 2009 at 07:45:34PM -0600, Rob Landley wrote:
-> > With respect to your three patches the plan is to:
-> > - add the updated timeconst patch to kbuild-next
-> > - add the updated cpu-feature patch to kbuild-next
-> >
-> > - the patch touching headers_install will not be merged.
-> >   The way forward for headers_install is to combine the
-> >   unifdef feature and the header modifications.
-> 
-> Since you're turning down an existing patch in favor of a theoretical patch, I 
-> assume you have plans to do this yourself?
+Hello,
 
-If noone else beats me I will do so - yes.
-> 
-> >   And this must be in a single program that can process
-> >   all headers in one go so the install process becomes so fast
-> >   that we do not worry about if it was done before or not.
-> >   Then we can avoid all the .* files in the directory
-> >   where we isntall the headers.
-> 
-> What if they run out of disk space halfway through writing a file and thus it 
-> creates a short file (or a 0 length file where the dentry was created but no 
-> blocks could be allocated for the write)?
+On Sun, Jan 4, 2009 at 4:06 AM, Paul Mundt <lethal@linux-sh.org> wrote:
+> Let's look at the rationale presented so far in this thread:
+>
+>        1 - Being able to build the kernel natively on a constrained
+>        target is useful, regardless of whether it is being used for
+>        regression/stress testing or for headers installation or whatever
+>        else.
+>
+>        2 - Cross-compiling perl is hard.
+>
+>        3 - Some oddly constrained target distributions manage to ship
+>        with an entire toolchain yet fail to provide any implementation
+>        of perl.
+>
+>        4 - It wasn't required before.
+>
+> If there is anything I missed, feel free to add it to the list. It was
+> difficult to extract even those 4 from the ranting.
+>
 
-Then they fail and make will know. Then may leave a file or 100
-but it still failed. At next run everything will be done right
-assuming the culprint has been fixed.
+2 is not hard.
 
-> I can try to make the shell version more readable, and more powerful.  It's 
-> already noticeably faster than the perl version.  I have no objections to 
-> making unifdef do all of this, I just haven't got any interest either.
+5. Tool *version* dependency is hard to get right. When cross-building
+30 software packages all requiring native perl, we probably need to
+build a few versions of perl (native), one for each set of packages.
 
-I have no interest in merging a shell version.
-I clearly expressed above that we need a _single_ program doing
-all of the preparations and we do not need a reimplmentatio of the
-current headers_install.
-I also explained why.
 
-	Sam
+
+Regards,
+-- 
+Leon
