@@ -1,65 +1,125 @@
-From: Bernd Petrovitsch <bernd@firmix.at>
-Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with
-	kernel/timeconst.sh
-Date: Mon, 05 Jan 2009 11:46:18 +0100
-Message-ID: <1231152378.3326.14.camel@gimli.at.home>
-References: <200901020207.30359.rob@landley.net>
-	 <200901031936.04642.rob@landley.net>
-	 <25035.1231045675@turing-police.cc.vt.edu>
-	 <200901040043.08577.rob@landley.net> <20090104221356.GA32357@shareable.org>
-	 <1231114530.3310.6.camel@gimli.at.home>
-	 <20090105022349.GB1345@shareable.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090105022349.GB1345@shareable.org>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+From: Phillip Lougher <phillip@lougher.demon.co.uk>
+Subject: [PATCH V3 08/17] Squashfs: fragment block operations
+Date: Mon, 05 Jan 2009 11:08:23 +0000
+Message-ID: <E1LJnJn-0002Lc-Rx@dylan.lougher.demon.co.uk>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-To: Jamie Lokier <jamie@shareable.org>
-Cc: Rob Landley <rob@landley.net>, Valdis.Kletnieks@vt.edu, Ingo Oeser <ioe-lkml@rameria.de>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+Content-Transfer-Encoding: 7bit
+To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com, sfr@canb.auug.org.au
 
-On Mon, 2009-01-05 at 02:23 +0000, Jamie Lokier wrote:
-> Bernd Petrovitsch wrote:
-> > > (I have 850 Linux boxes on my network with a bourne shell which
-> > > doesn't do $((...)).  I won't be building kernels on them though :-)
-> > 
-> > Believe it or not, but there are folks out there who build the firmware
-> > on ARM 200 MHz NFS-mounted systems natively  (and not simply
-> > cross-compile it on a 2GHz PC .....).
-> 
-> Really?
-> 
-> My 850 Linux boxes are 166MHz ARMs and occasionally NFS-mounted.
-> Their /bin/sh does not do $((...)), and Bash is not there at all.
 
-I assume that the NFS-mounted root filesystem is a real distribution.
-And on the local flash is a usual busybox based firmware.
+Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
+---
+ fs/squashfs/fragment.c |   98 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 98 insertions(+), 0 deletions(-)
 
-> If I were installing GCC natively on them, I'd install GNU Make and a
-> proper shell while I were at it.  But I don't know if Bash works
-
-ACK.
-
-> properly without fork()* - or even if GCC does :-)
-> 
-> Perl might be hard, as shared libraries aren't supported by the
-> toolchain which targets my ARMs* and Perl likes its loadable modules.
-
-The simplest way to go is probably to use CentOS or Debian or another
-ready binary distribution on ARM (or MIPS or PPC or whatever core the
-embedded system has) possibly on a custom build kernel (if necessary).
-
-[...]
-> (* - No MMU on some ARMs, but I'm working on ARM FDPIC-ELF to add
->      proper shared libs.  Feel free to fund this :-)
-
-The above mentioned ARMs have a MMU. Without MMU, it would be truly
-insane IMHO.
-
-	Bernd
+diff --git a/fs/squashfs/fragment.c b/fs/squashfs/fragment.c
+new file mode 100644
+index 0000000..b5a2c15
+--- /dev/null
++++ b/fs/squashfs/fragment.c
+@@ -0,0 +1,98 @@
++/*
++ * Squashfs - a compressed read only filesystem for Linux
++ *
++ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
++ * Phillip Lougher <phillip@lougher.demon.co.uk>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2,
++ * or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
++ *
++ * fragment.c
++ */
++
++/*
++ * This file implements code to handle compressed fragments (tail-end packed
++ * datablocks).
++ *
++ * Regular files contain a fragment index which is mapped to a fragment
++ * location on disk and compressed size using a fragment lookup table.
++ * Like everything in Squashfs this fragment lookup table is itself stored
++ * compressed into metadata blocks.  A second index table is used to locate
++ * these.  This second index table for speed of access (and because it
++ * is small) is read at mount time and cached in memory.
++ */
++
++#include <linux/fs.h>
++#include <linux/vfs.h>
++#include <linux/slab.h>
++#include <linux/zlib.h>
++
++#include "squashfs_fs.h"
++#include "squashfs_fs_sb.h"
++#include "squashfs_fs_i.h"
++#include "squashfs.h"
++
++/*
++ * Look-up fragment using the fragment index table.  Return the on disk
++ * location of the fragment and its compressed size
++ */
++int squashfs_frag_lookup(struct super_block *sb, unsigned int fragment,
++				u64 *fragment_block)
++{
++	struct squashfs_sb_info *msblk = sb->s_fs_info;
++	int block = SQUASHFS_FRAGMENT_INDEX(fragment);
++	int offset = SQUASHFS_FRAGMENT_INDEX_OFFSET(fragment);
++	u64 start_block = le64_to_cpu(msblk->fragment_index[block]);
++	struct squashfs_fragment_entry fragment_entry;
++	int size;
++
++	size = squashfs_read_metadata(sb, &fragment_entry, &start_block,
++					&offset, sizeof(fragment_entry));
++	if (size < 0)
++		return size;
++
++	*fragment_block = le64_to_cpu(fragment_entry.start_block);
++	size = le32_to_cpu(fragment_entry.size);
++
++	return size;
++}
++
++
++/*
++ * Read the uncompressed fragment lookup table indexes off disk into memory
++ */
++__le64 *squashfs_read_fragment_index_table(struct super_block *sb,
++	u64 fragment_table_start, unsigned int fragments)
++{
++	unsigned int length = SQUASHFS_FRAGMENT_INDEX_BYTES(fragments);
++	__le64 *fragment_index;
++	int err;
++
++	/* Allocate fragment lookup table indexes */
++	fragment_index = kmalloc(length, GFP_KERNEL);
++	if (fragment_index == NULL) {
++		ERROR("Failed to allocate fragment index table\n");
++		return ERR_PTR(-ENOMEM);
++	}
++
++	err = squashfs_read_table(sb, fragment_index, fragment_table_start,
++			length);
++	if (err < 0) {
++		ERROR("unable to read fragment index table\n");
++		kfree(fragment_index);
++		return ERR_PTR(err);
++	}
++
++	return fragment_index;
++}
 -- 
-Firmix Software GmbH                   http://www.firmix.at/
-mobil: +43 664 4416156                 fax: +43 1 7890849-55
-          Embedded Linux Development and Services
+1.5.6.3
+
