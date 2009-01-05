@@ -1,49 +1,65 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with kernel/timeconst.sh
-Date: Sun, 4 Jan 2009 23:08:26 -0600
-Message-ID: <200901042308.27275.rob@landley.net>
-References: <200901020207.30359.rob@landley.net> <200901020213.30658.rob@landley.net> <2c0942db0901041641v5546a1e2med4ca18fe8d2510f@mail.gmail.com>
+From: Bernd Petrovitsch <bernd@firmix.at>
+Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with
+	kernel/timeconst.sh
+Date: Mon, 05 Jan 2009 11:46:18 +0100
+Message-ID: <1231152378.3326.14.camel@gimli.at.home>
+References: <200901020207.30359.rob@landley.net>
+	 <200901031936.04642.rob@landley.net>
+	 <25035.1231045675@turing-police.cc.vt.edu>
+	 <200901040043.08577.rob@landley.net> <20090104221356.GA32357@shareable.org>
+	 <1231114530.3310.6.camel@gimli.at.home>
+	 <20090105022349.GB1345@shareable.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <2c0942db0901041641v5546a1e2med4ca18fe8d2510f@mail.gmail.com>
+In-Reply-To: <20090105022349.GB1345@shareable.org>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Ray Lee <ray-lk@madrabbit.org>
-Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Rob Landley <rob@landley.net>, Valdis.Kletnieks@vt.edu, Ingo Oeser <ioe-lkml@rameria.de>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
 
-On Sunday 04 January 2009 18:41:15 Ray Lee wrote:
-> On Fri, Jan 2, 2009 at 12:13 AM, Rob Landley <rob@landley.net> wrote:
-> > Replace kernel/timeconst.pl with kernel/timeconst.sh.  The new shell
-> > script is much simpler, about 1/4 the size, and runs on Red Hat 9 from
-> > 2003.
-> >
-> > Peter Anvin added this perl to 2.6.25.  Before that, the kernel had never
-> > required perl to build.
->
-> Nice work.
+On Mon, 2009-01-05 at 02:23 +0000, Jamie Lokier wrote:
+> Bernd Petrovitsch wrote:
+> > > (I have 850 Linux boxes on my network with a bourne shell which
+> > > doesn't do $((...)).  I won't be building kernels on them though :-)
+> > 
+> > Believe it or not, but there are folks out there who build the firmware
+> > on ARM 200 MHz NFS-mounted systems natively  (and not simply
+> > cross-compile it on a 2GHz PC .....).
+> 
+> Really?
+> 
+> My 850 Linux boxes are 166MHz ARMs and occasionally NFS-mounted.
+> Their /bin/sh does not do $((...)), and Bash is not there at all.
 
-Thanks.  You'll definitely want to look at the _second_ version of that patch 
-rather than the first, though. :)
+I assume that the NFS-mounted root filesystem is a real distribution.
+And on the local flash is a usual busybox based firmware.
 
-> As the computations can all be done in 64-bit precision
-> now, and there have been concerns expressed about some shells not
-> supporting 64 bit integers, is there any reason this can't be done
-> using long longs in C?
+> If I were installing GCC natively on them, I'd install GNU Make and a
+> proper shell while I were at it.  But I don't know if Bash works
 
-Nope.  Any of this could be done in C.  (And that's the approach Sam Ravnborg 
-prefers to take for the second patch in the series, upgrading unifdef.c to do 
-everything itself.)
+ACK.
 
-I tend to lean towards scripts that create header files rather than programs 
-that create header files, but as long as you remember to use HOSTCC it's 
-fairly straightforward. :)
+> properly without fork()* - or even if GCC does :-)
+> 
+> Perl might be hard, as shared libraries aren't supported by the
+> toolchain which targets my ARMs* and Perl likes its loadable modules.
 
-> Other than ruining a good bike shed argument, anyway.
+The simplest way to go is probably to use CentOS or Debian or another
+ready binary distribution on ARM (or MIPS or PPC or whatever core the
+embedded system has) possibly on a custom build kernel (if necessary).
 
-Oh pile on.  It beats being dismissed as the only one on the planet who cares 
-about the issue (again). :)
+[...]
+> (* - No MMU on some ARMs, but I'm working on ARM FDPIC-ELF to add
+>      proper shared libs.  Feel free to fund this :-)
 
-Rob
+The above mentioned ARMs have a MMU. Without MMU, it would be truly
+insane IMHO.
+
+	Bernd
+-- 
+Firmix Software GmbH                   http://www.firmix.at/
+mobil: +43 664 4416156                 fax: +43 1 7890849-55
+          Embedded Linux Development and Services
