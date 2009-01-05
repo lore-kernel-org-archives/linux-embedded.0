@@ -1,9 +1,9 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V3 09/17] Squashfs: uid/gid lookup operations
+Subject: [PATCH V3 07/17] Squashfs: export operations
 Date: Mon, 05 Jan 2009 11:08:23 +0000
-Message-ID: <E1LJnJn-0002Lh-TS@dylan.lougher.demon.co.uk>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Message-ID: <E1LJnJn-0002LW-QI@dylan.lougher.demon.co.uk>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -13,15 +13,15 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/squashfs/id.c |   94 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 94 insertions(+), 0 deletions(-)
+ fs/squashfs/export.c |  155 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 155 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/id.c b/fs/squashfs/id.c
+diff --git a/fs/squashfs/export.c b/fs/squashfs/export.c
 new file mode 100644
-index 0000000..3795b83
+index 0000000..69e971d
 --- /dev/null
-+++ b/fs/squashfs/id.c
-@@ -0,0 +1,94 @@
++++ b/fs/squashfs/export.c
+@@ -0,0 +1,155 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -42,22 +42,27 @@ index 0000000..3795b83
 + * along with this program; if not, write to the Free Software
 + * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 + *
-+ * id.c
++ * export.c
 + */
 +
 +/*
-+ * This file implements code to handle uids and gids.
++ * This file implements code to make Squashfs filesystems exportable (NFS etc.)
 + *
-+ * For space efficiency regular files store uid and gid indexes, which are
-+ * converted to 32-bit uids/gids using an id look up table.  This table is
-+ * stored compressed into metadata blocks.  A second index table is used to
-+ * locate these.  This second index table for speed of access (and because it
-+ * is small) is read at mount time and cached in memory.
++ * The export code uses an inode lookup table to map inode numbers passed in
++ * filehandles to an inode location on disk.  This table is stored compressed
++ * into metadata blocks.  A second index table is used to locate these.  This
++ * second index table for speed of access (and because it is small) is read at
++ * mount time and cached in memory.
++ *
++ * The inode lookup table is used only by the export code, inode disk
++ * locations are directly encoded in directories, enabling direct access
++ * without an intermediate lookup for all operations except the export ops.
 + */
 +
 +#include <linux/fs.h>
 +#include <linux/vfs.h>
-+#include <linux/slab.h>
++#include <linux/dcache.h>
++#include <linux/exportfs.h>
 +#include <linux/zlib.h>
 +
 +#include "squashfs_fs.h"
@@ -66,56 +71,111 @@ index 0000000..3795b83
 +#include "squashfs.h"
 +
 +/*
-+ * Map uid/gid index into real 32-bit uid/gid using the id look up table
++ * Look-up inode number (ino) in table, returning the inode location.
 + */
-+int squashfs_get_id(struct super_block *sb, unsigned int index,
-+					unsigned int *id)
++static long long squashfs_inode_lookup(struct super_block *sb, int ino_num)
 +{
 +	struct squashfs_sb_info *msblk = sb->s_fs_info;
-+	int block = SQUASHFS_ID_BLOCK(index);
-+	int offset = SQUASHFS_ID_BLOCK_OFFSET(index);
-+	u64 start_block = le64_to_cpu(msblk->id_table[block]);
-+	__le32 disk_id;
++	int blk = SQUASHFS_LOOKUP_BLOCK(ino_num - 1);
++	int offset = SQUASHFS_LOOKUP_BLOCK_OFFSET(ino_num - 1);
++	u64 start = le64_to_cpu(msblk->inode_lookup_table[blk]);
++	__le64 ino;
 +	int err;
 +
-+	err = squashfs_read_metadata(sb, &disk_id, &start_block, &offset,
-+							sizeof(disk_id));
++	TRACE("Entered squashfs_inode_lookup, inode_number = %d\n", ino_num);
++
++	err = squashfs_read_metadata(sb, &ino, &start, &offset, sizeof(ino));
 +	if (err < 0)
 +		return err;
 +
-+	*id = le32_to_cpu(disk_id);
-+	return 0;
++	TRACE("squashfs_inode_lookup, inode = 0x%llx\n",
++		(u64) le64_to_cpu(ino));
++
++	return le64_to_cpu(ino);
++}
++
++
++static struct dentry *squashfs_export_iget(struct super_block *sb,
++	unsigned int ino_num)
++{
++	long long ino;
++	struct dentry *dentry = ERR_PTR(-ENOENT);
++
++	TRACE("Entered squashfs_export_iget\n");
++
++	ino = squashfs_inode_lookup(sb, ino_num);
++	if (ino >= 0)
++		dentry = d_obtain_alias(squashfs_iget(sb, ino, ino_num));
++
++	return dentry;
++}
++
++
++static struct dentry *squashfs_fh_to_dentry(struct super_block *sb,
++		struct fid *fid, int fh_len, int fh_type)
++{
++	if ((fh_type != FILEID_INO32_GEN && fh_type != FILEID_INO32_GEN_PARENT)
++			|| fh_len < 2)
++		return NULL;
++
++	return squashfs_export_iget(sb, fid->i32.ino);
++}
++
++
++static struct dentry *squashfs_fh_to_parent(struct super_block *sb,
++		struct fid *fid, int fh_len, int fh_type)
++{
++	if (fh_type != FILEID_INO32_GEN_PARENT || fh_len < 4)
++		return NULL;
++
++	return squashfs_export_iget(sb, fid->i32.parent_ino);
++}
++
++
++static struct dentry *squashfs_get_parent(struct dentry *child)
++{
++	struct inode *inode = child->d_inode;
++	unsigned int parent_ino = squashfs_i(inode)->parent;
++
++	return squashfs_export_iget(inode->i_sb, parent_ino);
 +}
 +
 +
 +/*
-+ * Read uncompressed id lookup table indexes from disk into memory
++ * Read uncompressed inode lookup table indexes off disk into memory
 + */
-+__le64 *squashfs_read_id_index_table(struct super_block *sb,
-+			u64 id_table_start, unsigned short no_ids)
++__le64 *squashfs_read_inode_lookup_table(struct super_block *sb,
++		u64 lookup_table_start, unsigned int inodes)
 +{
-+	unsigned int length = SQUASHFS_ID_BLOCK_BYTES(no_ids);
-+	__le64 *id_table;
++	unsigned int length = SQUASHFS_LOOKUP_BLOCK_BYTES(inodes);
++	__le64 *inode_lookup_table;
 +	int err;
 +
-+	TRACE("In read_id_index_table, length %d\n", length);
++	TRACE("In read_inode_lookup_table, length %d\n", length);
 +
-+	/* Allocate id lookup table indexes */
-+	id_table = kmalloc(length, GFP_KERNEL);
-+	if (id_table == NULL) {
-+		ERROR("Failed to allocate id index table\n");
++	/* Allocate inode lookup table indexes */
++	inode_lookup_table = kmalloc(length, GFP_KERNEL);
++	if (inode_lookup_table == NULL) {
++		ERROR("Failed to allocate inode lookup table\n");
 +		return ERR_PTR(-ENOMEM);
 +	}
 +
-+	err = squashfs_read_table(sb, id_table, id_table_start, length);
++	err = squashfs_read_table(sb, inode_lookup_table, lookup_table_start,
++			length);
 +	if (err < 0) {
-+		ERROR("unable to read id index table\n");
-+		kfree(id_table);
++		ERROR("unable to read inode lookup table\n");
++		kfree(inode_lookup_table);
 +		return ERR_PTR(err);
 +	}
 +
-+	return id_table;
++	return inode_lookup_table;
 +}
++
++
++const struct export_operations squashfs_export_ops = {
++	.fh_to_dentry = squashfs_fh_to_dentry,
++	.fh_to_parent = squashfs_fh_to_parent,
++	.get_parent = squashfs_get_parent
++};
 -- 
 1.5.6.3
-
