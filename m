@@ -1,46 +1,46 @@
-From: "Pekka Enberg" <penberg@cs.helsinki.fi>
-Subject: Re: [PATCH V3 12/17] Squashfs: header files
-Date: Mon, 5 Jan 2009 15:32:13 +0200
-Message-ID: <84144f020901050532m3c8a4d68q655514051d4e259a@mail.gmail.com>
-References: <E1LJnJo-0002Lz-2y@dylan.lougher.demon.co.uk>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: [PATCH 1/3]: Replace kernel/timeconst.pl with kernel/timeconst.sh
+Date: Mon, 5 Jan 2009 15:01:56 +0000
+Message-ID: <20090105150156.GD14503@shareable.org>
+References: <200901020207.30359.rob@landley.net> <200901031936.04642.rob@landley.net> <25035.1231045675@turing-police.cc.vt.edu> <200901040043.08577.rob@landley.net> <20090104221356.GA32357@shareable.org> <1231114530.3310.6.camel@gimli.at.home> <20090105022349.GB1345@shareable.org> <1231152378.3326.14.camel@gimli.at.home>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:sender
-         :to:subject:cc:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:references
-         :x-google-sender-auth;
-        bh=Qa3SzxtV3Kyzb+mciis2Po7TjKzcVNJM29+Hc3oLG04=;
-        b=ljer/sa4/daEJEJ0PpXYUpb9t/pB5EI9dRUPhp3/pmjOR1fnCDnIDJ/TPvgvXmlHm0
-         Jo4gBGrdNt+QL2lQFG/Y73Jaii/xS+oyoOtI/sktiPRJtbAexDkohXSDcgLNnT6YohEn
-         Ho+YDqPYle8LTQml08VOUN9WTjNHDvSEAqcxI=
-In-Reply-To: <E1LJnJo-0002Lz-2y@dylan.lougher.demon.co.uk>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1758224AbZAEPCg@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <1231152378.3326.14.camel@gimli.at.home>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com, sfr@canb.auug.org.au
+Content-Transfer-Encoding: 7bit
+To: Bernd Petrovitsch <bernd@firmix.at>
+Cc: Rob Landley <rob@landley.net>, Valdis.Kletnieks@vt.edu, Ingo Oeser <ioe-lkml@rameria.de>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>
 
-Hi Phillip,
+Bernd Petrovitsch wrote:
+> I assume that the NFS-mounted root filesystem is a real distribution.
 
-On Mon, Jan 5, 2009 at 1:08 PM, Phillip Lougher
-<phillip@lougher.demon.co.uk> wrote:
-> +#define TRACE(s, args...)      pr_debug("SQUASHFS: "s, ## args)
+Not unless you call uClinux (MMU-less) a real distribution, no.
 
-You've probably heard this before but silly "tracing" such as:
+> > (* - No MMU on some ARMs, but I'm working on ARM FDPIC-ELF to add
+> >      proper shared libs.  Feel free to fund this :-)
+> 
+> The above mentioned ARMs have a MMU. Without MMU, it would be truly
+> insane IMHO.
 
-    TRACE("Entered squashfs_fill_superblock\n");
+We have similar cross-build issues without MMUs... I.e. that a lot of
+useful packages don't cross-build properly (including many which use
+Autoconf), and it might be easier to make a native build environment
+than to debug and patch all the broken-for-cross-build packages.
+Especially as sometimes they build, but fail at run-time in some
+conditions.
 
-should really be removed from the filesystem code.
+But you're right it's probably insane to try.  I haven't dared as I
+suspect GCC and/or Binutils would break too :-)
 
-> +#define ERROR(s, args...)      pr_err("SQUASHFS error: "s, ## args)
-> +
-> +#define WARNING(s, args...)    pr_warning("SQUASHFS: "s, ## args)
+I'm sticking instead with "oh well cross-build a few packages by hand
+and just don't even _try_ to use most of the handy software out there".
 
-I think you're supposed to #define pr_fmt() in your header instead of
-adding wrappers like these.
+You mentioned ARM Debian.  According to
+http://wiki.debian.org/ArmEabiPort one recommended method of
+bootstrapping it is building natively on an emulated ARM, because
+cross-building is fragile.
 
-                        Pekka
+-- Jamie
