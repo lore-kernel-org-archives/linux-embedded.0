@@ -1,7 +1,7 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V3 11/17] Squashfs: block operations
-Date: Mon, 05 Jan 2009 11:08:24 +0000
-Message-ID: <E1LJnJo-0002Lt-0v@dylan.lougher.demon.co.uk>
+Subject: [PATCH V3 01/17] Squashfs: inode operations
+Date: Mon, 05 Jan 2009 11:08:23 +0000
+Message-ID: <E1LJnJn-0002L2-GZ@dylan.lougher.demon.co.uk>
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -13,15 +13,15 @@ To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vge
 
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- fs/squashfs/block.c |  274 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 274 insertions(+), 0 deletions(-)
+ fs/squashfs/inode.c |  346 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 346 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/block.c b/fs/squashfs/block.c
+diff --git a/fs/squashfs/inode.c b/fs/squashfs/inode.c
 new file mode 100644
-index 0000000..c837dfc
+index 0000000..7a63398
 --- /dev/null
-+++ b/fs/squashfs/block.c
-@@ -0,0 +1,274 @@
++++ b/fs/squashfs/inode.c
+@@ -0,0 +1,346 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -42,20 +42,28 @@ index 0000000..c837dfc
 + * along with this program; if not, write to the Free Software
 + * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 + *
-+ * block.c
++ * inode.c
 + */
 +
 +/*
-+ * This file implements the low-level routines to read and decompress
-+ * datablocks and metadata blocks.
++ * This file implements code to create and read inodes from disk.
++ *
++ * Inodes in Squashfs are identified by a 48-bit inode which encodes the
++ * location of the compressed metadata block containing the inode, and the byte
++ * offset into that block where the inode is placed (<block, offset>).
++ *
++ * To maximise compression there are different inodes for each file type
++ * (regular file, directory, device, etc.), the inode contents and length
++ * varying with the type.
++ *
++ * To further maximise compression, two types of regular file inode and
++ * directory inode are defined: inodes optimised for frequently occurring
++ * regular files and directories, and extended types where extra
++ * information has to be stored.
 + */
 +
 +#include <linux/fs.h>
 +#include <linux/vfs.h>
-+#include <linux/slab.h>
-+#include <linux/mutex.h>
-+#include <linux/string.h>
-+#include <linux/buffer_head.h>
 +#include <linux/zlib.h>
 +
 +#include "squashfs_fs.h"
@@ -64,237 +72,301 @@ index 0000000..c837dfc
 +#include "squashfs.h"
 +
 +/*
-+ * Read the metadata block length, this is stored in the first two
-+ * bytes of the metadata block.
++ * Initialise VFS inode with the base inode information common to all
++ * Squashfs inode types.  Sqsh_ino contains the unswapped base inode
++ * off disk.
 + */
-+static struct buffer_head *get_block_length(struct super_block *sb,
-+			u64 *cur_index, int *offset, int *length)
++static int squashfs_new_inode(struct super_block *sb, struct inode *inode,
++				struct squashfs_base_inode *sqsh_ino)
 +{
-+	struct squashfs_sb_info *msblk = sb->s_fs_info;
-+	struct buffer_head *bh;
++	int err;
 +
-+	bh = sb_bread(sb, *cur_index);
-+	if (bh == NULL)
-+		return NULL;
++	err = squashfs_get_id(sb, le16_to_cpu(sqsh_ino->uid), &inode->i_uid);
++	if (err)
++		return err;
 +
-+	if (msblk->devblksize - *offset == 1) {
-+		*length = (unsigned char) bh->b_data[*offset];
-+		put_bh(bh);
-+		bh = sb_bread(sb, ++(*cur_index));
-+		if (bh == NULL)
-+			return NULL;
-+		*length |= (unsigned char) bh->b_data[0] << 8;
-+		*offset = 1;
-+	} else {
-+		*length = (unsigned char) bh->b_data[*offset] |
-+			(unsigned char) bh->b_data[*offset + 1] << 8;
-+		*offset += 2;
++	err = squashfs_get_id(sb, le16_to_cpu(sqsh_ino->guid), &inode->i_gid);
++	if (err)
++		return err;
++
++	inode->i_ino = le32_to_cpu(sqsh_ino->inode_number);
++	inode->i_mtime.tv_sec = le32_to_cpu(sqsh_ino->mtime);
++	inode->i_atime.tv_sec = inode->i_mtime.tv_sec;
++	inode->i_ctime.tv_sec = inode->i_mtime.tv_sec;
++	inode->i_mode = le16_to_cpu(sqsh_ino->mode);
++	inode->i_size = 0;
++
++	return err;
++}
++
++
++struct inode *squashfs_iget(struct super_block *sb, long long ino,
++				unsigned int ino_number)
++{
++	struct inode *inode = iget_locked(sb, ino_number);
++	int err;
++
++	TRACE("Entered squashfs_iget\n");
++
++	if (!inode)
++		return ERR_PTR(-ENOMEM);
++	if (!(inode->i_state & I_NEW))
++		return inode;
++
++	err = squashfs_read_inode(inode, ino);
++	if (err) {
++		iget_failed(inode);
++		return ERR_PTR(err);
 +	}
 +
-+	return bh;
++	unlock_new_inode(inode);
++	return inode;
 +}
 +
 +
 +/*
-+ * Read and decompress a metadata block or datablock.  Length is non-zero
-+ * if a datablock is being read (the size is stored elsewhere in the
-+ * filesystem), otherwise the length is obtained from the first two bytes of
-+ * the metadata block.  A bit in the length field indicates if the block
-+ * is stored uncompressed in the filesystem (usually because compression
-+ * generated a larger block - this does occasionally happen with zlib).
++ * Initialise VFS inode by reading inode from inode table (compressed
++ * metadata).  The format and amount of data read depends on type.
 + */
-+int squashfs_read_data(struct super_block *sb, void **buffer, u64 index,
-+			int length, u64 *next_index, int srclength)
++int squashfs_read_inode(struct inode *inode, long long ino)
 +{
++	struct super_block *sb = inode->i_sb;
 +	struct squashfs_sb_info *msblk = sb->s_fs_info;
-+	struct buffer_head **bh;
-+	int offset = index & ((1 << msblk->devblksize_log2) - 1);
-+	u64 cur_index = index >> msblk->devblksize_log2;
-+	int bytes, compressed, b = 0, k = 0, page = 0, avail;
++	u64 block = SQUASHFS_INODE_BLK(ino) + msblk->inode_table;
++	int err, type, offset = SQUASHFS_INODE_OFFSET(ino);
++	union squashfs_inode squashfs_ino;
++	struct squashfs_base_inode *sqshb_ino = &squashfs_ino.base;
 +
++	TRACE("Entered squashfs_read_inode\n");
 +
-+	bh = kcalloc((msblk->block_size >> msblk->devblksize_log2) + 1,
-+				sizeof(*bh), GFP_KERNEL);
-+	if (bh == NULL)
-+		return -ENOMEM;
++	/*
++	 * Read inode base common to all inode types.
++	 */
++	err = squashfs_read_metadata(sb, sqshb_ino, &block,
++				&offset, sizeof(*sqshb_ino));
++	if (err < 0)
++		goto failed_read;
 +
-+	if (length) {
-+		/*
-+		 * Datablock.
-+		 */
-+		bytes = -offset;
-+		compressed = SQUASHFS_COMPRESSED_BLOCK(length);
-+		length = SQUASHFS_COMPRESSED_SIZE_BLOCK(length);
-+		if (next_index)
-+			*next_index = index + length;
++	err = squashfs_new_inode(sb, inode, sqshb_ino);
++	if (err)
++		goto failed_read;
 +
-+		TRACE("Block @ 0x%llx, %scompressed size %d, src size %d\n",
-+			index, compressed ? "" : "un", length, srclength);
++	block = SQUASHFS_INODE_BLK(ino) + msblk->inode_table;
++	offset = SQUASHFS_INODE_OFFSET(ino);
 +
-+		if (length < 0 || length > srclength ||
-+				(index + length) > msblk->bytes_used)
-+			goto read_failure;
++	type = le16_to_cpu(sqshb_ino->inode_type);
++	switch (type) {
++	case SQUASHFS_REG_TYPE: {
++		unsigned int frag_offset, frag_size, frag;
++		u64 frag_blk;
++		struct squashfs_reg_inode *sqsh_ino = &squashfs_ino.reg;
 +
-+		for (b = 0; bytes < length; b++, cur_index++) {
-+			bh[b] = sb_getblk(sb, cur_index);
-+			if (bh[b] == NULL)
-+				goto block_release;
-+			bytes += msblk->devblksize;
++		err = squashfs_read_metadata(sb, sqsh_ino, &block, &offset,
++							sizeof(*sqsh_ino));
++		if (err < 0)
++			goto failed_read;
++
++		frag = le32_to_cpu(sqsh_ino->fragment);
++		if (frag != SQUASHFS_INVALID_FRAG) {
++			frag_offset = le32_to_cpu(sqsh_ino->offset);
++			frag_size = squashfs_frag_lookup(sb, frag, &frag_blk);
++			if (frag_size < 0) {
++				err = frag_size;
++				goto failed_read;
++			}
++		} else {
++			frag_blk = SQUASHFS_INVALID_BLK;
++			frag_size = 0;
++			frag_offset = 0;
 +		}
-+		ll_rw_block(READ, b, bh);
-+	} else {
-+		/*
-+		 * Metadata block.
-+		 */
-+		if ((index + 2) > msblk->bytes_used)
-+			goto read_failure;
 +
-+		bh[0] = get_block_length(sb, &cur_index, &offset, &length);
-+		if (bh[0] == NULL)
-+			goto read_failure;
-+		b = 1;
++		inode->i_nlink = 1;
++		inode->i_size = le32_to_cpu(sqsh_ino->file_size);
++		inode->i_fop = &generic_ro_fops;
++		inode->i_mode |= S_IFREG;
++		inode->i_blocks = ((inode->i_size - 1) >> 9) + 1;
++		squashfs_i(inode)->fragment_block = frag_blk;
++		squashfs_i(inode)->fragment_size = frag_size;
++		squashfs_i(inode)->fragment_offset = frag_offset;
++		squashfs_i(inode)->start = le32_to_cpu(sqsh_ino->start_block);
++		squashfs_i(inode)->block_list_start = block;
++		squashfs_i(inode)->offset = offset;
++		inode->i_data.a_ops = &squashfs_aops;
 +
-+		bytes = msblk->devblksize - offset;
-+		compressed = SQUASHFS_COMPRESSED(length);
-+		length = SQUASHFS_COMPRESSED_SIZE(length);
-+		if (next_index)
-+			*next_index = index + length + 2;
++		TRACE("File inode %x:%x, start_block %llx, block_list_start "
++			"%llx, offset %x\n", SQUASHFS_INODE_BLK(ino),
++			offset, squashfs_i(inode)->start, block, offset);
++		break;
++	}
++	case SQUASHFS_LREG_TYPE: {
++		unsigned int frag_offset, frag_size, frag;
++		u64 frag_blk;
++		struct squashfs_lreg_inode *sqsh_ino = &squashfs_ino.lreg;
 +
-+		TRACE("Block @ 0x%llx, %scompressed size %d\n", index,
-+				compressed ? "" : "un", length);
++		err = squashfs_read_metadata(sb, sqsh_ino, &block, &offset,
++							sizeof(*sqsh_ino));
++		if (err < 0)
++			goto failed_read;
 +
-+		if (length < 0 || length > srclength ||
-+					(index + length) > msblk->bytes_used)
-+			goto block_release;
-+
-+		for (; bytes < length; b++) {
-+			bh[b] = sb_getblk(sb, ++cur_index);
-+			if (bh[b] == NULL)
-+				goto block_release;
-+			bytes += msblk->devblksize;
++		frag = le32_to_cpu(sqsh_ino->fragment);
++		if (frag != SQUASHFS_INVALID_FRAG) {
++			frag_offset = le32_to_cpu(sqsh_ino->offset);
++			frag_size = squashfs_frag_lookup(sb, frag, &frag_blk);
++			if (frag_size < 0) {
++				err = frag_size;
++				goto failed_read;
++			}
++		} else {
++			frag_blk = SQUASHFS_INVALID_BLK;
++			frag_size = 0;
++			frag_offset = 0;
 +		}
-+		ll_rw_block(READ, b - 1, bh + 1);
++
++		inode->i_nlink = le32_to_cpu(sqsh_ino->nlink);
++		inode->i_size = le64_to_cpu(sqsh_ino->file_size);
++		inode->i_fop = &generic_ro_fops;
++		inode->i_mode |= S_IFREG;
++		inode->i_blocks = ((inode->i_size -
++				le64_to_cpu(sqsh_ino->sparse) - 1) >> 9) + 1;
++
++		squashfs_i(inode)->fragment_block = frag_blk;
++		squashfs_i(inode)->fragment_size = frag_size;
++		squashfs_i(inode)->fragment_offset = frag_offset;
++		squashfs_i(inode)->start = le64_to_cpu(sqsh_ino->start_block);
++		squashfs_i(inode)->block_list_start = block;
++		squashfs_i(inode)->offset = offset;
++		inode->i_data.a_ops = &squashfs_aops;
++
++		TRACE("File inode %x:%x, start_block %llx, block_list_start "
++			"%llx, offset %x\n", SQUASHFS_INODE_BLK(ino),
++			offset, squashfs_i(inode)->start, block, offset);
++		break;
++	}
++	case SQUASHFS_DIR_TYPE: {
++		struct squashfs_dir_inode *sqsh_ino = &squashfs_ino.dir;
++
++		err = squashfs_read_metadata(sb, sqsh_ino, &block, &offset,
++				sizeof(*sqsh_ino));
++		if (err < 0)
++			goto failed_read;
++
++		inode->i_nlink = le32_to_cpu(sqsh_ino->nlink);
++		inode->i_size = le16_to_cpu(sqsh_ino->file_size);
++		inode->i_op = &squashfs_dir_inode_ops;
++		inode->i_fop = &squashfs_dir_ops;
++		inode->i_mode |= S_IFDIR;
++		squashfs_i(inode)->start = le32_to_cpu(sqsh_ino->start_block);
++		squashfs_i(inode)->offset = le16_to_cpu(sqsh_ino->offset);
++		squashfs_i(inode)->dir_idx_cnt = 0;
++		squashfs_i(inode)->parent = le32_to_cpu(sqsh_ino->parent_inode);
++
++		TRACE("Directory inode %x:%x, start_block %llx, offset %x\n",
++				SQUASHFS_INODE_BLK(ino), offset,
++				squashfs_i(inode)->start,
++				le16_to_cpu(sqsh_ino->offset));
++		break;
++	}
++	case SQUASHFS_LDIR_TYPE: {
++		struct squashfs_ldir_inode *sqsh_ino = &squashfs_ino.ldir;
++
++		err = squashfs_read_metadata(sb, sqsh_ino, &block, &offset,
++				sizeof(*sqsh_ino));
++		if (err < 0)
++			goto failed_read;
++
++		inode->i_nlink = le32_to_cpu(sqsh_ino->nlink);
++		inode->i_size = le32_to_cpu(sqsh_ino->file_size);
++		inode->i_op = &squashfs_dir_inode_ops;
++		inode->i_fop = &squashfs_dir_ops;
++		inode->i_mode |= S_IFDIR;
++		squashfs_i(inode)->start = le32_to_cpu(sqsh_ino->start_block);
++		squashfs_i(inode)->offset = le16_to_cpu(sqsh_ino->offset);
++		squashfs_i(inode)->dir_idx_start = block;
++		squashfs_i(inode)->dir_idx_offset = offset;
++		squashfs_i(inode)->dir_idx_cnt = le16_to_cpu(sqsh_ino->i_count);
++		squashfs_i(inode)->parent = le32_to_cpu(sqsh_ino->parent_inode);
++
++		TRACE("Long directory inode %x:%x, start_block %llx, offset "
++				"%x\n", SQUASHFS_INODE_BLK(ino), offset,
++				squashfs_i(inode)->start,
++				le16_to_cpu(sqsh_ino->offset));
++		break;
++	}
++	case SQUASHFS_SYMLINK_TYPE:
++	case SQUASHFS_LSYMLINK_TYPE: {
++		struct squashfs_symlink_inode *sqsh_ino = &squashfs_ino.symlink;
++
++		err = squashfs_read_metadata(sb, sqsh_ino, &block, &offset,
++				sizeof(*sqsh_ino));
++		if (err < 0)
++			goto failed_read;
++
++		inode->i_nlink = le32_to_cpu(sqsh_ino->nlink);
++		inode->i_size = le32_to_cpu(sqsh_ino->symlink_size);
++		inode->i_op = &page_symlink_inode_operations;
++		inode->i_data.a_ops = &squashfs_symlink_aops;
++		inode->i_mode |= S_IFLNK;
++		squashfs_i(inode)->start = block;
++		squashfs_i(inode)->offset = offset;
++
++		TRACE("Symbolic link inode %x:%x, start_block %llx, offset "
++				"%x\n", SQUASHFS_INODE_BLK(ino), offset,
++				block, offset);
++		break;
++	}
++	case SQUASHFS_BLKDEV_TYPE:
++	case SQUASHFS_CHRDEV_TYPE:
++	case SQUASHFS_LBLKDEV_TYPE:
++	case SQUASHFS_LCHRDEV_TYPE: {
++		struct squashfs_dev_inode *sqsh_ino = &squashfs_ino.dev;
++		unsigned int rdev;
++
++		err = squashfs_read_metadata(sb, sqsh_ino, &block, &offset,
++				sizeof(*sqsh_ino));
++		if (err < 0)
++			goto failed_read;
++
++		if (type == SQUASHFS_CHRDEV_TYPE)
++			inode->i_mode |= S_IFCHR;
++		else
++			inode->i_mode |= S_IFBLK;
++		inode->i_nlink = le32_to_cpu(sqsh_ino->nlink);
++		rdev = le32_to_cpu(sqsh_ino->rdev);
++		init_special_inode(inode, inode->i_mode, new_decode_dev(rdev));
++
++		TRACE("Device inode %x:%x, rdev %x\n",
++				SQUASHFS_INODE_BLK(ino), offset, rdev);
++		break;
++	}
++	case SQUASHFS_FIFO_TYPE:
++	case SQUASHFS_SOCKET_TYPE:
++	case SQUASHFS_LFIFO_TYPE:
++	case SQUASHFS_LSOCKET_TYPE: {
++		struct squashfs_ipc_inode *sqsh_ino = &squashfs_ino.ipc;
++
++		err = squashfs_read_metadata(sb, sqsh_ino, &block, &offset,
++				sizeof(*sqsh_ino));
++		if (err < 0)
++			goto failed_read;
++
++		if (type == SQUASHFS_FIFO_TYPE)
++			inode->i_mode |= S_IFIFO;
++		else
++			inode->i_mode |= S_IFSOCK;
++		inode->i_nlink = le32_to_cpu(sqsh_ino->nlink);
++		init_special_inode(inode, inode->i_mode, 0);
++		break;
++	}
++	default:
++		ERROR("Unknown inode type %d in squashfs_iget!\n", type);
++		return -EINVAL;
 +	}
 +
-+	if (compressed) {
-+		int zlib_err = 0, zlib_init = 0;
++	return 0;
 +
-+		/*
-+		 * Uncompress block.
-+		 */
-+
-+		mutex_lock(&msblk->read_data_mutex);
-+
-+		msblk->stream.avail_out = 0;
-+		msblk->stream.avail_in = 0;
-+
-+		bytes = length;
-+		do {
-+			if (msblk->stream.avail_in == 0 && k < b) {
-+				avail = min(bytes, msblk->devblksize - offset);
-+				bytes -= avail;
-+				wait_on_buffer(bh[k]);
-+				if (!buffer_uptodate(bh[k]))
-+					goto release_mutex;
-+
-+				if (avail == 0) {
-+					offset = 0;
-+					put_bh(bh[k++]);
-+					continue;
-+				}
-+
-+				msblk->stream.next_in = bh[k]->b_data + offset;
-+				msblk->stream.avail_in = avail;
-+				offset = 0;
-+			}
-+
-+			if (msblk->stream.avail_out == 0) {
-+				msblk->stream.next_out = buffer[page++];
-+				msblk->stream.avail_out = PAGE_CACHE_SIZE;
-+			}
-+
-+			if (!zlib_init) {
-+				zlib_err = zlib_inflateInit(&msblk->stream);
-+				if (zlib_err != Z_OK) {
-+					ERROR("zlib_inflateInit returned"
-+						" unexpected result 0x%x,"
-+						" srclength %d\n", zlib_err,
-+						srclength);
-+					goto release_mutex;
-+				}
-+				zlib_init = 1;
-+			}
-+
-+			zlib_err = zlib_inflate(&msblk->stream, Z_NO_FLUSH);
-+
-+			if (msblk->stream.avail_in == 0 && k < b)
-+				put_bh(bh[k++]);
-+		} while (zlib_err == Z_OK);
-+
-+		if (zlib_err != Z_STREAM_END) {
-+			ERROR("zlib_inflate returned unexpected result"
-+				" 0x%x, srclength %d, avail_in %d,"
-+				" avail_out %d\n", zlib_err, srclength,
-+				msblk->stream.avail_in,
-+				msblk->stream.avail_out);
-+			goto release_mutex;
-+		}
-+
-+		zlib_err = zlib_inflateEnd(&msblk->stream);
-+		if (zlib_err != Z_OK) {
-+			ERROR("zlib_inflateEnd returned unexpected result 0x%x,"
-+				" srclength %d\n", zlib_err, srclength);
-+			goto release_mutex;
-+		}
-+		length = msblk->stream.total_out;
-+		mutex_unlock(&msblk->read_data_mutex);
-+	} else {
-+		/*
-+		 * Block is uncompressed.
-+		 */
-+		int i, in, pg_offset = 0;
-+
-+		for (i = 0; i < b; i++) {
-+			wait_on_buffer(bh[i]);
-+			if (!buffer_uptodate(bh[i]))
-+				goto block_release;
-+		}
-+
-+		for (bytes = length; k < b; k++) {
-+			in = min(bytes, msblk->devblksize - offset);
-+			bytes -= in;
-+			while (in) {
-+				if (pg_offset == PAGE_CACHE_SIZE) {
-+					page++;
-+					pg_offset = 0;
-+				}
-+				avail = min_t(int, in, PAGE_CACHE_SIZE -
-+						pg_offset);
-+				memcpy(buffer[page] + pg_offset,
-+						bh[k]->b_data + offset, avail);
-+				in -= avail;
-+				pg_offset += avail;
-+				offset += avail;
-+			}
-+			offset = 0;
-+			put_bh(bh[k]);
-+		}
-+	}
-+
-+	kfree(bh);
-+	return length;
-+
-+release_mutex:
-+	mutex_unlock(&msblk->read_data_mutex);
-+
-+block_release:
-+	for (; k < b; k++)
-+		put_bh(bh[k]);
-+
-+read_failure:
-+	ERROR("sb_bread failed reading block 0x%llx\n", cur_index);
-+	kfree(bh);
-+	return -EIO;
++failed_read:
++	ERROR("Unable to read inode 0x%llx\n", ino);
++	return err;
 +}
 -- 
 1.5.6.3
