@@ -1,47 +1,86 @@
-From: Grant Erickson <gerickson@nuovations.com>
-Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk
- Messages
-Date: Tue, 06 Jan 2009 18:11:11 -0800
-Message-ID: <C5894F3F.13C20%gerickson__5851.58500257439$1231294777$gmane$org@nuovations.com>
-References: <1231286642.14860.35.camel@pasglop>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: [PATCH V3 10/17] Squashfs: cache operations
+Date: Wed, 7 Jan 2009 17:17:20 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.0901071713570.16480@vixen.sonytel.be>
+References: <E1LJnJn-0002Lm-Va@dylan.lougher.demon.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1231286642.14860.35.camel@pasglop>
+In-Reply-To: <E1LJnJn-0002Lm-Va@dylan.lougher.demon.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Cc: linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset="utf-8"
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, tim.bird@am.sony.com, sfr@canb.auug.org.au
 
-On 1/6/09 4:04 PM, Benjamin Herrenschmidt wrote:
-> On Tue, 2008-11-25 at 10:34 -0800, Grant Erickson wrote:
->> This merges support for the previously DENX-only kernel feature of
->> specifying an alternative, "external" buffer for kernel printk
->> messages and their associated metadata. In addition, this ports
->> architecture support for this feature from arch/ppc to arch/powerpc.
->> 
->> Signed-off-by: Grant Erickson <gerickson@nuovations.com>
-> 
-> Considering the extensive changes to generic code, this patch will
-> have to be submitted via the linux-kernel mailing list.
-> 
-> I suggest you split the generic core change from the powerpc specific
-> implementation.
-> 
-> I'm not sure whether I like the idea myself or not there, so you'll have
-> to convince the powers that be to take it.
+On Mon, 5 Jan 2009, Phillip Lougher wrote:
+> diff --git a/fs/squashfs/cache.c b/fs/squashfs/cache.c
+> new file mode 100644
+> index 0000000..f29eda1
+> --- /dev/null
+> +++ b/fs/squashfs/cache.c
 
-Ben:
+> +/*
+> + * Copy upto length bytes from cache entry to buffer starting at off=
+set bytes
+> + * into the cache entry.  If there's not length bytes then copy the =
+number of
+> + * bytes available.  In all cases return the number of bytes copied.
+> + */
+> +int squashfs_copy_data(void *buffer, struct squashfs_cache_entry *en=
+try,
+                                        ^
+					const?
 
-Thanks for the feedback. Matt Sealey had some good feedback
-<http://ozlabs.org/pipermail/linuxppc-dev/2008-November/065594.html> which I
-have on my to-do list to evaluate.
+It also makes it clear from the prototype in which direction is copied.
+> +		int offset, int length)
+                ^^^         ^^^
+> +{
+> +	int remaining =3D length;
+        ^^^
+Shouldn't all of these be unsigned int?
 
-In the interim, I'll hold off on pushing up to linux-kernel until I've done
-that.
+> +
+> +	if (length =3D=3D 0)
+> +		return 0;
+> +	else if (buffer =3D=3D NULL)
+> +		return min(length, entry->length - offset);
+> +
+> +	while (offset < entry->length) {
+> +		void *buff =3D entry->data[offset / PAGE_CACHE_SIZE]
+> +				+ (offset % PAGE_CACHE_SIZE);
+> +		int bytes =3D min_t(int, entry->length - offset,
+> +				PAGE_CACHE_SIZE - (offset % PAGE_CACHE_SIZE));
+> +
+> +		if (bytes >=3D remaining) {
+> +			memcpy(buffer, buff, remaining);
+> +			remaining =3D 0;
+> +			break;
+> +		}
+> +
+> +		memcpy(buffer, buff, bytes);
+> +		buffer +=3D bytes;
+> +		remaining -=3D bytes;
+> +		offset +=3D bytes;
+> +	}
+> +
+> +	return length - remaining;
+> +}
 
-Regards,
+With kind regards,
 
-Grant
+Geert Uytterhoeven
+Software Architect
 
+Sony Techsoft Centre Europe
+The Corporate Village =C2=B7 Da Vincilaan 7-D1 =C2=B7 B-1935 Zaventem =C2=
+=B7 Belgium
+
+Phone:    +32 (0)2 700 8453
+=46ax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 =C2=B7 RPR Brussels
+=46ortis =C2=B7 BIC GEBABEBB =C2=B7 IBAN BE41293037680010
