@@ -1,23 +1,16 @@
 From: Grant Erickson <gerickson@nuovations.com>
-Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk Messages
+Subject: Re: [PATCH/RFC] Add Alternative Log Buffer Support for printk
+ Messages
 Date: Tue, 06 Jan 2009 18:11:11 -0800
-Message-ID: <C5894F3F.13C20%gerickson__13050.396301742$1231294408$gmane$org@nuovations.com>
+Message-ID: <C5894F3F.13C20%gerickson__5851.58500257439$1231294777$gmane$org@nuovations.com>
 References: <1231286642.14860.35.camel@pasglop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1231286642.14860.35.camel@pasglop>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://ozlabs.org/mailman/options/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@ozlabs.org?subject=unsubscribe>
-List-Archive: <http://ozlabs.org/pipermail/linuxppc-dev>
-List-Post: <mailto:linuxppc-dev@ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@ozlabs.org?subject=help>
-List-Subscribe: <https://ozlabs.org/mailman/listinfo/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@ozlabs.org?subject=subscribe>
-Sender: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
-Errors-To: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@ozlabs.org
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
 To: Benjamin Herrenschmidt <benh@kernel.crashing.org>
 Cc: linuxppc-dev@ozlabs.org, Stefan Roese <sr@denx.de>, Wolfgang Denx <wd@denx.de>, linux-embedded@vger.kernel.org
 
@@ -51,3 +44,4 @@ that.
 Regards,
 
 Grant
+
