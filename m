@@ -1,64 +1,57 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+From: Stephen Rothwell <sfr@canb.auug.org.au>
 Subject: Re: [PATCH V3 01/17] Squashfs: inode operations
-Date: Wed, 7 Jan 2009 19:00:24 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.0901071854210.32034@vixen.sonytel.be>
+Date: Thu, 8 Jan 2009 08:36:09 +1100
+Message-ID: <20090108083609.97f0703a.sfr@canb.auug.org.au>
 References: <E1LJnJn-0002L2-GZ@dylan.lougher.demon.co.uk>
+	<Pine.LNX.4.64.0901071854210.32034@vixen.sonytel.be>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1759901AbZAGSAu@vger.kernel.org>
-In-Reply-To: <E1LJnJn-0002L2-GZ@dylan.lougher.demon.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: multipart/signed; protocol="application/pgp-signature";
+ micalg="PGP-SHA1";
+ boundary="Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i"
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.0901071854210.32034@vixen.sonytel.be>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="utf-8"
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, Linux Kernel Development <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, sfr@canb.auug.org.au, Linux/PPC Development <linuxppc-dev@ozlabs.org>
+To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, Linux Kernel Development <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Linux/PPC Development <linuxppc-dev@ozlabs.org>
 
-On Mon, 5 Jan 2009, Phillip Lougher wrote:
-> diff --git a/fs/squashfs/inode.c b/fs/squashfs/inode.c
-> new file mode 100644
-> index 0000000..7a63398
-> --- /dev/null
-> +++ b/fs/squashfs/inode.c
-> @@ -0,0 +1,346 @@
+--Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i
+Content-Type: text/plain; charset=US-ASCII
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> +int squashfs_read_inode(struct inode *inode, long long ino)
-> +{
-> +	struct super_block *sb =3D inode->i_sb;
-> +	struct squashfs_sb_info *msblk =3D sb->s_fs_info;
-> +	u64 block =3D SQUASHFS_INODE_BLK(ino) + msblk->inode_table;
-        ^^^
+Hi Geert,
 
-> +		TRACE("File inode %x:%x, start_block %llx, block_list_start "
-                                                     ^^^^
-> +			"%llx, offset %x\n", SQUASHFS_INODE_BLK(ino),
-                         ^^^^
-> +			offset, squashfs_i(inode)->start, block, offset);
+On Wed, 7 Jan 2009 19:00:24 +0100 (CET) Geert Uytterhoeven <Geert.Uytterhoe=
+ven@sonycom.com> wrote:
+>
+> Note that I get lots of
+>=20
+> | warning: format '%llx' expects type 'long long unsigned int', but argum=
+ent 3 has type 'u64'
+>=20
+> on ppc64, since you switched from `unsigned long long' to 'u64', as `u64'=
+ is
+> (still -- this is being changed) `unsigned long' on pp64.
+>=20
+> I guess no action has to be taken, for now?
 
-Note that I get lots of
+Correct, as we are in the process of changing u64 to unsigned long long for
+powerpc.
+--=20
+Cheers,
+Stephen Rothwell                    sfr@canb.auug.org.au
+http://www.canb.auug.org.au/~sfr/
 
-| warning: format '%llx' expects type 'long long unsigned int', but arg=
-ument 3 has type 'u64'
+--Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i
+Content-Type: application/pgp-signature
 
-on ppc64, since you switched from `unsigned long long' to 'u64', as `u6=
-4' is
-(still -- this is being changed) `unsigned long' on pp64.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
 
-I guess no action has to be taken, for now?
+iEYEARECAAYFAkllIEkACgkQjjKRsyhoI8z+kACgqYc6WZOOWrsC3r7DIQxcBfZT
+ddUAoKQX7RBP6l9WH98d3MgBSQ/3fPDf
+=JuME
+-----END PGP SIGNATURE-----
 
-With kind regards,
-
-Geert Uytterhoeven
-Software Architect
-
-Sony Techsoft Centre Europe
-The Corporate Village =C2=B7 Da Vincilaan 7-D1 =C2=B7 B-1935 Zaventem =C2=
-=B7 Belgium
-
-Phone:    +32 (0)2 700 8453
-=46ax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
-
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 =C2=B7 RPR Brussels
-=46ortis =C2=B7 BIC GEBABEBB =C2=B7 IBAN BE41293037680010
+--Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i--
