@@ -1,46 +1,64 @@
-From: Christian Gagneraud <cgagneraud@techworks.ie>
-Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Thu, 08 Jan 2009 15:04:03 +0000
-Message-ID: <496615E3.4030401@techworks.ie>
-References: <200901020207.30359.rob@landley.net>	 <20090102172540.GE8858@knossos.aleph1.co.uk>	 <20090102180134.GB5818@uranus.ravnborg.org>	 <200901031348.46847.rob@landley.net> <33cac1200901080513k4df78751uc752c38e71486164@mail.gmail.com>
+From: Hugo Villeneuve <hugo@hugovil.com>
+Subject: Re: FPGA programming driver architecture
+Date: Thu, 8 Jan 2009 15:18:27 -0500
+Message-ID: <20090108151827.72f50cee.hugo@hugovil.com>
+References: <20081212150314.6ea24996.hugo@hugovil.com>
+	<200812131358.03010.florian@openwrt.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <33cac1200901080513k4df78751uc752c38e71486164@mail.gmail.com>
+In-Reply-To: <200812131358.03010.florian@openwrt.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: klaasjan gm <klaasjan.gm@gmail.com>
-Cc: Rob Landley <rob@landley.net>, Sam Ravnborg <sam@ravnborg.org>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Florian Fainelli <florian@openwrt.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-klaasjan gm wrote:
-> Rob and to whom it may concern,
-> 
->> I didn't discover this topic independently.  Somebody pinged me about it on
->> freenode back in February, and several other people sent me private email
->> about it, and it's been previously raised on several other mailing lists (such
->> as busybox and uclibc ones).
->>
->> Unfortunately, most of the embedded developers I know aren't subscribed to
->> linux-kernel.
-> 
-> FWIW,
-> 
->> Hopefully the cc: to linux-embedded is helping get more embedded guys involved
->> in the discussion than just me. :)
-> 
-> Having some experience with cross-compiling the kernel, and some of the basic
-> toolsets:
-> I'm with you on this one (and testing the waters at linux-embedded
-> while I'm at it)
+On Sat, 13 Dec 2008 13:58:01 +0100
+=46lorian Fainelli <florian@openwrt.org> wrote:
 
-+1
+> (CC'ing linux-embedded)
+>=20
+> Salut Hugo,
+>=20
+> Le Friday 12 December 2008 21:03:14 Hugo Villeneuve, vous avez =E9cri=
+t=A0:
+> > Hi,
+> > I have written some code to program a FPGA in Linux, for two
+> > different types of boards: one uses a serial interface (SPI) and
+> > the second a parallel interface. I have been able to sucessfully
+> > program both boards. I'm now trying to clean my code and make it
+> > more generic, as well as better in line with the Linux driver
+> > model. I would also like to include it in the mainline kernel if
+> > there is interest.
+> ...
+> What about something like that :
+>=20
+> - fpgaload-core which contains all the code that can be shared
+> between the drivers like requesting firmware, providing sysfs
+> attributes,=20
+> - fpgaload-spi would handle the low-level SPI connection
+> - fpgaload-par would handle the low-level parallel connection
+>=20
+> fpgaload-ser and par would register with fpgaload-core and they could
+> register a fpga loading callback which is low-level specific for
+> instance. Platform code would instantiate the core driver. That way,
+> adding support for other loading protocols like slave serial or
+> master serial can be done easily.
 
-Chris
-> 
-> Regards,
-> Klaasjan
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes, but how I actually implement fpgaload_core, fpgaload_ser and
+fpgaload_par?
+
+Bus driver?
+class driver?
+platform driver?
+
+I am not sure how I should implement things and how each low-level
+specific driver should register with the fpgaload_core driver...
+
+Hugo V.
+
+---------------
+Hugo Villeneuve
+www.hugovil.com
+---------------
