@@ -1,64 +1,60 @@
-From: Hugo Villeneuve <hugo@hugovil.com>
+From: "Thiago Galesi" <thiagogalesi@gmail.com>
 Subject: Re: FPGA programming driver architecture
-Date: Thu, 8 Jan 2009 15:18:27 -0500
-Message-ID: <20090108151827.72f50cee.hugo@hugovil.com>
+Date: Thu, 8 Jan 2009 20:14:36 -0200
+Message-ID: <82ecf08e0901081414u15af3c2dy9c88a242db024dc7@mail.gmail.com>
 References: <20081212150314.6ea24996.hugo@hugovil.com>
-	<200812131358.03010.florian@openwrt.org>
+	 <200812131358.03010.florian@openwrt.org>
+	 <20090108151827.72f50cee.hugo@hugovil.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200812131358.03010.florian@openwrt.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=gOgG8DvATYQNK0DVqhtkwEnEKI4jMHq24wliJpOpBVU=;
+        b=WgPmxK/8jqOdDJ+b5H5nJxuiBM2B9FiDXMzaBDj7v/c9bSD3kUKDUkt5DdAFdsJGQX
+         BeFp8orfAKNgXTo0bbZarVyqz0eyKTWA9I0d7zoMzJrGdGW75DMzlnrle2q6uWoL6nfA
+         aTMfq81db1Kc68icOSFSvANWn+yaMz4QMRLaA=
+In-Reply-To: <20090108151827.72f50cee.hugo@hugovil.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Florian Fainelli <florian@openwrt.org>
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Hugo Villeneuve <hugo@hugovil.com>
+Cc: Florian Fainelli <florian@openwrt.org>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Sat, 13 Dec 2008 13:58:01 +0100
-=46lorian Fainelli <florian@openwrt.org> wrote:
+> > > Hi,
+> > > I have written some code to program a FPGA in Linux, for two
+> > > different types of boards: one uses a serial interface (SPI) and
+> > > the second a parallel interface. I have been able to sucessfully
+> > > program both boards. I'm now trying to clean my code and make it
+> > > more generic, as well as better in line with the Linux driver
+> > > model.
 
-> (CC'ing linux-embedded)
->=20
-> Salut Hugo,
->=20
-> Le Friday 12 December 2008 21:03:14 Hugo Villeneuve, vous avez =E9cri=
-t=A0:
-> > Hi,
-> > I have written some code to program a FPGA in Linux, for two
-> > different types of boards: one uses a serial interface (SPI) and
-> > the second a parallel interface. I have been able to sucessfully
-> > program both boards. I'm now trying to clean my code and make it
-> > more generic, as well as better in line with the Linux driver
-> > model. I would also like to include it in the mainline kernel if
-> > there is interest.
-> ...
-> What about something like that :
->=20
-> - fpgaload-core which contains all the code that can be shared
-> between the drivers like requesting firmware, providing sysfs
-> attributes,=20
-> - fpgaload-spi would handle the low-level SPI connection
-> - fpgaload-par would handle the low-level parallel connection
->=20
-> fpgaload-ser and par would register with fpgaload-core and they could
-> register a fpga loading callback which is low-level specific for
-> instance. Platform code would instantiate the core driver. That way,
-> adding support for other loading protocols like slave serial or
-> master serial can be done easily.
+Considering the several FPGA models available and ways to program it,
+I guess the important thing to consider is what can be made generic.
+(that is what will become fpgaload)
 
-Yes, but how I actually implement fpgaload_core, fpgaload_ser and
-fpgaload_par?
+Also, there may be cases where after FPGA is programmed it "becomes a
+device" (PCI or whatever)
 
-Bus driver?
-class driver?
-platform driver?
+> >
+> > - fpgaload-core which contains all the code that can be shared
+> > between the drivers like requesting firmware, providing sysfs
+> > attributes,
+> > - fpgaload-spi would handle the low-level SPI connection
+> > - fpgaload-par would handle the low-level parallel connection
 
-I am not sure how I should implement things and how each low-level
-specific driver should register with the fpgaload_core driver...
+I think this maybe split into three layers (maybe)
 
-Hugo V.
+1 - low level connection: paralell / spi / i2c / whatever
+2 - vendor: xylinx, altera, etc
+3 - generic stuff
 
----------------
-Hugo Villeneuve
-www.hugovil.com
----------------
+Take a look at the MTD and SPI drivers and how they split things
+
+--
+-
+Thiago Galesi
