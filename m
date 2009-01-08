@@ -1,57 +1,50 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: Re: [PATCH V3 01/17] Squashfs: inode operations
-Date: Thu, 8 Jan 2009 08:36:09 +1100
-Message-ID: <20090108083609.97f0703a.sfr@canb.auug.org.au>
-References: <E1LJnJn-0002L2-GZ@dylan.lougher.demon.co.uk>
-	<Pine.LNX.4.64.0901071854210.32034@vixen.sonytel.be>
+From: "klaasjan gm" <klaasjan.gm@gmail.com>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Thu, 8 Jan 2009 14:13:57 +0100
+Message-ID: <33cac1200901080513k4df78751uc752c38e71486164@mail.gmail.com>
+References: <200901020207.30359.rob@landley.net>
+	 <20090102172540.GE8858@knossos.aleph1.co.uk>
+	 <20090102180134.GB5818@uranus.ravnborg.org>
+	 <200901031348.46847.rob@landley.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i"
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.0901071854210.32034@vixen.sonytel.be>
-Sender: linux-fsdevel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, Linux Kernel Development <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Linux/PPC Development <linuxppc-dev@ozlabs.org>
-
---Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i
-Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:to
+         :subject:cc:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:references;
+        bh=wC4RZOVf9+iJQUWaTlcSSRmYy9Y5Zn0BFOqvomYgIIY=;
+        b=t2oIMlt+33JN4vzBPICTakx+9qiVb3M1Fgoe5Dxa6tYIBtW3x0OfS3xwd3ufvhu0fL
+         D93LsqADA+gccXOY0wjTKsDrp9MNL29IO4rpHuumgsAlQjFhnBore5vXCzXxsnT6vfVB
+         2pv67cYRoARkPQk0dTEmYG8YzPZHyAcVyt1Ys=
+In-Reply-To: <200901031348.46847.rob@landley.net>
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Rob Landley <rob@landley.net>
+Cc: Sam Ravnborg <sam@ravnborg.org>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>
 
-Hi Geert,
+Rob and to whom it may concern,
 
-On Wed, 7 Jan 2009 19:00:24 +0100 (CET) Geert Uytterhoeven <Geert.Uytterhoe=
-ven@sonycom.com> wrote:
+> I didn't discover this topic independently.  Somebody pinged me about it on
+> freenode back in February, and several other people sent me private email
+> about it, and it's been previously raised on several other mailing lists (such
+> as busybox and uclibc ones).
 >
-> Note that I get lots of
->=20
-> | warning: format '%llx' expects type 'long long unsigned int', but argum=
-ent 3 has type 'u64'
->=20
-> on ppc64, since you switched from `unsigned long long' to 'u64', as `u64'=
- is
-> (still -- this is being changed) `unsigned long' on pp64.
->=20
-> I guess no action has to be taken, for now?
+> Unfortunately, most of the embedded developers I know aren't subscribed to
+> linux-kernel.
 
-Correct, as we are in the process of changing u64 to unsigned long long for
-powerpc.
---=20
-Cheers,
-Stephen Rothwell                    sfr@canb.auug.org.au
-http://www.canb.auug.org.au/~sfr/
+FWIW,
 
---Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i
-Content-Type: application/pgp-signature
+> Hopefully the cc: to linux-embedded is helping get more embedded guys involved
+> in the discussion than just me. :)
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
+Having some experience with cross-compiling the kernel, and some of the basic
+toolsets:
+I'm with you on this one (and testing the waters at linux-embedded
+while I'm at it)
 
-iEYEARECAAYFAkllIEkACgkQjjKRsyhoI8z+kACgqYc6WZOOWrsC3r7DIQxcBfZT
-ddUAoKQX7RBP6l9WH98d3MgBSQ/3fPDf
-=JuME
------END PGP SIGNATURE-----
-
---Signature=_Thu__8_Jan_2009_08_36_09_+1100_IRCI5g.wNKF4sD4i--
+Regards,
+Klaasjan
