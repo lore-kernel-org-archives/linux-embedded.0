@@ -1,31 +1,79 @@
-From: Alexander Clouter <alex@digriz.org.uk>
+From: Hugo Villeneuve <hugo@hugovil.com>
 Subject: Re: FPGA programming driver architecture
-Date: Fri, 9 Jan 2009 12:24:08 +0000
-Message-ID: <88sj36-s3t.ln1@woodchuck.wormnet.eu>
-References: <20081212150314.6ea24996.hugo@hugovil.com> <82ecf08e0901081414u15af3c2dy9c88a242db024dc7@mail.gmail.com> <c384c5ea0901081447i5ad807b3yb0ec3adebeaa46a0@mail.gmail.com> <200901082357.24432.florian@openwrt.org> <c384c5ea0901081507v5d186eai5ec71d56b4c7a972@mail.gmail.com> <4966C125.10604@duaneellis.com>
+Date: Fri, 9 Jan 2009 10:07:25 -0500
+Message-ID: <20090109100725.77a07e74.hugo@hugovil.com>
+References: <20081212150314.6ea24996.hugo@hugovil.com>
+	<200812131358.03010.florian@openwrt.org>
+	<20090108151827.72f50cee.hugo@hugovil.com>
+	<82ecf08e0901081414u15af3c2dy9c88a242db024dc7@mail.gmail.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <82ecf08e0901081414u15af3c2dy9c88a242db024dc7@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Thiago Galesi <thiagogalesi@gmail.com>
+Cc: Florian Fainelli <florian@openwrt.org>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Duane Ellis <duane@duaneellis.com> wrote:
-> >> [various FPGA config methods]
-> 
-> Don't forget JTAG, and playing back an SVF files, or BIT files.
-> 
-On the board we have, the FPGA is programmable over JTAG which is 
-conveniently strapped to the GPIO pins of the CPU.
+On Thu, 8 Jan 2009 20:14:36 -0200
+"Thiago Galesi" <thiagogalesi@gmail.com> wrote:
 
-http://www.embeddedarm.com/products/board-detail.php?product=TS-7800
+> > > > Hi,
+> > > > I have written some code to program a FPGA in Linux, for two
+> > > > different types of boards: one uses a serial interface (SPI) an=
+d
+> > > > the second a parallel interface. I have been able to sucessfull=
+y
+> > > > program both boards. I'm now trying to clean my code and make i=
+t
+> > > > more generic, as well as better in line with the Linux driver
+> > > > model.
+>=20
+> Considering the several FPGA models available and ways to program it,
+> I guess the important thing to consider is what can be made generic.
+> (that is what will become fpgaload)
 
-Cheers
+I have a pretty good idea of what goes into the core and
+what goes into the specific interface modules (spi, parallel, etc).
 
-Alex
+> Also, there may be cases where after FPGA is programmed it "becomes a
+> device" (PCI or whatever)
 
--- 
-Alexander Clouter
-.sigmonster says: This screen intentionally left blank.
+This is exactly the case for my board, but it doesn=B4t change anything
+to the programming side of things, apart for the fact that the FPGA
+must be configured before using any in-FPGA PCI bus for example.
+
+> > > - fpgaload-core which contains all the code that can be shared
+> > > between the drivers like requesting firmware, providing sysfs
+> > > attributes,
+> > > - fpgaload-spi would handle the low-level SPI connection
+> > > - fpgaload-par would handle the low-level parallel connection
+>=20
+> I think this maybe split into three layers (maybe)
+>=20
+> 1 - low level connection: paralell / spi / i2c / whatever
+> 2 - vendor: xylinx, altera, etc
+> 3 - generic stuff
+>=20
+> Take a look at the MTD and SPI drivers and how they split things
+
+I think that for the moment, I will focus on implementing the core
+module and the parallel/SPI interfaces only. Later we may want to add
+more fonctionality (vendors, JTAG, etc).
+
+But for now, my main problem is that I need to have some insight on how
+I actually implement the different modules:
+
+Bus driver?
+class driver?
+platform driver?
+
+Can anybody give some advice on that?
+
+Thank-you, Hugo.
+
+---------------
+Hugo Villeneuve
+www.hugovil.com
+---------------
