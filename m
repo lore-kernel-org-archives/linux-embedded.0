@@ -1,59 +1,60 @@
-From: "Mark A. Miller" <mark@mirell.org>
+From: Paul Mundt <lethal@linux-sh.org>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Sun, 11 Jan 2009 23:50:31 -0600
-Message-ID: <31014a580901112150x57cd715aj5f42ee19bc28c701@mail.gmail.com>
-References: <200901020207.30359.rob@landley.net>
-	 <c384c5ea0901031454n451bc899w166bb146c96f6164@mail.gmail.com>
-	 <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net>
-	 <20090104030619.GA21466@linux-sh.org>
-	 <c384c5ea0901040223l6e53f041s9f7cdea20c9d1d8d@mail.gmail.com>
-	 <1231677939.3517.5.camel@gimli.at.home>
-	 <31014a580901111928u586e2246uccf370ff941c8a01@mail.gmail.com>
-	 <20090112053552.GA9061@uranus.ravnborg.org>
+Date: Mon, 12 Jan 2009 17:20:58 +0900
+Message-ID: <20090112082058.GB28564@linux-sh.org>
+References: <200901020207.30359.rob@landley.net> <c384c5ea0901031454n451bc899w166bb146c96f6164@mail.gmail.com> <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net> <20090104030619.GA21466@linux-sh.org> <c384c5ea0901040223l6e53f041s9f7cdea20c9d1d8d@mail.gmail.com> <1231677939.3517.5.camel@gimli.at.home> <31014a580901111936q41486efagcb90af2b6880a470@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090112053552.GA9061@uranus.ravnborg.org>
 Content-Disposition: inline
+In-Reply-To: <31014a580901111936q41486efagcb90af2b6880a470@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Bernd Petrovitsch <bernd@firmix.at>, Leon Woestenberg <leon.woestenberg@gmail.com>, Paul Mundt <lethal@linux-sh.org>, Rob Landley <rob@landley.net>, "H. Peter Anvin" <hpa@zytor.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Content-Transfer-Encoding: 7bit
+To: "Mark A. Miller" <mark@mirell.org>
+Cc: Bernd Petrovitsch <bernd@firmix.at>, Leon Woestenberg <leon.woestenberg@gmail.com>, Rob Landley <rob@landley.net>, "H. Peter Anvin" <hpa@zytor.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
 
-On Sun, Jan 11, 2009 at 11:35 PM, Sam Ravnborg <sam@ravnborg.org> wrote:
->> There are several other packages which are broken for embedded
->> architectures, which I will hopefully attempt to fix by submitting patches
->> upstream. But this is why we should be cautious about including new tools
->> for compiling the kernel. Sam Ravnborg was correct in that a C program to do
->> the work would be the proper way. But by not addressing a currently existing
->> problem with an adequate replacement with something that does not exist
->> currently, seems faulty.
->
-> Why are "make headers_install" such a crucial thing for your
-> embedded environmnet?
+On Sun, Jan 11, 2009 at 09:36:58PM -0600, Mark A. Miller wrote:
+> Actually, something that has amused me during this discussion, is that
+> right now, the latest stable Perl (5.8.8) does not compile correctly
+> on a uclibc host, which is typically what you want for embedded
+> systems, which is why you'd bother to cross compile. (Albeit I was
+> doing this natively under QEMU with a gcc/uclibc toolchain).
+> 
+> I'll have a patch submitted upstream shortly, but basically the
+> hints/linux.sh assumes *obviously* you're linking to glibc. I've made
+> that less libc dependent, looking for either glibc or uclibc.
+> 
+There are plenty that ship with glibc, too. What you "want" for embedded
+systems depends entirely on the application for the device, not general
+hand-wavy assertions. We (Renesas) ship BSPs on both precisely because of
+this reason, and eglibc will probably factor in at some point later on
+too.
 
-Sanity check. If the environment cannot replicate itself, then
-something has been faulty in the cross-compiling stage, that was used
-to propagate a native environment for the target architecture.
+> So without patching Perl, by adding it to the kernel configuration,
+> it's broken being able to compile the kernel on most embedded
+> architectures.
+> 
+This again has nothing to do with the kernel and everything to do with
+your distribution. I use perl on uclibc natively just fine, it is
+possible there are patches that have not been merged upstream, but this
+is again an entirely separate issue.
 
-> I would assume that if this of such improtance then there is also
-> someone to step up and contribute a C version of it.
+You seem to be confusing the fact that people who build distributions and
+people who use them are one and the same, whereas "most" embedded
+developers are going to be using pre-built distributions provided with
+their reference hardware, and locking it down during productization. The
+fact you are doing a distribution aimed at embedded devices is nice, but
+do not try to push off problems you run in to that have a reasonable
+expectation of working everywhere else on to the kernel community as
+something we ought to care about. 
 
-You've already dismissed a shell version to correct the issue, in
-hopes of a "possible" C version. It would be nice, I'm not capable of
-doing it personally, but a solution already exists to "unbreak" the
-kernel build. If you're unwilling to merge the current patches, then
-feel free to claim that this doesn't break anything on current
-architectures, but it's incorrect, due to Perl not even compiling as
-is currently on a native uclibc environment.
+If you need to use a different libc on your platform, yes, you will have
+to update packages for this. This used to be true for gcc and other
+packages as well, but those were all fixed over time. The fact perl still
+stands out despite there being patches available is simply an indicator
+that folks working in that area haven't been very proactive in getting
+their changes merged upstream. Tough.
 
-I look forward to what other tools will be introduced to break yet
-more architectures until the kernel cannot be compiled unless on an
-i686+glibc architecture.
-
->        Sam
-
--- 
-Mark A. Miller
-mark@mirell.org
+This is now entirely off-topic and has nothing to do with the kernel any
+more. Please take this to the uclibc or perl lists instead.
