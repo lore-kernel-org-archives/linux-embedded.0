@@ -1,40 +1,50 @@
-From: Paul Mundt <lethal@linux-sh.org>
+From: "Mark A. Miller" <mark@mirell.org>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Mon, 12 Jan 2009 19:38:20 +0900
-Message-ID: <20090112103820.GF28564@linux-sh.org>
-References: <c384c5ea0901031454n451bc899w166bb146c96f6164@mail.gmail.com> <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net> <20090104030619.GA21466@linux-sh.org> <c384c5ea0901040223l6e53f041s9f7cdea20c9d1d8d@mail.gmail.com> <1231677939.3517.5.camel@gimli.at.home> <31014a580901111928u586e2246uccf370ff941c8a01@mail.gmail.com> <20090112053552.GA9061@uranus.ravnborg.org> <31014a580901112150x57cd715aj5f42ee19bc28c701@mail.gmail.com> <20090112101803.GB10086@uranus.ravnborg.org>
+Date: Mon, 12 Jan 2009 04:55:32 -0600
+Message-ID: <31014a580901120255q368714a7o897a328d9da479ad@mail.gmail.com>
+References: <200901020207.30359.rob@landley.net>
+	 <20090112101803.GB10086@uranus.ravnborg.org>
+	 <31014a580901120222s747d9641o641b2991baa5f8f8@mail.gmail.com>
+	 <200901121144.16255.neundorf@eit.uni-kl.de>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754716AbZALKl0@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <200901121144.16255.neundorf@eit.uni-kl.de>
 Content-Disposition: inline
-In-Reply-To: <20090112101803.GB10086@uranus.ravnborg.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: "Mark A. Miller" <mark@mirell.org>, Bernd Petrovitsch <bernd@firmix.at>, Leon Woestenberg <leon.woestenberg@gmail.com>, Rob Landley <rob@landley.net>, "H. Peter Anvin" <hpa@zytor.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+To: Alexander Neundorf <neundorf@eit.uni-kl.de>
+Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
 
-On Mon, Jan 12, 2009 at 11:18:03AM +0100, Sam Ravnborg wrote:
-> On Sun, Jan 11, 2009 at 11:50:31PM -0600, Mark A. Miller wrote:
-> > On Sun, Jan 11, 2009 at 11:35 PM, Sam Ravnborg <sam@ravnborg.org> wrote:
-> > >> There are several other packages which are broken for embedded
-> > >> architectures, which I will hopefully attempt to fix by submitting patches
-> > >> upstream. But this is why we should be cautious about including new tools
-> > >> for compiling the kernel. Sam Ravnborg was correct in that a C program to do
-> > >> the work would be the proper way. But by not addressing a currently existing
-> > >> problem with an adequate replacement with something that does not exist
-> > >> currently, seems faulty.
-> > >
-> > > Why are "make headers_install" such a crucial thing for your
-> > > embedded environmnet?
-> > 
-> > Sanity check. If the environment cannot replicate itself, then
-> > something has been faulty in the cross-compiling stage, that was used
-> > to propagate a native environment for the target architecture.
-> 
-> So you actually build your target toolchain on your target?
-> 
-This happens in a lot of places, like embedded gentoo ports, where almost
-all of the work is sent across distcc to a cross-compilation machine. In
-systems that use package management, it is done on the host through
-emulation, or painfully cross-compiled.
+On Mon, Jan 12, 2009 at 4:44 AM, Alexander Neundorf
+<neundorf@eit.uni-kl.de> wrote:
+> On Monday 12 January 2009 11:22:47 you wrote:
+> ...
+>> entire environment, QEMU allows it nicely with distcc at a reasonable
+>> speed. (Albeit there is no distconfigure, but that's entirely an
+>> unrelated tanget of muck and despair and rants against configure, but
+>> we're not going there...)
+>
+> I'd be interested in hearing your issues with configure for cross compiling
+> right ?
+> I added cross compiling support to cmake, so I'm interested to see whether we
+> did it better :-)
+>
+> Alex
+
+Actually, I've mostly avoided that with doing most of the compiles in
+QEMU. I just pine for a distconfigure, and rant about configure in
+general, since it takes quite a while to do all the checks under an
+emulated host, and it checks for *stupid things* in a lot of packages,
+like, "Do we have the MacOSX 10.5 SDK installed...", when it already
+determined that it was running on Linux, and...
+
+Yah. Muck and despair...muck and despair.
+
+-- 
+Mark A. Miller
+mark@mirell.org
+
+"My greatest strength, I guess it would be my humility. My greatest
+weakness, it's possible that I'm a little too awesome" - Barack Obama
