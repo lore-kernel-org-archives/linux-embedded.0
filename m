@@ -1,36 +1,29 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+From: Jamie Lokier <jamie@shareable.org>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Mon, 12 Jan 2009 18:04:39 +0000
-Message-ID: <20090112180439.0938ab5a@lxorguk.ukuu.org.uk>
-References: <200901020207.30359.rob@landley.net>
-	<31014a580901120118u55256b51g448f22e9e0ef5d1f@mail.gmail.com>
-	<20090112094121.GD28564@linux-sh.org>
-	<200901121156.17377.rob@landley.net>
+Date: Wed, 14 Jan 2009 02:51:16 +0000
+Message-ID: <20090114025115.GB22154@shareable.org>
+References: <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net> <20090104030619.GA21466@linux-sh.org> <c384c5ea0901040223l6e53f041s9f7cdea20c9d1d8d@mail.gmail.com> <1231677939.3517.5.camel@gimli.at.home> <31014a580901111928u586e2246uccf370ff941c8a01@mail.gmail.com> <20090112053552.GA9061@uranus.ravnborg.org> <31014a580901112150x57cd715aj5f42ee19bc28c701@mail.gmail.com> <20090112101803.GB10086@uranus.ravnborg.org> <20090112103820.GF28564@linux-sh.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200901121156.17377.rob@landley.net>
+Content-Disposition: inline
+In-Reply-To: <20090112103820.GF28564@linux-sh.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Rob Landley <rob@landley.net>
-Cc: Paul Mundt <lethal@linux-sh.org>, "Mark A. Miller" <mark@mirell.org>, Bernd Petrovitsch <bernd@firmix.at>, Leon Woestenberg <leon.woestenberg@gmail.com>, "H. Peter Anvin" <hpa@zytor.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Sam Ravnborg <sam@ravnborg.org>
+Content-Transfer-Encoding: 7bit
+To: Paul Mundt <lethal@linux-sh.org>, Sam Ravnborg <sam@ravnborg.org>, "Mark A. Miller" <mark@mirell.org>, Bernd Petrovitsch <bernd@firmix.at>, Leon Woestenberg <leon.woestenberg@gmail.co>
 
-> I didn't say it was incapable of being supported.  We're _capable_ of 
-> reimplementing the entire kernel in perl 
+Paul Mundt wrote:
+> This happens in a lot of places, like embedded gentoo ports, where almost
+> all of the work is sent across distcc to a cross-compilation machine. In
+> systems that use package management, it is done on the host through
+> emulation, or painfully cross-compiled.
 
-Which perl. What minor release, what day of the week syntax.
+Ah yes, I remember using embedded Gentoo.
 
-Ask anyone in the distribution business about the joy of perl and you can
-listen to the screams for hours.
+95% of the time in ./configure scripts, 5% in compilations.
 
-Perl5 has no formal grammar and you cannot tell what perl of the week
-does and perl of last week doesn't do.
+And this is on x86!  I dread to think how slow it gets on something
+slow.
 
-That makes it a bad candidate for our toolchain dependencies.
-
-
-Alan
---
-   "I don't want world domination if it means I have to deal with more
-	people like this" - Mike Wangsmo
+-- Jamie
