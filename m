@@ -1,29 +1,41 @@
-From: Jamie Lokier <jamie@shareable.org>
+From: =?ISO-8859-1?Q?P=E1draig_Brady?= <P@draigBrady.com>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Wed, 14 Jan 2009 02:51:16 +0000
-Message-ID: <20090114025115.GB22154@shareable.org>
-References: <495FEEAF.5020005@zytor.com> <200901032006.47652.rob@landley.net> <20090104030619.GA21466@linux-sh.org> <c384c5ea0901040223l6e53f041s9f7cdea20c9d1d8d@mail.gmail.com> <1231677939.3517.5.camel@gimli.at.home> <31014a580901111928u586e2246uccf370ff941c8a01@mail.gmail.com> <20090112053552.GA9061@uranus.ravnborg.org> <31014a580901112150x57cd715aj5f42ee19bc28c701@mail.gmail.com> <20090112101803.GB10086@uranus.ravnborg.org> <20090112103820.GF28564@linux-sh.org>
+Date: Thu, 15 Jan 2009 12:59:48 +0000
+Message-ID: <496F3344.9060104@draigBrady.com>
+References: <200901020207.30359.rob@landley.net> <200901021026.37905.a.miskiewicz@gmail.com> <20090102094934.GB17841@infradead.org> <495DE995.1070002@opensde.org> <yw1x3ag2t2gd.fsf@thrashbarg.mansr.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20090112103820.GF28564@linux-sh.org>
+In-Reply-To: <yw1x3ag2t2gd.fsf@thrashbarg.mansr.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Paul Mundt <lethal@linux-sh.org>, Sam Ravnborg <sam@ravnborg.org>, "Mark A. Miller" <mark@mirell.org>, Bernd Petrovitsch <bernd@firmix.at>, Leon Woestenberg <leon.woestenberg@gmail.co>
+Content-Type: text/plain; charset="iso-8859-1"
+To: =?ISO-8859-1?Q?M=E5ns_Rullg=E5rd?= <mans@mansr.com>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Paul Mundt wrote:
-> This happens in a lot of places, like embedded gentoo ports, where almost
-> all of the work is sent across distcc to a cross-compilation machine. In
-> systems that use package management, it is done on the host through
-> emulation, or painfully cross-compiled.
+M=E5ns Rullg=E5rd wrote:
+> Alejandro Mery <amery@opensde.org> writes:
+>=20
+>> I think the $(( ... )) bash-ism can be replaced with a simple .c hel=
+per toy.
+>=20
+> The $(( ... )) construct is standard POSIX shell syntax, see
+> http://www.opengroup.org/onlinepubs/000095399/utilities/xcu_chap02.ht=
+ml#tag_02_06_04
+>=20
+> Bash supports $[ ... ] as an alternate syntax for the same thing.
+> Perhaps you were thinking of that.
 
-Ah yes, I remember using embedded Gentoo.
+I think the misconception that $(( ... )) is a bashism is caused by
+the wrong highlighting defaults chosen by vim. To fix this add this to =
+~/.vimrc
 
-95% of the time in ./configure scripts, 5% in compilations.
+let g:is_posix =3D 1
 
-And this is on x86!  I dread to think how slow it gets on something
-slow.
+That will also allow you to use the $(command) POSIX construct.
+BTW, the vim syntax maintainers don't agree with changing this default:
+http://groups.google.com/group/vim_dev/browse_thread/thread/41139a32772=
+b2f5f
 
--- Jamie
+cheers,
+P=E1draig.
