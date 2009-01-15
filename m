@@ -1,41 +1,44 @@
-From: =?ISO-8859-1?Q?P=E1draig_Brady?= <P@draigBrady.com>
+From: =?UTF-8?B?UMOhZHJhaWcgQnJhZHk=?= <P@draigBrady.com>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Thu, 15 Jan 2009 12:59:48 +0000
-Message-ID: <496F3344.9060104@draigBrady.com>
-References: <200901020207.30359.rob@landley.net> <200901021026.37905.a.miskiewicz@gmail.com> <20090102094934.GB17841@infradead.org> <495DE995.1070002@opensde.org> <yw1x3ag2t2gd.fsf@thrashbarg.mansr.com>
+Date: Thu, 15 Jan 2009 14:32:57 +0000
+Message-ID: <496F4919.8060302@draigBrady.com>
+References: <200901020207.30359.rob@landley.net> <200901032006.47652.rob@landley.net> <49601B94.3060408@zytor.com> <200901040029.03396.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <yw1x3ag2t2gd.fsf@thrashbarg.mansr.com>
+In-Reply-To: <200901040029.03396.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: =?ISO-8859-1?Q?M=E5ns_Rullg=E5rd?= <mans@mansr.com>
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Rob Landley <rob@landley.net>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Leon Woestenberg <leon.woestenberg@gmail.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Sam Ravnborg <sam@ravnborg.org>, austin-group-l@opengroup.org
 
-M=E5ns Rullg=E5rd wrote:
-> Alejandro Mery <amery@opensde.org> writes:
->=20
->> I think the $(( ... )) bash-ism can be replaced with a simple .c hel=
-per toy.
->=20
-> The $(( ... )) construct is standard POSIX shell syntax, see
-> http://www.opengroup.org/onlinepubs/000095399/utilities/xcu_chap02.ht=
-ml#tag_02_06_04
->=20
-> Bash supports $[ ... ] as an alternate syntax for the same thing.
-> Perhaps you were thinking of that.
+Rob Landley wrote:
+> Implementing something by hand isn't _always_ a good alternative, sur=
+e.  That=20
+> would be the "thinking about the problem" part.  In this instance, av=
+oiding=20
+> overflow is trivial.  (If 1<<-1 didn't wrap around, it wouldn't even =
+need the=20
+> if statement.)
 
-I think the misconception that $(( ... )) is a bashism is caused by
-the wrong highlighting defaults chosen by vim. To fix this add this to =
-~/.vimrc
+I don't think this affects your script but it's worth noting
+that both bash and ksh use arithmetic rather than logical shift
+for the >> operator.
 
-let g:is_posix =3D 1
+Now arithmetic shift is not useful on 2's compliment machines,
+and moreover it's compiler dependent as to whether arithmetic
+or logical shift is done for >>. Therefore to increase usefulness
+and decrease ambiguity, shells really should only shift unsigned
+variables internally.
 
-That will also allow you to use the $(command) POSIX construct.
-BTW, the vim syntax maintainers don't agree with changing this default:
-http://groups.google.com/group/vim_dev/browse_thread/thread/41139a32772=
-b2f5f
+I know the opengroup spec says to use signed ints, but I think
+that is intended to disambiguate input and output, rather than defining
+internal operations. This is correct I think since the POSIX spec says
+you can even use floating point internally if you like.
+
+I asked the bash maintainer who said he would need clarification
+from the austin group (CC'd) before changing anything.
 
 cheers,
-P=E1draig.
+P=C3=A1draig.
