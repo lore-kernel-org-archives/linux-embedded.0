@@ -1,65 +1,34 @@
-From: "Leisner, Martin" <Martin.Leisner@xerox.com>
-Subject: RE: ramfs/tmpfs for application partition
-Date: Thu, 15 Jan 2009 11:55:24 -0500
-Message-ID: <556445368AFA1C438794ABDA8901891C0A5A0C8E@USA0300MS03.na.xerox.net>
-References: <FF584854D6FFE547AB2F7515A798AC3A045716A1B4@venus.imagineil.tv>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Thu, 15 Jan 2009 18:52:24 +0000
+Message-ID: <20090115185224.GB5440@shareable.org>
+References: <200901020207.30359.rob@landley.net> <200901021026.37905.a.miskiewicz@gmail.com> <20090102094934.GB17841@infradead.org> <495DE995.1070002@opensde.org> <yw1x3ag2t2gd.fsf@thrashbarg.mansr.com> <496F3344.9060104@draigBrady.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-class: urn:content-classes:message
-In-Reply-To: <FF584854D6FFE547AB2F7515A798AC3A045716A1B4@venus.imagineil.tv>
+Content-Disposition: inline
+In-Reply-To: <496F3344.9060104@draigBrady.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Jacob Avraham <jacob@imaginecommunications.com>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: =?iso-8859-1?Q?P=E1draig?= Brady <P@draigBrady.com>
+Cc: =?iso-8859-1?Q?M=E5ns_Rullg=E5rd?= <mans@mansr.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Not sure I fully understand....
+P=E1draig Brady wrote:
+> > The $(( ... )) construct is standard POSIX shell syntax, see
+> > http://www.opengroup.org/onlinepubs/000095399/utilities/xcu_chap02.=
+html#tag_02_06_04
+> >=20
+> > Bash supports $[ ... ] as an alternate syntax for the same thing.
+> > Perhaps you were thinking of that.
+>=20
+> I think the misconception that $(( ... )) is a bashism is caused by
+> the wrong highlighting defaults chosen by vim.
 
-You basically want two blobs -- the initramfs and the application?
+I think the misconception is because traditional unix bourne shells
+don't implement that construct.  I just tried it on a few machines,
+and it failed on 4 of them.  Admittedly, the only up to date one is
+running Solaris 10; the others are older unixes that you're unlikely
+to build Linux on.
 
-You can expand the initramfs by copying to it...so you mount the application and run a script to copy it to initramfs before running it.
-
-marty
-
->   -----Original Message-----
->   From: linux-embedded-owner@vger.kernel.org [mailto:linux-embedded-
->   owner@vger.kernel.org] On Behalf Of Jacob Avraham
->   Sent: Thursday, January 15, 2009 11:43 AM
->   To: linux-embedded@vger.kernel.org
->   Subject: ramfs/tmpfs for application partition
->   
->   
->   Hi,
->   
->   I have a system with 128M RAM and a flash partitioned so that 10M is
->   dedicated to initramfs image,
->   6M to application partition. And another 6M for JFFS2.
->   As I have plenty of RAM, I'd like to have my application directory
->   mounted on RAM, from a pre-populated
->   filesystem that resides in the 6M application partition.
->   So basically I want to use the same mechanism as initramfs, but mounted
->   on /my/app/partition instead of root.
->   Does it make sense? How do I go about and do that?
->   
->   
->   Jacob Avraham
->   
->   
->   
->   
->   
->   ************************************************************************
->   ************
->   This footnote confirms that this email message has been scanned by
->   PineApp Mail-SeCure for the presence of malicious code, vandals &
->   computer viruses.
->   ************************************************************************
->   ************
->   
->   
->   
->   --
->   To unsubscribe from this list: send the line "unsubscribe linux-
->   embedded" in
->   the body of a message to majordomo@vger.kernel.org
->   More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- Jamie
