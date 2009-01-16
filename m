@@ -1,55 +1,100 @@
-From: Valdis.Kletnieks@vt.edu
+From: Rob Landley <rob@landley.net>
 Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Fri, 16 Jan 2009 09:54:42 -0500
-Message-ID: <15458.1232117682@turing-police.cc.vt.edu>
-References: <495FEEAF.5020005@zytor.com> <20090112103820.GF28564@linux-sh.org> <20090114025115.GB22154@shareable.org>
-            <200901160011.11679.rob@landley.net>
+Date: Fri, 16 Jan 2009 15:54:00 -0600
+Message-ID: <200901161554.02054.rob@landley.net>
+References: <495FEEAF.5020005@zytor.com> <200901160011.11679.rob@landley.net> <15458.1232117682@turing-police.cc.vt.edu>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="==_Exmh_1232117682_11157P";
-	 micalg=pgp-sha1; protocol="application/pgp-signature"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: Your message of "Fri, 16 Jan 2009 00:11:09 CST."
-             <200901160011.11679.rob@landley.net>
+In-Reply-To: <15458.1232117682@turing-police.cc.vt.edu>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Rob Landley <rob@landley.net>
-Cc: Jamie Lokier <jamie@shareable.org>, Paul Mundt <lethal@linux-sh.org>, Sam Ravnborg <sam@ravnborg.org>, "Mark A. Miller" <mark@mirell.org>, Bernd Petrovitsch <bernd@firmix.at>, Leon Woestenberg <leon.woestenberg@gmail.com>, "H. Peter Anvin" <hpa@zytor.com>, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Valdis.Kletnieks@vt.edu, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+Cc: Sam Ravnborg <sam@ravnborg.org>, linux-kernel@vger.kernel.org
 
---==_Exmh_1232117682_11157P
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Friday 16 January 2009 08:54:42 Valdis.Kletnieks@vt.edu wrote:
+> On Fri, 16 Jan 2009 00:11:09 CST, Rob Landley said:
+> > P.S.  I still hope autoconf dies off and the world wakes up and moves
+> > away from that.  And from makefiles for that matter.  But in the
+> > meantime, I can work around it with enough effort.
+>
+> What do you propose autoconf and makefiles get replaced by?
 
-On Fri, 16 Jan 2009 00:11:09 CST, Rob Landley said:
-> P.S.  I still hope autoconf dies off and the world wakes up and moves a=
-way=20
-> from that.  And from makefiles for that matter.  But in the meantime, I=
- can=20
-> work around it with enough effort.
+At a first guess, meaningful standards and an acknowledgement that Linux is a 
+platform in its own right?  Between the two of them, that's 90% of your 
+problem right there.
 
-What do you propose autoconf and makefiles get replaced by?
+Not a new issue, here's a link from 2002:
+http://news.cnet.com/2100-1001-950180.html
 
-% wc pidgin/configure*
-  34287  118303 1004074 pidgin/configure
-   2499    7684   81532 pidgin/configure.ac
+And here's a multi-vendor effort at a standards group (the 86open project to 
+definite a Unix binary standard for x86 processors) dissolving itself way back 
+in 1999 with a declaration that the Linux binary format already was an open 
+standard and other unixes should just use things like lxrun to support that: 
+http://www.telly.org/86open/
 
-Which you rather code, 2.5K lines of autoconf or 35K lines of configure
-script? As long as there's enough diversity to require configure scripts,=
+Also, it would be nice if configure steps could stop entangling 1) users 
+providing preferences (command line options like --prefix or most of the --
+enable and --disable flags) for which things like kconfig might make more 
+sense, 2) probe for installed packages like zlib and enabling optional support 
+if found, 3) questions like "does my build environment provide strlcpy()".  
+Turning that into a big hairball does not help keep things simple.
 
-there's going to be a demand for an autoconf-ish feature to ease writing =
-them.
+> % wc pidgin/configure*
+>   34287  118303 1004074 pidgin/configure
+>    2499    7684   81532 pidgin/configure.ac
+>
+> Which you rather code, 2.5K lines of autoconf or 35K lines of configure
+> script?
 
+I consider it a false dichotomy.  I prefer "neither", and have seen it done 
+successfully many times.
 
---==_Exmh_1232117682_11157P
-Content-Type: application/pgp-signature
+I've never built pidgin from source, but I've got the output of the binutils 
+build in a log file.  How many of these tests are actually necessary on any 
+Linux system:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-Comment: Exmh version 2.5 07/13/2001
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... yes
+checking for suffix of object files... o
+checking whether gcc accepts -g... yes
+checking for library containing strerror... none required
+checking how to run the C preprocessor... gcc -E
+checking whether build environment is sane... yes
+checking whether gcc and cc understand -c and -o together... yes
+checking for an ANSI C-conforming const... yes
+checking for inline... inline
 
-iD8DBQFJcJ+ycC3lWbTT17ARAmzHAJ9dXiFYWL88pY/jhJRdwBuHTNSLdQCgk+0Q
-BJXEaXpMuPEVKm7itutVlWE=
-=SXda
------END PGP SIGNATURE-----
+It just goes on and on and on like this.  Tests like "checking whether byte 
+ordering is bigendian... no" means "Either I didn't know endian.h existed, or 
+I don't trust it to be there".  How about the long stretches checking for the 
+existence of header files specified by posix?  Or this gem:
 
---==_Exmh_1232117682_11157P--
+checking for gawk... no
+checking for mawk... no
+checking for nawk... no
+checking for awk... awk
+
+(If you can use awk, when is it _not_ there?  Probable answer: there was some 
+broken version on irix back in 1992 with zero remaining seats today, and they 
+never went back to clean anything out of the makefile because "simplifying the 
+build" and "autoconf" do not go together, and because you can't sanely 
+regression test against build environments nobody has anymore.)
+
+This argument is a can of worms, and the linux-kernel list probably isn't the 
+best place for it.  However, "install mingw on windows instead of trying to 
+get your thing to build under Visual Studio" is a decent support strategy.  
+Tinycc and Intel's icc both implemented gcc extensions to build the kernel, 
+and the kernel's been removing such extensions where c99 versions are 
+available since then.  Things like uClibc implement standards and copy glibc 
+extensions that are actually used.
+
+In the era of open source, it's now a viable strategy to specify, document, 
+and require a standardized build environment.  The way to make that build 
+environment portable is to keep it simple and standardized, not to create a 
+tower of #ifdefs testing the output of a huge environment probing shell 
+script.
+
+Rob
