@@ -1,239 +1,82 @@
-From: Jaya Kumar <jayakumar.lkml@gmail.com>
-Subject: [RFC 2.6.28 2/2] mach-pxa: add and use batch set/get gpio
-Date: Sat, 17 Jan 2009 17:57:18 +0800
-Message-ID: <12321862462894-git-send-email-jayakumar.lkml@gmail.com>
-References: <12321862383405-git-send-email-jayakumar.lkml@gmail.com>
+From: Marco <marco.stornelli@coritel.it>
+Subject: Re: ramfs/tmpfs for application partition
+Date: Sat, 17 Jan 2009 16:55:18 +0100
+Message-ID: <4971FF66.6080709@coritel.it>
+References: <FF584854D6FFE547AB2F7515A798AC3A045716A1B4@venus.imagineil.tv> <556445368AFA1C438794ABDA8901891C0A5A0C8E@USA0300MS03.na.xerox.net> <FF584854D6FFE547AB2F7515A798AC3A045716A1F8@venus.imagineil.tv>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:from:to:cc:subject:date
-         :message-id:x-mailer:in-reply-to:references;
-        bh=I8jk7FGQBa05KdFC5Llp3n2ZY/8T6t/76UCQvKg9rZE=;
-        b=Lgqk41Xq4hX5j5AHU2kNOEw/U8pI8EFJ6Han0PAmvJ6njxkm2BZqnvrEvK3r7+frV7
-         X/+0pzfAptEDAwpfQTHaYUlg4YsoMs99mme9V9cHafA2E0ZbrRf6lF+kn2Iue/dYgdKY
-         tGaawwwQ28Px26ccFZ4Ugrwe8SHSjOW++pbAU=
-In-Reply-To: <12321862383405-git-send-email-jayakumar.lkml@gmail.com>
+In-Reply-To: <FF584854D6FFE547AB2F7515A798AC3A045716A1F8@venus.imagineil.tv>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: 
-Cc: David Brownell <david-b@pacbell.net>, Eric Miao <eric.miao@marvell.com>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Geert Uytterhoeven <geert@linux-m68k.org>, Sam Ravnborg <sam@ravnborg.org>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Jaya Kumar <jayakumar.lkml@gmail.com>
+To: Jacob Avraham <jacob@imaginecommunications.com>
+Cc: "Leisner, Martin" <Martin.Leisner@Xerox.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-This patch adds support for pxa specific batch set/get of gpio. This
-is exported to gpiolib via the gpio_chip interface and then used within
-am300epd.c
+Hi Jacob,
 
-Cc: David Brownell <david-b@pacbell.net>
-Cc: Eric Miao <eric.miao@marvell.com>
-Cc: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Sam Ravnborg <sam@ravnborg.org>
-Cc: linux-arm-kernel@lists.arm.linux.org.uk
-Cc: linux-fbdev-devel@lists.sourceforge.net
-Cc: linux-kernel@vger.kernel.org
-Cc: linux-embedded@vger.kernel.org
-Signed-off-by: Jaya Kumar <jayakumar.lkml@gmail.com>
----
- arch/arm/mach-pxa/Kconfig             |    1 +
- arch/arm/mach-pxa/am300epd.c          |   23 ++++++------
- arch/arm/mach-pxa/gpio.c              |   63 +++++++++++++++++++++++++++++++++
- arch/arm/mach-pxa/include/mach/gpio.h |   48 +++++++++++++++++++++++++
- 4 files changed, 124 insertions(+), 11 deletions(-)
+only another idea, why do you think to use a persistant ram filesystem
+(like pramfs) mounted on /my/application/partition? If you use a simple
+ram you can repopulate after a power off/on the directory with a simple
+untar of the archive. In this way you haven't to repopulate the
+filesystem after each reboot. What do you think about it? Could it be a
+solution?
 
-diff --git a/arch/arm/mach-pxa/Kconfig b/arch/arm/mach-pxa/Kconfig
-index f844425..1b3e631 100644
---- a/arch/arm/mach-pxa/Kconfig
-+++ b/arch/arm/mach-pxa/Kconfig
-@@ -41,6 +41,7 @@ config GUMSTIX_AM200EPD
- 	bool "Enable AM200EPD board support"
- 
- config GUMSTIX_AM300EPD
-+	select GPIOLIB_BATCH
- 	bool "Enable AM300EPD board support"
- 
- endchoice
-diff --git a/arch/arm/mach-pxa/am300epd.c b/arch/arm/mach-pxa/am300epd.c
-index 4bd10a1..c065368 100644
---- a/arch/arm/mach-pxa/am300epd.c
-+++ b/arch/arm/mach-pxa/am300epd.c
-@@ -187,24 +187,25 @@ static void am300_cleanup(struct broadsheetfb_par *par)
- 
- static u16 am300_get_hdb(struct broadsheetfb_par *par)
- {
--	u16 res = 0;
--	int i;
--
--	for (i = 0; i <= (DB15_GPIO_PIN - DB0_GPIO_PIN) ; i++)
--		res |= (gpio_get_value(DB0_GPIO_PIN + i)) ? (1 << i) : 0;
-+	int err;
-+	u32 val;
- 
--	return res;
-+	err = gpio_get_batch(DB0_GPIO_PIN, 0xFFFF, 16, &val);
-+	if (err) {
-+		dev_err(&am300_device->dev, "get failed: %d\n", err);
-+		return 0;
-+	}
-+	return (u16) val;
- }
- 
- static void am300_set_hdb(struct broadsheetfb_par *par, u16 data)
- {
--	int i;
--
--	for (i = 0; i <= (DB15_GPIO_PIN - DB0_GPIO_PIN) ; i++)
--		gpio_set_value(DB0_GPIO_PIN + i, (data >> i) & 0x01);
-+	int err;
-+	err = gpio_set_batch(DB0_GPIO_PIN, data, 0xFFFF, 16);
-+	if (err)
-+		dev_err(&am300_device->dev, "set failed: %d\n", err);
- }
- 
--
- static void am300_set_ctl(struct broadsheetfb_par *par, unsigned char bit,
- 				u8 state)
- {
-diff --git a/arch/arm/mach-pxa/gpio.c b/arch/arm/mach-pxa/gpio.c
-index 5fec1e4..46371a1 100644
---- a/arch/arm/mach-pxa/gpio.c
-+++ b/arch/arm/mach-pxa/gpio.c
-@@ -162,6 +162,67 @@ static void pxa_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
- 		__raw_writel(mask, pxa->regbase + GPCR_OFFSET);
- }
- 
-+#ifdef CONFIG_GPIOLIB_BATCH
-+/*
-+ * Set output GPIO level in batches
-+ */
-+static int pxa_gpio_set_batch(struct gpio_chip *chip, unsigned offset,
-+				u32 values, u32 bitmask, int width)
-+{
-+	struct pxa_gpio_chip *pxa;
-+
-+	/* we're guaranteed by the caller that offset + bitmask remains
-+	 * in this chip.
-+	 */
-+	pxa = container_of(chip, struct pxa_gpio_chip, chip);
-+
-+	/* bitmask is used twice in shifted form */
-+	bitmask <<= offset;
-+
-+	values = (values << offset) & bitmask;
-+	if (values)
-+		__raw_writel(values, pxa->regbase + GPSR_OFFSET);
-+
-+	values = ~values & bitmask;
-+	if (values)
-+		__raw_writel(values, pxa->regbase + GPCR_OFFSET);
-+
-+	return 0;
-+}
-+
-+/*
-+ * Get output GPIO level in batches
-+ */
-+static int pxa_gpio_get_batch(struct gpio_chip *chip, unsigned offset,
-+				u32 bitmask, int width, u32 *result)
-+{
-+	u32 values;
-+	struct pxa_gpio_chip *pxa;
-+
-+	/* we're guaranteed by the caller that offset + bitmask remains
-+	 * in this chip.
-+	 */
-+	pxa = container_of(chip, struct pxa_gpio_chip, chip);
-+
-+	values = __raw_readl(pxa->regbase + GPLR_OFFSET);
-+
-+	/* shift the result back into original position */
-+	*result = (values >> offset) & bitmask;
-+	return 0;
-+}
-+#endif
-+
-+/* this is done this way so that we can insert an ifdef-able value
-+ * into the following GPIO_CHIP macro
-+ */
-+#ifdef CONFIG_GPIOLIB_BATCH
-+#define SET_BATCH_MACRO	.set_batch 	  = pxa_gpio_set_batch,
-+#define GET_BATCH_MACRO	.get_batch	  = pxa_gpio_get_batch,
-+#else
-+#define SET_BATCH_MACRO
-+#define GET_BATCH_MACRO
-+#endif
-+
- #define GPIO_CHIP(_n)							\
- 	[_n] = {							\
- 		.regbase = GPIO##_n##_BASE,				\
-@@ -173,6 +234,8 @@ static void pxa_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
- 			.set		  = pxa_gpio_set,		\
- 			.base		  = (_n) * 32,			\
- 			.ngpio		  = 32,				\
-+			SET_BATCH_MACRO					\
-+			GET_BATCH_MACRO					\
- 		},							\
- 	}
- 
-diff --git a/arch/arm/mach-pxa/include/mach/gpio.h b/arch/arm/mach-pxa/include/mach/gpio.h
-index 2c538d8..46d9022 100644
---- a/arch/arm/mach-pxa/include/mach/gpio.h
-+++ b/arch/arm/mach-pxa/include/mach/gpio.h
-@@ -56,6 +56,54 @@ static inline void gpio_set_value(unsigned gpio, int value)
- 	}
- }
- 
-+#ifdef CONFIG_GPIOLIB_BATCH
-+static inline int gpio_set_batch(unsigned gpio, u32 values, u32 bitmask,
-+					int bitwidth)
-+{
-+	int err = 0;
-+	if (__builtin_constant_p(gpio) &&
-+		(gpio + bitwidth < NR_BUILTIN_GPIO) &&
-+		((gpio + bitwidth) <= roundup(gpio+1, 32))) {
-+		int shift;
-+
-+		shift = gpio % 32;
-+		bitmask <<= shift;
-+
-+		values = (values << shift) & bitmask;
-+		if (values)
-+			GPSR(gpio) = values;
-+
-+		values = ~values & bitmask;
-+		if (values)
-+			GPCR(gpio) = values;
-+	} else {
-+		err = __gpio_set_batch(gpio, values, bitmask, bitwidth);
-+	}
-+	return err;
-+}
-+
-+static inline int gpio_get_batch(unsigned gpio, u32 bitmask, int bitwidth,
-+					u32 *result)
-+{
-+	int ret = 0;
-+	if (__builtin_constant_p(gpio) &&
-+		(gpio + bitwidth < NR_BUILTIN_GPIO) &&
-+		((gpio + bitwidth) <= roundup(gpio+1, 32))) {
-+		int shift;
-+		u32 values;
-+
-+		shift = gpio % 32;
-+
-+		values = GPLR(gpio);
-+
-+		*result = (values >> shift) & bitmask;
-+	} else {
-+		ret = __gpio_get_batch(gpio, bitmask, bitwidth, result);
-+	}
-+	return ret;
-+}
-+#endif
-+
- #define gpio_cansleep __gpio_cansleep
- 
- #define gpio_to_irq(gpio)	IRQ_GPIO(gpio)
--- 
-1.5.2.3
+Marco
+
+Jacob Avraham ha scritto:
+>> Not sure I fully understand....
+>>
+>> You basically want two blobs -- the initramfs and the application?
+>>
+> Yes, I want to keep on the flash a stable, rarely changed, OS image, which is in initramfs
+> format, and another application image, which is changing frequently.
+> 
+>> You can expand the initramfs by copying to it...so you mount the
+>> application and run a script to copy it to initramfs before running it.
+>>
+> When you say 'you mount the application' it means that the application
+> image on the flash has to be in some filesystem format, right? Like cramfs?
+> On the other hand, if I want the application directory tree to reside
+> in memory (and handle application persistency needs via the JFFS2 partition),
+> maybe all I need is to keep a compressed tar image of the application on the flash,
+> and untar it into /my/application/partition, which will be in initramfs?
+> So I don't need to create another tmpfs filesystem as suggested in another post?
+> Is there a better way to handle this?
+> 
+>> marty
+>>
+>>>   Hi,
+>>>
+>>>   I have a system with 128M RAM and a flash partitioned so that 10M
+>> is
+>>>   dedicated to initramfs image,
+>>>   6M to application partition. And another 6M for JFFS2.
+>>>   As I have plenty of RAM, I'd like to have my application directory
+>>>   mounted on RAM, from a pre-populated
+>>>   filesystem that resides in the 6M application partition.
+>>>   So basically I want to use the same mechanism as initramfs, but
+>> mounted
+>>>   on /my/app/partition instead of root.
+>>>   Does it make sense? How do I go about and do that?
+>>>
+>>>
+>>>   Jacob Avraham
+>>>
+> 
+> 
+> 
+>  
+>  
+> ************************************************************************************
+> This footnote confirms that this email message has been scanned by
+> PineApp Mail-SeCure for the presence of malicious code, vandals & computer viruses.
+> ************************************************************************************
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
