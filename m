@@ -1,100 +1,67 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
-Date: Fri, 16 Jan 2009 15:54:00 -0600
-Message-ID: <200901161554.02054.rob@landley.net>
-References: <495FEEAF.5020005@zytor.com> <200901160011.11679.rob@landley.net> <15458.1232117682@turing-police.cc.vt.edu>
+From: Jacob Avraham <jacob@imaginecommunications.com>
+Subject: RE: ramfs/tmpfs for application partition
+Date: Sat, 17 Jan 2009 11:39:40 +0200
+Message-ID: <FF584854D6FFE547AB2F7515A798AC3A045716A1F8@venus.imagineil.tv>
+References: <FF584854D6FFE547AB2F7515A798AC3A045716A1B4@venus.imagineil.tv>
+ <556445368AFA1C438794ABDA8901891C0A5A0C8E@USA0300MS03.na.xerox.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <15458.1232117682@turing-police.cc.vt.edu>
-Content-Disposition: inline
+In-Reply-To: <556445368AFA1C438794ABDA8901891C0A5A0C8E@USA0300MS03.na.xerox.net>
+Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Valdis.Kletnieks@vt.edu, Embedded Linux mailing list <linux-embedded@vger.kernel.org>
-Cc: Sam Ravnborg <sam@ravnborg.org>, linux-kernel@vger.kernel.org
+To: "Leisner, Martin" <Martin.Leisner@Xerox.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-On Friday 16 January 2009 08:54:42 Valdis.Kletnieks@vt.edu wrote:
-> On Fri, 16 Jan 2009 00:11:09 CST, Rob Landley said:
-> > P.S.  I still hope autoconf dies off and the world wakes up and moves
-> > away from that.  And from makefiles for that matter.  But in the
-> > meantime, I can work around it with enough effort.
 >
-> What do you propose autoconf and makefiles get replaced by?
-
-At a first guess, meaningful standards and an acknowledgement that Linux is a 
-platform in its own right?  Between the two of them, that's 90% of your 
-problem right there.
-
-Not a new issue, here's a link from 2002:
-http://news.cnet.com/2100-1001-950180.html
-
-And here's a multi-vendor effort at a standards group (the 86open project to 
-definite a Unix binary standard for x86 processors) dissolving itself way back 
-in 1999 with a declaration that the Linux binary format already was an open 
-standard and other unixes should just use things like lxrun to support that: 
-http://www.telly.org/86open/
-
-Also, it would be nice if configure steps could stop entangling 1) users 
-providing preferences (command line options like --prefix or most of the --
-enable and --disable flags) for which things like kconfig might make more 
-sense, 2) probe for installed packages like zlib and enabling optional support 
-if found, 3) questions like "does my build environment provide strlcpy()".  
-Turning that into a big hairball does not help keep things simple.
-
-> % wc pidgin/configure*
->   34287  118303 1004074 pidgin/configure
->    2499    7684   81532 pidgin/configure.ac
+> Not sure I fully understand....
 >
-> Which you rather code, 2.5K lines of autoconf or 35K lines of configure
-> script?
+> You basically want two blobs -- the initramfs and the application?
+>
+Yes, I want to keep on the flash a stable, rarely changed, OS image, which is in initramfs
+format, and another application image, which is changing frequently.
 
-I consider it a false dichotomy.  I prefer "neither", and have seen it done 
-successfully many times.
+> You can expand the initramfs by copying to it...so you mount the
+> application and run a script to copy it to initramfs before running it.
+>
+When you say 'you mount the application' it means that the application
+image on the flash has to be in some filesystem format, right? Like cramfs?
+On the other hand, if I want the application directory tree to reside
+in memory (and handle application persistency needs via the JFFS2 partition),
+maybe all I need is to keep a compressed tar image of the application on the flash,
+and untar it into /my/application/partition, which will be in initramfs?
+So I don't need to create another tmpfs filesystem as suggested in another post?
+Is there a better way to handle this?
 
-I've never built pidgin from source, but I've got the output of the binutils 
-build in a log file.  How many of these tests are actually necessary on any 
-Linux system:
+> marty
+>
+> >
+> >   Hi,
+> >
+> >   I have a system with 128M RAM and a flash partitioned so that 10M
+> is
+> >   dedicated to initramfs image,
+> >   6M to application partition. And another 6M for JFFS2.
+> >   As I have plenty of RAM, I'd like to have my application directory
+> >   mounted on RAM, from a pre-populated
+> >   filesystem that resides in the 6M application partition.
+> >   So basically I want to use the same mechanism as initramfs, but
+> mounted
+> >   on /my/app/partition instead of root.
+> >   Does it make sense? How do I go about and do that?
+> >
+> >
+> >   Jacob Avraham
+> >
 
-checking for C compiler default output file name... a.out
-checking whether the C compiler works... yes
-checking for suffix of object files... o
-checking whether gcc accepts -g... yes
-checking for library containing strerror... none required
-checking how to run the C preprocessor... gcc -E
-checking whether build environment is sane... yes
-checking whether gcc and cc understand -c and -o together... yes
-checking for an ANSI C-conforming const... yes
-checking for inline... inline
 
-It just goes on and on and on like this.  Tests like "checking whether byte 
-ordering is bigendian... no" means "Either I didn't know endian.h existed, or 
-I don't trust it to be there".  How about the long stretches checking for the 
-existence of header files specified by posix?  Or this gem:
 
-checking for gawk... no
-checking for mawk... no
-checking for nawk... no
-checking for awk... awk
+ 
+ 
+************************************************************************************
+This footnote confirms that this email message has been scanned by
+PineApp Mail-SeCure for the presence of malicious code, vandals & computer viruses.
+************************************************************************************
 
-(If you can use awk, when is it _not_ there?  Probable answer: there was some 
-broken version on irix back in 1992 with zero remaining seats today, and they 
-never went back to clean anything out of the makefile because "simplifying the 
-build" and "autoconf" do not go together, and because you can't sanely 
-regression test against build environments nobody has anymore.)
 
-This argument is a can of worms, and the linux-kernel list probably isn't the 
-best place for it.  However, "install mingw on windows instead of trying to 
-get your thing to build under Visual Studio" is a decent support strategy.  
-Tinycc and Intel's icc both implemented gcc extensions to build the kernel, 
-and the kernel's been removing such extensions where c99 versions are 
-available since then.  Things like uClibc implement standards and copy glibc 
-extensions that are actually used.
-
-In the era of open source, it's now a viable strategy to specify, document, 
-and require a standardized build environment.  The way to make that build 
-environment portable is to keep it simple and standardized, not to create a 
-tower of #ifdefs testing the output of a huge environment probing shell 
-script.
-
-Rob
