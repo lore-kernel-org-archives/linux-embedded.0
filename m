@@ -1,67 +1,52 @@
-From: Jacob Avraham <jacob@imaginecommunications.com>
-Subject: RE: ramfs/tmpfs for application partition
-Date: Sat, 17 Jan 2009 11:39:40 +0200
-Message-ID: <FF584854D6FFE547AB2F7515A798AC3A045716A1F8@venus.imagineil.tv>
-References: <FF584854D6FFE547AB2F7515A798AC3A045716A1B4@venus.imagineil.tv>
- <556445368AFA1C438794ABDA8901891C0A5A0C8E@USA0300MS03.na.xerox.net>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: PATCH [0/3]: Simplify the kernel build by removing perl.
+Date: Sat, 17 Jan 2009 09:51:43 +0000
+Message-ID: <20090117095143.GA20389@shareable.org>
+References: <495FEEAF.5020005@zytor.com> <200901160011.11679.rob@landley.net> <15458.1232117682@turing-police.cc.vt.edu> <200901161554.02054.rob@landley.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <556445368AFA1C438794ABDA8901891C0A5A0C8E@USA0300MS03.na.xerox.net>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <200901161554.02054.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: "Leisner, Martin" <Martin.Leisner@Xerox.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Rob Landley <rob@landley.net>
+Cc: Valdis.Kletnieks@vt.edu, Embedded Linux mailing list <linux-embedded@vger.kernel.org>, Sam Ravnborg <sam@ravnborg.org>, linux-kernel@vger.kernel.org
 
->
-> Not sure I fully understand....
->
-> You basically want two blobs -- the initramfs and the application?
->
-Yes, I want to keep on the flash a stable, rarely changed, OS image, which is in initramfs
-format, and another application image, which is changing frequently.
-
-> You can expand the initramfs by copying to it...so you mount the
-> application and run a script to copy it to initramfs before running it.
->
-When you say 'you mount the application' it means that the application
-image on the flash has to be in some filesystem format, right? Like cramfs?
-On the other hand, if I want the application directory tree to reside
-in memory (and handle application persistency needs via the JFFS2 partition),
-maybe all I need is to keep a compressed tar image of the application on the flash,
-and untar it into /my/application/partition, which will be in initramfs?
-So I don't need to create another tmpfs filesystem as suggested in another post?
-Is there a better way to handle this?
-
-> marty
->
+Rob Landley wrote:
+> On Friday 16 January 2009 08:54:42 Valdis.Kletnieks@vt.edu wrote:
+> > On Fri, 16 Jan 2009 00:11:09 CST, Rob Landley said:
+> > > P.S.  I still hope autoconf dies off and the world wakes up and moves
+> > > away from that.  And from makefiles for that matter.  But in the
+> > > meantime, I can work around it with enough effort.
 > >
-> >   Hi,
-> >
-> >   I have a system with 128M RAM and a flash partitioned so that 10M
-> is
-> >   dedicated to initramfs image,
-> >   6M to application partition. And another 6M for JFFS2.
-> >   As I have plenty of RAM, I'd like to have my application directory
-> >   mounted on RAM, from a pre-populated
-> >   filesystem that resides in the 6M application partition.
-> >   So basically I want to use the same mechanism as initramfs, but
-> mounted
-> >   on /my/app/partition instead of root.
-> >   Does it make sense? How do I go about and do that?
-> >
-> >
-> >   Jacob Avraham
-> >
+> > What do you propose autoconf and makefiles get replaced by?
+> 
 
+> I've never built pidgin from source, but I've got the output of the binutils 
+> build in a log file. 
+> How many of these tests are actually necessary on an Linux system:
 
+None, but then it's not a Linux-only program that you're compiling.
+(Nor is it Linux-in-2009-only).
 
- 
- 
-************************************************************************************
-This footnote confirms that this email message has been scanned by
-PineApp Mail-SeCure for the presence of malicious code, vandals & computer viruses.
-************************************************************************************
+If you _know_ you're running on Linux from a particular era, you can
+provide a config.cache file with the correct answers already filled in.
 
+I agree that Autoconf sucks (I've written enough sucking Autoconf
+macros myself, I hate it), but the tough part is providing a suitable
+replacement when you still want portable source code.
 
+> It just goes on and on and on like this.  Tests like "checking
+> whether byte ordering is bigendian... no" means "Either I didn't
+> know endian.h existed, or I don't trust it to be there".  How about
+> the long stretches checking for the existence of header files
+> specified by posix?
+
+You seem to be arguing for "let's make all our programs Linux-specific
+(and Glibc-specific in many cases)".  Given all the problems you've
+seen with cross-compiling, let alone compiling for different OS
+platforms, that seems a little odd.
+
+-- Jamie
