@@ -1,64 +1,37 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-	<u.kleine-koenig@pengutronix.de>
-Subject: Re: [RFC 2.6.28 1/3] gpiolib: add batch set/get
-Date: Sun, 25 Jan 2009 12:20:24 +0100
-Message-ID: <20090125112024.GA28213@pengutronix.de>
-References: <123287728936-git-send-email-jayakumar.lkml@gmail.com>
+From: Michael Opdenacker <michael-lists@free-electrons.com>
+Subject: Embedded Linux Conference Europe 2008 videos
+Date: Tue, 03 Feb 2009 11:06:08 +0100
+Message-ID: <49881710.9060200@free-electrons.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <123287728936-git-send-email-jayakumar.lkml@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Jaya Kumar <jayakumar.lkml@gmail.com>
-Cc: David Brownell <david-b@pacbell.net>, Eric Miao <eric.miao@marvell.com>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Geert Uytterhoeven <geert@linux-m68k.org>, Sam Ravnborg <sam@ravnborg.org>, linux-arm-kernel@lists.arm.linux.org.uk, linux-fbdev-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-Hello Jaya,
+Greetings,
 
-On Sun, Jan 25, 2009 at 05:54:47PM +0800, Jaya Kumar wrote:
-> - split the patches into generic, arch specific and am300epd
-I would swap the order to have:
+Thomas Petazzoni and myself have (at last) completed the production of
+ELCE videos. Here they are: http://free-electrons.com/blog/elce-2008-videos/
 
-	generic
-	am300epd
-	pxa specific
+Many thanks to Ruud Derwig and Tim Bird for filming many presentations!
 
-This way the tree of the second commit is a test case for the generic
-implementation.
+By the way, if you were a speaker at ELCE 2008, make sure you posted
+your slides on
+http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2008Presentations .
+Many people haven't done it yet.
 
-> - adjusting the API to remove width (note, the actual API call where
->   width was dropped is in the arch specific code, not here.)
-Nevertheless I would document the "generic" per arch specific
-implementation in gpio.txt.  For the functions like __gpio_get_value yo=
-u
-can just do
+Thomas and I strongly recommend presentations like David Woodhouse's or
+Harald Welte's, and Tim's talk about boot time reduction techniques.
+Anyway, they were plenty of very interesting talks.
 
-	#define gpio_get_value(gpio) __gpio_get_value(gpio)
+Cheers,
 
-but for your batch functions you need something like
+Michael.
 
-	#define gpio_set_batch(startpin, mask, values) \
-		({ u32 __mask =3D mask; __gpio_set_batch(startpin, __mask, fls(__mask=
-), values);})
-
-Maybe better use/recommend an inline function?
-
-> Cc: David Brownell <david-b@pacbell.net>
-> Cc: Eric Miao <eric.miao@marvell.com>
-> Cc: Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
-> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-> Cc: Sam Ravnborg <sam@ravnborg.org>
-> Cc: linux-arm-kernel@lists.arm.linux.org.uk
-> Cc: linux-fbdev-devel@lists.sourceforge.net
-> Cc: linux-kernel@vger.kernel.org
-> Cc: linux-embedded@vger.kernel.org
-> Signed-off-by: Jaya Kumar <jayakumar.lkml@gmail.com>
-Note you didn't Cc: me.
-
---=20
-Pengutronix e.K.                              | Uwe Kleine-K=F6nig     =
-       |
-Industrial Linux Solutions                    | http://www.pengutronix.=
-de/  |
+-- 
+Michael Opdenacker, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
