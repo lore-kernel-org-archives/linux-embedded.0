@@ -1,101 +1,56 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: [ANNOUNCE] Embedded Linux Conference 2009
-Date: Mon, 9 Mar 2009 15:00:40 -0700
-Message-ID: <49B59188.2060204@am.sony.com>
+From: Lasse Collin <lasse.collin@tukaani.org>
+Subject: XZ (LZMA2) decoder
+Date: Sun, 22 Mar 2009 15:57:33 +0200
+Message-ID: <200903221557.33588.lasse.collin@tukaani.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-My apologies in advance for this notice.  I only do this
-a few times a year. Some people on this list may be interested....
+(Please CC your replies to me, I'm not on the list.)
 
-Embedded Linux Developers,
+An initial version of the .xz file format decoder for Linux is now 
+available at <git://ctrl.tukaani.org/xz-embedded.git>. It supports both 
+stateful and single-call decoding using the LZMA2 algorithm.
 
-Registration for Embedded Linux Conference 2009 -
-   "Ubiquity" - is now open!
+Two buffers (1.2 KiB and 28 KiB) are allocated with kmalloc() for 
+internal data. For stateful decoding, also a dictionary is allocated 
+with vmalloc(), which probably will usually be from 64 KiB to 1 MiB. The 
+dictionary is allocated when the decoder is created, so the decoder 
+never allocates memory in the middle of decoding. This means that if the 
+preallocated dictionary was too small for the input stream, decoding 
+will fail. In single-call mode, the destination buffer is used as the 
+dictionary, thus a separate dictionary doesn't need to be allocated.
 
-The conference is coming soon - It will be April 6, 7 and 8
-in San Francisco, California.
+On x86, xz_dec.ko is 11-14 KiB. Stack usage is around 120-240 bytes, 
+depending on the GCC version and compiler flags. I hope it is not too 
+much, but I can try to reduce it slightly if needed.
 
-The program is now available at the conference web site at:
-http://www.embeddedlinuxconference.com/elc_2009/
-(see the "Program" and "Sessions" tabs).
+BCJ filters are not added yet. They will increase the code size a little 
+but they should save more space by increasing compression ratio of 
+executables (and naturally it will be possible to disable these filters 
+in the kernel config).
 
-Here are some highlights:
+There is some code (mostly in xz_boot.c), which hopefully makes it 
+easier to add support for XZ compressed kernel and initramfs. I hope 
+that someone else does the actual work to get XZ support in the arch-
+specific trees (IIRC, there were some patches to add bzip2 and LZMA 
+support already), but I'm happy to help if my code needs some 
+adjustments to support that work.
 
-Keynote speakers Dirk Hohndel and David Woodhouse will talk about
-recent trends in Linux development, and what it means now that
-Linux has achieved ubiquity in the embedded space.
+I have tried to follow to the kernel coding style as well as I can, but 
+if there are style issues that should be fixed, please let me know. I 
+want to keep the code usable outside Linux, which why there are some 
+extra #ifdefs and such. I hope this is OK.
 
-* Dirk Hohndel is Intel's Chief Linux and Open Source Technologist
-and former CTO of SuSE
+I haven't tested the code much yet. It appears to work in userspace. The 
+kernel module compiles cleanly on x86, but I haven't tested it in kernel 
+space, because I currently have no code to feed data to the XZ decoder 
+in the kernel space.
 
-* David Woodhouse is the official "embedded" maintainer for the mainline
-Linux kernel, and the original author of the JFFS2 flash filesystem.
-
-Just a few of the notable speakers presenting at the conference include:
-
-* Jim Ready - Founder and CTO of MontaVista
-* Kate Alhola - Maemo chief engineer in Forum Nokia
-* Dan Malek - Founder and CTO of Embedded Alley
-* Mike Anderson - CTO and Chief Scientist at The PTR Group
-
-Along with these speakers, there will be 3 days of presentations,
-tutorials and Bird-of-a-Feather sessions on topics like:
-
-Flash filesystems, real-time Linux, graphics systems for embedded,
-mobile and embedded distributions, optimizations for embedded
-processors (SH, ARM, MIPS, PPC), security, memory management,
-porting and platform bringup, networking, development tools,
-compilers, tracing, bootup time reduction, power management,
-   and (surprisingly) more!
-
-This is your chance to talk to engineers working on real products at
-some of the largest CE companies in the world, describing how they
-solved real issues in their own development projects.  Also, meet
-leading developers from the embedded Linux community, and learn about
-the latest changes in Linux.  The Embedded Linux Conference is one of
-the leading events where you can learn directly from the experts.
-Just take a look at past conferences to see the technical depth of
-this event!
-See http://www.embeddedlinuxconference.com/history.html
-
-I know... - In the current economic conditions, it's going to be tough
-to convince your management to let you come to a conference - but NOW
-is exactly the time to be honing your Linux skills and increasing
-the efficiency of your development work.  A 15-minute hallway
-conversation with an expert can save you weeks of development effort.
-It's happened to me again and again at Embedded Linux Conferences
-over the years, which is one of the reasons I keep coming back!
-
-Register now by following the link on the conference page at:
-    http://www.embeddedlinuxconference.com/elc_2009/
-
-Please note that this year, we are co-locating with the Linux Foundation
-Collaboration Summit.  This event will be held April 8-10 in the same
-venue. As a special one-time opportunity, the Linux Foundation has
-agreed to allow to ELC attendees to participate in that event as
-well (at no charge). The Collaboration Summit is normally an invitation-only
-event, so this is a unique opportunity to participate and interact
-with additional community and industry Linux developers and leaders!
-
-The website for the Collaboration Summit is:
-http://events.linuxfoundation.org/events/collaboration-summit
-
-We've got a great event planned, that we're sure you won't want to miss.
-Register now and join us in San Francisco, for more progress towards
-embedded Linux "Ubiquity"!
-
-Register by March 20th to receive the "early-bird" (no relation to me)
-discount!
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+-- 
+Lasse Collin  |  IRC: Larhzu @ IRCnet & Freenode
