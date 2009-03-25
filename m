@@ -1,47 +1,39 @@
-From: David VomLehn <dvomlehn@cisco.com>
-Subject: Re: Sources of entropy?
-Date: Wed, 25 Mar 2009 10:06:10 -0700
-Message-ID: <49CA6482.4090809@cisco.com>
-References: <200903241847.29104.rgetz@blackfin.uclinux.org>
+From: Leon Woestenberg <leon.woestenberg@gmail.com>
+Subject: Re: XZ (LZMA2) decoder
+Date: Wed, 25 Mar 2009 22:39:06 +0100
+Message-ID: <c384c5ea0903251439k2ba46bffq729c013a48e2d6b9@mail.gmail.com>
+References: <200903221557.33588.lasse.collin@tukaani.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200903241847.29104.rgetz@blackfin.uclinux.org>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=909; t=1238000771; x=1238864771;
-	c=relaxed/simple; s=sjdkim3002;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Re=3A=20Sources=20of=20entropy?
-	|Sender:=20;
-	bh=8z+lTQGXnUks0OTdCA3E+Rn6S1yuo9QUc6y9eLmxFEY=;
-	b=fO28hji89a9b8TxxWQWwLxT02PF0pttscFbvDQ8podLRH7uqNLEWTVDEZ7
-	Ex3c670z5s4jMR4fBTKpWgipVK3d8Z9DI/tAVrYAPxuTIIV9zeW5hVRgyiBv
-	vE4uWHhC5p;
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=jm8YElAQ/E+HXMfo+OWaM8zbZxzirZq/1xL/CtZP5RY=;
+        b=AfONU1853B6v+XmOt9LdoThPPFPb7Gdfi3XhjuJg0Z/Mpb4yG3RcgtZg/aM1R9kB3h
+         l3N+w5CucgXE/ZOE4CTCol7vNBpKyqgztaOW2b+RwyD1LXj8656W7IHGLIXM9OVeRo4T
+         7xwBqpZLF9+oFIt71nghQVK4JwpB/X2+BOmhc=
+In-Reply-To: <200903221557.33588.lasse.collin@tukaani.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Robin Getz <rgetz@blackfin.uclinux.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Lasse Collin <lasse.collin@tukaani.org>
 Cc: linux-embedded@vger.kernel.org
 
-Robin Getz wrote:
-> I'm just wondering what people using on standard embedded/headless/diskless 
-> targets (which do not have hw random number generators) as a source of 
-> entropy - since networking was removed as an entropy source circa 2.6.26
-> 
-> On my target:
-> 
-> root:/> cat /proc/sys/kernel/random/entropy_avail
-> 0
-> 
-> is about all I get... (since I'm not running any userspace utils yet).
-> 
-> I have seen rngd, clrngd, audio_entropyd, & video_entroyd - but I was just 
-> wondering what others were actually using. (I was cautioned that everything 
-> was pretty CPU intensive, since they all have a FIPS testing to ensure 
-> randomness)...
+Hello Lasse,
 
-The answer on the box I'm working on is: very little. I need to generate 
-  an Ethernet MAC address and had to come up with way so that few random 
-bits I had were sufficient, in my particular environment, to avoid 
-address collisions.
+On Sun, Mar 22, 2009 at 2:57 PM, Lasse Collin <lasse.collin@tukaani.org> wrote:
+> (Please CC your replies to me, I'm not on the list.)
+>
+> An initial version of the .xz file format decoder for Linux is now
+> available at <git://ctrl.tukaani.org/xz-embedded.git>. It supports both
+> stateful and single-call decoding using the LZMA2 algorithm.
+>
+Is this something the linux-embedded community must pick up, or maybe
+even the LKML?
+
+Regards,
+-- 
+Leon
