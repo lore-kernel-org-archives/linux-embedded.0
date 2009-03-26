@@ -1,56 +1,50 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: Sources of entropy?
-Date: Thu, 26 Mar 2009 13:25:08 +0000
-Message-ID: <20090326132508.GA21993@shareable.org>
-References: <200903241847.29104.rgetz@blackfin.uclinux.org>
+From: Lasse Collin <lasse.collin@tukaani.org>
+Subject: Re: XZ (LZMA2) decoder
+Date: Thu, 26 Mar 2009 15:34:41 +0200
+Message-ID: <200903261534.41887.lasse.collin@tukaani.org>
+References: <200903221557.33588.lasse.collin@tukaani.org> <c384c5ea0903251439k2ba46bffq729c013a48e2d6b9@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <c384c5ea0903251439k2ba46bffq729c013a48e2d6b9@mail.gmail.com>
 Content-Disposition: inline
-In-Reply-To: <200903241847.29104.rgetz@blackfin.uclinux.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Robin Getz <rgetz@blackfin.uclinux.org>
+To: Leon Woestenberg <leon.woestenberg@gmail.com>
 Cc: linux-embedded@vger.kernel.org
 
-Robin Getz wrote:
-> I'm just wondering what people using on standard embedded/headless/diskless 
-> targets (which do not have hw random number generators) as a source of 
-> entropy - since networking was removed as an entropy source circa 2.6.26
+On 2009-03-25 Leon Woestenberg wrote:
+> Is this something the linux-embedded community must pick up, or maybe
+> even the LKML?
 
-You might not have much real entropy to use.  I guess networking was
-removed because it's an obvious attack vector.
+In December, there was some discussion on linux-embedded about getting 
+LZMA decoder into Linux. I understood that some of the existing patches 
+had trouble meeting the kernel quality standards. There were also 
+requirements like support for multi-call decoding, which should be 
+useful at least in Squashfs. I promised to write a nice-looking .xz file 
+format decoder for Linux (.xz will replace the .lzma format) and post to 
+linux-embedded when I have something to show.
 
-On my devices, I save the entropy pool to flash on shutdown and merge
-it back on reboot.  This lets cumulative history build.
-    
-    [shutdown]
-    dd if=/dev/urandom of=$ENTROPY_STORE.new bs=512 count=1 2>/dev/null \
-       && mv $ENTROPY_STORE.new $ENTROPY_STORE \
-       || rm -f $ENTROPY_STORE.new
+Assuming there still is interest like there was in December, hope I will 
+get some feedback to know if my code looks promising and possibly how it 
+should be improved to be good for in-kernel use. This is my first Linux 
+kernel related coding project, so there probably are things (other than 
+plain bugs) that need to be fixed before the code can be considered for 
+inclusion.
 
-    [boot]
-    dd if=$ENTROPY_STORE of=/dev/random bs=512 2>/dev/null
+If linux-embedded is not the best list for this, I can post to LKML too. 
+However, since I promised to post at least to linux-embedded, and the 
+discussion on this list in December was very helpful for me to 
+understand what is required from an in-kernel decompressor, starting a 
+new discussion first on linux-embedded sounded obvious to me.
 
-You'll still drain the pool quickly so may need to use /dev/urandom
-for everything (e.g. by linking /dev/random -> /dev/urandom), but
-keeping history does mean you get more real entropy from /dev/urandom,
-even though entropy_avail cannot estimate it (and the lower bound is
-still zero, if what you did before has always been predictable).
+Stable userspace tools to handle .xz files are still not available. I 
+simply haven't worked on them much in the past two months. I naturally 
+hope to get the stable release out soon, but my ability work on these 
+projects depends on a couple of other things in my life, so it's better 
+I don't promise anything detailed. On the positive side, the latest XZ 
+Utils beta should be quite good already.
 
-> I have seen rngd, clrngd, audio_entropyd, & video_entroyd - but I was just 
-> wondering what others were actually using. (I was cautioned that everything 
-> was pretty CPU intensive, since they all have a FIPS testing to ensure 
-> randomness)...
-
-You can write anything you think is an entropy source to /dev/random,
-and it won't increase the entropy estimate but it will increase real
-entropy if your source has any.  So you could add low-order bits from
-high-resolution timing data from your network application from time to
-time, for example, if you think it's worth it.
-
-That won't make /dev/random show confirmed non-zero entropy, but that
-might not be feasible on your device anyway.
-
--- Jamie
+-- 
+Lasse Collin  |  IRC: Larhzu @ IRCnet & Freenode
