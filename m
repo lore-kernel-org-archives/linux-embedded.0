@@ -1,42 +1,122 @@
-From: VomLehn <dvomlehn@cisco.com>
-Subject: Re: USB console and network devices unsupported for boot
-Date: Fri, 27 Mar 2009 12:55:28 -0700
-Message-ID: <20090327195528.GA24379@cuplxvomd02.corp.sa.net>
-References: <20090327182758.GA10454@cuplxvomd02.corp.sa.net> <49CD2508.10706@am.sony.com>
+From: Suresh Jayaraman <sjayaraman-l3A5Bk7waGM@public.gmane.org>
+Subject: [PATCH] nfs: add support for splice writes
+Date: Thu, 02 Apr 2009 11:51:40 +0530
+Message-ID: <49D45974.2060202@suse.de>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <49CD2508.10706@am.sony.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=599; t=1238183729; x=1239047729;
-	c=relaxed/simple; s=sjdkim4002;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Re=3A=20USB=20console=20and=20network=20devices
-	=20unsupported=20for=20boot
-	|Sender:=20;
-	bh=FzwXHK0PB6PdZ/6/2TZJEyR5+0rfnWyDpLD9pvVMEtI=;
-	b=rmU6abHQ7ECgdximp8N0mNzWugJAiH6R4B8xUyuA7K6iZ6OYZCzfLLPO0o
-	Kxxqfbd1P5pQgmVG/alrxVTjugC2L6WZDlPuO963G3SP/iCgwrM2xVz0ayBg
-	hm6XDhWUqL;
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Tony Colclough <colclot@cisco.com>, Andrew Morton <akpm@linux-foundation.org>
+To: Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org
+Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mathieu.desnoyers-scC8bbJcJLCw5LPnMra/2Q@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, compudj-vdFpqfd5riKZ9vWoFJJngh2eb7JE58TQ@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ltt-dev-33AaDErTWvBVxDZ2/Zk0YoryAYyacSEB@public.gmane.org
 
-On Fri, Mar 27, 2009 at 12:12:08PM -0700, Tim Bird wrote:
-> VomLehn wrote:
-> > My question: are USB serial consoles and auto-configured network devices in
-> > common use or is my application a special case? If the former, we need to push
-> > for a better resolution. Otherwise, I'll go off and figure out something that
-> > works for my application.
-> 
-> I'd say that they're not uncommon during development, but I
-> (personally) don't know of any shipped products with either of
-> these.
+This patch attempts to add splice writes support. In essence, it just
+calls generic_file_splice_write() after doing a little sanity check.
+This would allow LTTng users that are using NFS to store trace data.
+There could be more applications that could be benefitted too.
 
-Good point. This is definitely a question about development phase use of USB.
+I have tested this using the Jens' test program and have found no
+real issues. The test program is inlined below:
+
+/*
+ * splice-out.c: Splice stdout to file
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#define SPLICE_SIZE (64*1024)
+
+int main(int argc, char *argv[])
+{
+        int fd;
+
+        if (argc < 2) {
+                printf("%s: outfile\n", argv[0]);
+                return 1;
+        }
+
+        fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd < 0) {
+                perror("open");
+                return 1;
+        }
+
+        do {
+                int ret = splice(STDIN_FILENO, NULL, fd, NULL, SPLICE_SIZE, 0);
+
+                if (ret < 0) {
+                        perror("splice");
+                        break;
+                } else if (ret < SPLICE_SIZE)
+                        break;
+        } while (1);
+
+        close(fd);
+        return 0;
+}
+
+Compile with -D _GNU_SOURCE and do something like:
+	echo "some stuff" | ./splice-out <outfile>
+
+Signed-off-by: Suresh Jayaraman <sjayaraman-l3A5Bk7waGM@public.gmane.org>
+---
+ fs/nfs/file.c |   24 ++++++++++++++++++++++++
+ 1 files changed, 24 insertions(+), 0 deletions(-)
+
+diff --git a/fs/nfs/file.c b/fs/nfs/file.c
+index 90f292b..13d6a00 100644
+--- a/fs/nfs/file.c
++++ b/fs/nfs/file.c
+@@ -47,6 +47,9 @@ static ssize_t nfs_file_splice_read(struct file *filp, loff_t *ppos,
+ 					size_t count, unsigned int flags);
+ static ssize_t nfs_file_read(struct kiocb *, const struct iovec *iov,
+ 				unsigned long nr_segs, loff_t pos);
++static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
++					struct file *filp, loff_t *ppos,
++					size_t count, unsigned int flags);
+ static ssize_t nfs_file_write(struct kiocb *, const struct iovec *iov,
+ 				unsigned long nr_segs, loff_t pos);
+ static int  nfs_file_flush(struct file *, fl_owner_t id);
+@@ -76,6 +79,7 @@ const struct file_operations nfs_file_operations = {
+ 	.lock		= nfs_lock,
+ 	.flock		= nfs_flock,
+ 	.splice_read	= nfs_file_splice_read,
++	.splice_write	= nfs_file_splice_write,
+ 	.check_flags	= nfs_check_flags,
+ 	.setlease	= nfs_setlease,
+ };
+@@ -550,6 +554,26 @@ out_swapfile:
+ 	goto out;
+ }
+ 
++static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
++				     struct file *filp, loff_t *ppos,
++				     size_t count, unsigned int flags)
++{
++	struct dentry *dentry = filp->f_path.dentry;
++	struct inode *inode = dentry->d_inode;
++
++	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
++		dentry->d_parent->d_name.name, dentry->d_name.name,
++		(unsigned long) count, (unsigned long long) *ppos);
++
++	if (IS_SWAPFILE(inode)) {
++		printk(KERN_INFO "NFS: attempt to write to active swap"
++		       "file!\n");
++		return -EBUSY;
++	}
++
++	return generic_file_splice_write(pipe, filp, ppos, count, flags);
++}
++
+ static int do_getlk(struct file *filp, int cmd, struct file_lock *fl)
+ {
+ 	struct inode *inode = filp->f_mapping->host;
+
 --
-David VomLehn
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
