@@ -1,9 +1,9 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
-Subject: Re: Sources of entropy?
-Date: Thu, 2 Apr 2009 08:03:08 -0400
-Message-ID: <8bd0f97a0904020503uf434376s2ba8f9d0e8fcfa7b@mail.gmail.com>
-References: <200903241847.29104.rgetz@blackfin.uclinux.org>
-	 <20090402114553.GA7568@opentech.at>
+From: Masahiro Tamori <masahiro.tamori@gmail.com>
+Subject: Re: [ltt-dev] [PATCH] nfs: add support for splice writes
+Date: Thu, 2 Apr 2009 21:42:05 +0900
+Message-ID: <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com>
+References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal>
+	 <49D45E42.3050502@suse.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -12,34 +12,135 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:mime-version:received:in-reply-to:references
          :date:message-id:subject:from:to:cc:content-type
          :content-transfer-encoding;
-        bh=OOZAlR2EJ87khRf1qcXIyrONOrnBtVwi/VgOjt5Ao9Y=;
-        b=BQJO73A/MzpRGrMQUYUEYzV13IriVjPF6SF0xGPdgqIfV2XfDg25n4mExmp1U/3bWt
-         1/dlZc4o2zQQigaiRDB2u+HhSP+P9jMug3qWABzSA7f9L224cfUCw6kfCtbbRgjYfRMS
-         JGLfAWBIW8YNStk1m8nDLkTyoKiqrhNmgN50c=
-In-Reply-To: <20090402114553.GA7568@opentech.at>
+        bh=CVJAPlC4//C6OVdswL6eVyWwXlYswFcqRiay/y/o3Ak=;
+        b=OI0C24hvM2IfsthaMpP3HoAyo2QBG+Yp2B+Engp5yBfhwlxlLMOPlURgwcwUSbzstA
+         nzhOOaxrBl9bsHeFSbMI2WYLukBNlPTTgPQHEDnLbveM3fHnJUlp3e4vFDiZAWPv6/FM
+         LcvVmvRWAfVXBvJe4BOT+i4we9lK3XEmwGzmg=
+In-Reply-To: <49D45E42.3050502@suse.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Nicholas Mc Guire <der.herr@hofr.at>
-Cc: Robin Getz <rgetz@blackfin.uclinux.org>, linux-embedded@vger.kernel.org
+To: Suresh Jayaraman <sjayaraman@suse.de>, Mathieu Desnoyers <compudj@krystal.dyndns.org>
+Cc: linux-nfs@vger.kernel.org, ltt-dev@lists.casi.polymtl.ca, Trond.Myklebust@netapp.com, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
 
-On Thu, Apr 2, 2009 at 07:45, Nicholas Mc Guire wrote:
-> On Tue, 24 Mar 2009, Robin Getz wrote:
->> I'm just wondering what people using on standard embedded/headless/diskless
->> targets (which do not have hw random number generators) as a source of
->> entropy - since networking was removed as an entropy source circa 2.6.26
+Hello Suresh and Mathieu,
+
+2009/4/2 Suresh Jayaraman <sjayaraman@suse.de>:
+> Mathieu Desnoyers wrote:
+>> * Suresh Jayaraman (sjayaraman@suse.de) wrote:
+>>> This patch attempts to add splice writes support. In essence, it just
+>>> calls generic_file_splice_write() after doing a little sanity check.
+>>> This would allow LTTng users that are using NFS to store trace data.
+>>> There could be more applications that could be benefitted too.
+>>>
+>>> I have tested this using the Jens' test program and have found no
+>>> real issues. The test program is inlined below:
+>>>
+>>
+>> There is just a small checkpatch nit that I'll fix directly in place in
+>> the LTTng tree.
+>>
+>> WARNING: %Ld/%Lu are not-standard C, use %lld/%llu
+>> #93: FILE: fs/nfs/file.c:564:
+>> +   dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
+>>
+>> total: 0 errors, 1 warnings, 42 lines checked
+>>
 >
-> without claiming that this is actually usable at this point but a simple
-> source of entropy that looks quite good is simply to use the timer-counter/TSC
-> or what ever available. The attached trng.c has been tested on a few X86
-> systems and produces remarkably good random numbers - this might be suitable
-> if you have no other sources available.
+> Yes, I noticed it. There are quite a few places in nfs code where we
+> happened to use that (that doesn't imply that it shouldn't be fixed), so
+> I thought it's OK.
+>
+>> That's great ! I'll pull it in the LTTng tree so my users can try it.
+>> They currently cannot write LTTng traces to NFS mounts anyway.
+>
+> Yes, please report the test results. Would appreciate it very much.
+>
+>
+> Thanks,
 
-unfortunately on Blackfin parts, the TSC (we call it "CYCLES" as that
-is the actual register name) is writable from userspace
+Thank you for creating a patch !!
 
-i have used this in the bootloader as a simple way of getting a little
-bit of entropy, but then i found that our system is too reliable in
-booting -- it tends to take the exact same amount of time to boot to a
-prompt
--mike
+I tested it, and it works fine.
+
+My environment is following,
+LTTV 0.12.10
+LTTng 0.100
+LTT Control 0.65
+Kernles 2.6.29
+
+LTTng version is old now, but the test is passed on ARM11 target.
+
+Furthermore, I run the splice test and the test is passed too.
+The test code is copied from
+http://kzk9.net/blog/2007/05/splice2.html
+(Japanese page)
+
+Thanks all people who commented this issue.
+
+Best regards,
+Masahiro Tamori
+
+>
+>>>
+>>> diff --git a/fs/nfs/file.c b/fs/nfs/file.c
+>>> index 90f292b..13d6a00 100644
+>>> --- a/fs/nfs/file.c
+>>> +++ b/fs/nfs/file.c
+>>> @@ -47,6 +47,9 @@ static ssize_t nfs_file_splice_read(struct file *filp, loff_t *ppos,
+>>>                   size_t count, unsigned int flags);
+>>> static ssize_t nfs_file_read(struct kiocb *, const struct iovec *iov,
+>>>               unsigned long nr_segs, loff_t pos);
+>>> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
+>>> +                  struct file *filp, loff_t *ppos,
+>>> +                  size_t count, unsigned int flags);
+>>> static ssize_t nfs_file_write(struct kiocb *, const struct iovec *iov,
+>>>               unsigned long nr_segs, loff_t pos);
+>>> static int nfs_file_flush(struct file *, fl_owner_t id);
+>>> @@ -76,6 +79,7 @@ const struct file_operations nfs_file_operations = {
+>>>   .lock      = nfs_lock,
+>>>   .flock     = nfs_flock,
+>>>   .splice_read  = nfs_file_splice_read,
+>>> +  .splice_write  = nfs_file_splice_write,
+>>>   .check_flags  = nfs_check_flags,
+>>>   .setlease    = nfs_setlease,
+>>> };
+>>> @@ -550,6 +554,26 @@ out_swapfile:
+>>>   goto out;
+>>> }
+>>>
+>>> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
+>>> +                 struct file *filp, loff_t *ppos,
+>>> +                 size_t count, unsigned int flags)
+>>> +{
+>>> +  struct dentry *dentry = filp->f_path.dentry;
+>>> +  struct inode *inode = dentry->d_inode;
+>>> +
+>>> +  dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
+>>> +      dentry->d_parent->d_name.name, dentry->d_name.name,
+>>> +      (unsigned long) count, (unsigned long long) *ppos);
+>>> +
+>>> +  if (IS_SWAPFILE(inode)) {
+>>> +      printk(KERN_INFO "NFS: attempt to write to active swap"
+>>> +          "file!\n");
+>>> +      return -EBUSY;
+>>> +  }
+>>> +
+>>> +  return generic_file_splice_write(pipe, filp, ppos, count, flags);
+>>> +}
+>>> +
+>>> static int do_getlk(struct file *filp, int cmd, struct file_lock *fl)
+>>> {
+>>>   struct inode *inode = filp->f_mapping->host;
+>>>
+>>
+>
+>
+> --
+> Suresh Jayaraman
+>
+> _______________________________________________
+> ltt-dev mailing list
+> ltt-dev@lists.casi.polymtl.ca
+> http://lists.casi.polymtl.ca/cgi-bin/mailman/listinfo/ltt-dev
+>
