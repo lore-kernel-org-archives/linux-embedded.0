@@ -1,7 +1,7 @@
 From: Mathieu Desnoyers <compudj-vdFpqfd5riKZ9vWoFJJngh2eb7JE58TQ@public.gmane.org>
 Subject: Re: [PATCH] nfs: add support for splice writes
-Date: Thu, 2 Apr 2009 02:29:53 -0400
-Message-ID: <20090402062952.GA24846@Krystal>
+Date: Thu, 2 Apr 2009 02:32:35 -0400
+Message-ID: <20090402063235.GB24846@Krystal>
 References: <49D45974.2060202@suse.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -24,10 +24,14 @@ Cc: Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29
 > real issues. The test program is inlined below:
 > 
 
-That's great ! I'll pull it in the LTTng tree so my users can try it.
-They currently cannot write LTTng traces to NFS mounts anyway.
+There is just a small checkpatch nit that I'll fix directly in place in
+the LTTng tree.
 
-Thanks !
+WARNING: %Ld/%Lu are not-standard C, use %lld/%llu
+#93: FILE: fs/nfs/file.c:564:
++	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
+
+total: 0 errors, 1 warnings, 42 lines checked
 
 Mathieu
 
