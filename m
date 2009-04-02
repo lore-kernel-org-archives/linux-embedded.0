@@ -1,93 +1,45 @@
-From: Nicholas Mc Guire <der.herr@hofr.at>
+From: Mike Frysinger <vapier.adi@gmail.com>
 Subject: Re: Sources of entropy?
-Date: Thu, 2 Apr 2009 13:45:53 +0200
-Message-ID: <20090402114553.GA7568@opentech.at>
+Date: Thu, 2 Apr 2009 08:03:08 -0400
+Message-ID: <8bd0f97a0904020503uf434376s2ba8f9d0e8fcfa7b@mail.gmail.com>
 References: <200903241847.29104.rgetz@blackfin.uclinux.org>
+	 <20090402114553.GA7568@opentech.at>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <200903241847.29104.rgetz@blackfin.uclinux.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=OOZAlR2EJ87khRf1qcXIyrONOrnBtVwi/VgOjt5Ao9Y=;
+        b=BQJO73A/MzpRGrMQUYUEYzV13IriVjPF6SF0xGPdgqIfV2XfDg25n4mExmp1U/3bWt
+         1/dlZc4o2zQQigaiRDB2u+HhSP+P9jMug3qWABzSA7f9L224cfUCw6kfCtbbRgjYfRMS
+         JGLfAWBIW8YNStk1m8nDLkTyoKiqrhNmgN50c=
+In-Reply-To: <20090402114553.GA7568@opentech.at>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Robin Getz <rgetz@blackfin.uclinux.org>
-Cc: linux-embedded@vger.kernel.org
+To: Nicholas Mc Guire <der.herr@hofr.at>
+Cc: Robin Getz <rgetz@blackfin.uclinux.org>, linux-embedded@vger.kernel.org
 
-On Tue, 24 Mar 2009, Robin Getz wrote:
-
-> I'm just wondering what people using on standard embedded/headless/diskless 
-> targets (which do not have hw random number generators) as a source of 
-> entropy - since networking was removed as an entropy source circa 2.6.26
+On Thu, Apr 2, 2009 at 07:45, Nicholas Mc Guire wrote:
+> On Tue, 24 Mar 2009, Robin Getz wrote:
+>> I'm just wondering what people using on standard embedded/headless/diskless
+>> targets (which do not have hw random number generators) as a source of
+>> entropy - since networking was removed as an entropy source circa 2.6.26
 >
-without claiming that this is actually usable at this point but a simple
-source of entropy that looks quite good is simply to use the timer-counter/TSC
-or what ever available. The attached trng.c has been tested on a few X86
-systems and produces remarkably good random numbers - this might be suitable
-if you have no other sources available.
+> without claiming that this is actually usable at this point but a simple
+> source of entropy that looks quite good is simply to use the timer-counter/TSC
+> or what ever available. The attached trng.c has been tested on a few X86
+> systems and produces remarkably good random numbers - this might be suitable
+> if you have no other sources available.
 
-The actual source of randomness simply is that sampling the LSB of what ever
-timer source is available is of lower granularity than the system jitter 
-(scheduling jitter actually) - so this should be quite generally applicable.
-In fact on some of the tested X86 system the randomness was good up to the
-10 or 11th bit of the TSC.
+unfortunately on Blackfin parts, the TSC (we call it "CYCLES" as that
+is the actual register name) is writable from userspace
 
- 
-/* naive true random number generator in software - this seems to be doing
- * better than /dev/random on most linux boxes ;)
- *
- * Copyright OpenTech EDV Research GmbH 2009
- * Author Der Herr Hofrat, <der.herr@hofr.at>
- * License GPL V2 - see http://www.gnu.org/copyleft/gpl.html for more
- *
- * cmpile: gcc -O2 trng.c -o trng
- * usage: ./trng > rand_data
- *
- * what is this doing ?
- * Simply take the non-determinism of intel architectures at the instruction
- * level and sample the TSCs LSB - bit shift it into an array and through
- * most of it away again (this could be optimized - but thats not essential
- * here) - the output is by all standards truly random 
- *
- * first "test"
- *
- * aetsch:~# ./trng > 1
- * ls -aetsch:~# ls -l 1
- * -rw-r--r-- 1 root root 8192 2008-10-19 14:03 1
- * aetsch:~# bzip2 1
- * aetsch:~# ls -l 1.bz2
- * -rw-r--r-- 1 root root 8679 2008-10-19 14:03 1.bz2
- *
- * indicate very good randomness as bzip is not able to compress anything!
- */
-
-#include <stdio.h>
-
-/* read the tsc snip of the LSB and shift it into a long long
- * usleep(something) to ensure that the CPU is sufficiently randomized
- * so we have NO deterministic (periodic) and thus non-random access
- */
-__inline__ unsigned long long int sample_tsc(void)
-{
-	unsigned long long int x,res;
-	int i;
-	res=0;
-	for(i=0;i<32;i++){
-		__asm__ __volatile__("rdtsc\n\t":"=A" (x));
-		res|=((x&0x01LL)<<i);
-		usleep(10);
-	}
-	return res;
-}
-
-int main(int argc, char **argv)
-{
-	unsigned int n;
-
-	n=0;
-	/* simply dump the bit patters to stdout */
-	while(n++ < 8192){
-		printf("%c",(sample_tsc()&0x00FFLL));
-	}
-	return 0;
-}
+i have used this in the bootloader as a simple way of getting a little
+bit of entropy, but then i found that our system is too reliable in
+booting -- it tends to take the exact same amount of time to boot to a
+prompt
+-mike
