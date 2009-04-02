@@ -1,108 +1,73 @@
-From: Suresh Jayaraman <sjayaraman-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [PATCH] nfs: add support for splice writes
-Date: Thu, 02 Apr 2009 12:12:10 +0530
-Message-ID: <49D45E42.3050502@suse.de>
-References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal>
+From: Markus Brunner <super.firetwister@googlemail.com>
+Subject: root on Squashfs breaks mknod
+Date: Thu, 2 Apr 2009 13:40:27 +0200
+Message-ID: <200904021340.27277.super.firetwister@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20090402063235.GB24846@Krystal>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:subject:date
+         :user-agent:cc:mime-version:content-type:content-transfer-encoding
+         :content-disposition:message-id;
+        bh=tZ++u/QStnxeOBbGkI4El4hQ0GM7Xpejuw71fNqLWT8=;
+        b=Y4HaYXldvsfdbdIAqQh+zNNm3ShWdN50cfWaoyYEVh6n7mkAqjHlGwh59SK5f7t4AU
+         3Pk9D3aM3yAYzAOExDfahWxrYrENRNn8um60s9tS3NglMqlOyYZFJLmWErAeC4ufXaY0
+         xhjT9hDVIrhQQkissSRKdNVSvOvt0oXmoqeFc=
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mathieu Desnoyers <compudj-vdFpqfd5riKZ9vWoFJJngh2eb7JE58TQ@public.gmane.org>
-Cc: Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ltt-dev-33AaDErTWvBVxDZ2/Zk0YoryAYyacSEB@public.gmane.org
+To: squashfs-devel@lists.sourceforge.net
+Cc: linux-embedded@vger.kernel.org
 
-Mathieu Desnoyers wrote:
-> * Suresh Jayaraman (sjayaraman-l3A5Bk7waGM@public.gmane.org) wrote:
->> This patch attempts to add splice writes support. In essence, it just
->> calls generic_file_splice_write() after doing a little sanity check.
->> This would allow LTTng users that are using NFS to store trace data.
->> There could be more applications that could be benefitted too.
->>
->> I have tested this using the Jens' test program and have found no
->> real issues. The test program is inlined below:
->>
-> 
-> There is just a small checkpatch nit that I'll fix directly in place in
-> the LTTng tree.
-> 
-> WARNING: %Ld/%Lu are not-standard C, use %lld/%llu
-> #93: FILE: fs/nfs/file.c:564:
-> +	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
-> 
-> total: 0 errors, 1 warnings, 42 lines checked
-> 
+Hi,
 
-Yes, I noticed it. There are quite a few places in nfs code where we
-happened to use that (that doesn't imply that it shouldn't be fixed), so
-I thought it's OK.
+I have a problem if I use squashfs as root filesystem. The error occurs at 
+least with linux 2.6.11/2.6.29 and squashfs 3.4/4.0 on x86.
 
-> That's great ! I'll pull it in the LTTng tree so my users can try it.
-> They currently cannot write LTTng traces to NFS mounts anyway.
+I use an initramfs where I mount the squashfs and use run-init from klibc to 
+make my squashfs the new root device. I can also copy the devices to a tmpfs 
+and bind it to /dev. But after I have left the initramfs newly created 
+devices don't work anymore. It doesn't matter if they get created with mknod, 
+or copied with "cp -a" from /dev. The devices in /dev still work, regardless 
+if they are directly on the squashfs, or on a tmpfs.
 
-Yes, please report the test results. Would appreciate it very much.
+The created devices have the same Major/Minor numbers and are special files. 
+It is also possible to put the devices in an archive and restore them after 
+reboot. But they only work if mknod still works.
 
+Here is the output of strace, reading from the working /dev/zero to the 
+broken /tmp/null.
 
-Thanks,
-
->>
->> diff --git a/fs/nfs/file.c b/fs/nfs/file.c
->> index 90f292b..13d6a00 100644
->> --- a/fs/nfs/file.c
->> +++ b/fs/nfs/file.c
->> @@ -47,6 +47,9 @@ static ssize_t nfs_file_splice_read(struct file *filp, loff_t *ppos,
->>  					size_t count, unsigned int flags);
->>  static ssize_t nfs_file_read(struct kiocb *, const struct iovec *iov,
->>  				unsigned long nr_segs, loff_t pos);
->> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
->> +					struct file *filp, loff_t *ppos,
->> +					size_t count, unsigned int flags);
->>  static ssize_t nfs_file_write(struct kiocb *, const struct iovec *iov,
->>  				unsigned long nr_segs, loff_t pos);
->>  static int  nfs_file_flush(struct file *, fl_owner_t id);
->> @@ -76,6 +79,7 @@ const struct file_operations nfs_file_operations = {
->>  	.lock		= nfs_lock,
->>  	.flock		= nfs_flock,
->>  	.splice_read	= nfs_file_splice_read,
->> +	.splice_write	= nfs_file_splice_write,
->>  	.check_flags	= nfs_check_flags,
->>  	.setlease	= nfs_setlease,
->>  };
->> @@ -550,6 +554,26 @@ out_swapfile:
->>  	goto out;
->>  }
->>  
->> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
->> +				     struct file *filp, loff_t *ppos,
->> +				     size_t count, unsigned int flags)
->> +{
->> +	struct dentry *dentry = filp->f_path.dentry;
->> +	struct inode *inode = dentry->d_inode;
->> +
->> +	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
->> +		dentry->d_parent->d_name.name, dentry->d_name.name,
->> +		(unsigned long) count, (unsigned long long) *ppos);
->> +
->> +	if (IS_SWAPFILE(inode)) {
->> +		printk(KERN_INFO "NFS: attempt to write to active swap"
->> +		       "file!\n");
->> +		return -EBUSY;
->> +	}
->> +
->> +	return generic_file_splice_write(pipe, filp, ppos, count, flags);
->> +}
->> +
->>  static int do_getlk(struct file *filp, int cmd, struct file_lock *fl)
->>  {
->>  	struct inode *inode = filp->f_mapping->host;
->>
-> 
+# strace -fff dd if=/dev/zero of=/tmp/null count=1
+execve("/bin/dd", ["dd", "if=/dev/zero", "of=/tmp/null", "count=1"], [/* 
+16 vars */]) = 0
+ioctl(0, SNDCTL_TMR_TIMEBASE or TCGETS, {B38400 opost isig icanon echo 
+...}) = 0
+ioctl(1, SNDCTL_TMR_TIMEBASE or TCGETS, {B38400 opost isig icanon echo 
+...}) = 0
+getuid()                                = 0
+brk(0)                                  = 0x80e6000
+brk(0x80e7000)                          = 0x80e7000
+open("/dev/zero", O_RDONLY|O_LARGEFILE) = 4
+dup2(4, 0)                              = 0
+close(4)                                = 0
+open("/tmp/null", O_WRONLY|O_CREAT|O_TRUNC|O_LARGEFILE, 027741600666) = -1 
+ENXIO (No such device or address)
+brk(0x80e8000)                          = 0x80e8000
+ioctl(2147483647, SNDCTL_TMR_TIMEBASE or TCGETS, 0xbf870224) = -1 EBADF 
+(Bad file descriptor)
+brk(0x80e9000)                          = 0x80e9000
+write(2, "dd: can\'t open \'/tmp/null\': No s"..., 54dd: can't open 
+'/tmp/null': No such device or address
+) = 54
+_exit(1)
 
 
--- 
-Suresh Jayaraman
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Any ideas where this bug might came from?
+
+Best Regards
+
+Markus
