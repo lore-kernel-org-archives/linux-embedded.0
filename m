@@ -1,146 +1,51 @@
-From: Masahiro Tamori <masahiro.tamori@gmail.com>
-Subject: Re: [ltt-dev] [PATCH] nfs: add support for splice writes
-Date: Thu, 2 Apr 2009 21:42:05 +0900
-Message-ID: <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com>
-References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal>
-	 <49D45E42.3050502@suse.de>
+From: Phillip Lougher <phillip-cnXvMjJKhjYG2Il/BtU0GPXRex20P6io@public.gmane.org>
+Subject: Squashfs 4.0 tools (for 2.6.29) released
+Date: Mon, 06 Apr 2009 00:41:53 +0100
+Message-ID: <49D941C1.1050007@lougher.demon.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=CVJAPlC4//C6OVdswL6eVyWwXlYswFcqRiay/y/o3Ak=;
-        b=OI0C24hvM2IfsthaMpP3HoAyo2QBG+Yp2B+Engp5yBfhwlxlLMOPlURgwcwUSbzstA
-         nzhOOaxrBl9bsHeFSbMI2WYLukBNlPTTgPQHEDnLbveM3fHnJUlp3e4vFDiZAWPv6/FM
-         LcvVmvRWAfVXBvJe4BOT+i4we9lK3XEmwGzmg=
-In-Reply-To: <49D45E42.3050502@suse.de>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Suresh Jayaraman <sjayaraman@suse.de>, Mathieu Desnoyers <compudj@krystal.dyndns.org>
-Cc: linux-nfs@vger.kernel.org, ltt-dev@lists.casi.polymtl.ca, Trond.Myklebust@netapp.com, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
+	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=squashfs-devel>
+List-Post: <mailto:squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
+	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Linux Kernel Development <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Embedded Maillist <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 
-Hello Suresh and Mathieu,
+Hi,
 
-2009/4/2 Suresh Jayaraman <sjayaraman@suse.de>:
-> Mathieu Desnoyers wrote:
->> * Suresh Jayaraman (sjayaraman@suse.de) wrote:
->>> This patch attempts to add splice writes support. In essence, it just
->>> calls generic_file_splice_write() after doing a little sanity check.
->>> This would allow LTTng users that are using NFS to store trace data.
->>> There could be more applications that could be benefitted too.
->>>
->>> I have tested this using the Jens' test program and have found no
->>> real issues. The test program is inlined below:
->>>
->>
->> There is just a small checkpatch nit that I'll fix directly in place in
->> the LTTng tree.
->>
->> WARNING: %Ld/%Lu are not-standard C, use %lld/%llu
->> #93: FILE: fs/nfs/file.c:564:
->> +   dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
->>
->> total: 0 errors, 1 warnings, 42 lines checked
->>
->
-> Yes, I noticed it. There are quite a few places in nfs code where we
-> happened to use that (that doesn't imply that it shouldn't be fixed), so
-> I thought it's OK.
->
->> That's great ! I'll pull it in the LTTng tree so my users can try it.
->> They currently cannot write LTTng traces to NFS mounts anyway.
->
-> Yes, please report the test results. Would appreciate it very much.
->
->
-> Thanks,
+I'm pleased to announce the first release of the squashfs 4.0 tools.
+These are needed by any Squashfs users using linux 2.6.29.  They are available
+from http://sourceforge.net/projects/squashfs
 
-Thank you for creating a patch !!
+The changes from the change-log are:
 
-I tested it, and it works fine.
+1. Unsquashfs improvements:
 
-My environment is following,
-LTTV 0.12.10
-LTTng 0.100
-LTT Control 0.65
-Kernles 2.6.29
+1.1 Support for 4.0 filesystems added.
+1.2 Swapping macros rewritten.
+1.3 Unsquashfs code restructured and split into separate files.
 
-LTTng version is old now, but the test is passed on ARM11 target.
+2. Mksquashfs improvements:
 
-Furthermore, I run the splice test and the test is passed too.
-The test code is copied from
-http://kzk9.net/blog/2007/05/splice2.html
-(Japanese page)
+2.1 Swapping macros rewritten.  Fixed little-endian layout allows
+     code to be optimised and only added at compile time for
+     big endian systems.
+2.2 Support for pseudo files added.
 
-Thanks all people who commented this issue.
+New Mksquashfs options
 
-Best regards,
-Masahiro Tamori
+Mksquashfs now supports pseudo files, these allow fake directories, character
+and block devices to be specified and added to the Squashfs filesystem being
+built, rather than requiring them to be present in the source directories.
+This, for example, allows device nodes to be added to the filesystem without
+requiring root access.
 
->
->>>
->>> diff --git a/fs/nfs/file.c b/fs/nfs/file.c
->>> index 90f292b..13d6a00 100644
->>> --- a/fs/nfs/file.c
->>> +++ b/fs/nfs/file.c
->>> @@ -47,6 +47,9 @@ static ssize_t nfs_file_splice_read(struct file *filp, loff_t *ppos,
->>>                   size_t count, unsigned int flags);
->>> static ssize_t nfs_file_read(struct kiocb *, const struct iovec *iov,
->>>               unsigned long nr_segs, loff_t pos);
->>> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
->>> +                  struct file *filp, loff_t *ppos,
->>> +                  size_t count, unsigned int flags);
->>> static ssize_t nfs_file_write(struct kiocb *, const struct iovec *iov,
->>>               unsigned long nr_segs, loff_t pos);
->>> static int nfs_file_flush(struct file *, fl_owner_t id);
->>> @@ -76,6 +79,7 @@ const struct file_operations nfs_file_operations = {
->>>   .lock      = nfs_lock,
->>>   .flock     = nfs_flock,
->>>   .splice_read  = nfs_file_splice_read,
->>> +  .splice_write  = nfs_file_splice_write,
->>>   .check_flags  = nfs_check_flags,
->>>   .setlease    = nfs_setlease,
->>> };
->>> @@ -550,6 +554,26 @@ out_swapfile:
->>>   goto out;
->>> }
->>>
->>> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
->>> +                 struct file *filp, loff_t *ppos,
->>> +                 size_t count, unsigned int flags)
->>> +{
->>> +  struct dentry *dentry = filp->f_path.dentry;
->>> +  struct inode *inode = dentry->d_inode;
->>> +
->>> +  dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
->>> +      dentry->d_parent->d_name.name, dentry->d_name.name,
->>> +      (unsigned long) count, (unsigned long long) *ppos);
->>> +
->>> +  if (IS_SWAPFILE(inode)) {
->>> +      printk(KERN_INFO "NFS: attempt to write to active swap"
->>> +          "file!\n");
->>> +      return -EBUSY;
->>> +  }
->>> +
->>> +  return generic_file_splice_write(pipe, filp, ppos, count, flags);
->>> +}
->>> +
->>> static int do_getlk(struct file *filp, int cmd, struct file_lock *fl)
->>> {
->>>   struct inode *inode = filp->f_mapping->host;
->>>
->>
->
->
-> --
-> Suresh Jayaraman
->
-> _______________________________________________
-> ltt-dev mailing list
-> ltt-dev@lists.casi.polymtl.ca
-> http://lists.casi.polymtl.ca/cgi-bin/mailman/listinfo/ltt-dev
->
+Phillip
+
+------------------------------------------------------------------------------
