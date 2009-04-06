@@ -1,51 +1,56 @@
-From: Phillip Lougher <phillip-cnXvMjJKhjYG2Il/BtU0GPXRex20P6io@public.gmane.org>
-Subject: Squashfs 4.0 tools (for 2.6.29) released
-Date: Mon, 06 Apr 2009 00:41:53 +0100
-Message-ID: <49D941C1.1050007@lougher.demon.co.uk>
+From: Matthias Kaehlcke <matthias@kaehlcke.net>
+Subject: e2factory: Embedded Linux build system released under the GPL
+Date: Mon, 6 Apr 2009 11:05:45 +0200
+Message-ID: <20090406090545.GC4616@traven>
 Mime-Version: 1.0
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
-	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=squashfs-devel>
-List-Post: <mailto:squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
-	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Linux Kernel Development <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Embedded Maillist <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-embedded@vger.kernel.org
 
-Hi,
+thought this might be interesting for people on this list:
 
-I'm pleased to announce the first release of the squashfs 4.0 tools.
-These are needed by any Squashfs users using linux 2.6.29.  They are available
-from http://sourceforge.net/projects/squashfs
+e2factory, a build management system for embedded system developers,
+has been released as open source by emlix. Emlix, a specialist in
+creating embedded linux systems, developed e2factory to manage the
+complexity of bringing together numerous open source and free software
+packages to create releases for its customers. The e2factory software
+can use multiple source code control systems, such as git or
+subversion, within the same project if necessary, and the
+configuration and results of building with e2factory are themselves
+version controlled. This allows the build process to be easily
+reproducible and that in turn assists in the validation and auditing
+of the delivered software.
 
-The changes from the change-log are:
+The build system also documents the open source licenses of any
+modules used, making it easier to comply with those
+licenses. e2factory has been released under the GPL3 and emlix is
+offering a professional edition with a service contract.
 
-1. Unsquashfs improvements:
+http://www.h-online.com/open/e2factory-opens-its-gates--/news/112759
 
-1.1 Support for 4.0 filesystems added.
-1.2 Swapping macros rewritten.
-1.3 Unsquashfs code restructured and split into separate files.
 
-2. Mksquashfs improvements:
+more info about e2factory:
 
-2.1 Swapping macros rewritten.  Fixed little-endian layout allows
-     code to be optimised and only added at compile time for
-     big endian systems.
-2.2 Support for pseudo files added.
+http://www.emlix.com/fileadmin/emlix/dokumente/090303_PI_e2factorygoesOS_en1.doc
 
-New Mksquashfs options
+http://www.emlix.com/sol-e2factory.html?&language=en
 
-Mksquashfs now supports pseudo files, these allow fake directories, character
-and block devices to be specified and added to the Squashfs filesystem being
-built, rather than requiring them to be present in the source directories.
-This, for example, allows device nodes to be added to the filesystem without
-requiring root access.
+http://www.e2factory.org
 
-Phillip
+-- 
+Matthias Kaehlcke
+Embedded Linux Engineer
+Barcelona
 
-------------------------------------------------------------------------------
+                Don't walk behind me, I may not lead
+             Don't walk in front of me, I may not follow
+                Just walk beside me and be my friend
+                          (Albert Camus)
+                                                                 .''`.
+    using free software / Debian GNU/Linux | http://debian.org  : :'  :
+                                                                `. `'`
+gpg --keyserver pgp.mit.edu --recv-keys 47D8E5D4                  `-
