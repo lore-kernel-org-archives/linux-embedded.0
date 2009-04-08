@@ -1,56 +1,38 @@
-From: Matthias Kaehlcke <matthias@kaehlcke.net>
-Subject: e2factory: Embedded Linux build system released under the GPL
-Date: Mon, 6 Apr 2009 11:05:45 +0200
-Message-ID: <20090406090545.GC4616@traven>
-Mime-Version: 1.0
+From: Mark Miller <mark@mirell.org>
+Subject: Versatile PB Board Support for ARMv6 and ARMv7
+Date: Tue, 7 Apr 2009 22:37:25 -0500
+Message-ID: <6F1ECC5B-A247-4328-892E-1620FF5E2172@mirell.org>
+Mime-Version: 1.0 (Apple Message framework v930.3)
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
+To: linux-kernel@vger.kernel.org
+Cc: Embedded Linux mailing list <linux-embedded@vger.kernel.org>, qemu-devel@nongnu.org
 
-thought this might be interesting for people on this list:
+(Apologies if this appeared twice for some. My mail client was  
+misbehaving and sending HTML messages)
 
-e2factory, a build management system for embedded system developers,
-has been released as open source by emlix. Emlix, a specialist in
-creating embedded linux systems, developed e2factory to manage the
-complexity of bringing together numerous open source and free software
-packages to create releases for its customers. The e2factory software
-can use multiple source code control systems, such as git or
-subversion, within the same project if necessary, and the
-configuration and results of building with e2factory are themselves
-version controlled. This allows the build process to be easily
-reproducible and that in turn assists in the validation and auditing
-of the delivered software.
+In late October 2008, according to the git logs, the methodology for  
+selecting a processor on several boards, at least the Versatile PB  
+board was changed so that it automatically selects CPU_ARM926T as a  
+hidden symbol.
 
-The build system also documents the open source licenses of any
-modules used, making it easier to comply with those
-licenses. e2factory has been released under the GPL3 and emlix is
-offering a professional edition with a service contract.
+The reason I have a question, is since QEMU currently can emulate a  
+Versatile PB board with other processors than just the ARM926T (Such  
+as the ARM1136 (ARMv6) and Cortex-A8 (ARMv7), is there a good way to  
+allow that in the mainstream kernel? Previously the patch was to just  
+add extra potential dependencies on CPU_V6 and CPU_V7, so that by  
+selecting MACH_VERSATILE_PB, you could select ARMv6/v7 support.
 
-http://www.h-online.com/open/e2factory-opens-its-gates--/news/112759
-
-
-more info about e2factory:
-
-http://www.emlix.com/fileadmin/emlix/dokumente/090303_PI_e2factorygoesOS_en1.doc
-
-http://www.emlix.com/sol-e2factory.html?&language=en
-
-http://www.e2factory.org
+Currently I'm just deleting the select statement, and having all the  
+CPUs appear, as no longer hidden symbols. My question is, what is the  
+best way to allow for other processors for this board in Kconfig, so  
+it could be submitted to the mainstream kernel?
 
 -- 
-Matthias Kaehlcke
-Embedded Linux Engineer
-Barcelona
+Mark A. Miller
+mark@mirell.org
 
-                Don't walk behind me, I may not lead
-             Don't walk in front of me, I may not follow
-                Just walk beside me and be my friend
-                          (Albert Camus)
-                                                                 .''`.
-    using free software / Debian GNU/Linux | http://debian.org  : :'  :
-                                                                `. `'`
-gpg --keyserver pgp.mit.edu --recv-keys 47D8E5D4                  `-
+
