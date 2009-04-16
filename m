@@ -1,75 +1,39 @@
-From: VomLehn <dvomlehn@cisco.com>
-Subject: [PATCH] Wait for console to become available
-Date: Tue, 14 Apr 2009 16:28:36 -0700
-Message-ID: <20090414232835.GA20307@cuplxvomd02.corp.sa.net>
+From: Markus Brunner <super.firetwister@googlemail.com>
+Subject: Re: root on Squashfs breaks mknod
+Date: Thu, 16 Apr 2009 19:21:55 +0200
+Message-ID: <200904161921.55667.super.firetwister@gmail.com>
+References: <200904021340.27277.super.firetwister@gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:subject:date
+         :user-agent:cc:references:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:message-id;
+        bh=4P01FuyhGpiUp8DEI+czzb8oStCidg4oyxbG4e0JbXw=;
+        b=Q5+IMfkB68cKo+3iqCVNqn8MIq/stbEpbXEvYgDIytzyVJFMy1ux6GUIir/5Xq91hw
+         BRa2PNQLKtLmBGHkvwT9Dis9R+XywaWmTLK0xmxsE5UhvpMr6xb+9N68dZOTzrIbTsYs
+         uqxpO0KixwLIPUVpTaTOJiiHbcmKIRsJfjQQw=
+In-Reply-To: <200904021340.27277.super.firetwister@gmail.com>
 Content-Disposition: inline
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1926; t=1239751716; x=1240615716;
-	c=relaxed/simple; s=sjdkim2002;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20[PATCH]=20Wait=20for=20console=20to=20become=20
-	available
-	|Sender:=20;
-	bh=E82uSc4OrgdHJuRZA//A6kk0iH+a8AxsCO6Wn6QKy9A=;
-	b=VlglKsgXN9ZwtBVnTWyTRb1VZq/yu2GILwQpNP1zq3lp9LJ+gBpFTwqTBL
-	77zXsCa40xR7Den6mhTK3DDuZhMqUaxSO8MfP/zjQNptUKfJutM5fmLhF5fv
-	x5G5xVAOyh;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Cc: Linux Embedded Mailing List <linux-embedded@vger.kernel.org>
+To: squashfs-devel@lists.sourceforge.net
+Cc: linux-embedded@vger.kernel.org
 
-Work to improve boot times appears to be successful enough that a race
-condition has been created between the open of /dev/console in init_post
-and USB serial device initialization. Embedded systems are probably the
-primary users of USB serial devices, though I can certainly image blade
-servers using them, as well.
+Hi,
 
-This patch works for me and, though it's possible this is all that needs
-to be done, I think it's likely there are some other changes required,
-as well.
+I've got good news:
 
-Signed-off-by: David VomLehn <dvomlehn@cisco>
----
- kernel/printk.c |    9 +++++++++
- 1 files changed, 9 insertions(+), 0 deletions(-)
+1. It has nothing to do with squashfs, more with the readonly loopback device
+2. The Problem is with an old version of uclibc
+3. It's already fixed in the latest version of uclibc.
+4. Everybody who cannot update uclibc, can use mknod of klibc
 
-diff --git a/kernel/printk.c b/kernel/printk.c
-index e3602d0..39f554a 100644
---- a/kernel/printk.c
-+++ b/kernel/printk.c
-@@ -104,6 +104,10 @@ static unsigned log_start;	/* Index into log_buf: next char to be read by syslog
- static unsigned con_start;	/* Index into log_buf: next char to be sent to consoles */
- static unsigned log_end;	/* Index into log_buf: most-recently-written-char + 1 */
- 
-+/* Definitions for waiting until a console is registered */
-+#define MAX_CONSOLE_WAIT	msecs_to_jiffies(2000)
-+static DECLARE_WAIT_QUEUE_HEAD(console_wait);
-+
- /*
-  *	Array of consoles built from command line options (console=)
-  */
-@@ -1062,6 +1066,10 @@ struct tty_driver *console_device(int *index)
- 	struct console *c;
- 	struct tty_driver *driver = NULL;
- 
-+	/* Wait a while for a console to show up. If one doesn't show up
-+	 * for too long, we'll just continue without a console. */
-+	wait_event_timeout(console_wait, console_drivers, MAX_CONSOLE_WAIT);
-+
- 	acquire_console_sem();
- 	for (c = console_drivers; c != NULL; c = c->next) {
- 		if (!c->device)
-@@ -1211,6 +1219,7 @@ void register_console(struct console *console)
- 		spin_unlock_irqrestore(&logbuf_lock, flags);
- 	}
- 	release_console_sem();
-+	wake_up_all(&console_wait);
- }
- EXPORT_SYMBOL(register_console);
- 
+
+Best Regards
+
+Markus
+
