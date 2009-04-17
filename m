@@ -1,33 +1,33 @@
-From: VomLehn <dvomlehn@cisco.com>
-Subject: [PATCH] Wait for console to become available, v2
-Date: Thu, 16 Apr 2009 12:08:37 -0700
-Message-ID: <20090416190837.GA26734@cuplxvomd02.corp.sa.net>
+From: David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
+Subject: [Patch] Wait for console to become available, ver 3
+Date: Fri, 17 Apr 2009 14:31:48 -0700
+Message-ID: <20090417213148.GA27825@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=3427; t=1239908918; x=1240772918;
-	c=relaxed/simple; s=sjdkim4002;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=6968; t=1240003909; x=1240867909;
+	c=relaxed/simple; s=sjdkim3002;
 	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20[PATCH]=20Wait=20for=20console=20to=20become=20
-	available,=20v2
+	d=cisco.com; i=dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org;
+	z=From:=20David=20VomLehn=20<dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
+	|Subject:=20[Patch]=20Wait=20for=20console=20to=20become=20
+	available,=20ver=203
 	|Sender:=20;
-	bh=xfpKe7vEHE7o/mXvhnm5wPKAMZtH8L+GRKn7p4dhGQY=;
-	b=q0E5UgXN2bXUQ4SuI5lAn6G7dJh1JHL+JJP1FEkIl4yrUWD/lSWyZ2Fvt9
-	WRLnzS0Ilz7FaaeRkZI+xYyFT0T6sSbJf3AoSUdfxC6+xZUAD1JPMnTPcLJz
-	eIxk5Knn6Q;
-Sender: linux-embedded-owner@vger.kernel.org
+	bh=/5PsmyZuZvYEuEoiBlkTgs/JupgukHN/gsH/a/i0K0k=;
+	b=l+mrh9HxEzWuqNzIwpRUKMxxT8hz+lBJEf+UOypo3nvSZO0pgR6BuGdOlX
+	W/o4BQbqOqHRjgHxunyIa/MJNSQQDPJa6riZ/U8gXXCwzMPK9hhah4O0pJCR
+	kvdTWcaMqb;
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>
+To: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Linux Embedded Mailing List <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 
 Parallelization to improve boot times has been successful enough that race
 conditions now exist between the init_post() open of /dev/console and
 initialization of the console device. When this occurs, opening /dev/console
-fails and any applications inherited for init have no standard in/out/err
+fails and any applications inherited from init have no standard in/out/error
 devices. This is expected behavior if no console device is available, but
 quite unfortunate in the case where the console is just a bit slow waking up.
 
@@ -35,75 +35,171 @@ Some buses, such as USB, offer no guarantees about how long it takes to
 discover devices, so there is no reliable way to distinguish between a missing
 console and a slow one.  The pragmatic approach taken in this patch is to
 wait for a while to see if a console shows up, and just go on if it doesn't.
-The default delay interval is set to 500 msec (0.5 seconds) based on a sample
-size of one device (cp2101) but is a tunable. If the console shows up sooner,
-we will continue immediately.
+The default delay is 1000 msec (1 second).
+
+There are two new command line parameters:
+consolewait		Wait forever for a console to be registered
+consoledelay=msec	Use the given number of milliseconds as the delay
+			interval instead of the default
+
+Note that, though these parameters are modeled after the rootwait and rootdelay
+parameters, details differ. Instead of sleeping and polling, which can increase
+boot time, this code uses a waitqueue and will proceed as soon as a console is
+available.
+
+It could be argued that providing both command line parameters and a Kconfig
+option for the console wait time is over-engineering. There doesn't really
+seem to be a reasonable way to determine a default, though, which drives the
+Kconfig option. The selection of USB devices connected to the system can
+only be known at runtime, which drives the need for command line parameters.
 
 History
+v3	Increase the default delay to 1 second and add kernel command line
+	parameters to override the default delay. Thanks to David Brownell for
+	his helpful suggestions.
 v2	Wait for the preferred console rather than any console. Make the
 	delay interval a tunable.
 v1	Initial version
 
-Signed-off-by: David VomLehn <dvomlehn@cisco.com>
+Signed-off-by: David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
 ---
- init/Kconfig    |   10 ++++++++++
- kernel/printk.c |   11 +++++++++++
- 2 files changed, 21 insertions(+), 0 deletions(-)
+ Documentation/kernel-parameters.txt |   10 ++++++++
+ arch/mips/configs/powertv_defconfig |    2 +-
+ init/Kconfig                        |   12 ++++++++++
+ kernel/printk.c                     |   41 +++++++++++++++++++++++++++++++++++
+ 4 files changed, 64 insertions(+), 1 deletions(-)
 
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 6172e43..2b0c4e6 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -507,6 +507,16 @@ and is between 256 and 4096 characters. It is defined in the file
+ 			console=brl,ttyS0
+ 		For now, only VisioBraille is supported.
+ 
++	consoledelay=mS	[KNL] Wait up to mS milliseconds for the a preferred
++			console to be registered, then continue. Useful for
++			systems where a console may not be plugged in, such as
++			for USB serial devices.
++
++	consolewait 	[KNL] Wait (indefinitely) for preferred console device
++			to be registered. Useful, for example, for USB serial
++			devices, but will never complete booting if no console
++			is plugged in.
++
+ 	coredump_filter=
+ 			[KNL] Change the default value for
+ 			/proc/<pid>/coredump_filter.
+diff --git a/arch/mips/configs/powertv_defconfig b/arch/mips/configs/powertv_defconfig
+index 7311e63..b4a046d 100644
+--- a/arch/mips/configs/powertv_defconfig
++++ b/arch/mips/configs/powertv_defconfig
+@@ -1,7 +1,7 @@
+ #
+ # Automatically generated make config: don't edit
+ # Linux kernel version: 2.6.30-rc2
+-# Thu Apr 16 11:29:44 2009
++# Fri Apr 17 12:38:42 2009
+ #
+ CONFIG_MIPS=y
+ 
 diff --git a/init/Kconfig b/init/Kconfig
-index 7be4d38..5d5b0fa 100644
+index 7be4d38..a04eba1 100644
 --- a/init/Kconfig
 +++ b/init/Kconfig
-@@ -835,6 +835,16 @@ config PRINTK
+@@ -835,6 +835,18 @@ config PRINTK
  	  very difficult to diagnose system problems, saying N here is
  	  strongly discouraged.
  
 +config PRINTK_CONSOLE_WAIT
-+	int "Number of milliseconds to wait for console device"
-+	default 500
++	int "Default number of milliseconds to wait for console device"
++	default 1000
 +	help
 +	  Some systems use console devices, such as USB serial devices, which
 +	  may not be present or which may take an unspecified amount of time
-+	  to be initialized. This setting determines the maximum number of
-+	  milliseconds the system will wait for a console to be registered.
-+	  Slow devices may require this value be increased.
++	  to be initialized. This setting is the default for the maximum number
++	  of milliseconds the system will wait for a console to be registered.
++	  This value can be overridden by the command line parameters
++	  consolewait, to wait forever, or consoledelay=msec, to give a
++	  different value for the wait.
 +
  config BUG
  	bool "BUG() support" if EMBEDDED
  	default y
 diff --git a/kernel/printk.c b/kernel/printk.c
-index 5052b54..3a05c8a 100644
+index 5052b54..aa6db96 100644
 --- a/kernel/printk.c
 +++ b/kernel/printk.c
-@@ -105,6 +105,9 @@ static unsigned log_start;	/* Index into log_buf: next char to be read by syslog
+@@ -105,6 +105,11 @@ static unsigned log_start;	/* Index into log_buf: next char to be read by syslog
  static unsigned con_start;	/* Index into log_buf: next char to be sent to consoles */
  static unsigned log_end;	/* Index into log_buf: most-recently-written-char + 1 */
  
-+/* Wait queue controlling the wait for a console device */
-+static DECLARE_WAIT_QUEUE_HEAD(console_wait);
++/* Definitions controlling the wait for a console device to be initialized */
++static bool console_wait;	/* If true, wait forever for console */
++static long console_delay = CONFIG_PRINTK_CONSOLE_WAIT; /* In milliseconds */
++static DECLARE_WAIT_QUEUE_HEAD(console_wq);
 +
  /*
   *	Array of consoles built from command line options (console=)
   */
-@@ -1081,6 +1084,13 @@ struct tty_driver *console_device(int *index)
+@@ -195,6 +200,30 @@ out:
+ 
+ __setup("log_buf_len=", log_buf_len_setup);
+ 
++/*
++ * Set up to wait forever for the console to appear
++ * @str:	Ignored
++ * Returns one.
++ */
++static int __init consolewait_setup(char *str)
++{
++	console_wait = true;
++	return 1;
++}
++__setup("consolewait", consolewait_setup);
++
++/*
++ * Set the delay, in milliseconds, to wait for the console.
++ * @str:	Pointer to the start of the delay value
++ * Returns one.
++ */
++static int __init consoledelay_setup(char *str)
++{
++	console_delay = simple_strtoul(str, NULL, 10);
++	return 1;
++}
++__setup("consoledelay=", consoledelay_setup);
++
+ #ifdef CONFIG_BOOT_PRINTK_DELAY
+ 
+ static unsigned int boot_delay; /* msecs delay after each printk during bootup */
+@@ -1081,6 +1110,17 @@ struct tty_driver *console_device(int *index)
  	struct console *c;
  	struct tty_driver *driver = NULL;
  
-+	/* Wait a while for a console to show up. If one doesn't show up
-+	 * for too long, we'll just continue without a console. */
-+	if (wait_event_timeout(console_wait, preferred_console >= 0,
-+		CONFIG_PRINTK_CONSOLE_WAIT) == 0)
-+		pr_warning("No preferred console after waiting %u msec; "
-+			"continuing anyway\n", CONFIG_PRINTK_CONSOLE_WAIT);
++	/* The console device may not be initialized yet. We can either wait
++	 * forever if consolewait is specified on the command line, or wait
++	 * for some number of milliseconds if console_delay=msec is used */
++	if (console_wait)
++		wait_event(console_wq, preferred_console >= 0);
++
++	else if (wait_event_timeout(console_wq, preferred_console >= 0,
++		msecs_to_jiffies(console_delay)) == 0)
++		pr_warning("No preferred console after waiting %ld msec; "
++			"continuing anyway\n", console_delay);
 +
  	acquire_console_sem();
  	for (c = console_drivers; c != NULL; c = c->next) {
  		if (!c->device)
-@@ -1230,6 +1240,7 @@ void register_console(struct console *console)
+@@ -1230,6 +1270,7 @@ void register_console(struct console *console)
  		spin_unlock_irqrestore(&logbuf_lock, flags);
  	}
  	release_console_sem();
-+	wake_up_all(&console_wait);
++	wake_up_all(&console_wq);
  }
  EXPORT_SYMBOL(register_console);
  
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
