@@ -1,103 +1,80 @@
-From: Suresh Jayaraman <sjayaraman@suse.de>
-Subject: Re: [ltt-dev] [PATCH] nfs: add support for splice writes
-Date: Mon, 20 Apr 2009 21:17:23 +0530
-Message-ID: <49EC990B.1030007@suse.de>
-References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal>	 <49D45E42.3050502@suse.de>	 <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com>	 <49EC0A83.8060802@suse.de> <1240230224.8073.6.camel@heimdal.trondhjem.org>	 <49EC6CB3.8080800@suse.de> <1240237274.13636.9.camel@heimdal.trondhjem.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [Patch] Wait for console to become available, ver 3
+Date: Mon, 20 Apr 2009 14:30:10 -0700
+Message-ID: <20090420143010.697c7380.akpm@linux-foundation.org>
+References: <20090417213148.GA27825@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756484AbZDTPsj@vger.kernel.org>
-In-Reply-To: <1240237274.13636.9.camel@heimdal.trondhjem.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090417213148.GA27825@cuplxvomd02.corp.sa.net>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Trond Myklebust <trond.myklebust@fys.uio.no>
-Cc: Masahiro Tamori <masahiro.tamori@gmail.com>, Mathieu Desnoyers <compudj@krystal.dyndns.org>, linux-nfs@vger.kernel.org, ltt-dev@lists.casi.polymtl.ca, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Peter Zijlstra <a.p.zijlstra@chello.nl>
+To: David VomLehn <dvomlehn@cisco.com>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-usb@vger.kernel.org
 
-Trond Myklebust wrote:
-> On Mon, 2009-04-20 at 18:08 +0530, Suresh Jayaraman wrote:
->> Trond Myklebust wrote:
->>> On Mon, 2009-04-20 at 11:09 +0530, Suresh Jayaraman wrote:
->>>> Hi Trond,
->>>>
->>>> Do you think this patch is OK? Can this be considered for merging?
->>>>>>>> +
->>>>>>>> +  if (IS_SWAPFILE(inode)) {
->>>>>>>> +      printk(KERN_INFO "NFS: attempt to write to active swap"
->>>>>>>> +          "file!\n");
->>>>>>>> +      return -EBUSY;
->>>>>>>> +  }
->>> I don't know that we really need this. We should sweep through the NFS
->>> code and kill all those IS_SWAPFILE() thingys. Or at least #define
->>> IS_SWAPFILE(a) (0)
->>> ...
->> Hmm.. I'm not sure whether we should kill them now. I think originally,
->> these were added keeping in mind the future NFS swap support. Given that
->> the recent work from Peterz Zilstra on "Swap over NFS" and multiple
->> iterations/review on the same, I think those patches will eventually get
->> merged sooner or later. Perhaps, it's a good idea to #define
->> IS_SWAPFILE(a) 0 than killing them entirely..?
+On Fri, 17 Apr 2009 14:31:48 -0700
+David VomLehn <dvomlehn@cisco.com> wrote:
+
+> Parallelization to improve boot times has been successful enough that race
+> conditions now exist between the init_post() open of /dev/console and
+> initialization of the console device. When this occurs, opening /dev/console
+> fails and any applications inherited from init have no standard in/out/error
+> devices. This is expected behavior if no console device is available, but
+> quite unfortunate in the case where the console is just a bit slow waking up.
 > 
-> Why are they needed at all? AFAICS, other filesystems check IS_SWAPFILE
-> when truncating a file, but don't litter their code with all these weird
-> checks for writing, reading, etc.
-
-Yes, except for afs other filesystems seem to check only during
-truncation.
-
-> It's not as if these checks can stop a determined privileged person from
-> writing to the swapfile anyway. All they have to do is go to another
-> client or write directly to the file on the server...
+> Some buses, such as USB, offer no guarantees about how long it takes to
+> discover devices, so there is no reliable way to distinguish between a missing
+> console and a slow one.  The pragmatic approach taken in this patch is to
+> wait for a while to see if a console shows up, and just go on if it doesn't.
+> The default delay is 1000 msec (1 second).
 > 
+> There are two new command line parameters:
+> consolewait		Wait forever for a console to be registered
+> consoledelay=msec	Use the given number of milliseconds as the delay
+> 			interval instead of the default
 
-Make sense.
+This is all pretty nasty, isn't it?
 
-Here is the trimmed version. I think the dprink could be retained
-for debugging issues, if any.
+Let's step back for a bit from any implementation and ask "what is the
+ideal behaviour"?  I think it's one of
 
-Signed-off-by: Suresh Jayaraman <sjayaraman@suse.de>
----
- fs/nfs/file.c |   17 +++++++++++++++++
- 1 files changed, 17 insertions(+), 0 deletions(-)
+a) we permit init_post()'s open() to succeed.  Console output is
+   buffered by the kernel (could be in the printk log_buf).  When the
+   initial console is eventually registered, we flush all the queued
+   characters into it.
 
-diff --git a/fs/nfs/file.c b/fs/nfs/file.c
-index 5a97bcf..6dfe7df 100644
---- a/fs/nfs/file.c
-+++ b/fs/nfs/file.c
-@@ -48,6 +48,9 @@ static ssize_t nfs_file_splice_read(struct file *filp, loff_t *ppos,
- 					size_t count, unsigned int flags);
- static ssize_t nfs_file_read(struct kiocb *, const struct iovec *iov,
- 				unsigned long nr_segs, loff_t pos);
-+static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
-+					struct file *filp, loff_t *ppos,
-+					size_t count, unsigned int flags);
- static ssize_t nfs_file_write(struct kiocb *, const struct iovec *iov,
- 				unsigned long nr_segs, loff_t pos);
- static int  nfs_file_flush(struct file *, fl_owner_t id);
-@@ -73,6 +76,7 @@ const struct file_operations nfs_file_operations = {
- 	.lock		= nfs_lock,
- 	.flock		= nfs_flock,
- 	.splice_read	= nfs_file_splice_read,
-+	.splice_write	= nfs_file_splice_write,
- 	.check_flags	= nfs_check_flags,
- 	.setlease	= nfs_setlease,
- };
-@@ -587,6 +591,19 @@ out_swapfile:
- 	goto out;
- }
- 
-+static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
-+				     struct file *filp, loff_t *ppos,
-+				     size_t count, unsigned int flags)
-+{
-+	struct dentry *dentry = filp->f_path.dentry;
-+
-+	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
-+		dentry->d_parent->d_name.name, dentry->d_name.name,
-+		(unsigned long) count, (unsigned long long) *ppos);
-+
-+	return generic_file_splice_write(pipe, filp, ppos, count, flags);
-+}
-+
- static int do_getlk(struct file *filp, int cmd, struct file_lock *fl)
- {
- 	struct inode *inode = filp->f_mapping->host;
+b) we block in init_post(), waiting for the initial console to
+   become available.
+
+I think b) is better.  Simpler, safer, less likely for information loss
+if the kernel were to crash in that delay window.
+
+Am I right?  Did I miss any options?
+
+If we want b) then how to do it?
+
+One possibility: the initcalls have been completed when init_post() is
+called.  How about: if one of those initcalls will be asynchronously
+registering a console, it should inform the console layer about this. 
+It should call the new i_will_be_adding_a_console_soon() function
+within its initcall.  The console subsystem will remember this, and we
+can cause init_post() to block until that registration has occurred.
+
+We'll need to be able to handle errors, and we'll need to be able to
+handle the case where the initcall function isn't sure whether or not
+it will be registering a console.  So there will also need to be an
+oops_im_not_adding_a_console_after_all() function, which will withdraw
+the effects of i_will_be_adding_a_console_soon().
+
+Which means that i_will_be_adding_a_console_soon() will need to return
+a handle for the oops_im_not_adding_a_console_after_all() caller to
+pass.
+
+If init_post() is currently blocked awaiting the arrival of the
+console, oops_im_not_adding_a_console_after_all() will unblock
+init_post() if there are no more potential console registrations
+pending, and inti_post()'s attempt to open a console will fail.
+
+
+Or something like that?
