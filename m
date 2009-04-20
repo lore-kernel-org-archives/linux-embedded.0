@@ -1,35 +1,92 @@
-From: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+From: David VomLehn <dvomlehn@cisco.com>
 Subject: Re: [Patch] Wait for console to become available, ver 3
-Date: Mon, 20 Apr 2009 15:53:58 -0700
-Message-ID: <20090420225358.GC28697@kroah.com>
-References: <20090420143010.697c7380.akpm@linux-foundation.org> <Pine.LNX.4.44L0.0904201744410.6832-100000@iolanthe.rowland.org> <20090420151400.11afd62a.akpm@linux-foundation.org> <20090420223500.GB11068@cuplxvomd02.corp.sa.net>
+Date: Mon, 20 Apr 2009 16:23:27 -0700
+Message-ID: <20090420232327.GA25424@cuplxvomd02.corp.sa.net>
+References: <20090420143010.697c7380.akpm@linux-foundation.org> <Pine.LNX.4.44L0.0904201744410.6832-100000@iolanthe.rowland.org> <20090420151400.11afd62a.akpm@linux-foundation.org> <20090420223500.GB11068@cuplxvomd02.corp.sa.net> <20090420155033.a89ad4a0.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20090420223500.GB11068-CFZJ1or75eBPWxJt6d6B6bQa8qPdvLwY@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20090420155033.a89ad4a0.akpm@linux-foundation.org>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=3228; t=1240269808; x=1241133808;
+	c=relaxed/simple; s=sjdkim4002;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=dvomlehn@cisco.com;
+	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	|Subject:=20Re=3A=20[Patch]=20Wait=20for=20console=20to=20b
+	ecome=20available,=20ver=203
+	|Sender:=20;
+	bh=VeKFbsTheaH32enTJcZoQdnYbELh4lRY3aCvc2Z34MU=;
+	b=C6Xue0aYEpigW546T2musxe6rtEBBiQ5cCV1AsMsR43ou3fUTS6ydwrMOc
+	BHlXEW4ddPGwJ3JTPEIEqs7NDSsEMdmH0IDgrNy9h2qfUYlB9cbVgEzfdIef
+	sDB/NaHCRC;
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
-Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: stern@rowland.harvard.edu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-usb@vger.kernel.org
 
-On Mon, Apr 20, 2009 at 03:35:00PM -0700, David VomLehn wrote:
-> With USB, you just can't *ever* get it right. There is no limit on how
-> long a device has to tell you its there. I wish this weren't the case,
-> but our good friends in the USB world tell us that we have been lucky
-> to have had USB consoles work as long as they have.
+On Mon, Apr 20, 2009 at 03:50:33PM -0700, Andrew Morton wrote:
+> On Mon, 20 Apr 2009 15:35:00 -0700
+> David VomLehn <dvomlehn@cisco.com> wrote:
+> 
+> > On Mon, Apr 20, 2009 at 03:14:00PM -0700, Andrew Morton wrote:
+> > > On Mon, 20 Apr 2009 17:51:16 -0400 (EDT)
+> > > Alan Stern <stern@rowland.harvard.edu> wrote:
+> > ...
+> > > > What if a subsystem simply doesn't know in advance whether or not it's 
+> > > > going to register a console?  Or doesn't know when it has finished 
+> > > > probing all devices (since a new device could be plugged in at any 
+> > > > time)?
+> > > 
+> > > Fix it.  It's trivial to make a sub-driver call back into a higher
+> > > layer to tell it that it registered a console.  Or just do the
+> > > i_will_be_adding_a_console_soon()/oops_im_not_adding_a_console_after_all()
+> > > calls from the layer which _does_ know.
+> > 
+> > In the case of the console, we already have register_console(), which is
+> > what I'm using. I think your proposal will require adding code all over
+> > the place. And buses such as USB simply have no way of knowing whether they
+> > are done enumerating devices. A new device could take hours to come on line.
+> 
+> Add a timeout parameter to i_will_be_adding_a_console_soon().  (This
+> means that the how-long-to-wait-for policy is probably ahrd-coded into
+> the kernel which might be a problem).
 
-Lucky?  You all are _more_ than lucky.  USB consoles was a bad hack
-written on a drunken dare.  I'm still constantly amazed that the thing
-even works at all, let alone the fact that people are actually using it :)
+Yes, it breaks one problem into a host of smaller problems.
+> 
+> > > Yes, a boot parameter is "simple" to inplement.  But it's ghastly from
+> > > a usability POV.  Especially if you care about boot times.  For how
+> > > long do you delay?  The user has to experiment with different delays
+> > > until he finds the magic number.  Then he adds 10% and waits for the
+> > > inevitable failure reports to come in.
+> > > 
+> > > It's much better to just get it right, even if that makes it more
+> > > "complex".
+> > 
+> > With USB, you just can't *ever* get it right. There is no limit on how
+> > long a device has to tell you its there. I wish this weren't the case,
+> > but our good friends in the USB world tell us that we have been lucky
+> > to have had USB consoles work as long as they have.
+> 
+> Sigh, OK, I appreciate the problem better.  But the proposed "solution"
+> is really quite fragile.  I expect that it will only prove usable in
+> highly controlled hardware setups.
+> 
+> Is my option a) any use?
 
-The things I agree to over beers, you would think I would learn...
+I thought about option a). The problem is, given that it might take a very
+long time for the console device to appear, you either have to buffer an
+arbitrarily large amount of output or simply drop data on the floor. Dropping
+log buffer output from printk is one issue, but what's more scary is that
+you'll eventually lose data from innocent programs that you start running
+from init.
 
-thanks,
-
-greg k-h
+I just don't see any great solutions here; what I've offered is one pragmatic
+approach to coming to grips with the Great Unknowns of USB. As Greg KH says,
+we're lucky it worked at all. My USB console broke a few months ago and my
+primary focus has been to get things back to where, if we are as lucky as
+we used to be, things will be no broken than they were. Hey, I'm an engineer,
+not a miracle worker!
 --
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+David VomLehn
