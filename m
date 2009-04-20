@@ -1,57 +1,144 @@
-From: David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] Wait for console to become available, v2
-Date: Sun, 19 Apr 2009 16:17:11 -0700
-Message-ID: <49EBB0F7.3050606@cisco.com>
-References: <20090416190837.GA26734@cuplxvomd02.corp.sa.net> <874owlqcce.fsf@basil.nowhere.org> <49EB5008.1090000@cisco.com> <20090419163923.GS14687@one.firstfloor.org>
+From: Suresh Jayaraman <sjayaraman@suse.de>
+Subject: Re: [ltt-dev] [PATCH] nfs: add support for splice writes
+Date: Mon, 20 Apr 2009 11:09:15 +0530
+Message-ID: <49EC0A83.8060802@suse.de>
+References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal>	 <49D45E42.3050502@suse.de> <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20090419163923.GS14687-qrUzlfsMFqo/4alezvVtWx2eb7JE58TQ@public.gmane.org>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1208; t=1240183037; x=1241047037;
-	c=relaxed/simple; s=sjdkim1004;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org;
-	z=From:=20David=20VomLehn=20<dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
-	|Subject:=20Re=3A=20[PATCH]=20Wait=20for=20console=20to=20b
-	ecome=20available,=20v2
-	|Sender:=20;
-	bh=LKgucMAKZNb/KjIX6jL3H/39joAa061RHFRgL4+X9T0=;
-	b=hMBVZhwpmKJq1oJnGls+k29c56z11w1IluS4aTozLcu+xZQT6EYSrJhPuY
-	FzRg3dUpc1jJNheOvSzXY9olydqhvadtQsHLud+K1b+lKPhaxcYQiYHg2JbS
-	LT/4ziPZbb9dw7ciW01r0LDQCxmwNgJeG+pVypc8r78q2AYhN7S0s=;
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Andi Kleen <andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org>
-Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux Embedded Mailing List <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Masahiro Tamori <masahiro.tamori@gmail.com>
+Cc: Mathieu Desnoyers <compudj@krystal.dyndns.org>, linux-nfs@vger.kernel.org, ltt-dev@lists.casi.polymtl.ca, Trond.Myklebust@netapp.com, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
 
-Andi Kleen wrote:
-> On Sun, Apr 19, 2009 at 09:23:36AM -0700, David VomLehn wrote:
->> Andi Kleen wrote:
->>> VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org> writes:
-...
->>> Also a setting to panic in this case might be useful, normally a system
->>> without console is not very useful and needs to be rebooted anyways.
->> Umm, those of us in the embedded space have the, perhaps misguided, 
->> notion that our systems are quite useful without consoles...
+Hi Trond,
+
+Do you think this patch is OK? Can this be considered for merging?
+
+Thanks,
+
+Masahiro Tamori wrote:
+> Hello Suresh and Mathieu,
 > 
-> That seems more like a special case that shouldn't be default?
+> 2009/4/2 Suresh Jayaraman <sjayaraman@suse.de>:
+>> Mathieu Desnoyers wrote:
+>>> * Suresh Jayaraman (sjayaraman@suse.de) wrote:
+>>>> This patch attempts to add splice writes support. In essence, it just
+>>>> calls generic_file_splice_write() after doing a little sanity check.
+>>>> This would allow LTTng users that are using NFS to store trace data.
+>>>> There could be more applications that could be benefitted too.
+>>>>
+>>>> I have tested this using the Jens' test program and have found no
+>>>> real issues. The test program is inlined below:
+>>>>
+>>> There is just a small checkpatch nit that I'll fix directly in place in
+>>> the LTTng tree.
+>>>
+>>> WARNING: %Ld/%Lu are not-standard C, use %lld/%llu
+>>> #93: FILE: fs/nfs/file.c:564:
+>>> +   dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
+>>>
+>>> total: 0 errors, 1 warnings, 42 lines checked
+>>>
+>> Yes, I noticed it. There are quite a few places in nfs code where we
+>> happened to use that (that doesn't imply that it shouldn't be fixed), so
+>> I thought it's OK.
+>>
+>>> That's great ! I'll pull it in the LTTng tree so my users can try it.
+>>> They currently cannot write LTTng traces to NFS mounts anyway.
+>> Yes, please report the test results. Would appreciate it very much.
+>>
+>>
+>> Thanks,
+> 
+> Thank you for creating a patch !!
+> 
+> I tested it, and it works fine.
+> 
+> My environment is following,
+> LTTV 0.12.10
+> LTTng 0.100
+> LTT Control 0.65
+> Kernles 2.6.29
+> 
+> LTTng version is old now, but the test is passed on ARM11 target.
+> 
+> Furthermore, I run the splice test and the test is passed too.
+> The test code is copied from
+> http://kzk9.net/blog/2007/05/splice2.html
+> (Japanese page)
+> 
+> Thanks all people who commented this issue.
+> 
+> Best regards,
+> Masahiro Tamori
+> 
+>>>> diff --git a/fs/nfs/file.c b/fs/nfs/file.c
+>>>> index 90f292b..13d6a00 100644
+>>>> --- a/fs/nfs/file.c
+>>>> +++ b/fs/nfs/file.c
+>>>> @@ -47,6 +47,9 @@ static ssize_t nfs_file_splice_read(struct file *filp, loff_t *ppos,
+>>>>                   size_t count, unsigned int flags);
+>>>> static ssize_t nfs_file_read(struct kiocb *, const struct iovec *iov,
+>>>>               unsigned long nr_segs, loff_t pos);
+>>>> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
+>>>> +                  struct file *filp, loff_t *ppos,
+>>>> +                  size_t count, unsigned int flags);
+>>>> static ssize_t nfs_file_write(struct kiocb *, const struct iovec *iov,
+>>>>               unsigned long nr_segs, loff_t pos);
+>>>> static int nfs_file_flush(struct file *, fl_owner_t id);
+>>>> @@ -76,6 +79,7 @@ const struct file_operations nfs_file_operations = {
+>>>>   .lock      = nfs_lock,
+>>>>   .flock     = nfs_flock,
+>>>>   .splice_read  = nfs_file_splice_read,
+>>>> +  .splice_write  = nfs_file_splice_write,
+>>>>   .check_flags  = nfs_check_flags,
+>>>>   .setlease    = nfs_setlease,
+>>>> };
+>>>> @@ -550,6 +554,26 @@ out_swapfile:
+>>>>   goto out;
+>>>> }
+>>>>
+>>>> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
+>>>> +                 struct file *filp, loff_t *ppos,
+>>>> +                 size_t count, unsigned int flags)
+>>>> +{
+>>>> +  struct dentry *dentry = filp->f_path.dentry;
+>>>> +  struct inode *inode = dentry->d_inode;
+>>>> +
+>>>> +  dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
+>>>> +      dentry->d_parent->d_name.name, dentry->d_name.name,
+>>>> +      (unsigned long) count, (unsigned long long) *ppos);
+>>>> +
+>>>> +  if (IS_SWAPFILE(inode)) {
+>>>> +      printk(KERN_INFO "NFS: attempt to write to active swap"
+>>>> +          "file!\n");
+>>>> +      return -EBUSY;
+>>>> +  }
+>>>> +
+>>>> +  return generic_file_splice_write(pipe, filp, ppos, count, flags);
+>>>> +}
+>>>> +
+>>>> static int do_getlk(struct file *filp, int cmd, struct file_lock *fl)
+>>>> {
+>>>>   struct inode *inode = filp->f_mapping->host;
+>>>>
+>>
+>> --
+>> Suresh Jayaraman
+>>
+>> _______________________________________________
+>> ltt-dev mailing list
+>> ltt-dev@lists.casi.polymtl.ca
+>> http://lists.casi.polymtl.ca/cgi-bin/mailman/listinfo/ltt-dev
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I have to disagree. Panicing because you can't open /dev/console is 
-likely to mean that you get no output at all and so no chance to see a 
-message explaining why the open failed. If the open failure is all that 
-happened, the rest of the system may very well come up normally. You 
-would then be able to look at the kernel log and diagnose the issue.
 
-In any case, the purpose of this patch is fix USB consoles to work as 
-they did before parallelized startup. This involves addressing a race 
-condition that, theoretically, always existed but which previously 
-hadn't been a problem. Changing the behavior when init_post() can't open 
-/dev/console seems out of scope.
-
-> -Andi
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Suresh Jayaraman
