@@ -1,36 +1,87 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [ltt-dev] [PATCH] nfs: add support for splice writes
-Date: Tue, 21 Apr 2009 10:48:10 -0400
-Message-ID: <20090421144810.GA7036@infradead.org>
-References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal> <49D45E42.3050502@suse.de> <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com> <49EC0A83.8060802@suse.de> <1240230224.8073.6.camel@heimdal.trondhjem.org> <49EC6CB3.8080800@suse.de> <1240237274.13636.9.camel@heimdal.trondhjem.org> <49EC990B.1030007@suse.de>
+From: David VomLehn <dvomlehn@cisco.com>
+Subject: Re: Wait for console to become available, v3.2
+Date: Tue, 21 Apr 2009 09:42:23 -0700
+Message-ID: <20090421164223.GA8251@cuplxvomd02.corp.sa.net>
+References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net> <20090421064346.GB8020@elte.hu> <20090421063549.3b71881d@infradead.org> <20090421135034.GA30114@elte.hu> <20090421140533.GA6375@shareable.org> <20090421142627.GA18129@elte.hu>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757912AbZDUQo6@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <49EC990B.1030007@suse.de>
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <20090421142627.GA18129@elte.hu>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=2908; t=1240332147; x=1241196147;
+	c=relaxed/simple; s=sjdkim3002;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=dvomlehn@cisco.com;
+	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	|Subject:=20Re=3A=20Wait=20for=20console=20to=20become=20av
+	ailable,=20v3.2
+	|Sender:=20;
+	bh=6Y1NnGy+h/nSawj09dSMkl90nHCIMIYet/kkqHTivuY=;
+	b=Ox3krWTVPZgk1mViYPtEV+7PgiusgIYkxydom2jqHPvBlWHkdMYqCgvQKP
+	hhjpSg3cQCnnPf/07NI4uFVYcApgZav1LVxBelxJ+5PmrQYNjrIu4sfuCCLc
+	f19ovmDSCS;
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Suresh Jayaraman <sjayaraman@suse.de>
-Cc: Trond Myklebust <trond.myklebust@fys.uio.no>, Masahiro Tamori <masahiro.tamori@gmail.com>, Mathieu Desnoyers <compudj@krystal.dyndns.org>, linux-nfs@vger.kernel.org, ltt-dev@lists.casi.polymtl.ca, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Peter Zijlstra <a.p.zijlstra@chello.nl>
+To: Ingo Molnar <mingo@elte.hu>
+Cc: Jamie Lokier <jamie@shareable.org>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Mon, Apr 20, 2009 at 09:17:23PM +0530, Suresh Jayaraman wrote:
-> +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
-> +				     struct file *filp, loff_t *ppos,
-> +				     size_t count, unsigned int flags)
-> +{
-> +	struct dentry *dentry = filp->f_path.dentry;
-> +
-> +	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
-> +		dentry->d_parent->d_name.name, dentry->d_name.name,
-> +		(unsigned long) count, (unsigned long long) *ppos);
-> +
-> +	return generic_file_splice_write(pipe, filp, ppos, count, flags);
-> +}
-> +
+On Tue, Apr 21, 2009 at 04:26:27PM +0200, Ingo Molnar wrote:
+> 
+> * Jamie Lokier <jamie@shareable.org> wrote:
+> 
+> > Ingo Molnar wrote:
+...
+> > > What i'm saying is: instead of "wait 2000 msecs, maybe it works 
+> > > out" hack, there should be a proper sleep+event based approach 
+> > > to the same. With perhaps a _timeout_ for the "no console 
+> > > arrived" negative case as well. (which timeout can be set to 
+> > > zero in the "I _know_ there's no console around".)
+> > 
+> > Isn't the proposed code doing exactly that?  It sleeps waiting for 
+> > a console, with a timeout of X msecs.  If a console arrives before 
+> > that, doesn't it wake immediately?
+> 
+> Yes - except that the timeout is aspecific. I.e. we'll time out even 
+> if the delay happens not due to a device arriving too late (or not 
+> arriving at all), but due to some earlier init step taking an 
+> unexpectedly long time.
 
-You need all calls from nfs_file_write, too:
+I agree, but this is also a pretty good description of why things actually
+worked before--it just so happened that work intervening between starting
+USB enumeration and the opening of /dev/console was long enough that
+USB serial devices were initialized. So, no, it's not good. But it's a
+pretty close equivalent to previous behavior.
 
- - most importantly the nfs_revalidate_file_size for O_APPEND
- - the nfs_do_fsync for sync writes
- - probably the stats increment
+That being said, I'm also thinking that the timeout interval should start when
+bus initialization is started. The point between the start of USB
+initialization and when a particular device is initialized should be, as
+a practical matter and for a particular hardware configuration, more or
+less constant, and so more predictable for users.
+
+Basing the wait interval from the start of bus initialization has the
+additional advantage that we can also implement similar timers, such as one
+for network devices, off the same base time. Since the ip= kernel parameter
+is similarly broken, I've been looking at what it would take to get it
+working again, too. Or at least, with deference to the constraints of USB and
+acknowledging the importance of luck, working as well as it used to.
+
+> Also, if we end up doing this - the patch, as proposed right now, 
+> appears to add a default 1000 msecs sleep to every __tty_open() 
+> call:
+> 
+> +config PRINTK_CONSOLE_WAIT
+> +       int "Default number of milliseconds to wait for console device"
+> +       default 1000
+> 
+> Does this only delay init during a console-less bootup - or are 
+> there other later apps that might trigger the delay?
+
+Sleeping and polling for an event, rather than using a suitable notification
+primitive, causes me existential anguish. Seriously, I *hate* code like that
+and systems that make you do such brutish things. Linux is not one of those
+throwbacks, so as soon as a console shows up, we continue. Thus, we only wait
+the whole interval if the console device is very slow to initialize or if
+there is no console device, at all.
+--
+David VomLehn
