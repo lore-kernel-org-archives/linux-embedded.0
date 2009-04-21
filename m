@@ -1,60 +1,63 @@
-From: David VomLehn <dvomlehn@cisco.com>
-Subject: Re: Wait for console to become available, v3.2
-Date: Tue, 21 Apr 2009 10:29:29 -0700
-Message-ID: <20090421172929.GC8251@cuplxvomd02.corp.sa.net>
-References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net> <20090421064346.GB8020@elte.hu> <200904210013.48551.david-b@pacbell.net> <1240333871.3632.70.camel@macbook.infradead.org>
+From: Trond Myklebust <trond.myklebust-41N18TsMXrtuMpJDpNschA@public.gmane.org>
+Subject: Re: [ltt-dev] [PATCH] nfs: add support for splice writes
+Date: Tue, 21 Apr 2009 13:35:02 -0400
+Message-ID: <1240335302.5390.20.camel@heimdal.trondhjem.org>
+References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal>
+	 <49D45E42.3050502@suse.de>
+	 <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com>
+	 <49EC0A83.8060802@suse.de> <1240230224.8073.6.camel@heimdal.trondhjem.org>
+	 <49EC6CB3.8080800@suse.de> <1240237274.13636.9.camel@heimdal.trondhjem.org>
+	 <49EC990B.1030007@suse.de>  <20090421144810.GA7036@infradead.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1240333871.3632.70.camel@macbook.infradead.org>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1476; t=1240334974; x=1241198974;
-	c=relaxed/simple; s=sjdkim5002;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Re=3A=20Wait=20for=20console=20to=20become=20av
-	ailable,=20v3.2
-	|Sender:=20;
-	bh=xhpyOqJ5uteZ18r99eTKeQRvVys6IGT0LHTWAC+3x4s=;
-	b=I+PzkpApzeX0sUC17bmBXhiWbCjCq5hXNjHfEBISOtbS+lf/B0BgSigZP/
-	SBimfQLevSh1PVDg62B8fuYI8ZcGlse+pKj7L3FJgbBHeN0NRxHjjPjIF1Zl
-	yX9yf4cbDh;
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20090421144810.GA7036-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: David Brownell <david-b@pacbell.net>, alan@lxorguk.ukuu.org.uk, Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+To: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Suresh Jayaraman <sjayaraman-l3A5Bk7waGM@public.gmane.org>, Masahiro Tamori <masahiro.tamori-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mathieu Desnoyers <compudj-vdFpqfd5riKZ9vWoFJJngh2eb7JE58TQ@public.gmane.org>, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ltt-dev-33AaDErTWvBVxDZ2/Zk0YoryAYyacSEB@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>
 
-On Tue, Apr 21, 2009 at 06:11:11PM +0100, David Woodhouse wrote:
-...
-> The kernel output is going to be spewed when a console registers with
-> CON_PRINTBUFFER anyway, and if we printk a warning about userspace
-> console output being lost, that ought to be good enough to notify the
-> user that something may have been lost. For bonus points, we could even
-> make that 'dummy' tty driver buffer a limited amount of userspace
-> output, maybe.
+On Tue, 2009-04-21 at 10:48 -0400, Christoph Hellwig wrote:
+> On Mon, Apr 20, 2009 at 09:17:23PM +0530, Suresh Jayaraman wrote:
+> > +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
+> > +				     struct file *filp, loff_t *ppos,
+> > +				     size_t count, unsigned int flags)
+> > +{
+> > +	struct dentry *dentry = filp->f_path.dentry;
+> > +
+> > +	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
+> > +		dentry->d_parent->d_name.name, dentry->d_name.name,
+> > +		(unsigned long) count, (unsigned long long) *ppos);
+> > +
+> > +	return generic_file_splice_write(pipe, filp, ppos, count, flags);
+> > +}
+> > +
+> 
+> You need all calls from nfs_file_write, too:
+> 
+>  - most importantly the nfs_revalidate_file_size for O_APPEND
 
-What in the world are users going to do when they see a message about
-output being lost? There is no way to recover the data and no way to
-prevent it in the future. I don't think this is a good approach.
+Isn't O_APPEND illegal for splice_write()? It looks like it is from a
+quick perusal of do_splice_from().
 
-Remember, even though the previous functionality of USB consoles was, in
-theory, less reliable than it appeared, it actually has been working well
-for years. Thus, tossing output will count as a regression for most of the
-world.
+>  - the nfs_do_fsync for sync writes
 
-> If userspace cares, let _it_ wait, by using an ioctl to see what tty
-> device it's _really_ attached to.
+generic_file_splice_write() calls generic_osync_inode(), which should
+ensure sync writes even with NFS.
+The one thing it won't do is propagate NFS write errors back to the
+caller. If we do care about this, then we should certainly test for
+nfs_need_sync_write() and then call nfs_do_fsync() (see
+nfs_file_write()).
 
-I have a notion, perhaps misguided, that userspace *always* cares about
-seeing all the output they have generated.
+>  - probably the stats increment
 
-I have no objection to a userspace solution, in the long run, but such an
-approach represents a significantly different approach to constructing boot
-filesystems and we need a transitional period. In the interim, let's get
-things working as they were.
+We should talk to Chuck about this.
 
-> David Woodhouse                            Open Source Technology Centre
+Cheers
+  Trond
 
-David VomLehn
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
