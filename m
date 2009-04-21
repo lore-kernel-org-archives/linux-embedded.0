@@ -1,63 +1,51 @@
-From: Trond Myklebust <trond.myklebust-41N18TsMXrtuMpJDpNschA@public.gmane.org>
-Subject: Re: [ltt-dev] [PATCH] nfs: add support for splice writes
-Date: Tue, 21 Apr 2009 13:35:02 -0400
-Message-ID: <1240335302.5390.20.camel@heimdal.trondhjem.org>
-References: <49D45974.2060202@suse.de> <20090402063235.GB24846@Krystal>
-	 <49D45E42.3050502@suse.de>
-	 <91e0b5050904020542l6b38d7a6hab6d7ef8b4593425@mail.gmail.com>
-	 <49EC0A83.8060802@suse.de> <1240230224.8073.6.camel@heimdal.trondhjem.org>
-	 <49EC6CB3.8080800@suse.de> <1240237274.13636.9.camel@heimdal.trondhjem.org>
-	 <49EC990B.1030007@suse.de>  <20090421144810.GA7036@infradead.org>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: Wait for console to become available, v3.2
+Date: Tue, 21 Apr 2009 10:31:48 -0700 (PDT)
+Message-ID: <alpine.LFD.2.00.0904211016190.2199@localhost.localdomain>
+References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net>  <20090421064346.GB8020@elte.hu>  <200904210013.48551.david-b@pacbell.net> <1240333871.3632.70.camel@macbook.infradead.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20090421144810.GA7036-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <1240333871.3632.70.camel@macbook.infradead.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Suresh Jayaraman <sjayaraman-l3A5Bk7waGM@public.gmane.org>, Masahiro Tamori <masahiro.tamori-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mathieu Desnoyers <compudj-vdFpqfd5riKZ9vWoFJJngh2eb7JE58TQ@public.gmane.org>, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ltt-dev-33AaDErTWvBVxDZ2/Zk0YoryAYyacSEB@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: David Brownell <david-b@pacbell.net>, alan@lxorguk.ukuu.org.uk, Ingo Molnar <mingo@elte.hu>, David VomLehn <dvomlehn@cisco.com>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Tue, 2009-04-21 at 10:48 -0400, Christoph Hellwig wrote:
-> On Mon, Apr 20, 2009 at 09:17:23PM +0530, Suresh Jayaraman wrote:
-> > +static ssize_t nfs_file_splice_write(struct pipe_inode_info *pipe,
-> > +				     struct file *filp, loff_t *ppos,
-> > +				     size_t count, unsigned int flags)
-> > +{
-> > +	struct dentry *dentry = filp->f_path.dentry;
-> > +
-> > +	dprintk("NFS splice_write(%s/%s, %lu@%Lu)\n",
-> > +		dentry->d_parent->d_name.name, dentry->d_name.name,
-> > +		(unsigned long) count, (unsigned long long) *ppos);
-> > +
-> > +	return generic_file_splice_write(pipe, filp, ppos, count, flags);
-> > +}
-> > +
+
+
+On Tue, 21 Apr 2009, David Woodhouse wrote:
 > 
-> You need all calls from nfs_file_write, too:
-> 
->  - most importantly the nfs_revalidate_file_size for O_APPEND
+> We can provide un-hooked-up /dev/console though. Rather than just
+> failing to open it, why can't we make __tty_open() give you a dummy tty
+> driver which is basically equivalent to /dev/null? And then 'replace' it
+> with the real console driver if/when that later gets registered? The
+> latter will be a high-caffeine job, but surely not impossible?
 
-Isn't O_APPEND illegal for splice_write()? It looks like it is from a
-quick perusal of do_splice_from().
+This sounds like a good option. 
 
->  - the nfs_do_fsync for sync writes
+Right now we look through all the console_drivers at open time in that
 
-generic_file_splice_write() calls generic_osync_inode(), which should
-ensure sync writes even with NFS.
-The one thing it won't do is propagate NFS write errors back to the
-caller. If we do care about this, then we should certainly test for
-nfs_need_sync_write() and then call nfs_do_fsync() (see
-nfs_file_write()).
+	struct tty_driver *console_device(int *index)
 
->  - probably the stats increment
+thing, but it should be possible to just do something like
 
-We should talk to Chuck about this.
+	static struct tty_driver console_driver;
 
-Cheers
-  Trond
+and then just make "console_device()" always return _that_ tty driver 
+instead. Then, we could make that console_device tty driver just at 
+run-time spread the IO to the proper device(s), rather than fix the one 
+particular device at "open()" time.
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[ Actually, looking closer we should not use that particular name: we 
+  already have something called a "console_driver" which is really the 
+  "current VT" driver.
+
+  So we should call it 'system_console_device' or something, but you 
+  get the idea. ]
+
+Anybody want to try it? Just make it ignore any IO if there are no 
+registered consoles. The patch shouldn't even be all that big, I suspect.
+
+		Linus
