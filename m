@@ -1,51 +1,49 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 Subject: Re: Wait for console to become available, v3.2
-Date: Tue, 21 Apr 2009 10:31:48 -0700 (PDT)
-Message-ID: <alpine.LFD.2.00.0904211016190.2199@localhost.localdomain>
-References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net>  <20090421064346.GB8020@elte.hu>  <200904210013.48551.david-b@pacbell.net> <1240333871.3632.70.camel@macbook.infradead.org>
+Date: Tue, 21 Apr 2009 18:41:05 +0100
+Message-ID: <1240335665.3632.71.camel@macbook.infradead.org>
+References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net>
+	 <20090421064346.GB8020@elte.hu> <200904210013.48551.david-b@pacbell.net>
+	 <1240333871.3632.70.camel@macbook.infradead.org>
+	 <20090421172929.GC8251@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1240333871.3632.70.camel@macbook.infradead.org>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: David Brownell <david-b@pacbell.net>, alan@lxorguk.ukuu.org.uk, Ingo Molnar <mingo@elte.hu>, David VomLehn <dvomlehn@cisco.com>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20090421172929.GC8251-CFZJ1or75eBPWxJt6d6B6bQa8qPdvLwY@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
+Cc: David Brownell <david-b-yBeKhBN/0LDR7s880joybQ@public.gmane.org>, alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, Arjan van de Ven <arjan-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Embedded Mailing List <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 
-
-
-On Tue, 21 Apr 2009, David Woodhouse wrote:
+On Tue, 2009-04-21 at 10:29 -0700, David VomLehn wrote:
+> On Tue, Apr 21, 2009 at 06:11:11PM +0100, David Woodhouse wrote:
+> ...
+> > The kernel output is going to be spewed when a console registers with
+> > CON_PRINTBUFFER anyway, and if we printk a warning about userspace
+> > console output being lost, that ought to be good enough to notify the
+> > user that something may have been lost. For bonus points, we could even
+> > make that 'dummy' tty driver buffer a limited amount of userspace
+> > output, maybe.
 > 
-> We can provide un-hooked-up /dev/console though. Rather than just
-> failing to open it, why can't we make __tty_open() give you a dummy tty
-> driver which is basically equivalent to /dev/null? And then 'replace' it
-> with the real console driver if/when that later gets registered? The
-> latter will be a high-caffeine job, but surely not impossible?
+> What in the world are users going to do when they see a message about
+> output being lost? There is no way to recover the data and no way to
+> prevent it in the future. I don't think this is a good approach.
+> 
+> Remember, even though the previous functionality of USB consoles was, in
+> theory, less reliable than it appeared, it actually has been working well
+> for years. Thus, tossing output will count as a regression for most of the
+> world.
 
-This sounds like a good option. 
+So implement a small amount of buffering, as I suggested, and it should
+be sufficient to cover the cases that were only working before by blind
+luck anyway.
 
-Right now we look through all the console_drivers at open time in that
+-- 
+David Woodhouse                            Open Source Technology Centre
+David.Woodhouse-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org                              Intel Corporation
 
-	struct tty_driver *console_device(int *index)
-
-thing, but it should be possible to just do something like
-
-	static struct tty_driver console_driver;
-
-and then just make "console_device()" always return _that_ tty driver 
-instead. Then, we could make that console_device tty driver just at 
-run-time spread the IO to the proper device(s), rather than fix the one 
-particular device at "open()" time.
-
-[ Actually, looking closer we should not use that particular name: we 
-  already have something called a "console_driver" which is really the 
-  "current VT" driver.
-
-  So we should call it 'system_console_device' or something, but you 
-  get the idea. ]
-
-Anybody want to try it? Just make it ignore any IO if there are no 
-registered consoles. The patch shouldn't even be all that big, I suspect.
-
-		Linus
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
