@@ -1,87 +1,52 @@
-From: David VomLehn <dvomlehn@cisco.com>
+From: David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
 Subject: Re: Wait for console to become available, v3.2
-Date: Tue, 21 Apr 2009 09:42:23 -0700
-Message-ID: <20090421164223.GA8251@cuplxvomd02.corp.sa.net>
-References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net> <20090421064346.GB8020@elte.hu> <20090421063549.3b71881d@infradead.org> <20090421135034.GA30114@elte.hu> <20090421140533.GA6375@shareable.org> <20090421142627.GA18129@elte.hu>
+Date: Tue, 21 Apr 2009 09:52:14 -0700
+Message-ID: <20090421165214.GB8251@cuplxvomd02.corp.sa.net>
+References: <20090421140533.GA6375@shareable.org> <Pine.LNX.4.44L0.0904211026080.2981-100000@iolanthe.rowland.org>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757912AbZDUQo6@vger.kernel.org>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20090421142627.GA18129@elte.hu>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=2908; t=1240332147; x=1241196147;
-	c=relaxed/simple; s=sjdkim3002;
+In-Reply-To: <Pine.LNX.4.44L0.0904211026080.2981-100000-IYeN2dnnYyZXsRXLowluHWD2FQJk+8+b@public.gmane.org>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=985; t=1240332747; x=1241196747;
+	c=relaxed/simple; s=sjdkim2002;
 	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	d=cisco.com; i=dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org;
+	z=From:=20David=20VomLehn=20<dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
 	|Subject:=20Re=3A=20Wait=20for=20console=20to=20become=20av
 	ailable,=20v3.2
 	|Sender:=20;
-	bh=6Y1NnGy+h/nSawj09dSMkl90nHCIMIYet/kkqHTivuY=;
-	b=Ox3krWTVPZgk1mViYPtEV+7PgiusgIYkxydom2jqHPvBlWHkdMYqCgvQKP
-	hhjpSg3cQCnnPf/07NI4uFVYcApgZav1LVxBelxJ+5PmrQYNjrIu4sfuCCLc
-	f19ovmDSCS;
-Sender: linux-kernel-owner@vger.kernel.org
+	bh=uS3sgLZxNp/7Srb3g7XTgX38Rs23Ws6S2MExB+A2ghk=;
+	b=ZZ2XL6+aJqtNDsNvpEcIImiGnwSa/xWXsJVSDKScZGHBbwQ6Dm0oWyHY7p
+	xyrb2vTYvhGuLDWsyB7AxgeerqDHRgZsF2l49mmdu6pNfioTDWQ45LPBtizA
+	iV0VKaWhRm;
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Ingo Molnar <mingo@elte.hu>
-Cc: Jamie Lokier <jamie@shareable.org>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Cc: Jamie Lokier <jamie-yetKDKU6eevNLxjTenLetw@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, Arjan van de Ven <arjan-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Embedded Mailing List <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 
-On Tue, Apr 21, 2009 at 04:26:27PM +0200, Ingo Molnar wrote:
-> 
-> * Jamie Lokier <jamie@shareable.org> wrote:
-> 
-> > Ingo Molnar wrote:
-...
-> > > What i'm saying is: instead of "wait 2000 msecs, maybe it works 
-> > > out" hack, there should be a proper sleep+event based approach 
-> > > to the same. With perhaps a _timeout_ for the "no console 
-> > > arrived" negative case as well. (which timeout can be set to 
-> > > zero in the "I _know_ there's no console around".)
-> > 
-> > Isn't the proposed code doing exactly that?  It sleeps waiting for 
-> > a console, with a timeout of X msecs.  If a console arrives before 
-> > that, doesn't it wake immediately?
-> 
-> Yes - except that the timeout is aspecific. I.e. we'll time out even 
-> if the delay happens not due to a device arriving too late (or not 
-> arriving at all), but due to some earlier init step taking an 
-> unexpectedly long time.
+> If somebody would like to suggest a programming interface (a waitqueue 
+> perhaps?) by which the USB hub driver could send a notification when it 
+> becomes idle, I could implement it.
 
-I agree, but this is also a pretty good description of why things actually
-worked before--it just so happened that work intervening between starting
-USB enumeration and the opening of /dev/console was long enough that
-USB serial devices were initialized. So, no, it's not good. But it's a
-pretty close equivalent to previous behavior.
+I actually started the USB console stuff with exactly this approach, but
+switched to the approach that's out there. A minor drawback, which is
+probably obvious, is that you actually wait for some interval without
+getting anything to do before you think things are idle.  But a bigger
+drawback is that you lose the ability to chose appropriate intervals for
+different classes of devices.
 
-That being said, I'm also thinking that the timeout interval should start when
-bus initialization is started. The point between the start of USB
-initialization and when a particular device is initialized should be, as
-a practical matter and for a particular hardware configuration, more or
-less constant, and so more predictable for users.
+So far, there appear to be three possible USB boot devices: consoles, network
+devices, and boot devices. A system may not have all of these and so may not
+need to wait as long as a system with all of them. One of my goals is to
+preserve as much of the reduction in boot time as possible, even on systems
+that use USB devices that may or may not be plugged in.
 
-Basing the wait interval from the start of bus initialization has the
-additional advantage that we can also implement similar timers, such as one
-for network devices, off the same base time. Since the ip= kernel parameter
-is similarly broken, I've been looking at what it would take to get it
-working again, too. Or at least, with deference to the constraints of USB and
-acknowledging the importance of luck, working as well as it used to.
+> Alan Stern
 
-> Also, if we end up doing this - the patch, as proposed right now, 
-> appears to add a default 1000 msecs sleep to every __tty_open() 
-> call:
-> 
-> +config PRINTK_CONSOLE_WAIT
-> +       int "Default number of milliseconds to wait for console device"
-> +       default 1000
-> 
-> Does this only delay init during a console-less bootup - or are 
-> there other later apps that might trigger the delay?
-
-Sleeping and polling for an event, rather than using a suitable notification
-primitive, causes me existential anguish. Seriously, I *hate* code like that
-and systems that make you do such brutish things. Linux is not one of those
-throwbacks, so as soon as a console shows up, we continue. Thus, we only wait
-the whole interval if the console device is very slow to initialize or if
-there is no console device, at all.
---
 David VomLehn
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
