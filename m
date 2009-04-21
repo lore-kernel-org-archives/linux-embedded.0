@@ -1,74 +1,57 @@
-From: Alan Stern <stern@rowland.harvard.edu>
+From: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
 Subject: Re: Wait for console to become available, v3.2
-Date: Tue, 21 Apr 2009 15:09:52 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.0904211457150.3986-100000@iolanthe.rowland.org>
-References: <20090421165214.GB8251@cuplxvomd02.corp.sa.net>
+Date: Tue, 21 Apr 2009 20:25:01 +0100
+Message-ID: <20090421202501.26a44f9d@lxorguk.ukuu.org.uk>
+References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net>
+	<20090421064346.GB8020@elte.hu>
+	<200904210013.48551.david-b@pacbell.net>
+	<1240333871.3632.70.camel@macbook.infradead.org>
+	<alpine.LFD.2.00.0904211016190.2199@localhost.localdomain>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090421165214.GB8251@cuplxvomd02.corp.sa.net>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: David VomLehn <dvomlehn@cisco.com>
-Cc: Jamie Lokier <jamie@shareable.org>, Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <alpine.LFD.2.00.0904211016190.2199-bi+AKbBUZKY6gyzm1THtWbp2dZbC/Bob@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, David Brownell <david-b-yBeKhBN/0LDR7s880joybQ@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, Arjan van de Ven <arjan-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Embedded Mailing List <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 
-On Tue, 21 Apr 2009, David VomLehn wrote:
-
-> > If somebody would like to suggest a programming interface (a waitqueue 
-> > perhaps?) by which the USB hub driver could send a notification when it 
-> > becomes idle, I could implement it.
+> > failing to open it, why can't we make __tty_open() give you a dummy tty
+> > driver which is basically equivalent to /dev/null? And then 'replace' it
+> > with the real console driver if/when that later gets registered? The
+> > latter will be a high-caffeine job, but surely not impossible?
 > 
-> I actually started the USB console stuff with exactly this approach, but
-> switched to the approach that's out there. A minor drawback, which is
-> probably obvious, is that you actually wait for some interval without
-> getting anything to do before you think things are idle.
+> This sounds like a good option. 
 
-Sorry, I don't understand.  You've got a waitqueue, and you wake up to
-try again every time a console device is registered.  So if the console
-device does exist, you'll find it as quickly as possible.  There's a
-problem only when no console device is ever registered.  In that case
-you want to stop waiting when all the devices present at boot time have
-been probed (as opposed to waiting for the user to plug in a USB serial
-device, for example).
+Don't confuse "/dev/console" and "the console device" in printk terms.
+The two are not the same thing and the latter is subject to stuff like
+redirection.
 
-So then the problem becomes: How do you tell when all the USB devices 
-present at boot time have been probed?  That's exactly what this new 
-interface is supposed to tell you.
+> thing, but it should be possible to just do something like
+> 
+> 	static struct tty_driver console_driver;
 
->  But a bigger
-> drawback is that you lose the ability to chose appropriate intervals for
-> different classes of devices.
+No - a console device can fail to open so you need to try the next one in
+that situation. Some platforms use this feature.
 
-Why do you need to choose any intervals at all?  Just keep waiting
-until you know there's no point waiting any longer.  If you stop 
-waiting before then, you run the risk of missing a device that could 
-have worked.
+> Anybody want to try it? Just make it ignore any IO if there are no 
+> registered consoles. The patch shouldn't even be all that big, I suspect.
 
-> So far, there appear to be three possible USB boot devices: consoles, network
-> devices, and boot devices.
+It will work, but on its own it won't actually fix the problem people
+have, which is wanting to wait for a real console to appear. Extending it
+to sleep (if not O_NDELAY) and loop back through the list when the list
+changes would however do the trick, that or a tty device that buffers
+then spews into the real device when it appears.
 
-Is that last supposed to be "disk drives containing root filesystems"?
+Definitely the right path, and we almost have every tty device in
+existance containing a struct tty_port, at which point it gets even
+cleaner.
 
-> A system may not have all of these and so may not
-> need to wait as long as a system with all of them. One of my goals is to
-> preserve as much of the reduction in boot time as possible, even on systems
-> that use USB devices that may or may not be plugged in.
-
-Let's take console devices as an example.  If one is present then you
-do want to wait until it is detected, instead of booting as quickly as
-possible, right?  Which implies that if one isn't present, you want to 
-wait until you _know_ that it's not present.  Which means waiting all 
-all the devices present during boot have been probed.
-
-This approach should work fine with USB consoles and network devices;
-it's not so easy to implement for USB disk drives.  So let's not worry 
-about them.
-
-Now the only drawback I can see would crop up if some device takes a
-very long time to probe (perhaps because of errors and retries).  If
-there's no other console device, it could slow down the boot procedure
-quite a lot.  But there doesn't appear to be any logical alternative,
-given your goals as stated above.
-
-Alan Stern
+The printk() console needs to buffer up data and replay it but we already
+pretty much do what is needed even for vt consoles because the fb isn't
+ready before the first printk.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
