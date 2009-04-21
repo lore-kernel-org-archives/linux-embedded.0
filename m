@@ -1,65 +1,74 @@
-From: David VomLehn <dvomlehn@cisco.com>
+From: Alan Stern <stern@rowland.harvard.edu>
 Subject: Re: Wait for console to become available, v3.2
-Date: Tue, 21 Apr 2009 10:59:52 -0700
-Message-ID: <20090421175952.GA20146@cuplxvomd02.corp.sa.net>
-References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net> <20090421064346.GB8020@elte.hu> <200904210013.48551.david-b@pacbell.net> <1240333871.3632.70.camel@macbook.infradead.org> <20090421172929.GC8251@cuplxvomd02.corp.sa.net> <alpine.LFD.2.00.0904211036140.2199@localhost.localdomain>
+Date: Tue, 21 Apr 2009 15:09:52 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.0904211457150.3986-100000@iolanthe.rowland.org>
+References: <20090421165214.GB8251@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.2.00.0904211036140.2199@localhost.localdomain>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1915; t=1240336793; x=1241200793;
-	c=relaxed/simple; s=sjdkim1004;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Re=3A=20Wait=20for=20console=20to=20become=20av
-	ailable,=20v3.2
-	|Sender:=20;
-	bh=ge6NLnI5DewNr3mBVOkDjRscMz9OmCDDh/rcowPzi6o=;
-	b=r/gC5oe3ox7tVjBNDvLNrRpDL0HF3KKP8ZDMV92r3j2SK4BtGXssGSZlJj
-	J+pisee7xMxBPiYKMWHcbC2UNXlhoTkHN9giLmBDBuj7fewumUDck9bfmskt
-	lqydtOxXMgAJqgiL9vLs4CV+KgGOFcVYnLEXP6npJjBgQfgqj0dHo=;
+In-Reply-To: <20090421165214.GB8251@cuplxvomd02.corp.sa.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: TEXT/PLAIN; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: David Woodhouse <dwmw2@infradead.org>, David Brownell <david-b@pacbell.net>, alan@lxorguk.ukuu.org.uk, Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+To: David VomLehn <dvomlehn@cisco.com>
+Cc: Jamie Lokier <jamie@shareable.org>, Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
- Tue, Apr 21, 2009 at 10:37:41AM -0700, Linus Torvalds wrote:
+On Tue, 21 Apr 2009, David VomLehn wrote:
+
+> > If somebody would like to suggest a programming interface (a waitqueue 
+> > perhaps?) by which the USB hub driver could send a notification when it 
+> > becomes idle, I could implement it.
 > 
-> 
-> On Tue, 21 Apr 2009, David VomLehn wrote:
-> > 
-> > What in the world are users going to do when they see a message about
-> > output being lost? There is no way to recover the data and no way to
-> > prevent it in the future. I don't think this is a good approach.
-> 
-> Sure there is. The console messages are saved too, so doing 'dmesg' will 
-> get you all the data that was generated before the console went on-line.
-> 
-> We _already_ lose data in that sense (although we could replay it for the 
-> first console connected - maybe we even do, I'm too lazy to check).
+> I actually started the USB console stuff with exactly this approach, but
+> switched to the approach that's out there. A minor drawback, which is
+> probably obvious, is that you actually wait for some interval without
+> getting anything to do before you think things are idle.
 
-There are two different things coming out on the console, kernel log buffer
-messages and userspace output to /dev/console. Kernel log buffer output
-is replayed for each console as it connects. There might be quite a bit of
-it, but it is pretty much the same from boot to boot, so the guy working on
-the kernel, me, can tune the size of log_buf pretty easily. This is not
-the problem.
+Sorry, I don't understand.  You've got a waitqueue, and you wake up to
+try again every time a console device is registered.  So if the console
+device does exist, you'll find it as quickly as possible.  There's a
+problem only when no console device is ever registered.  In that case
+you want to stop waiting when all the devices present at boot time have
+been probed (as opposed to waiting for the user to plug in a USB serial
+device, for example).
 
-The problem is the userspace output to /dev/console. I work in the embedded
-space and my box does not simply throw up a few windows and wait placidly for
-the user to do something. Instead, it immediately starts running a whole bunch
-of software with a whole bunch of startup messages. In short order, I am
-running over 300 threads. I have no control over how much output comes out,
-I have no idea how much kernel memory to allocate for this, and I'm quote sure
-it's enough that I wouldn't want to waste that much space even if I did. No
-matter what, this looks like we'd need a new tunable for the size.
+So then the problem becomes: How do you tell when all the USB devices 
+present at boot time have been probed?  That's exactly what this new 
+interface is supposed to tell you.
 
-And then, what happens if I *never* get a console, because one isn't plugged
-in? This happens a lot in the embedded world. How long am I supposed to keep
-around this big chunk of buffered data? Sounds like I need *another* tunable.
-Yuck.
+>  But a bigger
+> drawback is that you lose the ability to chose appropriate intervals for
+> different classes of devices.
 
-> 			Linus
+Why do you need to choose any intervals at all?  Just keep waiting
+until you know there's no point waiting any longer.  If you stop 
+waiting before then, you run the risk of missing a device that could 
+have worked.
+
+> So far, there appear to be three possible USB boot devices: consoles, network
+> devices, and boot devices.
+
+Is that last supposed to be "disk drives containing root filesystems"?
+
+> A system may not have all of these and so may not
+> need to wait as long as a system with all of them. One of my goals is to
+> preserve as much of the reduction in boot time as possible, even on systems
+> that use USB devices that may or may not be plugged in.
+
+Let's take console devices as an example.  If one is present then you
+do want to wait until it is detected, instead of booting as quickly as
+possible, right?  Which implies that if one isn't present, you want to 
+wait until you _know_ that it's not present.  Which means waiting all 
+all the devices present during boot have been probed.
+
+This approach should work fine with USB consoles and network devices;
+it's not so easy to implement for USB disk drives.  So let's not worry 
+about them.
+
+Now the only drawback I can see would crop up if some device takes a
+very long time to probe (perhaps because of errors and retries).  If
+there's no other console device, it could slow down the boot procedure
+quite a lot.  But there doesn't appear to be any logical alternative,
+given your goals as stated above.
+
+Alan Stern
