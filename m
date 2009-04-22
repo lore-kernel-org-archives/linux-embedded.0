@@ -1,35 +1,32 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+From: Jamie Lokier <jamie-yetKDKU6eevNLxjTenLetw@public.gmane.org>
 Subject: Re: Wait for console to become available, v3.2
-Date: Wed, 22 Apr 2009 10:13:03 +0100
-Message-ID: <20090422101303.406eef99@lxorguk.ukuu.org.uk>
-References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net>
-	<20090421064346.GB8020@elte.hu>
-	<20090421063549.3b71881d@infradead.org>
-	<20090421135034.GA30114@elte.hu>
-	<20090421140533.GA6375@shareable.org>
-	<20090421142627.GA18129@elte.hu>
-	<20090421153745.2d8964c7@lxorguk.ukuu.org.uk>
-	<20090422082216.GA31246@shareable.org>
+Date: Wed, 22 Apr 2009 11:39:53 +0100
+Message-ID: <20090422103953.GB2196@shareable.org>
+References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net> <20090421064346.GB8020@elte.hu> <200904210013.48551.david-b@pacbell.net> <1240333871.3632.70.camel@macbook.infradead.org> <alpine.LFD.2.00.0904211016190.2199@localhost.localdomain> <20090422082547.GB31246@shareable.org> <20090422101109.7beee3ee@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090422082216.GA31246@shareable.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20090422101109.7beee3ee-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Jamie Lokier <jamie@shareable.org>
-Cc: Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, David VomLehn <dvomlehn@cisco.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Content-Transfer-Encoding: 7bit
+To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, David Brownell <david-b-yBeKhBN/0LDR7s880joybQ@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>, Arjan van de Ven <arjan-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Embedded Mailing List <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 
-> Ah, that doesn't work, when you want to use the USB serial console
-> _if_ there's a USB serial adapter plugged in, and a different (lower
-> priority) console if it's not.
+Alan Cox wrote:
+> > It would be a sensible though boring cleanup to change all the "VC"
+> > (virtual console) stuff to use the name "VT" (virtual terminal)
+> > consistently.
+> 
+> Then we would have two completely different meanings for virtual terminal
+> in the kernel.
 
-I don't see the problem. If there is a lower priority console available
-then the kernel can use that anyway and clearly that would be the right
-thing to do.
+As opposed to three meanings for console - causing a bit of confusion
+you had to point out to Linus earlier :-)
 
-The case that wouldn't work perhaps is the 'no console present and a USB
-or firewire one might appear' - for that to work you'd need the queue to
-be smarter - or even the lowest priority console...
-
-Alan
+-- Jamie
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
