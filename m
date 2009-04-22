@@ -1,28 +1,35 @@
 From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: Wait for console to become available, v3.2
-Date: Wed, 22 Apr 2009 10:11:09 +0100
-Message-ID: <20090422101109.7beee3ee@lxorguk.ukuu.org.uk>
+Date: Wed, 22 Apr 2009 10:13:03 +0100
+Message-ID: <20090422101303.406eef99@lxorguk.ukuu.org.uk>
 References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net>
 	<20090421064346.GB8020@elte.hu>
-	<200904210013.48551.david-b@pacbell.net>
-	<1240333871.3632.70.camel@macbook.infradead.org>
-	<alpine.LFD.2.00.0904211016190.2199@localhost.localdomain>
-	<20090422082547.GB31246@shareable.org>
+	<20090421063549.3b71881d@infradead.org>
+	<20090421135034.GA30114@elte.hu>
+	<20090421140533.GA6375@shareable.org>
+	<20090421142627.GA18129@elte.hu>
+	<20090421153745.2d8964c7@lxorguk.ukuu.org.uk>
+	<20090422082216.GA31246@shareable.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090422082547.GB31246@shareable.org>
+In-Reply-To: <20090422082216.GA31246@shareable.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Jamie Lokier <jamie@shareable.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, David Woodhouse <dwmw2@infradead.org>, David Brownell <david-b@pacbell.net>, Ingo Molnar <mingo@elte.hu>, David VomLehn <dvomlehn@cisco.com>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, David VomLehn <dvomlehn@cisco.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-> It would be a sensible though boring cleanup to change all the "VC"
-> (virtual console) stuff to use the name "VT" (virtual terminal)
-> consistently.
+> Ah, that doesn't work, when you want to use the USB serial console
+> _if_ there's a USB serial adapter plugged in, and a different (lower
+> priority) console if it's not.
 
-Then we would have two completely different meanings for virtual terminal
-in the kernel.
+I don't see the problem. If there is a lower priority console available
+then the kernel can use that anyway and clearly that would be the right
+thing to do.
+
+The case that wouldn't work perhaps is the 'no console present and a USB
+or firewire one might appear' - for that to work you'd need the queue to
+be smarter - or even the lowest priority console...
 
 Alan
