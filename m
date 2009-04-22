@@ -1,59 +1,62 @@
-From: David VomLehn <dvomlehn@cisco.com>
+From: David VomLehn <dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
 Subject: Re: Wait for console to become available, v3.2
-Date: Tue, 21 Apr 2009 16:17:28 -0700
-Message-ID: <20090421231728.GB29555@cuplxvomd02.corp.sa.net>
-References: <20090420234006.GA1958@cuplxvomd02.corp.sa.net> <20090421064346.GB8020@elte.hu> <200904210013.48551.david-b@pacbell.net> <1240333871.3632.70.camel@macbook.infradead.org> <alpine.LFD.2.00.0904211016190.2199@localhost.localdomain> <20090421202501.26a44f9d@lxorguk.ukuu.org.uk>
+Date: Tue, 21 Apr 2009 22:35:18 -0700
+Message-ID: <20090422053518.GA11055@cuplxvomd02.corp.sa.net>
+References: <20090421165214.GB8251@cuplxvomd02.corp.sa.net> <Pine.LNX.4.44L0.0904211457150.3986-100000@iolanthe.rowland.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20090421202501.26a44f9d@lxorguk.ukuu.org.uk>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1641; t=1240355857; x=1241219857;
+In-Reply-To: <Pine.LNX.4.44L0.0904211457150.3986-100000-IYeN2dnnYyZXsRXLowluHWD2FQJk+8+b@public.gmane.org>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1358; t=1240378533; x=1241242533;
 	c=relaxed/simple; s=sjdkim2002;
 	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	d=cisco.com; i=dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org;
+	z=From:=20David=20VomLehn=20<dvomlehn-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
 	|Subject:=20Re=3A=20Wait=20for=20console=20to=20become=20av
 	ailable,=20v3.2
 	|Sender:=20;
-	bh=abwz3LmStZAa17awUeAxy0F7yO1eka+taP5xqNnUsiQ=;
-	b=SM4HxNw/AalAR/GIYXy5lbn2G03+CSB2tK7JbzAqCEG7qd1wobNGZRqjrk
-	15OMUwYXp+D9fGGy/7CFZ1I2jjHhXeveLH1TKIxI1cUF86ya3RCEiIjjgZet
-	e5JTcMO3s5;
-Sender: linux-embedded-owner@vger.kernel.org
+	bh=u/WyTcZQ68+HLrKWMfXx2amT3AbxI2gw2P8eojucY7k=;
+	b=OqGHK7WdkTCE6oFcFs13L0kplgPHdEcvHv90I7RKKyh2YoeaE6KPhcSw7J
+	cjJT05UP/dQm9ku+AM6old/9gYqosIFA52dcy/w3RrL8fBQyG07s5JTaePvb
+	m+2LB+uTAZ;
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, David Woodhouse <dwmw2@infradead.org>, David Brownell <david-b@pacbell.net>, Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Cc: Jamie Lokier <jamie-yetKDKU6eevNLxjTenLetw@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, Arjan van de Ven <arjan-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Embedded Mailing List <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 
-On Tue, Apr 21, 2009 at 08:25:01PM +0100, Alan Cox wrote:
-> > Anybody want to try it? Just make it ignore any IO if there are no 
-> > registered consoles. The patch shouldn't even be all that big, I suspect.
-> 
-> It will work, but on its own it won't actually fix the problem people
-> have, which is wanting to wait for a real console to appear. Extending it
-> to sleep (if not O_NDELAY) and loop back through the list when the list
-> changes would however do the trick, that or a tty device that buffers
-> then spews into the real device when it appears.
-> 
-> Definitely the right path, and we almost have every tty device in
-> existance containing a struct tty_port, at which point it gets even
-> cleaner.
-> 
-> The printk() console needs to buffer up data and replay it but we already
-> pretty much do what is needed even for vt consoles because the fb isn't
-> ready before the first printk.
+By now, pretty much everone is probably up to speed on what the USB folks are
+telling us:
 
-We're already good on printk, the size of log_buf is configurable and log_buf
-is dumped to each console as it gets registered. Even then, printk output is
-not an especially big issue since you have dmesg to get to anything you
-might have missed.
+	There is no way to avoid using some sort of timeout to decide
+	whether the console is ever going to appear.
 
-Other the other hand, userspace output is not buffered and has the potential
-to be much larger. Any approach that buffers it risks either truncation or
-gobbling up memory. There is also the human factors issue that users will
-pretty much ignore printk output because they don't particularly understand
-it. They understand, and expect to see, the output they generate. I'm pretty
-sure they won't like for it to go missing under mysterious circumstances.
+So:
+1.	We want the minimum timeout possible so that headless systems will
+	not be delayed any more than is necessary to detect that no console
+	is available.
+2.	As I understand it, USB devices don't generally come with any
+	guarantee what the maximum time to initialize will be.
+
+Therefore, as far as I can see, this means that we can't empirically
+determine an appropriate timeout until we know what USB devices are
+connected to a particular system. This, in turn, means that any default
+timeout we might choose will have to have a command line parameter to
+override it.
+
+Naturally, we want to help a user determine as easily as possible just how
+long it took to detect whatever serial device they may want to use so that
+they can set the timeout so the system will boot as quickly as possible when
+being used in a headless mode. This probably means picking a stable point
+from which to start measuring the timeout, as well as printing how long it
+took to detect the console, if there was one.
+
+An open question is whether we want to wait for all possible consoles or
+whether we can proceed with as few as one.
 
 David VomLehn
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
