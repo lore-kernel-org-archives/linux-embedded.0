@@ -1,34 +1,43 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: Wait for console to become available, v3.2
-Date: Fri, 24 Apr 2009 23:11:03 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.0904242309300.3926-100000@netrider.rowland.org>
-References: <20090425014152.GD23106@shareable.org>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [Patch] Wait for console to become available, ver 3
+Date: Sat, 25 Apr 2009 10:16:59 +0200
+Message-ID: <20090425081657.GB2428@ucw.cz>
+References: <20090417213148.GA27825@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090425014152.GD23106@shareable.org>
+Content-Disposition: inline
+In-Reply-To: <20090417213148.GA27825@cuplxvomd02.corp.sa.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Jamie Lokier <jamie@shareable.org>
-Cc: David VomLehn <dvomlehn@cisco.com>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Ingo Molnar <mingo@elte.hu>, Arjan van de Ven <arjan@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Linus Torvalds <torvalds@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+To: David VomLehn <dvomlehn@cisco.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Embedded Mailing List <linux-embedded@vger.kernel.org>, Linux USB Mailing List <linux-usb@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Sat, 25 Apr 2009, Jamie Lokier wrote:
+Hi!
 
-> I'm thinking this broader use:
+> Parallelization to improve boot times has been successful enough that race
+> conditions now exist between the init_post() open of /dev/console and
+> initialization of the console device. When this occurs, opening /dev/console
+> fails and any applications inherited from init have no standard in/out/error
+> devices. This is expected behavior if no console device is available, but
+> quite unfortunate in the case where the console is just a bit slow waking up.
 > 
->     - My boot _script_ is waiting for a disk which identifies as
->       UUID=392852908752345749857 to appear before it can mount it on
->       /data.  If there's no such disk, it proceeds without it.  It's a
->       USB disk, behind a USB hub.
+> Some buses, such as USB, offer no guarantees about how long it takes to
+> discover devices, so there is no reliable way to distinguish between a missing
+> console and a slow one.  The pragmatic approach taken in this patch is to
+> wait for a while to see if a console shows up, and just go on if it doesn't.
+> The default delay is 1000 msec (1 second).
 > 
->     - My boot script is looking to see if I'm holding down 'z' on the
->       keyboard, to do something different.  But how does it know if
->       there's a USB keyboard plugged in (behind two USB hubs) that
->       hasn't finished being detected?
-> 
-> It just seemed to fit comfortably into what's being discussed.
+> There are two new command line parameters:
+> consolewait		Wait forever for a console to be registered
+> consoledelay=msec	Use the given number of milliseconds as the delay
+> 			interval instead of the default
 
-Are you suggesting this new interface be exported to userspace somehow?
+Could you use rootfsdelay for this? Root needs to be mounted for init
+to run, so...?
+								Pavel
 
-Alan Stern
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
