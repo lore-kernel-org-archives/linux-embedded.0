@@ -1,38 +1,53 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: Can I run an application compiled with gcc ABI 2.95 on a
- kernel compiled with gcc ABI 3.4?
-Date: Fri, 15 May 2009 14:56:05 +0100
-Message-ID: <1242395765.4201.94.camel@macbook.infradead.org>
-References: <20090515115009.110740@gmx.net>
-	 <1242390699.4201.3.camel@macbook.infradead.org>
-	 <20090515135105.GC8235@shareable.org>
+From: Gustavo Zacarias <gustavo@zacarias.com.ar>
+Subject: Re: Can I run an application compiled with gcc ABI 2.95 on a kernel
+	compiled with gcc ABI 3.4?
+Date: Fri, 15 May 2009 11:03:59 -0300
+Message-ID: <4A0D764F.80103@zacarias.com.ar>
+References: <20090515115009.110740@gmx.net>	
+	<1242390699.4201.3.camel@macbook.infradead.org>	
+	<20090515135105.GC8235@shareable.org>
+	<1242395765.4201.94.camel@macbook.infradead.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090515135105.GC8235@shareable.org>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Jamie Lokier <jamie@shareable.org>
-Cc: muzungu@gmx.net, linux-embedded@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.arm.linux.org.uk>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=arm.linux.org.uk; s=lists; h=Message-ID:Date:From:MIME-Version:
+	To:CC:Subject:References:In-Reply-To:List-Id:List-Unsubscribe:
+	List-Archive:List-Post:List-Help:List-Subscribe:Content-Type:
+	Content-Transfer-Encoding:Sender; bh=IAi8Qra0UZDbwsNvCFyGoR4+fso
+	BP916/EXEuuwAiJ8=; b=SEaqykSdPBlIaMJhw2/36eWFEgrdux/EtiC72YxCJ/a
+	3Lk7XuEGt7xfFhfMu8tn9xbXuvn+Kzhvw7DNMtOK503hayICOVfJ5r+ZHsd3TUQJ
+	E9ev29DK44baHW9tvzQs3dINEvUCzSZmj2oSHGmS/lYbfWJh77tdbNa31zn9DTF0
+	=
+In-Reply-To: <1242395765.4201.94.camel@macbook.infradead.org>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <http://lists.arm.linux.org.uk/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.arm.linux.org.uk?subject=unsubscribe>
+List-Archive: <http://lists.arm.linux.org.uk/lurker/list/linux-arm-kernel.html>
+List-Post: <mailto:linux-arm-kernel@lists.arm.linux.org.uk>
+List-Help: <mailto:linux-arm-kernel-request@lists.arm.linux.org.uk?subject=help>
+List-Subscribe: <http://lists.arm.linux.org.uk/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.arm.linux.org.uk?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.arm.linux.org.uk
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.arm.linux.org.uk
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: Jamie Lokier <jamie@shareable.org>, muzungu@gmx.net, linux-embedded@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk
 
-On Fri, 2009-05-15 at 14:51 +0100, Jamie Lokier wrote:
-> 
-> Eek, can you say a bit more about the ARM EABI mismatch?
-> 
-> I would like to run a shiny modern ARM EABI kernel and userspace, but
-> also need to run one or two OABI binaries (from the gcc 2.95 era) on
-> the same kernel which I cannot recompile because they're built with
-> closed source libraries only supplied as OABI.
-> 
-> Does that not work at all?
-> 
-> If it does work, which part of userspace must be EABI to work?
+David Woodhouse wrote:
 
-It was just a note of caution that sometimes we _do_ change the ABI.
+> 
+> It was just a note of caution that sometimes we _do_ change the ABI.
+> 
+> I'm not 100% sure offhand whether the EABI kernel can support OABI
+> userspace; I didn't think so though.
+> 
 
-I'm not 100% sure offhand whether the EABI kernel can support OABI
-userspace; I didn't think so though.
+He could try CONFIG_OABI_COMPAT=y, at least in 2.6.28+.
+No thumb though.
+Regards.
 
--- 
-dwmw2
+-------------------------------------------------------------------
+List admin: http://lists.arm.linux.org.uk/mailman/listinfo/linux-arm-kernel
+FAQ:        http://www.arm.linux.org.uk/mailinglists/faq.php
+Etiquette:  http://www.arm.linux.org.uk/mailinglists/etiquette.php
