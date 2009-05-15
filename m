@@ -1,50 +1,33 @@
-From: muzungu@gmx.net
-Subject: Can I run an application compiled with gcc ABI 2.95 on a kernel
- compiled with gcc ABI 3.4?
-Date: Fri, 15 May 2009 13:50:09 +0200
-Message-ID: <20090515115009.110740@gmx.net>
+From: David Woodhouse <dwmw2@infradead.org>
+Subject: Re: Can I run an application compiled with gcc ABI 2.95 on a
+ kernel compiled with gcc ABI 3.4?
+Date: Fri, 15 May 2009 13:31:39 +0100
+Message-ID: <1242390699.4201.3.camel@macbook.infradead.org>
+References: <20090515115009.110740@gmx.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090515115009.110740@gmx.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: muzungu@gmx.net
+Cc: linux-embedded@vger.kernel.org
 
-Hello all
+On Fri, 2009-05-15 at 13:50 +0200, muzungu@gmx.net wrote:
+> Questions:
+> - Can I run an application compiled with gcc ABI 2.95 on a kernel
+> compiled with gcc ABI 3.4?
 
-We have a target system with an old Linux environment that we can not e=
-asily upgrade to a new one.
+Yes. The kernel ABI never changes in a backward-incompatible fashion.
+Unless you try switching your kernel to ARM EABI and don't update
+userspace to match -- don't do that :)
 
-The actual development system (linux) has more or less the same age (pr=
-ox. 10 year)
+Unless you're using C++, you're more likely to have problems with
+different versions of libraries, and buggy code which doesn't compile
+correctly with the new compiler, than you are with GCC ABI variations
+per se. Especially in the kernel<->userspace interface.
 
-We intend to do the following:
-
-- Use a new distribution as development environment (linux)
-- Still compile the target application for the old system (2.2 and 2.4 =
-kernels, once all compiled with egcs 2.91.66)
-- Test the target applications in the new development environment
-
-Questions:
-- Can I run an application compiled with gcc ABI 2.95 on a kernel compi=
-led with gcc ABI 3.4?
-- In other words: does it matter if the gcc ABI of the compilers for th=
-e kernel and the application are different, assuming all the libraries =
-used, have the same gcc ABI as the application?
-
-I guess:
-- gcc ABI of librabies and applications compilation must generally matc=
-h
-- gcc ABI of kernel, libraries and applications compilation must genera=
-lly match to.
-
-Am I wrong?
-
-I would appreciate any help
-
-Roman
---=20
-Neu: GMX FreeDSL Komplettanschluss mit DSL 6.000 Flatrate + Telefonansc=
-hluss f=FCr nur 17,95 Euro/mtl.!* http://dslspecial.gmx.de/freedsl-surf=
-flat/?ac=3DOM.AD.PD003K11308T4569a
+-- 
+David Woodhouse                            Open Source Technology Centre
+David.Woodhouse@intel.com                              Intel Corporation
