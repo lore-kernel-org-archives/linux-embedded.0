@@ -1,66 +1,34 @@
-From: Catalin Marinas <catalin.marinas@arm.com>
+From: Josh Boyer <jwboyer@linux.vnet.ibm.com>
 Subject: Re: [Ksummit-2009-discuss] Representing Embedded Architectures at
 	the Kernel Summit
-Date: Wed, 03 Jun 2009 14:04:46 +0100
-Message-ID: <1244034286.24482.84.camel@pc1117.cambridge.arm.com>
-References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com>
+Date: Wed, 3 Jun 2009 09:18:42 -0400
+Message-ID: <20090603131842.GT3095@hansolo.jdub.homelinux.org>
+References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> <1244034286.24482.84.camel@pc1117.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com>
-Sender: linux-arch-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:sender:date:from:to:cc
+         :subject:message-id:references:mime-version:content-type
+         :content-disposition:in-reply-to:user-agent;
+        bh=pdzhQhm4MQDZvTaSCpxNL7dItQa0IP+/l/etUm9L3Ig=;
+        b=nGw85A3Y3Uy1UYY0Bd5XcudhszWDGVBNpuUb8CLueIy3rF8NW4ma7RZwLGuCPSXjzC
+         GbzPzdWWsDBruhpV/cDTcmEa+i0mgUlomioJBMyqMpfhi1fB2uODXdJlVV9uhApSeh6q
+         Ub4T1zrIKynsLS1qWBo7Wl+AD8MBA/BrolglI=
+Content-Disposition: inline
+In-Reply-To: <1244034286.24482.84.camel@pc1117.cambridge.arm.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: James Bottomley <James.Bottomley@hansenpartnership.com>
-Cc: ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Catalin Marinas <catalin.marinas@arm.com>
+Cc: linux-embedded@vger.kernel.org
 
-Hi,
+On Wed, Jun 03, 2009 at 02:04:46PM +0100, Catalin Marinas wrote:
+>      * Mixed endianness devices in the same system - this may only need
+>        dedicated readl_be/writel_be etc. macros but it could also be
+>        done by having bus-aware readl/writel-like macros
 
-On Tue, 2009-06-02 at 15:22 +0000, James Bottomley wrote:
-> So what we're looking for is a proposal to discuss the issues
-> most affecting embedded architectures, or preview any features affecting
-> the main kernel which embedded architectures might need ... or any other
-> topics from embedded architectures which might need discussion or
-> debate.
+ioread/iowrite{8,16,32} and ioread/iowrite{8,16,32}_be don't suffice here?
 
-Some issues that come up on embedded systems (and not only):
-
-      * Multiple coherency domains for devices - the system may have
-        multiple bus levels, coherency ports, cache levels etc. Some
-        devices in the system (but not all) may be able to "see" various
-        cache levels but the DMA API (at least on ARM) cannot handle
-        this. It may be useful to discuss how other embedded
-        architectures handle this and come up with a unified solution
-
-      * Better support for coherent DMA mask - currently ZONE_DMA is
-        assumed to be in the bottom part of the memory which isn't
-        always the case. Enabling NUMA may help but it is overkill for
-        some systems. As above, a more unified solution across
-        architectures would help
-
-      * PIO block devices and non-coherent hardware - code like mpage.c
-        assumes that the either the hardware is coherent or the device
-        driver performs the cache flushing. The latter is true for
-        DMA-capable device but not for PIO. The issue becomes visible
-        with write-allocate caches and the device driver may not have
-        the struct page information to call flush_dcache_page(). A
-        proposed solution on the ARM lists was to differentiate (via
-        some flags) between PIO and DMA block devices and use this
-        information in mpage.c
-
-      * Mixed endianness devices in the same system - this may only need
-        dedicated readl_be/writel_be etc. macros but it could also be
-        done by having bus-aware readl/writel-like macros
-
-      * Asymmetric MP:
-              * Different CPU frequencies
-              * Different CPU features (e.g. floating point only one
-                some CPUs): scheduler awareness, per-CPU hwcap bits (in
-                case user space wants to set the affinity) 
-              * Asymmetric workload balancing for power consumption (may
-                be better to load 1 CPU at 60% than 4 at 15%) 
-
-Thanks.
-
--- 
-Catalin
+josh
