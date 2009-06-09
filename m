@@ -1,58 +1,210 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: Representing Embedded Architectures at the Kernel Summit
-Date: Thu, 4 Jun 2009 14:24:32 -0600
-Message-ID: <fa686aa40906041324s4634ae85gdeeaf4ae05c9fad@mail.gmail.com>
-References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> 
-	<fa686aa40906021029macf3c72g5261f8d4dbea935a@mail.gmail.com> 
-	<20090602211057.GA10800@flint.arm.linux.org.uk> <3340601010994331832@unknownmsgid>
+From: Childhood Hwang <childhood.hwang@gmail.com>
+Subject: USB : Problem in backporting C67x00 Driver to kernel 2.6.20
+Date: Tue, 9 Jun 2009 20:45:28 +0800
+Message-ID: <f4b46ce60906090545n3a277feftbd9491df0a7c51db@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <3340601010994331832@unknownmsgid>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:date:message-id:subject
+         :from:to:content-type:content-transfer-encoding;
+        bh=/KKccq31dEXhLlmrWyZB0R/HXzXKD8pXXoSkI3YyAxs=;
+        b=ty7wRqlOB5ZUcy/ijxjMlKIOP6Y3V7mEFIFkKGRUe6zaR1EeLpCvj1GP3s8dn2K5S/
+         GllgGM7siCdounrkYEp70NNyWj4/cpH3LaSjIxJRscdWCOLM9iDvTzE9ROjjrN5iEpEz
+         EtNJTAEfMO+4C3C70E05M9JdT5UdD34pshprc=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: steve.langstaff@pebblebay.com
-Cc: Russell King <rmk@arm.linux.org.uk>, James Bottomley <James.Bottomley@hansenpartnership.com>, ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org, Josh Boyer <jwboyer@linux.vnet.ibm.com>, Tim Bird <tim.bird@am.sony.com>
+Content-Type: text/plain; charset="us-ascii"
+To: linux-embedded@vger.kernel.org
 
-On Wed, Jun 3, 2009 at 3:08 AM, Steve Langstaff
-<steve.langstaff@pebblebay.com> wrote:
->> From: linux-embedded-owner@vger.kernel.org [mailto:linux-embedded-
->> owner@vger.kernel.org] On Behalf Of Russell King
->
->> The big problem we have is that the only commonality between differe=
-nt
->> SoCs is that the CPU executes ARM instructions. =A0Everything else i=
-s
->> entirely up to the SoC designer - eg location of memory, spacing of
->> memory banks, type of interrupt controller, etc is all highly SoC
->> specific. =A0Nothing outside of the ARM CPU itself is standardized.
->
-> To my naive ears it sounds like this problem is crying out for ARM an=
-d the
-> SoC designers to add a standardized "autoprobe" interface to the core=
- to
-> allow discovery of machine type and/or "location of memory, spacing o=
-f
-> memory banks, type of interrupt controller, etc".
->
-> The benefits of such mechanisms are well known, but what are the draw=
-backs?
+I am tring to backport C67x00 driver to kernel 2.6.20 right now. But I
+can't make it work.
+I saw there was some discussion before, and it seem's that those
+discussions were the right thing  messing me.
 
-Local bus probing probably imposes a lot of assumptions on a bus
-designed to be as open as possible.  How are chip selects wired up?
-What base addresses do devices respond to?  How do you know what the
-device is?  What IRQ lines are used?  PCI solves this by exporting
-configuration space which defines all of this, but PCI is considerably
-more complex and not as fast as a CPU's local bus.  Similarly busses
-like spi and i2c either have no probing protocol defined (spi), or
-cannot always be reliably probed (i2c).
+I found the discussion in link: http://marc.info/?t=122849175200004&r=1&w=2
 
-In short, the drawbacks are complexity on devices which cannot afford
-the complexity.
+But there is no answer how to getover this, just that the problem was
+in different status handling for older kernel.
 
-g.
+I am quite newest to Linux.
 
---=20
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+I insert a kernel module that register the platform device for USB,
+I think the interrupt works well.
+Register code is like that,:
+
+static struct resource c67x00_resources[] = {
+        [0] = {
+                .start  = 0x80800000,
+                .end    = 0x8080ffff,
+                .flags  = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start  = 0,
+                .end    = 0,
+                .flags  = IORESOURCE_IRQ,
+        },
+};
+
+static struct c67x00_platform_data c67x00_data = {
+        .sie_config             = C67X00_SIE1_HOST | C67X00_SIE2_HOST,
+        .hpi_regstep            = 0x02,
+};
+
+static struct platform_device c67x00_device = {
+        .name                   = "c67x00",
+        .id                     = -1,
+        .num_resources          = ARRAY_SIZE(c67x00_resources),
+        .resource               = c67x00_resources,
+        .dev.platform_data      = &c67x00_data,
+};
+
+static int __init c67x00_device_reg_init(void)
+{
+	/* printk("<1>Hello module world.\n");
+	printk("<1>Module parameters were (0x%08x) and \"%s\"\n", myint,
+	       mystr); */
+	printk("======== Call : c67x00_device_reg_init() ========\n");
+	
+	/* A non 0 return means init_module failed; module can't be loaded. */
+	return platform_device_register(&c67x00_device);
+}
+
+
+static void __exit c67x00_device_reg_exit(void)
+{
+	printk(KERN_ALERT "======== Goodbye c67x00_device_reg_exit(). ========\n");
+	platform_device_unregister(&c67x00_device);
+}
+
+module_init(c67x00_device_reg_init);
+module_exit(c67x00_device_reg_exit);
+
+
+And the log list below:
+
+# insmod /lib/modules/kernel/drivers/misc/c67x00_device_reg.ko
+======== Call : c67x00_device_reg_init() ========
+============ USB driver : Call c67x00_drv_probe() ============
+c67x00 c67x00: Cypress C67X00 Host Controller
+drivers/usb/core/inode.c: creating file 'devices'
+drivers/usb/core/inode.c: creating file '001'
+c67x00 c67x00: new USB bus registered, assigned bus number 1
+usb usb1: default language 0x0409
+usb usb1: new device strings: Mfr=3, Product=2, SerialNumber=1
+usb usb1: Product: Cypress C67X00 Host Controller
+usb usb1: Manufacturer: Linux 2.6.20-uc0 c67x00-hcd
+usb usb1: SerialNumber: c67x00_sie
+usb usb1: usb_probe_device
+usb usb1: configuration #1 chosen from 1 choice
+usb usb1: adding 1-0:1.0 (config #1, interface 0)
+hub 1-0:1.0: usb_probe_interface
+hub 1-0:1.0: usb_probe_interface - got id
+hub 1-0:1.0: USB hub found
+hub 1-0:1.0: 2 ports detected
+hub 1-0:1.0: standalone hub
+hub 1-0:1.0: ganged power switching
+hub 1-0:1.0: global over-current protection
+hub 1-0:1.0: power on to power good time: 100ms
+hub 1-0:1.0: local power source is good
+hub 1-0:1.0: no over-current condition exists
+hub 1-0:1.0: enabling power on all ports
+drivers/usb/core/inode.c: creating file '001'
+hub 1-0:1.0: state 7 ports 2 chg 0000 evt 0000
+c67x00 c67x00: Cypress C67X00 Host Controller
+drivers/usb/core/inode.c: creating file '002'
+c67x00 c67x00: new USB bus registered, assigned bus number 2
+usb usb2: default language 0x0409
+usb usb2: new device strings: Mfr=3, Product=2, SerialNumber=1
+usb usb2: Product: Cypress C67X00 Host Controller
+usb usb2: Manufacturer: Linux 2.6.20-uc0 c67x00-hcd
+usb usb2: SerialNumber: c67x00_sie
+usb usb2: usb_probe_device
+usb usb2: configuration #1 chosen from 1 choice
+usb usb2: adding 2-0:1.0 (config #1, interface 0)
+hub 2-0:1.0: usb_probe_interface
+hub 2-0:1.0: usb_probe_interface - got id
+hub 2-0:1.0: USB hub found
+hub 2-0:1.0: 2 ports detected
+hub 2-0:1.0: standalone hub
+hub 2-0:1.0: ganged power switching
+hub 2-0:1.0: global over-current protection
+hub 2-0:1.0: power on to power good time: 100ms
+hub 2-0:1.0: local power source is good
+hub 2-0:1.0: no over-current condition exists
+hub 2-0:1.0: enabling power on all ports
+drivers/usb/core/inode.c: creating file '001'
+hub 2-0:1.0: state 7 ports 2 chg 0000 evt 0000
+
+
+
+# hub 1-0:1.0: state 7 ports 2 chg 0000 evt 0002
+hub 1-0:1.0: port 1, status 0101, change 0001, 12 Mb/s
+hub 1-0:1.0: debounce: port 1: total 100ms stable 100ms status 0x101
+c67x00 c67x00: ClearPortFeature (0): C_RESET
+usb 1-1: new full speed USB device using c67x00 and address 2
+c67x00 c67x00: ClearPortFeature (0): C_RESET
+c67x00 c67x00: ### TIMEOUT at 0x0500
+c67x00 c67x00: urb:      0x902390cc
+c67x00 c67x00: endpoint:      0
+c67x00 c67x00: pipeout:       1
+c67x00 c67x00: ly_base_addr: 0x0700
+c67x00 c67x00: port_length:  0x0008
+c67x00 c67x00: pid_ep:         0xd0
+c67x00 c67x00: dev_addr:       0x00
+c67x00 c67x00: ctrl_reg:       0x01
+c67x00 c67x00: status:         0x14
+c67x00 c67x00: retry_cnt:      0x00
+c67x00 c67x00: residue:        0x00
+c67x00 c67x00: next_td_addr: 0x0000
+c67x00 c67x00: data:<3>usb 1-1: device not accepting address 2, error -115
+c67x00 c67x00: ClearPortFeature (0): C_RESET
+usb 1-1: new full speed USB device using c67x00 and address 3
+c67x00 c67x00: ClearPortFeature (0): C_RESET
+c67x00 c67x00: ### TIMEOUT at 0x0500
+c67x00 c67x00: urb:      0x902390cc
+c67x00 c67x00: endpoint:      0
+c67x00 c67x00: pipeout:       1
+c67x00 c67x00: ly_base_addr: 0x0700
+c67x00 c67x00: port_length:  0x0008
+c67x00 c67x00: pid_ep:         0xd0
+c67x00 c67x00: dev_addr:       0x00
+c67x00 c67x00: ctrl_reg:       0x01
+c67x00 c67x00: status:         0x14
+c67x00 c67x00: retry_cnt:      0x00
+c67x00 c67x00: residue:        0x00
+c67x00 c67x00: next_td_addr: 0x0000
+c67x00 c67x00: data:<3>usb 1-1: device not accepting address 3, error -115
+c67x00 c67x00: ClearPortFeature (0): C_RESET
+usb 1-1: new full speed USB device using c67x00 and address 4
+c67x00 c67x00: ### TIMEOUT at 0x0500
+c67x00 c67x00: urb:      0x902390cc
+c67x00 c67x00: endpoint:      0
+c67x00 c67x00: pipeout:       1
+c67x00 c67x00: ly_base_addr: 0x0700
+c67x00 c67x00: port_length:  0x0008
+c67x00 c67x00: pid_ep:         0xd0
+c67x00 c67x00: dev_addr:       0x00
+c67x00 c67x00: ctrl_reg:       0x01
+c67x00 c67x00: status:         0x14
+c67x00 c67x00: retry_cnt:      0x00
+c67x00 c67x00: residue:        0x00
+c67x00 c67x00: next_td_addr: 0x0000
+c67x00 c67x00: data:<3>usb 1-1: device not accepting address 4, error -115
+c67x00 c67x00: ClearPortFeature (0): C_RESET
+usb 1-1: new full speed USB device using c67x00 and address 5
+c67x00 c67x00: ### TIMEOUT at 0x0500
+c67x00 c67x00: urb:      0x902390cc
+c67x00 c67x00: endpoint:      0
+c67x00 c67x00: pipeout:       1
+c67x00 c67x00: ly_base_addr: 0x0700
+c67x00 c67x00: port_length:  0x0008
+c67x00 c67x00: pid_ep:         0xd0
+c67x00 c67x00: dev_addr:       0x00
+c67x00 c67x00: ctrl_reg:       0x01
+c67x00 c67x00: status:         0x14
+c67x00 c67x00: retry_cnt:      0x00
+c67x00 c67x00: residue:        0x00
+c67x00 c67x00: next_td_addr: 0x0000
+c67x00 c67x00: data:<3>usb 1-1: device not accepting address 5, error -115
