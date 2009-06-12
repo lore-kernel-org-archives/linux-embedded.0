@@ -1,114 +1,75 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
+From: David VomLehn <dvomlehn@cisco.com>
 Subject: Re: Kernel crashing and log buffers...
-Date: Thu, 11 Jun 2009 19:27:16 -0400
-Message-ID: <8bd0f97a0906111627h128cc561y2bf4a0b2b30d7187@mail.gmail.com>
-References: <200906102126.40410.rgetz@blackfin.uclinux.org> 
-	<20090611175303.GA10058@cuplxvomd02.corp.sa.net>
+Date: Thu, 11 Jun 2009 17:33:02 -0700
+Message-ID: <20090612003302.GA23715@cuplxvomd02.corp.sa.net>
+References: <200906111452.39210.rgetz@blackfin.uclinux.org> <C656DA04.1708D%gerickson@nuovations.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :from:date:message-id:subject:to:cc:content-type
-         :content-transfer-encoding;
-        bh=7rmMnyt7esn2Ip9BURabk7TyVSBdIA3ynNlnj2y+O44=;
-        b=bPzOWBJ7aZ2skeIiDnCsXy9heKSYmKlXtaCtzr+k/RiArtZGnEBagNy5p4mU/bKRrS
-         bV3VsW32GIb/THmcawQgtCwOSZRyycG6iHXbN7D1gw6IkzeNvK5IkDOyHKRZNnneX+fu
-         PR6OOOJ20NAnBdplwr9mnnPnYKZpgufm6DDtE=
-In-Reply-To: <20090611175303.GA10058@cuplxvomd02.corp.sa.net>
+Content-Disposition: inline
+In-Reply-To: <C656DA04.1708D%gerickson@nuovations.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=2373; t=1244766782; x=1245630782;
+	c=relaxed/simple; s=sjdkim1004;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=dvomlehn@cisco.com;
+	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
+	|Subject:=20Re=3A=20Kernel=20crashing=20and=20log=20buffers
+	...
+	|Sender:=20;
+	bh=g8gM+NZuqNHHyFOul2bSkhAr/exlEBUDsUgzt2/xec8=;
+	b=dMfdAX+0T0Alp2V8kZFETOhpUimh8smuP45OI340stV34UB9KIAuMDEKz9
+	UrFGPMwVuoq8uWdbBA7vKhqo+2tKP1DjwsGYdFCi2LjH4kFbHJINjC7OEwK0
+	O8z/b/sUfo4XMVkHDnU5/QX28maNTYOQBGgevrtJR4EC6FfHGFEHY=;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: David VomLehn <dvomlehn@cisco.com>
-Cc: Robin Getz <rgetz@blackfin.uclinux.org>, Greg Ungerer <gerg@snapgear.com>, Russell King <rmk@arm.linux.org.uk>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Grant Erickson <gerickson@nuovations.com>
+Cc: Robin Getz <rgetz@blackfin.uclinux.org>, Mike Frysinger <vapier@gentoo.org>, Greg Ungerer <gerg@snapgear.com>, Russell King <rmk@arm.linux.org.uk>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, linux-embedded <linux-embedded@vger.kernel.org>, Hariprasad Nellitheertha <hari@in.ibm.com>
 
-On Thu, Jun 11, 2009 at 13:53, David VomLehn wrote:
-> On Wed, Jun 10, 2009 at 09:26:40PM -0400, Robin Getz wrote:
->> On 17 Oct 2007, after much discussion and debate, Mike added add two=
- new
->> functions for reading the kernel log buffer (from kernel space).
->>
->> http://git.kernel.org/?p=3Dlinux/kernel/git/torvalds/linux-2.6.git;a=
-=3Dcommit;h=3D0b15d04af3dd996035d8fa81fc849d049171f9c3
->>
->> The intention was for them to be used by recovery/dump/debug code so=
- the
->> kernel log can be easily retrieved/parsed by the bootloader (or anot=
-her
->> kernel) in a crash scenario.
->>
->> I was going to push the arch specific recovery/dump/debug code that =
-uses them
->> upstream (yeah, it has been a little while - but anyway...) it was r=
-emoved
->> since then by Roel Kluin ...
->>
->> 21 Oct 2008:
->> http://git.kernel.org/?p=3Dlinux/kernel/git/torvalds/linux-2.6.git;a=
-=3Dcommitdiff;h=3Dacff181d3574244e651913df77332e897b88bff4
->>
->> Before I ask Andrew to add it back, I thought I would make sure it w=
-as still a
->> useful function, and did everything everyone wanted - and wasn't dee=
-med
->> unnecessary by a feature/function that I wasn't aware of - like the =
-next
->> thing...
->>
->> I saw the patch Grant sent recently - Add Alternative Log Buffer Sup=
-port for
->> printk Messages (in Nov2008 to the embedded list, and Jan 2009 to lk=
-ml) - but
->> I couldn't find any followups - and it doesn't seem to be in Linus's=
- tree.
->>
->> http://thread.gmane.org/gmane.linux.kernel.embedded/1358/focus=3D137=
-3
->>
->> http://lkml.org/lkml/2009/1/21/250
->>
->> I can see the desire on Wolfgang & Grant's part - for not needing th=
-e copy
->> from/to - (you never have to worry about crashing "nicely" - the ker=
-nel
->> panics, but you still need to copy memory around - potentially causi=
-ng all
->> kinds of secondary issues - and masking the real reason the crash oc=
-curred).
->>
->> But for the majority of the case - the copy from/to would work much =
-better
->> than what we have in mainstream today...
->>
->>
->> I would be interested in Paul and Russell - how have you solved this=
- issue?
->> (Or do your kernel's never crash? :)
->
-> Our kernel does crash, so we have to do this. I had submitted a patch=
- a
-> while ago that tweaks emit_log_char, but this was bounced, reasonably=
-,
-> because it would be interferring with the great majority of people wh=
-o
-> are not interested in capturing log output. The suggestion was made t=
-hat
-> we do this with a console driver. I've recently got a version working=
-, as
-> a module, but I've only started testing of the version integrated int=
-o the
-> kernel tree. =C2=A0Still, post early, post often, so I've appended a =
-version
-> of the patch here to see if this seems to be the right direction.
+On Thu, Jun 11, 2009 at 03:57:56PM -0700, Grant Erickson wrote:
+> On 6/11/09 11:52 AM, Robin Getz wrote:
+> > On Thu 11 Jun 2009 13:53, David VomLehn pondered:
+> >> On Wed, Jun 10, 2009 at 09:26:40PM -0400, Robin Getz wrote:
+> >>> I would be interested in Paul and Russell - how have you solved this
+> >>> issue? (Or do your kernel's never crash? :)
+> >> 
+> >> Our kernel does crash, so we have to do this. I had submitted a patch a
+> >> while ago that tweaks emit_log_char, but this was bounced, reasonably,
+> >> because it would be interferring with the great majority of people who
+> >> are not interested in capturing log output. The suggestion was made that
+> >> we do this with a console driver. I've recently got a version working,
+> >> as a module, but I've only started testing of the version integrated
+> >> into the kernel tree.  Still, post early, post often, so I've appended
+> >> a version of the patch here to see if this seems to be the right
+> >> direction. 
+> > 
+> > Yeah - it looks like n people have done this n ways.
+> > 
+> > I think even Andrew M had mentioned that he had done something in a past
+> > embedded life.
+> > 
+> > I think what you have would do what I need it to do - I'm not so sure about
+> > what Wolfgang/Grant had in mind (- since they wanted also to dump buffers
+> > from the bootloader into the console for syslog processing)...
+> 
+> Regrettably, I have not had the time to follow-up on this since my last
+> commentary in March:
+> 
+>     http://lkml.org/lkml/2009/3/31/293
+> 
+> However, from what I can glean of the discussion, you are correct that this
+> does not precisely cover what Wolfgang (originally) or, later, I was working
+> towards in that neither boot loader logs nor round-trip log buffering
+> (bootloader to kernel and back again) are covered.
+> 
+> However, the value and what's being proposed here and what I and others
+> proposed--at least in the embedded kingdom--seems high and the features and
+> implementation needn't be mutually exclusive.
 
-i guess there's two distinct crash types: early and late.  your
-console driver seems like it should be able to handle the "late"
-variety ok (i.e. the kernel is up and running and at some point, it
-blows up).  but it doesnt address the early crashes which is what
-we're currently looking for (i.e. kernel crash occurs before the
-serial console is up and running).
+I agree. In this case, we have three different approaches to three different
+problems (bootloader buffers, continuous state logging, and in-kernel capture
+of logging). All are problems that need to be solved. Personally, I'd love
+to have the continuous state logging, though I don't need the bootloader
+buffer part.
 
-i think extending this driver to include early printk support should
-address that ?
--mike
+> Grant
