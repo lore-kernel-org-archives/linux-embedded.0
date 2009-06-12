@@ -1,89 +1,68 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: AT91SAM9G20 design and boot times
-Date: Fri, 12 Jun 2009 16:06:26 +0200
-Message-ID: <20090612140626.GA10372@game.jcrosoft.org>
-References: <ed62800906102037q71f2a6bdq835793a1ac36c41b@mail.gmail.com> <ed62800906102043m723911d8t1968174201ba7fbb@mail.gmail.com> <4A30FD17.7060508@atmel.com>
+From: Christian Gagneraud <cgagneraud@techworks.ie>
+Subject: Re: AT91SAM9G20 design and power (was and boot times)
+Date: Fri, 12 Jun 2009 19:37:51 +0100
+Message-ID: <4A32A07F.5020907@techworks.ie>
+References: <ed62800906102037q71f2a6bdq835793a1ac36c41b@mail.gmail.com> <ed62800906102043m723911d8t1968174201ba7fbb@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4A30FD17.7060508@atmel.com>
+In-Reply-To: <ed62800906102043m723911d8t1968174201ba7fbb@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Aras Vaichas <arasv@magellan-technology.com>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Aras Vaichas <arasv@magellan-technology.com>
+Cc: linux-embedded@vger.kernel.org
 
-On 14:48 Thu 11 Jun     , Nicolas Ferre wrote:
+Aras Vaichas wrote:
 > Hi,
 > 
-> Aras Vaichas :
-> > Hi,
-> > 
-> > we're designing our next generation RFID reader and I'm planning on
-> > using the AT91SAM9G20 in the next design. We currently use the
-> > AT91RM9200.
+> we're designing our next generation RFID reader and I'm planning on
+> using the AT91SAM9G20 in the next design. We currently use the
+> AT91RM9200.
 > 
-> Good choice ;-)
+> Can I get some feedback from people with regards to general design
+> configurations  that affect the boot time with respect to this CPU (or
+> the AT91SAM9260)
 > 
-> > Can I get some feedback from people with regards to general design
-> > configurations  that affect the boot time with respect to this CPU (or
-> > the AT91SAM9260)
+> Some questions are:
 > 
-> I presume that you already know what are the configurations we are using
-> at Linux4sam.org on our at91sam9g20ek board. Anyway, I answer your
-> questions as it may also interest other readers.
+> * what is your boot time? What is the time from power-on to kernel
+> running, how long does the kernel take to run until init starts, and
+> how long does init take?
+> * what is your system hardware configuration? CPU+NAND, CPU+NOR+NAND,
+> CPU+DATAFLASH+NAND?
+> * do you boot everything from the NAND or do you use a combination of
+> Dataflash/NOR and NAND?
+> * do you use U-Boot, or a minimal custom bootloader that copies a
+> kernel image from NAND to SDRAM and then executes it?
+> * do you mount a small partition of the NAND to begin with and then
+> mount the rest later?
+> * do you have a monolithic kernel, or is it split into minimal with
+> modules loaded from, say, JFFS2 on NAND?
+> * are you using JFFS2 or UBIFS?
 > 
-> > Some questions are:
-> > 
-> > * what is your boot time? What is the time from power-on to kernel
-> > running, how long does the kernel take to run until init starts, and
-> > how long does init take?
-> 
-> We have not tried to be clever on speeding up boot process but I guess
-> that we can save time:
-> - removing unneeded bootloader steps (remove u-boot for instance)
-> - removing unused drivers
-> - lower timeouts (Ethernet phy detection for example)
-> - tailor rootfs exactly to your needs
-> 
-> That said, here are numbers from our not optimized demo
-> (AT91Bootstrap+u-boot+linux+buildroot):
-> - ~6s to Linux (can certainly be optimized)
-> - ~+2s to init
-> - ~+5s to login (here also)
-I've done some test on 9263
-with the following config
-cpu+nor (u-boot+linux+busybox)
-~4/5s to the prompt
+> Any info is much appreciated, thank you!
 
-if the boottime is critical I'll recommend you NOR + XIP
+Hi all,
 
-> 
-> > * what is your system hardware configuration? CPU+NAND, CPU+NOR+NAND,
-> > CPU+DATAFLASH+NAND?
-> 
-> CPU + NAND can lower your BOM
-> 
-> > * do you boot everything from the NAND or do you use a combination of
-> > Dataflash/NOR and NAND?
-I've test it on 9263
-> 
-> Both.
-> 
-> > * do you use U-Boot, or a minimal custom bootloader that copies a
-> > kernel image from NAND to SDRAM and then executes it?
-> 
-> If boot time is a hot topic, choose AT91Bootstrap that directly loads Linux.
-I disagree on this because you will loose a lot's of possibity as bootcount
-DFU, store your kernel in your rootfs etc...
+I'm changing slightly the topic...
+
+We are thinking about making our own board as well, but we are mainly 
+concerned with power consumption.
+
+Can anyone gives some feedback as well about power consumption of 
+their board (or the main components) and as well about the current 
+support for power management of the Linux kernel? What about suspend 
+to RAM, frequency scaling, etc...?
+
+Regards,
+Chris
 
 > 
-> > * do you mount a small partition of the NAND to begin with and then
-> > mount the rest later?
+> regards,
 > 
-I'll consider to switch to UBIFS
-and use lzma compression (for the uImage) if no XIP
-
-Best Regards,
-J.
+> Aras Vaichas
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
