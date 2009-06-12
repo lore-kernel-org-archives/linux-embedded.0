@@ -1,71 +1,103 @@
-From: David VomLehn <dvomlehn@cisco.com>
+From: Robin Getz <rgetz@blackfin.uclinux.org>
 Subject: Re: Kernel crashing and log buffers...
-Date: Thu, 11 Jun 2009 18:07:07 -0700
-Message-ID: <20090612010707.GB23715@cuplxvomd02.corp.sa.net>
-References: <200906102126.40410.rgetz@blackfin.uclinux.org> <20090611175303.GA10058@cuplxvomd02.corp.sa.net> <8bd0f97a0906111627h128cc561y2bf4a0b2b30d7187@mail.gmail.com>
+Date: Fri, 12 Jun 2009 00:54:46 -0400
+Message-ID: <200906120054.46965.rgetz@blackfin.uclinux.org>
+References: <200906102126.40410.rgetz@blackfin.uclinux.org> <8bd0f97a0906111627h128cc561y2bf4a0b2b30d7187@mail.gmail.com> <20090612010707.GB23715@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090612010707.GB23715@cuplxvomd02.corp.sa.net>
 Content-Disposition: inline
-In-Reply-To: <8bd0f97a0906111627h128cc561y2bf4a0b2b30d7187@mail.gmail.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=1662; t=1244768827; x=1245632827;
-	c=relaxed/simple; s=sjdkim1004;
-	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
-	d=cisco.com; i=dvomlehn@cisco.com;
-	z=From:=20David=20VomLehn=20<dvomlehn@cisco.com>
-	|Subject:=20Re=3A=20Kernel=20crashing=20and=20log=20buffers
-	...
-	|Sender:=20;
-	bh=N5gNp7EyBdd/rhrwxRCHfHtM9UKKsba+VxHA4nZPNA8=;
-	b=FPDd41xHlK2ed24Kt64RuCFJP6TXOhkfZCr2Q1hKcTJ7QUroRLVn4Z83X1
-	+SRspG/i5HCSmJdcr6qBkMpnkTcldPVytJgMrBUlOj6f/dtW2VxjwP0nffNG
-	Siuws9kQkMGiyh98Q9unCUfEk19rCVknM8hJdlcdOaIDIZzEmXqxo=;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Robin Getz <rgetz@blackfin.uclinux.org>, Greg Ungerer <gerg@snapgear.com>, Russell King <rmk@arm.linux.org.uk>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: David VomLehn <dvomlehn@cisco.com>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, Greg Ungerer <gerg@snapgear.com>, Russell King <rmk@arm.linux.org.uk>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Thu, Jun 11, 2009 at 07:27:16PM -0400, Mike Frysinger wrote:
-> On Thu, Jun 11, 2009 at 13:53, David VomLehn wrote:
-> > On Wed, Jun 10, 2009 at 09:26:40PM -0400, Robin Getz wrote:
-=2E..
-> > Our kernel does crash, so we have to do this. I had submitted a pat=
-ch a
-> > while ago that tweaks emit_log_char, but this was bounced, reasonab=
-ly,
-> > because it would be interferring with the great majority of people =
-who
-> > are not interested in capturing log output. The suggestion was made=
- that
-> > we do this with a console driver. I've recently got a version worki=
-ng, as
-> > a module, but I've only started testing of the version integrated i=
-nto the
-> > kernel tree. =A0Still, post early, post often, so I've appended a v=
-ersion
-> > of the patch here to see if this seems to be the right direction.
->=20
-> i guess there's two distinct crash types: early and late.  your
-> console driver seems like it should be able to handle the "late"
-> variety ok (i.e. the kernel is up and running and at some point, it
-> blows up).  but it doesnt address the early crashes which is what
-> we're currently looking for (i.e. kernel crash occurs before the
-> serial console is up and running).
->=20
-> i think extending this driver to include early printk support should
-> address that ?
+On Thu 11 Jun 2009 21:07, David VomLehn pondered:
+> It may be helpful if you can say a bit more about
+> the problem you are trying to solve.
 
-If you really want to see really early output, I don't think this will =
-give
-you more benefit than simply looking at log_buf through your favorite k=
-ernel
-debugging tool. Which is something I do with some regularity, so I know=
- that
-it can be a bit of a pain. It may be helpful if you can say a bit more =
-about
-the problem you are trying to solve.
+Yeah, I guess defining the goals is a good place to start (and 
+the hardest to come to agreement on).
 
-> -mike
+ - early crash analysis - before the kernel has set up the console 
+   or console drivers, (which happens after interrupts, caches, & 
+   memory, are set up) crashes are pretty difficult to figure out. 
+   Typically - the kernel crashes or hangs without any output on 
+   the console.
+   What the end users experiences is typically...
+   "Starting Kernel at = xxxx"
+   and nothing else. The valuable info (if any) is stuck in the 
+   kernel's log buffer.
 
-David VomLehn
+   earlyprintk helps with this, however - this assumes that the 
+   kernel has set up the early_printk console properly. If there
+   is a problem doing that (wrong driver compiled in, wrong pin 
+   muxing, etc), then the info is still stuck (unseen) in the
+   kernel's log buffer.
+
+   - but is only to be supported on:
+   Documentation/kernel-parameters.txt
+       earlyprintk=    [X86-32,X86-64,SH,BLACKFIN]
+                        earlyprintk=vga
+                        earlyprintk=serial[,ttySn[,baudrate]]
+                        earlyprintk=dbgp
+
+   see:
+   arch/x86/kernel/early_printk.c
+   arch/sh/kernel/early_printk.c
+   arch/blackfin/kernel/early_printk.c
+
+   For giggles - put a panic() in your arch/*/kernel/setup.c:setup_arch()
+   With earlyprintk - you still get to see what happened (if the 
+   earlyprintk console is working OK).
+
+   Problem:
+    Even with earlyprintk - there are times when things not getting
+    out of the system, and are stuck in the printk __log_buf.
+
+   David's patch might help with this - as architectures could register, 
+   and write all the prink data into a buffer in memory - where it could
+   be read out by the bootloader, or future kernels - but it would need
+   some tweaks to support early functionality (but I don't think much).
+
+ - late crash analysis - Sometimes - even after the kernel is up
+   and running properly - a device driver does a bad thing. 
+   Normally - complete kernel dumps can come out a serial
+   console, and you can you your favourite serial application
+   to scroll back and determine what is going on.
+
+   In many embedded devices - this is not a possibility, since
+   all the serial ports are in use (Irda, Bluetooth, GPS, etc).
+
+   In devices that are deployed in the field - this is not a
+   possibility, since nothing is connected to the serial 
+   console (if it exists) for logging.
+
+   Even when there is no console device, or anything attached to the
+   console device, everything is in the __log_buf.
+
+   Problem:
+   There doesn't appear (to me) to be anything in mainline to help 
+   with this.
+
+   David's patch might help with this - as architectures could register, 
+   and write all the prink data into a buffer in memory - where it could
+   be read out by the bootloader, or future kernels.
+
+ - allowing board startup information (POST) created/output from
+   the boot loader to be transfered to the standard/normal kernel
+   log processing features (syslog/dmesg/etc).
+
+   There doesn't appear (to me) to be anything in mainline to help 
+   with this.
+ 
+   David's patch could help with this - as architectures could register, 
+   and if a magic number was in the start of the buffer, it could just
+   strnlen the buffer, and then do a printk on it. The downside is it would
+   not be at the start of the buffer - as Grant's and Wolfgang's suggestion.
+   But I'm not sure this is a requirement???
+
+
+Is there anything I'm missing?
