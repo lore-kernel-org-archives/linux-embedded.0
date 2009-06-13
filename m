@@ -1,35 +1,58 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH 1/2] MMC Agressive clocking framework v2
-Date: Sat, 13 Jun 2009 14:45:09 +0200
-Message-ID: <63386a3d0906130545i4d2227a2h25e9b55df6954a1@mail.gmail.com>
-References: <63386a3d0906020536t5a3391f9r921959ba6d6dd96e@mail.gmail.com>
+From: Marco <marco.stornelli@gmail.com>
+Subject: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Sat, 13 Jun 2009 15:20:34 +0200
+Message-ID: <4A33A7A2.1050608@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:cc:content-type
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=mYOwHyvoJdqd1LZgzfeEE2Qh+hYqhRVSHL/z1xEf78I=;
-        b=U2MM2JT20KKA9jo85k2ucR3zxPBRFGLZAnoFQO8epMUGPNG5jwwpunuRGr/Z6knFra
-         67HWG5KBxgnDOqMhP6RUUlwycqXALYU24ijJPntOqsovkSO9e9NMT9wOe/3Rqfrs5rdN
-         lw1NJkb4j+uB8nzn7+kWwix9avFoMXeyClA28=
-In-Reply-To: <63386a3d0906020536t5a3391f9r921959ba6d6dd96e@mail.gmail.com>
+        bh=rR0IPGvBAJGBMuv7lJy6K1WJp6VR0XUwOBPwMb8GTog=;
+        b=f9L9hcFvDeU3GUWXHVdSsUdqZPxrkK4z3cRW5h+L1ULVgz6xSsQ49NjitMKVrpco/U
+         kWlNsyyrSGCXPTW4T68m+/dPjgOlvji5wGIvMYNkenwzLuNq74hvc3os+z5K9pIL9lEd
+         D74EPJxn36bYi/aeXR70lLccKbX3pHfFrK3f0=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Pierre Ossman <pierre@ossman.eu>, linux-arm-kernel@lists.arm.linux.org.uk, Pierre Ossman <drzeus-list@drzeus.cx>
-Cc: linux-embedded@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
+To: Linux FS Devel <linux-fsdevel@vger.kernel.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Daniel Walker <dwalker@soe.ucsc.edu>
 
-2009/6/2 Linus Walleij <linus.ml.walleij@gmail.com>:
+This is a second attempt at mainlining Pramfs. The first attempt was
+back in early 2004 by MontaVista. Since then the kernel code has almost
+been completely rewritten. So my first item on the list was porting the
+code on a recent kernel version. After that I added the XIP support.
 
-> This patch modified the MMC core code to optionally call the
-> set_ios() operation on the driver with the clock frequency set
-> to 0 to gate the hardware block clock (and thus the MCI clock)
+Now some FAQs:
 
-have you had a chance to look at this for the current merge
-window Pierre?
+What is the goal of this filesystem?
 
-Yours,
-Linus Walleij
+Many embedded systems have a block of non-volatile RAM separate from
+normal system memory, i.e. of which the kernel maintains no memory page
+descriptors. For such systems it would be beneficial to mount a
+fast read/write filesystem over this "I/O memory", for storing
+frequently accessed data that must survive system reboots and power
+cycles. An example usage might be system logs under /var/log, or a user
+address book in a cell phone or PDA.
+
+Why this kind of filesystem should be "mainlined"?
+
+Linux traditionally had no support for a persistent, non-volatile
+RAM-based filesystem, persistent meaning the filesystem survives a
+system reboot or power cycle intact. The RAM-based filesystems such as
+tmpfs and ramfs have no actual backing store but exist entirely in the
+page and buffer caches, hence the filesystem disappears after a system
+reboot or power cycle.
+
+Are there any pending patents on this code?
+
+NO, there aren't patents pending on this code. MontaVista had a pending
+patent application but now it has abandoned this way. Daniel Walker can
+confirm that.
+
+
+Marco
+
+
