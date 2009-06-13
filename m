@@ -1,55 +1,35 @@
-From: Russell King <rmk@arm.linux.org.uk>
-Subject: Re: Kernel crashing and log buffers...
-Date: Sat, 13 Jun 2009 11:26:42 +0100
-Message-ID: <20090613102642.GB7976@flint.arm.linux.org.uk>
-References: <200906102126.40410.rgetz@blackfin.uclinux.org>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH 1/2] MMC Agressive clocking framework v2
+Date: Sat, 13 Jun 2009 14:45:09 +0200
+Message-ID: <63386a3d0906130545i4d2227a2h25e9b55df6954a1@mail.gmail.com>
+References: <63386a3d0906020536t5a3391f9r921959ba6d6dd96e@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=arm.linux.org.uk; s=caramon; h=Date:From:To:Cc:Subject:
-	Message-ID:References:MIME-Version:Content-Type:In-Reply-To:
-	Sender; bh=UVv+Boy4zXx4Cm7SFxSKz+FkQ0efN72ezlEXYz2Ft5k=; b=WhihC
-	Tr+oz70GXOCTYbpMm8dNPxWa7FlP2BF7juIL2IDDjPhvsbqmJ7cgGftkaU5/F3g5
-	PQ6lCe2mvFmys8jKD2SqfDpj8VcWragfRpFIcEwuUa9E5OJeMxRYt3Kl2JvrJkNI
-	cO1NG6YL/kWJXRzN7QC/uTMudapZPeShQqmAe0=
-Content-Disposition: inline
-In-Reply-To: <200906102126.40410.rgetz@blackfin.uclinux.org>
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=mYOwHyvoJdqd1LZgzfeEE2Qh+hYqhRVSHL/z1xEf78I=;
+        b=U2MM2JT20KKA9jo85k2ucR3zxPBRFGLZAnoFQO8epMUGPNG5jwwpunuRGr/Z6knFra
+         67HWG5KBxgnDOqMhP6RUUlwycqXALYU24ijJPntOqsovkSO9e9NMT9wOe/3Rqfrs5rdN
+         lw1NJkb4j+uB8nzn7+kWwix9avFoMXeyClA28=
+In-Reply-To: <63386a3d0906020536t5a3391f9r921959ba6d6dd96e@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Robin Getz <rgetz@blackfin.uclinux.org>
-Cc: Mike Frysinger <vapier@gentoo.org>, Greg Ungerer <gerg@snapgear.com>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
+To: Pierre Ossman <pierre@ossman.eu>, linux-arm-kernel@lists.arm.linux.org.uk, Pierre Ossman <drzeus-list@drzeus.cx>
+Cc: linux-embedded@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
 
-On Wed, Jun 10, 2009 at 09:26:40PM -0400, Robin Getz wrote:
-> I would be interested in Paul and Russell - how have you solved this issue? 
-> (Or do your kernel's never crash? :)
+2009/6/2 Linus Walleij <linus.ml.walleij@gmail.com>:
 
-We haven't any dedicated solution to reading out the crash messages.
+> This patch modified the MMC core code to optionally call the
+> set_ios() operation on the driver with the clock frequency set
+> to 0 to gate the hardware block clock (and thus the MCI clock)
 
-What we do have is a very basic platform specific serial IO implementation
-which we call "low level debug" - it just provides a number of functions
-(eg, printascii).  These functions are callable from assembly or C, and
-can work whether the MMU is enabled or not.
+have you had a chance to look at this for the current merge
+window Pierre?
 
-People can enable the low level debug build option and patch into
-kernel/printk.c to hook it up (or place printascii etc where-ever they
-choose.)  It has the advantage that it is entirely synchronous from
-every context.
-
-Yes, it requires a little bit of effort on the part of the developer to
-hook it up - so far no one has complained about the process of hooking
-this facility up in their kernel.
-
-You can use this to debug SMP bringup, but you risk having each CPU
-stomping on each other's messages - so it's in no way perfect.
-
-The other way I've seen people read out crash messages is using a
-debugger to dump the kernel's log buffer directly.  That seems to work
-as well as any other method, and has the advantage that it doesn't
-require any kernel modifications.
-
--- 
-Russell King
- Linux kernel    2.6 ARM Linux   - http://www.arm.linux.org.uk/
- maintainer of:
+Yours,
+Linus Walleij
