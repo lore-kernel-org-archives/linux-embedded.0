@@ -1,7 +1,7 @@
 From: Marco <marco.stornelli@gmail.com>
-Subject: [PATCH 13/14] Pramfs: Write protection
-Date: Sat, 13 Jun 2009 15:23:01 +0200
-Message-ID: <4A33A835.901@gmail.com>
+Subject: [PATCH 14/14] Pramfs: XIP operations
+Date: Sat, 13 Jun 2009 15:23:13 +0200
+Message-ID: <4A33A841.6080902@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=gd9tOIEuRgcpAiLnS/1HIv9wETYcrP8RVSl7ujAFgOQ=;
-        b=Ku5MVVaRw/SPTBb6JJacMS9FonsM269rJofA5oYyKsZfQul8EsZX68U++xLLtYiCZE
-         NQ7eEK8ElZnccYAYK3UrzwTsgtmbLBVG1/TTLUGT4zF5otcts7cM50RTyXQkjs9xBPKN
-         pD0aTz9pDGGaKrHxQtMuctk71+ccqqxwkGGjM=
+        bh=Ms3KYEbBaJN7oUs4q7SPatreAH0CPrgAVJkxHMUdTKc=;
+        b=Emcydh2VVTuRkI936BJYTfTbiBSUjoqZkqlihd0hFKUvexM7WuPG3iyCOWY6HXeOAM
+         r/owN71G/Kg6yS220psrmV/LgP9SrMx2dsTZbKO7taTHK4u2TG2bhEJu83x393u74sPH
+         gmvDpnbvuzu8koMdrz1vf+bTZjFk7tVLrdTtE=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -22,97 +22,131 @@ Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-Write protection.
+XIP operations.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
 
-diff -uprN linux-2.6.30-orig/fs/pramfs/wprotect.c linux-2.6.30/fs/pramfs/wprotect.c
---- linux-2.6.30-orig/fs/pramfs/wprotect.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.30/fs/pramfs/wprotect.c	2009-06-13 12:54:16.000000000 +0200
-@@ -0,0 +1,84 @@
+diff -uprN linux-2.6.30-orig/fs/pramfs/xip.c linux-2.6.30/fs/pramfs/xip.c
+--- linux-2.6.30-orig/fs/pramfs/xip.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.30/fs/pramfs/xip.c	2009-06-13 12:54:26.000000000 +0200
+@@ -0,0 +1,90 @@
 +/*
-+ * FILE NAME fs/pramfs/wprotect.c
++ * FILE NAME fs/pramfs/xip.c
 + *
 + * BRIEF DESCRIPTION
 + *
-+ * Write protection for the filesystem pages.
++ * XIP operations.
 + *
 + * Copyright 2009 Marco Stornelli <marco.stornelli@gmail.com>
-+ * Copyright 2003 Sony Corporation
-+ * Copyright 2003 Matsushita Electric Industrial Co., Ltd.
-+ * 2003-2004 (c) MontaVista Software, Inc. , Steve Longerbeam
 + * This file is licensed under the terms of the GNU General Public
 + * License version 2. This program is licensed "as is" without any
 + * warranty of any kind, whether express or implied.
 + */
 +
-+#include <linux/module.h>
-+#include <linux/fs.h>
 +#include <linux/mm.h>
-+#include <asm/pgtable.h>
-+#include <asm/pgalloc.h>
-+#include <asm/tlbflush.h>
++#include <linux/fs.h>
++#include <linux/genhd.h>
++#include <linux/buffer_head.h>
 +#include "pram_fs.h"
++#include "xip.h"
 +
-+/* init_mm.page_table_lock must be held before calling! */
-+static void pram_page_writeable(unsigned long addr, int rw)
++static int pram_find_and_alloc_blocks(struct inode *inode, sector_t iblock,
++				     sector_t *data_block, int create)
 +{
-+	pgd_t *pgdp;
-+	pud_t *pudp;
-+	pmd_t *pmdp;
-+	pte_t *ptep;
++	int err = -EIO;
++	off_t block;
 +
-+	pgdp = pgd_offset_k(addr);
-+	if (!pgd_none(*pgdp)) {
-+		pudp = pud_offset(pgdp, addr);
-+		if (!pud_none(*pudp)) {
-+			pmdp = pmd_offset(pudp, addr);
-+			if (!pmd_none(*pmdp)) {
-+				pte_t pte;
-+				ptep = pte_offset_kernel(pmdp, addr);
-+				pte = *ptep;
-+				if (pte_present(pte)) {
-+					pte = rw ? pte_mkwrite(pte) :
-+						pte_wrprotect(pte);
-+					set_pte(ptep, pte);
-+				}
-+			}
++	lock_kernel();
++
++	block = pram_find_data_block(inode, iblock);
++
++	if (!block) {
++		if (!create) {
++			err = -ENODATA;
++			goto err;
++		}
++
++		err = pram_alloc_blocks(inode, iblock, 1);
++		if (err)
++			goto err;
++
++		block = pram_find_data_block(inode, iblock);
++		if (!block) {
++			err = -ENODATA;
++			goto err;
 +		}
 +	}
++
++	*data_block = block;
++	err = 0;
++
++ err:
++	unlock_kernel();
++	return err;
 +}
 +
-+/* init_mm.page_table_lock must be held before calling! */
-+void pram_writeable(void *vaddr, unsigned long size, int rw)
++
++static int __pram_get_block(struct inode *inode, pgoff_t pgoff, int create,
++		   sector_t *result)
 +{
-+	unsigned long addr = (unsigned long)vaddr & PAGE_MASK;
-+	unsigned long end = (unsigned long)vaddr + size;
-+	unsigned long start = addr;
++	int rc = 0;
++	sector_t iblock;
 +
-+	do {
-+		pram_page_writeable(addr, rw);
-+		addr += PAGE_SIZE;
-+	} while (addr && (addr < end));
++	/* find starting block number to access */
++	iblock = (sector_t)pgoff << (PAGE_CACHE_SHIFT - inode->i_blkbits);
 +
++	rc = pram_find_and_alloc_blocks(inode, iblock, result, create);
 +
-+	/*
-+	 * NOTE: we will always flush just one page (one TLB
-+	 * entry) except possibly in one case: when a new
-+	 * filesystem is initialized at mount time, when pram_read_super
-+	 * calls pram_lock_range to make the super block, inode
-+	 * table, and bitmap writeable.
-+	 */
-+#if defined(CONFIG_ARM) || defined(CONFIG_M68K) || defined(CONFIG_H8300) || \
-+	defined(CONFIG_BLACKFIN)
-+	/*
-+	 * FIXME: so far only these archs have flush_tlb_kernel_page(),
-+	 * for the rest just use flush_tlb_kernel_range(). Not ideal
-+	 * to use _range() because many archs just flush the whole TLB.
-+	 */
-+	if (end <= start + PAGE_SIZE)
-+		flush_tlb_kernel_page(start);
-+	else
-+#endif
-+		flush_tlb_kernel_range(start, end);
++	if (rc == -ENODATA)
++		BUG_ON(create);
++
++	return rc;
 +}
-
++
++int pram_get_xip_mem(struct address_space *mapping, pgoff_t pgoff, int create,
++				void **kmem, unsigned long *pfn)
++{
++	int rc;
++	sector_t block;
++
++	/* first, retrieve the block */
++	rc = __pram_get_block(mapping->host, pgoff, create, &block);
++	if (rc)
++		goto exit;
++
++	*kmem = pram_get_block(mapping->host->i_sb, block);
++	*pfn = page_to_pfn(virt_to_page((unsigned long)*kmem));
++
++exit:
++	return rc;
++}
+diff -uprN linux-2.6.30-orig/fs/pramfs/xip.h linux-2.6.30/fs/pramfs/xip.h
+--- linux-2.6.30-orig/fs/pramfs/xip.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.30/fs/pramfs/xip.h	2009-03-28 14:59:13.000000000 +0100
+@@ -0,0 +1,25 @@
++/*
++ * FILE NAME fs/pramfs/xip.h
++ *
++ * BRIEF DESCRIPTION
++ *
++ * XIP operations.
++ *
++ * Author: Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#ifdef CONFIG_PRAMFS_XIP
++
++int pram_get_xip_mem(struct address_space *, pgoff_t, int, void **,
++							      unsigned long *);
++
++#else
++
++#define pram_get_xip_mem NULL
++
++#endif
++
