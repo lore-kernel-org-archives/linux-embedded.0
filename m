@@ -1,39 +1,39 @@
-From: Wolfgang Denk <wd@denx.de>
-Subject: Re: Kernel crashing and log buffers...
-Date: Sat, 13 Jun 2009 20:59:26 +0200
-Message-ID: <20090613185926.BAB66832E416@gemini.denx.de>
-References: <200906102126.40410.rgetz@blackfin.uclinux.org> <20090613102642.GB7976@flint.arm.linux.org.uk>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Sun, 14 Jun 2009 00:59:56 +0200
+Message-ID: <200906140059.57362.arnd@arndb.de>
+References: <4A33A7EC.6070008@gmail.com> <20090613140459.GC30053@uranus.ravnborg.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: <20090613102642.GB7976@flint.arm.linux.org.uk>
+In-Reply-To: <20090613140459.GC30053@uranus.ravnborg.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Russell King <rmk@arm.linux.org.uk>
-Cc: Robin Getz <rgetz@blackfin.uclinux.org>, Mike Frysinger <vapier@gentoo.org>, Greg Ungerer <gerg@snapgear.com>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: Text/Plain; charset="us-ascii"
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Marco <marco.stornelli@gmail.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-Dear Russell King,
+On Saturday 13 June 2009, Sam Ravnborg wrote:
+> > +     union {
+> > +             struct {
+> > +                     /*
+> > +                      * ptr to row block of 2D block pointer array,
+> > +                      * file block #'s 0 to (blocksize/4)^2 - 1.
+> > +                      */
+> > +                     off_t row_block;
+> 
+> It is my understanding that we shall use: __kernel_off_t
+> in exported headers.
 
-In message <20090613102642.GB7976@flint.arm.linux.org.uk> you wrote:
->
-> The other way I've seen people read out crash messages is using a
-> debugger to dump the kernel's log buffer directly.  That seems to work
-> as well as any other method, and has the advantage that it doesn't
-> require any kernel modifications.
+That is a correct understanding in general, however this case is
+different, because it describes an on-disk data structure,
+not a kernel to user space interface. Here, __kernel_off_t is just
+as wrong as off_t, because it will differ between 32 and 64 bit
+architectures, making the fs layout incompatible. I'd suggest
+simply defining this as __u64.
 
-This works well in the lab during hardware bringup or BSP development.
+Moreover, file system layout should be described in terms of
+big-endian or little-endian types (e.g. __be64 or __le64),
+together with the right accessor functions.
 
-But we are also interested in a solution that allows to get  more  or
-less  automatic access to the log buffer content after a crash - when
-you have several ten thousand systems in the field,  such  a  feature
-can save you a lot of money.
-
-Best regards,
-
-Wolfgang Denk
-
--- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+	Arnd <><
