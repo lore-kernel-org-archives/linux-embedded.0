@@ -1,59 +1,32 @@
-From: Sam Ravnborg <sam@ravnborg.org>
+From: Daniel Walker <dwalker@fifo99.com>
 Subject: Re: [PATCH 08/14] Pramfs: Makefile and Kconfig
-Date: Sat, 13 Jun 2009 15:56:04 +0200
-Message-ID: <20090613135604.GB30053@uranus.ravnborg.org>
+Date: Sat, 13 Jun 2009 07:02:12 -0700
+Message-ID: <1244901732.5982.221.camel@desktop>
 References: <4A33A802.8040507@gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <4A33A802.8040507@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Marco <marco.stornelli@gmail.com>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-> +
-> +config PRAMFS_NOWP
-> +	bool "Disable PRAMFS write protection"
-> +	depends on PRAMFS
-> +	default n
-> +	help
-> +	   Say Y here to disable the write protect feature of PRAMFS.
-n is default so "default n" is not needed.
-If you reverse the logic (and add a default y) then..
+On Sat, 2009-06-13 at 15:22 +0200, Marco wrote:
+> From: Marco Stornelli <marco.stornelli@gmail.com>
+> 
+> Makefile and Kconfig.
+> 
+> Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+> ---
+> 
 
-> +ifneq ($(CONFIG_PRAMFS_NOWP),y)
-> +pramfs-objs += wprotect.o
-> +endif
-This is a trivial:
-pramfs-$(PRAMFS_WRITE_PROTECT) += wprotect.o
+You should move this patch to 11 of 14, as I think that is the point
+when the filesystem can actually be enabled and function. If this series
+is only applied up to this patch you can get build failures if you
+enabled PRAMFS, XIP, or any of the other features. Also breaking out the
+individual features menuconfig options like XIP, and write protect, etc,
+into their respective patches would be nice.
 
-(I renamed the option to something more descriptive - please do so in the abvoe).
-
-
-> +++ linux-2.6.30/fs/pramfs/Makefile	2009-04-19 11:58:51.000000000 +0200
-> @@ -0,0 +1,13 @@
-> +#
-> +# Makefile for the linux pram-filesystem routines.
-> +#
-> +
-> +obj-$(CONFIG_PRAMFS) += pramfs.o
-> +obj-$(CONFIG_TEST_MODULE) += pramfs_test.o
-> +
-> +pramfs-objs := balloc.o dir.o file.o inode.o namei.o super.o symlink.o
-
-Use:
-pramfs-y := balloc.o ...
-
-This match usa later in this file.
-
-> +
-> +ifneq ($(CONFIG_PRAMFS_NOWP),y)
-> +pramfs-objs += wprotect.o
-> +endif
-> +pramfs-$(CONFIG_PRAMFS_XIP) += xip.o
-
-
-	Sam
+Daniel
