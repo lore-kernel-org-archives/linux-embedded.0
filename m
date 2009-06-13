@@ -1,45 +1,64 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: Kernel crashing and log buffers...
-Date: Sat, 13 Jun 2009 17:49:01 +0100
-Message-ID: <20090613164901.GF16220@shareable.org>
-References: <200906102126.40410.rgetz@blackfin.uclinux.org> <8bd0f97a0906111627h128cc561y2bf4a0b2b30d7187@mail.gmail.com> <20090612010707.GB23715@cuplxvomd02.corp.sa.net> <200906120054.46965.rgetz@blackfin.uclinux.org>
+From: Pierre Ossman <drzeus-list@drzeus.cx>
+Subject: Re: [PATCH 1/2] MMC Agressive clocking framework v2
+Date: Sat, 13 Jun 2009 20:27:15 +0200
+Message-ID: <20090613202715.33a03a43@mjolnir.ossman.eu>
+References: <63386a3d0906020536t5a3391f9r921959ba6d6dd96e@mail.gmail.com>
+	<63386a3d0906130545i4d2227a2h25e9b55df6954a1@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-28342-1244917639-0001-2"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <200906120054.46965.rgetz@blackfin.uclinux.org>
+In-Reply-To: <63386a3d0906130545i4d2227a2h25e9b55df6954a1@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
+
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
+
+--=_freyr.ossman.eu-28342-1244917639-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
+
+On Sat, 13 Jun 2009 14:45:09 +0200
+Linus Walleij <linus.ml.walleij@gmail.com> wrote:
+
+> 2009/6/2 Linus Walleij <linus.ml.walleij@gmail.com>:
+>=20
+> > This patch modified the MMC core code to optionally call the
+> > set_ios() operation on the driver with the clock frequency set
+> > to 0 to gate the hardware block clock (and thus the MCI clock)
+>=20
+> have you had a chance to look at this for the current merge
+> window Pierre?
+>=20
+
+Not yet, but I plan to. Sorry about the delay.
+
+Rgds
+--=20
+     -- Pierre Ossman
+
+  Linux kernel, MMC maintainer        http://www.kernel.org
+  rdesktop, core developer          http://www.rdesktop.org
+  TigerVNC, core developer          http://www.tigervnc.org
+
+  WARNING: This correspondence is being monitored by the
+  Swedish government. Make sure your server uses encryption
+  for SMTP traffic and consider using PGP for end-to-end
+  encryption.
+
+--=_freyr.ossman.eu-28342-1244917639-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
 Content-Transfer-Encoding: 7bit
-To: Robin Getz <rgetz@blackfin.uclinux.org>
-Cc: David VomLehn <dvomlehn@cisco.com>, Mike Frysinger <vapier.adi@gmail.com>, Greg Ungerer <gerg@snapgear.com>, Russell King <rmk@arm.linux.org.uk>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Disposition: attachment; filename=signature.asc
 
-Robin Getz wrote:
->  - late crash analysis - Sometimes - even after the kernel is up
->    and running properly - a device driver does a bad thing. 
->    Normally - complete kernel dumps can come out a serial
->    console, and you can you your favourite serial application
->    to scroll back and determine what is going on.
-> 
->    In many embedded devices - this is not a possibility, since
->    all the serial ports are in use (Irda, Bluetooth, GPS, etc).
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.11 (GNU/Linux)
 
-There's another thing with serial ports:
+iEYEARECAAYFAkoz74cACgkQ7b8eESbyJLh9GACfYzds2CPZfhluTZUwYAsuOOBD
+E6wAniRGBLzATX0HntBkA/BhTXaFqIE5
+=3gMc
+-----END PGP SIGNATURE-----
 
-In embedded devices, I've seen serial drivers hooked up to the console
-output either synchronously or asynchronously.
-
-Synchronously, every printk() waits to be sent to the serial port, and
-this slows the kernel down in normal operation, and especially boot
-time.
-
-Asynchronously, every printk() does into the log buffer without delay,
-and is sent over the serial port as fast as that can.  It doesn't slow
-the kernel down much.
-
-When it's done asynchronously, if the kernel crashes you don't always
-get the last output prior to the crash, even with a serial terminal
-listening in your lab.  But if you do it synchronously, it slows
-things down.
-
--- Jamie
+--=_freyr.ossman.eu-28342-1244917639-0001-2--
