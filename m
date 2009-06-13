@@ -1,68 +1,55 @@
-From: Christian Gagneraud <cgagneraud@techworks.ie>
-Subject: Re: AT91SAM9G20 design and power (was and boot times)
-Date: Fri, 12 Jun 2009 19:37:51 +0100
-Message-ID: <4A32A07F.5020907@techworks.ie>
-References: <ed62800906102037q71f2a6bdq835793a1ac36c41b@mail.gmail.com> <ed62800906102043m723911d8t1968174201ba7fbb@mail.gmail.com>
+From: Russell King <rmk@arm.linux.org.uk>
+Subject: Re: Kernel crashing and log buffers...
+Date: Sat, 13 Jun 2009 11:26:42 +0100
+Message-ID: <20090613102642.GB7976@flint.arm.linux.org.uk>
+References: <200906102126.40410.rgetz@blackfin.uclinux.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <ed62800906102043m723911d8t1968174201ba7fbb@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=arm.linux.org.uk; s=caramon; h=Date:From:To:Cc:Subject:
+	Message-ID:References:MIME-Version:Content-Type:In-Reply-To:
+	Sender; bh=UVv+Boy4zXx4Cm7SFxSKz+FkQ0efN72ezlEXYz2Ft5k=; b=WhihC
+	Tr+oz70GXOCTYbpMm8dNPxWa7FlP2BF7juIL2IDDjPhvsbqmJ7cgGftkaU5/F3g5
+	PQ6lCe2mvFmys8jKD2SqfDpj8VcWragfRpFIcEwuUa9E5OJeMxRYt3Kl2JvrJkNI
+	cO1NG6YL/kWJXRzN7QC/uTMudapZPeShQqmAe0=
+Content-Disposition: inline
+In-Reply-To: <200906102126.40410.rgetz@blackfin.uclinux.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Aras Vaichas <arasv@magellan-technology.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Robin Getz <rgetz@blackfin.uclinux.org>
+Cc: Mike Frysinger <vapier@gentoo.org>, Greg Ungerer <gerg@snapgear.com>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Aras Vaichas wrote:
-> Hi,
-> 
-> we're designing our next generation RFID reader and I'm planning on
-> using the AT91SAM9G20 in the next design. We currently use the
-> AT91RM9200.
-> 
-> Can I get some feedback from people with regards to general design
-> configurations  that affect the boot time with respect to this CPU (or
-> the AT91SAM9260)
-> 
-> Some questions are:
-> 
-> * what is your boot time? What is the time from power-on to kernel
-> running, how long does the kernel take to run until init starts, and
-> how long does init take?
-> * what is your system hardware configuration? CPU+NAND, CPU+NOR+NAND,
-> CPU+DATAFLASH+NAND?
-> * do you boot everything from the NAND or do you use a combination of
-> Dataflash/NOR and NAND?
-> * do you use U-Boot, or a minimal custom bootloader that copies a
-> kernel image from NAND to SDRAM and then executes it?
-> * do you mount a small partition of the NAND to begin with and then
-> mount the rest later?
-> * do you have a monolithic kernel, or is it split into minimal with
-> modules loaded from, say, JFFS2 on NAND?
-> * are you using JFFS2 or UBIFS?
-> 
-> Any info is much appreciated, thank you!
+On Wed, Jun 10, 2009 at 09:26:40PM -0400, Robin Getz wrote:
+> I would be interested in Paul and Russell - how have you solved this issue? 
+> (Or do your kernel's never crash? :)
 
-Hi all,
+We haven't any dedicated solution to reading out the crash messages.
 
-I'm changing slightly the topic...
+What we do have is a very basic platform specific serial IO implementation
+which we call "low level debug" - it just provides a number of functions
+(eg, printascii).  These functions are callable from assembly or C, and
+can work whether the MMU is enabled or not.
 
-We are thinking about making our own board as well, but we are mainly 
-concerned with power consumption.
+People can enable the low level debug build option and patch into
+kernel/printk.c to hook it up (or place printascii etc where-ever they
+choose.)  It has the advantage that it is entirely synchronous from
+every context.
 
-Can anyone gives some feedback as well about power consumption of 
-their board (or the main components) and as well about the current 
-support for power management of the Linux kernel? What about suspend 
-to RAM, frequency scaling, etc...?
+Yes, it requires a little bit of effort on the part of the developer to
+hook it up - so far no one has complained about the process of hooking
+this facility up in their kernel.
 
-Regards,
-Chris
+You can use this to debug SMP bringup, but you risk having each CPU
+stomping on each other's messages - so it's in no way perfect.
 
-> 
-> regards,
-> 
-> Aras Vaichas
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The other way I've seen people read out crash messages is using a
+debugger to dump the kernel's log buffer directly.  That seems to work
+as well as any other method, and has the advantage that it doesn't
+require any kernel modifications.
+
+-- 
+Russell King
+ Linux kernel    2.6 ARM Linux   - http://www.arm.linux.org.uk/
+ maintainer of:
