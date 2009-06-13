@@ -1,33 +1,45 @@
 From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Sat, 13 Jun 2009 16:59:57 +0100
-Message-ID: <20090613155957.GA16220@shareable.org>
-References: <4A33A7A2.1050608@gmail.com>
+Subject: Re: Kernel crashing and log buffers...
+Date: Sat, 13 Jun 2009 17:49:01 +0100
+Message-ID: <20090613164901.GF16220@shareable.org>
+References: <200906102126.40410.rgetz@blackfin.uclinux.org> <8bd0f97a0906111627h128cc561y2bf4a0b2b30d7187@mail.gmail.com> <20090612010707.GB23715@cuplxvomd02.corp.sa.net> <200906120054.46965.rgetz@blackfin.uclinux.org>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A33A7A2.1050608@gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+In-Reply-To: <200906120054.46965.rgetz@blackfin.uclinux.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Marco <marco.stornelli@gmail.com>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Daniel Walker <dwalker@soe.ucsc.edu>
+To: Robin Getz <rgetz@blackfin.uclinux.org>
+Cc: David VomLehn <dvomlehn@cisco.com>, Mike Frysinger <vapier.adi@gmail.com>, Greg Ungerer <gerg@snapgear.com>, Russell King <rmk@arm.linux.org.uk>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Marco wrote:
-> Linux traditionally had no support for a persistent, non-volatile
-> RAM-based filesystem, persistent meaning the filesystem survives a
-> system reboot or power cycle intact. The RAM-based filesystems such as
-> tmpfs and ramfs have no actual backing store but exist entirely in the
-> page and buffer caches, hence the filesystem disappears after a system
-> reboot or power cycle.
+Robin Getz wrote:
+>  - late crash analysis - Sometimes - even after the kernel is up
+>    and running properly - a device driver does a bad thing. 
+>    Normally - complete kernel dumps can come out a serial
+>    console, and you can you your favourite serial application
+>    to scroll back and determine what is going on.
+> 
+>    In many embedded devices - this is not a possibility, since
+>    all the serial ports are in use (Irda, Bluetooth, GPS, etc).
 
-Why is a ramdisk not sufficient for this?
+There's another thing with serial ports:
 
-Why is an entire filesystem needed, instead of simply a block driver
-if the ramdisk driver cannot be used?
+In embedded devices, I've seen serial drivers hooked up to the console
+output either synchronously or asynchronously.
 
-It just struck me as a lot of code which might be completely
-unnecessary for the desired functionality.
+Synchronously, every printk() waits to be sent to the serial port, and
+this slows the kernel down in normal operation, and especially boot
+time.
+
+Asynchronously, every printk() does into the log buffer without delay,
+and is sent over the serial port as fast as that can.  It doesn't slow
+the kernel down much.
+
+When it's done asynchronously, if the kernel crashes you don't always
+get the last output prior to the crash, even with a serial terminal
+listening in your lab.  But if you do it synchronously, it slows
+things down.
 
 -- Jamie
