@@ -1,20 +1,20 @@
 From: Marco <marco.stornelli@gmail.com>
-Subject: [PATCH 08/14] Pramfs: Makefile and Kconfig
-Date: Sat, 13 Jun 2009 15:22:10 +0200
-Message-ID: <4A33A802.8040507@gmail.com>
+Subject: [PATCH 09/14] Pramfs: Inode operations for directories
+Date: Sat, 13 Jun 2009 15:22:20 +0200
+Message-ID: <4A33A80C.4080001@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=pk3S8Q95tasHDLVZsvhxzhvFRE7zDKiUC8O7TwFJXoU=;
-        b=fLp5UBzKJfLFWhZwOdRzlU68gksuIuo9KH0rzjG802ezwc/7qCqL7GL4FHkLg5DY7z
-         ID2fWWtOTz8GQmO3+1IfR5IvznGLkwrxmgXDsbeczHseTcOOT4tNCSQd7cZnyXQPvErY
-         pmXUUBPbisXiHr0en6us9eNTz/gPL3OWIj6lo=
-Sender: linux-embedded-owner@vger.kernel.org
+        bh=vugRaC+8oalhp1PwMM4YevQPm6YImTORm/loS9rXNZo=;
+        b=IUSp3pFPPc4PXaf7Xm9MxGdMaucgdO8cdit9sYuv81Kam9YaAmIjTuoRnAo+s2NRxJ
+         8X4e1sfLIEjKQCkha85HIfXcmyQH7gHi3Dr5wfSiXhMVr8diD2Q7vFiH95M94Ncze1iB
+         N8XUIZNep22feJgvqQasUetya2XuII6Ib3zug=
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Linux FS Devel <linux-fsdevel@vger.kernel.org>
@@ -22,110 +22,342 @@ Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-Makefile and Kconfig.
+Inode operations for directories.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
 
-diff -uprN linux-2.6.30-orig/fs/Kconfig linux-2.6.30/fs/Kconfig
---- linux-2.6.30-orig/fs/Kconfig	2009-06-10 05:05:27.000000000 +0200
-+++ linux-2.6.30/fs/Kconfig	2009-06-13 10:01:41.000000000 +0200
-@@ -13,7 +13,7 @@ source "fs/ext4/Kconfig"
- config FS_XIP
- # execute in place
- 	bool
--	depends on EXT2_FS_XIP
-+	depends on EXT2_FS_XIP || PRAMFS_XIP
- 	default y
- 
- source "fs/jbd/Kconfig"
-@@ -176,6 +176,7 @@ source "fs/romfs/Kconfig"
- source "fs/sysv/Kconfig"
- source "fs/ufs/Kconfig"
- source "fs/exofs/Kconfig"
-+source "fs/pramfs/Kconfig"
- 
- config NILFS2_FS
- 	tristate "NILFS2 file system support (EXPERIMENTAL)"
-diff -uprN linux-2.6.30-orig/fs/Makefile linux-2.6.30/fs/Makefile
---- linux-2.6.30-orig/fs/Makefile	2009-06-10 05:05:27.000000000 +0200
-+++ linux-2.6.30/fs/Makefile	2009-06-13 10:00:26.000000000 +0200
-@@ -124,3 +124,5 @@ obj-$(CONFIG_OCFS2_FS)		+= ocfs2/
- obj-$(CONFIG_BTRFS_FS)		+= btrfs/
- obj-$(CONFIG_GFS2_FS)           += gfs2/
- obj-$(CONFIG_EXOFS_FS)          += exofs/
-+obj-$(CONFIG_PRAMFS)		+= pramfs/
+diff -uprN linux-2.6.30-orig/fs/pramfs/namei.c linux-2.6.30/fs/pramfs/namei.c
+--- linux-2.6.30-orig/fs/pramfs/namei.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.30/fs/pramfs/namei.c	2009-06-13 12:53:15.000000000 +0200
+@@ -0,0 +1,328 @@
++/*
++ * FILE NAME fs/pramfs/namei.c
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Inode operations for directories.
++ *
++ * Copyright 2009 Marco Stornelli <marco.stornelli@gmail.com>
++ * Copyright 2003 Sony Corporation
++ * Copyright 2003 Matsushita Electric Industrial Co., Ltd.
++ * 2003-2004 (c) MontaVista Software, Inc. , Steve Longerbeam
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++#include <linux/fs.h>
++#include <linux/pagemap.h>
++#include "pram_fs.h"
 +
-diff -uprN linux-2.6.30-orig/fs/pramfs/Kconfig linux-2.6.30/fs/pramfs/Kconfig
---- linux-2.6.30-orig/fs/pramfs/Kconfig	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.30/fs/pramfs/Kconfig	2009-04-22 15:22:54.000000000 +0200
-@@ -0,0 +1,51 @@
-+config PRAMFS
-+	tristate "Persistent and Protected RAM file system support"
-+	select PRAMFS_NOWP if PRAMFS=m
-+	help
-+	   If your system has a block of fast (comparable in access speed to
-+	   system memory) and non-volatile RAM and you wish to mount a
-+	   light-weight, full-featured, and space-efficient filesystem over it,
-+	   say Y here, and read <file:Documentation/filesystems/pramfs.txt>.
++/*
++ * Couple of helper functions - make the code slightly cleaner.
++ */
 +
-+	   To compile this as a module,  choose M here: the module will be
-+	   called pramfs.
++static inline void pram_inc_count(struct inode *inode)
++{
++	inode->i_nlink++;
++	pram_write_inode(inode, 0);
++}
 +
-+config PRAMFS_XIP
-+	bool "Enable Execute-in-place in PRAMFS"
-+	depends on PRAMFS
-+	select PRAMFS_NOWP
-+	help
-+	   Say Y here to enable xip feature of PRAMFS.
++static inline void pram_dec_count(struct inode *inode)
++{
++	if (inode->i_nlink) {
++		inode->i_nlink--;
++		pram_write_inode(inode, 0);
++	}
++}
 +
-+config PRAMFS_NOWP
-+	bool "Disable PRAMFS write protection"
-+	depends on PRAMFS
-+	default n
-+	help
-+	   Say Y here to disable the write protect feature of PRAMFS.
++static inline int pram_add_nondir(struct inode *dir,
++				   struct dentry *dentry,
++				   struct inode *inode)
++{
++	int err = pram_add_link(dentry, inode);
++	if (!err) {
++		d_instantiate(dentry, inode);
++		return 0;
++	}
++	pram_dec_count(inode);
++	iput(inode);
++	return err;
++}
 +
-+config ROOT_PRAMFS
-+	bool "Root file system on PRAMFS"
-+	depends on PRAMFS && !ROOT_NFS
-+	help
-+	  Say Y if you have enabled PRAMFS, and you want to be
-+	  able to use PRAMFS as the root filesystem.  To actually
-+	  have the kernel mount PRAMFS as a root file system, you
-+	  must also pass the command line parameter
-+	  "root=/dev/null rootflags=physaddr=0x********" to the kernel
-+	  (replace 0x******** with the physical address location of the
-+	  previously initialized PRAMFS memory to boot with).
++/*
++ * Methods themselves.
++ */
 +
-+config PRAMFS_TEST
-+	boolean
-+	depends on PRAMFS
-+	default n
++static ino_t
++pram_inode_by_name(struct inode *dir,
++		   struct dentry *dentry)
++{
++	struct pram_inode *pi;
++	ino_t ino;
++	int namelen;
 +
-+config TEST_MODULE
-+	tristate "PRAMFS Test"
-+	depends on PRAMFS && m && !PRAMFS_NOWP
-+	select PRAMFS_TEST
-+	default n
-+	help
-+	  Say Y here to build a simple module to test the protection of
-+	  PRAMFS. The module will be called pramfs_test.ko.
-diff -uprN linux-2.6.30-orig/fs/pramfs/Makefile linux-2.6.30/fs/pramfs/Makefile
---- linux-2.6.30-orig/fs/pramfs/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.30/fs/pramfs/Makefile	2009-04-19 11:58:51.000000000 +0200
-@@ -0,0 +1,13 @@
-+#
-+# Makefile for the linux pram-filesystem routines.
-+#
++	pi = pram_get_inode(dir->i_sb, dir->i_ino);
++	ino = pi->i_type.dir.head;
 +
-+obj-$(CONFIG_PRAMFS) += pramfs.o
-+obj-$(CONFIG_TEST_MODULE) += pramfs_test.o
++	while (ino) {
++		pi = pram_get_inode(dir->i_sb, ino);
 +
-+pramfs-objs := balloc.o dir.o file.o inode.o namei.o super.o symlink.o
++		if (pi->i_links_count) {
++			namelen = strlen(pi->i_d.d_name);
 +
-+ifneq ($(CONFIG_PRAMFS_NOWP),y)
-+pramfs-objs += wprotect.o
-+endif
-+pramfs-$(CONFIG_PRAMFS_XIP) += xip.o
++			if (namelen == dentry->d_name.len &&
++			    !memcmp(dentry->d_name.name,
++				    pi->i_d.d_name, namelen))
++				break;
++		}
++
++		ino = pi->i_d.d_next;
++	}
++
++	return ino;
++}
++
++static struct dentry *
++pram_lookup(struct inode *dir, struct dentry *dentry, struct nameidata *nd)
++{
++	struct inode *inode = NULL;
++	ino_t ino;
++
++	if (dentry->d_name.len > PRAM_NAME_LEN)
++		return ERR_PTR(-ENAMETOOLONG);
++
++	ino = pram_inode_by_name(dir, dentry);
++	if (ino) {
++		struct pram_inode *pi = pram_get_inode(dir->i_sb, ino);
++		inode = pram_fill_new_inode(dir->i_sb, pi);
++		if (!inode)
++			return ERR_PTR(-EACCES);
++	}
++
++	d_add(dentry, inode);
++	return NULL;
++}
++
++
++/*
++ * By the time this is called, we already have created
++ * the directory cache entry for the new file, but it
++ * is so far negative - it has no inode.
++ *
++ * If the create succeeds, we fill in the inode information
++ * with d_instantiate().
++ */
++static int pram_create(struct inode *dir, struct dentry *dentry,
++			int mode, struct nameidata *nd)
++{
++	struct inode *inode = pram_new_inode(dir, mode);
++	int err = PTR_ERR(inode);
++	if (!IS_ERR(inode)) {
++
++		inode->i_op = &pram_file_inode_operations;
++		inode->i_fop = &pram_file_operations;
++		inode->i_mapping->a_ops = &pram_aops;
++		err = pram_add_nondir(dir, dentry, inode);
++	}
++	return err;
++}
++
++static int pram_mknod(struct inode *dir, struct dentry *dentry, int mode,
++		       dev_t rdev)
++{
++	struct inode *inode = pram_new_inode(dir, mode);
++	int err = PTR_ERR(inode);
++	if (!IS_ERR(inode)) {
++		init_special_inode(inode, mode, rdev);
++		pram_write_inode(inode, 0); /* update rdev */
++		err = pram_add_nondir(dir, dentry, inode);
++	}
++	return err;
++}
++
++static int pram_symlink(struct inode *dir,
++			  struct dentry *dentry,
++			  const char *symname)
++{
++	struct super_block *sb = dir->i_sb;
++	int err = -ENAMETOOLONG;
++	unsigned len = strlen(symname);
++	struct inode *inode;
++
++	if (len+1 > sb->s_blocksize)
++		goto out;
++
++	inode = pram_new_inode(dir, S_IFLNK | S_IRWXUGO);
++	err = PTR_ERR(inode);
++	if (IS_ERR(inode))
++		goto out;
++
++	inode->i_op = &pram_symlink_inode_operations;
++	inode->i_mapping->a_ops = &pram_aops;
++
++	err = pram_block_symlink(inode, symname, len);
++	if (err)
++		goto out_fail;
++
++	inode->i_size = len;
++	pram_write_inode(inode, 0);
++
++	err = pram_add_nondir(dir, dentry, inode);
++out:
++	return err;
++
++out_fail:
++	pram_dec_count(inode);
++	iput(inode);
++	goto out;
++}
++
++static int pram_link(struct dentry *dest_dentry,
++		       struct inode *dir,
++		       struct dentry *dentry)
++{
++	pram_dbg("hard links not supported\n");
++	return -ENOSYS;
++}
++
++static int pram_unlink(struct inode *dir, struct dentry *dentry)
++{
++	struct inode *inode = dentry->d_inode;
++	inode->i_ctime = dir->i_ctime;
++	pram_dec_count(inode);
++
++	return 0;
++}
++
++static int pram_mkdir(struct inode *dir, struct dentry *dentry, int mode)
++{
++	struct inode *inode;
++	struct pram_inode *pi;
++	int err = -EMLINK;
++	unsigned long flags;
++
++	flags = 0;
++
++	if (dir->i_nlink >= PRAM_LINK_MAX)
++		goto out;
++
++	pram_inc_count(dir);
++
++	inode = pram_new_inode(dir, S_IFDIR | mode);
++	err = PTR_ERR(inode);
++	if (IS_ERR(inode))
++		goto out_dir;
++
++	inode->i_op = &pram_dir_inode_operations;
++	inode->i_fop = &pram_dir_operations;
++	inode->i_mapping->a_ops = &pram_aops;
++
++	pram_inc_count(inode);
++
++	/* make the new directory empty */
++	pi = pram_get_inode(dir->i_sb, inode->i_ino);
++	pram_lock_inode(pi, flags);
++	pi->i_type.dir.head = pi->i_type.dir.tail = 0;
++	pram_unlock_inode(pi, flags);
++
++	err = pram_add_link(dentry, inode);
++	if (err)
++		goto out_fail;
++
++	d_instantiate(dentry, inode);
++out:
++	return err;
++
++out_fail:
++	pram_dec_count(inode);
++	pram_dec_count(inode);
++	iput(inode);
++out_dir:
++	pram_dec_count(dir);
++	goto out;
++}
++
++static int pram_rmdir(struct inode *dir, struct dentry *dentry)
++{
++	struct inode *inode = dentry->d_inode;
++	struct pram_inode *pi;
++	int err = -ENOTEMPTY;
++
++	if (!inode)
++		return -ENOENT;
++
++	pi = pram_get_inode(dir->i_sb, inode->i_ino);
++
++	/* directory to delete is empty? */
++	if (pi->i_type.dir.tail == 0) {
++		inode->i_ctime = dir->i_ctime;
++		inode->i_size = 0;
++		inode->i_nlink = 0;
++		pram_write_inode(inode, 0);
++		pram_dec_count(dir);
++		err = 0;
++	} else {
++		pram_dbg("dir not empty\n");
++	}
++
++	return err;
++}
++
++static int pram_rename(struct inode  *old_dir,
++			struct dentry *old_dentry,
++			struct inode  *new_dir,
++			struct dentry *new_dentry)
++{
++	struct inode *old_inode = old_dentry->d_inode;
++	struct inode *new_inode = new_dentry->d_inode;
++	struct pram_inode *pi_new;
++	int err = -ENOENT;
++
++	if (new_inode) {
++		err = -ENOTEMPTY;
++		pi_new = pram_get_inode(new_dir->i_sb, new_inode->i_ino);
++		if (S_ISDIR(old_inode->i_mode)) {
++			if (pi_new->i_type.dir.tail != 0)
++				goto out;
++			if (new_inode->i_nlink)
++				new_inode->i_nlink--;
++		}
++
++		new_inode->i_ctime = CURRENT_TIME;
++		pram_dec_count(new_inode);
++	} else {
++		if (S_ISDIR(old_inode->i_mode)) {
++			err = -EMLINK;
++			if (new_dir->i_nlink >= PRAM_LINK_MAX)
++				goto out;
++			pram_dec_count(old_dir);
++			pram_inc_count(new_dir);
++		}
++	}
++
++	/* unlink the inode from the old directory ... */
++	err = pram_remove_link(old_inode);
++	if (err)
++		goto out;
++
++	/* and link it into the new directory. */
++	err = pram_add_link(new_dentry, old_inode);
++	if (err)
++		goto out;
++
++	err = 0;
++ out:
++	return err;
++}
++
++struct inode_operations pram_dir_inode_operations = {
++	.create		= pram_create,
++	.lookup		= pram_lookup,
++	.link		= pram_link,
++	.unlink		= pram_unlink,
++	.symlink	= pram_symlink,
++	.mkdir		= pram_mkdir,
++	.rmdir		= pram_rmdir,
++	.mknod		= pram_mknod,
++	.rename		= pram_rename,
++};
+
 
