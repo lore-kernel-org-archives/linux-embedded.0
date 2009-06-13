@@ -1,32 +1,133 @@
-From: Daniel Walker <dwalker@fifo99.com>
-Subject: Re: [PATCH 08/14] Pramfs: Makefile and Kconfig
-Date: Sat, 13 Jun 2009 07:02:12 -0700
-Message-ID: <1244901732.5982.221.camel@desktop>
-References: <4A33A802.8040507@gmail.com>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Sat, 13 Jun 2009 16:04:59 +0200
+Message-ID: <20090613140459.GC30053@uranus.ravnborg.org>
+References: <4A33A7EC.6070008@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4A33A802.8040507@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <4A33A7EC.6070008@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 To: Marco <marco.stornelli@gmail.com>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-On Sat, 2009-06-13 at 15:22 +0200, Marco wrote:
+On Sat, Jun 13, 2009 at 03:21:48PM +0200, Marco wrote:
 > From: Marco Stornelli <marco.stornelli@gmail.com>
 > 
-> Makefile and Kconfig.
+> Include files.
 > 
 > Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 > ---
 > 
+> diff -uprN linux-2.6.30-orig/fs/pramfs/pram_fs.h linux-2.6.30/fs/pramfs/pram_fs.h
+> --- linux-2.6.30-orig/fs/pramfs/pram_fs.h	1970-01-01 01:00:00.000000000 +0100
+> +++ linux-2.6.30/fs/pramfs/pram_fs.h	2009-06-13 12:58:49.000000000 +0200
+> @@ -0,0 +1,388 @@
+> +/*
+> + * FILE NAME include/linux/pram_fs.h
+> + *
+> + * BRIEF DESCRIPTION
+> + *
+> + * Definitions for the PRAMFS filesystem.
+> + *
+> + * Copyright 2009 Marco Stornelli <marco.stornelli@gmail.com>
+> + * Copyright 2003 Sony Corporation
+> + * Copyright 2003 Matsushita Electric Industrial Co., Ltd.
+> + * 2003-2004 (c) MontaVista Software, Inc. , Steve Longerbeam
+> + * This file is licensed under the terms of the GNU General Public
+> + * License version 2. This program is licensed "as is" without any
+> + * warranty of any kind, whether express or implied.
+> + */
+> +#ifndef _LINUX_PRAM_FS_H
+> +#define _LINUX_PRAM_FS_H
+> +
+> +#include <linux/types.h>
+> +
+> +#ifdef __KERNEL__
+> +#include <linux/sched.h>
+> +#include <linux/buffer_head.h>
+> +#include "pram_fs_sb.h"
+> +#endif
 
-You should move this patch to 11 of 14, as I think that is the point
-when the filesystem can actually be enabled and function. If this series
-is only applied up to this patch you can get build failures if you
-enabled PRAMFS, XIP, or any of the other features. Also breaking out the
-individual features menuconfig options like XIP, and write protect, etc,
-into their respective patches would be nice.
+The only reason to have this header file in include/linux/
+is that it is used by userspace.
+So please split it up so we have one header suitable for exporting
+and another header with all the promfs local stuff.
+The latter should be in fs/pramsfs/
 
-Daniel
+
+> +
+> +/*
+> + * The PRAM filesystem constants/structures
+> + */
+> +
+> +/*
+> + * Define PRAMFS_DEBUG to produce debug messages
+> + */
+> +#define PRAMFS_DEBUG
+> +
+> +/*
+> + * Debug code
+> + */
+> +#ifdef __KERNEL__
+> +#define PFX "pramfs"
+> +#ifdef PRAMFS_DEBUG
+> +#define pram_dbg(format, arg...) \
+> +    printk(KERN_DEBUG PFX ": " format , ## arg)
+> +#else
+> +#define pram_dbg(format, arg...) do {} while (0)
+> +#endif
+> +#define pram_err(format, arg...) \
+> +    printk(KERN_ERR PFX ": " format , ## arg)
+> +#define pram_info(format, arg...) \
+> +    printk(KERN_INFO PFX ": " format , ## arg)
+> +#define pram_warn(format, arg...) \
+> +    printk(KERN_WARNING PFX ": " format , ## arg)
+> +#endif
+
+For a typical drivers we have some pr_* to avoid the above.
+Can they be used for a filesystem too?
+
+> +
+> +/*
+> + * The PRAM file system magic number
+> + */
+> +#define PRAM_SUPER_MAGIC	0xEFFA
+
+Move to include/linux/magic.h
+
+> +
+> +/*
+> + * Structure of an inode in PRAMFS
+> + */
+> +struct pram_inode {
+> +	__u32   i_sum;          /* checksum of this inode */
+> +	__u32	i_uid;		/* Owner Uid */
+> +	__u32	i_gid;		/* Group Id */
+> +	__u16	i_mode;		/* File mode */
+> +	__u16	i_links_count;	/* Links count */
+> +	__u32	i_blocks;	/* Blocks count */
+> +	__u32	i_size;		/* Size of data in bytes */
+> +	__u32	i_atime;	/* Access time */
+> +	__u32	i_ctime;	/* Creation time */
+> +	__u32	i_mtime;	/* Modification time */
+> +	__u32	i_dtime;	/* Deletion Time */
+> +
+> +	union {
+> +		struct {
+> +			/*
+> +			 * ptr to row block of 2D block pointer array,
+> +			 * file block #'s 0 to (blocksize/4)^2 - 1.
+> +			 */
+> +			off_t row_block;
+
+It is my understanding that we shall use: __kernel_off_t
+in exported headers.
+
+The headers are not added to Kbuild - so it is not exported.
+I assume thats an oversight.
+
+	Sam
