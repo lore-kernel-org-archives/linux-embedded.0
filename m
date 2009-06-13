@@ -1,7 +1,7 @@
 From: Marco <marco.stornelli@gmail.com>
-Subject: [PATCH 02/14] Pramfs: File operations for directories
-Date: Sat, 13 Jun 2009 15:21:00 +0200
-Message-ID: <4A33A7BC.1020703@gmail.com>
+Subject: [PATCH 05/14] Pramfs: File operations for files
+Date: Sat, 13 Jun 2009 15:21:38 +0200
+Message-ID: <4A33A7E2.9020803@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=1D+OAW1VZ+L5+txmPGncnslpsiwy1ZP1lXik1YSX7ig=;
-        b=E3+HxISbT0X9+cfMcwA6Zb9kKfdUOxzevh/hLQKl0uoqKq7Xgrm9PQ5gW0z6AAApWV
-         1cadIiXtf3Z0V/fsivftHqLkVlGq5SKeswHzPZtmDLD6wKz0OcZgvbQTocqOP1peOMkx
-         nVDH3hDvsVGqUvxq4aQWueqeLkKeQEaaXW34g=
+        bh=hTNwo6IgbhU+NZ10Kqp8OB9Eru0mjLLhvcWVAR+nYoE=;
+        b=V8xrytwpEplFBwYVqG4QW/cq+zhIfAR3JP6XV5msX9UMcGErIIKrdzD/1hA4X1CVci
+         YVkDPKe7bKYc28WdSwOimEISfURFxqqktGMy6/THv2CDKyfiMGJ35SxGr9gi32Zf7MPU
+         g9AcsvQIZuD36G2ef7vucb6BQG5LCmLJWRI7Q=
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -22,21 +22,21 @@ Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-File operations for directories.
+File operations for files.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
 
-diff -uprN linux-2.6.30-orig/fs/pramfs/dir.c linux-2.6.30/fs/pramfs/dir.c
---- linux-2.6.30-orig/fs/pramfs/dir.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.30/fs/pramfs/dir.c	2009-06-13 12:51:46.000000000 +0200
-@@ -0,0 +1,220 @@
+diff -uprN linux-2.6.30-orig/fs/pramfs/file.c linux-2.6.30/fs/pramfs/file.c
+--- linux-2.6.30-orig/fs/pramfs/file.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.30/fs/pramfs/file.c	2009-06-13 12:52:56.000000000 +0200
+@@ -0,0 +1,141 @@
 +/*
-+ * FILE NAME fs/pramfs/dir.c
++ * FILE NAME fs/pramfs/file.c
 + *
 + * BRIEF DESCRIPTION
 + *
-+ * File operations for directories.
++ * File operations for files.
 + *
 + * Copyright 2009 Marco Stornelli <marco.stornelli@gmail.com>
 + * Copyright 2003 Sony Corporation
@@ -46,209 +46,130 @@ diff -uprN linux-2.6.30-orig/fs/pramfs/dir.c linux-2.6.30/fs/pramfs/dir.c
 + * License version 2. This program is licensed "as is" without any
 + * warranty of any kind, whether express or implied.
 + */
-+
 +#include <linux/fs.h>
-+#include <linux/pagemap.h>
++#include <linux/sched.h>
++#include <linux/slab.h>
++#include <linux/uio.h>
++#include <linux/uaccess.h>
 +#include "pram_fs.h"
++#include "xip.h"
++
++static int pram_open_file(struct inode *inode, struct file *filp)
++{
++#ifndef CONFIG_PRAMFS_XIP
++	/* Without XIP we force to use Direct IO */
++	filp->f_flags |= O_DIRECT;
++#endif
++	return generic_file_open(inode, filp);
++}
 +
 +/*
-+ *	Parent is locked.
++ * Called when an inode is released. Note that this is different
++ * from pram_open_file: open gets called at every open, but release
++ * gets called only when /all/ the files are closed.
 + */
-+int pram_add_link(struct dentry *dentry, struct inode *inode)
++static int pram_release_file(struct inode *inode, struct file *filp)
 +{
-+	struct inode *dir = dentry->d_parent->d_inode;
-+	struct pram_inode *pidir, *pi, *pitail = NULL;
-+	off_t tail_ino, prev_ino;
-+	unsigned long flags;
-+
-+	const char *name = dentry->d_name.name;
-+	int namelen = dentry->d_name.len > PRAM_NAME_LEN ?
-+		PRAM_NAME_LEN : dentry->d_name.len;
-+
-+	flags = 0;
-+
-+	pidir = pram_get_inode(dir->i_sb, dir->i_ino);
-+	pi = pram_get_inode(dir->i_sb, inode->i_ino);
-+
-+	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
-+
-+	tail_ino = pidir->i_type.dir.tail;
-+	if (tail_ino != 0) {
-+		pitail = pram_get_inode(dir->i_sb, tail_ino);
-+		pram_lock_inode(pitail, flags);
-+		pitail->i_d.d_next = inode->i_ino;
-+		pram_unlock_inode(pitail, flags);
-+
-+		prev_ino = tail_ino;
-+
-+		pram_lock_inode(pidir, flags);
-+		pidir->i_type.dir.tail = inode->i_ino;
-+		pidir->i_mtime = dir->i_mtime.tv_sec;
-+		pidir->i_ctime = dir->i_ctime.tv_sec;
-+		pram_unlock_inode(pidir, flags);
-+	} else {
-+		/* the directory is empty */
-+		prev_ino = 0;
-+
-+		pram_lock_inode(pidir, flags);
-+		pidir->i_type.dir.head = pidir->i_type.dir.tail = inode->i_ino;
-+		pidir->i_mtime = dir->i_mtime.tv_sec;
-+		pidir->i_ctime = dir->i_ctime.tv_sec;
-+		pram_unlock_inode(pidir, flags);
-+	}
-+
-+
-+	pram_lock_inode(pi, flags);
-+	pi->i_d.d_prev = prev_ino;
-+	pi->i_d.d_parent = dir->i_ino;
-+	memcpy(pi->i_d.d_name, name, namelen);
-+	pi->i_d.d_name[namelen] = '\0';
-+	pram_unlock_inode(pi, flags);
 +	return 0;
 +}
 +
-+int pram_remove_link(struct inode *inode)
++ssize_t __pram_direct_IO(int rw, struct kiocb *iocb,
++		   const struct iovec *iov,
++		   loff_t offset, unsigned long nr_segs)
 +{
++	struct file *file = iocb->ki_filp;
++	struct inode *inode = file->f_mapping->host;
 +	struct super_block *sb = inode->i_sb;
-+	struct pram_inode *prev = NULL;
-+	struct pram_inode *next = NULL;
-+	struct pram_inode *pidir, *pi;
++	int progress = 0;
++	ssize_t retval = 0;
++	struct pram_inode *pi;
++	void *tmp = NULL;
 +	unsigned long flags;
++	unsigned long blocknr, blockoff;
++	int num_blocks, blocksize_mask, blocksize, blocksize_bits;
++	char __user *buf = iov->iov_base;
++	size_t length = iov->iov_len;
 +
 +	flags = 0;
 +
-+	pi = pram_get_inode(sb, inode->i_ino);
-+	pidir = pram_get_inode(sb, pi->i_d.d_parent);
-+	if (!pidir)
-+		return -EACCES;
++	if (length < 0)
++		return -EINVAL;
++	if ((rw == READ) && (offset + length > inode->i_size))
++		length = inode->i_size - offset;
++	if (!length)
++		goto out;
 +
-+	if (inode->i_ino == pidir->i_type.dir.head) {
-+		/* first inode in directory */
-+		next = pram_get_inode(sb, pi->i_d.d_next);
++	blocksize_bits = inode->i_sb->s_blocksize_bits;
++	blocksize = 1 << blocksize_bits;
++	blocksize_mask = blocksize - 1;
 +
-+		if (next) {
-+			pram_lock_inode(next, flags);
-+			next->i_d.d_prev = 0;
-+			pram_unlock_inode(next, flags);
++	/* find starting block number to access */
++	blocknr = offset >> blocksize_bits;
++	/* find starting offset within starting block */
++	blockoff = offset & blocksize_mask;
++	/* find number of blocks to access */
++	num_blocks = (blockoff + length + blocksize_mask) >> blocksize_bits;
 +
-+			pram_lock_inode(pidir, flags);
-+			pidir->i_type.dir.head = pi->i_d.d_next;
-+		} else {
-+			pram_lock_inode(pidir, flags);
-+			pidir->i_type.dir.head = pidir->i_type.dir.tail = 0;
-+		}
-+		pram_unlock_inode(pidir, flags);
-+	} else if (inode->i_ino == pidir->i_type.dir.tail) {
-+		/* last inode in directory */
-+		prev = pram_get_inode(sb, pi->i_d.d_prev);
-+
-+		pram_lock_inode(prev, flags);
-+		prev->i_d.d_next = 0;
-+		pram_unlock_inode(prev, flags);
-+
-+		pram_lock_inode(pidir, flags);
-+		pidir->i_type.dir.tail = pi->i_d.d_prev;
-+		pram_unlock_inode(pidir, flags);
-+	} else {
-+		/* somewhere in the middle */
-+		prev = pram_get_inode(sb, pi->i_d.d_prev);
-+		next = pram_get_inode(sb, pi->i_d.d_next);
-+
-+		if (prev && next) {
-+			pram_lock_inode(prev, flags);
-+			prev->i_d.d_next = pi->i_d.d_next;
-+			pram_unlock_inode(prev, flags);
-+
-+			pram_lock_inode(next, flags);
-+			next->i_d.d_prev = pi->i_d.d_prev;
-+			pram_unlock_inode(next, flags);
-+		}
++	if (rw == WRITE) {
++		/* prepare a temporary buffer to hold a user data block
++		   for writing. */
++		tmp = kmalloc(blocksize, GFP_KERNEL);
++		if (!tmp)
++			return -ENOMEM;
++		/* now allocate the data blocks we'll need */
++		retval = pram_alloc_blocks(inode, blocknr, num_blocks);
++		if (retval)
++			goto fail;
 +	}
 +
-+	pram_lock_inode(pi, flags);
-+	pi->i_d.d_next = pi->i_d.d_prev = pi->i_d.d_parent = 0;
-+	pram_unlock_inode(pi, flags);
++	pi = pram_get_inode(inode->i_sb, inode->i_ino);
 +
-+	return 0;
++	while (length) {
++		int count;
++		off_t block = pram_find_data_block(inode, blocknr++);
++		u8 *bp = (u8 *)pram_get_block(sb, block);
++		if (!bp)
++			goto fail;
++
++		count = blockoff + length > blocksize ?
++			blocksize - blockoff : length;
++
++		if (rw == READ) {
++			copy_to_user(buf, &bp[blockoff], count);
++		} else {
++			copy_from_user(tmp, buf, count);
++
++			pram_lock_block(inode->i_sb, bp, flags);
++			memcpy(&bp[blockoff], tmp, count);
++			pram_unlock_block(inode->i_sb, bp, flags);
++		}
++
++		progress += count;
++		buf += count;
++		length -= count;
++		blockoff = 0;
++	}
++
++	retval = progress;
++ fail:
++	kfree(tmp);
++ out:
++	return retval;
 +}
 +
-+#define S_SHIFT 12
-+static unsigned int dtype_by_mode[S_IFMT >> S_SHIFT] = {
-+	[S_IFREG >> S_SHIFT]    DT_REG,
-+	[S_IFDIR >> S_SHIFT]    DT_DIR,
-+	[S_IFCHR >> S_SHIFT]    DT_CHR,
-+	[S_IFBLK >> S_SHIFT]    DT_BLK,
-+	[S_IFIFO >> S_SHIFT]    DT_FIFO,
-+	[S_IFSOCK >> S_SHIFT]   DT_SOCK,
-+	[S_IFLNK >> S_SHIFT]    DT_LNK,
++struct file_operations pram_file_operations = {
++	.llseek		= generic_file_llseek,
++	.read		= pram_read,
++	.write		= pram_write,
++	.aio_read	= pram_aio_read,
++	.aio_write	= pram_aio_write,
++	.mmap		= pram_mmap,
++	.open		= pram_open_file,
++	.release	= pram_release_file,
++	.fsync		= simple_sync_file,
 +};
 +
-+static int
-+pram_readdir(struct file *filp, void *dirent, filldir_t filldir)
-+{
-+	struct inode *inode = filp->f_dentry->d_inode;
-+	struct super_block *sb = inode->i_sb;
-+	struct pram_inode *pi;
-+	int namelen, ret = 0;
-+	char *name;
-+	ino_t ino;
-+
-+	if (filp->f_pos >> 32)
-+		return 0;
-+
-+	pi = pram_get_inode(sb, inode->i_ino);
-+
-+	switch ((unsigned long)filp->f_pos) {
-+	case 0:
-+		ret = filldir(dirent, ".", 1, 0, inode->i_ino, DT_DIR);
-+		filp->f_pos++;
-+		return ret;
-+	case 1:
-+		ret = filldir(dirent, "..", 2, 1, pi->i_d.d_parent, DT_DIR);
-+		ino = pi->i_type.dir.head;
-+		filp->f_pos = ino ? ino : 2;
-+		return ret;
-+	case 2:
-+		ino = pi->i_type.dir.head;
-+		if (ino) {
-+			filp->f_pos = ino;
-+			pi = pram_get_inode(sb, ino);
-+			break;
-+		} else {
-+			/* the directory is empty */
-+			filp->f_pos = 2;
-+			return 0;
-+		}
-+	case 3:
-+		return 0;
-+	default:
-+		ino = filp->f_pos;
-+		pi = pram_get_inode(sb, ino);
-+		break;
-+	}
-+
-+	while (pi && !pi->i_links_count) {
-+		ino = filp->f_pos = pi->i_d.d_next;
-+		pi = pram_get_inode(sb, ino);
-+	}
-+
-+	if (pi) {
-+		name = pi->i_d.d_name;
-+		namelen = strlen(name);
-+
-+		ret = filldir(dirent, name, namelen,
-+			      filp->f_pos, ino,
-+			      dtype_by_mode[(pi->i_mode & S_IFMT)>>S_SHIFT]);
-+		filp->f_pos = pi->i_d.d_next ? pi->i_d.d_next : 3;
-+	} else
-+		filp->f_pos = 3;
-+
-+	return ret;
-+}
-+
-+struct file_operations pram_dir_operations = {
-+	.read 		= generic_read_dir,
-+	.readdir	= pram_readdir,
-+	.fsync		= simple_sync_file,	
++struct inode_operations pram_file_inode_operations = {
++	.truncate	= pram_truncate,
 +};
 
