@@ -1,20 +1,20 @@
 From: Marco <marco.stornelli@gmail.com>
-Subject: [PATCH 12/14] Pramfs: test module
-Date: Sat, 13 Jun 2009 15:22:51 +0200
-Message-ID: <4A33A82B.9070306@gmail.com>
+Subject: [PATCH 13/14] Pramfs: Write protection
+Date: Sat, 13 Jun 2009 15:23:01 +0200
+Message-ID: <4A33A835.901@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=ClYCp9LvW5VEcADEQWunu03rqAygKJ3UKvG306qsCg4=;
-        b=RFMGwnFravtLO3pJF+xlhxtoLjY7kuiIVIlWbYTtWHtTcNYKphGTmdBuhLIsmZRfZO
-         Rl4gMZQHUwHWZGzryqPzLGzyvK+S5iauR5JhWtXxdNh4+zB0I5bKE4GNA+c7T9QwnjVm
-         1tIBEnITCnKD0gyfUul5Fen4cUuL2mkhrJ8H8=
-Sender: linux-fsdevel-owner@vger.kernel.org
+        bh=gd9tOIEuRgcpAiLnS/1HIv9wETYcrP8RVSl7ujAFgOQ=;
+        b=Ku5MVVaRw/SPTBb6JJacMS9FonsM269rJofA5oYyKsZfQul8EsZX68U++xLLtYiCZE
+         NQ7eEK8ElZnccYAYK3UrzwTsgtmbLBVG1/TTLUGT4zF5otcts7cM50RTyXQkjs9xBPKN
+         pD0aTz9pDGGaKrHxQtMuctk71+ccqqxwkGGjM=
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Linux FS Devel <linux-fsdevel@vger.kernel.org>
@@ -22,20 +22,21 @@ Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-Test module.
+Write protection.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
-diff -uprN linux-2.6.30-orig/fs/pramfs/pramfs_test.c linux-2.6.30/fs/pramfs/pramfs_test.c
---- linux-2.6.30-orig/fs/pramfs/pramfs_test.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.30/fs/pramfs/pramfs_test.c	2009-06-13 13:07:38.000000000 +0200
-@@ -0,0 +1,50 @@
+
+diff -uprN linux-2.6.30-orig/fs/pramfs/wprotect.c linux-2.6.30/fs/pramfs/wprotect.c
+--- linux-2.6.30-orig/fs/pramfs/wprotect.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.30/fs/pramfs/wprotect.c	2009-06-13 12:54:16.000000000 +0200
+@@ -0,0 +1,84 @@
 +/*
-+ * FILE NAME fs/pramfs/namei.c
++ * FILE NAME fs/pramfs/wprotect.c
 + *
 + * BRIEF DESCRIPTION
 + *
-+ * Inode operations for directories.
++ * Write protection for the filesystem pages.
 + *
 + * Copyright 2009 Marco Stornelli <marco.stornelli@gmail.com>
 + * Copyright 2003 Sony Corporation
@@ -45,39 +46,73 @@ diff -uprN linux-2.6.30-orig/fs/pramfs/pramfs_test.c linux-2.6.30/fs/pramfs/pram
 + * License version 2. This program is licensed "as is" without any
 + * warranty of any kind, whether express or implied.
 + */
++
 +#include <linux/module.h>
-+#include <linux/version.h>
-+#include <linux/init.h>
 +#include <linux/fs.h>
++#include <linux/mm.h>
++#include <asm/pgtable.h>
++#include <asm/pgalloc.h>
++#include <asm/tlbflush.h>
 +#include "pram_fs.h"
 +
-+int __init test_pramfs_write(void)
++/* init_mm.page_table_lock must be held before calling! */
++static void pram_page_writeable(unsigned long addr, int rw)
 +{
-+	struct pram_super_block *psb;
-+	char *ptr;
++	pgd_t *pgdp;
++	pud_t *pudp;
++	pmd_t *pmdp;
++	pte_t *ptep;
 +
-+	psb = get_pram_super();
-+	if (!psb) {
-+		printk(KERN_ERR
-+		"%s: PRAMFS super block not found (not mounted?)\n",
-+		__func__);
-+		return 1;
++	pgdp = pgd_offset_k(addr);
++	if (!pgd_none(*pgdp)) {
++		pudp = pud_offset(pgdp, addr);
++		if (!pud_none(*pudp)) {
++			pmdp = pmd_offset(pudp, addr);
++			if (!pmd_none(*pmdp)) {
++				pte_t pte;
++				ptep = pte_offset_kernel(pmdp, addr);
++				pte = *ptep;
++				if (pte_present(pte)) {
++					pte = rw ? pte_mkwrite(pte) :
++						pte_wrprotect(pte);
++					set_pte(ptep, pte);
++				}
++			}
++		}
 +	}
-+
-+	/*
-+	 * Attempt an unprotected clear of all information in the superblock,
-+	 * this should cause a kernel page protection fault.
-+	 */
-+	printk("%s: writing to kernel VA %p\n", __func__, psb);
-+	memset(psb, 0 , PRAM_SB_SIZE);
-+
-+	return 0;
 +}
 +
-+void test_pramfs_write_cleanup(void) {}
++/* init_mm.page_table_lock must be held before calling! */
++void pram_writeable(void *vaddr, unsigned long size, int rw)
++{
++	unsigned long addr = (unsigned long)vaddr & PAGE_MASK;
++	unsigned long end = (unsigned long)vaddr + size;
++	unsigned long start = addr;
 +
-+/* Module information */
-+MODULE_LICENSE("GPL");
-+module_init(test_pramfs_write);
-+module_exit(test_pramfs_write_cleanup);
++	do {
++		pram_page_writeable(addr, rw);
++		addr += PAGE_SIZE;
++	} while (addr && (addr < end));
++
++
++	/*
++	 * NOTE: we will always flush just one page (one TLB
++	 * entry) except possibly in one case: when a new
++	 * filesystem is initialized at mount time, when pram_read_super
++	 * calls pram_lock_range to make the super block, inode
++	 * table, and bitmap writeable.
++	 */
++#if defined(CONFIG_ARM) || defined(CONFIG_M68K) || defined(CONFIG_H8300) || \
++	defined(CONFIG_BLACKFIN)
++	/*
++	 * FIXME: so far only these archs have flush_tlb_kernel_page(),
++	 * for the rest just use flush_tlb_kernel_range(). Not ideal
++	 * to use _range() because many archs just flush the whole TLB.
++	 */
++	if (end <= start + PAGE_SIZE)
++		flush_tlb_kernel_page(start);
++	else
++#endif
++		flush_tlb_kernel_range(start, end);
++}
 
