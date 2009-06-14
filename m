@@ -1,42 +1,44 @@
-From: Marco <firefox82@alice.it>
-Subject: Re: [PATCH 04/14] Pramfs: Mounting as root filesystem
-Date: Sun, 14 Jun 2009 18:29:38 +0200
-Message-ID: <4A352572.50602@alice.it>
-References: <4A33A7D7.3040008@gmail.com> <200906140104.43463.arnd@arndb.de>	 <4A34B2FD.20701@gmail.com> <1244970445.3468.2732.camel@macbook.infradead.org> <4A351FB0.3060008@gmail.com>
+From: Robin Getz <rgetz@blackfin.uclinux.org>
+Subject: Re: Kernel crashing and log buffers...
+Date: Sun, 14 Jun 2009 14:33:12 -0400
+Message-ID: <200906141433.12931.rgetz@blackfin.uclinux.org>
+References: <200906102126.40410.rgetz@blackfin.uclinux.org> <20090613102642.GB7976@flint.arm.linux.org.uk> <20090613185926.BAB66832E416@gemini.denx.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <4A351FB0.3060008@gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090613185926.BAB66832E416@gemini.denx.de>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Marco <marco.stornelli@gmail.com>
-Cc: David Woodhouse <dwmw2@infradead.org>, Arnd Bergmann <arnd@arndb.de>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+To: Wolfgang Denk <wd@denx.de>
+Cc: Russell King <rmk@arm.linux.org.uk>, Mike Frysinger <vapier@gentoo.org>, Greg Ungerer <gerg@snapgear.com>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-David Woodhouse wrote:
-> On Sun, 2009-06-14 at 10:21 +0200, Marco wrote:
->> Mmm...MEM_MAJOR and RAMDISK_MAJOR have the same value and pramfs works
->> in memory. We could simply use /dev/null (there was an error in the
->> submitted kconfig description, my intention was to use /dev/mem). In
->> that case I can use UNNAMED_MAJOR. PRAMFS root option is not enabled
->> if it's already enabled the NFS one. What do you think?
->
-> Why use a major number at all? See how we handle mtd and ubi devices in
-> prepare_namespace() -- can't you do something similar?
->
- 
-Do you suggest me something similar? Why not. I though that mtd and ubi 
-were only special cases.
+On Sat 13 Jun 2009 14:59, Wolfgang Denk pondered:
+> Dear Russell King,
+> 
+> In message <20090613102642.GB7976@flint.arm.linux.org.uk> you wrote:
+> >
+> > The other way I've seen people read out crash messages is using a
+> > debugger to dump the kernel's log buffer directly.  That seems to work
+> > as well as any other method, and has the advantage that it doesn't
+> > require any kernel modifications.
+> 
+> This works well in the lab during hardware bringup or BSP development.
+> 
+> But we are also interested in a solution that allows to get  more  or
+> less  automatic access to the log buffer content after a crash - when
+> you have several ten thousand systems in the field,  such  a  feature
+> can save you a lot of money.
 
-if (saved_root_name[0]) {
-		root_device_name = saved_root_name;
-		if (!strncmp(root_device_name, "mtd", 3) ||
-		    !strncmp(root_device_name, "ubi", 3) ||
-  -------->         !strncmp(root_device_name, "pram", 4)) {
-			mount_block_root(root_device_name, root_mountflags);
-			goto out;
-		}
-		ROOT_DEV = name_to_dev_t(root_device_name);
-		if (strncmp(root_device_name, "/dev/", 5) == 0)
-			root_device_name += 5;
-	}
+in this case - is it true that providing the kernel crash log buffer to the 
+next running kernel - is actually more important than just giving it to the 
+bootloader? (Since the bootloader may not have the facilities to 
+email/post/netcat it to a developer - like the next running kernel might?)
+
+In this case - the Bootloader being able to read the buffer, understand that 
+there was a crash, and be able to pass the buffer (with the crash message) 
+into the next running kernel - where that kernel can package it up and do 
+anything it wants to it - would be a requirement?
+
+-Robin
