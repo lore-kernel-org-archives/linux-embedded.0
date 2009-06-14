@@ -1,36 +1,92 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: Representing Embedded Architectures at the Kernel Summit
-Date: Sat, 13 Jun 2009 21:48:39 -0600
-Message-ID: <fa686aa40906132048t52aae093m1c67a9982c218531@mail.gmail.com>
-References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> 
-	<20090602172941.GL3095@hansolo.jdub.homelinux.org> <20090602222132.GK6399@game.jcrosoft.org> 
-	<1B5FD82F-79A5-4FD1-BA99-59F3041B0470@kernel.crashing.org>
+From: Marco <marco.stornelli@gmail.com>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Sun, 14 Jun 2009 09:15:32 +0200
+Message-ID: <4A34A394.5040509@gmail.com>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <1B5FD82F-79A5-4FD1-BA99-59F3041B0470@kernel.crashing.org>
-Sender: linux-arch-owner@vger.kernel.org
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=lK9uhPClnP9lUzO5WfTXW4fyWpCw3+m0SXwxIMjZ/1Q=;
+        b=fv0go3bIE9clYwW7pNjL+lhdOQEeobwQuOczPH+3IrDqvz3Gop4eunhTUDbw8k+lut
+         JlABTvqzSppo+YAhQn2htk2xQf2daAm2ulDFwZBqbN3goJej2K0NVvoOcDqgf7bb/2qm
+         kiiimMgTCvNCGQ4/3LW40eHXs3jtUerOwCqXY=
+In-Reply-To: <20090613155957.GA16220@shareable.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Kumar Gala <galak@kernel.crashing.org>
-Cc: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, Josh Boyer <jwboyer@linux.vnet.ibm.com>, James Bottomley <James.Bottomley@hansenpartnership.com>, ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-On Wed, Jun 10, 2009 at 5:13 PM, Kumar Gala<galak@kernel.crashing.org> wrote:
->
-> On Jun 2, 2009, at 5:21 PM, Jean-Christophe PLAGNIOL-VILLARD wrote:
->
->> I'd like to propose AMP and kernel relocate
->> as more and SoC will came with multiple core with or without the same arch
->
-> I think AMP or at least the idea of the kernel communicating with other OSes
-> on the same SoC in multi-core systems is interesting.
 
-Indeed, and not just for SoCs.  I'm currently looking at Ira's
-adaptation of virtio to use it for IPC between two separate CPUs
-running separate Linux instances and connected via PCI.
+Jamie Lokier wrote:
+> Marco wrote:
+>> Linux traditionally had no support for a persistent, non-volatile
+>> RAM-based filesystem, persistent meaning the filesystem survives a
+>> system reboot or power cycle intact. The RAM-based filesystems such as
+>> tmpfs and ramfs have no actual backing store but exist entirely in the
+>> page and buffer caches, hence the filesystem disappears after a system
+>> reboot or power cycle.
+> 
+> Why is a ramdisk not sufficient for this?
+> 
 
-g.
+Simply because the ramdisk was not designed to work in a persistent
+environment. In addition this kind of filesystem has been designed to
+work not only with classic ram. You can think at the situation where you
+have got an external SRAM with a battery for example. With it you can
+"remap" in an easy way the SRAM. Moreover there's the issue of memory
+protection that this filesystem takes care.
 
--- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+> Why is an entire filesystem needed, instead of simply a block driver
+> if the ramdisk driver cannot be used?
+> 
+
+From documentation:
+
+"A relatively straight-forward solution is to write a simple block
+driver for the non-volatile RAM, and mount over it any disk-based
+filesystem such as ext2/ext3, reiserfs, etc.
+
+But the disk-based fs over non-volatile RAM block driver approach has
+some drawbacks:
+
+1. Disk-based filesystems such as ext2/ext3 were designed for optimum
+   performance on spinning disk media, so they implement features such
+   as block groups, which attempts to group inode data into a contiguous
+   set of data blocks to minimize disk seeking when accessing files. For
+   RAM there is no such concern; a file's data blocks can be scattered
+   throughout the media with no access speed penalty at all. So block
+   groups in a filesystem mounted over RAM just adds unnecessary
+   complexity. A better approach is to use a filesystem specifically
+   tailored to RAM media which does away with these disk-based features.
+   This increases the efficient use of space on the media, i.e. more
+   space is dedicated to actual file data storage and less to meta-data
+   needed to maintain that file data.
+
+2. If the backing-store RAM is comparable in access speed to system memory,
+   there's really no point in caching the file I/O data in the page
+   cache. Better to move file data directly between the user buffers
+   and the backing store RAM, i.e. use direct I/O. This prevents the
+   unnecessary populating of the page cache with dirty pages. However
+   direct I/O has to be enabled at every file open. To enable direct
+   I/O at all times for all regular files requires either that
+   applications be modified to include the O_DIRECT flag on all file
+   opens, or that a new filesystem be used that always performs direct
+   I/O by default."
+
+On this point I'd like to hear other embedded guys.
+
+> It just struck me as a lot of code which might be completely
+> unnecessary for the desired functionality.
+> 
+> -- Jamie
+> 
+
+
+
+
