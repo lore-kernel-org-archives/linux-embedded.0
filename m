@@ -1,8 +1,8 @@
 From: Marco <marco.stornelli@gmail.com>
 Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Mon, 15 Jun 2009 19:42:54 +0200
-Message-ID: <4A36881E.8010009@gmail.com>
-References: <OFD1325B2C.7A926EF9-ON882575D6.00567314-882575D6.00571BC3@us.ibm.com>
+Date: Mon, 15 Jun 2009 19:44:28 +0200
+Message-ID: <4A36887C.1050906@gmail.com>
+References: <4A33A7A2.1050608@gmail.com> <4A3681C2.5010508@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
@@ -11,37 +11,46 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:references:in-reply-to
          :content-type:content-transfer-encoding;
-        bh=kqA7nhETKGa7RP8fZpNqP6Hb9R4o0w2HptVsZIpV6rc=;
-        b=Zr8wCQmEtN8KC6N5kYemTOoY1LAn3LDL630MO/R5cIiGWLYRLbY1yhvLrp6PkW99yx
-         OBsOMZ9ly5kwYh+RtJQMrotR7dZXXB8mB7VmWxVF5rF/Eu9IGGY2EADot6pu6E0iM6a+
-         ZFNGG/Jijpl8JeKglRW1lT2xonc9nZvixruag=
-In-Reply-To: <OFD1325B2C.7A926EF9-ON882575D6.00567314-882575D6.00571BC3@us.ibm.com>
+        bh=bG6DByrzDbUyKqeVZjQhnMjituSLn43fjp1lOKqBP5M=;
+        b=qYTeB9yx1yMtNvSj4ceZIfjKhie0D/TmLS8UtkS5ww+KLa5Pp6gSvAjWfczRJgZKHm
+         /dI2E1KE30vgwPpfRPCcGLhQ56kkUHrE9MpFyP0gRKUHuTfjKJds4N8UPoq679ti+GrV
+         oO/HAs6OZKp7EpWc4Wooo+xdw8A1ttq2PU53c=
+In-Reply-To: <4A3681C2.5010508@am.sony.com>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Bryan Henderson <hbryan@us.ibm.com>
-Cc: Artem Bityutskiy <dedekind1@gmail.com>, Daniel Walker <dwalker@soe.ucsc.edu>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Daniel Walker <dwalker@soe.ucsc.edu>
 
-Bryan Henderson wrote:
->> Marco wrote:
->>>    To enable direct
->>>    I/O at all times for all regular files requires either that
->>>    applications be modified to include the O_DIRECT flag on all file
->>>    opens, or that a new filesystem be used that always performs direct
->>>    I/O by default."
->> This could be done as well by just introducing a "direct_io_only"
->> mount option to a file-system which would need this feature.
+Tim Bird wrote:
+> Marco wrote:
+>> This is a second attempt at mainlining Pramfs. The first attempt was
+>> back in early 2004 by MontaVista. Since then the kernel code has almost
+>> been completely rewritten. So my first item on the list was porting the
+>> code on a recent kernel version. After that I added the XIP support.
 > 
-> But it's possible that there's just no advantage to having a block device 
-> in the stack here.  When unix block devices were invented, their main 
-> purpose was that they could reorder reads and writes and do buffering and 
-> caching -- all things essential for disk drives.  We don't want to stretch 
-> the concept too far.
+> It's very nice to see this technology revived.
+> 
+> Is the information at:
+> http://pramfs.sourceforge.net/
+> and
+> http://pramfs.sourceforge.net/pramfs-spec.html
+> still valid - particularly the latter?
+
+Yep. at 99%. I've done some modifications due to the porting and there
+will be some ones due to this review. I tried to talk with Steve
+Longerbeam to update the site but without success. I'd like to update it.
+
+> 
+> It would be very nice to see this get mainlined.  I believe that
+> one of the main uses for this is to store crash information
+> over a reboot so the next kernel (not in crashing state) can have
+> a better chance of dealing with it.  As such, I think
+> it's important to keep the code paths for Pramfs short, synchronous,
+> and unentangled with other kernel systems (block IO, page cache, etc.).
 > 
 
-Yes I agree, we can't in this case talk about read and write reordering,
-buffering and caching because we're talking about something completely
-different from a classic disk. The issues of this kind of fs are more
-similar to the tmpfs issues.
+Yes, I quite agree. I think that this kind of feature would be very
+useful especially for the embedded world.
 
 Marco
