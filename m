@@ -1,60 +1,154 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Mon, 15 Jun 2009 10:58:32 -0700
-Message-ID: <4A368BC8.3010006@am.sony.com>
-References: <4A33A7A2.1050608@gmail.com> <4A3681C2.5010508@am.sony.com> <4A36887C.1050906@gmail.com>
+From: Pierre Ossman <pierre@ossman.eu>
+Subject: Re: [PATCH 1/2] MMC Agressive clocking framework v2
+Date: Mon, 15 Jun 2009 21:09:30 +0200
+Message-ID: <20090615210930.27afe27a@mjolnir.ossman.eu>
+References: <63386a3d0906020536t5a3391f9r921959ba6d6dd96e@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <4A36887C.1050906@gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-28951-1245092974-0001-2"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <63386a3d0906020536t5a3391f9r921959ba6d6dd96e@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Marco <marco.stornelli@gmail.com>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Daniel Walker <dwalker@soe.ucsc.edu>
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
 
-Marco wrote:
-> Tim Bird wrote:
->> Marco wrote:
->>> This is a second attempt at mainlining Pramfs. The first attempt was
->>> back in early 2004 by MontaVista. Since then the kernel code has almost
->>> been completely rewritten. So my first item on the list was porting the
->>> code on a recent kernel version. After that I added the XIP support.
->> It's very nice to see this technology revived.
->>
->> Is the information at:
->> http://pramfs.sourceforge.net/
->> and
->> http://pramfs.sourceforge.net/pramfs-spec.html
->> still valid - particularly the latter?
-> 
-> Yep. at 99%. I've done some modifications due to the porting and there
-> will be some ones due to this review. I tried to talk with Steve
-> Longerbeam to update the site but without success. I'd like to update it.
-> 
->> It would be very nice to see this get mainlined.  I believe that
->> one of the main uses for this is to store crash information
->> over a reboot so the next kernel (not in crashing state) can have
->> a better chance of dealing with it.  As such, I think
->> it's important to keep the code paths for Pramfs short, synchronous,
->> and unentangled with other kernel systems (block IO, page cache, etc.).
->>
-> 
-> Yes, I quite agree. I think that this kind of feature would be very
-> useful especially for the embedded world.
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
 
-Just FYI - we have an "exception monitor" at Sony
-which is used in several projects, that records application and
-kernel crash information into the file system, for subsequent
-(often in-field) analysis.  However, the data currently gets written
-to a flash filesystem and the logs sometimes get truncated or otherwise
-corrupted.  This seems like a perfect match for what we're trying
-to do.
- -- Tim
+--=_freyr.ossman.eu-28951-1245092974-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+On Tue, 2 Jun 2009 14:36:28 +0200
+Linus Walleij <linus.ml.walleij@gmail.com> wrote:
 
+> This patch modified the MMC core code to optionally call the
+> set_ios() operation on the driver with the clock frequency set
+> to 0 to gate the hardware block clock (and thus the MCI clock)
+> for an MMC host controller after a grace period of at least 8
+> MCLK cycles. It is inspired by existing clock gating code found
+> in the OMAP and Atmel drivers and brings this up to the host
+> abstraction. Gating is performed before and after any MMC request
+> or IOS operation, the other optional host operations will not
+> ungate/gate the clock since they do not necessary touch the
+> actual host controller hardware.
+>=20
+> It exemplifies by implementing this for the MMCI/PL180 MMC/SD
+> host controller, but it should be simple to switch OMAP and
+> Atmel over to using this instead.
+>=20
+> Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+> ---
+
+This looks pretty good. We might want to make it more runtime
+configurable in the future, but this lays a nice groundwork. It's also
+nicely commented to boot. :)
+
+The only thing that concerns me is the locking and reference counting.
+Wouldn't it be sufficient to enable the clock around requests? Or
+when the host lock is grabbed? Either version would remove the need for
+both clk_users and clk_lock. I think it would also remove a lot of the
+special logic you have.
+
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index ab37a6d..6ae2156 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -14,3 +14,14 @@ config MMC_UNSAFE_RESUME
+>  	  This option is usually just for embedded systems which use
+>  	  a MMC/SD card for rootfs. Most people should say N here.
+>=20
+> +config MMC_CLKGATE
+> +	bool "MMC host clock gaing (EXPERIMENTAL)"
+> +	depends on EXPERIMENTAL
+> +	help
+> +	  This will attempt to agressively gate the clock to the MMC host,
+> +	  which typically also will gate the MCI clock to the card. This
+> +	  is done to save power due to gating off the logic and bus noise
+> +	  when MMC is not in use. Your host driver has to support this in
+> +	  order for it to be of any use.
+
+The last sense isn't true anymore, is it?
+
+> +
+> +	  Of unsure, say N.
+
+"If" :)
+
+> +/*
+> + * Internal work. Work to disable the clock at some later point.
+> + */
+> +static void mmc_clk_disable_work(struct work_struct *work)
+> +{
+> +	struct mmc_host *host =3D container_of(work, struct mmc_host,
+> +					      clk_disable_work);
+> +
+> +	mmc_clk_disable_delayed(host);
+> +}
+
+I think I did a bad job explaining my comments about this the last
+time. What I was trying to say was that why have this
+mmc_clk_disable_work() when you could give mmc_clk_disable_delayed()
+directly to the workqueue?
+
+> +/*
+> + *	mmc_clk_remove - shut down clock gating code
+> + *	@host: host with potential hardware clock to control
+> + */
+> +static inline void mmc_clk_remove(struct mmc_host *host)
+> +{
+> +	if (cancel_work_sync(&host->clk_disable_work))
+> +		mmc_clk_disable_delayed(host);
+> +	BUG_ON(host->clk_users > 0);
+> +}
+
+I'm not sure why you call mmc_clk_disable_delayed() here. Is the clock
+properly enabled again when this function exits? It should be, but the
+disable call there has me confused.
+
+> @@ -80,6 +235,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct
+> device *dev)
+>  	host->class_dev.class =3D &mmc_host_class;
+>  	device_initialize(&host->class_dev);
+>=20
+> +	mmc_clk_alloc(host);
+> +
+>  	spin_lock_init(&host->lock);
+>  	init_waitqueue_head(&host->wq);
+>  	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+> @@ -156,6 +313,8 @@ void mmc_remove_host(struct mmc_host *host)
+>  	device_del(&host->class_dev);
+>=20
+>  	led_trigger_unregister_simple(host->led);
+> +
+> +	mmc_clk_remove(host);
+>  }
+>=20
+>  EXPORT_SYMBOL(mmc_remove_host);
+
+alloc and remove don't form a nice pair. I suggest add/remove or
+perhaps init/exit.
+
+Rgds
+--=20
+     -- Pierre Ossman
+
+  WARNING: This correspondence is being monitored by the
+  Swedish government. Make sure your server uses encryption
+  for SMTP traffic and consider using PGP for end-to-end
+  encryption.
+
+--=_freyr.ossman.eu-28951-1245092974-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.11 (GNU/Linux)
+
+iEYEARECAAYFAko2nG0ACgkQ7b8eESbyJLjtyACeJxm9pTEhyO33HvnMsyZ7L7SA
++08An2T6UoAwOZmpKH1m0griD6E5Xz9q
+=XLT7
+-----END PGP SIGNATURE-----
+
+--=_freyr.ossman.eu-28951-1245092974-0001-2--
