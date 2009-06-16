@@ -1,37 +1,55 @@
-From: Mike Rapoport <mike@compulab.co.il>
+From: Mike Frysinger <vapier.adi@gmail.com>
 Subject: Re: Representing Embedded Architectures at the Kernel Summit
-Date: Tue, 16 Jun 2009 09:42:46 +0300
-Message-ID: <4A373EE6.6070201@compulab.co.il>
-References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com>
+Date: Tue, 16 Jun 2009 04:06:48 -0400
+Message-ID: <8bd0f97a0906160106g333eb222idd0d694f452650ff@mail.gmail.com>
+References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> 
+	<4A373EE6.6070201@compulab.co.il>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :from:date:message-id:subject:to:cc:content-type
+         :content-transfer-encoding;
+        bh=w0WfiDlV0XXXPZhq3BcNXGjjLmXqm4zefTplpvtifJo=;
+        b=qPYjobx+Utb1iUtrN950jGY0bTiEXC9r2BowLJkvUqrAxhhyPbk3xX/wOUx9HCHStP
+         o7MMMO7FQOHtIiWCuTEgpOVfmjUEqbfzMFKFn5K5yc0KRsaH0VgWAG7hmpjzUFzZX+sL
+         C9WE3JqyXPV1RO/O5xMDkxU4bw5DjSte4Vx58=
+In-Reply-To: <4A373EE6.6070201@compulab.co.il>
 Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Mike Rapoport <mike@compulab.co.il>
+Cc: James Bottomley <James.Bottomley@hansenpartnership.com>, ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
 
+On Tue, Jun 16, 2009 at 02:42, Mike Rapoport wrote:
+> James Bottomley wrote:
+>> We've got to the point where there are simply too many embedded
+>> architectures to invite all the arch maintainers to the kernel summi=
+t.
+>> So, this year, we thought we'd do embedded via topic driven invitati=
+ons
+>> instead. =C2=A0So what we're looking for is a proposal to discuss th=
+e issues
+>> most affecting embedded architectures, or preview any features affec=
+ting
+>> the main kernel which embedded architectures might need ... or any o=
+ther
+>> topics from embedded architectures which might need discussion or
+>> debate.
+>
+> Another issue that affects embedded architectures is drivers initiali=
+zation
+> order. There are a lot of cases when you need the drivers to be initi=
+alized in
+> particular order, and current initcalls scheme does not allow fine gr=
+ained
+> control for it.
 
-
-James Bottomley wrote:
-> Hi All,
-> 
-> We've got to the point where there are simply too many embedded
-> architectures to invite all the arch maintainers to the kernel summit.
-> So, this year, we thought we'd do embedded via topic driven invitations
-> instead.  So what we're looking for is a proposal to discuss the issues
-> most affecting embedded architectures, or preview any features affecting
-> the main kernel which embedded architectures might need ... or any other
-> topics from embedded architectures which might need discussion or
-> debate.
-
-Another issue that affects embedded architectures is drivers initialization
-order. There are a lot of cases when you need the drivers to be initialized in
-particular order, and current initcalls scheme does not allow fine grained
-control for it.
-
--- 
-Sincerely yours,
-Mike.
+example: device configuration information stored in i2c eeprom (i.e.
+dimensions of attached framebuffer), but i2c is not available when
+framebuffer layer is setup.  framebuffer driver has to be built as a
+module and loaded by userspace, or i2c information is read by
+bootloader and passed down to the kernel.
+-mike
