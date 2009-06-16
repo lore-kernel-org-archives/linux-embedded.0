@@ -1,73 +1,56 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Tue, 16 Jun 2009 16:07:50 +0100
-Message-ID: <20090616150750.GF29040@shareable.org>
-References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090614114613.GC9514@shareable.org> <4A351FA9.1090808@gmail.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: Representing Embedded Architectures at the Kernel Summit
+Date: Tue, 16 Jun 2009 10:06:44 -0600
+Message-ID: <fa686aa40906160906i7a05fc77jd1b2b920a1680812@mail.gmail.com>
+References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> 
+	<4A373EE6.6070201@compulab.co.il> <8bd0f97a0906160106g333eb222idd0d694f452650ff@mail.gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4A351FA9.1090808@gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arch-owner@vger.kernel.org>
+In-Reply-To: <8bd0f97a0906160106g333eb222idd0d694f452650ff@mail.gmail.com>
+Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Marco <marco.stornelli@gmail.com>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Mike Frysinger <vapier.adi@gmail.com>
+Cc: Mike Rapoport <mike@compulab.co.il>, James Bottomley <James.Bottomley@hansenpartnership.com>, ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Marco wrote:
-> There's the checksum, but the most important feature of this fs is the
-> write protection. The page table entries that map the
-> backing-store RAM are normally marked read-only. Write operations into
-> the filesystem temporarily mark the affected pages as writeable, the
-> write operation is carried out with locks held, and then the pte is
-> marked read-only again. This feature provides protection against
-> filesystem corruption caused by errant writes into the RAM due to
-> kernel bugs for instance. I provided a test module for this. When the
-> module is loaded tries to do a dirty write in the superblock, at this
-> point you should see an error on the write.
+On Tue, Jun 16, 2009 at 2:06 AM, Mike Frysinger<vapier.adi@gmail.com> w=
+rote:
+> On Tue, Jun 16, 2009 at 02:42, Mike Rapoport wrote:
+>> James Bottomley wrote:
+>> Another issue that affects embedded architectures is drivers initial=
+ization
+>> order. There are a lot of cases when you need the drivers to be init=
+ialized in
+>> particular order, and current initcalls scheme does not allow fine g=
+rained
+>> control for it.
+>
+> example: device configuration information stored in i2c eeprom (i.e.
+> dimensions of attached framebuffer), but i2c is not available when
+> framebuffer layer is setup. =A0framebuffer driver has to be built as =
+a
+> module and loaded by userspace, or i2c information is read by
+> bootloader and passed down to the kernel.
 
-Ok.  Random question: does it work with NOMMU? :-)  (I'm biased, my
-devices are NOMMU).
+I experimented a bit with having some infrastructure for waiting for
+another device to get either registered as part of the phylib stuff I
+was doing.  Here's the patchwork link to the discussion:
 
-Second question: what happens if the system crashing _during_ a write
-to a file.  Does it mean that file will fail it's checksum when it's
-read at the next boot?
+http://patchwork.ozlabs.org/patch/24152/
 
-Maybe files aren't so important.  What about when you write a file,
-and then rename it over an existing file to replace it.  (E.g. a
-config file), and the system crashes _during_ the rename?  At the next
-boot, is it guaranteed to see either the old or the new file, or can
-the directory be corrupt / fail it's checksum?
+I never actually pushed through and finished it because it turned out
+to be a non-issue for Ethernet devices in the end.  However, I can see
+the value.  With this approach, a driver can use a
+bus_register_notifier() variant without caring about the device
+registration order, and the drivers notifier callback will get called
+at the appropriate time.
 
-> > As you say PRAMFS can work with special SRAMs needing memory
-> > protection (and maybe cache coherence?), if you mmap() a file does it
-> > need to use the page cache then?  If so, do you have issues with
-> > coherency between mmap() and direct read/write?
-> 
-> See my response above about my concept of protection. However the mmap
-> it's a similar approach. I can "mmap" the SRAM and I can write into it
-> my data, but I think the possibility to have a fs it's great. We can use
-> the device as normal disk, i.e. we can use cp, mv and so on.
+In your example case I could see the framebuffer driver deferring the
+final part of its initialization until the needed i2c device shows up.
 
-I meant when you mmap() a file on the filesystem, like you do when
-running an executable, for example.  Does mmap() on a file work or is
-it forbidden?  Just curious, I'd guess it's forbidden, and you
-wouldn't want _direct_ mappings to the backing SRAM anyway so you can
-keep those checksums up to date.
+g.
 
-> >> On this point I'd like to hear other embedded guys.
-> > 
-> > As one, I'd like to say if it can checksum the RAM at boot as well,
-> > then I might like to use a small one in ordinary SRAM (at a fixed
-> > reserved address) for those occasions when a reboot happens
-> > (intentional or not) and I'd like to pass a little data to the next
-> > running kernel about why the reboot happened, without touching flash
-> > every time.
-> > 
-> > -- Jamie
-> 
-> Yeah Jamie, the goal of this fs is exactly that!
-
-Great :-)
-
--- Jamie
+--=20
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
