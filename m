@@ -1,105 +1,71 @@
-From: Marco <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Tue, 16 Jun 2009 21:15:22 +0200
-Message-ID: <4A37EF4A.1080006@gmail.com>
-References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090614114613.GC9514@shareable.org> <4A351FA9.1090808@gmail.com> <20090616150750.GF29040@shareable.org>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: Representing Embedded Architectures at the Kernel Summit
+Date: Tue, 16 Jun 2009 13:28:40 -0600
+Message-ID: <fa686aa40906161228o569fa75fp60cdfc450ccbb5ea@mail.gmail.com>
+References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> 
+	<4A373EE6.6070201@compulab.co.il> <8bd0f97a0906160106g333eb222idd0d694f452650ff@mail.gmail.com> 
+	<fa686aa40906160906i7a05fc77jd1b2b920a1680812@mail.gmail.com> 
+	<20090616181855.GF11893@shareable.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=+EUl95PYyrDdkL7rkHTM80tpeJT6tjsWEJi8TnShZps=;
-        b=QuGRA4AllQWiAxCO3JUrORMT1J6FJCcJmquLphdJQxnI3ljSwROjnZDC4+I6h383c+
-         jfoIKs2cHb+EJMRr3+nahCR4SH1EJ232Fz3djr37pW6kQX6r5PP1fQkk8qFbYijgaX83
-         uVetWOC4OmYWFfdFfYj90xgHqowSupSgFiM0Q=
-In-Reply-To: <20090616150750.GF29040@shareable.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090616181855.GF11893@shareable.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="iso-8859-1"
 To: Jamie Lokier <jamie@shareable.org>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, Mike Rapoport <mike@compulab.co.il>, James Bottomley <James.Bottomley@hansenpartnership.com>, ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Jamie Lokier wrote:
-> Marco wrote:
->> There's the checksum, but the most important feature of this fs is the
->> write protection. The page table entries that map the
->> backing-store RAM are normally marked read-only. Write operations into
->> the filesystem temporarily mark the affected pages as writeable, the
->> write operation is carried out with locks held, and then the pte is
->> marked read-only again. This feature provides protection against
->> filesystem corruption caused by errant writes into the RAM due to
->> kernel bugs for instance. I provided a test module for this. When the
->> module is loaded tries to do a dirty write in the superblock, at this
->> point you should see an error on the write.
-> 
-> Ok.  Random question: does it work with NOMMU? :-)  (I'm biased, my
-> devices are NOMMU).
-> 
+On Tue, Jun 16, 2009 at 12:18 PM, Jamie Lokier<jamie@shareable.org> wro=
+te:
+> Grant Likely wrote:
+>> http://patchwork.ozlabs.org/patch/24152/
+>>
+>> I never actually pushed through and finished it because it turned ou=
+t
+>> to be a non-issue for Ethernet devices in the end. =A0However, I can=
+ see
+>> the value. =A0With this approach, a driver can use a
+>> bus_register_notifier() variant without caring about the device
+>> registration order, and the drivers notifier callback will get calle=
+d
+>> at the appropriate time.
+>>
+>> In your example case I could see the framebuffer driver deferring th=
+e
+>> final part of its initialization until the needed i2c device shows u=
+p.
+>
+> It makes drivers more complicated and larger than necessary, though,
+> having to add more functions and register more callbacks.
+>
+> Something which lets you specify a dependency in a one-line
+> MODULE_INIT_PREREQS() macro would be much nicer.
 
-I have to say no. Or at least you can use it but you should select the
-option to disable the write protection. Of course, from this point of
-view there are some archs that they couldn't have this feature. I had to
-disable when I worked with a board with avr32.
+That would work for some cases, but a lot of cases the problem is not
+module init order, but rather driver the probe order.  ie. In the
+Ethernet case I was working on the mac cannot be opened before the
+phy_device is registered.  Or another example is GPIOs.  An GPIO
+driven SPI or MDIO bus cannot be probed before all the devices
+providing the GPIOs are probed (right now GPIOs are 'special' and
+probed early, but this is ugly and there is no reason it couldn't be
+handled within the Linux driver model.
 
-> Second question: what happens if the system crashing _during_ a write
-> to a file.  Does it mean that file will fail it's checksum when it's
-> read at the next boot?
-> 
-> Maybe files aren't so important.  What about when you write a file,
-> and then rename it over an existing file to replace it.  (E.g. a
-> config file), and the system crashes _during_ the rename?  At the next
-> boot, is it guaranteed to see either the old or the new file, or can
-> the directory be corrupt / fail it's checksum?
+I could see some form of .probe_prereqs member of a device driver, but
+what form should it take?  Callback?  Data structure?  The field of
+prereqs (or rather figuring out the prereqs) is so large that I don't
+feel confident trying to define something.  A callback is probably the
+most flexible if it could be called after each probe or registration
+event on other devices.  The idea being that if the prereq call fails,
+then it will be tried again later.  Or, thinking further, perhaps
+instead of a .probe_prereq, just have .probe returns -ETRYAGAIN and
+make the driver core put the device on the end of the queue of devices
+to get probed.  This could get ugly in the driver core though.
 
-First of all I have to explain better the current policy: the checksum
-works at inode and superblock level and currently there isn't a recovery
-function as the journaling. About the superblock it's easy to use a
-redundant policy to be more robust. About the inode, at the moment when
-the checksum doesn't match the inode it's marked as bad calling the
-function make_bad_inode().
+Needs more thought....
 
->>> As you say PRAMFS can work with special SRAMs needing memory
->>> protection (and maybe cache coherence?), if you mmap() a file does it
->>> need to use the page cache then?  If so, do you have issues with
->>> coherency between mmap() and direct read/write?
->> See my response above about my concept of protection. However the mmap
->> it's a similar approach. I can "mmap" the SRAM and I can write into it
->> my data, but I think the possibility to have a fs it's great. We can use
->> the device as normal disk, i.e. we can use cp, mv and so on.
-> 
-> I meant when you mmap() a file on the filesystem, like you do when
-> running an executable, for example.  Does mmap() on a file work or is
-> it forbidden?  Just curious, I'd guess it's forbidden, and you
-> wouldn't want _direct_ mappings to the backing SRAM anyway so you can
-> keep those checksums up to date.
-> 
+g.
 
-Because pramfs attempts to avoid filesystem corruption caused by kernel
-bugs, dirty pages in the page cache are not allowed to be written back
-to the backing-store RAM. This means that only private file mappings are
-supported. This way, an errant write into the page cache will not get
-written back to the filesystem.
-
-
->>>> On this point I'd like to hear other embedded guys.
->>> As one, I'd like to say if it can checksum the RAM at boot as well,
->>> then I might like to use a small one in ordinary SRAM (at a fixed
->>> reserved address) for those occasions when a reboot happens
->>> (intentional or not) and I'd like to pass a little data to the next
->>> running kernel about why the reboot happened, without touching flash
->>> every time.
->>>
->>> -- Jamie
->> Yeah Jamie, the goal of this fs is exactly that!
-> 
-> Great :-)
-> 
-> -- Jamie
-> 
-
-Marco
-
-
+--=20
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
