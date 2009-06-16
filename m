@@ -1,42 +1,105 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: Representing Embedded Architectures at the Kernel Summit
-Date: Tue, 16 Jun 2009 19:18:55 +0100
-Message-ID: <20090616181855.GF11893@shareable.org>
-References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> <4A373EE6.6070201@compulab.co.il> <8bd0f97a0906160106g333eb222idd0d694f452650ff@mail.gmail.com> <fa686aa40906160906i7a05fc77jd1b2b920a1680812@mail.gmail.com>
+From: Marco <marco.stornelli@gmail.com>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Tue, 16 Jun 2009 21:15:22 +0200
+Message-ID: <4A37EF4A.1080006@gmail.com>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090614114613.GC9514@shareable.org> <4A351FA9.1090808@gmail.com> <20090616150750.GF29040@shareable.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <fa686aa40906160906i7a05fc77jd1b2b920a1680812@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=+EUl95PYyrDdkL7rkHTM80tpeJT6tjsWEJi8TnShZps=;
+        b=QuGRA4AllQWiAxCO3JUrORMT1J6FJCcJmquLphdJQxnI3ljSwROjnZDC4+I6h383c+
+         jfoIKs2cHb+EJMRr3+nahCR4SH1EJ232Fz3djr37pW6kQX6r5PP1fQkk8qFbYijgaX83
+         uVetWOC4OmYWFfdFfYj90xgHqowSupSgFiM0Q=
+In-Reply-To: <20090616150750.GF29040@shareable.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Mike Frysinger <vapier.adi@gmail.com>, Mike Rapoport <mike@compulab.co.il>, James Bottomley <James.Bottomley@hansenpartnership.com>, ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-Grant Likely wrote:
-> http://patchwork.ozlabs.org/patch/24152/
+Jamie Lokier wrote:
+> Marco wrote:
+>> There's the checksum, but the most important feature of this fs is the
+>> write protection. The page table entries that map the
+>> backing-store RAM are normally marked read-only. Write operations into
+>> the filesystem temporarily mark the affected pages as writeable, the
+>> write operation is carried out with locks held, and then the pte is
+>> marked read-only again. This feature provides protection against
+>> filesystem corruption caused by errant writes into the RAM due to
+>> kernel bugs for instance. I provided a test module for this. When the
+>> module is loaded tries to do a dirty write in the superblock, at this
+>> point you should see an error on the write.
 > 
-> I never actually pushed through and finished it because it turned out
-> to be a non-issue for Ethernet devices in the end.  However, I can see
-> the value.  With this approach, a driver can use a
-> bus_register_notifier() variant without caring about the device
-> registration order, and the drivers notifier callback will get called
-> at the appropriate time.
+> Ok.  Random question: does it work with NOMMU? :-)  (I'm biased, my
+> devices are NOMMU).
 > 
-> In your example case I could see the framebuffer driver deferring the
-> final part of its initialization until the needed i2c device shows up.
 
-It makes drivers more complicated and larger than necessary, though,
-having to add more functions and register more callbacks.
+I have to say no. Or at least you can use it but you should select the
+option to disable the write protection. Of course, from this point of
+view there are some archs that they couldn't have this feature. I had to
+disable when I worked with a board with avr32.
 
-Something which lets you specify a dependency in a one-line
-MODULE_INIT_PREREQS() macro would be much nicer.
+> Second question: what happens if the system crashing _during_ a write
+> to a file.  Does it mean that file will fail it's checksum when it's
+> read at the next boot?
+> 
+> Maybe files aren't so important.  What about when you write a file,
+> and then rename it over an existing file to replace it.  (E.g. a
+> config file), and the system crashes _during_ the rename?  At the next
+> boot, is it guaranteed to see either the old or the new file, or can
+> the directory be corrupt / fail it's checksum?
 
-I can see the callbacks being useful, and necessary, for drivers which
-need to interleave their initialisation.  E.g. need to initialise an
-external framebuffer chip before you can use it's I2C GPIOs, but then
-need to initialise an I2C driver before you can read the framebuffer
-parameters to finish setting up the framebuffer.
+First of all I have to explain better the current policy: the checksum
+works at inode and superblock level and currently there isn't a recovery
+function as the journaling. About the superblock it's easy to use a
+redundant policy to be more robust. About the inode, at the moment when
+the checksum doesn't match the inode it's marked as bad calling the
+function make_bad_inode().
 
--- Jamie
+>>> As you say PRAMFS can work with special SRAMs needing memory
+>>> protection (and maybe cache coherence?), if you mmap() a file does it
+>>> need to use the page cache then?  If so, do you have issues with
+>>> coherency between mmap() and direct read/write?
+>> See my response above about my concept of protection. However the mmap
+>> it's a similar approach. I can "mmap" the SRAM and I can write into it
+>> my data, but I think the possibility to have a fs it's great. We can use
+>> the device as normal disk, i.e. we can use cp, mv and so on.
+> 
+> I meant when you mmap() a file on the filesystem, like you do when
+> running an executable, for example.  Does mmap() on a file work or is
+> it forbidden?  Just curious, I'd guess it's forbidden, and you
+> wouldn't want _direct_ mappings to the backing SRAM anyway so you can
+> keep those checksums up to date.
+> 
+
+Because pramfs attempts to avoid filesystem corruption caused by kernel
+bugs, dirty pages in the page cache are not allowed to be written back
+to the backing-store RAM. This means that only private file mappings are
+supported. This way, an errant write into the page cache will not get
+written back to the filesystem.
+
+
+>>>> On this point I'd like to hear other embedded guys.
+>>> As one, I'd like to say if it can checksum the RAM at boot as well,
+>>> then I might like to use a small one in ordinary SRAM (at a fixed
+>>> reserved address) for those occasions when a reboot happens
+>>> (intentional or not) and I'd like to pass a little data to the next
+>>> running kernel about why the reboot happened, without touching flash
+>>> every time.
+>>>
+>>> -- Jamie
+>> Yeah Jamie, the goal of this fs is exactly that!
+> 
+> Great :-)
+> 
+> -- Jamie
+> 
+
+Marco
+
+
