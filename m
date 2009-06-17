@@ -1,41 +1,39 @@
-From: Daniel Ng <daniel.ng1234@gmail.com>
-Subject: usb gadget serial changes since 2.6.14
-Date: Wed, 17 Jun 2009 12:36:21 +0000 (UTC)
-Message-ID: <loom.20090617T121932-512@post.gmane.org>
+From: Ralf Baechle <ralf@linux-mips.org>
+Subject: Re: [Ksummit-2009-discuss] Representing Embedded Architectures at
+	the Kernel Summit
+Date: Wed, 17 Jun 2009 16:04:14 +0100
+Message-ID: <20090617150414.GA18525@linux-mips.org>
+References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> <4A373EE6.6070201@compulab.co.il> <8bd0f97a0906160106g333eb222idd0d694f452650ff@mail.gmail.com> <20090616121909.GA1547@linux-mips.org> <4A38705A.3060007@zytor.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-arch-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4A38705A.3060007@zytor.com>
+Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, Mike Rapoport <mike@compulab.co.il>, James Bottomley <James.Bottomley@hansenpartnership.com>, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org, ksummit-2009-discuss@lists.linux-foundation.org
 
-Hi,
+On Tue, Jun 16, 2009 at 09:26:02PM -0700, H. Peter Anvin wrote:
 
-I'm having trouble porting our in-house UDC driver to 2.6.27. It originally 
-worked on 2.6.14 as an CDC-ACM driver.
+> > I2C or similar busses can be a particularly annoying if they contain
+> > essential configuration information such as memory size which is needed
+> > long before anything else.  So for far a common solution is that platforms
+> > are carrying a private (aka redundant, ugly) early-i2c system that's just
+> > about sufficient for this purpose.
+> 
+> For what it's worth, this is true for pretty much ALL systems with
+> removable memory modules, since Serial Presence Detect (SPD) is
+> electrically equivalent to I2C.
+> 
+> However, on most systems, even embedded, bringing up memory falls on
+> firmware (sometimes in the form of a boot loader) so Linux rarely sees it.
 
-I notice a lot of changes since 2.6.14. For starters, instead of the single 
-serial.c file, there is now f_serial.c, u_serial.c and f_acm.c.
+There are embedded systems were the firmware does not provide a usuable
+memory map or where that is plain broken.  Or Linux with some extra init
+code serves as the firmware.  Often there is a single serial EEPROM for
+the entire system.  If there is an atrocity that can save a penny it will
+be commited at least in the embedded world.
 
-Currently, the UDC driver in 2.6.27 seems to work if I simply plug the USB 
-cable in between our gadget serial Linux device and a Windows PC. However, if 
-I unplug, then replug the cable, the 'Out' Endpoint seems fine, but the 'In' 
-Endpoint doesn't seem to come up properly. 
-
-In other words, data only seems to be getting through in the direction from 
-the PC to the gadget serial Linux device, but not vice versa.
-
-Is there some sort of architecture document to show how the f_serial.c, 
-u_serial.c and f_acm.c files all fit together? I've searched in the 
-Documentation directory and I've read the usb-gadget-serial docbook document 
-but it doesn't really tell me this.
-
-Also, it seems that for some reason composite.c is being compiled and used, 
-but my CDC-ACM gadget serial driver is *not* a composite driver. Is it 
-possible to prevent linking with this composite driver?
-
-Cheers,
-Daniel
-
-
+  Ralf
