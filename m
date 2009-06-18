@@ -1,54 +1,47 @@
-From: "Chris Friesen" <cfriesen@nortel.com>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Wed, 17 Jun 2009 12:32:00 -0600
-Message-ID: <4A3936A0.9050709@nortel.com>
-References: <4A33A7A2.1050608@gmail.com>
+From: Daniel Ng <daniel.ng1234@gmail.com>
+Subject: CDC ACM composite gadget serial not working between Linux and 
+	Windows?
+Date: Thu, 18 Jun 2009 12:09:24 +1000
+Message-ID: <547eba1b0906171909y44fc89c8q2bc94edd1eff7411@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4A33A7A2.1050608@gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:date:message-id:subject
+         :from:to:content-type:content-transfer-encoding;
+        bh=uF58cqrCEtolUMe0SBaATBc7JFO1UfzpVj1d9jSIPZA=;
+        b=M5zkgz8YlY0lsQdSXeGG8a16/WNrZdlEtM/xkznKYeYNimTI1654oPpx+GHX0RHjzF
+         mcDctkGE8ajtJAC7eTu2r8fMEEcK29km/qr5mt3G+i3GSqMF+xixCw/kMl3tbtFulEpX
+         ZhE6Lxhni4LMKsPtccqNffZ5cRzb5N2+EITVI=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Marco <marco.stornelli@gmail.com>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Daniel Walker <dwalker@soe.ucsc.edu>
+To: linux-embedded@vger.kernel.org
 
-Marco wrote:
-> This is a second attempt at mainlining Pramfs. The first attempt was
-> back in early 2004 by MontaVista. Since then the kernel code has almost
-> been completely rewritten. So my first item on the list was porting the
-> code on a recent kernel version. After that I added the XIP support.
-> 
-> Now some FAQs:
-> 
-> What is the goal of this filesystem?
-> 
-> Many embedded systems have a block of non-volatile RAM separate from
-> normal system memory, i.e. of which the kernel maintains no memory page
-> descriptors. For such systems it would be beneficial to mount a
-> fast read/write filesystem over this "I/O memory", for storing
-> frequently accessed data that must survive system reboots and power
-> cycles. An example usage might be system logs under /var/log, or a user
-> address book in a cell phone or PDA.
+Hi,
 
-Nice to see something like this submitted to mainline.  We use something
-similar to provide persistent storage for crash recovery debug data for
-boards which don't have local storage.
+I've found this comment in f_acm.c, 2.6.27:
 
-In many cases kdump can provide good information, but it's not
-sufficient for "flight recorder" type data if the kernel gets rebooted
-by a hardware mechanism (watchdog, for instance) that doesn't give a
-pre-interrupt.
+ * Note that even MS-Windows has some support for ACM.  However, that
+ * support is somewhat broken because when you use ACM in a composite
+ * device, having multiple interfaces confuses the poor OS.  It doesn't
+ * seem to understand CDC Union descriptors.  The new "association"
+ * descriptors (roughly equivalent to CDC Unions) may sometimes help.
 
-I'm a bit concerned about your PTE modifications on every write
-though...we do things like log every exception and scheduler operation
-to persistent memory, and I think the overhead of changing the
-protection on every write would be a killer.  Instead, we make extensive
-use of checksums at various different levels so that the recovery app
-can determine which data is valid.
+Does this mean I will not be able to successfully connect a Linux box
+to a Windows PC via the Linux box's CDC ACM composite gadget serial
+driver?
 
-Also, I'd like to ensure that direct memory access to the memory area
-would be available.  There are some things (like the sched/exception
-logging mentioned above) where we want to make accesses as fast as possible.
+Also, there are direct references to the composite driver in f_acm.c,
+which tells me the following:
 
-Chris
+-In Linux (2.6.27), a CDC ACM gadget serial driver MUST be a composite
+driver as well.
+
+Is this true? If so why is such tight coupling required?
+
+Please suggest an alternate list if this message is inappropriate for this list.
+
+Cheers,
+Daniel
