@@ -1,92 +1,174 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Thu, 18 Jun 2009 08:35:35 +0200
-Message-ID: <2ea1731b0906172335p1b6f2085j294df002ab2b71e0@mail.gmail.com>
-References: <4A33A7A2.1050608@gmail.com> <4A3936A0.9050709@nortel.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH 2/2] Modify MMCI/PL180 to handle agressive clocking v3
+Date: Thu, 18 Jun 2009 08:57:31 +0200
+Message-ID: <1245308251-25313-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=ljiSmP1Gn5PiIEo1V4hL0hUyiGmz8gHoBdbAw5cTzhM=;
-        b=Ws48yDa2craE2XW83uMJsO7CBZ4CzRFrERXWyWd5ad1nQ6+0qVL8/j/HQQEPDypNx4
-         D4jUEYH+Inv2hgfHyIfGdTAu1JlQm7vN+Iwu/VkylncSMu+Oup0rO9fqrF+VfH+Ke/cP
-         LYip6WU52/r2c+GcmsZIJIiEbURBF58mOsH8g=
-In-Reply-To: <4A3936A0.9050709@nortel.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Chris Friesen <cfriesen@nortel.com>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, linux-kernel@vger.kernel.org, Daniel Walker <dwalker@soe.ucsc.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Pierre Ossman <pierre@ossman.eu>
+Cc: linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
 
-2009/6/17 Chris Friesen <cfriesen@nortel.com>:
-> Marco wrote:
->> This is a second attempt at mainlining Pramfs. The first attempt was
->> back in early 2004 by MontaVista. Since then the kernel code has alm=
-ost
->> been completely rewritten. So my first item on the list was porting =
-the
->> code on a recent kernel version. After that I added the XIP support.
->>
->> Now some FAQs:
->>
->> What is the goal of this filesystem?
->>
->> Many embedded systems have a block of non-volatile RAM separate from
->> normal system memory, i.e. of which the kernel maintains no memory p=
-age
->> descriptors. For such systems it would be beneficial to mount a
->> fast read/write filesystem over this "I/O memory", for storing
->> frequently accessed data that must survive system reboots and power
->> cycles. An example usage might be system logs under /var/log, or a u=
-ser
->> address book in a cell phone or PDA.
->
-> Nice to see something like this submitted to mainline. =A0We use some=
-thing
-> similar to provide persistent storage for crash recovery debug data f=
-or
-> boards which don't have local storage.
->
-> In many cases kdump can provide good information, but it's not
-> sufficient for "flight recorder" type data if the kernel gets reboote=
-d
-> by a hardware mechanism (watchdog, for instance) that doesn't give a
-> pre-interrupt.
+This adds a few clk_enable()/clk_disable() calls to the MMCI
+driver so as to handle an set_ios() request with clock
+frequency set to 0 as an instruction to gate the block clock.
+This also breaks out the clock setting code into its own
+function to simplify the set_ios() function a bit.
 
-I'm very happy that this fs has the approval of the kernel community. :=
-)
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |   78 ++++++++++++++++++++++++++++++++++------------
+ 1 files changed, 57 insertions(+), 21 deletions(-)
 
->
-> I'm a bit concerned about your PTE modifications on every write
-> though...we do things like log every exception and scheduler operatio=
-n
-> to persistent memory, and I think the overhead of changing the
-> protection on every write would be a killer. =A0Instead, we make exte=
-nsive
-> use of checksums at various different levels so that the recovery app
-> can determine which data is valid.
->
-
-It's a trade-off between security and performance. Checksum it's a
-good way to understand if a data is valid or not (indeed it's used in
-this fs), but with this schema you can prevent the system to do
-something wrong. This option, however, can be enabled/disabled via
-kconfig.
-
-> Also, I'd like to ensure that direct memory access to the memory area
-> would be available.
-
-What do you exactly mean with this? Can you explain to me a bit deeper?
-
-> There are some things (like the sched/exception logging mentioned abo=
-ve) where we want to make accesses as fast as possible.
->
-> Chris
->
->
-
-Marco
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 36875dc..d9f5c9a 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -37,8 +37,34 @@
+ 
+ static unsigned int fmax = 515633;
+ 
++/*
++ * This must be called with host->lock held
++ */
++static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
++{
++	u32 clk = 0;
++
++	if (desired) {
++		if (desired >= host->mclk) {
++			clk = MCI_CLK_BYPASS;
++			host->cclk = host->mclk;
++			DBG(host, "MMCI: bypass clock divider, cclk = %u Hz\n", host->cclk);
++		} else {
++			clk = host->mclk / (2 * desired) - 1;
++			if (clk >= 256)
++				clk = 255;
++			host->cclk = host->mclk / (2 * (clk + 1));
++			DBG(host, "MMCI: divide cclk to %u Hz (divide %u by %u)\n", host->cclk, host->mclk, clk);
++		}
++		if (host->hw_designer == 0x80)
++			clk |= MCI_FCEN; /* Bug fix in ST IP block */
++		clk |= MCI_CLK_ENABLE;
++	}
++	writel(clk, host->base + MMCICLOCK);
++}
++
+ static void
+-mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
++ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+ 	writel(0, host->base + MMCICOMMAND);
+ 
+@@ -418,22 +444,7 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
+-	u32 clk = 0, pwr = 0;
+-
+-	if (ios->clock) {
+-		if (ios->clock >= host->mclk) {
+-			clk = MCI_CLK_BYPASS;
+-			host->cclk = host->mclk;
+-		} else {
+-			clk = host->mclk / (2 * ios->clock) - 1;
+-			if (clk >= 256)
+-				clk = 255;
+-			host->cclk = host->mclk / (2 * (clk + 1));
+-		}
+-		if (host->hw_designer == 0x80)
+-			clk |= MCI_FCEN; /* Bug fix in ST IP block */
+-		clk |= MCI_CLK_ENABLE;
+-	}
++	u32 pwr = 0;
+ 
+ 	if (host->plat->translate_vdd)
+ 		pwr |= host->plat->translate_vdd(mmc_dev(mmc), ios->vdd);
+@@ -464,12 +475,23 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		}
+ 	}
+ 
+-	writel(clk, host->base + MMCICLOCK);
++	spin_lock(&host->lock);
++
++	if (ios->clock == 0) {
++		clk_disable(host->clk);
++	} else {
++		clk_enable(host->clk);
++		mmci_set_clkreg(host, ios->clock);
++	}
+ 
+ 	if (host->pwr != pwr) {
+ 		host->pwr = pwr;
++		clk_enable(host->clk);
+ 		writel(pwr, host->base + MMCIPOWER);
++		clk_disable(host->clk);
+ 	}
++
++	spin_unlock(&host->lock);
+ }
+ 
+ static const struct mmc_host_ops mmci_ops = {
+@@ -615,6 +637,8 @@ static int __devinit mmci_probe(struct amba_device *dev, void *id)
+ 	host->timer.expires = jiffies + HZ;
+ 	add_timer(&host->timer);
+ 
++	/* The first IOS will turn the clock on again */
++	clk_disable(host->clk);
+ 	return 0;
+ 
+  irq0_free:
+@@ -646,17 +670,22 @@ static int __devexit mmci_remove(struct amba_device *dev)
+ 
+ 		mmc_remove_host(mmc);
+ 
++		/* framework may have gated the block clock */
++		clk_enable(host->clk);
++
+ 		writel(0, host->base + MMCIMASK0);
+ 		writel(0, host->base + MMCIMASK1);
+ 
+ 		writel(0, host->base + MMCICOMMAND);
+ 		writel(0, host->base + MMCIDATACTRL);
+ 
++		clk_disable(host->clk);
++
+ 		free_irq(dev->irq[0], host);
+ 		free_irq(dev->irq[1], host);
+ 
+ 		iounmap(host->base);
+-		clk_disable(host->clk);
++
+ 		clk_put(host->clk);
+ 
+ 		mmc_free_host(mmc);
+@@ -677,8 +706,11 @@ static int mmci_suspend(struct amba_device *dev, pm_message_t state)
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+ 		ret = mmc_suspend_host(mmc, state);
+-		if (ret == 0)
++		if (ret == 0) {
++			clk_enable(host->clk);
+ 			writel(0, host->base + MMCIMASK0);
++			clk_disable(host->clk);
++		}
+ 	}
+ 
+ 	return ret;
+@@ -692,7 +724,11 @@ static int mmci_resume(struct amba_device *dev)
+ 	if (mmc) {
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+-		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++		if (ret == 0) {
++			clk_enable(host->clk);
++			writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++			clk_disable(host->clk);
++		}
+ 
+ 		ret = mmc_resume_host(mmc);
+ 	}
+-- 
+1.6.2.1
