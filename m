@@ -1,61 +1,70 @@
-From: Pierre Ossman <pierre@ossman.eu>
-Subject: Re: [PATCH 1/2] MMC Agressive clocking framework v3
-Date: Sun, 21 Jun 2009 22:43:23 +0200
-Message-ID: <20090621224323.5fea812c@mjolnir.ossman.eu>
-References: <1245308220-25069-1-git-send-email-linus.walleij@stericsson.com>
-	<63386a3d0906211305yd09b4e6x488ac8b572af8204@mail.gmail.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Sun, 21 Jun 2009 22:52:45 +0200
+Message-ID: <20090621205245.GC3254@elf.ucw.cz>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-14583-1245617008-0001-2"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <63386a3d0906211305yd09b4e6x488ac8b572af8204@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <4A3E6F28.4090404@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Linus Walleij <linus.walleij@stericsson.com>, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org
-
-This is a MIME-formatted message.  If you see this text it means that your
-E-mail software does not support MIME-formatted messages.
-
---=_freyr.ossman.eu-14583-1245617008-0001-2
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
-
-On Sun, 21 Jun 2009 22:05:18 +0200
-Linus Walleij <linus.ml.walleij@gmail.com> wrote:
-
-> 2009/6/18 Linus Walleij <linus.walleij@stericsson.com>:
->=20
-> > diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-> >(...)
-> > +         Of unsure, say N.
->=20
-> However the rest of the patch is as I intended. I'll send a V4 pronto
-> if you want that for the current merge window.
->=20
-
-I'm trying to squeeze you in, but time is short so I'm afraid I can't
-give you any guarantees. :/
-
-Rgds
---=20
-     -- Pierre Ossman
-
-  WARNING: This correspondence is being monitored by the
-  Swedish government. Make sure your server uses encryption
-  for SMTP traffic and consider using PGP for end-to-end
-  encryption.
-
---=_freyr.ossman.eu-14583-1245617008-0001-2
-Content-Type: application/pgp-signature; name="signature.asc"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=signature.asc
+To: Marco <marco.stornelli@gmail.com>
+Cc: Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.11 (GNU/Linux)
 
-iEYEARECAAYFAko+m28ACgkQ7b8eESbyJLhp+ACfeREmXyCEBxmEdwyYsMk/pzUN
-bYIAoMH3c5R6c2coiXTDojsyWZuvOKqm
-=fiNk
------END PGP SIGNATURE-----
+> >> 1. Disk-based filesystems such as ext2/ext3 were designed for optimum
+> >>    performance on spinning disk media, so they implement features such
+> >>    as block groups, which attempts to group inode data into a contiguous
+> >>    set of data blocks to minimize disk seeking when accessing files. For
+> >>    RAM there is no such concern; a file's data blocks can be scattered
+> >>    throughout the media with no access speed penalty at all. So block
+> >>    groups in a filesystem mounted over RAM just adds unnecessary
+> >>    complexity. A better approach is to use a filesystem specifically
+> >>    tailored to RAM media which does away with these disk-based features.
+> >>    This increases the efficient use of space on the media, i.e. more
+> >>    space is dedicated to actual file data storage and less to meta-data
+> >>    needed to maintain that file data.
+> > 
+> > So... what is the performance difference between ext2 and your new
+> > filesystem?
+> > 
+> 
+> About the "space" you can read a detailed documentation on the site:
+> 
+> http://pramfs.sourceforge.net/pramfs-spec.html
 
---=_freyr.ossman.eu-14583-1245617008-0001-2--
+I do not see any numbers there. Do you think you can save significant
+memory when storing for example kernel source trees?
+
+> In addition I can do an example of "compact" information: ext2 uses
+> directory entry objects ("dentries") to associate file names to
+> inodes,
+
+I'm not sure that on-disk directory entry == dentry.
+
+> and these dentries are located in data blocks owned by the parent
+> directory. In pramfs, directory inode's do not need to own any data
+> blocks, because all dentry information is contained within the inode's
+> themselves.
+
+How do you handle hard-links, then?
+
+> >From performance point of view:
+> 
+> Sometimes ago I uploaded here (http://elinux.org/Pram_Fs) some benchmark
+> results to compare the performance with and without XIP in a real
+> embedded environment with bonnie++. You could use it as reference point.
+
+Well, so XIP helps. ext2 can do XIP too, IIRC. Is your performance
+better than ext2?
+
+Wait... those numbers you pointed me... claim to be as slow as
+13MB/sec. That's very very bad. My harddrive is faster than that.
+									Pavel
+
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
