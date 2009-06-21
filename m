@@ -1,70 +1,174 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Sun, 21 Jun 2009 22:52:45 +0200
-Message-ID: <20090621205245.GC3254@elf.ucw.cz>
-References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com>
-Mime-Version: 1.0
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH 2/2] Modify MMCI/PL180 to handle agressive clocking v4
+Date: Sun, 21 Jun 2009 22:59:59 +0200
+Message-ID: <1245617999-5273-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4A3E6F28.4090404@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Marco <marco.stornelli@gmail.com>
-Cc: Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+To: Pierre Ossman <pierre@ossman.eu>
+Cc: linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
 
+This adds a few clk_enable()/clk_disable() calls to the MMCI
+driver so as to handle an set_ios() request with clock
+frequency set to 0 as an instruction to gate the block clock.
+This also breaks out the clock setting code into its own
+function to simplify the set_ios() function a bit.
 
-> >> 1. Disk-based filesystems such as ext2/ext3 were designed for optimum
-> >>    performance on spinning disk media, so they implement features such
-> >>    as block groups, which attempts to group inode data into a contiguous
-> >>    set of data blocks to minimize disk seeking when accessing files. For
-> >>    RAM there is no such concern; a file's data blocks can be scattered
-> >>    throughout the media with no access speed penalty at all. So block
-> >>    groups in a filesystem mounted over RAM just adds unnecessary
-> >>    complexity. A better approach is to use a filesystem specifically
-> >>    tailored to RAM media which does away with these disk-based features.
-> >>    This increases the efficient use of space on the media, i.e. more
-> >>    space is dedicated to actual file data storage and less to meta-data
-> >>    needed to maintain that file data.
-> > 
-> > So... what is the performance difference between ext2 and your new
-> > filesystem?
-> > 
-> 
-> About the "space" you can read a detailed documentation on the site:
-> 
-> http://pramfs.sourceforge.net/pramfs-spec.html
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |   78 ++++++++++++++++++++++++++++++++++------------
+ 1 files changed, 57 insertions(+), 21 deletions(-)
 
-I do not see any numbers there. Do you think you can save significant
-memory when storing for example kernel source trees?
-
-> In addition I can do an example of "compact" information: ext2 uses
-> directory entry objects ("dentries") to associate file names to
-> inodes,
-
-I'm not sure that on-disk directory entry == dentry.
-
-> and these dentries are located in data blocks owned by the parent
-> directory. In pramfs, directory inode's do not need to own any data
-> blocks, because all dentry information is contained within the inode's
-> themselves.
-
-How do you handle hard-links, then?
-
-> >From performance point of view:
-> 
-> Sometimes ago I uploaded here (http://elinux.org/Pram_Fs) some benchmark
-> results to compare the performance with and without XIP in a real
-> embedded environment with bonnie++. You could use it as reference point.
-
-Well, so XIP helps. ext2 can do XIP too, IIRC. Is your performance
-better than ext2?
-
-Wait... those numbers you pointed me... claim to be as slow as
-13MB/sec. That's very very bad. My harddrive is faster than that.
-									Pavel
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 36875dc..d9f5c9a 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -37,8 +37,34 @@
+ 
+ static unsigned int fmax = 515633;
+ 
++/*
++ * This must be called with host->lock held
++ */
++static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
++{
++	u32 clk = 0;
++
++	if (desired) {
++		if (desired >= host->mclk) {
++			clk = MCI_CLK_BYPASS;
++			host->cclk = host->mclk;
++			DBG(host, "MMCI: bypass clock divider, cclk = %u Hz\n", host->cclk);
++		} else {
++			clk = host->mclk / (2 * desired) - 1;
++			if (clk >= 256)
++				clk = 255;
++			host->cclk = host->mclk / (2 * (clk + 1));
++			DBG(host, "MMCI: divide cclk to %u Hz (divide %u by %u)\n", host->cclk, host->mclk, clk);
++		}
++		if (host->hw_designer == 0x80)
++			clk |= MCI_FCEN; /* Bug fix in ST IP block */
++		clk |= MCI_CLK_ENABLE;
++	}
++	writel(clk, host->base + MMCICLOCK);
++}
++
+ static void
+-mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
++ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+ 	writel(0, host->base + MMCICOMMAND);
+ 
+@@ -418,22 +444,7 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
+-	u32 clk = 0, pwr = 0;
+-
+-	if (ios->clock) {
+-		if (ios->clock >= host->mclk) {
+-			clk = MCI_CLK_BYPASS;
+-			host->cclk = host->mclk;
+-		} else {
+-			clk = host->mclk / (2 * ios->clock) - 1;
+-			if (clk >= 256)
+-				clk = 255;
+-			host->cclk = host->mclk / (2 * (clk + 1));
+-		}
+-		if (host->hw_designer == 0x80)
+-			clk |= MCI_FCEN; /* Bug fix in ST IP block */
+-		clk |= MCI_CLK_ENABLE;
+-	}
++	u32 pwr = 0;
+ 
+ 	if (host->plat->translate_vdd)
+ 		pwr |= host->plat->translate_vdd(mmc_dev(mmc), ios->vdd);
+@@ -464,12 +475,23 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		}
+ 	}
+ 
+-	writel(clk, host->base + MMCICLOCK);
++	spin_lock(&host->lock);
++
++	if (ios->clock == 0) {
++		clk_disable(host->clk);
++	} else {
++		clk_enable(host->clk);
++		mmci_set_clkreg(host, ios->clock);
++	}
+ 
+ 	if (host->pwr != pwr) {
+ 		host->pwr = pwr;
++		clk_enable(host->clk);
+ 		writel(pwr, host->base + MMCIPOWER);
++		clk_disable(host->clk);
+ 	}
++
++	spin_unlock(&host->lock);
+ }
+ 
+ static const struct mmc_host_ops mmci_ops = {
+@@ -615,6 +637,8 @@ static int __devinit mmci_probe(struct amba_device *dev, void *id)
+ 	host->timer.expires = jiffies + HZ;
+ 	add_timer(&host->timer);
+ 
++	/* The first IOS will turn the clock on again */
++	clk_disable(host->clk);
+ 	return 0;
+ 
+  irq0_free:
+@@ -646,17 +670,22 @@ static int __devexit mmci_remove(struct amba_device *dev)
+ 
+ 		mmc_remove_host(mmc);
+ 
++		/* framework may have gated the block clock */
++		clk_enable(host->clk);
++
+ 		writel(0, host->base + MMCIMASK0);
+ 		writel(0, host->base + MMCIMASK1);
+ 
+ 		writel(0, host->base + MMCICOMMAND);
+ 		writel(0, host->base + MMCIDATACTRL);
+ 
++		clk_disable(host->clk);
++
+ 		free_irq(dev->irq[0], host);
+ 		free_irq(dev->irq[1], host);
+ 
+ 		iounmap(host->base);
+-		clk_disable(host->clk);
++
+ 		clk_put(host->clk);
+ 
+ 		mmc_free_host(mmc);
+@@ -677,8 +706,11 @@ static int mmci_suspend(struct amba_device *dev, pm_message_t state)
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+ 		ret = mmc_suspend_host(mmc, state);
+-		if (ret == 0)
++		if (ret == 0) {
++			clk_enable(host->clk);
+ 			writel(0, host->base + MMCIMASK0);
++			clk_disable(host->clk);
++		}
+ 	}
+ 
+ 	return ret;
+@@ -692,7 +724,11 @@ static int mmci_resume(struct amba_device *dev)
+ 	if (mmc) {
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+-		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++		if (ret == 0) {
++			clk_enable(host->clk);
++			writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++			clk_disable(host->clk);
++		}
+ 
+ 		ret = mmc_resume_host(mmc);
+ 	}
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+1.6.2.1
