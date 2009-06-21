@@ -1,52 +1,49 @@
-From: Kumar Gala <galak@kernel.crashing.org>
-Subject: Re: Representing Embedded Architectures at the Kernel Summit
-Date: Fri, 19 Jun 2009 02:53:23 -0500
-Message-ID: <CFF5881B-56E5-47CF-A879-D5285A92B591@kernel.crashing.org>
-References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> <BE4622E9-611A-4D56-BB54-3C7786939CF2@kernel.crashing.org> <20090618025125.GA26531@linux-sh.org> <AED49645-009B-45A4-BF7B-EBF60D9C34C8@kernel.crashing.org> <20090619030009.GB16806@linux-sh.org>
-Mime-Version: 1.0 (Apple Message framework v935.3)
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arch-owner@vger.kernel.org>
-In-Reply-To: <20090619030009.GB16806@linux-sh.org>
-Sender: linux-arch-owner@vger.kernel.org
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Sun, 21 Jun 2009 08:40:41 +0200
+Message-ID: <20090621064040.GC1656@ucw.cz>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com>
+Mime-Version: 1.0
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4A34A394.5040509@gmail.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"; delsp="yes"
-To: Paul Mundt <lethal@Linux-SH.ORG>
-Cc: James Bottomley <James.Bottomley@HansenPartnership.com>, ksummit-2009-discuss@lists.linux-foundation.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Marco <marco.stornelli@gmail.com>
+Cc: Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
 
-On Jun 18, 2009, at 10:00 PM, Paul Mundt wrote:
+> > Why is an entire filesystem needed, instead of simply a block driver
+> > if the ramdisk driver cannot be used?
+> > 
+> 
+> >From documentation:
+> 
+> "A relatively straight-forward solution is to write a simple block
+> driver for the non-volatile RAM, and mount over it any disk-based
+> filesystem such as ext2/ext3, reiserfs, etc.
+> 
+> But the disk-based fs over non-volatile RAM block driver approach has
+> some drawbacks:
+> 
+> 1. Disk-based filesystems such as ext2/ext3 were designed for optimum
+>    performance on spinning disk media, so they implement features such
+>    as block groups, which attempts to group inode data into a contiguous
+>    set of data blocks to minimize disk seeking when accessing files. For
+>    RAM there is no such concern; a file's data blocks can be scattered
+>    throughout the media with no access speed penalty at all. So block
+>    groups in a filesystem mounted over RAM just adds unnecessary
+>    complexity. A better approach is to use a filesystem specifically
+>    tailored to RAM media which does away with these disk-based features.
+>    This increases the efficient use of space on the media, i.e. more
+>    space is dedicated to actual file data storage and less to meta-data
+>    needed to maintain that file data.
 
-> On Thu, Jun 18, 2009 at 09:59:20PM -0500, Kumar Gala wrote:
->>
->> On Jun 17, 2009, at 9:51 PM, Paul Mundt wrote:
->>
->>> On Wed, Jun 17, 2009 at 09:31:48AM -0500, Kumar Gala wrote:
->>>> One topic that was partially touched on was dealing with various
->>>> memories on embedded systems.  We have several sram based  
->>>> allocators
->>>> in the kernel for various different arch's:
->>>>
->>>> - Blackfin sram allocator arch/blackfin/mm/sram-alloc.c
->>>> - Lite5200(b) sram allocator arch/powerpc/sysdev/bestcomm/sram.c
->>>> - AVR32 sram allocator arch/avr32/mach-at32ap/at32ap700x.c and  
->>>> arch/
->>>> avr32/mach-at32ap/include/mach/sram.h
->>>> - Potential davinci sram allocator
->>>>
->>>> There maybe others.
->>>>
->>> SH does this through NUMA on SRAM blocks that are anywhere from
->>> 128kB to
->>> 64MB. Some of our SMP configurations have upwards of a dozen of  
->>> these
->>> blocks.
->>
->> Do you really have that much on chip memory?
->>
-> Is this really a serious question? If we didn't, I would not have
-> mentioned it.
+So... what is the performance difference between ext2 and your new
+filesystem?
 
-It was.  I'm not familiar with SH hardware so wasn't sure if there was  
-some other application you had for the multiple regions.
-
-- k
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
