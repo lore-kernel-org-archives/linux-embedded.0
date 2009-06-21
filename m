@@ -1,8 +1,8 @@
 From: Marco <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 06/14] Pramfs: Include files
-Date: Sun, 21 Jun 2009 19:07:25 +0200
-Message-ID: <4A3E68CD.6080803@gmail.com>
-References: <4A33A7EC.6070008@gmail.com> <20090613140459.GC30053@uranus.ravnborg.org> <200906140059.57362.arnd@arndb.de>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Sun, 21 Jun 2009 19:34:32 +0200
+Message-ID: <4A3E6F28.4090404@gmail.com>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -11,51 +11,65 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:references:in-reply-to
          :content-type:content-transfer-encoding;
-        bh=zacdLg2K5AkEsWqaF65qSqePQsQQ5f8eyeCxZPEJG5A=;
-        b=Onh+jGO5A667ift2TAXkUThiEQaUf8x3OCSDOIXhNGI3pZAbN+x8TOJZ78hybPxQHq
-         cX7soCh/x/KG4JTgsZGU63jmFFuqtaVgsXPC8jcn0vQS7icnJKLVHrnYiB+sWtmSK6Pn
-         n5VcywDAlOV9vGv2UXNLFAjCPnS6QC8azebEk=
-In-Reply-To: <200906140059.57362.arnd@arndb.de>
+        bh=ZJteITYtYp/eM2fP1W+94KvNnEXNkOtM/byKLsdwivk=;
+        b=bKxnSKZUojVYfDrK7d5Jg9AV84P5Ij92pRyx9L31RbNQyfOD7jzIrSMcxenLDiZtk/
+         i2fW7qwrd0GeQ7eq6bxPR46S8i05HDToU7Efu517U1l1hzmH/Rnn3GHCQCQx7NKNDI8F
+         W1Flou7FYHPKG1/ecSWZFohUwey+2rzfkWA3o=
+In-Reply-To: <20090621064040.GC1656@ucw.cz>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-Arnd Bergmann wrote:
-> On Saturday 13 June 2009, Sam Ravnborg wrote:
->>> +     union {
->>> +             struct {
->>> +                     /*
->>> +                      * ptr to row block of 2D block pointer array,
->>> +                      * file block #'s 0 to (blocksize/4)^2 - 1.
->>> +                      */
->>> +                     off_t row_block;
->> It is my understanding that we shall use: __kernel_off_t
->> in exported headers.
+Pavel Machek wrote:
+>>> Why is an entire filesystem needed, instead of simply a block driver
+>>> if the ramdisk driver cannot be used?
+>>>
+>> >From documentation:
+>>
+>> "A relatively straight-forward solution is to write a simple block
+>> driver for the non-volatile RAM, and mount over it any disk-based
+>> filesystem such as ext2/ext3, reiserfs, etc.
+>>
+>> But the disk-based fs over non-volatile RAM block driver approach has
+>> some drawbacks:
+>>
+>> 1. Disk-based filesystems such as ext2/ext3 were designed for optimum
+>>    performance on spinning disk media, so they implement features such
+>>    as block groups, which attempts to group inode data into a contiguous
+>>    set of data blocks to minimize disk seeking when accessing files. For
+>>    RAM there is no such concern; a file's data blocks can be scattered
+>>    throughout the media with no access speed penalty at all. So block
+>>    groups in a filesystem mounted over RAM just adds unnecessary
+>>    complexity. A better approach is to use a filesystem specifically
+>>    tailored to RAM media which does away with these disk-based features.
+>>    This increases the efficient use of space on the media, i.e. more
+>>    space is dedicated to actual file data storage and less to meta-data
+>>    needed to maintain that file data.
 > 
-> That is a correct understanding in general, however this case is
-> different, because it describes an on-disk data structure,
-> not a kernel to user space interface. Here, __kernel_off_t is just
-> as wrong as off_t, because it will differ between 32 and 64 bit
-> architectures, making the fs layout incompatible. I'd suggest
-> simply defining this as __u64.
-> 
-> Moreover, file system layout should be described in terms of
-> big-endian or little-endian types (e.g. __be64 or __le64),
-> together with the right accessor functions.
-> 
-> 	Arnd <><
+> So... what is the performance difference between ext2 and your new
+> filesystem?
 > 
 
-I was thinking about your comment and I think I'll use __kernel_off_t
-for the exported headers. I know that it will differ between 32 and 64
-bit architectures, but for this kind of fs there isn't any compatibility
-problem at layout level. You cannot remove a chip of RAM from a board
-32bit little endian and attach it to a board with a cpu 64bit big
-endian, the memory isn't a disk. Indeed, I see that tmpfs uses simply
-"unsigned long" in the exported header file without any problems to
-little or big endian.
+About the "space" you can read a detailed documentation on the site:
+
+http://pramfs.sourceforge.net/pramfs-spec.html
+
+In addition I can do an example of "compact" information: ext2 uses
+directory entry objects ("dentries") to associate file names to inodes,
+and these dentries are located in data blocks owned by the parent
+directory. In pramfs, directory inode's do not need to own any data
+blocks, because all dentry information is contained within the inode's
+themselves.
+
+From performance point of view:
+
+Sometimes ago I uploaded here (http://elinux.org/Pram_Fs) some benchmark
+results to compare the performance with and without XIP in a real
+embedded environment with bonnie++. You could use it as reference point.
+
+I hope I've answered to your question.
 
 Regards,
 
