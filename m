@@ -1,68 +1,62 @@
-From: Tim Bird <tim.bird@am.sony.com>
+From: Pavel Machek <pavel@ucw.cz>
 Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Mon, 22 Jun 2009 10:31:28 -0700
-Message-ID: <4A3FBFF0.40006@am.sony.com>
-References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com> <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz>
+Date: Mon, 22 Jun 2009 19:37:04 +0200
+Message-ID: <20090622173704.GC21299@elf.ucw.cz>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com> <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz> <4A3FBFF0.40006@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20090622172003.GB21149@elf.ucw.cz>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4A3FBFF0.40006@am.sony.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Pavel Machek <pavel@ucw.cz>
+Content-Transfer-Encoding: 7bit
+To: Tim Bird <tim.bird@am.sony.com>
 Cc: Marco Stornelli <marco.stornelli@gmail.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-Pavel Machek wrote:
->>> How do you handle hard-links, then?
->> Indeed hard-links are not supported :) Due to the design of this fs
->> there are some limitations explained in the documentation as not
->> hard-link, only private memory mapping and so on. However this
->> limitations don't limit the fs itself because you must consider the
->> special goal of this fs.
+On Mon 2009-06-22 10:31:28, Tim Bird wrote:
+> Pavel Machek wrote:
+> >>> How do you handle hard-links, then?
+> >> Indeed hard-links are not supported :) Due to the design of this fs
+> >> there are some limitations explained in the documentation as not
+> >> hard-link, only private memory mapping and so on. However this
+> >> limitations don't limit the fs itself because you must consider the
+> >> special goal of this fs.
+> > 
+> > I did not see that in the changelog. If it is not general purpose
+> > filesystem, it is lot less interesting.
 > 
-> I did not see that in the changelog. If it is not general purpose
-> filesystem, it is lot less interesting.
+> PRAMFS is not a general purpose filesystem. Please read
+> the introductory post to this thread, or look at
+> http://pramfs.sourceforge.net/ for more information.
 
-PRAMFS is not a general purpose filesystem. Please read
-the introductory post to this thread, or look at
-http://pramfs.sourceforge.net/ for more information.
+Yeah, I seen that. It directly contradicts what you say.
 
-Since the purpose of PRAMFS is to provide a filesystem
-that is persistent across kernel instantions, it is not
-designed for high speed.  Robustness in the face of
-kernel crashes or bugs is the highest priority, so
-PRAMFS has significant overhead to make the window
-of writability to the filesystem RAM as small as possible.
+> Since the purpose of PRAMFS is to provide a filesystem
+> that is persistent across kernel instantions, it is not
+> designed for high speed.  Robustness in the face of
+> kernel crashes or bugs is the highest priority, so
+> PRAMFS has significant overhead to make the window
+> of writability to the filesystem RAM as small as possible.
 
-This is not a file system one would do kernel compiles on.
-This is where someone would keep a small amount of sensitive
-data, or crash logs that one needed to preserve over kernel
-invocations.
+Really? So why don't you use well known, reliable fs like ext3?
 
-> 
->>>> >From performance point of view:
->>>>
->>>> Sometimes ago I uploaded here (http://elinux.org/Pram_Fs) some benchmark
->>>> results to compare the performance with and without XIP in a real
->>>> embedded environment with bonnie++. You could use it as reference point.
->>> Well, so XIP helps. ext2 can do XIP too, IIRC. Is your performance
->>> better than ext2?
->>>
->>> Wait... those numbers you pointed me... claim to be as slow as
->>> 13MB/sec. That's very very bad. My harddrive is faster than that.
->> As I said I did the test in a real embedded environment so to have
->> comparable result you should use the same environmente with the same
->> tools, with the same workload and so on.
-> 
-> Even on real embedded hardware you should get better than 13MB/sec
-> writing to _RAM_. I guess something is seriously wrong with pramfs.
+> This is not a file system one would do kernel compiles on.
+> This is where someone would keep a small amount of sensitive
+> data, or crash logs that one needed to preserve over kernel
+> invocations.
 
-See above.
+Really? Web page says:
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+#2. If the backing-store RAM is comparable in access speed to system
+#memory, there's really no point in caching the file I/O data in the
+#page cache. Better to move file data directly between the user buffers
+#and the backing store RAM, i.e. use direct I/O. This prevents the
+#unnecessary 
 
+So you don't cache it "because its fast", and then it is 13MB/sec?
+
+									Pavel
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
