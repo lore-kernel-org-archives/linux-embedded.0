@@ -1,32 +1,46 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Mon, 22 Jun 2009 23:57:53 +0200
-Message-ID: <20090622215753.GA25434@elf.ucw.cz>
-References: <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com> <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz> <4A3FBFF0.40006@am.sony.com> <20090622173704.GC21299@elf.ucw.cz> <4A3FC84A.6060608@gmail.com> <20090622204031.GA24236@elf.ucw.cz> <4A3FFC89.4070006@am.sony.com>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Mon, 22 Jun 2009 15:00:55 -0700
+Message-ID: <4A3FFF17.9020701@am.sony.com>
+References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de> <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de> <4A3FDBFE.8050509@2net.co.uk> <20090622203034.GA12587@uranus.ravnborg.org>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4A3FFC89.4070006@am.sony.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090622203034.GA12587@uranus.ravnborg.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Marco <marco.stornelli@gmail.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Chris Simmonds <chris@2net.co.uk>, Arnd Bergmann <arnd@arndb.de>, Marco <marco.stornelli@gmail.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-On Mon 2009-06-22 14:50:01, Tim Bird wrote:
-> Pavel Machek wrote:
-> >> block of fast non-volatile RAM that need to access data on it using a
-> >> standard filesytem interface."
-> > 
-> > Turns a block of fast RAM into 13MB/sec disk. Hmm. I believe you are
-> > better with ext2.
-> 
-> Not if you want the RAM-based filesystem to persist over a kernel
-> invocation.
+Sam Ravnborg wrote:
+> It is not that we are talking big and complex stuff here.
 
-Yes, you'll need to code Persistent, RAM-based _block_device_. 
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+I agree completely.
+
+> pramfs is likely to be used for small things and then having to
+> fix endian on a few headers in the on-dsk format does not matter.
+
+I agree with this, but mostly out of exhaustion.
+
+> Not compared to the potential disadvantages.
+
+I can see no potential disadvantages.
+
+
+> It should be possible to read a file-system on your x86 64bit
+> box that you wrote with your small powerpc target.
+For a (NV)RAM-based filesystem??  WTH???
+
+This is not my file system, so I don't have a dog in this
+fight.  I just wanted to clarify what I thought were some
+misconceptions about the use cases and priorities for the
+FS.  My "advocacy" may be interfering with understanding
+this system and its purpose.  I'll be quiet now.
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
