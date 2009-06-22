@@ -1,39 +1,45 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Tue, 23 Jun 2009 00:38:55 +0200
-Message-ID: <20090622223855.GA25996@elf.ucw.cz>
-References: <4A3E6F28.4090404@gmail.com> <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz> <4A3FBFF0.40006@am.sony.com> <20090622173704.GC21299@elf.ucw.cz> <4A3FC84A.6060608@gmail.com> <20090622204031.GA24236@elf.ucw.cz> <4A3FFC89.4070006@am.sony.com> <20090622215753.GA25434@elf.ucw.cz>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Tue, 23 Jun 2009 01:07:42 +0200
+Message-ID: <200906230107.43667.arnd@arndb.de>
+References: <4A33A7EC.6070008@gmail.com> <4A3FDBFE.8050509@2net.co.uk> <20090622214155.GA19332@logfs.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20090622215753.GA25434@elf.ucw.cz>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20090622214155.GA19332@logfs.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Marco <marco.stornelli@gmail.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Content-Type: Text/Plain; charset="iso-8859-1"
+To: =?utf-8?q?J=C3=B6rn_Engel?= <joern@logfs.org>
+Cc: Chris Simmonds <chris@2net.co.uk>, Marco <marco.stornelli@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-On Mon 2009-06-22 23:57:53, Pavel Machek wrote:
-> On Mon 2009-06-22 14:50:01, Tim Bird wrote:
-> > Pavel Machek wrote:
-> > >> block of fast non-volatile RAM that need to access data on it using a
-> > >> standard filesytem interface."
-> > > 
-> > > Turns a block of fast RAM into 13MB/sec disk. Hmm. I believe you are
-> > > better with ext2.
-> > 
-> > Not if you want the RAM-based filesystem to persist over a kernel
-> > invocation.
-> 
-> Yes, you'll need to code Persistent, RAM-based _block_device_. 
+On Monday 22 June 2009, J=C3=B6rn Engel wrote:
+> Four loops doing the same increment with different data types: long,
+> u64, we32 (wrong-endian) and we64.  Compile with no optimizations.
+>=20
+> Results on my i386 notebook:
+> long:     453953 us
+> we32:     880273 us
+> u64:      504214 us
+> we64:    2259953 us
+> loops: 100000000
 
-More politely said: "I believe you would be better off modifying
-ramdisk to include the functionality for persistence."  New filesystem
-should not really be neccessary. ext2 for performance, ext3 if you
-need robustness from journalling, maybe something else makes sense,
-too.
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+(couldn't resist)
+
+The we64 number is artificially high because the glibc bswap_64
+implementation forces the conversion to be done on the stack.
+Using __builtin_bswap64 make this look more logical, and
+makes your point even stronger (on core 2, using -m32):
+
+long:     236792 us
+we32:     500827 us
+u64:      265990 us
+we64:     757380 us
+loops: 100000000
+
+	Arnd <><
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
