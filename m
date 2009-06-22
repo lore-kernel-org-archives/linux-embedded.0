@@ -1,8 +1,8 @@
 From: Marco <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 06/14] Pramfs: Include files
-Date: Mon, 22 Jun 2009 20:05:37 +0200
-Message-ID: <4A3FC7F1.5050108@gmail.com>
-References: <4A33A7EC.6070008@gmail.com> <200906212222.25434.arnd@arndb.de> <2ea1731b0906212323h6ed8621dg22e1bc8638c26e2c@mail.gmail.com> <200906221317.04166.arnd@arndb.de>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Mon, 22 Jun 2009 20:07:06 +0200
+Message-ID: <4A3FC84A.6060608@gmail.com>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com> <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz> <4A3FBFF0.40006@am.sony.com> <20090622173704.GC21299@elf.ucw.cz>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
@@ -11,50 +11,65 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:references:in-reply-to
          :content-type:content-transfer-encoding;
-        bh=5/R8bEA8Sp+QF6bzrWrubCYVU5lGIrCtAA388LGm/HY=;
-        b=l2aS4GBbs/dhwrALOmSFo3CY4u5egKxs8OcTKPwtWpQXgKKlBkwAo7gz0q7whXzzOh
-         REpVA4RNfRe5isM7DUoXcPFOCFaHlooJYvzDM25ZWKRKOAf9Rt8cjCZ4M8qzhPBL+49v
-         tFcQDhu+KZ0aFh7PyCdJ2kRLytoB2ZxH7tv/k=
-In-Reply-To: <200906221317.04166.arnd@arndb.de>
+        bh=SQDhdJr09/s8LrODxc47gXFWvsxs5P2YteQ15z3FdRo=;
+        b=uAP3YxsBN1EcdxpbwHiwnVygaCjCmkYjG4PCbL9+WTZqDMZnv0DzDSwObIhg7kxZua
+         1MJAQQ6vJmBOGRytRM7vvqiJX8eokQTKJGyuAEHDREE7OtZIKmwYvUkZm9QXcl7359ww
+         ByzagsBobMsxnjD9c5eB+DNYF2pRfrm7qVjuQ=
+In-Reply-To: <20090622173704.GC21299@elf.ucw.cz>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Tim Bird <tim.bird@am.sony.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-Arnd Bergmann wrote:
-> On Monday 22 June 2009, Marco Stornelli wrote:
->>> It's still a problem. You might be creating a file system image
->>> for an embedded board with a different endianess.
->> It's not possible to create an "image" with pramfs, it's like tmpfs.
+Pavel Machek wrote:
+> On Mon 2009-06-22 10:31:28, Tim Bird wrote:
+>> Pavel Machek wrote:
+>>>>> How do you handle hard-links, then?
+>>>> Indeed hard-links are not supported :) Due to the design of this fs
+>>>> there are some limitations explained in the documentation as not
+>>>> hard-link, only private memory mapping and so on. However this
+>>>> limitations don't limit the fs itself because you must consider the
+>>>> special goal of this fs.
+>>> I did not see that in the changelog. If it is not general purpose
+>>> filesystem, it is lot less interesting.
+>> PRAMFS is not a general purpose filesystem. Please read
+>> the introductory post to this thread, or look at
+>> http://pramfs.sourceforge.net/ for more information.
 > 
-> But the data is persistant, you even support using it as a root file
-> system, so the data has to have a way to get there. Even if you
-> don't do it right now, I don't see any fundamental limitation that
-> prevents you from creating an image on one machine and dumping it
-> into the nvram of another machine as part of manufacturing or testing.
-> 
-
-Sorry, I meant it's not *currently* possible. At the moment the only way
-to use it as rootfs it's to copy all the data in an already mounted
-(empty) ram partition and reboot. However it's not my first item on my
-todo list because I think that it's possible to use it as rootfs but it
-isn't the standard use for this fs.
-
-
->>> Or even on the same machine, you could be looking at the file system contents
->>> with a 32 bit process running on a 64 bit kernel.
->> Yes, indeed the most important thing is to be sure that a 64bit kernel
->> works well. I'll try to test it in this environment. If there are
->> "64bit guys" to help me to test it, it'd be great.
-> 
-> This particular problem (__kernel_off_t on 64-bit machines) can be avoided
-> by just switching to __kernel_loff_t, which is 64 bit long on all machines,
-> while __kernel_off_t is always the register length (32 or 64 bits).
-> 
-> 	Arnd <><
+> Yeah, I seen that. It directly contradicts what you say.
 > 
 
-Yep, it can be a good idea, thanks for the tip.
+I don't think, I think it's very clear:
 
-Marco
+"In summary, PRAMFS is a light-weight, full-featured, and
+space-efficient special filesystem that is ideal for systems with a
+block of fast non-volatile RAM that need to access data on it using a
+standard filesytem interface."
+
+
+>> Since the purpose of PRAMFS is to provide a filesystem
+>> that is persistent across kernel instantions, it is not
+>> designed for high speed.  Robustness in the face of
+>> kernel crashes or bugs is the highest priority, so
+>> PRAMFS has significant overhead to make the window
+>> of writability to the filesystem RAM as small as possible.
+> 
+> Really? So why don't you use well known, reliable fs like ext3?
+> 
+>> This is not a file system one would do kernel compiles on.
+>> This is where someone would keep a small amount of sensitive
+>> data, or crash logs that one needed to preserve over kernel
+>> invocations.
+> 
+> Really? Web page says:
+> 
+> #2. If the backing-store RAM is comparable in access speed to system
+> #memory, there's really no point in caching the file I/O data in the
+> #page cache. Better to move file data directly between the user buffers
+> #and the backing store RAM, i.e. use direct I/O. This prevents the
+> #unnecessary 
+> 
+> So you don't cache it "because its fast", and then it is 13MB/sec?
+> 
+> 									Pavel
