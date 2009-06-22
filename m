@@ -1,38 +1,43 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Mon, 22 Jun 2009 15:02:35 -0700
-Message-ID: <4A3FFF7B.8050707@am.sony.com>
-References: <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com> <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz> <4A3FBFF0.40006@am.sony.com> <20090622173704.GC21299@elf.ucw.cz> <4A3FD388.6040801@am.sony.com> <20090622210231.GC24236@elf.ucw.cz>
+From: David Woodhouse <dwmw2@infradead.org>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Mon, 22 Jun 2009 23:20:39 +0100
+Message-ID: <1245709239.25547.394.camel@macbook.infradead.org>
+References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de>
+	 <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de>
+	 <4A3FDBFE.8050509@2net.co.uk>  <20090622214155.GA19332@logfs.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090622210231.GC24236@elf.ucw.cz>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20090622214155.GA19332@logfs.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Marco Stornelli <marco.stornelli@gmail.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Content-Type: text/plain; charset="iso-8859-1"
+To: =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>
+Cc: Chris Simmonds <chris@2net.co.uk>, Arnd Bergmann <arnd@arndb.de>, Marco <marco.stornelli@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-Pavel Machek wrote:
-> You are saying top goal is robustness, while the web page says (home
-> page, stop using frames!):
-> 
-> "embedded systems have a block of non-volatile RAM seperate from
-> normal system memory, i.e. of which the kernel maintains no memory
-> page descriptors. For such systems it would be beneficial to mount a
-> fast read/write filesystem over this "I/O memory", for storing
-> frequently accessed data that must survive system reboots and power
-> cycles"
-> 
-> Note the "frequently accessed" and "fast".
-> 
-> IOW the web page is confusing. It does not talk about robustness at
-> all.
+On Mon, 2009-06-22 at 23:41 +0200, J=C3=B6rn Engel wrote:
+> Four loops doing the same increment with different data types: long,
+> u64, we32 (wrong-endian) and we64.  Compile with _no_ optimizations.
 
-OK, thanks.
+That's a bit of a poor test then. Especially on architectures with a
+load-and-swap instruction where it really shouldn't be any slower at
+all.
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+(Although since GCC doesn't have an __attribute__((littleendian)) I'm
+not entirely sure how to entice it into _using_ said instruction for th=
+e
+purpose of the test... I think the kernel does manage somehow though, i=
+f
+you get the sources _just_ right.)
+
+--=20
+David Woodhouse                            Open Source Technology Centr=
+e
+David.Woodhouse@intel.com                              Intel Corporatio=
+n
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
