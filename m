@@ -1,69 +1,106 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Mon, 22 Jun 2009 23:02:31 +0200
-Message-ID: <20090622210231.GC24236@elf.ucw.cz>
-References: <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090621064040.GC1656@ucw.cz> <4A3E6F28.4090404@gmail.com> <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz> <4A3FBFF0.40006@am.sony.com> <20090622173704.GC21299@elf.ucw.cz> <4A3FD388.6040801@am.sony.com>
+From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Mon, 22 Jun 2009 23:41:55 +0200
+Message-ID: <20090622214155.GA19332@logfs.org>
+References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de> <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de> <4A3FDBFE.8050509@2net.co.uk>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A3FD388.6040801@am.sony.com>
+In-Reply-To: <4A3FDBFE.8050509@2net.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Marco Stornelli <marco.stornelli@gmail.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Chris Simmonds <chris@2net.co.uk>
+Cc: Arnd Bergmann <arnd@arndb.de>, Marco <marco.stornelli@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-On Mon 2009-06-22 11:55:04, Tim Bird wrote:
-> Pavel Machek wrote:
-> > On Mon 2009-06-22 10:31:28, Tim Bird wrote:
-> >> Pavel Machek wrote:
-> >>> I did not see that in the changelog. If it is not general purpose
-> >>> filesystem, it is lot less interesting.
-> >> PRAMFS is not a general purpose filesystem. Please read
-> >> the introductory post to this thread, or look at
-> >> http://pramfs.sourceforge.net/ for more information.
-> > 
-> > Yeah, I seen that. It directly contradicts what you say.
-> 
-> Could you be more specific?  In what way does the
-> description on the website contradict what I said?
+On Mon, 22 June 2009 20:31:10 +0100, Chris Simmonds wrote:
+>=20
+> I disagree: that adds an unnecessary overhead for those architectures=
+=20
+> where the cpu byte order does not match the data structure ordering. =
+I=20
+> think the data structures should be native endian and when mkpramfs i=
+s=20
+> written it can take a flag (e.g. -r) in the same way mkcramfs does.
 
-You are saying top goal is robustness, while the web page says (home
-page, stop using frames!):
+Just to quantify this point, I've written a small crap program:
+#include <stdio.h>
+#include <stdint.h>
+#include <byteswap.h>
+#include <sys/time.h>
 
-"embedded systems have a block of non-volatile RAM seperate from
-normal system memory, i.e. of which the kernel maintains no memory
-page descriptors. For such systems it would be beneficial to mount a
-fast read/write filesystem over this "I/O memory", for storing
-frequently accessed data that must survive system reboots and power
-cycles"
+long long delta(struct timeval *t1, struct timeval *t2)
+{
+	long long delta;
 
-Note the "frequently accessed" and "fast".
+	delta  =3D 1000000ull * t2->tv_sec + t2->tv_usec;
+	delta -=3D 1000000ull * t1->tv_sec + t1->tv_usec;
+	return delta;
+}
 
-IOW the web page is confusing. It does not talk about robustness at
-all.
+#define LOOPS 100000000
+int main(void)
+{
+	long native =3D 0;
+	uint32_t narrow =3D 0;
+	uint64_t wide =3D 0, native_wide =3D 0;
+	struct timeval t1, t2, t3, t4, t5;
+	int i;
 
+	gettimeofday(&t1, NULL);
+	for (i =3D 0; i < LOOPS; i++)
+		native++;
+	gettimeofday(&t2, NULL);
+	for (i =3D 0; i < LOOPS; i++)
+		narrow =3D bswap_32(bswap_64(narrow) + 1);
+	gettimeofday(&t3, NULL);
+	for (i =3D 0; i < LOOPS; i++)
+		native_wide++;
+	gettimeofday(&t4, NULL);
+	for (i =3D 0; i < LOOPS; i++)
+		wide =3D bswap_64(bswap_64(wide) + 1);
+	gettimeofday(&t5, NULL);
+	printf("long:  %9lld us\n", delta(&t1, &t2));
+	printf("we32:  %9lld us\n", delta(&t2, &t3));
+	printf("u64:   %9lld us\n", delta(&t3, &t4));
+	printf("we64:  %9lld us\n", delta(&t4, &t5));
+	printf("loops: %9d\n", LOOPS);
+	return 0;
+}
 
-> >> Since the purpose of PRAMFS is to provide a filesystem
-> >> that is persistent across kernel instantions, it is not
-> >> designed for high speed.  Robustness in the face of
-> >> kernel crashes or bugs is the highest priority, so
-> >> PRAMFS has significant overhead to make the window
-> >> of writability to the filesystem RAM as small as possible.
-> > 
-> > Really? So why don't you use well known, reliable fs like ext3?
-> 
-> Are you sure you read the web site?  It directly addresses this
-> question.  From the web site: "1. Disk-based filesystems such as
+=46our loops doing the same increment with different data types: long,
+u64, we32 (wrong-endian) and we64.  Compile with _no_ optimizations.
 
-No, it does not. It explains that ext2 would be too slow on this, and
-explains that it will eat too much disk space. Please back that claims
-with numbers.
+Results on my i386 notebook:
+long:     453953 us
+we32:     880273 us
+u64:      504214 us
+we64:    2259953 us
+loops: 100000000
 
-If reliability is top concern, explain how you get away w/o
-journalling.
-								Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Or thereabouts, not completely stable.  Increasing the data width is 10=
+%
+slower, 32bit endianness conversions is 2x slower, 64bit conversion is
+5x slower.
+
+However, even the we64 loop still munches through 353MB/s (100M
+conversions in 2.2s, 8bytes per converion.  Double the number if you
+count both conversion to/from wrong endianness).  Elsewhere in this
+thread someone claimed the filesystem peaks out at 13MB/s.  One might
+further note that only filesystem metadata has to go through endianness
+conversion, so on this particular machine it is completely lost in the
+noise.
+
+=46eel free to run the program on any machine you care about.  If you g=
+et
+numbers to back up your position, I'm willing to be convinced.  Until
+then, I consider the alleged overhead of endianness conversion a prime
+example of premature optimization.
+
+J=C3=B6rn
+
+--=20
+Joern's library part 7:
+http://www.usenix.org/publications/library/proceedings/neworl/full_pape=
+rs/mckusick.a
