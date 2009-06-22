@@ -1,51 +1,46 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: [PATCH 06/14] Pramfs: Include files
-Date: Mon, 22 Jun 2009 22:30:34 +0200
-Message-ID: <20090622203034.GA12587@uranus.ravnborg.org>
-References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de> <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de> <4A3FDBFE.8050509@2net.co.uk>
+From: Henrique de Moraes Holschuh <hmh@hmh.eng.br>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Mon, 22 Jun 2009 17:40:29 -0300
+Message-ID: <20090622204028.GC29833@khazad-dum.debian.net>
+References: <20090613155957.GA16220@shareable.org>
+ <4A34A394.5040509@gmail.com>
+ <20090621064040.GC1656@ucw.cz>
+ <4A3E6F28.4090404@gmail.com>
+ <20090621205245.GC3254@elf.ucw.cz>
+ <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com>
+ <20090622172003.GB21149@elf.ucw.cz>
+ <4A3FBFF0.40006@am.sony.com>
+ <20090622173704.GC21299@elf.ucw.cz>
+ <4A3FC84A.6060608@gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A3FDBFE.8050509@2net.co.uk>
-Sender: linux-fsdevel-owner@vger.kernel.org
+In-Reply-To: <4A3FC84A.6060608@gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Chris Simmonds <chris@2net.co.uk>
-Cc: Arnd Bergmann <arnd@arndb.de>, Marco <marco.stornelli@gmail.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+To: Marco <marco.stornelli@gmail.com>
+Cc: Pavel Machek <pavel@ucw.cz>, Tim Bird <tim.bird@am.sony.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-On Mon, Jun 22, 2009 at 08:31:10PM +0100, Chris Simmonds wrote:
-> Arnd Bergmann wrote:
-> >On Monday 22 June 2009, Marco wrote:
-> >>Sorry, I meant it's not currently possible. At the moment the only way
-> >>to use it as rootfs it's to copy all the data in an already mounted
-> >>(empty) ram partition and reboot. However it's not my first item on my
-> >>todo list because I think that it's possible to use it as rootfs but it
-> >>isn't the standard use for this fs.
-> >
-> >Well, it doesn't have to work right away. What I'm asking to
-> >define the data structures in a way that keeps the layout stable
-> >across kernel updates. Since a future version of the file system
-> >might support cross-endian image creation, it would be good to
-> >define the data structures in a fixed endian mode already, so
-> >you don't have to change it in the future.
-> >
-> >	Arnd <><
-> >--
-> >To unsubscribe from this list: send the line "unsubscribe linux-embedded" 
-> >in
-> >the body of a message to majordomo@vger.kernel.org
-> >More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
+On Mon, 22 Jun 2009, Marco wrote:
+> I don't think, I think it's very clear:
 > 
-> I disagree: that adds an unnecessary overhead for those architectures 
-> where the cpu byte order does not match the data structure ordering.
-It is not that we are talking big and complex stuff here.
-pramfs is likely to be used for small things and then having to
-fix endian on a few headers in the on-dsk format does not matter.
-Not compared to the potential disadvantages.
+> "In summary, PRAMFS is a light-weight, full-featured, and
+> space-efficient special filesystem that is ideal for systems with a
+> block of fast non-volatile RAM that need to access data on it using a
+> standard filesytem interface."
 
-It should be possible to read a file-system on your x86 64bit
-box that you wrote with your small powerpc target.
+It is not full-featured if it doesn't have support for hardlinks, security
+labels, extended attributes, etc.  Please call it a specialized filesystem
+instead, that seems to be much more in line with the comments about pramfs
+use cases in this thread...
 
-	Sam
+Oh, and that should be in the Kconfig help text, as well as the stuff that
+goes in Documentation/*, obviously.  Maybe it already is, I didn't look.
+
+-- 
+  "One disk to rule them all, One disk to find them. One disk to bring
+  them all and in the darkness grind them. In the Land of Redmond
+  where the shadows lie." -- The Silicon Valley Tarot
+  Henrique Holschuh
