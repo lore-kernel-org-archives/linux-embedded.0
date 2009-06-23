@@ -1,45 +1,55 @@
-From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
+From: Marco Stornelli <marco.stornelli@gmail.com>
 Subject: Re: [PATCH 06/14] Pramfs: Include files
-Date: Tue, 23 Jun 2009 07:57:35 +0200
-Message-ID: <20090623055735.GA23119@logfs.org>
-References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de> <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de> <4A3FDBFE.8050509@2net.co.uk> <20090622214155.GA19332@logfs.org> <1245709239.25547.394.camel@macbook.infradead.org>
+Date: Tue, 23 Jun 2009 08:40:25 +0200
+Message-ID: <2ea1731b0906222340o13e9cf0fu7e15cddadf27bbbb@mail.gmail.com>
+References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de>
+	 <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1245709239.25547.394.camel@macbook.infradead.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=UwmOIkQDgSQGCBGXs8K7DtDOn7EQ9DWhd8qwnWSoTbg=;
+        b=cMoBzAlVtTAYA+HobCBcVd2rcEe0VBk26jm8qKtYVkJN/504nz46IwA12PsQa1LUoU
+         ts6nCvTFUk09G4aQMmKH0L8DXOz7ruKX9jejvquKWYrGiaoSCmX1WtMfiikneKmU8K/3
+         PDQn5fmovfoKNzqUyr1wdHvXDUDQj0Zplcmb4=
+In-Reply-To: <200906222033.20883.arnd@arndb.de>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: Chris Simmonds <chris@2net.co.uk>, Arnd Bergmann <arnd@arndb.de>, Marco <marco.stornelli@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Sam Ravnborg <sam@ravnborg.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-On Mon, 22 June 2009 23:20:39 +0100, David Woodhouse wrote:
-> On Mon, 2009-06-22 at 23:41 +0200, J=C3=B6rn Engel wrote:
-> > Four loops doing the same increment with different data types: long=
-,
-> > u64, we32 (wrong-endian) and we64.  Compile with _no_ optimizations=
-=2E
->=20
-> That's a bit of a poor test then. Especially on architectures with a
-> load-and-swap instruction where it really shouldn't be any slower at
-> all.
->=20
-> (Although since GCC doesn't have an __attribute__((littleendian)) I'm
-> not entirely sure how to entice it into _using_ said instruction for =
-the
-> purpose of the test... I think the kernel does manage somehow though,=
- if
-> you get the sources _just_ right.)
+2009/6/22 Arnd Bergmann <arnd@arndb.de>:
+> On Monday 22 June 2009, Marco wrote:
+>>
+>> Sorry, I meant it's not currently possible. At the moment the only w=
+ay
+>> to use it as rootfs it's to copy all the data in an already mounted
+>> (empty) ram partition and reboot. However it's not my first item on =
+my
+>> todo list because I think that it's possible to use it as rootfs but=
+ it
+>> isn't the standard use for this fs.
+>
+> Well, it doesn't have to work right away. What I'm asking to
+> define the data structures in a way that keeps the layout stable
+> across kernel updates. Since a future version of the file system
+> might support cross-endian image creation, it would be good to
+> define the data structures in a fixed endian mode already, so
+> you don't have to change it in the future.
+>
+> =A0 =A0 =A0 =A0Arnd <><
+>
 
-=46eel free to improve the test.  It is admittedly crap and designed to
-support Chris' argument.  But seeing that it still fails to do so and
-Arnd has already shown one improvement that weakened Chris' argument, I
-guess we can all agree that further improvments won't change the
-conclusion, can we? ;)
+I was refering to create a tool "mkpramfs".
 
-J=C3=B6rn
-
---=20
-It's just what we asked for, but not what we want!
--- anonymous
+Marco
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
