@@ -1,35 +1,29 @@
-From: David Woodhouse <dwmw2@infradead.org>
+From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: [PATCH 06/14] Pramfs: Include files
-Date: Tue, 23 Jun 2009 22:15:42 +0100
-Message-ID: <1245791743.25547.3517.camel@macbook.infradead.org>
-References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de>
-	 <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de>
-	 <4A3FDBFE.8050509@2net.co.uk> <20090622203034.GA12587@uranus.ravnborg.org>
-	 <4A3FFF17.9020701@am.sony.com> <20090623042106.GA17159@uranus.ravnborg.org>
-	 <4A411319.4020108@gmail.com>  <20090623192648.GB23119@logfs.org>
+Date: Tue, 23 Jun 2009 23:55:32 +0200
+Message-ID: <200906232355.34134.arnd@arndb.de>
+References: <4A33A7EC.6070008@gmail.com> <20090623192648.GB23119@logfs.org> <1245791743.25547.3517.camel@macbook.infradead.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090623192648.GB23119@logfs.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757696AbZFWV4M@vger.kernel.org>
+In-Reply-To: <1245791743.25547.3517.camel@macbook.infradead.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: =?ISO-8859-1?Q?J=F6rn?= Engel <joern@lazybastard.org>
-Cc: Marco <marco.stornelli@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Tim Bird <tim.bird@am.sony.com>, Chris Simmonds <chris@2net.co.uk>, Arnd Bergmann <arnd@arndb.de>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+Content-Type: Text/Plain; charset="us-ascii"
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: =?utf-8?q?J=C3=B6rn_Engel?= <joern@lazybastard.org>, Marco <marco.stornelli@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Tim Bird <tim.bird@am.sony.com>, Chris Simmonds <chris@2net.co.uk>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-On Tue, 2009-06-23 at 21:26 +0200, J=C3=B6rn Engel wrote:
-> Endianness is a
-> different case imo.  dd may not work, but a jtag probe will happily g=
-et
-> you the dump to your development machine.
+On Tuesday 23 June 2009, David Woodhouse wrote:
+> And dd on /dev/mem would work, surely?
 
-And dd on /dev/mem would work, surely?
+Actually, reading from /dev/mem is only valid on real RAM. If the nvram
+is part of an IO memory mapping, you have to do mmap()+memcpy() rather
+than read(). So dd won't do it, but it's still easy to read from user
+space.
 
-I'd definitely recommend making it fixed-endian. Not doing so for JFFS2
-was a mistake I frequently regretted.
+> I'd definitely recommend making it fixed-endian. Not doing so for JFFS2
+> was a mistake I frequently regretted.
 
---=20
-David Woodhouse                            Open Source Technology Centr=
-e
-David.Woodhouse@intel.com                              Intel Corporatio=
-n
+Right.
+
+	Arnd <><
