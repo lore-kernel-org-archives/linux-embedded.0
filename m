@@ -1,50 +1,65 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Tue, 23 Jun 2009 20:29:41 +0200
-Message-ID: <20090623182941.GA2045@elf.ucw.cz>
-References: <20090621205245.GC3254@elf.ucw.cz> <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com> <20090622172003.GB21149@elf.ucw.cz> <4A3FBFF0.40006@am.sony.com> <20090622173704.GC21299@elf.ucw.cz> <4A3FC84A.6060608@gmail.com> <20090622204031.GA24236@elf.ucw.cz> <4A3FFC89.4070006@am.sony.com> <20090622215753.GA25434@elf.ucw.cz> <4A4119DB.4030203@gmail.com>
+From: =?utf-8?B?SsO2cm4=?= Engel <joern@lazybastard.org>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Tue, 23 Jun 2009 21:26:49 +0200
+Message-ID: <20090623192648.GB23119@logfs.org>
+References: <4A33A7EC.6070008@gmail.com> <200906221317.04166.arnd@arndb.de> <4A3FC7F1.5050108@gmail.com> <200906222033.20883.arnd@arndb.de> <4A3FDBFE.8050509@2net.co.uk> <20090622203034.GA12587@uranus.ravnborg.org> <4A3FFF17.9020701@am.sony.com> <20090623042106.GA17159@uranus.ravnborg.org> <4A411319.4020108@gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A4119DB.4030203@gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+In-Reply-To: <4A411319.4020108@gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
 To: Marco <marco.stornelli@gmail.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, Jamie Lokier <jamie@shareable.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Cc: Sam Ravnborg <sam@ravnborg.org>, Tim Bird <tim.bird@am.sony.com>, Chris Simmonds <chris@2net.co.uk>, Arnd Bergmann <arnd@arndb.de>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-On Tue 2009-06-23 20:07:23, Marco wrote:
-> Pavel Machek wrote:
-> > On Mon 2009-06-22 14:50:01, Tim Bird wrote:
-> >> Pavel Machek wrote:
-> >>>> block of fast non-volatile RAM that need to access data on it using a
-> >>>> standard filesytem interface."
-> >>> Turns a block of fast RAM into 13MB/sec disk. Hmm. I believe you are
-> >>> better with ext2.
-> >> Not if you want the RAM-based filesystem to persist over a kernel
-> >> invocation.
-> > 
-> > Yes, you'll need to code Persistent, RAM-based _block_device_. 
-> 
-> First of all I have to say that I'd like to update the site and make it
-> clearer but at the moment it's not possible because I'm not the admin
-> and I've already asked to the sourceforge support to have this possibility.
-> 
-> About the comments: sincerely I don't understand the comments. We have
-> *already* a fs that takes care to remap a piace of ram (ram, sram,
-> nvram, etc.), takes care of caching problems, takes care of write
+On Tue, 23 June 2009 19:38:33 +0200, Marco wrote:
+>=20
+> dd? You haven't got any device file to have a dump. I think we're goi=
+ng
+> a bit out of scope. I had some doubt to support rootfs in pram and af=
+ter
+> some feedback and the comments of this review I think I'll remove it
+> from the next release (to understand some aspects of this fs with the
+> kernel community was my main goal for this review). I agree to use th=
+e
+> native endian. As I said the important thing is that if an user want =
+to
+> use it in a 64bit environment then the fs must work well and then it
+> must be designed to support even this situation, I think it's obvious=
+=2E
 
-Well, it looks pramfs design is confused. 13MB/sec shows that caching
-_is_ useful for pramfs. So...?
+Glancing at the discussion with Pawel, I see two paths to follow.  One
+is to turn pramfs into a full-features all-round general-purpose
+filesystem with mkfs, fsck, xattr and any number of additional features=
+=2E
+That way lies doom, as you would compete against ext2+xip and have
+little new to offer.
 
-> You are talked about journaling. This schema works well for a disk, but
-> what about a piece of ram? What about a crazy kernel that write in that
-> area for a bug? Do you remember for example the e1000e bug? It's not
+The other path is to make/keep pramfs as simple as possible for
+comparatively specialized purposes, like flight recorder data and dump
+information.  Main selling point here is the amount of vulnerable code
+in the total package.  ext2 + block layer + vfs helpers is relatively
+large and many things may go wrong in a panic situation.
 
-I believe you need both journaling *and* write protection. How do you
-handle power fault while writing data?
-								Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+So I agree with you that many things expected from general purpose
+filesystems simply don't apply to pramfs.  Moving mkfs into the kernel
+is a fair tradeoff, when the required code is small.  Endianness is a
+different case imo.  dd may not work, but a jtag probe will happily get
+you the dump to your development machine.
+
+And even within the same box you can have more than one architecture an=
+d
+endianness.  http://www.top500.org/system/9707 will show you one such
+beast, which happens to have the top bragging rights at the moment.  I
+don't want to endorse such strange beasts, but there is no good reason
+not to support reading the ppc-written fs from the opteron.  In fact,
+there is no reason full stop.
+
+J=C3=B6rn
+
+--=20
+Beware of bugs in the above code; I have only proved it correct, but
+not tried it.
+-- Donald Knuth
