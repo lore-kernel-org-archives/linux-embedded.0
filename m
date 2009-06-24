@@ -1,29 +1,32 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 06/14] Pramfs: Include files
-Date: Tue, 23 Jun 2009 23:55:32 +0200
-Message-ID: <200906232355.34134.arnd@arndb.de>
-References: <4A33A7EC.6070008@gmail.com> <20090623192648.GB23119@logfs.org> <1245791743.25547.3517.camel@macbook.infradead.org>
+From: Johnny Hung <johnny.hacking@gmail.com>
+Subject: How the kernel printk works before do console_setup.
+Date: Wed, 24 Jun 2009 11:50:06 +0800
+Message-ID: <cb9ecdfa0906232050n6fcfee31ubeee4bcd9b8c0dfe@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757696AbZFWV4M@vger.kernel.org>
-In-Reply-To: <1245791743.25547.3517.camel@macbook.infradead.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:date:message-id:subject
+         :from:to:content-type:content-transfer-encoding;
+        bh=h37afC4VrgJXpzZJDb07teaajhNXGK4CSU6yME+UAoI=;
+        b=MLAaA4NdwTAwSt5rgQDD+G6LZG9/vpGdkpHRpXOSb3WbgnC7b6SwRpdzkCYz+47kPs
+         4g+m/C1MaXyj07p/2LMeeQ24QYoRtMu8kyMCTTDB72QBrGb9a7Cr01pyDYfGo3CbUUft
+         u3HA9NbnwrQY1FF/qub/0AYFeMa/f3jYyfZhY=
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: =?utf-8?q?J=C3=B6rn_Engel?= <joern@lazybastard.org>, Marco <marco.stornelli@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Tim Bird <tim.bird@am.sony.com>, Chris Simmonds <chris@2net.co.uk>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-embedded@vger.kernel.org
 
-On Tuesday 23 June 2009, David Woodhouse wrote:
-> And dd on /dev/mem would work, surely?
+Hi All:
+    I have a powerpc arch platform. The default console is ttyS1 not
+ttyS0 in the platform. My question is how the kernel print debug
+message
+like DBG before parse kernel command line and do console_setup
+function. The command line passed to kernel about console info is
+console=ttyS1.
+So kernel can not print anything before parse cmd line and initial
+console but the result is against. Anyone point me or give me a clue
+is appreciate.
 
-Actually, reading from /dev/mem is only valid on real RAM. If the nvram
-is part of an IO memory mapping, you have to do mmap()+memcpy() rather
-than read(). So dd won't do it, but it's still easy to read from user
-space.
-
-> I'd definitely recommend making it fixed-endian. Not doing so for JFFS2
-> was a mistake I frequently regretted.
-
-Right.
-
-	Arnd <><
+BR, H. Johnny
