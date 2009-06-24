@@ -1,34 +1,28 @@
-From: Stefan Schoenleitner <dev.c0debabe@gmail.com>
-Subject: Re: Using UART in kernel driver code on AT91SAM9260
-Date: Wed, 24 Jun 2009 11:59:41 +0200
-Message-ID: <4A41F90D.6040103@gmail.com>
-References: <4A41EA93.2070904@gmail.com> <8763em3qsp.fsf@macbook.be.48ers.dk>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 06/14] Pramfs: Include files
+Date: Wed, 24 Jun 2009 17:30:36 +0200
+Message-ID: <200906241730.37151.arnd@arndb.de>
+References: <4A33A7EC.6070008@gmail.com> <200906232355.34134.arnd@arndb.de> <2ea1731b0906232332n2488d452p27419eac7edab7e4@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8763em3qsp.fsf@macbook.be.48ers.dk>
+In-Reply-To: <2ea1731b0906232332n2488d452p27419eac7edab7e4@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Type: Text/Plain; charset="us-ascii"
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: David Woodhouse <dwmw2@infradead.org>, =?iso-8859-1?q?J=F6rn_Engel?= <joern@lazybastard.org>, Sam Ravnborg <sam@ravnborg.org>, Tim Bird <tim.bird@am.sony.com>, Chris Simmonds <chris@2net.co.uk>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-Hi,
-
-Peter Korsgaard wrote:
-> The input layer has serio infrastructure for this (E.G. for serial
-> mice/touchscreens). Now, a speech codec doesn't have much to do with
-> input devices, but it atleast clearly seperates the lowlevel uart
-> communication from the speech codec handling.
+On Wednesday 24 June 2009, Marco Stornelli wrote:
+> > Actually, reading from /dev/mem is only valid on real RAM. If the nvram
+> > is part of an IO memory mapping, you have to do mmap()+memcpy() rather
+> > than read(). So dd won't do it, but it's still easy to read from user
+> > space.
 > 
-> Have a look in drivers/input/{serio,touchscreen}.
+> For "security" reasons pram reserve the region of memory with
+> reserve_mem_region_exclusive().....
 
-thanks for the tip !
-I'm looking to find some more serio documentation now.
+That will only prevent other device drivers from stepping on it,
+/dev/mem does not care about mem_region reservations.
 
-If it won't work out, I guess I still have the possibility to write a
-line discipline.
-However, using serio seems to be more comfortable (also from a useeland
-perspective).
-
-cheers,
-stefan
+	Arnd <><
