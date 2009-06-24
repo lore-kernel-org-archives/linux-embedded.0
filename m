@@ -1,28 +1,34 @@
 From: Stefan Schoenleitner <dev.c0debabe@gmail.com>
 Subject: Re: Using UART in kernel driver code on AT91SAM9260
-Date: Wed, 24 Jun 2009 11:49:13 +0200
-Message-ID: <4A41F699.6000806@gmail.com>
-References: <4A41EA93.2070904@gmail.com>
+Date: Wed, 24 Jun 2009 11:59:41 +0200
+Message-ID: <4A41F90D.6040103@gmail.com>
+References: <4A41EA93.2070904@gmail.com> <8763em3qsp.fsf@macbook.be.48ers.dk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4A41EA93.2070904@gmail.com>
+In-Reply-To: <8763em3qsp.fsf@macbook.be.48ers.dk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: linux-embedded@vger.kernel.org
 
-Stefan Schoenleitner wrote:
-> It would be great if you could provide some links to documentation and
-> example code.
+Hi,
 
-I just found out that there are other kernel drivers using the serial
-port as well (e.g. the SLIP or PPP drivers).
-It seems that what I want to do (which is accessing the serial port from
-kernel space) is called a "line discipline".
+Peter Korsgaard wrote:
+> The input layer has serio infrastructure for this (E.G. for serial
+> mice/touchscreens). Now, a speech codec doesn't have much to do with
+> input devices, but it atleast clearly seperates the lowlevel uart
+> communication from the speech codec handling.
+> 
+> Have a look in drivers/input/{serio,touchscreen}.
 
-I found an article "Writing a Kernel Line Discipline" with code snippets
-on http://www.linux-mag.com/id/1891
-(You can find a login to this page here: http://www.bugmenot.com)
+thanks for the tip !
+I'm looking to find some more serio documentation now.
 
-Is this the right way to go ?
+If it won't work out, I guess I still have the possibility to write a
+line discipline.
+However, using serio seems to be more comfortable (also from a useeland
+perspective).
+
+cheers,
+stefan
