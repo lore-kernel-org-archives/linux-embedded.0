@@ -1,64 +1,39 @@
-From: Marco <marco.stornelli@gmail.com>
-Subject: Re: Saving the kernel log accross boots
-Date: Thu, 25 Jun 2009 19:02:43 +0200
-Message-ID: <4A43ADB3.20808@gmail.com>
-References: <op.uv238aaxq25ece@thur.netmodule.intranet>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: Status of bzip2 and lzma kernel compression for ARM?
+Date: Fri, 26 Jun 2009 02:08:07 +0900
+Message-ID: <20090625170806.GA22326@linux-sh.org>
+References: <4A428AFF.20307@free-electrons.com> <4A433BCD.2030506@compulab.co.il> <200906251104.02830.florian@openwrt.org> <4A4396CB.9000703@free-electrons.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=i9M7B+M7s33qsUSmMv47Rd4lyoD11kExBNCaIVukuOg=;
-        b=YQZMr5UN/28kHuVYkMOaHYVcAhibMX5a43MPYHFNZRad92jMYrY07u1MVMhMe9Ekgf
-         wHC42VDQb4giHsykyZUCEYlKGODvnkWCcOlG5RDDLwoAAH+/iDi0Ytsf6erJqfm3fv3f
-         bCuNhaq2FwcpNbu884703kY9TkP3vUMFCU3e4=
-In-Reply-To: <op.uv238aaxq25ece@thur.netmodule.intranet>
+Content-Disposition: inline
+In-Reply-To: <4A4396CB.9000703@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Martin Meuli <Martin.Meuli@gmx.ch>
-Cc: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Michael Opdenacker <michael-lists@free-electrons.com>
+Cc: Florian Fainelli <florian@openwrt.org>, Mike Rapoport <mike@compulab.co.il>, Alain Knaff <alain@knaff.lu>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-Martin Meuli wrote:
-> Hi All
+On Thu, Jun 25, 2009 at 05:24:59PM +0200, Michael Opdenacker wrote:
+> On 06/25/2009 11:04 AM, Florian Fainelli wrote:
+> > Le Thursday 25 June 2009 10:56:45 Mike Rapoport, vous avez ?crit :
+> >> I'm not sure what exactly do you mean by "test bzip2 and lzma compression
+> >> on ARM", but if you refer to internal initramfs compression, I can tell
+> >> that I've used lzma compression on PXA270 and it works fine.
+> >>     
+> >
+> > I think Michael refers to the lzma decompressor which allows you to use a 
+> > lzma-compressed kernel as a (b)zImage with its architecture specific 
+> > decompressor piggy-backed in the (b)zImage.
+> >
+> > Such thing would also be very useful on MIPS and PowerPC as well.
+> >   
+> Yes, that's what I meant: using a bzip2 or lzma compressed kernel. I
+> would like to know the boot time impact on an ARM board.
 > 
-> In case of a crash we would like to save the kernel log and retrieve it
-> in the next boot.
-> There are already several suggestions on how to do it on this and other
-> lists.
-> (Kernel crashing and log buffers: Robin Getz)
-> Unfortunately we don't have extra SRAM to use for it. We need to do it
-> in the 'normal' RAM.
+> If I don't get any answer from Alain in the next days, I will propose a
+> patch update for ARM.
 > 
-> ARCH=ARM
-> 
-> What we did:
-> - modify kernel/printk.c: use
-> __attribute__((__section__(".bss.kringbuf"... to put the log related
-> stuf into a separate section
-> - modify the linker script to link .bss.kringbuf at the start of the
-> .bss section
-> - modify arch/arm/kernel/head-common.S to exclude the new section from
-> being nulled (if it was a watchdog restart)
-> - modify kernel/printk.c to use cach_flush after prink
-> - make sure the bootloader does not overwrite that memory
-> 
-> This seems to work.
-> After a crash we get the messages from the new boot and the last crash.
-> It seems that the decompress code is using memory at the end of the
-> kernel and destroys the log. So we have to use the bootloader to
-> decompress the image into RAM.
-> 
-> Before digging any deeper I would like to know if someone as a better
-> (more general) idea.
-> 
-> Regards, Martin
-
-I submitted for a review a new filesystem for 2.6.30 called pramfs that
-it can be useful for your case. You could use a little piece of ram to
-store the log.
-
-Marco
+It's possible to use this generically now, yes. Anything building uImages
+today can basically wire it up in a similar fashion to how blackfin has
+and support it out of the box.
