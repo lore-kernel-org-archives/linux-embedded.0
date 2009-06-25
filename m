@@ -1,78 +1,95 @@
-From: Michael Ellerman <michael@ellerman.id.au>
-Subject: Re: How the kernel printk works before do console_setup.
-Date: Thu, 25 Jun 2009 16:37:25 +1000
-Message-ID: <1245911845.11532.20.camel@concordia>
-References: <cb9ecdfa0906232050n6fcfee31ubeee4bcd9b8c0dfe@mail.gmail.com>
-	 <4A41B3A5.9010807@am.sony.com> <1245884203.21200.18.camel@pasglop>
-	 <cb9ecdfa0906242327j76d1e4fbib13bc7d9753aeacf@mail.gmail.com>
-Reply-To: michael@ellerman.id.au
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Thu, 25 Jun 2009 08:44:28 +0200
+Message-ID: <2ea1731b0906242344x5c8a6e58t5f82377be3d73411@mail.gmail.com>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org>
+	 <4A34A394.5040509@gmail.com> <20090614114613.GC9514@shareable.org>
+	 <4A351FA9.1090808@gmail.com> <20090616150750.GF29040@shareable.org>
+	 <4A37EF4A.1080006@gmail.com> <20090624174140.GH14121@shareable.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-43lc7/jLw0CPhY+C4l75"
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <cb9ecdfa0906242327j76d1e4fbib13bc7d9753aeacf@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=FeF1nukwa6h2j7QzDn2nRtJ4SRX6nFPHwZYtnhHNcnQ=;
+        b=NZ8xiQtXZusX7uueGDYKO0eXmak6cTtl6N8Alw2KbM13NmboryQSbuMakKRHzGSNVq
+         SsTSt/u5SkiRHjIPiFpN4p/rDYmr8GDbVzaiZXE9eiZ3BKe6VboorFcIZ0+JaGtWE47L
+         kksKF2S6Pq2pgVUb4xFmq6bS+QJtRg/bs/y38=
+In-Reply-To: <20090624174140.GH14121@shareable.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Johnny Hung <johnny.hacking@gmail.com>
-Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>, linuxppc-dev@lists.ozlabs.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
+2009/6/24 Jamie Lokier <jamie@shareable.org>:
+> Marco wrote:
+>> > Second question: what happens if the system crashing _during_ a wr=
+ite
+>> > to a file. =A0Does it mean that file will fail it's checksum when =
+it's
+>> > read at the next boot?
+>> >
+>> > Maybe files aren't so important. =A0What about when you write a fi=
+le,
+>> > and then rename it over an existing file to replace it. =A0(E.g. a
+>> > config file), and the system crashes _during_ the rename? =A0At th=
+e next
+>> > boot, is it guaranteed to see either the old or the new file, or c=
+an
+>> > the directory be corrupt / fail it's checksum?
+>>
+>> First of all I have to explain better the current policy: the checks=
+um
+>> works at inode and superblock level and currently there isn't a reco=
+very
+>> function as the journaling. About the superblock it's easy to use a
+>> redundant policy to be more robust.
+>
+> To be honest, superblock robustness is less of a concern. =A0The real
+> concern is losing file or directory contents, so it can't be used to
+> store persistent configuration data, only debugging logs.
+>
+>> About the inode, at the moment when the checksum doesn't match the
+>> inode it's marked as bad calling the function make_bad_inode().
+>
+> Let's see if I understand right.
+>
+> If it lose power when writing to a file, after boot the file is likel=
+y
+> to be marked bad and so return -EIO instead of any file contents?
 
---=-43lc7/jLw0CPhY+C4l75
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+Depends on the checksum. If you lose power before the checksum update
+of the inode
+you'll have a bad inode and then an -EIO at the next access.
 
-On Thu, 2009-06-25 at 14:27 +0800, Johnny Hung wrote:
-> 2009/6/25 Benjamin Herrenschmidt <benh@kernel.crashing.org>:
-> >
-> >> Before the console is set up, the printk data is formatted
-> >> and put into the kernel log buffer, but not sent to any console.
-> >> Any messages printk'ed before that are buffered but do not
-> >> appear.  When the console is initialized, then all buffered
-> >> messages are sent to the console, and subsequent printks cause
-> >> the message to go to the log buffer, but then immediately
-> >> get sent from there to the console.
-> >>
-> >> Under certain conditions you can examine the log buffer of
-> >> a kernel that failed to initialize it's console, after a
-> >> warm reset of the machine, using the firmware memory dump
-> >> command.
-> >
-> > On ppc, we have tricks to display things earlier :-)
-> >
-> > We can initialize the serial ports way before console_setup() (and we d=
-o
-> > in most cases) and we use what we call the "udbg" console until the rea=
-l
-> > one takes over. The "udbg" console is a very small layer which outputs
-> > via a provided "putc" routine. Platforms can provide their own here, we
-> > have a collection of standard ones for legacy UARTs (it should be
-> > automatically setup in that case by the code in legacy_serial), Apple
-> > ESCCs, etc... We even have compile time options that allow that stuff t=
-o
-> > be initialized before start_kernel...
->=20
-> Thank you. This is what I described and want to understand. The
-> arch/powerpc/kernel/legacy_serial.c
-> do find_legacy_serial_ports then take a default serial port by using
-> open firmware device tree
-> information. The find_legacy_serial_ports() called form setup_arch but
-> I don't know who call
-> setup_arch (setup_32.c)function. Can you give me a hint ? Thanks in advan=
-ced.
+>
+> If it loses power when doing atomic rename (to replace config files,
+> for example), it's likely that the whole /pramfs/configs/ directory
+> will be corrupt, because the rename is writing to the directory inode=
+,
+> so you lose access to all names in that directory?
+>
+> That sounds like it can't be used for persistent configuration data.
 
-setup_arch() is called from start_kernel() in init/main.c
+It's true from this point of view currently there is a lack for this
+and it needs a bit of effort to resolve this problem.
+=46rom this point of view I'd like to point out that I know that there
+was some aspects to study in a deeper way, so I'll need
+of more then one review :) but since this fs has been abandoned since
+2004 and it hadn't ever reviewed, it was important
+to do a serious review with the kernel community to understand all the
+problems.
 
-cheers
+>
+> If a directory is marked as bad, or a file-inode in it is marked bad,
+> can you even rmdir it to clean up and start again?
+>
 
---=-43lc7/jLw0CPhY+C4l75
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
+You can start again always. You can remount the fs with the init
+option and then you'll have a new fs.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEABECAAYFAkpDGyUACgkQdSjSd0sB4dIvigCfV3efnXTX8vAjThX/KGx/OHq+
-5FgAmgLMogbMi/GzA5SJmA7CqpNldRyr
-=EWua
------END PGP SIGNATURE-----
-
---=-43lc7/jLw0CPhY+C4l75--
+Marco
