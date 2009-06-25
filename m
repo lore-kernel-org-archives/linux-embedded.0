@@ -1,74 +1,78 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Thu, 25 Jun 2009 08:32:08 +0200
-Message-ID: <2ea1731b0906242332n305a8ebbgf37b259171741ea8@mail.gmail.com>
-References: <2ea1731b0906212333r20deb71q2f021fc79bcc8a8e@mail.gmail.com>
-	 <4A3FBFF0.40006@am.sony.com> <20090622173704.GC21299@elf.ucw.cz>
-	 <4A3FC84A.6060608@gmail.com> <20090622204031.GA24236@elf.ucw.cz>
-	 <4A3FFC89.4070006@am.sony.com> <20090622215753.GA25434@elf.ucw.cz>
-	 <4A4119DB.4030203@gmail.com> <20090623182941.GA2045@elf.ucw.cz>
-	 <20090624174700.GI14121@shareable.org>
+From: Michael Ellerman <michael@ellerman.id.au>
+Subject: Re: How the kernel printk works before do console_setup.
+Date: Thu, 25 Jun 2009 16:37:25 +1000
+Message-ID: <1245911845.11532.20.camel@concordia>
+References: <cb9ecdfa0906232050n6fcfee31ubeee4bcd9b8c0dfe@mail.gmail.com>
+	 <4A41B3A5.9010807@am.sony.com> <1245884203.21200.18.camel@pasglop>
+	 <cb9ecdfa0906242327j76d1e4fbib13bc7d9753aeacf@mail.gmail.com>
+Reply-To: michael@ellerman.id.au
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=/sLqertL0l1GB1FVoVLJJkHudtIcr5ypLudDtbtPAmI=;
-        b=AJvLpju6T7F1dyRjEWBxm7ftmZmiFMWQSf7qNuvddZ4zC/AgrhKitMYJ5aEHhpWkLC
-         kA2DUGb3c1v2daINuwucJzxiKn7bSK4/tJ3BZa+pS60CjZIa88HzXRvVXzJB50b+wF5P
-         Fu8eae2dC2kC1rkgbBBQhXY+Vf2TlLcyMykOQ=
-In-Reply-To: <20090624174700.GI14121@shareable.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-43lc7/jLw0CPhY+C4l75"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <cb9ecdfa0906242327j76d1e4fbib13bc7d9753aeacf@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Jamie Lokier <jamie@shareable.org>
-Cc: Pavel Machek <pavel@ucw.cz>, Tim Bird <tim.bird@am.sony.com>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+To: Johnny Hung <johnny.hacking@gmail.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>, linuxppc-dev@lists.ozlabs.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-2009/6/24 Jamie Lokier <jamie@shareable.org>:
-> Pavel Machek wrote:
->> On Tue 2009-06-23 20:07:23, Marco wrote:
->> > You are talked about journaling. This schema works well for a disk=
-, but
->> > what about a piece of ram? What about a crazy kernel that write in=
- that
->> > area for a bug? Do you remember for example the e1000e bug? It's n=
-ot
->>
->> I believe you need both journaling *and* write protection. How do yo=
-u
->> handle power fault while writing data?
->
-> I think this is basically right.
->
-> write protection for the crazy kernels, and journalling for
-> powerfail/crash during updates.
->
-> Journalling can be extremely simple. =A0It can be just one memory blo=
-ck
-> at a fixed location, double-buffering all writes.
->
-> Pramfs already has checksums, which makes that easier. =A0You just wr=
-ite
-> to the buffer area first, with checksum, then write to the final area=
-=2E
-> Mount looks at the buffer area, and if the checksum is fine, copies
-> the contents to the destination block.
->
-> That's all it takes to be resistant against power failures and crashe=
-s
-> during writes. =A0Probably <100 lines of code.
->
-> -- Jamie
->
 
-It seems a reasonable request.
+--=-43lc7/jLw0CPhY+C4l75
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-Marco
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Thu, 2009-06-25 at 14:27 +0800, Johnny Hung wrote:
+> 2009/6/25 Benjamin Herrenschmidt <benh@kernel.crashing.org>:
+> >
+> >> Before the console is set up, the printk data is formatted
+> >> and put into the kernel log buffer, but not sent to any console.
+> >> Any messages printk'ed before that are buffered but do not
+> >> appear.  When the console is initialized, then all buffered
+> >> messages are sent to the console, and subsequent printks cause
+> >> the message to go to the log buffer, but then immediately
+> >> get sent from there to the console.
+> >>
+> >> Under certain conditions you can examine the log buffer of
+> >> a kernel that failed to initialize it's console, after a
+> >> warm reset of the machine, using the firmware memory dump
+> >> command.
+> >
+> > On ppc, we have tricks to display things earlier :-)
+> >
+> > We can initialize the serial ports way before console_setup() (and we d=
+o
+> > in most cases) and we use what we call the "udbg" console until the rea=
+l
+> > one takes over. The "udbg" console is a very small layer which outputs
+> > via a provided "putc" routine. Platforms can provide their own here, we
+> > have a collection of standard ones for legacy UARTs (it should be
+> > automatically setup in that case by the code in legacy_serial), Apple
+> > ESCCs, etc... We even have compile time options that allow that stuff t=
+o
+> > be initialized before start_kernel...
+>=20
+> Thank you. This is what I described and want to understand. The
+> arch/powerpc/kernel/legacy_serial.c
+> do find_legacy_serial_ports then take a default serial port by using
+> open firmware device tree
+> information. The find_legacy_serial_ports() called form setup_arch but
+> I don't know who call
+> setup_arch (setup_32.c)function. Can you give me a hint ? Thanks in advan=
+ced.
+
+setup_arch() is called from start_kernel() in init/main.c
+
+cheers
+
+--=-43lc7/jLw0CPhY+C4l75
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEABECAAYFAkpDGyUACgkQdSjSd0sB4dIvigCfV3efnXTX8vAjThX/KGx/OHq+
+5FgAmgLMogbMi/GzA5SJmA7CqpNldRyr
+=EWua
+-----END PGP SIGNATURE-----
+
+--=-43lc7/jLw0CPhY+C4l75--
