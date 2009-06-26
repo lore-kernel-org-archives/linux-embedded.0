@@ -1,37 +1,98 @@
-From: "Martin Meuli" <Martin.Meuli@gmx.ch>
-Subject: Re: Saving the kernel log accross boots
-Date: Fri, 26 Jun 2009 10:21:29 +0200
-Message-ID: <op.uv4fzy1yq25ece@thur.netmodule.intranet>
-References: <op.uv238aaxq25ece@thur.netmodule.intranet>
- <4A43968A.2020905@billgatliff.com> <20090625152954.GB8445@pengutronix.de>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Fri, 26 Jun 2009 12:30:16 +0100
+Message-ID: <20090626113016.GB17737@shareable.org>
+References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090614114613.GC9514@shareable.org> <4A351FA9.1090808@gmail.com> <20090616150750.GF29040@shareable.org> <4A37EF4A.1080006@gmail.com> <20090624174140.GH14121@shareable.org> <2ea1731b0906242344x5c8a6e58t5f82377be3d73411@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090625152954.GB8445@pengutronix.de>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <2ea1731b0906242344x5c8a6e58t5f82377be3d73411@mail.gmail.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; format="flowed"; delsp="yes"; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-On Thu, 25 Jun 2009 17:29:54 +0200, Wolfram Sang <w.sang@pengutronix.de>  
-wrote:
+Marco Stornelli wrote:
+> 2009/6/24 Jamie Lokier <jamie@shareable.org>:
+> > Marco wrote:
+> >> > Second question: what happens if the system crashing _during_ a =
+write
+> >> > to a file. =A0Does it mean that file will fail it's checksum whe=
+n it's
+> >> > read at the next boot?
+> >> >
+> >> > Maybe files aren't so important. =A0What about when you write a =
+file,
+> >> > and then rename it over an existing file to replace it. =A0(E.g.=
+ a
+> >> > config file), and the system crashes _during_ the rename? =A0At =
+the next
+> >> > boot, is it guaranteed to see either the old or the new file, or=
+ can
+> >> > the directory be corrupt / fail it's checksum?
+> >>
+> >> First of all I have to explain better the current policy: the chec=
+ksum
+> >> works at inode and superblock level and currently there isn't a re=
+covery
+> >> function as the journaling. About the superblock it's easy to use =
+a
+> >> redundant policy to be more robust.
+> >
+> > To be honest, superblock robustness is less of a concern. =A0The re=
+al
+> > concern is losing file or directory contents, so it can't be used t=
+o
+> > store persistent configuration data, only debugging logs.
+> >
+> >> About the inode, at the moment when the checksum doesn't match the
+> >> inode it's marked as bad calling the function make_bad_inode().
+> >
+> > Let's see if I understand right.
+> >
+> > If it lose power when writing to a file, after boot the file is lik=
+ely
+> > to be marked bad and so return -EIO instead of any file contents?
+>=20
+> Depends on the checksum. If you lose power before the checksum update
+> of the inode
+> you'll have a bad inode and then an -EIO at the next access.
+>=20
+> >
 
->
->> > Before digging any deeper I would like to know if someone as a better
->> > (more general) idea.
->>
->> Could you stuff the output into an MTD device?
->
-> For that, see CONFIG_MTD_OOPS.
-Thak's looks great.
-Right now we have a watchdog without OOPS.
->
-> Regards,
->
->    Wolfram
->
+> > If it loses power when doing atomic rename (to replace config files=
+,
+> > for example), it's likely that the whole /pramfs/configs/ directory
+> > will be corrupt, because the rename is writing to the directory ino=
+de,
+> > so you lose access to all names in that directory?
+> >
+> > That sounds like it can't be used for persistent configuration data=
+=2E
+>=20
+> It's true from this point of view currently there is a lack for this
+> and it needs a bit of effort to resolve this problem.  >From this
+> point of view I'd like to point out that I know that there was some
+> aspects to study in a deeper way, so I'll need of more then one
+> review :) but since this fs has been abandoned since 2004 and it
+> hadn't ever reviewed, it was important to do a serious review with
+> the kernel community to understand all the problems.
 
+That's reasonable.
 
+What do you think of my suggestion to double-buffer writes using a
+single fixed position block, as explained elsewhere in this thread?
 
--- 
-MM
+It should give the power fail safety with very little code.  I don't
+know how much it would slwo down writing.  That probably depends on
+whether it's the checksum which is slow (which only needs to be done
+once when double-buffering), or the writing.
+
+-- Jamie
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
