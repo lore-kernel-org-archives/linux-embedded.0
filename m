@@ -1,98 +1,59 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Fri, 26 Jun 2009 12:30:16 +0100
-Message-ID: <20090626113016.GB17737@shareable.org>
-References: <4A33A7A2.1050608@gmail.com> <20090613155957.GA16220@shareable.org> <4A34A394.5040509@gmail.com> <20090614114613.GC9514@shareable.org> <4A351FA9.1090808@gmail.com> <20090616150750.GF29040@shareable.org> <4A37EF4A.1080006@gmail.com> <20090624174140.GH14121@shareable.org> <2ea1731b0906242344x5c8a6e58t5f82377be3d73411@mail.gmail.com>
+From: Robin Getz <rgetz@blackfin.uclinux.org>
+Subject: Re: Kernel crashing and log buffers...
+Date: Fri, 26 Jun 2009 10:39:50 -0400
+Message-ID: <200906261039.50570.rgetz@blackfin.uclinux.org>
+References: <200906102126.40410.rgetz@blackfin.uclinux.org> <20090611175303.GA10058@cuplxvomd02.corp.sa.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090611175303.GA10058@cuplxvomd02.corp.sa.net>
 Content-Disposition: inline
-In-Reply-To: <2ea1731b0906242344x5c8a6e58t5f82377be3d73411@mail.gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
+Content-Type: text/plain; charset="us-ascii"
+To: David VomLehn <dvomlehn@cisco.com>
+Cc: Mike Frysinger <vapier@gentoo.org>, Greg Ungerer <gerg@snapgear.com>, Russell King <rmk@arm.linux.org.uk>, Paul Mundt <lethal@linux-sh.org>, Tim Bird <tim.bird@am.sony.com>, Wolfgang Denk <wd@denx.de>, Grant Erickson <gerickson@nuovations.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Marco Stornelli wrote:
-> 2009/6/24 Jamie Lokier <jamie@shareable.org>:
-> > Marco wrote:
-> >> > Second question: what happens if the system crashing _during_ a =
-write
-> >> > to a file. =A0Does it mean that file will fail it's checksum whe=
-n it's
-> >> > read at the next boot?
-> >> >
-> >> > Maybe files aren't so important. =A0What about when you write a =
-file,
-> >> > and then rename it over an existing file to replace it. =A0(E.g.=
- a
-> >> > config file), and the system crashes _during_ the rename? =A0At =
-the next
-> >> > boot, is it guaranteed to see either the old or the new file, or=
- can
-> >> > the directory be corrupt / fail it's checksum?
-> >>
-> >> First of all I have to explain better the current policy: the chec=
-ksum
-> >> works at inode and superblock level and currently there isn't a re=
-covery
-> >> function as the journaling. About the superblock it's easy to use =
-a
-> >> redundant policy to be more robust.
-> >
-> > To be honest, superblock robustness is less of a concern. =A0The re=
-al
-> > concern is losing file or directory contents, so it can't be used t=
-o
-> > store persistent configuration data, only debugging logs.
-> >
-> >> About the inode, at the moment when the checksum doesn't match the
-> >> inode it's marked as bad calling the function make_bad_inode().
-> >
-> > Let's see if I understand right.
-> >
-> > If it lose power when writing to a file, after boot the file is lik=
-ely
-> > to be marked bad and so return -EIO instead of any file contents?
->=20
-> Depends on the checksum. If you lose power before the checksum update
-> of the inode
-> you'll have a bad inode and then an -EIO at the next access.
->=20
-> >
+OK - so after a bit more digging into things (and a poke by Mike) - I think 
+most of the stuff already exists.
 
-> > If it loses power when doing atomic rename (to replace config files=
-,
-> > for example), it's likely that the whole /pramfs/configs/ directory
-> > will be corrupt, because the rename is writing to the directory ino=
-de,
-> > so you lose access to all names in that directory?
-> >
-> > That sounds like it can't be used for persistent configuration data=
-=2E
->=20
-> It's true from this point of view currently there is a lack for this
-> and it needs a bit of effort to resolve this problem.  >From this
-> point of view I'd like to point out that I know that there was some
-> aspects to study in a deeper way, so I'll need of more then one
-> review :) but since this fs has been abandoned since 2004 and it
-> hadn't ever reviewed, it was important to do a serious review with
-> the kernel community to understand all the problems.
 
-That's reasonable.
+Normal run time issues:
+--------------------------
+ - MTD_OOPS - on 2007-06-28 this was added to Linus's tree:
+    http://lkml.org/lkml/2007/6/18/234
+    CONFIG_MTD_OOPS
+      tristate "Log panic/oops to an MTD buffer"
+        depends on MTD
+        help
+          This enables panic and oops messages to be logged to a circular
+          buffer in a flash partition where it can be read back at some
+          later point.
 
-What do you think of my suggestion to double-buffer writes using a
-single fixed position block, as explained elsewhere in this thread?
+          To use, add console=ttyMTDx to the kernel command line,
+          where x is the MTD device number to use.
 
-It should give the power fail safety with very little code.  I don't
-know how much it would slwo down writing.  That probably depends on
-whether it's the checksum which is slow (which only needs to be done
-once when double-buffering), or the writing.
+Note - this currently _only_ does things when oops_in_progress is set, but 
+should be easy to extend to all - if that what people want.
 
--- Jamie
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ - mtd devices can be backed by RAM.
+    CONFIG_MTD_RAM
+
+ - mtd devices can be backed by flash (if you want things to be persistant
+     across power cycles)...
+
+
+
+early boot issues:
+----------------------
+ - CONFIG_EARLY_PRINTK
+   - early printk just defined a console - and is supported by:
+      alpha, blackfin, microblaze, mips, powerpc, sh, x86
+   - it's pretty trivial to support a memory based buffer - some
+     archs already support it.
+
+I think this only leaves Wolfgang's desire for memory buffers from the 
+bootloader to get (somehow) into the kernel's log buffer for syslog 
+processing...
+
+Anyone else agree?
