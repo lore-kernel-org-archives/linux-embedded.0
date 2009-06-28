@@ -1,7 +1,7 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
 Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
-Date: Sun, 28 Jun 2009 18:44:57 +0200
-Message-ID: <4A479E09.5050100@gmail.com>
+Date: Sun, 28 Jun 2009 19:33:02 +0200
+Message-ID: <4A47A94E.4020808@gmail.com>
 References: <4a4254e2.09c5660a.109d.46f8@mx.google.com> <4A425907.2060105@gmail.com> <4A42649D.6080509@gmail.com> <20090624175943.GB6618@elf.ucw.cz> <2ea1731b0906242330t5f379322sdff9880788e9b181@mail.gmail.com> <20090628085932.GA20169@elf.ucw.cz>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -11,10 +11,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:references:in-reply-to
          :content-type:content-transfer-encoding;
-        bh=4iW9gUdyOgYEWyUIwjXhrZsIRGuicpzVtBIt8NfN/UY=;
-        b=M7TinSGYPZTLX0JY6zeWpkKuEdEYijiFHVPsQTfJtW+0BEMTTaRuvRbfL2p0l0F8Q9
-         D08hhCpCH3HW/pxYu36QNKOwapHLo9odL4KOHPTkOwIbX/KmNJruxlNoo66dQ2w/ecR1
-         6nmLD7n15yEUFHmEpIhyHr//bnsmKLoabgpgQ=
+        bh=qF5XVnWRBZEqzfFinCbtyyfoS//RkBbYwP+GjcQvgRs=;
+        b=W/3cDR+HoT3JW9dSixdXRjp4gweFKSs7D/WuV8WzyoTieCjD20RuS/8iM6nv/UHeGo
+         z7Wo8IafgDAGEDQaDVy+lPACEc7SySCfm5T8SXGtxizYARzzGTrpzDWmeOMKwZKFHmYB
+         qM0nAEk65flbhEJmtoY1cb0Jcl3lDxo450ceM=
 In-Reply-To: <20090628085932.GA20169@elf.ucw.cz>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -60,7 +60,15 @@ Pavel Machek wrote:
 > ext2 comparison would tell you how much pramfs sucks (or not).
 > 									Pavel
 
-If you knew that the results were machine-dependent I don't understand
-why you were so upset by my previous benchmark.
+Here the test with ext2 (same environment):
+
+Version 1.03e       ------Sequential Output------ --Sequential Input- --Random-
+                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine   Size:chnk K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+hostname     15M:1k 10262  83 40847  82 38574  82  9866  92 62252  98 25204  81
+                    ------Sequential Create------ --------Random Create--------
+                    -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
+              files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
+                  1 19859  98 44804  61 68830 100 13566  99 157129 100 30431  98
 
 Marco
