@@ -1,44 +1,74 @@
-From: Mike Rapoport <mike@compulab.co.il>
-Subject: Re: Status of bzip2 and lzma kernel compression for ARM?
-Date: Mon, 29 Jun 2009 15:21:45 +0300
-Message-ID: <4A48B1D9.90306@compulab.co.il>
-References: <4A428AFF.20307@free-electrons.com> <4A433BCD.2030506@compulab.co.il> <200906251104.02830.florian@openwrt.org> <4A4396CB.9000703@free-electrons.com> <4A4776DD.50105@knaff.lu> <4A478286.8020908@knaff.lu>
+From: Dan Magenheimer <dan.magenheimer@oracle.com>
+Subject: RE: [RFC] transcendent memory for Linux
+Date: Mon, 29 Jun 2009 07:44:50 -0700 (PDT)
+Message-ID: <5331ec14-c599-4317-bd5b-55911b8ee916@default>
+References: <63386a3d0906270618h5be01265v759f5acd1f49682f@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4A478286.8020908@knaff.lu>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Alain Knaff <alain@knaff.lu>
-Cc: Michael Opdenacker <michael-lists@free-electrons.com>, Florian Fainelli <florian@openwrt.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded mailing list <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <63386a3d0906270618h5be01265v759f5acd1f49682f@mail.gmail.com>
+Sender: owner-linux-mm@kvack.org
+List-Id: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: linux-kernel@vger.kernel.org, xen-devel@lists.xensource.com, npiggin@suse.de, chris.mason@oracle.com, kurt.hackel@oracle.com, dave.mccracken@oracle.com, Avi Kivity <avi@redhat.com>, jeremy@goop.org, Rik van Riel <riel@redhat.com>, alan@lxorguk.ukuu.org.uk, Rusty Russell <rusty@rustcorp.com.au>, Martin Schwidefsky <schwidefsky@de.ibm.com>, akpm@osdl.org, Marcelo Tosatti <mtosatti@redhat.com>, Balbir Singh <balbir@linux.vnet.ibm.com>, tmem-devel@oss.oracle.com, sunil.mushran@oracle.com, linux-mm@kvack.org, Himanshu Raj <rhim@microsoft.com>, linux-embedded@vger.kernel.org
 
 
 
-Alain Knaff wrote:
-> Alain Knaff wrote:
->> Attached is a version of the ARM patch for 2.6.30
->>
->> There seems to be some issues with the include files (which did not pose
->> any problems in 2.6.28...), but hopefully somebody more experienced with
->> the ARM architecture (and with its recent development) than I can help
->> out there.
->>
->> Regards,
->>
->> Alain
-> 
-> Actually, the needed changes turned out to be easier than I initially
-> feared. Attached a version that compiles all right.
+> From: Linus Walleij [mailto:linus.ml.walleij@gmail.com]
+> Sent: Saturday, June 27, 2009 7:19 AM
+> Subject: Re: [RFC] transcendent memory for Linux
+>=20
+> > We call this latter class "transcendent memory" and it
+> > provides an interesting opportunity to more efficiently
+> > utilize RAM in a virtualized environment. =A0However this
+> > "memory but not really memory" may also have applications
+> > in NON-virtualized environments, such as hotplug-memory
+> > deletion, SSDs, and page cache compression. =A0Others have
+> > suggested ideas such as allowing use of highmem memory
+> > without a highmem kernel, or use of spare video memory.
+>=20
+> Here is what I consider may be a use case from the embedded
+> world: we have to save power as much as possible, so we need
+> to shut off entire banks of memory.
+>=20
+> Currently people do things like put memory into self-refresh
+> and then sleep, but for long lapses of time you would
+> want to compress memory towards lower addresses and
+> turn as many banks as possible off.
+>=20
+> So we have something like 4x16MB banks of RAM =3D 64MB RAM,
+> and the most necessary stuff easily fits in one of them.
+> If we can shut down 3x16MB we save 3 x power supply of the
+> RAMs.
+>=20
+> However in embedded we don't have any swap, so we'd need
+> some call that would attempt to remove a memory by paging
+> out code and data that has been demand-paged in
+> from the FS but no dirty pages, these should instead be
+> moved down to memory which will be retained, and the
+> call should fail if we didn't succeed to migrate all
+> dirty pages.
+>=20
+> Would this be possible with transcendent memory?
 
-I gave it a quick test and it hangs before "Decompressing kernel" is output.
-I hope I'll have time this week to debug what's wrong there.
+Yes, I think this would work nicely as a use case for tmem.
 
-> Regards,
-> 
-> Alain
-> 
+As Avi points out, you could do this with memory defragmentation,
+but if you know in advance that you will be frequently
+powering on and off a bank of RAM, you could put only
+ephemeral memory into it (enforced by a kernel policy and
+the tmem API), then defragmentation (and compression towards
+lower addresses) would not be necessary, and you could power
+off a bank with no loss of data.
 
--- 
-Sincerely yours,
-Mike.
+One issue though: I would guess that copying pages of memory
+could be very slow in an inexpensive embedded processor.
+
+Dan
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
