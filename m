@@ -1,45 +1,57 @@
-From: Johnny Hung <johnny.hacking@gmail.com>
-Subject: PCI device support in Open Firmware (device tree syntax)
-Date: Mon, 29 Jun 2009 23:58:22 +0800
-Message-ID: <cb9ecdfa0906290858x125b8149na037f33258c21426@mail.gmail.com>
+From: Michael Opdenacker <michael-lists@free-electrons.com>
+Subject: Re: Status of bzip2 and lzma kernel compression for ARM?
+Date: Mon, 29 Jun 2009 18:39:57 +0200
+Message-ID: <4A48EE5D.10600@free-electrons.com>
+References: <4A428AFF.20307@free-electrons.com> <4A433BCD.2030506@compulab.co.il> <200906251104.02830.florian@openwrt.org> <4A4396CB.9000703@free-electrons.com> <4A4776DD.50105@knaff.lu> <4A478286.8020908@knaff.lu> <4A48B1D9.90306@compulab.co.il>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=gamma;
-	h=domainkey-signature:mime-version:received:date:message-id:subject
-	:from:to:content-type:content-transfer-encoding;
-	bh=HUV9nAaoj8O8dEIuJT7Eshe5tAVY/wM8poAQLLc3um0=;
-	b=yHKGuBFwnjHgMyV5tVjWjpXhPWOjz40CqBP+0hjqDkBnP2gSttMDUdSU3Xb4TIKCaz
-	HW3N1bPTSH1dxOjDKHuLZGEfaAtajLrfYD5JnKmI/i2BPcxK1PPxGMeHCaHi4aCLQY+a
-	yU2xebD4/d/3kRFzPD86FxAHzvoGJ7Fue5L44=
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Sender: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org
-Errors-To: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org
-To: linux-embedded@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kernelnewbies@nl.linux.org, scottwood@freescale.com
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755091AbZF2QkV@vger.kernel.org>
+In-Reply-To: <4A48B1D9.90306@compulab.co.il>
+Sender: linux-kernel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Mike Rapoport <mike@compulab.co.il>
+Cc: Alain Knaff <alain@knaff.lu>, Florian Fainelli <florian@openwrt.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel@lists.arm.linux.org.uk, linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-Hi all,
-    I am working in customized Freescale MPC8313 board. There are two
-PCI devices (Broadcom Switch) in PCI bus.
-Each PCI device has its configuration space. It contains
-vendor/product ID (RO)..., and important information, likes BARs
-(Base Address), INT line and IRQ(RW). These resources (BAR, INT, IRQ)
-is assigned from BIOS in x86 arch.
-    My problem is how to assign PCI device resources in device tree. I
-can't find exist dts file as an example. I have read the
-http://www.power.org/resources/downloads/Power_ePAPR_APPROVED_v1.0.pdf
-file. It's described detailed about device tree
-except PCI device. So, anyone give me a hint or sany tuff is appreciated.
-   I think Linux Kernel parses device tree and get the PCI device
-resources information then write into PCI configuration space.
-So PCI device driver do pci_register_driver (get resource) and do
-itself probe for PCI device. Is it right? CMIIAW
+On 06/29/2009 02:21 PM, Mike Rapoport wrote:
+> Alain Knaff wrote:
+>   
+>> Alain Knaff wrote:
+>>     
+>>> Attached is a version of the ARM patch for 2.6.30
+>>>
+>>> There seems to be some issues with the include files (which did not pose
+>>> any problems in 2.6.28...), but hopefully somebody more experienced with
+>>> the ARM architecture (and with its recent development) than I can help
+>>> out there.
+>>>
+>>> Regards,
+>>>
+>>> Alain
+>>>       
+>> Actually, the needed changes turned out to be easier than I initially
+>> feared. Attached a version that compiles all right.
+>>     
+>
+> I gave it a quick test and it hangs before "Decompressing kernel" is output.
+> I hope I'll have time this week to debug what's wrong there.
+>   
+Same here. I compiled 3 kernels with each option with no problem, but
+none goes beyond the "Uncompressing Linux.." message. I am using a CALAO
+USB-A9263 board with the AT91SAM9263 chip.
 
-BRs, H. Johnny
+This means that even zlib compression is broken with this patch.
+
+I hope I can work on this too.
+
+Thanks anyway!
+
+Cheers,
+
+Michael.
+
+-- 
+Michael Opdenacker, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
