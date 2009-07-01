@@ -1,71 +1,38 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: 2.6.27- Sending uevent from a driver
-Date: Tue, 30 Jun 2009 08:41:10 -0700
-Message-ID: <20090630154110.GD16038@kroah.com>
-References: <547eba1b0906300130r6b704e9ft408c63d2c1e6f4a@mail.gmail.com>
+From: Roland Dreier <rdreier@cisco.com>
+Subject: Re: [RFC] transcendent memory for Linux
+Date: Tue, 30 Jun 2009 20:41:01 -0700
+Message-ID: <aday6r9gjea.fsf@cisco.com>
+References: <5331ec14-c599-4317-bd5b-55911b8ee916@default>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <547eba1b0906300130r6b704e9ft408c63d2c1e6f4a@mail.gmail.com>
+In-Reply-To: <5331ec14-c599-4317-bd5b-55911b8ee916@default> (Dan Magenheimer's
+	message of "Mon, 29 Jun 2009 07:44:50 -0700 (PDT)")
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; l=413; t=1246419662; x=1247283662;
+	c=relaxed/simple; s=sjdkim1004;
+	h=Content-Type:From:Subject:Content-Transfer-Encoding:MIME-Version;
+	d=cisco.com; i=rdreier@cisco.com;
+	z=From:=20Roland=20Dreier=20<rdreier@cisco.com>
+	|Subject:=20Re=3A=20[RFC]=20transcendent=20memory=20for=20L
+	inux
+	|Sender:=20;
+	bh=Q9Dk/MpK4q5xNOlEm01dZQuWnmDIeLZkAa1oem7Gw1w=;
+	b=k69C2HQRhr4epK+IzVJ+v6rJB0gpdQHLYbLF+1yYIRMTx/9CIzS955tI0v
+	j1NpSMbQaQgbOyzUIGfxFiqGje5FUimjgx+SRGjobdUtDDJloQvyvPOi+7HN
+	Rz/q7p6UmE6PfCUxOY47yhfgW6Cb9LJrOhHzXkj4WCw4Cuc6Zx66U=;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Daniel Ng <daniel.ng1234@gmail.com>
-Cc: linux-embedded@vger.kernel.org, linux-usb@vger.kernel.org
+To: Dan Magenheimer <dan.magenheimer@oracle.com>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, xen-devel@lists.xensource.com, npiggin@suse.de, chris.mason@oracle.com, kurt.hackel@oracle.com, dave.mccracken@oracle.com, Avi Kivity <avi@redhat.com>, jeremy@goop.org, Rik van Riel <riel@redhat.com>, alan@lxorguk.ukuu.org.uk, Rusty Russell <rusty@rustcorp.com.au>, Martin Schwidefsky <schwidefsky@de.ibm.com>, akpm@osdl.org, Marcelo Tosatti <mtosatti@redhat.com>, Balbir Singh <balbir@linux.vnet.ibm.com>, tmem-devel@oss.oracle.com, sunil.mushran@oracle.com, linux-mm@kvack.org, Himanshu Raj <rhim@microsoft.com>, linux-embedded@vger.kernel.org
 
-On Tue, Jun 30, 2009 at 06:30:43PM +1000, Daniel Ng wrote:
-> Hi,
-> 
-> I'm trying to send a uevent from my USB Gadget Serial driver using:
-> 
-> kobject_uevent(&cdev->gadget->dev.kobj, KOBJ_ONLINE);
 
-Is your device one of the ones that "ONLINE" messages are expected to
-emit?  If not, it's not going to matter much, right?  :)
+ > One issue though: I would guess that copying pages of memory
+ > could be very slow in an inexpensive embedded processor.
 
-> However, the uevent gets filtered out with the error message:
-> 
-> "filter function caused the event to drop!"
-> 
-> -from kobject_uevent.c line 124
-> 
-> The filter function used is dev_uevent_filter() from core.c.
-> 
-> The dev_uevent_filter() filters out the uevent because the following test fails:
-> 
-> if (ktype == &device_ktype)
-> 
-> This is because my driver's (struct bus_type *) gadget.dev.bus is NULL.
-> 
-> So I tried the following in my driver's probe() function:
-> 
-> the_controller->gadget.dev.bus = &of_platform_bus_type;
-> 
-> But this results in a crash.
-> 
-> Here are my questions:
-> 
-> 1) I am trying to communicate to a Userspace prgoram that the Gadget
-> Serial driver has connected to a TTY device, so the Userspace program
-> can know when to start I/O with the TTY device.
-> To achieve this, I want to send a uevent from for example f_acm.c,
-> just after it calls gserial_connect() in acm_set_alt(). I'm hoping
-> that I can use libudev (via netlink sockets) to catch this uevent, and
-> hence send a notification to a socket that the Userspace program is
-> listening on. Does this all look like a sensible thing to do?
+And copying memory could very easily burn enough power by keeping the
+CPU busy that you lose the incremental gain of turning the memory off
+vs. just going to self refresh.  (And the copying latency would easily
+be as bad as the transition latency to/from self-refresh).
 
-Shouldn't the userspace just be monitoring the tty line settings (like
-CTS) to know when to start sending data?  I wouldn't recommend adding a
-new interface to a very old, and standardized, interface.
-
-> 2) Is there a 'proper' way to assign the bus type as above? Perhaps I
-> need to call some sort of init function instead, so that the crash can
-> be avoided.
-
-There is a way, but assigning it directly like you did above, is not the
-correct one.
-
-thanks,
-
-greg k-h
+ - R.
