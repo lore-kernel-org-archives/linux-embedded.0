@@ -1,28 +1,42 @@
-From: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Subject: Re: 2.6.27- Sending uevent from a driver
-Date: Thu, 2 Jul 2009 11:11:07 +0100
-Message-ID: <20090702111107.08332a4b@lxorguk.ukuu.org.uk>
-References: <547eba1b0906300130r6b704e9ft408c63d2c1e6f4a@mail.gmail.com>
-	<20090630154110.GD16038@kroah.com>
-	<547eba1b0907012139l6b406191p1fc1bdbe3ebc0737@mail.gmail.com>
+From: Aras Vaichas <arasv@magellan-technology.com>
+Subject: need help finding a WiFi + BT SDIO chipset/module for Linux
+Date: Fri, 3 Jul 2009 11:23:22 +1000
+Message-ID: <ed62800907021823t2518700cv3710d3aa46371369@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <547eba1b0907012139l6b406191p1fc1bdbe3ebc0737-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Daniel Ng <daniel.ng1234-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-embedded@vger.kernel.org
 
-> Or, maybe the userspace program can receive some sort of interrupt
-> from the TTY device when it is ready for I/O.
-> 
-> Perhaps there is another way to avoid continued polling?
+Hi,
 
-TIOCMIWAIT ioctl for modem signals, and just using poll/select() on the
-tty for I/O.
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+can someone point me in the right direction to choose an OEM WiFI +
+Bluetooth chipset/module suitable for an embedded Linux system? I'd
+prefer if it was connected via SDIO.
+
+My usual discovery process is to run "make config" -> Device Drivers
+->Network Device Support -> Wireless Lan to see which chipsets are
+supported. I then do keyword searches on Google to find which modules
+contain these chipsets.
+
+Or alternatively, I do a Google search for "wifi bluetooth SDIO
+module", try and find which chipset it contains, and then grep the
+latest kernel source to see if I get any hints of compatibility.
+
+This is all very hit and miss, as many of the WiFi module
+manufacturers provide little to no details about their products ...
+
+Also, some manufacturers state that they are Linux compatible like
+this: "Linux (Custom Driver Porting Services Available)" i.e. they
+want to sell you the driver for $XYZ ... no thanks.
+
+I know that there are sites which list compatible USB and PCI WiFi
+devices, but I've not seen anything that goes down to the OEM module
+level. Is there a webpage somewhere of OEM Linux compatible SDIO Wifi
+modules?
+
+regards,
+
+Aras Vaichas
