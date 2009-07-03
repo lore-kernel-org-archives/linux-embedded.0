@@ -1,31 +1,33 @@
-From: Aras Vaichas <arasv@magellan-technology.com>
-Subject: Re: need help finding a WiFi + BT SDIO chipset/module for Linux
-Date: Fri, 3 Jul 2009 13:17:42 +1000
-Message-ID: <ed62800907022017v4756c909n12f4105ee6e35f1d@mail.gmail.com>
-References: <ed62800907021823t2518700cv3710d3aa46371369@mail.gmail.com>
+From: Jamie Lokier <jamie-yetKDKU6eevNLxjTenLetw@public.gmane.org>
+Subject: Re: 2.6.27- Sending uevent from a driver
+Date: Fri, 3 Jul 2009 16:36:11 +0100
+Message-ID: <20090703153611.GA23678@shareable.org>
+References: <547eba1b0906300130r6b704e9ft408c63d2c1e6f4a@mail.gmail.com> <20090630154110.GD16038@kroah.com> <547eba1b0907012139l6b406191p1fc1bdbe3ebc0737@mail.gmail.com> <20090702111107.08332a4b@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <ed62800907021823t2518700cv3710d3aa46371369@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20090702111107.08332a4b-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Cc: Daniel Ng <daniel.ng1234-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-On Fri, Jul 3, 2009 at 11:23 AM, Aras
-Vaichas<arasv@magellan-technology.com> wrote:
-> Hi,
->
-> can someone point me in the right direction to choose an OEM WiFI +
-> Bluetooth chipset/module suitable for an embedded Linux system? I'd
-> prefer if it was connected via SDIO.
+Alan Cox wrote:
+> > Or, maybe the userspace program can receive some sort of interrupt
+> > from the TTY device when it is ready for I/O.
+> > 
+> > Perhaps there is another way to avoid continued polling?
+> 
+> TIOCMIWAIT ioctl for modem signals, and just using poll/select() on the
+> tty for I/O.
 
-Sorry to answer my own question.
+Ah yes, the undocumented ioctl...  I knew there was one, just couldn't
+find it in the man page just now.
 
-This article sums it up pretty well with what I've found so far.
-
-http://bec-systems.com/site/90/the-embedded-wifi-module-quest
-
-The two main contenders seem to be Marvell and Atheros for SDIO OEM modules.
-
-Aras
+-- Jamie
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
