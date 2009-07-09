@@ -1,39 +1,73 @@
-From: Jonathan Cameron <jic23@cam.ac.uk>
-Subject: Re: need help finding a WiFi + BT SDIO chipset/module for Linux
-Date: Fri, 03 Jul 2009 17:02:51 +0000
-Message-ID: <4A4E39BB.10300@cam.ac.uk>
-References: <ed62800907021823t2518700cv3710d3aa46371369@mail.gmail.com> <ed62800907022017v4756c909n12f4105ee6e35f1d@mail.gmail.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH 00/14] Pramfs: Persistent and protected ram filesystem
+Date: Fri, 10 Jul 2009 01:42:32 +0200
+Message-ID: <20090709234232.GB1817@ucw.cz>
+References: <4a4254e2.09c5660a.109d.46f8@mx.google.com> <4A425907.2060105@gmail.com> <4A42649D.6080509@gmail.com> <20090624175943.GB6618@elf.ucw.cz> <2ea1731b0906242330t5f379322sdff9880788e9b181@mail.gmail.com> <20090628085932.GA20169@elf.ucw.cz> <4A47A94E.4020808@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <ed62800907022017v4756c909n12f4105ee6e35f1d@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4A47A94E.4020808@gmail.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Aras Vaichas <arasv@magellan-technology.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: tim.bird@am.sony.com, jamie@shareable.org, Linux Embedded <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Daniel Walker <dwalker@soe.ucsc.edu>
 
-Aras Vaichas wrote:
-> On Fri, Jul 3, 2009 at 11:23 AM, Aras
-> Vaichas<arasv@magellan-technology.com> wrote:
->> Hi,
->>
->> can someone point me in the right direction to choose an OEM WiFI +
->> Bluetooth chipset/module suitable for an embedded Linux system? I'd
->> prefer if it was connected via SDIO.
+On Sun 2009-06-28 19:33:02, Marco Stornelli wrote:
+> Pavel Machek wrote:
+> >>>>> Ah now the write protection is a "needed feature", in your previous
+> >>>>> comment you talked about why not use ext2/3.......
+> >>>>>
+> >>>>> Marco
+> >>>>>
+> >>>> Just for your information I tried the same test with pc in a virtual machine with 32MB of RAM:
+> >>>>
+> >>>> Version 1.03e       ------Sequential Output------ --Sequential Input- --Random-
+> >>>>                     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+> >>>> Machine   Size:chnk K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+> >>>> hostname     15M:1k 14156  99 128779 100 92240 100 11669 100 166242  99 80058  82
+> >>>>                     ------Sequential Create------ --------Random Create--------
+> >>>>                     -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
+> >>>>               files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
+> >>>>                   4  2842  99 133506 104 45088 101  2787  99 79581 101 58212 102
+> >>>>
+> >>>> These data are the proof of the importance of the environment, workload and so on when we talk
+> >>>> about benchmark. Your consideration are really superficial.
+> >>> Unfortunately, your numbers are meaningless.
+> >> I don't think so.
+> >>
+> >>> (PCs should have cca 3GB/sec RAM transfer rates; and you demosstrated
+> >>> cca 166MB/sec read rate; disk is 80MB/sec, so that's too slow. If you
+> >>> want to prove your filesystem the filesystem is reasonably fast,
+> >>> compare it with ext2 on ramdisk.)
+> >>>
+> >> This is the point. I don't want compare it with ext2 from performance
+> >> point of view. This comparison makes no sense for me. I've done this
+> >> test to prove that if you change environment you can change in a
+> >> purposeful way the results.
+> > 
+> > Yes, IOW you demonstrated that the numbers are machine-dependend and
+> > really meaningless.
+> > 
+> > ext2 comparison would tell you how much pramfs sucks (or not).
 > 
-> Sorry to answer my own question.
+> Here the test with ext2 (same environment):
 > 
-> This article sums it up pretty well with what I've found so far.
+> Version 1.03e       ------Sequential Output------ --Sequential Input- --Random-
+>                     -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+> Machine   Size:chnk K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+> hostname     15M:1k 10262  83 40847  82 38574  82  9866  92 62252  98 25204  81
+>                     ------Sequential Create------ --------Random Create--------
+>                     -Create-- --Read--- -Delete-- -Create-- --Read--- -Delete--
+>               files  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP  /sec %CP
+>                   1 19859  98 44804  61 68830 100 13566  99 157129 100 30431  98
 > 
-> http://bec-systems.com/site/90/the-embedded-wifi-module-quest
-> 
-> The two main contenders seem to be Marvell and Atheros for SDIO OEM modules.
-That's about right. Unless things have changed recently, the support for
-the atheros 6000 series chips isn't good.  There are a couple of
-drivers out there, but I've never gotten anything to work with the board
-we have.  I know the openmoko guys were working on this.
 
-Marvell drivers are in kernel and work well so that's what we
-went with. 
+Ok, so pramfs is  significantly faster than ext2. Interesting, and good
+for pramfs.
+								Pavel 
 
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
