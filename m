@@ -1,52 +1,68 @@
-From: David McCullough <David_Mccullough@securecomputing.com>
-Subject: Re: syslog for embedded
-Date: Tue, 14 Jul 2009 20:48:52 +1000
-Message-ID: <20090714104852.GA15488@securecomputing.com>
-References: <4A5C576B.4040203@gmail.com> <e4c675870907140323x7e9846d3hb09a89fda239b984@mail.gmail.com>
+From: Pierre Ossman <pierre@ossman.eu>
+Subject: New MMC maintainer needed
+Date: Tue, 14 Jul 2009 15:36:01 +0200
+Message-ID: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
 Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-6573-1247578570-0001-2"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <e4c675870907140323x7e9846d3hb09a89fda239b984@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+To: LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Nicolas Pitre <nico@cam.org>, Nicolas Ferre <nicolas.ferre@rfo.atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.c>
+
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
+
+--=_freyr.ossman.eu-6573-1247578570-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
+
+I'm afraid the time has come for me to step down as maintainer for the
+MMC/SD/SDIO subsystem and for someone else to take over the rudder. It
+is no secret that I haven't been able to give the maintainer role the
+resources it required, and as a result it has gone from being a fun
+hobby to a burdensome chore. I was hoping it was a temporary slump, but
+this has been the norm for over a year now, so it's time for me to
+throw in the towel.
+
+I don't have any clear nominees for a replacement, but if you feel that
+you are in a position to take over the maintainer role then please
+raise your hand.
+
+I only have a few patches in my queue right now and I can push those
+off to Linus before I quit. There are however a lot of unhandled
+messages that need attention. I can provide a list once a successor has
+been named.
+
+I realise that you have put a lot of time and effort into the patches
+you send me and I am truly sorry that I haven't been able to handle
+them better. Hopefully me stepping down means that we get someone who
+can actually take care of everything in a timely manner.
+
+I haven't decided what to do with the sdhci maintainership yet. Right
+now I only know I need a break and freeing myself from the MMC
+maintainer role is the first step. Hopefully I can return as a
+developer in the future.
+
+Rgds
+--=20
+     -- Pierre Ossman
+
+  WARNING: This correspondence is being monitored by the
+  Swedish government. Make sure your server uses encryption
+  for SMTP traffic and consider using PGP for end-to-end
+  encryption.
+
+--=_freyr.ossman.eu-6573-1247578570-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
 Content-Transfer-Encoding: 7bit
-To: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
-Cc: zaphod001@gmail.com, linux-embedded@vger.kernel.org
+Content-Disposition: attachment; filename=signature.asc
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.11 (GNU/Linux)
 
-Jivin Roberto A. Foglietta lays it down ...
-> 2009/7/14 Zaphod <zaphod001@gmail.com>:
-> > Hi All,
-> >
-> > i am trying to find good syslog suitable for embedded.
-> > Means,
-> > 1. no use of dynamic allocations
-> > 2. small footprint
-> > 3. redirection to multiple destination (number of IPs, file, console)
-> >
-> > Thanks everyone for help.
-> 
->  AFAIK busbox syslogd miss the 3rd requirement. If any other existing
-> syslog still miss at least one of the requirements  then upgrading
-> busybox with the network support would be a viable solution.
+iEYEARECAAYFAkpcicoACgkQ7b8eESbyJLij2QCfQKe9XJvFsd/oUoF5/qIVFAoS
+hugAoJOIL4kmFHavWxEKpnt8C5gAuHFv
+=yhTF
+-----END PGP SIGNATURE-----
 
-The version of busybox that is included in the uClinux-dist:
-
-	http://www.uclinux.org/pub/uClinux/dist/
-
-has extensions to do most if not all of 3.  I can't recall how much of
-that functionality has made it back upstream.
-
-You can have a peek at a much older version of uCLinux-dist at:
-
-	http://cvs.uclinux.org/cgi-bin/cvsweb.cgi/uClinux-dist/user/busybox/
-
-might save the big download,
-
-Cheers,
-Davidm
-
--- 
-David McCullough,  david_mccullough@securecomputing.com,  Ph:+61 734352815
-McAfee - SnapGear  http://www.snapgear.com                http://www.uCdot.org
+--=_freyr.ossman.eu-6573-1247578570-0001-2--
