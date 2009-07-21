@@ -1,35 +1,43 @@
-From: Zaphod <zaphod001@gmail.com>
-Subject: syslog stops to deliver to console
-Date: Tue, 21 Jul 2009 11:37:06 +0300
-Message-ID: <4A657E32.2070703@gmail.com>
-Reply-To: zaphod001@gmail.com
+From: Joe Perches <joe@perches.com>
+Subject: [RFC] move __devinit or __init printk constant format strings to
+ __devinitconst or __initdata?
+Date: Tue, 21 Jul 2009 14:20:53 -0700
+Message-ID: <1248211253.31365.337.camel@Joe-Laptop.home>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from:reply-to
-         :user-agent:mime-version:to:subject:content-type
-         :content-transfer-encoding;
-        bh=dGlaqZ6PjIf9RmSw8h5vRJBAhROvA3lG4XptV7ZyrhY=;
-        b=hxdiXOIH0nh7ttZphq5CXqE9x+2hM29MY6KXIAmIgZf8Fl6hvtUM9/CjPPgcwZ8/Yd
-         y9U+YDSAELiV5Yfnf+rZNhbS8PkxfxJJon1Y6vuXB37whnWBE4PSHn9Z2Ix6XVCiPYow
-         GZZ/wgpshsE0eUnCkKoDrtB0HKjVfuYV7TRNE=
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756011AbZGUVU5@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 To: linux-embedded@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, Matt Mackall <mpm@selenic.com>, Tim Bird <tim.bird@am.sony.com>
 
-Hi
+Is moving constant string formats to __devinitconst or __initdata
+useful for embedded environments?
 
-I have ppc arch and sysklogd-1.5 working on it.
-The syslogd has config file which orders to redirect output to console 
-(/dev/console) and IP of other Linux machine.
+As in:
 
-I have application with 3 threads doing syslog every 50msec. After less that 
-minute the console stops to show messages, but the other Linux machine still 
-gets them.
+#define printk_section(section, fmt, ...)				\
+({ static const section char __fmt[] = fmt; printk(__fmt, ##__VA_ARGS__); })
 
-Is it known problem?
+#define pr_err_section(section, fmt, ...) \
+	printk_section(section, KERN_ERR pr_fmt(fmt), ##__VA_ARGS__)
 
-Thanks for help.
+with a use of:
+
+static int __devinit foo_probe(struct platform_device *pdev)
+{
+	if (bar())
+		pr_err_section(__devinitconst,
+			       "A long error message\n");
+}
+
+or
+
+static int __init foo_init(struct platform_device *pdev)
+{
+	if (bar())
+		pr_err_section(__initdata,
+			       "A long error message\n");
+}
+
