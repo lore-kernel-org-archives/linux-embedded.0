@@ -1,47 +1,47 @@
-From: Joe Perches <joe@perches.com>
+From: David Daney <ddaney@caviumnetworks.com>
 Subject: Re: [RFC] move __devinit or __init printk constant format strings
  to __devinitconst or __initdata?
-Date: Tue, 21 Jul 2009 16:05:02 -0700
-Message-ID: <1248217502.31365.381.camel@Joe-Laptop.home>
-References: <1248211253.31365.337.camel@Joe-Laptop.home>
-	 <1248212925.10466.143.camel@calx>
-	 <1248213403.31365.343.camel@Joe-Laptop.home>
-	 <1248217044.10466.202.camel@calx>
+Date: Tue, 21 Jul 2009 16:50:26 -0700
+Message-ID: <4A665442.1010006@caviumnetworks.com>
+References: <1248211253.31365.337.camel@Joe-Laptop.home>	 <1248212925.10466.143.camel@calx>	 <1248213403.31365.343.camel@Joe-Laptop.home>	 <1248217044.10466.202.camel@calx> <1248217502.31365.381.camel@Joe-Laptop.home>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1248217044.10466.202.camel@calx>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1751322AbZGUXvV@vger.kernel.org>
+In-Reply-To: <1248217502.31365.381.camel@Joe-Laptop.home>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Matt Mackall <mpm@selenic.com>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Joe Perches <joe@perches.com>
+Cc: Matt Mackall <mpm@selenic.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>
 
-On Tue, 2009-07-21 at 17:57 -0500, Matt Mackall wrote:
-> On Tue, 2009-07-21 at 14:56 -0700, Joe Perches wrote:
-> > On Tue, 2009-07-21 at 16:48 -0500, Matt Mackall wrote:
-> > > On Tue, 2009-07-21 at 14:20 -0700, Joe Perches wrote:
-> > > > Is moving constant string formats to __devinitconst or __initdata
-> > > > useful for embedded environments?
-> > > Interesting notion, but not worth the trouble in my mind. I think it's
-> > > more worthwhile to look into automatic such stuff in the build somehow.
-> > I think it's not possible today to get gcc to mark
-> > the format strings without source modification.
-> Yep, that's why I specifically said 'build'. It can probably be done in
-> a post-processing step with some ELF wizardry. 
-
-Know any elven wizards?
-
-> > It's pretty easy to script a source conversion.
+Joe Perches wrote:
+> On Tue, 2009-07-21 at 17:57 -0500, Matt Mackall wrote:
+>> On Tue, 2009-07-21 at 14:56 -0700, Joe Perches wrote:
+>>> On Tue, 2009-07-21 at 16:48 -0500, Matt Mackall wrote:
+>>>> On Tue, 2009-07-21 at 14:20 -0700, Joe Perches wrote:
+>>>>> Is moving constant string formats to __devinitconst or __initdata
+>>>>> useful for embedded environments?
+>>>> Interesting notion, but not worth the trouble in my mind. I think it's
+>>>> more worthwhile to look into automatic such stuff in the build somehow.
+>>> I think it's not possible today to get gcc to mark
+>>> the format strings without source modification.
+>> Yep, that's why I specifically said 'build'. It can probably be done in
+>> a post-processing step with some ELF wizardry. 
 > 
-> And that script has to be run how often?
+> Know any elven wizards?
+> 
 
-Once.
+It would be tricky, the string data from the entire compilation unit is 
+intermingled.  You would have to separate out only those strings 
+referenced from __init sections into their own section and fix up all 
+symbols and relocations that were affected.
 
->  I don't think people will find
-> the churn (and general extra ugliness) acceptable. For a typical
-> stripped-down embedded kernel, the amount of gain here will be fairly
-> minimal. I'd be surprised if you got as much as 1K out of it.
+Probably easier would be to use the plug-in feature that will be part of 
+GCC-4.5 (or will that be called GCC-5.0??), and create a special Linux 
+kernel GCC plug-in that just emits the __init literal strings to the 
+proper section to begin with.  This wouldn't be unprecedented, the 
+Mozilla people already use their own extensions to GCC, and will 
+probably migrate to GCC plug-ins.  We don't want the kernel to get left 
+behind in the GCC plug-in race.
 
-Got a typical config that uses printks I could try?
-
+David Daney
