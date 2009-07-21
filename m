@@ -1,41 +1,35 @@
-From: Alex Dubov <oakad@yahoo.com>
-Subject: Re: New MMC maintainer needed
-Date: Tue, 14 Jul 2009 21:59:04 -0700 (PDT)
-Message-ID: <812689.20578.qm@web37604.mail.mud.yahoo.com>
+From: Zaphod <zaphod001@gmail.com>
+Subject: syslog stops to deliver to console
+Date: Tue, 21 Jul 2009 11:37:06 +0300
+Message-ID: <4A657E32.2070703@gmail.com>
+Reply-To: zaphod001@gmail.com
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s1024; t=1247633944; bh=g7r+jX/mdVK+sLkFctpBYziQr7l5fuyHX3Snn6j5PJ0=; h=Message-ID:X-YMail-OSG:Received:X-Mailer:Date:From:Subject:To:MIME-Version:Content-Type; b=PXLGsuBwfTD9EOq285COfTOcAGWA8WljQ2vMHfvlSYzxa4U+LhbKJL39yLJd7LVfweHn+06Jl57vjaCW2M/IZmuqisBu0e+9fTstO0sCrVZ+4PSEDQ00gJ19EGUti60hDy4rewZJtrrWn0p3qmE9NOClIY2Soseunz9acQ6i3P0=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from:reply-to
+         :user-agent:mime-version:to:subject:content-type
+         :content-transfer-encoding;
+        bh=dGlaqZ6PjIf9RmSw8h5vRJBAhROvA3lG4XptV7ZyrhY=;
+        b=hxdiXOIH0nh7ttZphq5CXqE9x+2hM29MY6KXIAmIgZf8Fl6hvtUM9/CjPPgcwZ8/Yd
+         y9U+YDSAELiV5Yfnf+rZNhbS8PkxfxJJon1Y6vuXB37whnWBE4PSHn9Z2Ix6XVCiPYow
+         GZZ/wgpshsE0eUnCkKoDrtB0HKjVfuYV7TRNE=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Nicolas Pitre <nico@cam.org>, Nicolas Ferre <nicolas.ferre@rfo.atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.c>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded@vger.kernel.org
 
+Hi
 
-> I'm afraid the time has come for me
-> to step down as maintainer for the
-> MMC/SD/SDIO subsystem and for someone else to take over the
-> rudder. It
-> is no secret that I haven't been able to give the
-> maintainer role the
-> resources it required, and as a result it has gone from
-> being a fun
-> hobby to a burdensome chore. I was hoping it was a
-> temporary slump, but
-> this has been the norm for over a year now, so it's time
-> for me to
-> throw in the towel.
+I have ppc arch and sysklogd-1.5 working on it.
+The syslogd has config file which orders to redirect output to console 
+(/dev/console) and IP of other Linux machine.
 
-What an unfortunate thing.
+I have application with 3 threads doing syslog every 50msec. After less that 
+minute the console stops to show messages, but the other Linux machine still 
+gets them.
 
-Franky speaking, I couldn't manage any time to work on Linux
-in the last year myself. I had such a great plans for Memstick
-and such, yet none advanced.
+Is it known problem?
 
-At this rate, the future of the flash cards on Linux will
-become highly uncertain.
-:-(
-
-
-
-      
+Thanks for help.
