@@ -1,85 +1,34 @@
-From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Subject: [PATCH 5/5] Add support for LZO-compressed kernels on x86
-Date: Wed, 22 Jul 2009 16:01:19 +0200
-Message-ID: <1248271279-9920-5-git-send-email-albin.tonnerre@free-electrons.com>
-References: <1248271279-9920-1-git-send-email-albin.tonnerre@free-electrons.com>
- <1248271279-9920-2-git-send-email-albin.tonnerre@free-electrons.com>
- <1248271279-9920-3-git-send-email-albin.tonnerre@free-electrons.com>
- <1248271279-9920-4-git-send-email-albin.tonnerre@free-electrons.com>
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755737AbZGVOC1@vger.kernel.org>
-In-Reply-To: <1248271279-9920-4-git-send-email-albin.tonnerre@free-electrons.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: Re: [PATCH 3/5] Add support for LZO-compressed kernels
+Date: Wed, 22 Jul 2009 09:08:31 -0700
+Message-ID: <4A67397F.8080705@zytor.com>
+References: <0022152d7fe9b6dbcf046f4d04a6@google.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753557AbZGVQcb@vger.kernel.org>
+In-Reply-To: <0022152d7fe9b6dbcf046f4d04a6@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux@arm.linux.org.uk, hpa@zytor.com
-Cc: alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: kevin.granade@gmail.com
+Cc: Albin Tonnerre <albin.tonnerre@free-electrons.com>, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-This is the third and last part of the patch, which contains the
-necessary changes to the x86 Kconfig and boot/compressed to allow the
-use of this new compression method
+kevin.granade@gmail.com wrote:
+>  >
+>  > So for a compression ratio that is still relatively close to gzip, it's
+>  > much faster to extract, at least in that case.
+> 
+> Is that "time to run the extraction algorithm", or "time to read in 
+> image from media and extract"? I think the time to read from the media 
+> would tend to dominate the decompression time.
+> Either way, could you provide the other time for each algorithm in order 
+> to give a sense of how this might scale to other CPU speeds/media read 
+> speeds?
+> 
 
-Signed-off-by: Albin Tonnerre <albin.tonnerre@free-electrons.com>
----
- arch/x86/Kconfig                  |    1 +
- arch/x86/boot/compressed/Makefile |    5 ++++-
- arch/x86/boot/compressed/misc.c   |    4 ++++
- 3 files changed, 9 insertions(+), 1 deletions(-)
+If you have very slow media, you probably want to use LZMA.  If you have 
+a very slow CPU and comparatively fast media, LZO might be a good 
+option... I have heard people asking for *uncompressed* kernels for this 
+reason, but LZO runs at a significant fraction of memcpy() speed.
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 738bdc6..49974d3 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -48,6 +48,7 @@ config X86
- 	select HAVE_KERNEL_GZIP
- 	select HAVE_KERNEL_BZIP2
- 	select HAVE_KERNEL_LZMA
-+	select HAVE_KERNEL_LZO
- 	select HAVE_ARCH_KMEMCHECK
- 
- config OUTPUT_FORMAT
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index e2ff504..95bfe0e 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -4,7 +4,7 @@
- # create a compressed vmlinux image from the original vmlinux
- #
- 
--targets := vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma head_$(BITS).o misc.o piggy.o
-+targets := vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma vmlinux.bin.lzo head_$(BITS).o misc.o piggy.o
- 
- KBUILD_CFLAGS := -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2
- KBUILD_CFLAGS += -fno-strict-aliasing -fPIC
-@@ -48,10 +48,13 @@ $(obj)/vmlinux.bin.bz2: $(vmlinux.bin.all-y) FORCE
- 	$(call if_changed,bzip2)
- $(obj)/vmlinux.bin.lzma: $(vmlinux.bin.all-y) FORCE
- 	$(call if_changed,lzma)
-+$(obj)/vmlinux.bin.lzo: $(vmlinux.bin.all-y) FORCE
-+	$(call if_changed,lzo)
- 
- suffix-$(CONFIG_KERNEL_GZIP)	:= gz
- suffix-$(CONFIG_KERNEL_BZIP2)	:= bz2
- suffix-$(CONFIG_KERNEL_LZMA)	:= lzma
-+suffix-$(CONFIG_KERNEL_LZO) 	:= lzo
- 
- quiet_cmd_mkpiggy = MKPIGGY $@
-       cmd_mkpiggy = $(obj)/mkpiggy $< > $@ || ( rm -f $@ ; false )
-diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
-index 842b2a3..3b22fe8 100644
---- a/arch/x86/boot/compressed/misc.c
-+++ b/arch/x86/boot/compressed/misc.c
-@@ -162,6 +162,10 @@ static int lines, cols;
- #include "../../../../lib/decompress_unlzma.c"
- #endif
- 
-+#ifdef CONFIG_KERNEL_LZO
-+#include "../../../../lib/decompress_unlzo.c"
-+#endif
-+
- static void scroll(void)
- {
- 	int i;
--- 
-1.6.0.4
+	-hpa
