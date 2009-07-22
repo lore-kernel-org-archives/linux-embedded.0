@@ -1,100 +1,74 @@
-From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Subject: Re: [PATCH 3/5] Add support for LZO-compressed kernels
-Date: Wed, 22 Jul 2009 18:50:16 +0200
-Message-ID: <20090722165016.GC4625@pc-ras4041.res.insa>
-References: <1248271279-9920-3-git-send-email-albin.tonnerre@free-electrons.com> <0022152d7fe9b6dbcf046f4d04a6@google.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: New MMC maintainer needed
+Date: Wed, 22 Jul 2009 15:17:44 -0700
+Message-ID: <20090722151744.fffd7bf5.akpm@linux-foundation.org>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="TakKZr9L6Hm6aLOc"
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <0022152d7fe9b6dbcf046f4d04a6@google.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754682AbZGVWT7@vger.kernel.org>
+In-Reply-To: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: kevin.granade@gmail.com
-Cc: linux@arm.linux.org.uk, hpa@zytor.com, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Pierre Ossman <pierre@ossman.eu>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
+
+On Tue, 14 Jul 2009 15:36:01 +0200
+Pierre Ossman <pierre@ossman.eu> wrote:
+
+> I'm afraid the time has come for me to step down as maintainer for the
+> MMC/SD/SDIO subsystem and for someone else to take over the rudder. It
+> is no secret that I haven't been able to give the maintainer role the
+> resources it required, and as a result it has gone from being a fun
+> hobby to a burdensome chore. I was hoping it was a temporary slump, but
+> this has been the norm for over a year now, so it's time for me to
+> throw in the towel.
+> 
+> I don't have any clear nominees for a replacement, but if you feel that
+> you are in a position to take over the maintainer role then please
+> raise your hand.
+> 
+> I only have a few patches in my queue right now and I can push those
+> off to Linus before I quit. There are however a lot of unhandled
+> messages that need attention. I can provide a list once a successor has
+> been named.
+> 
+> I realise that you have put a lot of time and effort into the patches
+> you send me and I am truly sorry that I haven't been able to handle
+> them better. Hopefully me stepping down means that we get someone who
+> can actually take care of everything in a timely manner.
+> 
+> I haven't decided what to do with the sdhci maintainership yet. Right
+> now I only know I need a break and freeing myself from the MMC
+> maintainer role is the first step. Hopefully I can return as a
+> developer in the future.
+> 
+
+Thanks, Pierre.
+
+Until and unless someone else steps up I can act as maintainer of last
+resort for MMC.  As I'm presently doing for fbdev, hwmon, rtc, spi,
+gpio, i2o and about 1000 other identifiable subsystems.
+
+Fortunately, MMC doesn't appear to have its own mailing list so I'll
+actually get to see the patches.  I do monitor a couple of
+subsystem-specific lists (fbdev, hwmon) but the delays can be awful - a
+month or two.
 
 
---TakKZr9L6Hm6aLOc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+When it comes to subsystems about which I have little knowledge I tend
+to work as follows:
 
-On Wed, Jul 22, 2009 at 03:28:09PM +0000, kevin.granade@gmail.com wrote :
-> On Jul 22, 2009 9:01am, Albin Tonnerre <albin.tonnerre@free-electrons.com>
-> wrote:
-> > This is the first part of the lzo patch
-> >
-> > The lzo compressor is worse than gzip at compression, but faster at
-> >
-> > extraction. Here are some figures for an ARM board I'm working on:
-> >
-> >
-> >
-> > Uncompressed size: 3.24Mo
-> >
-> > gzip 1.61Mo 0.72s
-> >
-> > lzo 1.75Mo 0.48s
-> >
-> >
-> >
-> > So for a compression ratio that is still relatively close to gzip, it's
-> >
-> > much faster to extract, at least in that case.
->=20
-> Is that "time to run the extraction algorithm", or "time to read in image=
- from
-> media and extract"? I think the time to read from the media would tend to
-> dominate the decompression time.
-> Either way, could you provide the other time for each algorithm in order =
-to
-> give a sense of how this might scale to other CPU speeds/media read speed=
-s?
->=20
+- scan the patch to see if anything stands out to my inexperienced eye
 
-That's the time to run the extraction algorithm. As H. Peter Anvin pointed =
-out,
-you can have a fast media and a somewhat slow CPU, for which lzo makes sens=
-e.
-As for other data, I don't have all the figures handy, but:
+- if possible, comment on it to make a bit of noise and to let the
+  submitter and others know that a) someone has looked at it and b)
+  there's a chance that it'll be merged.
 
- - LZMA: compressed size 1.19Mo, decompression time: several *seconds* (tha=
-t's
-   on a 180MHz ARM9 board, using a patch to implement LZMA compression simi=
-lar
-   to this one)
- - Bzip2 eats a lot of RAM, and head.S only gives 64Ko of malloc() space on
-   ARM, so I didn't try.
+- try to identify some people who might have an interest in the patch
+  and/or who might have related experience which would help them review
+  this one effectively.
 
-Regards,
---=20
-Albin Tonnerre, Free Electrons
-Kernel, drivers and embedded Linux development,
-consulting, training and support.
-http://free-electrons.com
-
---TakKZr9L6Hm6aLOc
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iQIcBAEBCAAGBQJKZ0NIAAoJEBEG8gBbtuSl0x0P/32kBqozhjvMJVjopQhg879k
-CqVLP9CXmPcfFGc3ytyAnbP3glR+DiAcpc4sWvvCowZZ+k13znU5DpDMgl4+MdVl
-XHr3ebrQJon+LJ6toRmcPuy2U/qTqBV2vrAcy7PNViUMVG2QAKPS9LWYsQjdbHW5
-Z6bXMOdLCwVGJgENxapgKDwG+yGlDirROGoGHinIdHZmLnNdc+vMd+Grme58jSwC
-/D4l4vTU0kEOMon5t2sZOGguyPr7VGTzjJjHZ7vP2B+ltPobwmT1H4C/uut2KPkh
-cYxPevUjTkrvXiOqX8NBzB+FBxw8j/S99PEGH9sSTlMEaoPShz+QvR3AUFOcyAsQ
-IGoEmCnmm8tYwdhRPUKNs9APVdkQGilAgkVt6Sv/KgJ6ovs0cGMy0KO33TkK/+nS
-CgonnEVizauYxmg4mNCOdtxgOSIZvhw7vWQoGdzeC1REg+Lcpa8cadcRrYkZ5BO+
-yYXAHCRIX2C4mTzPq+bow7bMaoGnlAt7YFh8WkLi4Uuv1od3qKowqytSXp+07qsx
-AGseHIosb33EhCJb09Fbf7TCQDwnXKzrAMpTH/YvYfSoyX/0kdRNSmwRB1RhHSx1
-edLCu6mtnbO4A2rTLLEel7OdU4UqJUq3Tbeu4tYLoZNSNgxLXyWlHocNX5NLeOpK
-vT+GmLRBLkOipprBfFDW
-=jHrT
------END PGP SIGNATURE-----
-
---TakKZr9L6Hm6aLOc--
+So if someone finds themselves cc'ed on an MMC email from myself,
+please do take a bit of time to pass an eye across it, and let us know
+that you have done so - it really helps.
