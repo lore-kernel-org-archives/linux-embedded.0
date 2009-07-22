@@ -1,70 +1,77 @@
-From: Matt Mackall <mpm@selenic.com>
-Subject: Re: [RFC] move __devinit or __init printk constant format strings
- to __devinitconst or __initdata?
-Date: Wed, 22 Jul 2009 00:17:30 -0500
-Message-ID: <1248239850.10466.277.camel@calx>
-References: <1248211253.31365.337.camel@Joe-Laptop.home>
-	 <1248212925.10466.143.camel@calx>
-	 <1248213403.31365.343.camel@Joe-Laptop.home>
-	 <1248217044.10466.202.camel@calx>
-	 <1248217502.31365.381.camel@Joe-Laptop.home>
-	 <4A665442.1010006@caviumnetworks.com>  <1248226085.10466.251.camel@calx>
-	 <1248238202.31365.576.camel@Joe-Laptop.home>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1248238202.31365.576.camel@Joe-Laptop.home>
-Sender: linux-embedded-owner@vger.kernel.org
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Subject: [PATCH 1/5] lib/decompress_*: only include <linux/slab.h> if STATIC is not defined
+Date: Wed, 22 Jul 2009 16:01:15 +0200
+Message-ID: <1248271279-9920-1-git-send-email-albin.tonnerre@free-electrons.com>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755623AbZGVOBY@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-To: Joe Perches <joe@perches.com>
-Cc: David Daney <ddaney@caviumnetworks.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>
+Content-Transfer-Encoding: 7bit
+To: linux@arm.linux.org.uk, hpa@zytor.com
+Cc: alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Albin Tonnerre <albin.tonnerre@free-electrons.com>
 
-On Tue, 2009-07-21 at 21:50 -0700, Joe Perches wrote:
-> On Tue, 2009-07-21 at 20:28 -0500, Matt Mackall wrote:
-> > On Tue, 2009-07-21 at 16:50 -0700, David Daney wrote:
-> > > It would be tricky, the string data from the entire compilation unit is 
-> > > intermingled.  You would have to separate out only those strings 
-> > > referenced from __init sections into their own section and fix up all 
-> > > symbols and relocations that were affected.
-> > Exactly. Annoying but not impossible.
-> 
-> But faster and likely easier to do once in source.
+These includes were added by 079effb6933f34b9b1b67b08bd4fd7fb672d16ef to
+fix the build when using kmemtrace. However this is not necessary when
+used to create a compressed kernel, and actually creates issues (brings
+a lot of things unavailable in the decompression environment), so don't
+include it if STATIC is defined.
 
-How long have you been hanging out here, Joe? You really thing it's
-going to be EASY to push this change to literally thousands of drivers?
-Your idea may work but it isn't pretty and also isn't an obvious big win
-and is therefore going to hit a lot of friction from lots of different
-people. It's already getting friction from me and I actually care about
-this sort of thing.
+Signed-off-by: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+---
+ lib/decompress_bunzip2.c |    2 +-
+ lib/decompress_inflate.c |    2 +-
+ lib/decompress_unlzma.c  |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
-That effort would be better spent working on something transparent,
-automatic, and painless. Something people won't put up a fight about.
-
-> > > Probably easier would be to use the plug-in feature that will be part of 
-> > > GCC-4.5 (or will that be called GCC-5.0??), and create a special Linux 
-> > > kernel GCC plug-in that just emits the __init literal strings to the 
-> > > proper section to begin with.
-> 
-> Which is what the proposed marking would
-> more or less do today.
-> 
-> > > We don't want the kernel to get left 
-> > > behind in the GCC plug-in race.
-> 
-> Any guess when gcc 4.5/5.0 might become available?
-> It's in stage 1 now.  Mid 2010 or so?
-> 
-> 4.4.0 was April 21, 2009
-> 4.3.0 was March 5, 2008
-> 4.2.0 was May 13, 2007
-> 
-> Could you please send me what you think is a
-> reasonable .config for an embedded box.
-
-Lots of devices have only MTD, JFFS, ethernet, and one other driver like
-wifi.
-
+diff --git a/lib/decompress_bunzip2.c b/lib/decompress_bunzip2.c
+index 708e2a8..14b0c7d 100644
+--- a/lib/decompress_bunzip2.c
++++ b/lib/decompress_bunzip2.c
+@@ -47,10 +47,10 @@
+ 
+ #ifndef STATIC
+ #include <linux/decompress/bunzip2.h>
++#include <linux/slab.h>
+ #endif /* !STATIC */
+ 
+ #include <linux/decompress/mm.h>
+-#include <linux/slab.h>
+ 
+ #ifndef INT_MAX
+ #define INT_MAX 0x7fffffff
+diff --git a/lib/decompress_inflate.c b/lib/decompress_inflate.c
+index e36b296..fc30d50 100644
+--- a/lib/decompress_inflate.c
++++ b/lib/decompress_inflate.c
+@@ -19,11 +19,11 @@
+ #include "zlib_inflate/inflate.h"
+ 
+ #include "zlib_inflate/infutil.h"
++#include <linux/slab.h>
+ 
+ #endif /* STATIC */
+ 
+ #include <linux/decompress/mm.h>
+-#include <linux/slab.h>
+ 
+ #define INBUF_LEN (16*1024)
+ 
+diff --git a/lib/decompress_unlzma.c b/lib/decompress_unlzma.c
+index 32123a1..f078c88 100644
+--- a/lib/decompress_unlzma.c
++++ b/lib/decompress_unlzma.c
+@@ -31,10 +31,10 @@
+ 
+ #ifndef STATIC
+ #include <linux/decompress/unlzma.h>
++#include <linux/slab.h>
+ #endif /* STATIC */
+ 
+ #include <linux/decompress/mm.h>
+-#include <linux/slab.h>
+ 
+ #define	MIN(a, b) (((a) < (b)) ? (a) : (b))
+ 
 -- 
-http://selenic.com : development and support for Mercurial and Linux
-
+1.6.0.4
