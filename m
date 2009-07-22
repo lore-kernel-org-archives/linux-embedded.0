@@ -1,60 +1,53 @@
-From: Matt Mackall <mpm@selenic.com>
+From: Joe Perches <joe@perches.com>
 Subject: Re: [RFC] move __devinit or __init printk constant format strings
  to __devinitconst or __initdata?
-Date: Tue, 21 Jul 2009 20:28:05 -0500
-Message-ID: <1248226085.10466.251.camel@calx>
+Date: Tue, 21 Jul 2009 21:50:02 -0700
+Message-ID: <1248238202.31365.576.camel@Joe-Laptop.home>
 References: <1248211253.31365.337.camel@Joe-Laptop.home>
 	 <1248212925.10466.143.camel@calx>
 	 <1248213403.31365.343.camel@Joe-Laptop.home>
 	 <1248217044.10466.202.camel@calx>
 	 <1248217502.31365.381.camel@Joe-Laptop.home>
-	 <4A665442.1010006@caviumnetworks.com>
+	 <4A665442.1010006@caviumnetworks.com>  <1248226085.10466.251.camel@calx>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754622AbZGVB3y@vger.kernel.org>
-In-Reply-To: <4A665442.1010006@caviumnetworks.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <1248226085.10466.251.camel@calx>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Daney <ddaney@caviumnetworks.com>
-Cc: Joe Perches <joe@perches.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>
+To: Matt Mackall <mpm@selenic.com>
+Cc: David Daney <ddaney@caviumnetworks.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, Tim Bird <tim.bird@am.sony.com>
 
-On Tue, 2009-07-21 at 16:50 -0700, David Daney wrote:
-> Joe Perches wrote:
-> > On Tue, 2009-07-21 at 17:57 -0500, Matt Mackall wrote:
-> >> On Tue, 2009-07-21 at 14:56 -0700, Joe Perches wrote:
-> >>> On Tue, 2009-07-21 at 16:48 -0500, Matt Mackall wrote:
-> >>>> On Tue, 2009-07-21 at 14:20 -0700, Joe Perches wrote:
-> >>>>> Is moving constant string formats to __devinitconst or __initdata
-> >>>>> useful for embedded environments?
-> >>>> Interesting notion, but not worth the trouble in my mind. I think it's
-> >>>> more worthwhile to look into automatic such stuff in the build somehow.
-> >>> I think it's not possible today to get gcc to mark
-> >>> the format strings without source modification.
-> >> Yep, that's why I specifically said 'build'. It can probably be done in
-> >> a post-processing step with some ELF wizardry. 
-> > 
-> > Know any elven wizards?
-> > 
-> 
-> It would be tricky, the string data from the entire compilation unit is 
-> intermingled.  You would have to separate out only those strings 
-> referenced from __init sections into their own section and fix up all 
-> symbols and relocations that were affected.
+On Tue, 2009-07-21 at 20:28 -0500, Matt Mackall wrote:
+> On Tue, 2009-07-21 at 16:50 -0700, David Daney wrote:
+> > It would be tricky, the string data from the entire compilation unit is 
+> > intermingled.  You would have to separate out only those strings 
+> > referenced from __init sections into their own section and fix up all 
+> > symbols and relocations that were affected.
+> Exactly. Annoying but not impossible.
 
-Exactly. Annoying but not impossible.
+But faster and likely easier to do once in source.
 
-> Probably easier would be to use the plug-in feature that will be part of 
-> GCC-4.5 (or will that be called GCC-5.0??), and create a special Linux 
-> kernel GCC plug-in that just emits the __init literal strings to the 
-> proper section to begin with.  This wouldn't be unprecedented, the 
-> Mozilla people already use their own extensions to GCC, and will 
-> probably migrate to GCC plug-ins.  We don't want the kernel to get left 
-> behind in the GCC plug-in race.
+> > Probably easier would be to use the plug-in feature that will be part of 
+> > GCC-4.5 (or will that be called GCC-5.0??), and create a special Linux 
+> > kernel GCC plug-in that just emits the __init literal strings to the 
+> > proper section to begin with.
 
-There are no doubt a number of things we could be doing with such
-extensions.
+Which is what the proposed marking would
+more or less do today.
 
--- 
-http://selenic.com : development and support for Mercurial and Linux
+> > We don't want the kernel to get left 
+> > behind in the GCC plug-in race.
 
+Any guess when gcc 4.5/5.0 might become available?
+It's in stage 1 now.  Mid 2010 or so?
+
+4.4.0 was April 21, 2009
+4.3.0 was March 5, 2008
+4.2.0 was May 13, 2007
+
+Could you please send me what you think is a
+reasonable .config for an embedded box.
+
+cheers, Joe
