@@ -1,34 +1,100 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
 Subject: Re: [PATCH 3/5] Add support for LZO-compressed kernels
-Date: Wed, 22 Jul 2009 09:08:31 -0700
-Message-ID: <4A67397F.8080705@zytor.com>
-References: <0022152d7fe9b6dbcf046f4d04a6@google.com>
+Date: Wed, 22 Jul 2009 18:50:16 +0200
+Message-ID: <20090722165016.GC4625@pc-ras4041.res.insa>
+References: <1248271279-9920-3-git-send-email-albin.tonnerre@free-electrons.com> <0022152d7fe9b6dbcf046f4d04a6@google.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753557AbZGVQcb@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="TakKZr9L6Hm6aLOc"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <0022152d7fe9b6dbcf046f4d04a6@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: kevin.granade@gmail.com
-Cc: Albin Tonnerre <albin.tonnerre@free-electrons.com>, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: linux@arm.linux.org.uk, hpa@zytor.com, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-kevin.granade@gmail.com wrote:
->  >
->  > So for a compression ratio that is still relatively close to gzip, it's
->  > much faster to extract, at least in that case.
-> 
-> Is that "time to run the extraction algorithm", or "time to read in 
-> image from media and extract"? I think the time to read from the media 
-> would tend to dominate the decompression time.
-> Either way, could you provide the other time for each algorithm in order 
-> to give a sense of how this might scale to other CPU speeds/media read 
-> speeds?
-> 
 
-If you have very slow media, you probably want to use LZMA.  If you have 
-a very slow CPU and comparatively fast media, LZO might be a good 
-option... I have heard people asking for *uncompressed* kernels for this 
-reason, but LZO runs at a significant fraction of memcpy() speed.
+--TakKZr9L6Hm6aLOc
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-	-hpa
+On Wed, Jul 22, 2009 at 03:28:09PM +0000, kevin.granade@gmail.com wrote :
+> On Jul 22, 2009 9:01am, Albin Tonnerre <albin.tonnerre@free-electrons.com>
+> wrote:
+> > This is the first part of the lzo patch
+> >
+> > The lzo compressor is worse than gzip at compression, but faster at
+> >
+> > extraction. Here are some figures for an ARM board I'm working on:
+> >
+> >
+> >
+> > Uncompressed size: 3.24Mo
+> >
+> > gzip 1.61Mo 0.72s
+> >
+> > lzo 1.75Mo 0.48s
+> >
+> >
+> >
+> > So for a compression ratio that is still relatively close to gzip, it's
+> >
+> > much faster to extract, at least in that case.
+>=20
+> Is that "time to run the extraction algorithm", or "time to read in image=
+ from
+> media and extract"? I think the time to read from the media would tend to
+> dominate the decompression time.
+> Either way, could you provide the other time for each algorithm in order =
+to
+> give a sense of how this might scale to other CPU speeds/media read speed=
+s?
+>=20
+
+That's the time to run the extraction algorithm. As H. Peter Anvin pointed =
+out,
+you can have a fast media and a somewhat slow CPU, for which lzo makes sens=
+e.
+As for other data, I don't have all the figures handy, but:
+
+ - LZMA: compressed size 1.19Mo, decompression time: several *seconds* (tha=
+t's
+   on a 180MHz ARM9 board, using a patch to implement LZMA compression simi=
+lar
+   to this one)
+ - Bzip2 eats a lot of RAM, and head.S only gives 64Ko of malloc() space on
+   ARM, so I didn't try.
+
+Regards,
+--=20
+Albin Tonnerre, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
+
+--TakKZr9L6Hm6aLOc
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iQIcBAEBCAAGBQJKZ0NIAAoJEBEG8gBbtuSl0x0P/32kBqozhjvMJVjopQhg879k
+CqVLP9CXmPcfFGc3ytyAnbP3glR+DiAcpc4sWvvCowZZ+k13znU5DpDMgl4+MdVl
+XHr3ebrQJon+LJ6toRmcPuy2U/qTqBV2vrAcy7PNViUMVG2QAKPS9LWYsQjdbHW5
+Z6bXMOdLCwVGJgENxapgKDwG+yGlDirROGoGHinIdHZmLnNdc+vMd+Grme58jSwC
+/D4l4vTU0kEOMon5t2sZOGguyPr7VGTzjJjHZ7vP2B+ltPobwmT1H4C/uut2KPkh
+cYxPevUjTkrvXiOqX8NBzB+FBxw8j/S99PEGH9sSTlMEaoPShz+QvR3AUFOcyAsQ
+IGoEmCnmm8tYwdhRPUKNs9APVdkQGilAgkVt6Sv/KgJ6ovs0cGMy0KO33TkK/+nS
+CgonnEVizauYxmg4mNCOdtxgOSIZvhw7vWQoGdzeC1REg+Lcpa8cadcRrYkZ5BO+
+yYXAHCRIX2C4mTzPq+bow7bMaoGnlAt7YFh8WkLi4Uuv1od3qKowqytSXp+07qsx
+AGseHIosb33EhCJb09Fbf7TCQDwnXKzrAMpTH/YvYfSoyX/0kdRNSmwRB1RhHSx1
+edLCu6mtnbO4A2rTLLEel7OdU4UqJUq3Tbeu4tYLoZNSNgxLXyWlHocNX5NLeOpK
+vT+GmLRBLkOipprBfFDW
+=jHrT
+-----END PGP SIGNATURE-----
+
+--TakKZr9L6Hm6aLOc--
