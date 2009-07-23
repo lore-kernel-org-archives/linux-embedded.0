@@ -1,39 +1,69 @@
-From: Andi Kleen <andi@firstfloor.org>
-Subject: Re: New MMC maintainer needed
-Date: Thu, 23 Jul 2009 18:29:25 +0200
-Message-ID: <87zlav1hy2.fsf@basil.nowhere.org>
-References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
-	<20090722151744.fffd7bf5.akpm@linux-foundation.org>
-	<4A67A9E8.5080002@mnementh.co.uk>
-	<20090723055447.GA12211@console-pimps.org>
-	<20090722232259.d0ff3495.akpm@linux-foundation.org>
-	<20090723172559.e7aebbb5.sfr@canb.auug.org.au>
-	<20090723003228.fc0ec34b.akpm@linux-foundation.org>
-	<20090723173852.119c04c2.sfr@canb.auug.org.au>
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Subject: Re: [PATCH 4/5] Add support for LZO-compressed kernels for ARM
+Date: Thu, 23 Jul 2009 19:11:41 +0200
+Message-ID: <20090723171141.GG4625@pc-ras4041.res.insa>
+References: <1248271279-9920-1-git-send-email-albin.tonnerre@free-electrons.com> <1248271279-9920-2-git-send-email-albin.tonnerre@free-electrons.com> <1248271279-9920-3-git-send-email-albin.tonnerre@free-electrons.com> <1248271279-9920-4-git-send-email-albin.tonnerre@free-electrons.com>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754528AbZGWQ3c@vger.kernel.org>
-In-Reply-To: <20090723173852.119c04c2.sfr@canb.auug.org.au> (Stephen Rothwell's message of "Thu, 23 Jul 2009 17:38:52 +1000")
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="dgjlcl3Tl+kb3YDk"
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752936AbZGWRLr@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1248271279-9920-4-git-send-email-albin.tonnerre@free-electrons.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Stephen Rothwell <sfr@canb.auug.org.au>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, Ian Molton <ian@mnementh.co.uk>, Pierre Ossman <pierre@ossman.eu>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
+To: linux@arm.linux.org.uk, hpa@zytor.com
+Cc: alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Stephen Rothwell <sfr@canb.auug.org.au> writes:
 
-> Hi Andrew,
->
-> On Thu, 23 Jul 2009 00:32:28 -0700 Andrew Morton <akpm@linux-foundation.org> wrote:
->>
->> It gets easy if I remove linux-next.patch from -mm.  Maybe I'll do that.
->
-> At that point we could add the "stable" part of -mm to linux-next :-)
+--dgjlcl3Tl+kb3YDk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I think that would be a great idea. It always bugged me that
-if Andrew pulls something in it's not automatically tested in -next.
+On Wed, Jul 22, 2009 at 04:01:18PM +0200, Albin Tonnerre wrote :
+> This is the second part of patch. This part includes:
+>  - changes to ach/arch/boot/Makefile to make it easier to add new
+>    compression types
+>  - new piggy.lzo.S necessary for lzo compression
+>  - changes in arch/arm/boot/compressed/misc.c to allow the use of lzo or
+>    gzip, depending on the config
+>  - Kconfig support
+>=20
 
--Andi
+I failed to mention this in the first place, but for proper crediting it sh=
+ould
+be noted that the ARM part of the patch is based on Alain Knaff's work on t=
+he
+LZMA/Bzip compression patch for ARM.
 
--- 
-ak@linux.intel.com -- Speaking for myself only.
+Regards,
+--=20
+Albin Tonnerre, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
+
+--dgjlcl3Tl+kb3YDk
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iQIcBAEBCAAGBQJKaJnNAAoJEBEG8gBbtuSlwyQP/1w4nLEe+QIIwnh0gNqE3VMI
+G5c7x9/eZjEOcSZY/qOW98ebbptXi5aaGR1A5tp4RIyiE2m77NodhpCDpJxM9Ox+
+t1NiO/7Ksu+9/5DY3Gg5dC7sHssEHVqHALSXrp/hcpODBXBGCa8SR003MxdCAcgq
+9gx70HII8AK80UCo51K+2h5ZMYDwr4xo96ucWnHR4jqUy5Ne09jH+JDbi0uQ1Dxo
+2HEhWYT4/MIWnuF6BKNssNPmz5qwnFLwmzoFm/qHpWNcfi8w1aTqLhCEgXSTh8Vc
+1p2/4NwvQ/16hsfmy3lc5nI1kJOXDXvWXa4I4mdxCLitIPieTPFKfv6e2RbsMe9v
+zn6uh8S9q+KpKpHWAspYWs469jhbeTjlV7/aytOGTWnRvClqtymHJwxRvWoGKUeR
+aeOx6x196SZVUye7Hgi7z5NvvbBOBRCBusqAkFzKgTY0kVgsfDjcbe/Rhowo3AOB
+8YLLyVIDANNvfpERl2BjHLbiQgzKTT5Qun6UgJtL5RzYmMWuxOoO07OINKPzXcyr
+tdmn7JQgT/FeAGas9xeJ6CMSnjdtG9En9ofjAuTsK2sRzL7hDdPIEaJow8bjrbhr
+EourGvO3pynl4f5rxO/vmilZg3ClXqKuUz+9sCvUFWmVTaCZwhnjhtRkUiDnYPuV
+Yaht6PTs4BPyj8+u8pal
+=Wt/J
+-----END PGP SIGNATURE-----
+
+--dgjlcl3Tl+kb3YDk--
