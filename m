@@ -1,53 +1,45 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
+From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
 Subject: Re: New MMC maintainer needed
-Date: Thu, 23 Jul 2009 17:38:52 +1000
-Message-ID: <20090723173852.119c04c2.sfr@canb.auug.org.au>
+Date: Thu, 23 Jul 2009 12:57:35 +0200
+Message-ID: <e4c675870907230357u6357c358gfc4a097cbc29fe0f@mail.gmail.com>
 References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
-	<20090722151744.fffd7bf5.akpm@linux-foundation.org>
-	<4A67A9E8.5080002@mnementh.co.uk>
-	<20090723055447.GA12211@console-pimps.org>
-	<20090722232259.d0ff3495.akpm@linux-foundation.org>
-	<20090723172559.e7aebbb5.sfr@canb.auug.org.au>
-	<20090723003228.fc0ec34b.akpm@linux-foundation.org>
+	 <20090722151744.fffd7bf5.akpm@linux-foundation.org>
+	 <4A67A9E8.5080002@mnementh.co.uk>
+	 <20090723055447.GA12211@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Thu__23_Jul_2009_17_38_52_+1000_oDw4Esi.93GQJz8U"
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753723AbZGWHjH@vger.kernel.org>
-In-Reply-To: <20090723003228.fc0ec34b.akpm@linux-foundation.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753946AbZGWK5i@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=YAVUjhvsaQa45QdGv8C91WJFvj/IVVSQROO1V96MFUU=;
+        b=UlQvGQr9I/n/Yfdz6QnAF/ZKD5qShm3eETry8W95vaTrZ4vCYCNolERl6XlRYafKCu
+         +M36CqAKyBhoSrv1N4iCmbNLLi5wAIhEXWqnb7lNlHNR7r29nb05UTTYDey2ATOOgkoM
+         rpGDvhbhAbpSV26WxDAewxNKJLayWU3RoRhNc=
+In-Reply-To: <20090723055447.GA12211@console-pimps.org>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Matt Fleming <matt@console-pimps.org>, Ian Molton <ian@mnementh.co.uk>, Pierre Ossman <pierre@ossman.eu>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
+Content-Type: text/plain; charset="us-ascii"
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Ian Molton <ian@mnementh.co.uk>, Andrew Morton <akpm@linux-foundation.org>, Pierre Ossman <pierre@ossman.eu>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
 
---Signature=_Thu__23_Jul_2009_17_38_52_+1000_oDw4Esi.93GQJz8U
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi Andrew,
-
-On Thu, 23 Jul 2009 00:32:28 -0700 Andrew Morton <akpm@linux-foundation.org=
-> wrote:
+2009/7/23, Matt Fleming <matt@console-pimps.org>:
+> On Thu, Jul 23, 2009 at 01:08:08AM +0100, Ian Molton wrote:
+>  > Andrew Morton wrote:
+>  >
+>  >> Until and unless someone else steps up I can act as maintainer of last
+>  >> resort for MMC.  As I'm presently doing for fbdev, hwmon, rtc, spi,
+>  >> gpio, i2o and about 1000 other identifiable subsystems.
+>  >
+>  > If no-one else is helping out, Im happy to also be CC'd on MMC patches.
+>  >
 >
-> It gets easy if I remove linux-next.patch from -mm.  Maybe I'll do that.
 
-At that point we could add the "stable" part of -mm to linux-next :-)
+I am new in maintaining a kernel driver into community but I would help.
 
---=20
-Cheers,
-Stephen Rothwell                    sfr@canb.auug.org.au
-http://www.canb.auug.org.au/~sfr/
-
---Signature=_Thu__23_Jul_2009_17_38_52_+1000_oDw4Esi.93GQJz8U
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkpoE4wACgkQjjKRsyhoI8wrkgCfdjgP2DApF7CncFbPP7lThwmw
-sy4Ani/p693trAP+JnaAF1Jb5vdUkQhU
-=kPP5
------END PGP SIGNATURE-----
-
---Signature=_Thu__23_Jul_2009_17_38_52_+1000_oDw4Esi.93GQJz8U--
+-- 
+Roberto A. Foglietta,
+Linux Embedded Consultant
+mobile: (+39) 349.33.30.697
