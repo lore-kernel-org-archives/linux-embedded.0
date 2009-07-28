@@ -1,29 +1,71 @@
-From: David Vrabel <david.vrabel@csr.com>
+From: Pierre Ossman <pierre@ossman.eu>
 Subject: Re: New MMC maintainer needed
-Date: Tue, 28 Jul 2009 13:51:44 +0100
-Message-ID: <4A6EF460.70209@csr.com>
-References: <20090714153601.6dfe70ff@mjolnir.ossman.eu> <20090722151744.fffd7bf5.akpm@linux-foundation.org> <4A67A9E8.5080002@mnementh.co.uk> <20090723055447.GA12211@console-pimps.org> <20090722232259.d0ff3495.akpm@linux-foundation.org> <20090724152944.51402e87.akpm@linux-foundation.org> <20090726230630.7598fbe4@fido2.homeip.net> <4A6D990B.9000005@csr.com> <20090727214001.GK12665@console-pimps.org>
+Date: Tue, 28 Jul 2009 22:20:34 +0200
+Message-ID: <20090728222034.78966b3a@mjolnir.ossman.eu>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
+	<20090722151744.fffd7bf5.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-2546-1248812438-0001-2"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090727214001.GK12665@console-pimps.org>
+In-Reply-To: <20090722151744.fffd7bf5.akpm@linux-foundation.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Philip Langdale <philipl@overt.org>, Andrew Morton <akpm@linux-foundation.org>, ohad@bencohen.org, ian@mnementh.co.uk, pierre@ossman.eu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-l@jasper.es
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
 
-Matt Fleming wrote:
-> 
-> Is the 3.00 spec publicly available?
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
 
-There does not appear to be a simplified version of the 3.00 specification.
+--=_freyr.ossman.eu-2546-1248812438-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-David
--- 
-David Vrabel, Senior Software Engineer, Drivers
-CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
-Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
+On Wed, 22 Jul 2009 15:17:44 -0700
+Andrew Morton <akpm@linux-foundation.org> wrote:
 
+>=20
+> Thanks, Pierre.
+>=20
+> Until and unless someone else steps up I can act as maintainer of last
+> resort for MMC.  As I'm presently doing for fbdev, hwmon, rtc, spi,
+> gpio, i2o and about 1000 other identifiable subsystems.
+>=20
 
-'member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom'
+I'm not falling of the face of the earth here, so people can still cc
+me on MMC patches, although I probably cannot answer all of them. I
+don't want to be the bottle neck that keeps MMC patches and discussions
+moving at a glacial speed, which is the situation we're in today.
+
+> Fortunately, MMC doesn't appear to have its own mailing list so I'll
+> actually get to see the patches.  I do monitor a couple of
+> subsystem-specific lists (fbdev, hwmon) but the delays can be awful - a
+> month or two.
+
+MMC discussions tend to often be very system specific, which makes
+lists such as the arm kernel list more appropriate. Also, I've always
+tried to steer people to LKML as it allows others to keep a casual eye
+on things.
+
+Rgds
+--=20
+     -- Pierre Ossman
+
+  WARNING: This correspondence is being monitored by the
+  Swedish government. Make sure your server uses encryption
+  for SMTP traffic and consider using PGP for end-to-end
+  encryption.
+
+--=_freyr.ossman.eu-2546-1248812438-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.11 (GNU/Linux)
+
+iEYEARECAAYFAkpvXZYACgkQ7b8eESbyJLhB9gCgwPwab0z7gAEZs0U860FrA9+K
+otcAoNP30e8UJEdHVDzfuXWBP0YBWtiJ
+=YO7B
+-----END PGP SIGNATURE-----
+
+--=_freyr.ossman.eu-2546-1248812438-0001-2--
