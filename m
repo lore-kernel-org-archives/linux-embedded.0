@@ -1,41 +1,21 @@
-From: Sam Ravnborg <sam@ravnborg.org>
+From: Ian Molton <ian@mnementh.co.uk>
 Subject: Re: New MMC maintainer needed
-Date: Wed, 29 Jul 2009 08:35:11 +0200
-Message-ID: <20090729063511.GA21652@merkur.ravnborg.org>
-References: <20090714153601.6dfe70ff@mjolnir.ossman.eu> <20090722151744.fffd7bf5.akpm@linux-foundation.org> <20090728222034.78966b3a@mjolnir.ossman.eu> <4A6F6A40.60203@mnementh.co.uk> <20090728154137.36d68a4e.akpm@linux-foundation.org>
+Date: Wed, 29 Jul 2009 11:35:24 +0100
+Message-ID: <4A7025EC.8020902@mnementh.co.uk>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>	<20090722151744.fffd7bf5.akpm@linux-foundation.org>	<20090728222034.78966b3a@mjolnir.ossman.eu>	<4A6F6A40.60203@mnementh.co.uk> <20090728154137.36d68a4e.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753262AbZG2GfR@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20090728154137.36d68a4e.akpm@linux-foundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20090728154137.36d68a4e.akpm@linux-foundation.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, pierre@ossman.eu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
+Cc: pierre@ossman.eu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
 
-On Tue, Jul 28, 2009 at 03:41:37PM -0700, Andrew Morton wrote:
-> On Tue, 28 Jul 2009 22:14:40 +0100
-> Ian Molton <ian@mnementh.co.uk> wrote:
-> 
-> > Pierre Ossman wrote:
-> > 
-> > > MMC discussions tend to often be very system specific, which makes
-> > > lists such as the arm kernel list more appropriate. Also, I've always
-> > > tried to steer people to LKML as it allows others to keep a casual eye
-> > > on things.
-> > 
-> > I think an MMC list wouldnt be a bad idea now that we have a sort of 
-> > 'distributed maintainership' thing going on... itd help get people up to 
-> > speed...
-> 
+Andrew Morton wrote:
+
 > I expect that Dave Miller can set up linux-mmc@vger.kernel.org in a
 > jiffy.  A MAINTAINERS patch should be made if this is done.
-> 
-> What I am unsure about is whether and how web-based archives of the vger
-> lists come into being - is it automatic, or should people be asked?
 
-It was a manual process when I had linux-kbuild created.
-I contacted marc and one other place I do not recall right now.
-
-	Sam
+I've sent him an email, will let you all know what happens.
