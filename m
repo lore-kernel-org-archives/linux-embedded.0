@@ -1,35 +1,25 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: [PATCH 5/5] Add support for LZO-compressed kernels on x86
-Date: Wed, 29 Jul 2009 23:02:58 +0200
-Message-ID: <20090729210257.GA22975@merkur.ravnborg.org>
-References: <1248271279-9920-1-git-send-email-albin.tonnerre@free-electrons.com> <1248271279-9920-2-git-send-email-albin.tonnerre@free-electrons.com> <1248271279-9920-3-git-send-email-albin.tonnerre@free-electrons.com> <1248271279-9920-4-git-send-email-albin.tonnerre@free-electrons.com> <1248271279-9920-5-git-send-email-albin.tonnerre@free-electrons.com> <4A70AA64.4020301@zytor.com>
-Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4A70AA64.4020301@zytor.com>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+From: Segher Boessenkool <segher@kernel.crashing.org>
+Subject: Re: New MMC maintainer needed
+Date: Thu, 30 Jul 2009 04:36:28 +0200
+Message-ID: <17446369-60F1-4662-A3DA-9D3A961EDA11@kernel.crashing.org>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu> <20090722151744.fffd7bf5.akpm@linux-foundation.org> <4A67A9E8.5080002@mnementh.co.uk> <20090728222213.2de38c53@mjolnir.ossman.eu>
+Mime-Version: 1.0 (Apple Message framework v753.1)
 Content-Transfer-Encoding: 7bit
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Albin Tonnerre <albin.tonnerre@free-electrons.com>, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1751920AbZG3Cil@vger.kernel.org>
+In-Reply-To: <20090728222213.2de38c53@mjolnir.ossman.eu>
+Sender: linux-kernel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Pierre Ossman <pierre@ossman.eu>
+Cc: Ian Molton <ian@mnementh.co.uk>, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
 
-On Wed, Jul 29, 2009 at 01:00:36PM -0700, H. Peter Anvin wrote:
-> On 07/22/2009 07:01 AM, Albin Tonnerre wrote:
-> > This is the third and last part of the patch, which contains the
-> > necessary changes to the x86 Kconfig and boot/compressed to allow the
-> > use of this new compression method
-> > 
-> > Signed-off-by: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-> 
-> Acked-by: H. Peter Anvin <hpa@zytor.com>
-> 
-> Since the patchset otherwise isn't really x86-related it probably makes
-> more sense to pass this through the kbuild tree, or perhaps via akpm,
-> rather than -tip?
+> I use the public specs from sdcard.org for more or less everything. I
+> also have a MMC 4 spec, which was generously donated to me by Nokia.
+> Unfortunately I am not allowed to pass that on. I can look things up
+> for people if they have specific questions though.
 
-I can take it via kbuild if I get a fewsh patch-set with proper
-ack's added.
-I've long lost the original patch-set.
+The MMC Association has merged with JEDEC, so now everyone can download
+the specs, e.g. http://www.jedec.org/download/search/JESD84-A44.pdf .
 
-	Sam
+
+Segher
