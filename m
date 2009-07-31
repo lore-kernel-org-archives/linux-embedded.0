@@ -1,66 +1,100 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: New MMC maintainer needed
-Date: Fri, 31 Jul 2009 16:36:24 +0300
-Message-ID: <6d1efe520907310636g3c8fab76vc495169326fe77f1@mail.gmail.com>
-References: <812689.20578.qm@web37604.mail.mud.yahoo.com>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
+Subject: Re: flicker free booting
+Date: Fri, 31 Jul 2009 17:53:52 +0200
+Message-ID: <20090731155352.GA29245@pengutronix.de>
+References: <1243956140.4229.25.camel@mulgrave.int.hansenpartnership.com> <20090602172941.GL3095@hansolo.jdub.homelinux.org> <1243964577.4229.49.camel@mulgrave.int.hansenpartnership.com> <20090602175244.GB10973@cuplxvomd02.corp.sa.net> <20090602185143.GA8655@zod.rchland.ibm.com> <4A257DF0.6040607@am.sony.com> <1243975064.6342.10.camel@mulgrave.site> <20090602213452.GK32630@pengutronix.de> <20090603033535.GA24291@kroah.com> <20090731152617.GW29245@pengutronix.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1751352AbZGaNg0@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=v/PdUjSGvaHSy0/GyJQVGzqtnpJUItLYBvlfrg3b8QE=;
-        b=wzFYUkNgsduNCIE35/7YeOU0fd8E3m+wnGXAWcjM63vdbbczjuS2pjFOQlCptvT9iW
-         4LHRF9BnSCVtWI6tDt5rsk+7dTVgr+eONuvbWKCimReEtbKsio2TFo8fcWMBnxl74/sn
-         kjMKuYdb1FmckGSx5so6c6i3Q4olxbisGF12I=
-In-Reply-To: <812689.20578.qm@web37604.mail.mud.yahoo.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20090731152617.GW29245@pengutronix.de>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Alex Dubov <oakad@yahoo.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Nicolas Pitre <nico@cam.org>, Nicolas Ferre <nicolas.ferre@rfo.atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Tony Lindgren <tony@atomide.com>, David Brownell <david-b@pacbell.net>, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, Pavel Pisa <ppisa@pikron.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Ben Dooks <ben@fluff.org>, saschasommer@freenet.de, avorontsov@ru.mvista.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, Adrian Hunter <adrian.hunter@nokia.com>, Pierre Ossman <pierre@ossman.eu>
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
+Cc: Juergen Beisert <jbe@pengutronix.de>, Sascha Hauer <sha@pengutronix.de>, Wolfram Sang <wsa@pengutronix.de>
 
-On Wed, Jul 15, 2009 at 7:59 AM, Alex Dubov<oakad@yahoo.com> wrote:
+On Tue, Jun 02, 2009 at 08:35:35PM -0700, Greg KH wrote:
+> On Tue, Jun 02, 2009 at 11:34:52PM +0200, Robert Schwebel wrote:
+> > Could flickerfree-bootsplash be a topic? Or is that completely
+> > pushed into the userspace these fastboot days?
 >
->> I'm afraid the time has come for me
->> to step down as maintainer for the
->> MMC/SD/SDIO subsystem and for someone else to take over the
->> rudder. It
->> is no secret that I haven't been able to give the
->> maintainer role the
->> resources it required, and as a result it has gone from
->> being a fun
->> hobby to a burdensome chore. I was hoping it was a
->> temporary slump, but
->> this has been the norm for over a year now, so it's time
->> for me to
->> throw in the towel.
->
-> What an unfortunate thing.
->
-> Franky speaking, I couldn't manage any time to work on Linux
-> in the last year myself. I had such a great plans for Memstick
-> and such, yet none advanced.
->
-> At this rate, the future of the flash cards on Linux will
-> become highly uncertain.
-> :-(
->
+> We have that working today, no in-kernel work needed other than the
+> already-present KMS stuff. See the recent Moblin images for proof of
+> this.
 
-Me too.
+Well, I assume that the issue you've addressed is being flicker free
+between the kernel and x.org; what I mean is flicker-free even with the
+bootloader in mind.
 
-I had plans to reverse engineer and then write drivers for my ricoh 5
-in one controller
-for SD and memstick mode (especialy XD)
-Now I know that RE part isn't the hardest probably, but writing the
-core support for XD subsystem (your was rejected I see)
+What we want to address is another problem which is present on almost
+all display-enabled SoC-type embedded hardware. This kind of hardware is
+BIOS-free and is booted from an embedded bootloader like u-boot. These
+processors are often pretty slow, being in the 200 MHz ARM926 league.
 
-I am also an owner of a jmicron controller, and thanks to you memstick
-on it is supported.
+The boot scenario on these boxes looks like this:
 
-What to do now?
+1)  power-on
+2a) on NAND-only systems, pre-bootloader is fetched from NAND block
+2b) bootloader starts from NAND or NOR flash
+3)  the bootloader fetches Linux from NAND/NOR flash
+4)  kernel starts
+5)  userspace starts
+6)  application starts (i.e. app against qt+dfb or gtk+dfb)
 
-Best regards,
-         Maxim Levitsky
+These SoCs are usually built into "devices" which don't look like PCs;
+think of it as mobile phones (although our applications are usually more
+industry-style, like machine controllers, measurement systems etc). Most
+industry applications have been built with microcontrollers + 2x16 alpha
+numeric displays in the last generation; this type of hardware has a
+boot time (from power-on to full operation) of something like 0.5 s.
+
+So what I would like to see is this:
+
+a) power on
+b) almost immediately (< 1s) a splash screen appears
+c) optionally be able to do some animation, progress bar etc
+d) application appears (instantanously or by fading)
+
+At the moment, we do this by using random hacks in the kernel, which is
+pretty bad. So what I'm searching for is a clean API which may be
+accesptable form the Linux mainline.
+
+Here's a proposal from my kernel team:
+
+- u-boot initializes framebuffer on some <address> + shows image
+- kernel commandline: mem=127MB framebuffer=<num>:<address>:<size>
+  The framebuffer is reserved at the given address (i.e. 1 MB
+  at the upper end of the memory, so we have to reduce the
+  overall memory available for Linux)
+- kernel driver recognizes that the framebuffer was already set up and
+  skips the initialisation step (which would otherwhise result in
+  flicker)
+
+A second step could be:
+
+- Have this initial framebuffer as /dev/fb0 (mem at the end of RAM)
+- In order to avoid flicker, the driver sets up a 2nd framebuffer,
+  in dynamically allocated memory -> /dev/fb1. This framebuffer
+  continues to display the splash image (or an animation). Switching
+  from fb0 -> fb1 is done during VSync.
+- While the splash image is still visible in fb1, the application
+  starts, up to the point where it shows it's main screen. This usually
+  never works flicker-free, but we don't see it, as fb1 is visible.
+- switch back to fb0 (during a VSync to avoid flicker)
+- optionally discard fb1 ressources
+
+On some hardware, the switch could be done by fading from fb1 to fb0
+(i.e. on i.MX27 this should be possible).
+
+Drivers which see the framebuffer= parameter would have to skip their
+hardware initialisation step.
+
+What do you think? Would something like this be acceptable? Other ideas?
+
+rsc
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
