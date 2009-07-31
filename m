@@ -1,35 +1,43 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: New MMC maintainer needed
-Date: Fri, 31 Jul 2009 11:54:07 +0100
-Message-ID: <20090731105407.GA31900@console-pimps.org>
-References: <20090714153601.6dfe70ff@mjolnir.ossman.eu> <20090722151744.fffd7bf5.akpm@linux-foundation.org> <20090728222334.0c543c47@mjolnir.ossman.eu> <20090731122623.254fd0f1@mjolnir.ossman.eu>
+From: Ohad Ben-Cohen <ohad@bencohen.org>
+Subject: Re: [PATCH] sdio: add CD disable support
+Date: Fri, 31 Jul 2009 14:10:24 +0300
+Message-ID: <bd5b16740907310410q6860eba1m58e5cf2b771d157b@mail.gmail.com>
+References: <1248954848.5396.6.camel@localhost> <4A719811.4060904@csr.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20090731122623.254fd0f1@mjolnir.ossman.eu>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752537AbZGaLKq@vger.kernel.org>
+In-Reply-To: <4A719811.4060904@csr.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Pierre Ossman <pierre@ossman.eu>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
+Content-Type: text/plain; charset="iso-8859-1"
+To: David Vrabel <david.vrabel@csr.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Philip Langdale <philipl@overt.org>, Matt Fleming <matt@console-pimps.org>, ian@mnementh.co.uk, pierre@ossman.eu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-l@jasper.es, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan <madhu.cr@ti.com>
 
-On Fri, Jul 31, 2009 at 12:26:23PM +0200, Pierre Ossman wrote:
-> 
-> [PATCH 0/32] mmc and omap_hsmmc patches
-> http://marc.info/?t=124722953900010&r=1&w=2
-> 
-> I haven't looked through these at all. The ones affecting the core
-> probably need some thorough reviews.
-> 
-> I did notice the patch to say which cards a controller supports though,
-> and I'm very sceptical about that one. The scanning process should work
-> anyway, and the performance impact should be negligible as it is only
-> on init. So that patch only adds complexity and confusion IMO.
-> 
+Hi David,
 
-How much complexity does it really add? Surely it's better to give the
-host controller driver writers the ability to not entertain supporting
-some cards if they cannot be used? If they want to avoid the scanning
-process for certain cards, why not let them?
+Thank you for your comments.
 
+On Thu, Jul 30, 2009 at 3:54 PM, David Vrabel<david.vrabel@csr.com> wro=
+te:
+> Platforms may rely on the card's pull-up and not fit/configure an
+> external one. =A0There may need to be a way for host controller drive=
+rs to
+> =A0say this and prevent the disabling of the card's DAT3 pull-up.
+
+Currently the only way to really disable the CD using this patch is by
+setting the disable_cd bit on for a specific controller. We are doing s=
+o
+for a specific controller to which an embedded sdio device is wired,
+on certain boards. This is done using the embedded_sdio's .cccr field,
+which is used instead of reading the card's cccr.
+So as you correctly noted, card has no say here.
+
+> The first sentence of this comment doesn't make sense.
+
+=46ixed;
+
+I'll follow-up with a correction of the patch and will appreciate your =
+review.
+
+Thanks,
+Ohad.
