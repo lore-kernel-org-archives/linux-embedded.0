@@ -1,46 +1,28 @@
-From: tom.leiming@gmail.com
-Subject: [PATCH] USB:musb:fix dependency of selecting TWL4030_USB
-Date: Sat,  1 Aug 2009 21:01:58 +0800
-Message-ID: <1249131718-21388-1-git-send-email-tom.leiming@gmail.com>
+From: Jamie Lokier <jamie@shareable.org>
+Subject: Re: flicker free booting
+Date: Sat, 1 Aug 2009 15:25:25 +0100
+Message-ID: <20090801142525.GA27574@shareable.org>
+References: <1243964577.4229.49.camel@mulgrave.int.hansenpartnership.com> <20090602175244.GB10973@cuplxvomd02.corp.sa.net> <20090602185143.GA8655@zod.rchland.ibm.com> <4A257DF0.6040607@am.sony.com> <1243975064.6342.10.camel@mulgrave.site> <20090602213452.GK32630@pengutronix.de> <20090603033535.GA24291@kroah.com> <20090731152617.GW29245@pengutronix.de> <20090731155352.GA29245@pengutronix.de> <4A734545.10405@billgatliff.com>
+Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:from:to:cc:subject:date
-         :message-id:x-mailer;
-        bh=RXZdWZ4KkQGIaG10c8e5nQLirGlo8X73x/j0jYuv/80=;
-        b=lrg/WN400698WSYXy6IZvL+pP5R+8IwFfuI5OA/2wu2oJVzuDjcOuNcLLHlGx/L2cK
-         td/8bNPilcy1Xf44Xx6NPXstFCn9FFgEKe4WgTYFR5DnD/5G/LBH8sf1X0Kmr1GdnHR3
-         81xLQskKC9/WG2XbMwIuQ7vppZp6s7eqMNYGU=
+Content-Disposition: inline
+In-Reply-To: <4A734545.10405@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: greg@kroah.com, dbrownell@users.sourceforge.net
-Cc: linux-usb@vger.kernel.org, linux-embedded@vger.kernel.org, Ming Lei <tom.leiming@gmail.com>
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded@vger.kernel.org, Juergen Beisert <jbe@pengutronix.de>, Sascha Hauer <sha@pengutronix.de>, Wolfram Sang <wsa@pengutronix.de>
 
-From: Ming Lei <tom.leiming@gmail.com>
+Bill Gatliff wrote:
+> Actually, I'd rather that drivers look at the hardware itself, and 
+> verify that the configuration matches what the parameter specifies 
+> before making changes.  That way you could use framebuffer= to 
+> communicate the desired setup to the driver in cases where the hardware 
+> wasn't already initialized.
 
-All machines based on OMAP34XX should select TWL_4030_USB if
-they want to support musb.
+It's a good idea when possible, but some hardware cannot be queried in
+enough detail to confirm the framebuffer configuration - unless the
+bootloader passes an extra parameter saying what it has done.
 
-Signed-off-by: Ming Lei <tom.leiming@gmail.com>
----
- drivers/usb/musb/Kconfig |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/usb/musb/Kconfig b/drivers/usb/musb/Kconfig
-index 70073b1..6ac465e 100644
---- a/drivers/usb/musb/Kconfig
-+++ b/drivers/usb/musb/Kconfig
-@@ -11,7 +11,7 @@ config USB_MUSB_HDRC
- 	depends on (USB || USB_GADGET) && HAVE_CLK
- 	depends on !SUPERH
- 	select NOP_USB_XCEIV if ARCH_DAVINCI
--	select TWL4030_USB if MACH_OMAP_3430SDP
-+	select TWL4030_USB if ARCH_OMAP34XX
- 	select USB_OTG_UTILS
- 	tristate 'Inventra Highspeed Dual Role Controller (TI, ADI, ...)'
- 	help
--- 
-1.6.0.GIT
+-- Jamie
