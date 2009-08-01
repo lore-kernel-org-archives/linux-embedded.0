@@ -1,67 +1,27 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: flicker free booting
-Date: Fri, 31 Jul 2009 18:26:54 -0700
-Message-ID: <4A7399DE.3000904@am.sony.com>
-References: <20090602185143.GA8655@zod.rchland.ibm.com> <4A257DF0.6040607@am.sony.com> <1243975064.6342.10.camel@mulgrave.site> <20090602213452.GK32630@pengutronix.de> <20090603033535.GA24291@kroah.com> <20090731152617.GW29245@pengutronix.de> <20090731155352.GA29245@pengutronix.de> <20090731180309.GA17314@cuplxvomd02.corp.sa.net> <4A733C07.3050002@billgatliff.com> <4A734A95.6060703@am.sony.com> <20090731200555.GF29245@pengutronix.de>
+From: Alex Dubov <oakad@yahoo.com>
+Subject: Re: New MMC maintainer needed
+Date: Fri, 31 Jul 2009 23:53:17 -0700 (PDT)
+Message-ID: <995113.86615.qm@web37607.mail.mud.yahoo.com>
+References: <6d1efe520907310636g3c8fab76vc495169326fe77f1@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090731200555.GF29245@pengutronix.de>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s1024; t=1249109597; bh=YAarNyDpor8NaVJPBgSUm4Hd7AbpViBPdXO27/yq5XM=; h=Message-ID:X-YMail-OSG:Received:X-Mailer:Date:From:Subject:To:Cc:In-Reply-To:MIME-Version:Content-Type; b=L4jLG0h1glDW97eQhnS1QOC/GbFYO9Rv1PBXmDrSq2m7ScHGh+DBPJb3jcIuE1oY6riB9YtdGpw2Wa4lI/8RIueQUIQuMAHh2F5l497semrq5nv6RrkegmMsyzl7cKV4MPglypLsXUGq2qAwHVrT7DjjgxpHPFMMT+jU/GzmXCw=
+In-Reply-To: <6d1efe520907310636g3c8fab76vc495169326fe77f1@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Robert Schwebel <r.schwebel@pengutronix.de>
-Cc: Bill Gatliff <bgat@billgatliff.com>, David VomLehn <dvomlehn@cisco.com>, linux-embedded@vger.kernel.org, Juergen Beisert <jbe@pengutronix.de>, Sascha Hauer <sha@pengutronix.de>, Wolfram Sang <wsa@pengutronix.de>
+Content-Transfer-Encoding: 7bit
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Nicolas Pitre <nico@cam.org>, Nicolas Ferre <nicolas.ferre@rfo.atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Tony Lindgren <tony@atomide.com>, David Brownell <david-b@pacbell.net>, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, Pavel Pisa <ppisa@pikron.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Ben Dooks <ben@fluff.org>, saschasommer@freenet.de, avorontsov@ru.mvista.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, Adrian Hunter <adrian.hunter@nokia.com>, Pierre Ossman <pierre@ossman.eu>
 
-Robert Schwebel wrote:
-> On Fri, Jul 31, 2009 at 12:48:37PM -0700, Tim Bird wrote:
->>> Those fractions-of-seconds boot times are beyond the reach of the
->>> 200 MHz-class ARM9 processors and similar, where it takes two or
->>> three seconds just to load and uncompress the kernel from NOR or
->>> NAND flash.
->> While I don't disagree from a practical standpoint - at Sony using XIP
->> we have been able to finish kernel boot on a 192 MHZ ARM9 in 186
->> milliseconds. In the lab, anyway?
+
 > 
-> Wow, that's pretty fast; if that would be possible for standard
-> scenarios, it would indeed be better to do everything on the kernel
-> side.
+> What to do now?
 > 
-> Can you elaborate about the details of that experiment? Was that normal
-> XIP from NOR? What size has this kernel been?
 
-This was done quite some time ago, and it looks like my memory was
-not too good.  According to slides I did at the time, it was
-actually 110 milliseconds.  I'm sure this was a 2.4 kernel (likely
-2.4.20).  I couldn't find the size of the kernel used in the test, but
-I think it was about 800k, uncompressed.  (I'm not positive, though.)
-It was normal XIP from NOR flash.
-
-See slides 21 and 22 in the following:
-http://elinux.org/images/7/78/ReducingStartupTime_v0.8.pdf
-
-Here is some salient data:
-
-                  With Compression   W/ O Compression      XIP
-Copy              56 msec          120 msec             0 msec
-Decompression    545 msec            0 msec             0 msec
-Kernel execution  88 msec           88 msec           110 msec
-Total:           689 msec          208 msec           110 msec
-
-Note that copy time went up when going from a compressed to an
-uncompressed kernel.  Decompression time went down (to 0, no
-surpise).  When XIP was used, both copy time and decompression
-time were eliminated, but kernel execution time for the boot
-went from 88 msec to 110 msec.  So XIP did incur a pretty
-hefty runtime penalty.
-
-Aaahhh, 2.4.  The kernel was simpler in those days... :-)
-
- -- Tim
+Lift up your spirit and get back to work?
+;-)
 
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+
+      
