@@ -1,68 +1,97 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Subject: Re: flicker free booting
-Date: Mon, 3 Aug 2009 10:37:46 +0200 (CEST)
-Message-ID: <alpine.LRH.2.00.0908031035080.15308@vixen.sonytel.be>
-References: <20090602185143.GA8655@zod.rchland.ibm.com> <4A257DF0.6040607@am.sony.com> <1243975064.6342.10.camel@mulgrave.site> <20090602213452.GK32630@pengutronix.de> <20090603033535.GA24291@kroah.com> <20090731152617.GW29245@pengutronix.de>
- <20090731155352.GA29245@pengutronix.de> <20090731180309.GA17314@cuplxvomd02.corp.sa.net> <20090731180932.GC29245@pengutronix.de> <4A733B1B.2000009@billgatliff.com> <20090803081905.GP2714@pengutronix.de>
+From: Pierre Ossman <pierre@ossman.eu>
+Subject: Re: New MMC maintainer needed
+Date: Mon, 3 Aug 2009 12:34:29 +0200
+Message-ID: <20090803123429.390a636f@mjolnir.ossman.eu>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
+	<20090722151744.fffd7bf5.akpm@linux-foundation.org>
+	<20090728222334.0c543c47@mjolnir.ossman.eu>
+	<20090731122623.254fd0f1@mjolnir.ossman.eu>
+	<20090731105407.GA31900@console-pimps.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-16264-1249295673-0001-2"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090803081905.GP2714@pengutronix.de>
+In-Reply-To: <20090731105407.GA31900@console-pimps.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="ks_c_5601-1987"
-To: Sascha Hauer <sha@pengutronix.de>
-Cc: Bill Gatliff <bgat@billgatliff.com>, Robert Schwebel <r.schwebel@pengutronix.de>, David VomLehn <dvomlehn@cisco.com>, linux-embedded@vger.kernel.org, Juergen Beisert <jbe@pengutronix.de>, Wolfram Sang <wsa@pengutronix.de>
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
 
-On Mon, 3 Aug 2009, Sascha Hauer wrote:
-> On Fri, Jul 31, 2009 at 01:42:35PM -0500, Bill Gatliff wrote:
-> > Could your bootloader pre-initialize the graphics hardware to the s=
-ame =20
-> > mode that the Linux driver will ultimately select, and then throw u=
-p a =20
-> > static graphic?  That would give you some output until the driver i=
-tself =20
-> > comes online.
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
+
+--=_freyr.ossman.eu-16264-1249295673-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
+
+On Fri, 31 Jul 2009 11:54:07 +0100
+Matt Fleming <matt@console-pimps.org> wrote:
+
+> On Fri, Jul 31, 2009 at 12:26:23PM +0200, Pierre Ossman wrote:
+> >=20
+> > [PATCH 0/32] mmc and omap_hsmmc patches
+> > http://marc.info/?t=3D124722953900010&r=3D1&w=3D2
+> >=20
+> > I haven't looked through these at all. The ones affecting the core
+> > probably need some thorough reviews.
+> >=20
+> > I did notice the patch to say which cards a controller supports though,
+> > and I'm very sceptical about that one. The scanning process should work
+> > anyway, and the performance impact should be negligible as it is only
+> > on init. So that patch only adds complexity and confusion IMO.
+> >=20
 >=20
-> I implemented exactly this for the i.MX framebuffer last week. It wor=
-ks
-> by looking at the controllers physical screen start address, ioremapp=
-ing
-> this address and copying the content to the newly allocated framebuff=
-er.
-> Currently the driver still reinitilializes the controller with exactl=
-y
-> the same values. We could skip this initialization step depending on =
-a
-> imxfb.preinitialized=3D1 command line parameter and read back
-> resolution/depth from the device in order to fill the fb_info struct.
+> How much complexity does it really add? Surely it's better to give the
+> host controller driver writers the ability to not entertain supporting
+> some cards if they cannot be used? If they want to avoid the scanning
+> process for certain cards, why not let them?
 >=20
-> This approach works good, I just wonder how acceptable it is for
-> mainline.
 
-If the actual frame buffer driver doesn't do much after initialization,=
- we
-already have (at least) two similar drivers in the kernel: vesafb and o=
-ffb.
-Both rely on firmware (PC BIOS vs. Open Firmware) to initialize the gra=
-phics
-mode. Feel free to unify all of this into `staticfb.c'...
+Let's look at the pros and cons of this:
 
-With kind regards,
+Con:
 
-Geert Uytterhoeven
-Software Architect
-Techsoft Centre
+ - The scanning code gets less clear as you increase the number of
+   possible paths through it.
 
-Technology and Software Centre Europe
-The Corporate Village =B7 Da Vincilaan 7-D1 =B7 B-1935 Zaventem =B7 Bel=
-gium
+ - Different systems will have different init sequences, possibly
+   provoking bugs in the cards.
 
-Phone:    +32 (0)2 700 8453
-=46ax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven@sonycom.com
-Internet: http://www.sony-europe.com/
+ - Host driver writers now have more capability bits they have to
+   consider. And these might be less than obvious since SD/MMC/SDIO are
+   normally compatible so these bits seem useless.
 
-A division of Sony Europe (Belgium) N.V.
-VAT BE 0413.825.160 =B7 RPR Brussels
-=46ortis =B7 BIC GEBABEBB =B7 IBAN BE41293037680010
+ - With the current logic (which was better in the first version),
+   "normal" drivers will have to explicitly state that they work as
+   intended by setting all bits.
+
+Pro:
+
+ - A slightly reduced scanning time.
+
+
+I simply don't see it as being worth it. Linux patches generally need
+to provide the answer to "Why?", not just be able to avoid "Why not?".
+
+Rgds
+--=20
+     -- Pierre Ossman
+
+  WARNING: This correspondence is being monitored by the
+  Swedish government. Make sure your server uses encryption
+  for SMTP traffic and consider using PGP for end-to-end
+  encryption.
+
+--=_freyr.ossman.eu-16264-1249295673-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.11 (GNU/Linux)
+
+iEYEARECAAYFAkp2vTkACgkQ7b8eESbyJLj3MwCgqr4opv7W7elnHGfgXQC5YEkz
+G9oAn2Up6CCouEIGRtZ8x92CJmCnSPcK
+=544B
+-----END PGP SIGNATURE-----
+
+--=_freyr.ossman.eu-16264-1249295673-0001-2--
