@@ -1,44 +1,61 @@
-From: Ming Lei <tom.leiming@gmail.com>
-Subject: Re: [PATCH] USB:musb:fix dependency of selecting TWL4030_USB
-Date: Sat, 1 Aug 2009 22:51:18 +0800
-Message-ID: <d82e647a0908010751k7d8627c1m312b1316ba652563@mail.gmail.com>
-References: <1249131718-21388-1-git-send-email-tom.leiming@gmail.com>
-	 <5A47E75E594F054BAF48C5E4FC4B92AB0305398DC4@dbde02.ent.ti.com>
+From: Sascha Hauer <sha@pengutronix.de>
+Subject: Re: flicker free booting
+Date: Mon, 3 Aug 2009 10:19:05 +0200
+Message-ID: <20090803081905.GP2714@pengutronix.de>
+References: <20090602185143.GA8655@zod.rchland.ibm.com> <4A257DF0.6040607@am.sony.com> <1243975064.6342.10.camel@mulgrave.site> <20090602213452.GK32630@pengutronix.de> <20090603033535.GA24291@kroah.com> <20090731152617.GW29245@pengutronix.de> <20090731155352.GA29245@pengutronix.de> <20090731180309.GA17314@cuplxvomd02.corp.sa.net> <20090731180932.GC29245@pengutronix.de> <4A733B1B.2000009@billgatliff.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=gMakvUxJ/3rOb5QArx3cefdGUaan37kGHrYeFazbVSg=;
-        b=uxu7HqI24V/P7QSGi3MP1jbBcyJCUlU8U7HFifhQaQ9oLF8JXf/7VG8HI6e1FpZKz4
-         Ul35ddfb3HqV3PczPMx6rTsmybPu4RM8BNHq2BRn9rls1/50MwIvVxnFdnLI9u0rTDKo
-         NF3Jvskd5o0LMKUcsvU/sM0zBJdzKqlrfm/xU=
-In-Reply-To: <5A47E75E594F054BAF48C5E4FC4B92AB0305398DC4@dbde02.ent.ti.com>
+Content-Disposition: inline
+In-Reply-To: <4A733B1B.2000009@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "Gadiyar, Anand" <gadiyar@ti.com>
-Cc: "greg@kroah.com" <greg@kroah.com>, "dbrownell@users.sourceforge.net" <dbrownell@users.sourceforge.net>, "linux-usb@vger.kernel.org" <linux-usb@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Robert Schwebel <r.schwebel@pengutronix.de>, David VomLehn <dvomlehn@cisco.com>, linux-embedded@vger.kernel.org, Juergen Beisert <jbe@pengutronix.de>, Wolfram Sang <wsa@pengutronix.de>
 
-2009/8/1 Gadiyar, Anand <gadiyar@ti.com>:
-> Ming Lei wrote:
+On Fri, Jul 31, 2009 at 01:42:35PM -0500, Bill Gatliff wrote:
+> Robert Schwebel wrote:
+>>   
+>>> The question I've been looking at is: do sub-second boot times make
+>>> all this a moot point? After all, if you can bring up your graphics
+>>> driver in a fraction of a second and use *it* to display a splash
+>>> screen, it seems like it would meet your need to give almost immediate
+>>> feedback to users that the system is alive.
+>>>     
 >>
->> From: Ming Lei <tom.leiming@gmail.com>
+>> Yup, that would be cool.
 >>
->> All machines based on OMAP34XX should select TWL_4030_USB if
->> they want to support musb.
+>> However, on flash-based systems in the ARM926 / 200...400 MHz class
+>> (which is still quite common) the boot time up to the point where the
+>> penguin appears is still about 3...4 s [1] which is too long. So I
+>> suspect until systems become faster, we'll have no other choice than
+>> such as scenario.
+>>   
 >
-> Not really. The OMAP3 EVM uses an NXP ISP1504 transceiver instead,
-> and so registers a NOP transceiver instead.
+> Could your bootloader pre-initialize the graphics hardware to the same  
+> mode that the Linux driver will ultimately select, and then throw up a  
+> static graphic?  That would give you some output until the driver itself  
+> comes online.
 
-Oh, I forget that twl4030 is a standalone chip, so please ignore the patch.
+I implemented exactly this for the i.MX framebuffer last week. It works
+by looking at the controllers physical screen start address, ioremapping
+this address and copying the content to the newly allocated framebuffer.
+Currently the driver still reinitilializes the controller with exactly
+the same values. We could skip this initialization step depending on a
+imxfb.preinitialized=1 command line parameter and read back
+resolution/depth from the device in order to fill the fb_info struct.
 
-Maybe we should remove the dependency on MACH_OMAP_3430SDP, because
-many machines may use twl4030.
+This approach works good, I just wonder how acceptable it is for
+mainline.
 
+The downside of this approach is that we have to add
+mem=${physical_mem - 1MB} to the command line.
+
+Sascha
 
 -- 
-Lei Ming
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
