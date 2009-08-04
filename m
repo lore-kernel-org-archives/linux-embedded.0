@@ -1,40 +1,31 @@
 From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 1/6] lib/decompress_*: only include <linux/slab.h> if
- STATIC is not defined
-Date: Tue, 4 Aug 2009 15:55:00 -0700
-Message-ID: <20090804155500.db6c88fa.akpm@linux-foundation.org>
+Subject: Re: [PATCH 2/6] include/linux/unaligned/{l,b}e_byteshift.h: Fix
+ usage for compressed kernels
+Date: Tue, 4 Aug 2009 15:55:50 -0700
+Message-ID: <20090804155550.3203f5f4.akpm@linux-foundation.org>
 References: <20090731093107.GA29704@merkur.ravnborg.org>
 	<1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>
+	<1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S933552AbZHDW4D@vger.kernel.org>
-In-Reply-To: <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Cc: sam@ravnborg.org, hpa@zytor.com, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, albin.tonnerre@free-electrons.com, Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: sam@ravnborg.org, hpa@zytor.com, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, albin.tonnerre@free-electrons.com
 
-On Mon,  3 Aug 2009 16:58:16 +0200
+On Mon,  3 Aug 2009 16:58:17 +0200
 Albin Tonnerre <albin.tonnerre@free-electrons.com> wrote:
 
-> These includes were added by 079effb6933f34b9b1b67b08bd4fd7fb672d16ef to
-> fix the build when using kmemtrace. However this is not necessary when
-> used to create a compressed kernel, and actually creates issues (brings
-> a lot of things unavailable in the decompression environment), so don't
-> include it if STATIC is defined.
-> 
+> When unaligned accesses are required for uncompressing a kernel (such as
+> for LZO decompression on ARM in a patch that follows), including
+> <linux/kernel.h> causes issues as it brings in a lot of things that are
+> not available in the decompression environment.
+> However, those files apparently use nothing from <linux/kernel.h>, all
+> they need is the declaration of types such as u32 or u64, so
+> <linux/types.h> should be enough
 
-The description "actually creates issues (brings a lot of things
-unavailable in the decompression environment)" is inadequate.  Please
-describe te problem this patch fixes more completely so that others
-(ie: me) can decide whether this patch is needed in 2.6.32, 2.6.31. 
-2.6.30, ...
-
-
-This patch conflicts heavily with
-
-http://userweb.kernel.org/~akpm/mmotm/broken-out/bzip2-lzma-remove-nasty-uncompressed-size-hack-in-pre-boot-environment.patch
-
-
-What should we do about that?
-
+Again, please provide a full description of thes "issues" which a patch
+addresses so that the patch's importance can be understood by others,
+thanks.
