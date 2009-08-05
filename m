@@ -1,79 +1,53 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: [PATCH 1/6] lib/decompress_*: only include <linux/slab.h> if
- STATIC is not defined
-Date: Wed, 05 Aug 2009 03:06:41 +0100
-Message-ID: <4A78E931.6030308@lougher.demon.co.uk>
-References: <20090731093107.GA29704@merkur.ravnborg.org>	<1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>	<20090804155500.db6c88fa.akpm@linux-foundation.org>	<4A78D6BD.3030003@lougher.demon.co.uk> <20090804180854.d5dbb07f.akpm@linux-foundation.org>
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Subject: Re: [PATCH 3/6] Add support for LZO-compressed kernels
+Date: Wed, 5 Aug 2009 11:19:21 +0200
+Message-ID: <20090805091813.GC5854@laptop>
+References: <20090731093107.GA29704@merkur.ravnborg.org>
+ <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>
+ <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com>
+ <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com>
+ <20090804160043.82b256d8.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S933305AbZHECGm@vger.kernel.org>
-In-Reply-To: <20090804180854.d5dbb07f.akpm@linux-foundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20090804160043.82b256d8.akpm@linux-foundation.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Albin Tonnerre <albin.tonnerre@free-electrons.com>, sam@ravnborg.org, hpa@zytor.com, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: sam@ravnborg.org, hpa@zytor.com, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Andrew Morton wrote:
-> On Wed, 05 Aug 2009 01:47:57 +0100 Phillip Lougher <phillip@lougher.demon.co.uk> wrote:
-> 
->>
->> What do you normally do in this situation?
-> 
-> I normally fix the rejects ;)
-> 
-> But I'd like to confirm that the two patches don't fix the same thing
-> via different means.  Lacking a full description of Albin's "issues",
-> that's hard to determine.  They do appear to be unrelated.
-> 
+On Tue, Aug 04, 2009 at 04:00:43PM -0700, Andrew Morton wrote :
+> On Mon,  3 Aug 2009 16:58:18 +0200
+> Albin Tonnerre <albin.tonnerre@free-electrons.com> wrote:
 
-No they're not fixing the same thing.
+> > This is the first part of the lzo patch
+> > The lzo compressor is worse than gzip at compression, but faster at
+> > extraction. Here are some figures for an ARM board I'm working on:
 
-Albin's patch is moving #include <slab.h> inside the #ifndef STATIC ...
-#endif code segment.  This ensures that <slab.h>
-isn't included when the file is being built in the stripped down
-pre-boot environment.  I imagine Albin's issues is that slab.h
-pulls in a lot of definitions unnecessary in the pre-boot
-environment and which rely on things which are missing
-in the stripped down pre-boot environment.
+> > Uncompressed size: 3.24Mo
+> > gzip  1.61Mo 0.72s
+> > lzo   1.75Mo 0.48s
 
-My changes to the #ifndef STATIC logic defines PREBOOT if
-STATIC is defined.  My patch uses the PREBOOT definition
-later to define the decompress wrapper function, which is only
-needed in the preboot environment.
+> > So for a compression ratio that is still relatively close to gzip, it's
+> > much faster to extract, at least in that case.
 
-i.e.
+> Is 3.2Mb a typical kernel size for small systems?  It sounds large.
 
-#ifdef STATIC
-#define PREBOOT
-#else
-#include <linux/decompress/unlzma.h>
-#endif
+This one actually embeds an initramfs which accounts for about half of the size.
 
-...
-Lots of code
-...
+> > +#ifdef STATIC
 
-#ifdef PREBOOT
-static int INIT decompress.....
-#endif
+> What is this STATIC thing for?
 
+That's what is currently used to test whether you're compiling the pre-boot
+environment. eg. include/linux/decompress/mm.h uses this to determine whether it
+should provide a malloc() implementation or simply #define malloc(a) kmalloc(a, GFP_KERNEL),
+and a lot of similar things
 
-Obvious question, why doesn't my patch use STATIC here rather than
-PREBOOT?  The header file <linux/decompress/unlzma.h> defines STATIC, .i.e
-the #ifndef STATIC case defines STATIC via an include file, which makes
-decisions on STATIC later in the file impossible.
-
->>  I'm happy to send a revised
->> bzip2-lzma-remove-nasty-uncompressed-size-hack-in-pre-boot-environment.patch
->> that would apply cleanly on-top of Alvin's patch, but, this will obviously
->> create dependencies on his patch being applied.
-> 
-> Reworked
-> lib-decompress_-only-include-linux-slabh-if-static-is-not-defined.patch:
-
-The patch looks OK.
-
-Thanks
-
-Phillip
+-- 
+Albin Tonnerre, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
