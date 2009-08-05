@@ -1,9 +1,12 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Andrew Morton <akpm@linux-foundation.org>
 Subject: Re: [PATCH 1/6] lib/decompress_*: only include <linux/slab.h> if
  STATIC is not defined
-Date: Tue, 04 Aug 2009 17:57:03 -0700
-Message-ID: <4A78D8DF.8070303@zytor.com>
-References: <20090731093107.GA29704@merkur.ravnborg.org>	<1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com> <20090804155500.db6c88fa.akpm@linux-foundation.org> <4A78D6BD.3030003@lougher.demon.co.uk>
+Date: Tue, 4 Aug 2009 18:08:54 -0700
+Message-ID: <20090804180854.d5dbb07f.akpm@linux-foundation.org>
+References: <20090731093107.GA29704@merkur.ravnborg.org>
+	<1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>
+	<20090804155500.db6c88fa.akpm@linux-foundation.org>
+	<4A78D6BD.3030003@lougher.demon.co.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -12,45 +15,101 @@ Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Albin Tonnerre <albin.tonnerre@free-electrons.com>, sam@ravnborg.org, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: Albin Tonnerre <albin.tonnerre@free-electrons.com>, sam@ravnborg.org, hpa@zytor.com, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On 08/04/2009 05:47 PM, Phillip Lougher wrote:
+On Wed, 05 Aug 2009 01:47:57 +0100 Phillip Lougher <phillip@lougher.demon.co.uk> wrote:
+
 > Andrew Morton wrote:
->> On Mon,  3 Aug 2009 16:58:16 +0200
->> Albin Tonnerre <albin.tonnerre@free-electrons.com> wrote:
->>
->>> These includes were added by 079effb6933f34b9b1b67b08bd4fd7fb672d16ef to
->>> fix the build when using kmemtrace. However this is not necessary when
->>> used to create a compressed kernel, and actually creates issues (brings
->>> a lot of things unavailable in the decompression environment), so don't
->>> include it if STATIC is defined.
->>>
->>
->> The description "actually creates issues (brings a lot of things
->> unavailable in the decompression environment)" is inadequate.  Please
->> describe te problem this patch fixes more completely so that others
->> (ie: me) can decide whether this patch is needed in 2.6.32, 2.6.31.
->> 2.6.30, ...
->>
->> This patch conflicts heavily with
->>
->> http://userweb.kernel.org/~akpm/mmotm/broken-out/bzip2-lzma-remove-nasty-uncompressed-size-hack-in-pre-boot-environment.patch
->>
->> What should we do about that?
+> > On Mon,  3 Aug 2009 16:58:16 +0200
+> > Albin Tonnerre <albin.tonnerre@free-electrons.com> wrote:
+> > 
+> >> These includes were added by 079effb6933f34b9b1b67b08bd4fd7fb672d16ef to
+> >> fix the build when using kmemtrace. However this is not necessary when
+> >> used to create a compressed kernel, and actually creates issues (brings
+> >> a lot of things unavailable in the decompression environment), so don't
+> >> include it if STATIC is defined.
+> >>
+> > 
+> > The description "actually creates issues (brings a lot of things
+> > unavailable in the decompression environment)" is inadequate.  Please
+> > describe te problem this patch fixes more completely so that others
+> > (ie: me) can decide whether this patch is needed in 2.6.32, 2.6.31. 
+> > 2.6.30, ...
+> > 
+> > 
+> > This patch conflicts heavily with
+> > 
+> > http://userweb.kernel.org/~akpm/mmotm/broken-out/bzip2-lzma-remove-nasty-uncompressed-size-hack-in-pre-boot-environment.patch
+> > 
+> > 
+> > What should we do about that?
 > 
 > 
-> What do you normally do in this situation?  I'm happy to send a revised
+> What do you normally do in this situation?
+
+I normally fix the rejects ;)
+
+But I'd like to confirm that the two patches don't fix the same thing
+via different means.  Lacking a full description of Albin's "issues",
+that's hard to determine.  They do appear to be unrelated.
+
+>  I'm happy to send a revised
 > bzip2-lzma-remove-nasty-uncompressed-size-hack-in-pre-boot-environment.patch
-> 
 > that would apply cleanly on-top of Alvin's patch, but, this will obviously
 > create dependencies on his patch being applied.
-> 
 
-The general principle is that if A alone creates a more functional
-environment than B alone, then B should be applied on top of A, and vice
-versa.  This is especially so if A is a stable candidate.
+Reworked
+lib-decompress_-only-include-linux-slabh-if-static-is-not-defined.patch:
 
-It *sounds* like your patch is B here, but I am not sure from the
-description.
+ lib/decompress_bunzip2.c |    2 +-
+ lib/decompress_inflate.c |    2 +-
+ lib/decompress_unlzma.c  |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
-	-hpa
+diff -puN lib/decompress_bunzip2.c~lib-decompress_-only-include-linux-slabh-if-static-is-not-defined lib/decompress_bunzip2.c
+--- a/lib/decompress_bunzip2.c~lib-decompress_-only-include-linux-slabh-if-static-is-not-defined
++++ a/lib/decompress_bunzip2.c
+@@ -49,10 +49,10 @@
+ #define PREBOOT
+ #else
+ #include <linux/decompress/bunzip2.h>
++#include <linux/slab.h>
+ #endif /* STATIC */
+ 
+ #include <linux/decompress/mm.h>
+-#include <linux/slab.h>
+ 
+ #ifndef INT_MAX
+ #define INT_MAX 0x7fffffff
+diff -puN lib/decompress_inflate.c~lib-decompress_-only-include-linux-slabh-if-static-is-not-defined lib/decompress_inflate.c
+--- a/lib/decompress_inflate.c~lib-decompress_-only-include-linux-slabh-if-static-is-not-defined
++++ a/lib/decompress_inflate.c
+@@ -19,11 +19,11 @@
+ #include "zlib_inflate/inflate.h"
+ 
+ #include "zlib_inflate/infutil.h"
++#include <linux/slab.h>
+ 
+ #endif /* STATIC */
+ 
+ #include <linux/decompress/mm.h>
+-#include <linux/slab.h>
+ 
+ #define GZIP_IOBUF_SIZE (16*1024)
+ 
+diff -puN lib/decompress_unlzma.c~lib-decompress_-only-include-linux-slabh-if-static-is-not-defined lib/decompress_unlzma.c
+--- a/lib/decompress_unlzma.c~lib-decompress_-only-include-linux-slabh-if-static-is-not-defined
++++ a/lib/decompress_unlzma.c
+@@ -33,10 +33,10 @@
+ #define PREBOOT
+ #else
+ #include <linux/decompress/unlzma.h>
++#include <linux/slab.h>
+ #endif /* STATIC */
+ 
+ #include <linux/decompress/mm.h>
+-#include <linux/slab.h>
+ 
+ #define	MIN(a, b) (((a) < (b)) ? (a) : (b))
+ 
+_
