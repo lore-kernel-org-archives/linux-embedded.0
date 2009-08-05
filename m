@@ -1,66 +1,36 @@
-From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Subject: Re: [PATCH 2/6] include/linux/unaligned/{l,b}e_byteshift.h: Fix
- usage for compressed kernels
-Date: Wed, 5 Aug 2009 11:29:56 +0200
-Message-ID: <20090805092956.GD5854@laptop>
-References: <20090731093107.GA29704@merkur.ravnborg.org>
- <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>
- <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com>
- <20090804155550.3203f5f4.akpm@linux-foundation.org>
+From: Michael Opdenacker <michael-lists@free-electrons.com>
+Subject: Embedded Linux Conference 2009 videos
+Date: Wed, 05 Aug 2009 15:04:11 +0200
+Message-ID: <4A79834B.9050500@free-electrons.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20090804155550.3203f5f4.akpm@linux-foundation.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: sam@ravnborg.org, hpa@zytor.com, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-On Tue, Aug 04, 2009 at 03:55:50PM -0700, Andrew Morton wrote :
-> On Mon,  3 Aug 2009 16:58:17 +0200
-> Albin Tonnerre <albin.tonnerre@free-electrons.com> wrote:
+Greetings,
 
-> > When unaligned accesses are required for uncompressing a kernel (such as
-> > for LZO decompression on ARM in a patch that follows), including
-> > <linux/kernel.h> causes issues as it brings in a lot of things that are
-> > not available in the decompression environment.
-> > However, those files apparently use nothing from <linux/kernel.h>, all
-> > they need is the declaration of types such as u32 or u64, so
-> > <linux/types.h> should be enough
+We are proud to release the videos that we took at ELC 2009 in San
+Francisco:
+http://free-electrons.com/blog/elc-2009-videos/
 
-> Again, please provide a full description of thes "issues" which a patch
-> addresses so that the patch's importance can be understood by others,
-> thanks.
+In particular, don't miss the "Embedded Linux and Mainline Kernel"
+keynote from David Woodhouse, and the "Embedded Linux Kernel Features
+and Development" panel with Jonathan Corbet, Matt Mackall, David
+Woodhouse and Tim Bird. There are lots of other talks related to the
+kernel on embedded platforms.
 
-linux/kernel.h brings at least:
-extern int console_printk[];
-extern const char hex_asc[];
-which causes errors at link-time as they are not available when
-compiling the pre-boot environement. There are also a few others:
+Some of the videos are now in HD resolution, which should now make it
+possible to read the slides directly from the video.
 
-arch/arm/boot/compressed/misc.o: In function `valid_user_regs':
-/home/albin/devel/free-electrons/gits/linux-2.6/arch/arm/include/asm/ptrace.h:158: undefined reference to `elf_hwcap'
-arch/arm/boot/compressed/misc.o: In function `console_silent':
-/home/albin/devel/free-electrons/gits/linux-2.6/include/linux/kernel.h:292: undefined reference to `console_printk'
-arch/arm/boot/compressed/misc.o: In function `console_verbose':
-/home/albin/devel/free-electrons/gits/linux-2.6/include/linux/kernel.h:297: undefined reference to `console_printk'
-arch/arm/boot/compressed/misc.o: In function `pack_hex_byte':
-/home/albin/devel/free-electrons/gits/linux-2.6/include/linux/kernel.h:360: undefined reference to `hex_asc'
-arch/arm/boot/compressed/misc.o: In function `hweight_long':
-/home/albin/devel/free-electrons/gits/linux-2.6/include/linux/bitops.h:45: undefined reference to `hweight32'
-arch/arm/boot/compressed/misc.o: In function `__cmpxchg_local_generic':
-/home/albin/devel/free-electrons/gits/linux-2.6/include/asm-generic/cmpxchg-local.h:21: undefined reference to `wrong_size_cmpxchg'
-/home/albin/devel/free-electrons/gits/linux-2.6/include/asm-generic/cmpxchg-local.h:42: undefined reference to `wrong_size_cmpxchg'
-arch/arm/boot/compressed/misc.o: In function `__xchg':
-/home/albin/devel/free-electrons/gits/linux-2.6/arch/arm/include/asm/system.h:309: undefined reference to `__bad_xchg'
-make[2]: *** [arch/arm/boot/compressed/vmlinux] Error 1
-make[1]: *** [arch/arm/boot/compressed/vmlinux] Error 2
+Cheers,
 
-Regards,
+Satoru Ueda, Tim Bird, Thomas Petazzoni and Michael Opdenacker.
+
 -- 
-Albin Tonnerre, Free Electrons
+Michael Opdenacker, Free Electrons
 Kernel, drivers and embedded Linux development,
 consulting, training and support.
 http://free-electrons.com
