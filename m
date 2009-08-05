@@ -1,70 +1,79 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
 Subject: Re: [PATCH 1/6] lib/decompress_*: only include <linux/slab.h> if
  STATIC is not defined
-Date: Wed, 05 Aug 2009 02:32:44 +0100
-Message-ID: <4A78E13C.30309@lougher.demon.co.uk>
-References: <20090731093107.GA29704@merkur.ravnborg.org>	<1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com> <20090804155500.db6c88fa.akpm@linux-foundation.org> <4A78D6BD.3030003@lougher.demon.co.uk> <4A78D8DF.8070303@zytor.com>
+Date: Wed, 05 Aug 2009 03:06:41 +0100
+Message-ID: <4A78E931.6030308@lougher.demon.co.uk>
+References: <20090731093107.GA29704@merkur.ravnborg.org>	<1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>	<20090804155500.db6c88fa.akpm@linux-foundation.org>	<4A78D6BD.3030003@lougher.demon.co.uk> <20090804180854.d5dbb07f.akpm@linux-foundation.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4A78D8DF.8070303@zytor.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S933305AbZHECGm@vger.kernel.org>
+In-Reply-To: <20090804180854.d5dbb07f.akpm@linux-foundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Albin Tonnerre <albin.tonnerre@free-electrons.com>, sam@ravnborg.org, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Albin Tonnerre <albin.tonnerre@free-electrons.com>, sam@ravnborg.org, hpa@zytor.com, linux@arm.linux.org.uk, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-H. Peter Anvin wrote:
-> On 08/04/2009 05:47 PM, Phillip Lougher wrote:
->> Andrew Morton wrote:
->>> On Mon,  3 Aug 2009 16:58:16 +0200
->>> Albin Tonnerre <albin.tonnerre@free-electrons.com> wrote:
->>>
->>>> These includes were added by 079effb6933f34b9b1b67b08bd4fd7fb672d16ef to
->>>> fix the build when using kmemtrace. However this is not necessary when
->>>> used to create a compressed kernel, and actually creates issues (brings
->>>> a lot of things unavailable in the decompression environment), so don't
->>>> include it if STATIC is defined.
->>>>
->>> The description "actually creates issues (brings a lot of things
->>> unavailable in the decompression environment)" is inadequate.  Please
->>> describe te problem this patch fixes more completely so that others
->>> (ie: me) can decide whether this patch is needed in 2.6.32, 2.6.31.
->>> 2.6.30, ...
->>>
->>> This patch conflicts heavily with
->>>
->>> http://userweb.kernel.org/~akpm/mmotm/broken-out/bzip2-lzma-remove-nasty-uncompressed-size-hack-in-pre-boot-environment.patch
->>>
->>> What should we do about that?
+Andrew Morton wrote:
+> On Wed, 05 Aug 2009 01:47:57 +0100 Phillip Lougher <phillip@lougher.demon.co.uk> wrote:
+> 
 >>
->> What do you normally do in this situation?  I'm happy to send a revised
+>> What do you normally do in this situation?
+> 
+> I normally fix the rejects ;)
+> 
+> But I'd like to confirm that the two patches don't fix the same thing
+> via different means.  Lacking a full description of Albin's "issues",
+> that's hard to determine.  They do appear to be unrelated.
+> 
+
+No they're not fixing the same thing.
+
+Albin's patch is moving #include <slab.h> inside the #ifndef STATIC ...
+#endif code segment.  This ensures that <slab.h>
+isn't included when the file is being built in the stripped down
+pre-boot environment.  I imagine Albin's issues is that slab.h
+pulls in a lot of definitions unnecessary in the pre-boot
+environment and which rely on things which are missing
+in the stripped down pre-boot environment.
+
+My changes to the #ifndef STATIC logic defines PREBOOT if
+STATIC is defined.  My patch uses the PREBOOT definition
+later to define the decompress wrapper function, which is only
+needed in the preboot environment.
+
+i.e.
+
+#ifdef STATIC
+#define PREBOOT
+#else
+#include <linux/decompress/unlzma.h>
+#endif
+
+...
+Lots of code
+...
+
+#ifdef PREBOOT
+static int INIT decompress.....
+#endif
+
+
+Obvious question, why doesn't my patch use STATIC here rather than
+PREBOOT?  The header file <linux/decompress/unlzma.h> defines STATIC, .i.e
+the #ifndef STATIC case defines STATIC via an include file, which makes
+decisions on STATIC later in the file impossible.
+
+>>  I'm happy to send a revised
 >> bzip2-lzma-remove-nasty-uncompressed-size-hack-in-pre-boot-environment.patch
->>
 >> that would apply cleanly on-top of Alvin's patch, but, this will obviously
 >> create dependencies on his patch being applied.
->>
 > 
-> The general principle is that if A alone creates a more functional
-> environment than B alone, then B should be applied on top of A, and vice
-> versa.  This is especially so if A is a stable candidate.
-> 
-> It *sounds* like your patch is B here, but I am not sure from the
-> description.
->
+> Reworked
+> lib-decompress_-only-include-linux-slabh-if-static-is-not-defined.patch:
 
-Gosh, who wants to get into the my patch is better than yours
-argument.  I certainly don't...
+The patch looks OK.
 
-My patch series cleans up the code and fixes a number of
-rough edges (which I expect to hit when I try to make Squashfs
-use the new decompression code).  Albin's looks to be adding a
-new set of LZO functionality.  Regarding the conflicting
-patches in question, my patch removes a hack, Albin's moves
-#include <slab.h> into code covered by #ifndef STATIC, so it
-doesn't pull in loads of unnecessary definitions when the
-file is being built in the pre-boot environment.
-
-I personally can't decide which is A or B.
+Thanks
 
 Phillip
