@@ -1,92 +1,81 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
-Date: Fri, 7 Aug 2009 23:08:16 +0200
-Message-ID: <20090807210816.GA29797@merkur.ravnborg.org>
-References: <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com> <20090806224055.GH31579@n2100.arm.linux.org.uk> <20090807092423.GA4455@laptop> <4A7BF5B8.4030907@knaff.lu> <20090807102117.GB4455@laptop> <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop> <20090807200001.GE31543@n2100.arm.linux.org.uk>
+From: Pierre Ossman <pierre@ossman.eu>
+Subject: Re: New MMC maintainer needed
+Date: Thu, 6 Aug 2009 10:54:01 +0200
+Message-ID: <20090806105401.1f852995@mjolnir.ossman.eu>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
+	<20090728222334.0c543c47@mjolnir.ossman.eu>
+	<20090731122623.254fd0f1@mjolnir.ossman.eu>
+	<200908031851.24375.david-b@pacbell.net>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755704AbZHGVIU@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20090807200001.GE31543@n2100.arm.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-20598-1249548849-0001-2"
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <200908031851.24375.david-b@pacbell.net>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+To: David Brownell <david-b@pacbell.net>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
+
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
+
+--=_freyr.ossman.eu-20598-1249548849-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, 3 Aug 2009 18:51:23 -0700
+David Brownell <david-b@pacbell.net> wrote:
+
+> On Friday 31 July 2009, Pierre Ossman wrote:
+> > Restoring back the system state from MMC after a successful hibernation
+> > http://marc.info/?t=3D124818534700003&r=3D1&w=3D2
+> >=20
+> > I don't agree with this approach. The point of the workqueue is so that
+> > the kernel can do things in parallel, so this patch is a step back. The
+> > problem is really with how the kernel doesn't properly cope with
+> > asynchronous disk scanning during bootup. The root_delay parameter was
+> > added for this for the "normal" case, but it seems more work is needed.
+>=20
+
+(confusion on my end, I wasn't thinking about root_delay but rootwait)
+
+> Doesn't handing of resumes needs more attention overall?
+>=20
+
+Very much so. I haven't given that area much love since a) I haven't
+had the time, b) I don't have any systems with fancy enough suspend
+handling to do anything interesting.
+
+> Example, root on eMMC (e.g. a 32-MByte non-removable chip) wouldn't
+> resume at all well the last time I checked ... mounted file systems
+> (not just root) made trouble.  Hardware that reliably reports card
+> insert/remove was rude in the same ways.
+
+The general lack of removal detection during suspend tends to make
+everything more complicated than one would like. But I'm sure it's
+manageable just as long as someone puts enough time into it. I'm still
+very much opposed to just assuming that the user never removes the card
+during suspend though.
+
+Rgds
+--=20
+     -- Pierre Ossman
+
+  WARNING: This correspondence is being monitored by the
+  Swedish government. Make sure your server uses encryption
+  for SMTP traffic and consider using PGP for end-to-end
+  encryption.
+
+--=_freyr.ossman.eu-20598-1249548849-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
 Content-Transfer-Encoding: 7bit
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Albin Tonnerre <albin.tonnerre@free-electrons.com>, Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "hpa@zytor.com" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+Content-Disposition: attachment; filename=signature.asc
 
-On Fri, Aug 07, 2009 at 09:00:01PM +0100, Russell King - ARM Linux wrote:
-> On Fri, Aug 07, 2009 at 03:55:24PM +0200, Albin Tonnerre wrote:
-> > That's true for the actual kernel image, but not for the bootstrap code we use
-> > when compiling compressed kernels. arch/arm/boot/compressed/Makefile uses
-> > libgcc, unless I'm overlooking something here:
-> > 
-> >   arm-unknown-linux-uclibcgnueabi-ld -EL    --defsym zreladdr=0x20008000
-> >   --defsym initrd_phys=0x20410000 --defsym params_phys=0x20000100 -p
-> >   --no-undefined -X
-> >   /home/albin/x-tools/arm-unknown-linux-uclibcgnueabi/lib/gcc/arm-unknown-linux-uclibcgnueabi/4.3.2/libgcc.a
-> >   -T arch/arm/boot/compressed/vmlinux.lds arch/arm/boot/compressed/head.o
-> >   arch/arm/boot/compressed/piggy.gzip.o arch/arm/boot/compressed/misc.o -o
-> >   arch/arm/boot/compressed/vmlinux
-> 
-> It's because libgcc appears in the wrong place in the command line, and
-> due to the way kbuild works, we can't get it into the right place easily.
-> 
-> Linkers are sensitive to the order of archives on the command line - its
-> pointless having an archive as the first file argument because none of
-> the contained objects will ever be pulled in.
-> 
-> Sam - any ideas how to solve this?
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.11 (GNU/Linux)
 
-We could add libgcc as a prerequisite.
-Untested patch below.
+iEYEARECAAYFAkp6mi4ACgkQ7b8eESbyJLjGwQCfaDZO/QTMSmyt85o5XDJBOxii
+i/wAn3enY3iPeJjHxgkJBsFbDdMR69r7
+=qbfd
+-----END PGP SIGNATURE-----
 
-
-This is a ittle hackish - otherwise we have to change the
-definition of ld or use a private version.
-
-I added explanations for some of the linker symbols when
-I was there. I cannot the ld options.
-
-If you decide to use this it has my:
-
-Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
-
-
-	Sam
-
-
-diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
-index ce39dc5..4f980f2 100644
---- a/arch/arm/boot/compressed/Makefile
-+++ b/arch/arm/boot/compressed/Makefile
-@@ -87,15 +87,24 @@ endif
- ifneq ($(PARAMS_PHYS),)
- LDFLAGS_vmlinux += --defsym params_phys=$(PARAMS_PHYS)
- endif
--LDFLAGS_vmlinux += -p --no-undefined -X \
--       $(shell $(CC) $(KBUILD_CFLAGS) --print-libgcc-file-name) -T
-+
-+# ?
-+LDFLAGS_vmlinux += -p
-+# Report unresolved symbol references
-+LDFLAGS_vmlinux += --no-undefined
-+# Delete all temporary local symbols
-+LDFLAGS_vmlinux += -X
-+# Next argument is a linker script
-+LDFLAGS_vmlinux += -T
-+
-+libgcc = $(shell $(CC) $(KBUILD_CFLAGS) --print-libgcc-file-name)
- 
- # Don't allow any static data in misc.o, which
- # would otherwise mess up our GOT table
- CFLAGS_misc.o := -Dstatic=
- 
- $(obj)/vmlinux: $(obj)/vmlinux.lds $(obj)/$(HEAD) $(obj)/piggy.o \
--               $(addprefix $(obj)/, $(OBJS)) FORCE
-+               $(addprefix $(obj)/, $(OBJS)) $(libgcc) FORCE
-        $(call if_changed,ld)
-        @:
- 
-
-
-	Sam
+--=_freyr.ossman.eu-20598-1249548849-0001-2--
