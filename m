@@ -1,43 +1,47 @@
 From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 2/6] include/linux/unaligned/{l,b}e_byteshift.h: Fix
-	usage for compressed kernels
-Date: Wed, 5 Aug 2009 22:19:29 +0100
-Message-ID: <20090805211929.GB9303@n2100.arm.linux.org.uk>
-References: <20090731093107.GA29704@merkur.ravnborg.org> <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com> <20090804155550.3203f5f4.akpm@linux-foundation.org> <20090805092956.GD5854@laptop>
+Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
+Date: Thu, 6 Aug 2009 23:40:55 +0100
+Message-ID: <20090806224055.GH31579@n2100.arm.linux.org.uk>
+References: <20090731093107.GA29704@merkur.ravnborg.org> <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754798AbZHFWmk@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
 	d=arm.linux.org.uk; s=caramon; h=Date:From:To:Cc:Subject:
 	Message-ID:References:MIME-Version:Content-Type:In-Reply-To:
-	Sender; bh=dSmE3tRqNrmm2W9icgQyCo86BBgD87z1JZmD4QpV1X0=; b=PWBvK
-	l2WvhXJifvzBBXXeiP2r74NlT/PtaM8fmYGHoW4kpqcXKtLbtPs7qXX+DHI6hlkZ
-	3ivVI3FhTaptg0nGOTHJSYuwEDz/2wZ4OAXb76GuGk3ijeziXnxvok15FaKvRE8E
-	oOKQgdX57XxRpfyPcGM6cBeKn8URl9fHIauu8Q=
+	Sender; bh=hTBTULixSXGVdVHOuUnczKWHLotOL+Fz15D4XuEIQSs=; b=oecSl
+	QBB63HGVQfu1t//Wf9liAD23vPhLtnT+ORxkeZeR3u7hHQuVt6G4DfhpaI9GSMDx
+	YYbsZdj4qrkcA/DWUy1Fycokl96c/InPy+zlJ2vakMQYxC0xodq7NPs/6CbGB3Xj
+	k5wZ3aMpxh+vhRu7iduz9m7R6DvlZoXqZjORPQ=
 Content-Disposition: inline
-In-Reply-To: <20090805092956.GD5854@laptop>
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, sam@ravnborg.org, hpa@zytor.com, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: sam@ravnborg.org, hpa@zytor.com, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
 
-On Wed, Aug 05, 2009 at 11:29:56AM +0200, Albin Tonnerre wrote:
-> linux/kernel.h brings at least:
-> extern int console_printk[];
-> extern const char hex_asc[];
-> which causes errors at link-time as they are not available when
-> compiling the pre-boot environement. There are also a few others:
+On Mon, Aug 03, 2009 at 04:58:19PM +0200, Albin Tonnerre wrote:
+> This is the second part of patch. This part includes:
+>  - changes to ach/arch/boot/Makefile to make it easier to add new
+>    compression types
+>  - new piggy.lzo.S necessary for lzo compression
+>  - changes in arch/arm/boot/compressed/misc.c to allow the use of lzo or
+>    gzip, depending on the config
+>  - Kconfig support
 
-To be clear, for Andrew's benefit, the reason this happens is because
-we disable the 'static' when building on ARM - this is because we build
-the decompressor with -fPIC, so we can relocate _just_ the data segment
-without writing at all to the text segment.
+FYI, with these patches applied and selecting GZIP method, I get
+linker errors.  I've been unable to track down what's going on, but
+it appears to be a libgcc issue.
 
-This is so that we can flash the compressed image into read only memory
-and have the kernel boot directly from that memory, without having to
-have an expensive and unnecessary copy.
+In spite of the decompressor being built as an EABI object, gcc seems
+to be issuing calls to __umodsi3, which isn't in the EABI libgcc
+(they're called something different - don't ask.)
 
-Having static data and functions causes complications which make this
-impossible to otherwise achieve.  I don't remember the details, I'm not
-an expert on the ARM shared library stuff.
+So I think these patches need further testing and evaluation on ARM
+before they can be merged.  Moreover, I'd like to see some comparisons
+between the _current_ gzip method, the new gzip method and the lzo
+method on ARM.
+
+I was going to get those numbers, but the platform I was going to run
+the tests on has died on me today.
