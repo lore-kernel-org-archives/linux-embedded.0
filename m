@@ -1,36 +1,40 @@
-From: Alain Knaff <alain@knaff.lu>
+From: Matthieu CASTET <matthieu.castet@parrot.com>
 Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
-Date: Fri, 07 Aug 2009 13:29:09 +0200
-Message-ID: <4A7C1005.7010808@knaff.lu>
+Date: Fri, 7 Aug 2009 13:50:03 +0200
+Message-ID: <4A7C14EB.1060701@parrot.com>
 References: <20090731093107.GA29704@merkur.ravnborg.org> <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com> <20090806224055.GH31579@n2100.arm.linux.org.uk> <20090807092423.GA4455@laptop> <4A7BF5B8.4030907@knaff.lu> <20090807102117.GB4455@laptop>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757565AbZHGL3g@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757603AbZHGLuX@vger.kernel.org>
 In-Reply-To: <20090807102117.GB4455@laptop>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="iso-8859-1"
 To: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, sam@ravnborg.org, hpa@zytor.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
+Cc: Alain Knaff <alain@knaff.lu>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "sam@ravnborg.org" <sam@ravnborg.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-On 08/07/09 12:21, Albin Tonnerre wrote:
-
-> Indeed, they've not been applied. However, I'd rather try to understand why
-> exactly this is an issue when compiling with -Os and not -O2 instead of working
+Albin Tonnerre a =E9crit :
+> On Fri, Aug 07, 2009 at 11:36:56AM +0200, Alain Knaff wrote :
+>> On 08/07/09 11:24, Albin Tonnerre wrote:
+>=20
+>>> Regards,
+>=20
+>> Could it be that the patches that remove division (zutil.h and infla=
+te.c)
+>> have somehow not been applied?
+>=20
+> Indeed, they've not been applied. However, I'd rather try to understa=
+nd why
+> exactly this is an issue when compiling with -Os and not -O2 instead =
+of working
 > around it by removing the divisions.
-> 
-> Regards,
+>=20
+Look at the generated code.
 
-Well, I for myself couldn't get it to compile _at_all_ for ARM as long as
-there were any division operations in the code. My theory was that the ARM
-processor doesn't have native division, and that this is being supplied by
-some kind of run-time library, which is not linked with when building the
-pre-boot environment. But if it works with some compilation flags but not
-others, something more complex must be going on...
+Arm doesn't have division instruction.
+May be at -Os gcc emit a call to the software division, but at -O2 it
+manage to optimise the division (transform it in shift, inline some
+builtin, ...).
 
-... or could it be that with some flags, the compiler generates "division
-emulation" code, but not with others (such as when optimizing for size?)
 
-Regards,
-
-Alain
+Matthieu
