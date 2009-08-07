@@ -1,88 +1,44 @@
-From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
-Date: Fri, 7 Aug 2009 15:55:24 +0200
-Message-ID: <20090807135524.GF4455@laptop>
-References: <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com>
- <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com>
- <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com>
- <20090806224055.GH31579@n2100.arm.linux.org.uk>
- <20090807092423.GA4455@laptop>
- <4A7BF5B8.4030907@knaff.lu>
- <20090807102117.GB4455@laptop>
- <4A7C14EB.1060701@parrot.com>
- <20090807130130.GE4455@laptop>
- <4A7C2BA4.7030408@parrot.com>
+Date: Fri, 7 Aug 2009 21:00:01 +0100
+Message-ID: <20090807200001.GE31543@n2100.arm.linux.org.uk>
+References: <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com> <20090806224055.GH31579@n2100.arm.linux.org.uk> <20090807092423.GA4455@laptop> <4A7BF5B8.4030907@knaff.lu> <20090807102117.GB4455@laptop> <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S933578AbZHGUBb@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=arm.linux.org.uk; s=caramon; h=Date:From:To:Cc:Subject:
+	Message-ID:References:MIME-Version:Content-Type:In-Reply-To:
+	Sender; bh=GZxbtpUTHthkkgrq+RnNohPJdIbj2U3poeF3TEaL3QQ=; b=Eqge8
+	kte7XjhEjWThcIXuE6LU3EYY/VQFOGLzfV5CR3KFBH12iLsFPO0WE2GLqC25/kdF
+	9INpXVY+Um2Tk21ooQuEmrtjN5pvGnyTeDUqLO+GFMEJ4oFRpFNwKQYck4Q9Y6v0
+	7urSFWRnwVH8Eknli+cITk9LcxeA4KzrGkFL98=
 Content-Disposition: inline
-In-Reply-To: <4A7C2BA4.7030408@parrot.com>
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <20090807135524.GF4455@laptop>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Matthieu CASTET <matthieu.castet@parrot.com>
-Cc: Alain Knaff <alain@knaff.lu>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "sam@ravnborg.org" <sam@ravnborg.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Cc: Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "sam@ravnborg.org" <sam@ravnborg.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-On Fri, Aug 07, 2009 at 03:27:00PM +0200, Matthieu CASTET wrote :
-> Albin Tonnerre a =E9crit :
-> > On Fri, Aug 07, 2009 at 01:50:03PM +0200, Matthieu CASTET wrote :
-> >> Albin Tonnerre a =E9crit :
-> >>> On Fri, Aug 07, 2009 at 11:36:56AM +0200, Alain Knaff wrote :
-> >>>> On 08/07/09 11:24, Albin Tonnerre wrote:
+On Fri, Aug 07, 2009 at 03:55:24PM +0200, Albin Tonnerre wrote:
+> That's true for the actual kernel image, but not for the bootstrap code we use
+> when compiling compressed kernels. arch/arm/boot/compressed/Makefile uses
+> libgcc, unless I'm overlooking something here:
+> 
+>   arm-unknown-linux-uclibcgnueabi-ld -EL    --defsym zreladdr=0x20008000
+>   --defsym initrd_phys=0x20410000 --defsym params_phys=0x20000100 -p
+>   --no-undefined -X
+>   /home/albin/x-tools/arm-unknown-linux-uclibcgnueabi/lib/gcc/arm-unknown-linux-uclibcgnueabi/4.3.2/libgcc.a
+>   -T arch/arm/boot/compressed/vmlinux.lds arch/arm/boot/compressed/head.o
+>   arch/arm/boot/compressed/piggy.gzip.o arch/arm/boot/compressed/misc.o -o
+>   arch/arm/boot/compressed/vmlinux
 
-> >>>>> Regards,
+It's because libgcc appears in the wrong place in the command line, and
+due to the way kbuild works, we can't get it into the right place easily.
 
-> >>>> Could it be that the patches that remove division (zutil.h and i=
-nflate.c)
-> >>>> have somehow not been applied?
+Linkers are sensitive to the order of archives on the command line - its
+pointless having an archive as the first file argument because none of
+the contained objects will ever be pulled in.
 
-> >>> Indeed, they've not been applied. However, I'd rather try to unde=
-rstand why
-> >>> exactly this is an issue when compiling with -Os and not -O2 inst=
-ead of working
-> >>> around it by removing the divisions.
-
-> >> Look at the generated code.
-
-> >> Arm doesn't have division instruction.
-> >> May be at -Os gcc emit a call to the software division, but at -O2=
- it
-> >> manage to optimise the division (transform it in shift, inline som=
-e
-> >> builtin, ...).
-
-> > Yes, I figured that out. What I don't get, though, is that it fails=
- while the
-> > software division symbol (__aeabi_uidivmod here) does seem to be pr=
-ovided by
-> > libgcc.
-
-> AFAIK we don't link the kernel with libgcc.
-> That's why the kernel provide __aeabi_* in arch/arm/lib
-
-That's true for the actual kernel image, but not for the bootstrap code=
- we use
-when compiling compressed kernels. arch/arm/boot/compressed/Makefile us=
-es
-libgcc, unless I'm overlooking something here:
-
-  arm-unknown-linux-uclibcgnueabi-ld -EL    --defsym zreladdr=3D0x20008=
-000
-  --defsym initrd_phys=3D0x20410000 --defsym params_phys=3D0x20000100 -=
-p
-  --no-undefined -X
-  /home/albin/x-tools/arm-unknown-linux-uclibcgnueabi/lib/gcc/arm-unkno=
-wn-linux-uclibcgnueabi/4.3.2/libgcc.a
-  -T arch/arm/boot/compressed/vmlinux.lds arch/arm/boot/compressed/head=
-=2Eo
-  arch/arm/boot/compressed/piggy.gzip.o arch/arm/boot/compressed/misc.o=
- -o
-  arch/arm/boot/compressed/vmlinux
-
-
-Regards,
---=20
-Albin Tonnerre, Free Electrons
-Kernel, drivers and embedded Linux development,
-consulting, training and support.
-http://free-electrons.com
+Sam - any ideas how to solve this?
