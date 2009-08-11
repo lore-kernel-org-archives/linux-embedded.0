@@ -1,46 +1,64 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: New MMC maintainer needed
-Date: Tue, 11 Aug 2009 15:02:24 +0100
-Message-ID: <20090811140223.GA4278@console-pimps.org>
-References: <20090714153601.6dfe70ff@mjolnir.ossman.eu> <20090722151744.fffd7bf5.akpm@linux-foundation.org> <20090728222334.0c543c47@mjolnir.ossman.eu> <20090731122623.254fd0f1@mjolnir.ossman.eu> <20090731105407.GA31900@console-pimps.org> <20090803123429.390a636f@mjolnir.ossman.eu> <4A76C658.6050002@nokia.com>
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
+Date: Tue, 11 Aug 2009 16:17:31 +0200
+Message-ID: <20090811141731.GK9704@pc-ras4041.res.insa>
+References: <4A7BF5B8.4030907@knaff.lu> <20090807102117.GB4455@laptop> <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop> <20090807200001.GE31543@n2100.arm.linux.org.uk> <20090807210816.GA29797@merkur.ravnborg.org> <20090811094418.GI9704@pc-ras4041.res.insa> <20090811133943.GA3130@merkur.ravnborg.org>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A76C658.6050002@nokia.com>
+In-Reply-To: <20090811133943.GA3130@merkur.ravnborg.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Pierre Ossman <pierre@ossman.eu>, Andrew Morton <akpm@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "nico@cam.org" <nico@cam.org>, "nicolas.ferre@rfo.atmel.com" <nicolas.ferre@rfo.atmel.com>, "hskinnemoen@atmel.com" <hskinnemoen@atmel.com>, "tony@atomide.com" <tony@atomide.com>, "david-b@pacbell.net" <david-b@pacbell.net>, "manuel.lauss@gmail.com" <manuel.lauss@gmail.com>, "mirq-linux@rere.qmqm.pl" <mirq-linux@rere.qmqm.pl>, "ppisa@pikron.com" <ppisa@pikron.com>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>, "ben@fluff.org" <ben@fluff.org>, "saschasommer@freenet.de" <saschasommer@freenet.de>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>, "oakad@yahoo.com" <oakad@yahoo.com>, "ian@mnementh.co.uk" <ian@mnementh.co.uk>, HaraldWelte@viate
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "hpa@zytor.com" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-On Mon, Aug 03, 2009 at 02:13:28PM +0300, Adrian Hunter wrote:
-> Pierre Ossman wrote:
->> Con:
->>
->>  - The scanning code gets less clear as you increase the number of
->>    possible paths through it.
->>
->>  - Different systems will have different init sequences, possibly
->>    provoking bugs in the cards.
->>
->>  - Host driver writers now have more capability bits they have to
->>    consider. And these might be less than obvious since SD/MMC/SDIO are
->>    normally compatible so these bits seem useless.
->>
->>  - With the current logic (which was better in the first version),
->>    "normal" drivers will have to explicitly state that they work as
->>    intended by setting all bits.
->
-> And the pro is objective.
->
->> Pro:
->>
->>  - A slightly reduced scanning time.
->
-> That's great!  Why do you disregard this so easily?
->
+On Tue, Aug 11, 2009 at 03:39:43PM +0200, Sam Ravnborg wrote :
+> On Tue, Aug 11, 2009 at 11:44:18AM +0200, Albin Tonnerre wrote:
+> > Hi Sam,
+> > 
+> > On Fri, Aug 07, 2009 at 11:08:16PM +0200, Sam Ravnborg wrote :
+> > > We could add libgcc as a prerequisite.
+> > > Untested patch below.
+> > 
+> > When compiling with this patch applied, I get the following error:
+> > 
+> >   Kernel: arch/arm/boot/Image is ready
+> >     LD      arch/arm/boot/compressed/vmlinux
+> > /home/albin/x-tools/arm-unknown-linux-uclibcgnueabi/lib/gcc/arm-unknown-linux-uclibcgnueabi/4.3.2/libgcc.a(_dvmd_lnx.o):
+> > In function `__div0':
+> > /home/albin/devel/free-electrons/toolchain/targets/src/gcc-4.3.2/libgcc/../gcc/config/arm/lib1funcs.asm:1079:
+> > undefined reference to `raise'
+> > make[2]: *** [arch/arm/boot/compressed/vmlinux] Error 1
+> > make[1]: *** [arch/arm/boot/compressed/vmlinux] Error 2
+> > 
+> > I've got no idea where this symbol is defined, though. Has anyone an idea on
+> > this ?
+> 
+> To make sure thet hack did what it was intended could you
+> try to build with V=1 and post output of the ld command.
+> 
 
-Ping. Adrian, do you have any initialisation times for this patch? I'm
-afraid I don't have any eMMC hardware, so I'm not able to gather any
-numbers.
+Here it is:
+
+make -f scripts/Makefile.build obj=arch/arm/boot/compressed
+arch/arm/boot/compressed/vmlinux
+  arm-unknown-linux-uclibcgnueabi-ld -EL    --defsym zreladdr=0x20008000
+  --defsym initrd_phys=0x20410000 --defsym params_phys=0x20000100 -p
+  --no-undefined -X -T arch/arm/boot/compressed/vmlinux.lds
+  arch/arm/boot/compressed/head.o arch/arm/boot/compressed/piggy.gzip.o arch/arm/boot/compressed/misc.o
+  /home/albin/x-tools/arm-unknown-linux-uclibcgnueabi/lib/gcc/arm-unknown-linux-uclibcgnueabi/4.3.2/libgcc.a -o arch/arm/boot/compressed/vmlinux
+  /home/albin/x-tools/arm-unknown-linux-uclibcgnueabi/lib/gcc/arm-unknown-linux-uclibcgnueabi/4.3.2/libgcc.a(_dvmd_lnx.o):
+  In function `__div0':
+  /home/albin/devel/free-electrons/toolchain/targets/src/gcc-4.3.2/libgcc/../gcc/config/arm/lib1funcs.asm:1079:
+  undefined reference to `raise'
+
+So it seems like the hack indeed did what is was supposed to do.
+
+Regards,
+-- 
+Albin Tonnerre, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
