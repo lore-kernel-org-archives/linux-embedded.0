@@ -1,42 +1,42 @@
-From: Necati Demir <ndemir@demir.web.tr>
-Subject: conntrack disables network
-Date: Tue, 11 Aug 2009 15:23:27 +0300
-Message-ID: <cf1f4db60908110523s6614591dj69e37140a8c85c59@mail.gmail.com>
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
+Date: Tue, 11 Aug 2009 11:44:18 +0200
+Message-ID: <20090811094418.GI9704@pc-ras4041.res.insa>
+References: <20090806224055.GH31579@n2100.arm.linux.org.uk> <20090807092423.GA4455@laptop> <4A7BF5B8.4030907@knaff.lu> <20090807102117.GB4455@laptop> <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop> <20090807200001.GE31543@n2100.arm.linux.org.uk> <20090807210816.GA29797@merkur.ravnborg.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:sender:received:from:date
-         :x-google-sender-auth:message-id:subject:to:content-type
-         :content-transfer-encoding;
-        bh=uBEdJfit6Xm65iOqswThDCmDIApLYo3Gvrmxh9RfEmc=;
-        b=ZwmuCfVfTstdKpeRLVu5v1T+Myx4TUGEWA+iZBdfyELam/acNeRLqHZTRvvOBuEqyZ
-         ZG4Y1+uYu0gxVcdpw3ZnKSdvSuMYS573jmZr+6rxTtLJX3+7wzFqIWcwdRQUxBvIYycV
-         YjMiHsAyslZUGQ/jvrwncmb84yX3tVLv0eeMY=
+Content-Disposition: inline
+In-Reply-To: <20090807210816.GA29797@merkur.ravnborg.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "hpa@zytor.com" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-Hi,
+Hi Sam,
 
-I am using 2300SX (http://www.compactpc.com.tw/ebox-2300SX.htm).
+On Fri, Aug 07, 2009 at 11:08:16PM +0200, Sam Ravnborg wrote :
+> We could add libgcc as a prerequisite.
+> Untested patch below.
 
-When i enable conntrack in kernel configuration for NAT operations,
-ethernet card does not work. This is really strange. I mean, i can see
-eth0 in ifconfig output, but when i run "udhcpc -i eth0" it does not
-get IP. I tried giving IP manually and i did. But it still does not
-ping network.
+When compiling with this patch applied, I get the following error:
 
-When i disable conntrack, everything is fine again.
+  Kernel: arch/arm/boot/Image is ready
+    LD      arch/arm/boot/compressed/vmlinux
+/home/albin/x-tools/arm-unknown-linux-uclibcgnueabi/lib/gcc/arm-unknown-linux-uclibcgnueabi/4.3.2/libgcc.a(_dvmd_lnx.o):
+In function `__div0':
+/home/albin/devel/free-electrons/toolchain/targets/src/gcc-4.3.2/libgcc/../gcc/config/arm/lib1funcs.asm:1079:
+undefined reference to `raise'
+make[2]: *** [arch/arm/boot/compressed/vmlinux] Error 1
+make[1]: *** [arch/arm/boot/compressed/vmlinux] Error 2
 
-Any suggestion?
+I've got no idea where this symbol is defined, though. Has anyone an idea on
+this ?
 
---
-Necati Demir
-http://demir.web.tr
-http://blog.demir.web.tr
-ndemir [~] demir.web.tr
-necati83 [~] gmail.com
---------------------------------------
+Regards,
+-- 
+Albin Tonnerre, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
