@@ -1,29 +1,31 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
-Date: Tue, 11 Aug 2009 09:31:25 -0700
-Message-ID: <4A819CDD.1000700@zytor.com>
-References: <4A7BF5B8.4030907@knaff.lu> <20090807102117.GB4455@laptop> <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop> <20090807200001.GE31543@n2100.arm.linux.org.uk> <20090807210816.GA29797@merkur.ravnborg.org> <20090811094418.GI9704@pc-ras4041.res.insa> <4A819642.10700@zytor.com> <20090811162730.GM9704@pc-ras4041.res.insa>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: New MMC maintainer needed
+Date: Wed, 12 Aug 2009 15:27:31 -0700
+Message-ID: <20090812152731.d07bd980.akpm@linux-foundation.org>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
+	<20090722151744.fffd7bf5.akpm@linux-foundation.org>
+	<20090728222334.0c543c47@mjolnir.ossman.eu>
+	<20090731122623.254fd0f1@mjolnir.ossman.eu>
+	<20090731105407.GA31900@console-pimps.org>
+	<20090803123429.390a636f@mjolnir.ossman.eu>
+	<4A76C658.6050002@nokia.com>
+	<20090811140223.GA4278@console-pimps.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20090811162730.GM9704@pc-ras4041.res.insa>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752610AbZHLW3k@vger.kernel.org>
+In-Reply-To: <20090811140223.GA4278@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: Matt Fleming <matt@console-pimps.org>
+Cc: adrian.hunter@nokia.com, pierre@ossman.eu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw
 
-On 08/11/2009 09:27 AM, Albin Tonnerre wrote:
-> 
-> So I guess the only options left are either define a dummy raise() function, or
-> get rid of the divisions like Alain Knaff did in his patch ?
-> 
 
-Define a dummy raise, get rid of the divisions, or provide your own
-division function (there is probably one in the kernel already...)
+davem has set up linux-mmc@vger.kernel.org for us.  It will be archived
+at marc.info.  Thanks to both..
 
-	-hpa
+I was thinking that we wouldn't need a separate list but then I
+realised I didn't have anywhere to send MMC bug reports.
 
--- 
-H. Peter Anvin, Intel Open Source Technology Center
-I work for Intel.  I don't speak on their behalf.
+	echo "subscribe linux-mmc" | mail majordomo@vger.kernel.org
+
