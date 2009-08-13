@@ -1,36 +1,52 @@
 From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
 Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
-Date: Thu, 13 Aug 2009 11:30:36 +0200
-Message-ID: <20090813093036.GG4051@pc-ras4041.res.insa>
-References: <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop> <20090807200001.GE31543@n2100.arm.linux.org.uk> <20090807210816.GA29797@merkur.ravnborg.org> <20090811094418.GI9704@pc-ras4041.res.insa> <4A819642.10700@zytor.com> <20090811162730.GM9704@pc-ras4041.res.insa> <4A819CDD.1000700@zytor.com>
+Date: Thu, 13 Aug 2009 14:25:11 +0200
+Message-ID: <20090813122511.GJ4051@pc-ras4041.res.insa>
+References: <20090731093107.GA29704@merkur.ravnborg.org> <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com> <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com> <20090806224055.GH31579@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753942AbZHMJak@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A819CDD.1000700@zytor.com>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <20090806224055.GH31579@n2100.arm.linux.org.uk>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: "H. Peter Anvin" <hpa@zytor.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: sam@ravnborg.org, hpa@zytor.com, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
 
-On Tue, Aug 11, 2009 at 09:31:25AM -0700, H. Peter Anvin wrote :
-> On 08/11/2009 09:27 AM, Albin Tonnerre wrote:
-> > 
-> > So I guess the only options left are either define a dummy raise() function, or
-> > get rid of the divisions like Alain Knaff did in his patch ?
-> > 
+On Thu, Aug 06, 2009 at 11:40:55PM +0100, Russell King - ARM Linux wrote :
+> On Mon, Aug 03, 2009 at 04:58:19PM +0200, Albin Tonnerre wrote:
+> > This is the second part of patch. This part includes:
+> >  - changes to ach/arch/boot/Makefile to make it easier to add new
+> >    compression types
+> >  - new piggy.lzo.S necessary for lzo compression
+> >  - changes in arch/arm/boot/compressed/misc.c to allow the use of lzo or
+> >    gzip, depending on the config
+> >  - Kconfig support
 > 
-> Define a dummy raise, get rid of the divisions, or provide your own
-> division function (there is probably one in the kernel already...)
+> FYI, with these patches applied and selecting GZIP method, I get
+> linker errors.  I've been unable to track down what's going on, but
+> it appears to be a libgcc issue.
+> 
+> In spite of the decompressor being built as an EABI object, gcc seems
+> to be issuing calls to __umodsi3, which isn't in the EABI libgcc
+> (they're called something different - don't ask.)
 
-Yes, there's such a function in arch/arm/lib/lib1funcs.S, which in turns
-requires the __div0 symbol, defined in arch/arm/kernel/traps.c, and this one
-cannot be used as it brings plenty of symbols that aren't available in the
-pre-boot environment. So anyway, we have to define our own symbols there. Either
-we use libgcc and define raise(), or lib1funcs and define __div0().
+Looks like this one is on its way to getting solved.
 
-Russell, what's your take on this ?
+> So I think these patches need further testing and evaluation on ARM
+> before they can be merged.  Moreover, I'd like to see some comparisons
+> between the _current_ gzip method, the new gzip method and the lzo
+> method on ARM.
+
+The figures I posted with my patch were from an ARM (AT91SAM9263) 180MHz CPU.
+For the record (average on 25 boots with each compression method):
+
+Uncompressed size: 3.24Mo
+gzip  1.61Mo 0.72s
+lzo   1.75Mo 0.48s
+
+Some tests with the current gzip code give about 1.64s decompression time.
 
 Regards,
 -- 
