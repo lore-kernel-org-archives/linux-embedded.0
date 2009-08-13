@@ -1,40 +1,56 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
-Date: Thu, 13 Aug 2009 07:07:00 -0700
-Message-ID: <4A841E04.8070108@zytor.com>
-References: <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop> <20090807200001.GE31543@n2100.arm.linux.org.uk> <20090807210816.GA29797@merkur.ravnborg.org> <20090811094418.GI9704@pc-ras4041.res.insa> <4A819642.10700@zytor.com> <20090811162730.GM9704@pc-ras4041.res.insa> <4A819CDD.1000700@zytor.com> <20090813093036.GG4051@pc-ras4041.res.insa>
+From: Nicolas Pitre <nico@cam.org>
+Subject: Re: New MMC maintainer needed
+Date: Thu, 13 Aug 2009 13:03:56 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.0908131249340.10633@xanadu.home>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>
+ <20090722151744.fffd7bf5.akpm@linux-foundation.org>
+ <20090728222334.0c543c47@mjolnir.ossman.eu>
+ <20090731122623.254fd0f1@mjolnir.ossman.eu>
+ <20090731105407.GA31900@console-pimps.org>
+ <20090803123429.390a636f@mjolnir.ossman.eu> <4A76C658.6050002@nokia.com>
+ <20090811140223.GA4278@console-pimps.org> <4A83BA65.1080608@nokia.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753324AbZHMOMu@vger.kernel.org>
-In-Reply-To: <20090813093036.GG4051@pc-ras4041.res.insa>
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755084AbZHMREP@vger.kernel.org>
+In-reply-to: <4A83BA65.1080608@nokia.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Sam Ravnborg <sam@ravnborg.org>, Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Matt Fleming <matt@console-pimps.org>, Pierre Ossman <pierre@ossman.eu>, Andrew Morton <akpm@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "nicolas.ferre@rfo.atmel.com" <nicolas.ferre@rfo.atmel.com>, "hskinnemoen@atmel.com" <hskinnemoen@atmel.com>, "tony@atomide.com" <tony@atomide.com>, "david-b@pacbell.net" <david-b@pacbell.net>, "manuel.lauss@gmail.com" <manuel.lauss@gmail.com>, "mirq-linux@rere.qmqm.pl" <mirq-linux@rere.qmqm.pl>, "ppisa@pikron.com" <ppisa@pikron.com>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>, "ben@fluff.org" <ben@fluff.org>, "saschasommer@freenet.de" <saschasommer@freenet.de>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>, "oakad@yahoo.com" <oakad@yahoo.com>, "ian@mnementh.co.uk" <ian@mnementh.co.uk>, HaraldWel
 
-On 08/13/2009 02:30 AM, Albin Tonnerre wrote:
-> On Tue, Aug 11, 2009 at 09:31:25AM -0700, H. Peter Anvin wrote :
->> On 08/11/2009 09:27 AM, Albin Tonnerre wrote:
->>> So I guess the only options left are either define a dummy raise() function, or
->>> get rid of the divisions like Alain Knaff did in his patch ?
->>>
->> Define a dummy raise, get rid of the divisions, or provide your own
->> division function (there is probably one in the kernel already...)
+On Thu, 13 Aug 2009, Adrian Hunter wrote:
+
+> Results in microseconds:
 > 
-> Yes, there's such a function in arch/arm/lib/lib1funcs.S, which in turns
-> requires the __div0 symbol, defined in arch/arm/kernel/traps.c, and this one
-> cannot be used as it brings plenty of symbols that aren't available in the
-> pre-boot environment. So anyway, we have to define our own symbols there. Either
-> we use libgcc and define raise(), or lib1funcs and define __div0().
+> 	before		after
+> eMMC	194145		193641
+> uSD	4143		2129
 > 
+> However, that excludes powering up.  For example the pbias setting
+> on omap_hsmmc for MMC1 (uSD for us) has a 100ms delay.
+> 
+> So the difference is negligible.
 
-I would go with the variant in the kernel, as being a known quantity.
+I therefore tend to agree with Pierre and Andrew.  This doesn't make 
+enough of a difference to increase the complexity and maintenance cost 
+of the code for such a trivial improvement.
 
-Your __div0 function can just loop forever.
+> Although, the notion of unnecessarily sending SDIO commands
+> to an uSD, and SDIO and SD commands to an eMMC, seems wrong.
+> Especially when trying to debug very-hard-to-reproduce errors.
 
-	-hpa
+Simply commenting out the SD/SDIO or MMC probe call in the code is 
+very simple when you're debugging.  Then if you actually come to the 
+conclusion that some real bugs are due to this cross probe and can prove 
+it then we might reconsider.
 
--- 
-H. Peter Anvin, Intel Open Source Technology Center
-I work for Intel.  I don't speak on their behalf.
+Currently, generic host drivers are sometimes used in the context of a 
+uSD slot, sometimes in the context of a SD/SDIO/MMC slot, sometimes with 
+a hardwired SDIO based chip soldered on the board, and they don't need 
+any special flags to distinguish between those use cases.  This greatly 
+helps maintainability, and that should prevail over slight latency 
+improvements to non timing critical events such as card insertion.
+
+
+Nicolas
