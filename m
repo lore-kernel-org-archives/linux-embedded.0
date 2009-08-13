@@ -1,56 +1,40 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: New MMC maintainer needed
-Date: Thu, 13 Aug 2009 09:21:17 +0100
-Message-ID: <20090813082117.GA6837@console-pimps.org>
-References: <20090714153601.6dfe70ff@mjolnir.ossman.eu> <20090722151744.fffd7bf5.akpm@linux-foundation.org> <20090728222334.0c543c47@mjolnir.ossman.eu> <20090731122623.254fd0f1@mjolnir.ossman.eu> <20090731105407.GA31900@console-pimps.org> <20090803123429.390a636f@mjolnir.ossman.eu> <4A76C658.6050002@nokia.com> <20090811140223.GA4278@console-pimps.org> <20090812152731.d07bd980.akpm@linux-foundation.org>
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Subject: Re: [PATCH 4/6] Add support for LZO-compressed kernels for ARM
+Date: Thu, 13 Aug 2009 11:30:36 +0200
+Message-ID: <20090813093036.GG4051@pc-ras4041.res.insa>
+References: <4A7C14EB.1060701@parrot.com> <20090807130130.GE4455@laptop> <4A7C2BA4.7030408@parrot.com> <20090807135524.GF4455@laptop> <20090807200001.GE31543@n2100.arm.linux.org.uk> <20090807210816.GA29797@merkur.ravnborg.org> <20090811094418.GI9704@pc-ras4041.res.insa> <4A819642.10700@zytor.com> <20090811162730.GM9704@pc-ras4041.res.insa> <4A819CDD.1000700@zytor.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753942AbZHMJak@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20090812152731.d07bd980.akpm@linux-foundation.org>
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <4A819CDD.1000700@zytor.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: adrian.hunter@nokia.com, pierre@ossman.eu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw
+To: "H. Peter Anvin" <hpa@zytor.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Sam Ravnborg <sam@ravnborg.org>, Matthieu CASTET <matthieu.castet@parrot.com>, Alain Knaff <alain@knaff.lu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-On Wed, Aug 12, 2009 at 03:27:31PM -0700, Andrew Morton wrote:
+On Tue, Aug 11, 2009 at 09:31:25AM -0700, H. Peter Anvin wrote :
+> On 08/11/2009 09:27 AM, Albin Tonnerre wrote:
+> > 
+> > So I guess the only options left are either define a dummy raise() function, or
+> > get rid of the divisions like Alain Knaff did in his patch ?
+> > 
 > 
-> davem has set up linux-mmc@vger.kernel.org for us.  It will be archived
-> at marc.info.  Thanks to both..
-> 
-> I was thinking that we wouldn't need a separate list but then I
-> realised I didn't have anywhere to send MMC bug reports.
-> 
-> 	echo "subscribe linux-mmc" | mail majordomo@vger.kernel.org
-> 
+> Define a dummy raise, get rid of the divisions, or provide your own
+> division function (there is probably one in the kernel already...)
 
-Unless someone has beaten me to it,
+Yes, there's such a function in arch/arm/lib/lib1funcs.S, which in turns
+requires the __div0 symbol, defined in arch/arm/kernel/traps.c, and this one
+cannot be used as it brings plenty of symbols that aren't available in the
+pre-boot environment. So anyway, we have to define our own symbols there. Either
+we use libgcc and define raise(), or lib1funcs and define __div0().
 
-From a920e6c11635cab6261541a487db7b68b4892a74 Mon Sep 17 00:00:00 2001
-From: Matt Fleming <matt@console-pimps.org>
-Date: Thu, 13 Aug 2009 09:17:23 +0100
-Subject: [PATCH] mmc: Add linux-mmc mailing list
+Russell, what's your take on this ?
 
-A new linux-mmc mailing list has been set up at vger.kernel.org for all
-things related to MMC/SD development.
-
-Signed-off-by: Matt Fleming <matt@console-pimps.org>
----
- MAINTAINERS |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-diff --git a/MAINTAINERS b/MAINTAINERS
-index b1114cf..e16c7dd 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -3420,6 +3420,7 @@ S:	Supported
- F:	drivers/mfd/
- 
- MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
-+L:	linux-mmc@vger.kernel.org
- S:	Orphan
- F:	drivers/mmc/
- F:	include/linux/mmc/
+Regards,
 -- 
-1.6.4.rc0
+Albin Tonnerre, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
