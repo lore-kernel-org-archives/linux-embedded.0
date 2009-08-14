@@ -1,10 +1,10 @@
-From: Jamie Lokier <jamie@shareable.org>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
 Subject: Re: New fast(?)-boot results on ARM
-Date: Fri, 14 Aug 2009 19:46:51 +0100
-Message-ID: <20090814184651.GA12021@shareable.org>
+Date: Fri, 14 Aug 2009 20:57:31 +0200
+Message-ID: <20090814185731.GN13320@pengutronix.de>
 References: <20090814170228.GM13320@pengutronix.de> <4A85AAC4.7050505@acm.org>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756907AbZHNSq4@vger.kernel.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756144AbZHNS6T@vger.kernel.org>
 Content-Disposition: inline
 In-Reply-To: <4A85AAC4.7050505@acm.org>
 Sender: linux-kernel-owner@vger.kernel.org
@@ -12,19 +12,67 @@ List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: Zan Lynx <zlynx@acm.org>
-Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
 
-Zan Lynx wrote:
-> Or maybe its cheap and slow flash. In that case I think your only hope 
-> is to make all the code as small as possible and/or find a different 
-> flash filesystem that does not have to read so much of the device to 
-> mount. Perhaps use a read-only compressed filesystem for the system 
-> binaries and reflash it for software upgrades. Only init and mount the 
-> writable flash for user-storable data well after system boot has finished.
+Zan,
 
-Fwiw, logfs claims to mount quickly, but I haven't heard much about it
-in recent months and http://logfs.org/logfs/ implies it's not really
-stable yet.  But maybe if you're working on a prototype that doesn't
-matter so much.
+On Fri, Aug 14, 2009 at 12:19:48PM -0600, Zan Lynx wrote:
+> > That's factor 70 away from the 110 ms boot time Tim has talked about
+> > some days ago (and he measured on an ARM cpu which had almost half
+> > the speed of this one), and I'm wondering what we can do to improve
+> > the boot time.
+>
+> 2.4s in uncompression? That seems like an obvious target for
+> improvement.
 
--- Jamie
+Indeed, we'll check that.
+
+However, I have a little bit the impression that most systems which are
+hyped as "fast boot" out there are optimized so aggressively that they
+are not really usable in real life applications any more. So we try to
+configure the systems in a "realistic" way. I know that we won't get the
+last milliseconds that way - but I'd like to find out how far we can go.
+
+> Your kernel seems awfully large. 3104K code? You should definitely find
+> out what is making it that big and cut out everything you do not need.
+
+Definitely, will audit again.
+
+> You might even try some of the embedded system scripts that rip out
+> all the printk strings.
+
+Hmm, that's definitely in the "last-minute-before-product" category.
+
+> If you get the kernel size way down then use a uncompressed kernel and
+> it should boot a lot faster if the bottleneck is CPU speed.
+
+I'll try that.
+
+> However, it is probably IO speed. There could be something really wrong
+> and slow with your MTD. Does it DMA or is it doing something crazy like
+> using the CPU to read a byte at a time?
+
+Will check.
+
+> Or maybe its cheap and slow flash. In that case I think your only hope
+> is to make all the code as small as possible and/or find a different
+> flash filesystem that does not have to read so much of the device to
+> mount. Perhaps use a read-only compressed filesystem for the system
+> binaries and reflash it for software upgrades. Only init and mount the
+> writable flash for user-storable data well after system boot has
+> finished.
+
+That would be also a last-minute change, but surely worth to be
+evaluated.
+
+We recently changed from jffs2 to ubifs and hoped to gain speed during
+that step.
+
+Thanks for your feedback!
+
+rsc
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
