@@ -1,49 +1,57 @@
 From: Artem Bityutskiy <dedekind1@gmail.com>
 Subject: Re: New fast(?)-boot results on ARM
-Date: Sat, 15 Aug 2009 09:14:48 +0300
-Message-ID: <4A865258.5090903@gmail.com>
-References: <20090814170228.GM13320@pengutronix.de> <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com>
+Date: Sat, 15 Aug 2009 09:21:16 +0300
+Message-ID: <4A8653DC.3050102@gmail.com>
+References: <20090814170228.GM13320@pengutronix.de> <4A85AAC4.7050505@acm.org>	 <20090814185731.GN13320@pengutronix.de> <63386a3d0908141401t6050f39ey8d85213aeccf748a@mail.gmail.com> <4A85D89F.8080900@acm.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com>
+In-Reply-To: <4A85D89F.8080900@acm.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="utf-8"; format="flowed"
-To: Denys Vlasenko <vda.linux@googlemail.com>
-Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
+To: Zan Lynx <zlynx@acm.org>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, Robert Schwebel <r.schwebel@pengutronix.de>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
 
-On 08/14/2009 11:04 PM, Denys Vlasenko wrote:
->> [  2.742628]<    0.016050>  0x000000360000-0x000004000000 : "root"
->> [  3.058610]<    0.315982>  UBI: attaching mtd7 to ubi0
->> [  3.062878]<    0.004268>  UBI: physical eraseblock size:   16384 b=
-ytes (16 KiB)
->> [  3.070601]<    0.007723>  UBI: logical eraseblock size:    15360 b=
-ytes
->> [  3.070665]<    0.000064>  UBI: smallest flash I/O unit:    512
->> [  3.078564]<    0.007899>  UBI: VID header offset:          512 (al=
-igned 512)
->> [  3.078609]<    0.000045>  UBI: data offset:                1024
->> [  5.006609]<    1.928000>  UBI: attached mtd7 to ubi0
->> [  5.013157]<    0.006548>  UBI: MTD device name:            "root"
+On 08/15/2009 12:35 AM, Zan Lynx wrote:
+> Linus Walleij wrote:
+>> 2009/8/14 Robert Schwebel <r.schwebel@pengutronix.de>:
+>>> On Fri, Aug 14, 2009 at 12:19:48PM -0600, Zan Lynx wrote:
+>>
+>>>>> That's factor 70 away from the 110 ms boot time Tim has talked ab=
+out
+>>>>> some days ago (and he measured on an ARM cpu which had almost hal=
+f
+>>>>> the speed of this one), and I'm wondering what we can do to impro=
+ve
+>>>>> the boot time.
+>>>> 2.4s in uncompression? That seems like an obvious target for
+>>>> improvement.
+>>> Indeed, we'll check that.
+>>
+>> We got rid of uncompression on a flash-based system vastly improving
+>> boot time. The reason is that compressed kernels are faster only whe=
+n
+>> the throughput to the persistent storage is lower than the decompres=
+sion
+>> throughput, and on typical embedded systems with DMA the throughput =
+to
+>> memory outperforms the CPU-based decompression.
 >
-> As others commented, ubi looks slow and you probably need to find out=
- why.
+> I thought of another thing to check related to slow decompression. If
+> the kernel, bootloader or hardware is in charge of setting CPU power =
+and
+> speed scaling, then you should check that it boots with the CPU set a=
+t
+> maximum speed instead of slowest.
 
-Right. UBI is rather slow in attaching MTD devices. Everything is expla=
-ined
-here:
-
-http://www.linux-mtd.infradead.org/doc/ubi.html#L_scalability
-http://www.linux-mtd.infradead.org/doc/ubifs.html#L_scalability
-
-There is not very much you can do to speed it up but implement UBI2. UB=
-IFS
-would stay intact. There were discussions about this and it does not se=
-em
-to be impossibly difficult to do UBI2. Here are few ideas:
-
-http://www.linux-mtd.infradead.org/faq/ubi.html#L_attach_faster
+zlib is slow on decompression, and lzo is much faster. So if you implem=
+ent
+lzo compression, you'll probably speed things up a little as well. I sa=
+w
+some discussions about this on lkml. Having no compression at all may a=
+lso
+be a good thing to try.
 
 --=20
 Best Regards,
