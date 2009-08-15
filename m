@@ -1,43 +1,62 @@
-From: Zan Lynx <zlynx@acm.org>
+From: Dirk Behme <dirk.behme@googlemail.com>
 Subject: Re: New fast(?)-boot results on ARM
-Date: Fri, 14 Aug 2009 15:35:27 -0600
-Message-ID: <4A85D89F.8080900@acm.org>
-References: <20090814170228.GM13320@pengutronix.de> <4A85AAC4.7050505@acm.org>	 <20090814185731.GN13320@pengutronix.de> <63386a3d0908141401t6050f39ey8d85213aeccf748a@mail.gmail.com>
+Date: Sat, 15 Aug 2009 07:59:32 +0200
+Message-ID: <4A864EC4.7070907@googlemail.com>
+References: <20090814170228.GM13320@pengutronix.de> <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com> <20090814204305.GA31727@pengutronix.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756517AbZHNVfz@vger.kernel.org>
-In-Reply-To: <63386a3d0908141401t6050f39ey8d85213aeccf748a@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=69k8rX9bYKcRY7faHVnJhDvFhGP+ugonwFDyRC1WiJk=;
+        b=KjY0bqf7IIvQ/t1FFHjj4eNN6Ct/VYwG1kJAYT0PxU2r3EPijp59FczQuz7sxFeEqv
+         XQDtzPlxM/p7AdWRjnFjX5tennZjCf+lVi1yYqHQn2Gge0Jc4sQuhKhQo7iSJrhnE+Ko
+         P8gyXMkmU8duq9GBaD5yR7lXCk9MYUBq70PBc=
+In-Reply-To: <20090814204305.GA31727@pengutronix.de>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
+To: Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: Denys Vlasenko <vda.linux@googlemail.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
 
-Linus Walleij wrote:
-> 2009/8/14 Robert Schwebel <r.schwebel@pengutronix.de>:
->> On Fri, Aug 14, 2009 at 12:19:48PM -0600, Zan Lynx wrote:
+Robert Schwebel wrote:
+> On Fri, Aug 14, 2009 at 10:04:57PM +0200, Denys Vlasenko wrote:
+>>> rsc@thebe:~$ microcom | ptx_ts "U-Boot 2.0.0-rc9"
+>>> [  2.395740] <  2.395740>
+>>> [  2.395860] <  0.000120>
+>>> [  0.000011] <  0.000011> U-Boot 2.0.0-rc9 (Aug  5 2009 - 10:05:58)
+>>> [  0.000059] <  0.000048>
+>>> [  0.003823] <  0.003764> Board: Phytec phyCORE-i.MX27
+>>> [  0.010753] <  0.006930> cfi_probe: cfi_flash base: 0xc0000000 size: 0x02000000
+>>> [  0.018711] <  0.007958> NAND device: Manufacturer ID: 0x20, Chip ID: 0x36 (ST Micro NAND 64MiB 1,8V 8-bit)
+>>> [  0.026592] <  0.007881> imxfb@imxfb0: i.MX Framebuffer driver
+>>> [  0.178655] <  0.152063> dev_protect: currently broken
+>>> [  0.178736] <  0.000081> Using environment in NOR Flash
+>>> [  0.182577] <  0.003841> initialising PLLs
+>>> [  0.367142] <  0.184565> Malloc space: 0xa3f00000 -> 0xa7f00000 (size 64 MB)
+>>> [  0.370568] <  0.003426> Stack space : 0xa3ef8000 -> 0xa3f00000 (size 32 kB)
+>>> [  0.445993] <  0.075425> running /env/bin/init...
+>>> [  0.870592] <  0.424599>
+>>> [  0.874559] <  0.003967> Hit any key to stop autoboot:  0
+>> boot loader is not fast. considering its simple task, it can be made
+>> faster.
 > 
->>>> That's factor 70 away from the 110 ms boot time Tim has talked about
->>>> some days ago (and he measured on an ARM cpu which had almost half
->>>> the speed of this one), and I'm wondering what we can do to improve
->>>> the boot time.
->>> 2.4s in uncompression? That seems like an obvious target for
->>> improvement.
->> Indeed, we'll check that.
-> 
-> We got rid of uncompression on a flash-based system vastly improving
-> boot time. The reason is that compressed kernels are faster only when
-> the throughput to the persistent storage is lower than the decompression
-> throughput, and on typical embedded systems with DMA the throughput to
-> memory outperforms the CPU-based decompression.
+> Yup, will check. Almost 1 s seems really long.
 
-I thought of another thing to check related to slow decompression. If 
-the kernel, bootloader or hardware is in charge of setting CPU power and 
-speed scaling, then you should check that it boots with the CPU set at 
-maximum speed instead of slowest.
+Some things to check regarding this and kernel uncompression (copy):
 
--- 
-Zan Lynx
-zlynx@acm.org
+- How often is (compressed/uncompressed) kernel data copied? Once the 
+compressed one from storage (NOR/NAND?) to RAM by boot loader? Then by 
+kernel's uncompression from RAM to it's final location in RAM?
 
-"Knowledge is Power.  Power Corrupts.  Study Hard.  Be Evil."
+- For boot loader and uncompression, is D-Cache enabled?
+
+- Is data (image) copy done by optimized functions? Using (a) DMA or 
+at least (b) some optimized memcpy using ARM's ldmia/stmia?
+
+Best regards
+
+Dirk
