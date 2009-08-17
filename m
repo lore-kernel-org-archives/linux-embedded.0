@@ -1,94 +1,36 @@
-From: Johannes Stezenbach <js@sig21.net>
+From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: New fast(?)-boot results on ARM
-Date: Sat, 15 Aug 2009 12:35:32 +0200
-Message-ID: <20090815103532.GA5596@sig21.net>
-References: <20090814170228.GM13320@pengutronix.de>
- <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com>
- <20090814204305.GA31727@pengutronix.de>
+Date: Mon, 17 Aug 2009 12:15:12 -0700
+Message-ID: <4A89AC40.2040109@am.sony.com>
+References: <20090814170228.GM13320@pengutronix.de> <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com> <20090814204305.GA31727@pengutronix.de>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <20090814204305.GA31727@pengutronix.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="utf-8"
 To: Robert Schwebel <r.schwebel@pengutronix.de>
-Cc: Denys Vlasenko <vda.linux@googlemail.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
+Cc: Denys Vlasenko <vda.linux@googlemail.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, kernel@pengutronix.de
 
-On Fri, Aug 14, 2009 at 10:43:05PM +0200, Robert Schwebel wrote:
+Robert Schwebel wrote:
 > On Fri, Aug 14, 2009 at 10:04:57PM +0200, Denys Vlasenko wrote:
-> > > rsc@thebe:~$ microcom | ptx_ts "U-Boot 2.0.0-rc9"
-
-Now that microcom is in Debian sid (thanks!), where can I find ptx_ts?
-It seems to be quite useful.
-
-
-> > > [ =A00.874559] < =A00.003967> Hit any key to stop autoboot: =A00
-> >
-> > boot loader is not fast. considering its simple task, it can be mad=
-e
-> > faster.
->=20
-> Yup, will check. Almost 1 s seems really long.
-
-
-I'm working on a SoC with a 200MHz ARM926EJ-S.  We managed to get
-to 1.5sec from power-on to "starting init". The main difference to
-your platform seems to be that we use NOR flash.  The kernel is
-not optimized, it still has some debug options turned on and
-is used during development. (however, the 1.5sec is with "quiet")
-The root fs is cramfs. The kernel version is 2.6.20.
-
-=46or u-boot we enabled the D-cache which gave a decent speed up
-(on ARM926EJ-S this requires one to set up page tables and enable
-MMU, but it's not that difficult). I don't have the numbers here
-but I think it still takes ~300ms in u-boot, and ~1.2s for the kernel b=
-oot.
-
-
-> > > [ =A01.326621] < =A00.452062> loaded zImage from /dev/nand0.kerne=
-l.bb with size 1679656
-> > > [ =A02.009996] < =A00.683375> Uncompressing Linux................=
-=2E....................................................................=
-=2E......................... done, booting the kernel.
-> > > [ =A02.416999] < =A00.407003> Linux version 2.6.31-rc4-g056f82f-d=
-irty (sha@octopus) (gcc version 4.3.2 (OSELAS.Toolchain-1.99.3) ) #1 PR=
-EEMPT Thu Aug 6 08:37:19 CEST 2009
-> >=20
-> > Other people already commented on this (kernel is too big)
->=20
-> Not sure (the kernel is already customized for the board), but I'll t=
-ake
-> a look again.
-
-We are booting an uncomressed kernel (~2.8MB).  Uncompressing (running =
-the uncompressor
-XIP in NOR flash) took ~0.5s longer than copying 2.8MB from flash to RA=
-M.
-BTW, we are using uImage and set verify=3Dno in u-boot. We use u-boot-1=
-=2E3.0.
-
-
-> > > [ =A05.082616] < =A00.007992> RPC: Registered tcp transport modul=
-e.
-> > > [ =A05.605159] < =A00.522543> eth0: config: auto-negotiation on, =
-100FDX, 100HDX, 10FDX, 10HDX.
-
-What is happening here? Waiting for eth link negotiation?
-
-> > > [ =A06.602621] < =A00.997462> IP-Config: Complete:
-> > > [ =A06.606638] < =A00.004017> =A0 =A0 =A0device=3Deth0, addr=3D19=
-2.168.23.197, mask=3D255.255.0.0, gw=3D192.168.23.2,
-> > > [ =A06.614588] < =A00.007950> =A0 =A0 =A0host=3D192.168.23.197, d=
-omain=3D, nis-domain=3D(none),
-> > > [ =A06.618652] < =A00.004064> =A0 =A0 =A0bootserver=3D192.168.23.=
-2, rootserver=3D192.168.23.2, rootpath=3D
-> >=20
-> > Well, this ~1 second is not really kernel's fault, it's DHCP delay.
-> > But, do you need to do it at this moment?
-> > You do not seem to be using networking filesystems.
-> > You can run DHCP client in userspace.
+>>> [ =EF=BF=BD5.082616] < =EF=BF=BD0.007992> RPC: Registered tcp trans=
+port module.
+>>> [ =EF=BF=BD5.605159] < =EF=BF=BD0.522543> eth0: config: auto-negoti=
+ation on, 100FDX, 100HDX, 10FDX, 10HDX.
+>>> [ =EF=BF=BD6.602621] < =EF=BF=BD0.997462> IP-Config: Complete:
+>>> [ =EF=BF=BD6.606638] < =EF=BF=BD0.004017> =EF=BF=BD =EF=BF=BD =EF=BF=
+=BDdevice=3Deth0, addr=3D192.168.23.197, mask=3D255.255.0.0, gw=3D192.1=
+68.23.2,
+>>> [ =EF=BF=BD6.614588] < =EF=BF=BD0.007950> =EF=BF=BD =EF=BF=BD =EF=BF=
+=BDhost=3D192.168.23.197, domain=3D, nis-domain=3D(none),
+>>> [ =EF=BF=BD6.618652] < =EF=BF=BD0.004064> =EF=BF=BD =EF=BF=BD =EF=BF=
+=BDbootserver=3D192.168.23.2, rootserver=3D192.168.23.2, rootpath=3D
+>> Well, this ~1 second is not really kernel's fault, it's DHCP delay.
+>> But, do you need to do it at this moment?
+>> You do not seem to be using networking filesystems.
+>> You can run DHCP client in userspace.
 >=20
 > The board has ip autoconfig configured in, because we also use tftp/n=
 fs
@@ -98,23 +40,58 @@ fs
 >=20
 > That shouldn't do dhcp, right?
 
-Try to boot with eth cable unplugged, see if it hangs in IP-config.
-If it were doing static configuration it would be faster.
+I think it doesn't, but I'm not positive.  The DHCP trasmissions
+themselves don't take very long.  There are some very long timeouts
+in the network code paths, which appear to be used whether you specify
+a static address or not.
 
-However, unless you need ethernet to boot (NFS root) I'd suggest
-doing eth config in userspace.
+See the definitions of CONF_PRE_OPEN and CON_POST_OPEN
+in net/ipv4/ipconfig.c
 
+They are set to ridiculously long values.  In my experience,
+you can cut them down considerably with no dangerous side
+effects (but I haven't asked the network guys about the
+possible downsides).
 
-> > > [ =A07.137924] < =A00.059316> starting udev
-> > > [ =A07.147925] < =A00.010001> mounting tmpfs at /dev
-> > > [ =A07.182299] < =A00.034374> creating static nodes
-> > > [ =A07.410613] < =A00.228314> starting udevd...done
-> > > [ =A08.811097] < =A01.400484> waiting for devices...done
+Here's a patch which I've used in the past.  (Sorry
+if it doesn't apply cleanly, I just extracted it from
+a PDF and the whitespace may have gotten messed up.
+It's short enough that you can hand-edit the files if
+there's a problem.)
 
-And suddenly devtmpfs sounds like a good idea ;-)
+I'd like to hear back, if you apply this, whether it shortens
+the network startup time for you.
 
-We use static device nodes during boot, and later
-setup busybox mdev for hotplug.
+diff --git a/net/ipv4/ipconfig.c b/net/ipv4/ipconfig.c
+index 42065ff..e42d83f 100644
+--- a/net/ipv4/ipconfig.c
++++ b/net/ipv4/ipconfig.c
+@@ -86,8 +86,10 @@
+ #endif
 
+ /* Define the friendly delay before and after opening net devices */
+-#define CONF_PRE_OPEN 500 /* Before opening: 1/2 second */
+-#define CONF_POST_OPEN 1 /* After opening: 1 second */
++/*#define CONF_PRE_OPEN 500 /* Before opening: 1/2 second */
++/*#define CONF_POST_OPEN 1 /* After opening: 1 second */
++#define CONF_PRE_OPEN 5 /* Before opening: 5 milli seconds */
++#define CONF_POST_OPEN 10 /* After opening: 10 milli seconds */
 
-Johannes
+ /* Define the timeout for waiting for a DHCP/BOOTP/RARP reply */
+ #define CONF_OPEN_RETRIES 2 /* (Re)open devices twice */
+@@ -1292,7 +1294,7 @@ static int __init ip_auto_config(void)
+ 		return -1;
+ 	/* Give drivers a chance to settle */
+-	ssleep(CONF_POST_OPEN);
++	msleep(CONF_POST_OPEN);
+
+ 	/*
+ 	 * If the config information is insufficient (e.g., our IP address or
+
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
