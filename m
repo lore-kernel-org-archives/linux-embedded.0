@@ -1,60 +1,36 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
+From: Alex Riesen <raa.lkml@gmail.com>
 Subject: Re: New fast(?)-boot results on ARM
-Date: Tue, 18 Aug 2009 12:21:36 +0200
-Message-ID: <20090818102136.GN29655@pengutronix.de>
-References: <20090814170228.GM13320@pengutronix.de> <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com> <20090814204305.GA31727@pengutronix.de> <20090815103532.GA5596@sig21.net> <4A8A7D38.5020201@gmail.com>
+Date: Tue, 18 Aug 2009 12:34:52 +0200
+Message-ID: <81b0412b0908180334u51fd957dh36f2a4946dffbb0b@mail.gmail.com>
+References: <20090814170228.GM13320@pengutronix.de>
+	 <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com>
+	 <20090814204305.GA31727@pengutronix.de>
+	 <20090815103532.GA5596@sig21.net> <4A8A7D38.5020201@gmail.com>
+	 <20090818102136.GN29655@pengutronix.de>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4A8A7D38.5020201@gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1758628AbZHRKex@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=7mWLHZ/+HP0dXy9717Ad+wD3zuz8C5GxVwXYOTo3OR8=;
+        b=biD42cqjSMOHwQl16q0KHHUDtpkuX5RBRLXoym+FXCC7afs/R0QNwI5fbUAmQHcv73
+         +5ZpZd85708GqVz0Gyt3CBkYmv1SirZQu8ivaR44L7t/mhUo07/Kcdu9I+WF8KQ9/guM
+         S9cF4YnePMoHONNxHpL/iowF7HMnJmQxR2hog=
+In-Reply-To: <20090818102136.GN29655@pengutronix.de>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: Johannes Stezenbach <js@sig21.net>, Denys Vlasenko <vda.linux@googlemail.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
+Content-Type: text/plain; charset="utf-8"
+To: Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: Marco Stornelli <marco.stornelli@gmail.com>, Johannes Stezenbach <js@sig21.net>, Denys Vlasenko <vda.linux@googlemail.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
 
-Marco,
+On Tue, Aug 18, 2009 at 12:21, Robert Schwebel<r.schwebel@pengutronix.d=
+e> wrote:
+> - In general we want to have our systems close to what the mainline
+> =C2=A0does; Automation & Embedded is only a small market, and anythin=
+g
+> =C2=A0which is *not* specific to these markets but mainline is good.
 
-On Tue, Aug 18, 2009 at 12:06:48PM +0200, Marco Stornelli wrote:
-> Yeah, I agree, do you really need udevd, device file creation at every
-> start-up in /dev? Usually static devices nodes and mdev for hotplug are
-> enough or at least you could use a simple script to create only once
-> time the devices file (mdev -s). About the fs, do you really need a
-> rootfs with ubifs? I mean, you could "split" your fs. You could use a
-> read-only fs (SquashFS for example) for your root-fs, ubifs for
-> permanent storage data (mounted under /data for example) and a ram fs
-> for volatile data.
-
-Well, we try to find out what is possible with a fast booting Linux
-system which *still* is as "vanilla" as possible.
-
-All the "boot-in-one-second" systems out there are highly squeezed,
-which is surely good if you have a scenario with high production
-volumes. You can do the optimization in the last steps then and it
-doesn't really matter how much time you spend with testing to come from
-a system that works for a developer to a production system.
-
-For most of our use cases here at Pengutronix, we see that:
-
-- Customers want in-system upgradability on a per-packet base; so the
-  flash filesystems should be normally r/o, but may be remounted r/w.
-
-- Development systems should be close to production systems, in order to
-  be able to have more "early testing"; so things like printk-ripout or
-  special non-mainline patches/tweaks should be avoided as far as
-  possible.
-
-- In general we want to have our systems close to what the mainline
-  does; Automation & Embedded is only a small market, and anything
-  which is *not* specific to these markets but mainline is good.
-
-So let's see what we'll reach while trying what people have suggested.
-
-Thanks,
-rsc
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+BTW, what is your mainline (or it looks like you mean "upstream")?
