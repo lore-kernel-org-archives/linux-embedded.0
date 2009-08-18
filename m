@@ -1,55 +1,34 @@
-From: David Miller <davem@davemloft.net>
+From: david@lang.hm
 Subject: Re: new ipdelay= option for faster netboot
-Date: Mon, 17 Aug 2009 18:56:14 -0700 (PDT)
-Message-ID: <20090817.185614.267314151.davem@davemloft.net>
-References: <4A8A02CA.7040305@am.sony.com>
-	<20090817.182754.50348941.davem@davemloft.net>
-	<4A8A06A0.2070402@am.sony.com>
+Date: Mon, 17 Aug 2009 19:45:33 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.0908171942430.30426@asgard.lang.hm>
+References: <20090814204305.GA31727@pengutronix.de> <4A89AC40.2040109@am.sony.com> <4A89DB15.6060101@am.sony.com> <20090817.180323.253692704.davem@davemloft.net> <4A8A0454.8000902@hp.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1758611AbZHRB4F@vger.kernel.org>
-In-Reply-To: <4A8A06A0.2070402@am.sony.com>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755712AbZHRCqM@vger.kernel.org>
+In-Reply-To: <4A8A0454.8000902@hp.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: tim.bird@am.sony.com
-Cc: r.schwebel@pengutronix.de, vda.linux@googlemail.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset="us-ascii"; format="flowed"
+Content-Transfer-Encoding: 7bit
+To: Rick Jones <rick.jones2@hp.com>
+Cc: David Miller <davem@davemloft.net>, tim.bird@am.sony.com, r.schwebel@pengutronix.de, vda.linux@googlemail.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
 
-From: Tim Bird <tim.bird@am.sony.com>
-Date: Mon, 17 Aug 2009 18:40:48 -0700
+On Mon, 17 Aug 2009, Rick Jones wrote:
 
 > David Miller wrote:
->> From: Tim Bird <tim.bird@am.sony.com>
->> Date: Mon, 17 Aug 2009 18:24:26 -0700
->>
->>> David Miller wrote:
->>>> I have card/switch combinations that take up to 10 seconds to
->>>> negotiate a proper link.
->>> What types of delays are these timeouts supposed to
->>> cover?
->>
->> The problem is that if you don't first give at least some time for the
->> link to come up, the remaining time it takes the link to come up will
->> end up chewing into the actual bootp/dhcp protocol timeouts.  And
->> that's what we're trying to avoid.
-> 
-> What link?  I'm not that familiar with networking.
+>> I have card/switch combinations that take up to 10 seconds to
+>> negotiate a proper link.
+>
+> Gotta love it when things adhere to specs...
 
-The speed and duplex settings which are negotiated or forced between
-the ethernet card and whatever is at the other end of the cable.
+the default on Cisco switches is to wait 30 seconds before fully enabling 
+the port so that it can listen for spanning tree broadcasts.
 
-> Assuming I'm using ethernet, what link needs to come up?
+for windows systems this doesn't cause any problems (they take long enough 
+to boot), but for a tightly configured linux box it can be fully booted 
+long before the switch decides to enable the port (for that matter, I have 
+a bare-metal install process that takes about 90 seconds from hitting 
+power, from a CD. I could probably speed things up by switching to USB 
+boot media)
 
-All modern ethernet cards do autonegotiation of link parameters
-with whatever is at the other end of the ethernet cable.  Cards
-created ages ago which only support 10MB half-duplex typically
-do not support autonegotiation at all.
-
-This autonegotiation works like a protocol where the two link partners
-go back and forth trying to figure out the best speed and duplex
-settings to use.  There are advertisements of link capabilities and
-stuff like that.
-
-It should happen almost instantaneously, but there are millions
-upon millions of cruddy parts out there, and some of them take
-a long time to go through this negotiation process.
+David Lang
