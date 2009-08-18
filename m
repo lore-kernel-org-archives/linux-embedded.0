@@ -1,37 +1,31 @@
-From: David Miller <davem@davemloft.net>
-Subject: Re: new ipdelay= option for faster netboot
-Date: Mon, 17 Aug 2009 22:00:08 -0700 (PDT)
-Message-ID: <20090817.220008.26173943.davem@davemloft.net>
-References: <4A8A02CA.7040305@am.sony.com>
-	<20090817.182754.50348941.davem@davemloft.net>
-	<200908180656.54011.vda.linux@googlemail.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: New MMC maintainer needed
+Date: Tue, 18 Aug 2009 11:33:45 +0200
+Message-ID: <4A8A7579.9080604@atmel.com>
+References: <20090714153601.6dfe70ff@mjolnir.ossman.eu>	<20090722151744.fffd7bf5.akpm@linux-foundation.org>	<20090728222334.0c543c47@mjolnir.ossman.eu> <20090731122623.254fd0f1@mjolnir.ossman.eu>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1751485AbZHRE76@vger.kernel.org>
-In-Reply-To: <200908180656.54011.vda.linux@googlemail.com>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757309AbZHRJf5@vger.kernel.org>
+In-Reply-To: <20090731122623.254fd0f1@mjolnir.ossman.eu>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: vda.linux@googlemail.com
-Cc: tim.bird@am.sony.com, r.schwebel@pengutronix.de, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Pierre Ossman <pierre@ossman.eu>, Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, nico@cam.org, nicolas.ferre@rfo.atmel.com, hskinnemoen@atmel.com, tony@atomide.com, david-b@pacbell.net, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, ppisa@pikron.com, jarkko.lavinen@nokia.com, ben@fluff.org, saschasommer@freenet.de, avorontsov@ru.mvista.com, oakad@yahoo.com, ian@mnementh.co.uk, HaraldWelte@viatech.com, JosephChan@via.com.tw, adrian.hunter@nokia.com
 
-From: Denys Vlasenko <vda.linux@googlemail.com>
-Date: Tue, 18 Aug 2009 06:56:53 +0200
+Pierre Ossman :
+> This things are currently lingering in my inbox:
 
-> Since DHCP and any other networking activity like TCP connects
-> accomodate packet loss, things should work even without any delay
-> in kernel IP config code. The delay will be just shifted to the
-> moment when first DHCP/TCP/whatever negotiation happens.
+[..]
 
-Until the link is up, the packet scheduler just holds onto packets
-and queued them up.
+> [PATCH 1/2] atmel-mci: Unified Atmel MCI drivers (AVR32 & AT91)
+> http://marc.info/?l=linux-arm-kernel&m=124577578729455
+> 
+> This is nice work and it's really up to Nicolas when he wants it merged.
 
-When the link comes up, this queue is released and the packets
-sent out.
+Ok guys, it should be fine if we can plan a merge for those bits: I have
+additional patches that are waiting on top of this one...
 
-That's why it's beneficial to wait some time until the link
-comes up before we start sending stuff out.  Because otherwise
-any timeouts used will be inaccurate.
-
-This could code be spiffed up to wait for the link up indication
-on devices it cares about.  Feel free to code that up :-)
+Thanks a lot. Bye,
+-- 
+Nicolas Ferre
