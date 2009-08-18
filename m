@@ -1,34 +1,56 @@
-From: david@lang.hm
+From: Denys Vlasenko <vda.linux@googlemail.com>
 Subject: Re: new ipdelay= option for faster netboot
-Date: Mon, 17 Aug 2009 19:45:33 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.0908171942430.30426@asgard.lang.hm>
-References: <20090814204305.GA31727@pengutronix.de> <4A89AC40.2040109@am.sony.com> <4A89DB15.6060101@am.sony.com> <20090817.180323.253692704.davem@davemloft.net> <4A8A0454.8000902@hp.com>
+Date: Tue, 18 Aug 2009 06:56:53 +0200
+Message-ID: <200908180656.54011.vda.linux@googlemail.com>
+References: <4A89DB15.6060101@am.sony.com> <4A8A02CA.7040305@am.sony.com> <20090817.182754.50348941.davem@davemloft.net>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755712AbZHRCqM@vger.kernel.org>
-In-Reply-To: <4A8A0454.8000902@hp.com>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"; format="flowed"
 Content-Transfer-Encoding: 7bit
-To: Rick Jones <rick.jones2@hp.com>
-Cc: David Miller <davem@davemloft.net>, tim.bird@am.sony.com, r.schwebel@pengutronix.de, vda.linux@googlemail.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:subject:date
+         :user-agent:cc:references:in-reply-to:mime-version:content-type
+         :content-transfer-encoding:content-disposition:message-id;
+        bh=P9lWImsgfV5bTyY3c++//1VW4h+hRc/rBqmfIcEqyxo=;
+        b=Y5MwJ0P5j6CNJVk1oj29Xh16saDU4LPXrsxp8sDjMnW2xeigaXnGf5WYeLK7e/Ru0G
+         HRbk6EYMzNexj19SM7ZZxStaPYtM2Q92VdsjrE4sdgxDNvkYJbvBjjSmoHLUmsMTTAsF
+         CVoXRDaQUP1vVAjpfWjtzqnLUrLMsQdnS0RMI=
+In-Reply-To: <20090817.182754.50348941.davem@davemloft.net>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: David Miller <davem@davemloft.net>
+Cc: tim.bird@am.sony.com, r.schwebel@pengutronix.de, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
 
-On Mon, 17 Aug 2009, Rick Jones wrote:
+On Tuesday 18 August 2009 03:27, David Miller wrote:
+> From: Tim Bird <tim.bird@am.sony.com>
+> Date: Mon, 17 Aug 2009 18:24:26 -0700
+> 
+> > David Miller wrote:
+> >> I have card/switch combinations that take up to 10 seconds to
+> >> negotiate a proper link.
+> > 
+> > What types of delays are these timeouts supposed to
+> > cover?
+> 
+> The problem is that if you don't first give at least some time for the
+> link to come up, the remaining time it takes the link to come up will
+> end up chewing into the actual bootp/dhcp protocol timeouts.  And
+> that's what we're trying to avoid.
 
-> David Miller wrote:
->> I have card/switch combinations that take up to 10 seconds to
->> negotiate a proper link.
->
-> Gotta love it when things adhere to specs...
+But in this case, they assign a static IP. They do not use DHCP.
+So they pay this time penalty even if they wouldn't use networking
+until sometime later (or never).
 
-the default on Cisco switches is to wait 30 seconds before fully enabling 
-the port so that it can listen for spanning tree broadcasts.
+Since DHCP and any other networking activity like TCP connects
+accomodate packet loss, things should work even without any delay
+in kernel IP config code. The delay will be just shifted to the
+moment when first DHCP/TCP/whatever negotiation happens.
 
-for windows systems this doesn't cause any problems (they take long enough 
-to boot), but for a tightly configured linux box it can be fully booted 
-long before the switch decides to enable the port (for that matter, I have 
-a bare-metal install process that takes about 90 seconds from hitting 
-power, from a CD. I could probably speed things up by switching to USB 
-boot media)
+If dropping delays altogether sounds too big a change,
+then it makes sense at least to allow people to tweak it with
+ipdelay=TIME_IN_MS
 
-David Lang
+-- 
+vda
