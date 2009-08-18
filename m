@@ -1,31 +1,23 @@
-From: David Miller <davem@davemloft.net>
+From: Rick Jones <rick.jones2@hp.com>
 Subject: Re: new ipdelay= option for faster netboot
-Date: Mon, 17 Aug 2009 18:27:54 -0700 (PDT)
-Message-ID: <20090817.182754.50348941.davem@davemloft.net>
-References: <4A89DB15.6060101@am.sony.com>
-	<20090817.180323.253692704.davem@davemloft.net>
-	<4A8A02CA.7040305@am.sony.com>
+Date: Mon, 17 Aug 2009 18:31:00 -0700
+Message-ID: <4A8A0454.8000902@hp.com>
+References: <20090814204305.GA31727@pengutronix.de>	<4A89AC40.2040109@am.sony.com> <4A89DB15.6060101@am.sony.com> <20090817.180323.253692704.davem@davemloft.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4A8A02CA.7040305@am.sony.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S932621AbZHRBbE@vger.kernel.org>
+In-Reply-To: <20090817.180323.253692704.davem@davemloft.net>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: tim.bird@am.sony.com
-Cc: r.schwebel@pengutronix.de, vda.linux@googlemail.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: David Miller <davem@davemloft.net>
+Cc: tim.bird@am.sony.com, r.schwebel@pengutronix.de, vda.linux@googlemail.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
 
-From: Tim Bird <tim.bird@am.sony.com>
-Date: Mon, 17 Aug 2009 18:24:26 -0700
+David Miller wrote:
+> I have card/switch combinations that take up to 10 seconds to
+> negotiate a proper link.
 
-> David Miller wrote:
->> I have card/switch combinations that take up to 10 seconds to
->> negotiate a proper link.
-> 
-> What types of delays are these timeouts supposed to
-> cover?
+Gotta love it when things adhere to specs...
 
-The problem is that if you don't first give at least some time for the
-link to come up, the remaining time it takes the link to come up will
-end up chewing into the actual bootp/dhcp protocol timeouts.  And
-that's what we're trying to avoid.
+rick jones
+has also experienced nic/whatnot combinations that are far from IEEE specs... :(
