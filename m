@@ -1,65 +1,49 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: new ipdelay= option for faster netboot
-Date: Wed, 19 Aug 2009 12:57:52 +0100
-Message-ID: <20090819115752.GA25052@shareable.org>
-References: <4A89DB15.6060101@am.sony.com> <20090817.180323.253692704.davem@davemloft.net> <4A8A02CA.7040305@am.sony.com> <20090817.182754.50348941.davem@davemloft.net> <4A8A06A0.2070402@am.sony.com>
+From: Johannes Stezenbach <js@sig21.net>
+Subject: 100Mbit ethernet performance on embedded devices
+Date: Wed, 19 Aug 2009 16:50:57 +0200
+Message-ID: <20090819145057.GA25400@sig21.net>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A8A06A0.2070402@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: David Miller <davem@davemloft.net>, r.schwebel@pengutronix.de, vda.linux@googlemail.com, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, arjan@linux.intel.com, kernel@pengutronix.de, netdev@vger.kernel.org
+To: linux-embedded@vger.kernel.org
+Cc: netdev@vger.kernel.org
 
-Tim Bird wrote:
-> David Miller wrote:
-> > From: Tim Bird <tim.bird@am.sony.com>
-> > Date: Mon, 17 Aug 2009 18:24:26 -0700
-> >
-> >> David Miller wrote:
-> >>> I have card/switch combinations that take up to 10 seconds to
-> >>> negotiate a proper link.
-> >> What types of delays are these timeouts supposed to
-> >> cover?
-> >
-> > The problem is that if you don't first give at least some time for the
-> > link to come up, the remaining time it takes the link to come up will
-> > end up chewing into the actual bootp/dhcp protocol timeouts.  And
-> > that's what we're trying to avoid.
-> 
-> What link?  I'm not that familiar with networking.
-> 
-> Assuming I'm using ethernet, what link needs to come up?
+Hi,
 
-When you plug an ethernet cable in, you may have noticed it takes a
-short time before the signal light comes on.  That's negotiation time.
-Some are slower than others, but none of them do it instantly.
+a while ago I was working on a SoC with 200MHz ARM926EJ-S CPU
+and integrated 100Mbit ethernet core, connected on internal
+(fast) memory bus, with DMA.  With iperf I measured:
 
-> Is this something to do with power propagation to the
-> physical wire?
+  TCP RX ~70Mbit/sec  (iperf -s on SoC, iperf -c on destop PC)
+  TCP TX ~56Mbit/sec  (iperf -s on destop PC, iperf -c o SoC)
 
-Not really.
+The CPU load during the iperf test is around
+1% user, 44% system, 4% irq, 48% softirq, with 7500 irqs/sec.
 
-> Is there some MAC layer negotiation between the card and the switch?
-> Is it the time for the switch to do speed detection?
+The kernel used in these measurements does not have iptables
+support, I think packet filtering will slow it down noticably,
+but I didn't actually try.  The ethernet driver uses NAPI,
+but it doesn't seem to be a win judging from the irq/sec number.
+The kernel was an ancient 2.6.20.
 
-Yes and yes.
+I tried hard, but I couldn't find any performance figures for
+comparison.  (All performance figures I found refer to 1Gbit
+or 10Gbit server type systems.)
 
-> And, can any of this be more accurately determined
-> or guessed-at with knowledge of the onboard hardware?
-> Or is it dependent on external conditions?
+What I'm interested in are some numbers for similar hardware,
+to find out if my hardware and/or ethernet driver can be improved,
+or if the CPU will always be the limiting factor.
+I'd also be interested to know if hardware checksumming
+support would improve throughput noticably in such a system,
+or if it is only useful for 1Gbit and above.
 
-It can be accurately determined with most cards (all modern ones)
-because you get a notification when it's done, or you can poll the card.
+Did anyone actually manage to get close to 100Mbit/sec
+with similar CPU resources?
 
-That's why on the desktop it's able to detect when you plug in an
-ethernet cable and start DHCP as soon as link negotiation is complete.
 
-So the right thing to do, as David Miller suggested too, isn't a fixed
-timeout.  It should wait for link state UP and then start DHCP
-immediately.
-
--- Jamie
+TIA,
+Johannes
