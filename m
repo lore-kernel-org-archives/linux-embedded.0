@@ -1,71 +1,168 @@
-From: Johannes Stezenbach <js@sig21.net>
-Subject: Re: 100Mbit ethernet performance on embedded devices
-Date: Thu, 20 Aug 2009 14:56:49 +0200
-Message-ID: <20090820125649.GA29029@sig21.net>
-References: <20090819145057.GA25400@sig21.net>
- <20090819153534.GC30013@shareable.org>
+From: Samo Pogacnik <samo_pogacnik@t-2.net>
+Subject: [PATCH] mlock_everything
+Date: Fri, 21 Aug 2009 01:50:09 +0200
+Message-ID: <1250812209.2479.220.camel@itpsd6lap>
 Mime-Version: 1.0
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20090819153534.GC30013@shareable.org>
-Sender: netdev-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Jamie Lokier <jamie@shareable.org>
-Cc: linux-embedded@vger.kernel.org, netdev@vger.kernel.org
+To: linux-embedded@vger.kernel.org
 
-On Wed, Aug 19, 2009 at 04:35:34PM +0100, Jamie Lokier wrote:
-> Johannes Stezenbach wrote:
-> > 
-> >   TCP RX ~70Mbit/sec  (iperf -s on SoC, iperf -c on destop PC)
-> >   TCP TX ~56Mbit/sec  (iperf -s on destop PC, iperf -c o SoC)
-> > 
-> > The CPU load during the iperf test is around
-> > 1% user, 44% system, 4% irq, 48% softirq, with 7500 irqs/sec.
-> > 
-> > The kernel used in these measurements does not have iptables
-> > support, I think packet filtering will slow it down noticably,
-> > but I didn't actually try.  The ethernet driver uses NAPI,
-> > but it doesn't seem to be a win judging from the irq/sec number.
-> 
-> You should see far fewer interrupts if NAPI was working properly.
-> Rather than NAPI not being a win, it looks like it's not active at
-> all.
-> 
-> 7500/sec is close to the packet rate, for sending TCP with
-> full-size ethernet packages over a 100Mbit ethernet link.
+Hi,
 
-From debug output I can see that NAPI works in principle, however
-the timing seems to be such that ->poll() almost always completes
-before the next packet is received.  I followed the NAPI_HOWTO.txt
-which came with the 2.6.20 kernel.  The delay between irq ->
-netif_rx_schedule() -> NET_RX_SOFTIRQ ->  ->poll()  doesn't seem
-to be long enough.  But of course my understanding of NAPI is
-very limited, probably I missed something...
+This patch tries to provide the functionality for locking of all used
+memory of all living processes/threads into RAM. It creates an
+additional proc file named "/proc/sys/vm/mlock_everything". Every write
+to this file calls the do_mlock_everything() function, which scans all
+processes and threads and their VMAs. For each task (process or thread),
+locking is performed almost like mlockall(MCL_CURRENT | MCL_FUTURE)
+would have been called by each process but without checking the limits.
+Reads from this proc file return two numbers. The first number tells how
+many writes (do_mlock_everything() requests) have been already performed
+since the system startup. The second number shows how many VM_LOCKED
+flags had been set to different VMAs during the last locking request.
 
-> > What I'm interested in are some numbers for similar hardware,
-> > to find out if my hardware and/or ethernet driver can be improved,
-> > or if the CPU will always be the limiting factor.
-> 
-> I have a SoC with a 166MHz ARMv4 (ARM7TDMI I think, but I'm not sure),
-> and an external RTL8139 100Mbit ethernet chip over the SoC's PCI bus.
-> 
-> It gets a little over 80Mbit/s actual data throughput in both
-> directions, running a simple FTP client.
+So, why all this? Maybe this is not the best idea but enabling the
+do_mlock_everything() after the initialization phase of the system
+startup prevents system trashing in the OOM situation before the
+oom_killer does its job on an embedded system (typically without swap,
+running a fixed set of processes with maybe some RT requirements, ...).
 
-I found one interesting page which defines network driver performance
-in terms of "CPU MHz per Mbit".
-http://www.stlinux.com/drupal/node/439
+Is there another way to prevent unloading of any existing process'es
+memory segment backed up by a file on a filesystem (i.e. from a dynamic
+loadable shared object), when the system approaches the OOM situation?
 
-I can't really tell from their table how big a win HW csum is, but
-what they call "interrupt mitigation optimisations" (IOW: working NAPI)
-seems important.  (compare the values for STx7105)
+I am not sure about the correctness of the do_mlock_everything()
+implementation in the patch. Are there any strange implications of such
+functionality? Would it be sensible to have the possibility for a global
+lock flag, which would automatically set lock flags to all future
+processes as they would have been created?
 
-If some has an embedded platform with 100Mbit ethernet where they can switch
-HW checksum via ethtool and benchmark both under equal conditions, that
-would be very interesting.
+Any comments and suggestions would be very much appreciated, thank you. 
 
+The patch is below.
 
-Thanks
-Johannes
+regards, Samo
+
+diff --git a/include/linux/sysctl.h b/include/linux/sysctl.h
+index e76d3b2..91b21be 100644
+--- a/include/linux/sysctl.h
++++ b/include/linux/sysctl.h
+@@ -205,6 +205,7 @@ enum
+ 	VM_PANIC_ON_OOM=33,	/* panic at out-of-memory */
+ 	VM_VDSO_ENABLED=34,	/* map VDSO into new processes? */
+ 	VM_MIN_SLAB=35,		 /* Percent pages ignored by zone reclaim */
++	VM_MLOCK_EVERYTHING=36,	/* Lock all memory currently mapped by tasks
+*/
+ };
+ 
+ 
+diff --git a/kernel/sysctl.c b/kernel/sysctl.c
+index e5bfcc7..cfe8de2 100644
+--- a/kernel/sysctl.c
++++ b/kernel/sysctl.c
+@@ -77,6 +77,8 @@ extern int suid_dumpable;
+ extern char core_pattern[];
+ extern int pid_max;
+ extern int min_free_kbytes;
++extern int sysctl_mlock_everything[2];
++extern int mlock_everything_sysctl_handler(ctl_table *, int, struct
+file *, void __user *, size_t *, loff_t *);
+ extern int pid_max_min, pid_max_max;
+ extern int sysctl_drop_caches;
+ extern int percpu_pagelist_fraction;
+@@ -1109,6 +1111,15 @@ static struct ctl_table vm_table[] = {
+ 		.extra1		= &zero,
+ 	},
+ 	{
++		.ctl_name	= VM_MLOCK_EVERYTHING,
++		.procname	= "mlock_everything",
++		.data		= &sysctl_mlock_everything,
++		.maxlen		= sizeof(sysctl_mlock_everything),
++		.mode		= 0644,
++		.proc_handler	= mlock_everything_sysctl_handler,
++		.strategy	= &sysctl_intvec,
++	},
++	{
+ 		.ctl_name	= VM_PERCPU_PAGELIST_FRACTION,
+ 		.procname	= "percpu_pagelist_fraction",
+ 		.data		= &percpu_pagelist_fraction,
+diff --git a/kernel/sysctl_check.c b/kernel/sysctl_check.c
+index b38423c..019d788 100644
+--- a/kernel/sysctl_check.c
++++ b/kernel/sysctl_check.c
+@@ -135,6 +135,7 @@ static const struct trans_ctl_table trans_vm_table[]
+= {
+ 	{ VM_PANIC_ON_OOM,		"panic_on_oom" },
+ 	{ VM_VDSO_ENABLED,		"vdso_enabled" },
+ 	{ VM_MIN_SLAB,			"min_slab_ratio" },
++	{ VM_MLOCK_EVERYTHING,		"mlock_everything" },
+ 
+ 	{}
+ };
+diff --git a/mm/mlock.c b/mm/mlock.c
+index cbe9e05..2baace7 100644
+--- a/mm/mlock.c
++++ b/mm/mlock.c
+@@ -678,3 +678,56 @@ void free_locked_buffer(void *buffer, size_t size)
+ 
+ 	kfree(buffer);
+ }
++
++/*
++ * This function scans all mapped vma-s of all existing tasks and sets
+their
++ * default (future mapped areas) and already mapped areas flags to
+VM_LOCKED.
++ */ 
++int do_mlock_everything(void)
++{
++	struct task_struct *g, *p;
++	struct vm_area_struct * vma;
++	int count = 0;
++
++	do_each_thread(g, p)
++		if (p->pid && p->mm) {
++			down_write(&p->mm->mmap_sem);
++			read_lock(&tasklist_lock);
++			task_lock(p);
++			p->mm->def_flags = VM_LOCKED;
++
++			for (vma = p->mm->mmap; vma ; vma = vma->vm_next) {
++				if (vma->vm_flags & VM_LOCKED)
++					continue;
++				vma->vm_flags |= VM_LOCKED;
++				count++;
++			}
++
++			task_unlock(p);
++			read_unlock(&tasklist_lock);
++			up_write(&p->mm->mmap_sem);
++		}
++	while_each_thread(g, p);
++	return count;
++}
++
++/*
++ * Syctl handler for do_mlock_everything().
++ */
++int sysctl_mlock_everything[2] = {
++	0, /* subsequent request for mlock everything */
++	0  /* number of VMAs locked in the last mlock everything request */
++};
++static int mlock_everything_count = 0;
++
++int mlock_everything_sysctl_handler(ctl_table *table, int write, 
++	struct file *file, void __user *buffer, size_t *length, loff_t *ppos)
++{
++	proc_dointvec(table, write, file, buffer, length, ppos);
++	if (write) {
++		sysctl_mlock_everything[0] = ++mlock_everything_count;
++		sysctl_mlock_everything[1] = do_mlock_everything();
++	}
++	return 0;
++}
++
+
