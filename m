@@ -1,47 +1,71 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: New fast(?)-boot results on ARM
-Date: Thu, 20 Aug 2009 10:57:24 +0200
-Message-ID: <20090820085724.GG23444@pengutronix.de>
-References: <20090814170228.GM13320@pengutronix.de> <20090818140605.GB9943@pengutronix.de> <4A8AC95E.2040907@googlemail.com> <20090819072100.GA23444@pengutronix.de> <4A8C263D.9000009@googlemail.com>
+From: Johannes Stezenbach <js@sig21.net>
+Subject: Re: 100Mbit ethernet performance on embedded devices
+Date: Thu, 20 Aug 2009 14:56:49 +0200
+Message-ID: <20090820125649.GA29029@sig21.net>
+References: <20090819145057.GA25400@sig21.net>
+ <20090819153534.GC30013@shareable.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4A8C263D.9000009@googlemail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <20090819153534.GC30013@shareable.org>
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Dirk Behme <dirk.behme@googlemail.com>
-Cc: Robert Schwebel <r.schwebel@pengutronix.de>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
+To: Jamie Lokier <jamie@shareable.org>
+Cc: linux-embedded@vger.kernel.org, netdev@vger.kernel.org
 
-On Wed, Aug 19, 2009 at 06:20:13PM +0200, Dirk Behme wrote:
->>
->> Yes, correct. The copying itself is between 'copy' and 'done' so it
->> takes about 0.4s.
->>
->>> What's the size of the uncompressed kernel copied here?
->>
->> The image is about 2.8MB, but I copied the whole partition of 3MB
->> because with raw images you can't detect the image size.
->
-> With 3MB copied in ~0.4s you get ~8MB/s. This really depends on your HW, 
-> but I would think with standard NOR flashes you should be able to do at 
-> least two (three?) times better. Have you already checked the memory (NOR 
-> flash) timings configured in your SoC?
+On Wed, Aug 19, 2009 at 04:35:34PM +0100, Jamie Lokier wrote:
+> Johannes Stezenbach wrote:
+> > 
+> >   TCP RX ~70Mbit/sec  (iperf -s on SoC, iperf -c on destop PC)
+> >   TCP TX ~56Mbit/sec  (iperf -s on destop PC, iperf -c o SoC)
+> > 
+> > The CPU load during the iperf test is around
+> > 1% user, 44% system, 4% irq, 48% softirq, with 7500 irqs/sec.
+> > 
+> > The kernel used in these measurements does not have iptables
+> > support, I think packet filtering will slow it down noticably,
+> > but I didn't actually try.  The ethernet driver uses NAPI,
+> > but it doesn't seem to be a win judging from the irq/sec number.
+> 
+> You should see far fewer interrupts if NAPI was working properly.
+> Rather than NAPI not being a win, it looks like it's not active at
+> all.
+> 
+> 7500/sec is close to the packet rate, for sending TCP with
+> full-size ethernet packages over a 100Mbit ethernet link.
 
-It's NAND flash, so there's not much timing to optimize. What's
-interesting about this is that the kernel NAND driver is much slower
-than the one in U-Boot. Looking at it it turned out that the kernel
-driver uses interrupts to wait for the controller to get ready.
-Switching this to polling nearly doubles the NAND performance. UBI
-mounts much faster now and this cuts off another few seconds from the
-boot process :)
+From debug output I can see that NAPI works in principle, however
+the timing seems to be such that ->poll() almost always completes
+before the next packet is received.  I followed the NAPI_HOWTO.txt
+which came with the 2.6.20 kernel.  The delay between irq ->
+netif_rx_schedule() -> NET_RX_SOFTIRQ ->  ->poll()  doesn't seem
+to be long enough.  But of course my understanding of NAPI is
+very limited, probably I missed something...
 
-Sascha
+> > What I'm interested in are some numbers for similar hardware,
+> > to find out if my hardware and/or ethernet driver can be improved,
+> > or if the CPU will always be the limiting factor.
+> 
+> I have a SoC with a 166MHz ARMv4 (ARM7TDMI I think, but I'm not sure),
+> and an external RTL8139 100Mbit ethernet chip over the SoC's PCI bus.
+> 
+> It gets a little over 80Mbit/s actual data throughput in both
+> directions, running a simple FTP client.
+
+I found one interesting page which defines network driver performance
+in terms of "CPU MHz per Mbit".
+http://www.stlinux.com/drupal/node/439
+
+I can't really tell from their table how big a win HW csum is, but
+what they call "interrupt mitigation optimisations" (IOW: working NAPI)
+seems important.  (compare the values for STx7105)
+
+If some has an embedded platform with 100Mbit ethernet where they can switch
+HW checksum via ethtool and benchmark both under equal conditions, that
+would be very interesting.
 
 
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Thanks
+Johannes
