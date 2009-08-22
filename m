@@ -1,168 +1,69 @@
-From: Samo Pogacnik <samo_pogacnik@t-2.net>
-Subject: [PATCH] mlock_everything
-Date: Fri, 21 Aug 2009 01:50:09 +0200
-Message-ID: <1250812209.2479.220.camel@itpsd6lap>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
+From: tom.leiming@gmail.com
+Subject: [PATCH] OMAP3:PM: fix lockdep warning caused by omap3_pm_init
+Date: Sat, 22 Aug 2009 21:20:26 +0800
+Message-ID: <1250947226-2371-1-git-send-email-tom.leiming@gmail.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:from:to:cc:subject:date
+         :message-id:x-mailer;
+        bh=5OMln3+NvaPeTjxK8IcDPb99Epprg4Dzhdmal0WQhDg=;
+        b=voEgLMsJm/wi4APl5TwLYR9xUhxmK7m13YdOOsQedes+hPhCg6URapcYOgnE5m9084
+         n+0uYUMEXfwYRGmt6PGXia0K4AIq73frpZGyHo6ZXFoQSdbgKJMYP/+MpeKM2SbAINPS
+         fyzE2uPTlrzd5UsPkhcOcDYM2L0AnMUKNfFo4=
+Sender: linux-omap-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: khilman@deeprootsystems.com, peterz@infradead.org
+Cc: linux-omap@vger.kernel.org, arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, linux@arm.linux.org.uk, Ming Lei <tom.leiming@gmail.com>
 
-Hi,
+From: Ming Lei <tom.leiming@gmail.com>
 
-This patch tries to provide the functionality for locking of all used
-memory of all living processes/threads into RAM. It creates an
-additional proc file named "/proc/sys/vm/mlock_everything". Every write
-to this file calls the do_mlock_everything() function, which scans all
-processes and threads and their VMAs. For each task (process or thread),
-locking is performed almost like mlockall(MCL_CURRENT | MCL_FUTURE)
-would have been called by each process but without checking the limits.
-Reads from this proc file return two numbers. The first number tells how
-many writes (do_mlock_everything() requests) have been already performed
-since the system startup. The second number shows how many VM_LOCKED
-flags had been set to different VMAs during the last locking request.
+This patch uses kmalloc(size,GFP_ATOMIC) instead of kmalloc(size,GFP_KERNEL)
+to allocate memory for instance of struct power_state in pwrdms_setup(),
+since it may be called by pwrdm_for_each() with irq disabled.
 
-So, why all this? Maybe this is not the best idea but enabling the
-do_mlock_everything() after the initialization phase of the system
-startup prevents system trashing in the OOM situation before the
-oom_killer does its job on an embedded system (typically without swap,
-running a fixed set of processes with maybe some RT requirements, ...).
+It is a easy fix for the following lockdep warning caused by
+kmalloc(size,GFP_KERNEL) in pwrdms_setup():
 
-Is there another way to prevent unloading of any existing process'es
-memory segment backed up by a file on a filesystem (i.e. from a dynamic
-loadable shared object), when the system approaches the OOM situation?
+Power Management for TI OMAP3.
+------------[ cut here ]------------
+WARNING: at kernel/lockdep.c:2282 lockdep_trace_alloc+0xe8/0xfc()
+Modules linked in:
+[<c0032ccc>] (unwind_backtrace+0x0/0xec) from [<c0056934>] (warn_slowpath_common+0x48/0x60)
+[<c0056934>] (warn_slowpath_common+0x48/0x60) from [<c007da10>] (lockdep_trace_alloc+0xe8/0xfc)
+[<c007da10>] (lockdep_trace_alloc+0xe8/0xfc) from [<c00cd9bc>] (kmem_cache_alloc+0x28/0x178)
+[<c00cd9bc>] (kmem_cache_alloc+0x28/0x178) from [<c000f184>] (pwrdms_setup+0x30/0xf8)
+[<c000f184>] (pwrdms_setup+0x30/0xf8) from [<c00381c4>] (pwrdm_for_each+0x64/0x84)
+[<c00381c4>] (pwrdm_for_each+0x64/0x84) from [<c000ef60>] (omap3_pm_init+0x3f4/0x5ac)
+[<c000ef60>] (omap3_pm_init+0x3f4/0x5ac) from [<c002c2c0>] (do_one_initcall+0x30/0x1d4)
+[<c002c2c0>] (do_one_initcall+0x30/0x1d4) from [<c00088d8>] (kernel_init+0xa4/0x118)
+[<c00088d8>] (kernel_init+0xa4/0x118) from [<c002ddf8>] (kernel_thread_exit+0x0/0x8)
+---[ end trace 1e06f8d97dc5a19b ]---
 
-I am not sure about the correctness of the do_mlock_everything()
-implementation in the patch. Are there any strange implications of such
-functionality? Would it be sensible to have the possibility for a global
-lock flag, which would automatically set lock flags to all future
-processes as they would have been created?
+---
+This patch is against linux-2.6.31-rc7.
 
-Any comments and suggestions would be very much appreciated, thank you. 
+Signed-off-by: Ming Lei <tom.leiming@gmail.com>
+---
+ arch/arm/mach-omap2/pm34xx.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-The patch is below.
-
-regards, Samo
-
-diff --git a/include/linux/sysctl.h b/include/linux/sysctl.h
-index e76d3b2..91b21be 100644
---- a/include/linux/sysctl.h
-+++ b/include/linux/sysctl.h
-@@ -205,6 +205,7 @@ enum
- 	VM_PANIC_ON_OOM=33,	/* panic at out-of-memory */
- 	VM_VDSO_ENABLED=34,	/* map VDSO into new processes? */
- 	VM_MIN_SLAB=35,		 /* Percent pages ignored by zone reclaim */
-+	VM_MLOCK_EVERYTHING=36,	/* Lock all memory currently mapped by tasks
-*/
- };
+diff --git a/arch/arm/mach-omap2/pm34xx.c b/arch/arm/mach-omap2/pm34xx.c
+index 488d595..d67b781 100644
+--- a/arch/arm/mach-omap2/pm34xx.c
++++ b/arch/arm/mach-omap2/pm34xx.c
+@@ -665,7 +665,7 @@ static int __init pwrdms_setup(struct powerdomain *pwrdm)
+ 	if (!pwrdm->pwrsts)
+ 		return 0;
  
- 
-diff --git a/kernel/sysctl.c b/kernel/sysctl.c
-index e5bfcc7..cfe8de2 100644
---- a/kernel/sysctl.c
-+++ b/kernel/sysctl.c
-@@ -77,6 +77,8 @@ extern int suid_dumpable;
- extern char core_pattern[];
- extern int pid_max;
- extern int min_free_kbytes;
-+extern int sysctl_mlock_everything[2];
-+extern int mlock_everything_sysctl_handler(ctl_table *, int, struct
-file *, void __user *, size_t *, loff_t *);
- extern int pid_max_min, pid_max_max;
- extern int sysctl_drop_caches;
- extern int percpu_pagelist_fraction;
-@@ -1109,6 +1111,15 @@ static struct ctl_table vm_table[] = {
- 		.extra1		= &zero,
- 	},
- 	{
-+		.ctl_name	= VM_MLOCK_EVERYTHING,
-+		.procname	= "mlock_everything",
-+		.data		= &sysctl_mlock_everything,
-+		.maxlen		= sizeof(sysctl_mlock_everything),
-+		.mode		= 0644,
-+		.proc_handler	= mlock_everything_sysctl_handler,
-+		.strategy	= &sysctl_intvec,
-+	},
-+	{
- 		.ctl_name	= VM_PERCPU_PAGELIST_FRACTION,
- 		.procname	= "percpu_pagelist_fraction",
- 		.data		= &percpu_pagelist_fraction,
-diff --git a/kernel/sysctl_check.c b/kernel/sysctl_check.c
-index b38423c..019d788 100644
---- a/kernel/sysctl_check.c
-+++ b/kernel/sysctl_check.c
-@@ -135,6 +135,7 @@ static const struct trans_ctl_table trans_vm_table[]
-= {
- 	{ VM_PANIC_ON_OOM,		"panic_on_oom" },
- 	{ VM_VDSO_ENABLED,		"vdso_enabled" },
- 	{ VM_MIN_SLAB,			"min_slab_ratio" },
-+	{ VM_MLOCK_EVERYTHING,		"mlock_everything" },
- 
- 	{}
- };
-diff --git a/mm/mlock.c b/mm/mlock.c
-index cbe9e05..2baace7 100644
---- a/mm/mlock.c
-+++ b/mm/mlock.c
-@@ -678,3 +678,56 @@ void free_locked_buffer(void *buffer, size_t size)
- 
- 	kfree(buffer);
- }
-+
-+/*
-+ * This function scans all mapped vma-s of all existing tasks and sets
-their
-+ * default (future mapped areas) and already mapped areas flags to
-VM_LOCKED.
-+ */ 
-+int do_mlock_everything(void)
-+{
-+	struct task_struct *g, *p;
-+	struct vm_area_struct * vma;
-+	int count = 0;
-+
-+	do_each_thread(g, p)
-+		if (p->pid && p->mm) {
-+			down_write(&p->mm->mmap_sem);
-+			read_lock(&tasklist_lock);
-+			task_lock(p);
-+			p->mm->def_flags = VM_LOCKED;
-+
-+			for (vma = p->mm->mmap; vma ; vma = vma->vm_next) {
-+				if (vma->vm_flags & VM_LOCKED)
-+					continue;
-+				vma->vm_flags |= VM_LOCKED;
-+				count++;
-+			}
-+
-+			task_unlock(p);
-+			read_unlock(&tasklist_lock);
-+			up_write(&p->mm->mmap_sem);
-+		}
-+	while_each_thread(g, p);
-+	return count;
-+}
-+
-+/*
-+ * Syctl handler for do_mlock_everything().
-+ */
-+int sysctl_mlock_everything[2] = {
-+	0, /* subsequent request for mlock everything */
-+	0  /* number of VMAs locked in the last mlock everything request */
-+};
-+static int mlock_everything_count = 0;
-+
-+int mlock_everything_sysctl_handler(ctl_table *table, int write, 
-+	struct file *file, void __user *buffer, size_t *length, loff_t *ppos)
-+{
-+	proc_dointvec(table, write, file, buffer, length, ppos);
-+	if (write) {
-+		sysctl_mlock_everything[0] = ++mlock_everything_count;
-+		sysctl_mlock_everything[1] = do_mlock_everything();
-+	}
-+	return 0;
-+}
-+
+-	pwrst = kmalloc(sizeof(struct power_state), GFP_KERNEL);
++	pwrst = kmalloc(sizeof(struct power_state), GFP_ATOMIC);
+ 	if (!pwrst)
+ 		return -ENOMEM;
+ 	pwrst->pwrdm = pwrdm;
+-- 
+1.6.0.GIT
 
