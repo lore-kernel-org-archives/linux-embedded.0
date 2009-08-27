@@ -1,69 +1,108 @@
-From: tom.leiming@gmail.com
-Subject: [PATCH] OMAP3:PM: fix lockdep warning caused by omap3_pm_init
-Date: Sat, 22 Aug 2009 21:20:26 +0800
-Message-ID: <1250947226-2371-1-git-send-email-tom.leiming@gmail.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
+From: H M Thalib <hmthalib@gmail.com>
+Subject: Re: 100Mbit ethernet performance on embedded devices
+Date: Thu, 27 Aug 2009 21:08:25 +0530
+Message-ID: <4A96A871.3090002@gmail.com>
+References: <20090819145057.GA25400@sig21.net>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:from:to:cc:subject:date
-         :message-id:x-mailer;
-        bh=5OMln3+NvaPeTjxK8IcDPb99Epprg4Dzhdmal0WQhDg=;
-        b=voEgLMsJm/wi4APl5TwLYR9xUhxmK7m13YdOOsQedes+hPhCg6URapcYOgnE5m9084
-         n+0uYUMEXfwYRGmt6PGXia0K4AIq73frpZGyHo6ZXFoQSdbgKJMYP/+MpeKM2SbAINPS
-         fyzE2uPTlrzd5UsPkhcOcDYM2L0AnMUKNfFo4=
-Sender: linux-omap-owner@vger.kernel.org
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=814/9TsLlGuFId9auiFLTwuOCLqcR0PSsp8LMv84mdA=;
+        b=rfpsX7m0vi3VKScANdTNM0S/JWE1ELRDTmM4xp0l9MtavSsWCPdeoYtyJJeCd9paUw
+         j4Eclnkjn2h5XDvbxQVpfbyYW+3HsyGBRTGqUBURak0dp04foCsfCfGEkLZEN99yay7Y
+         taaiJNHcDk7PyLGHxvuWsOKB7cOJ2VwavXB/k=
+In-Reply-To: <20090819145057.GA25400@sig21.net>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: khilman@deeprootsystems.com, peterz@infradead.org
-Cc: linux-omap@vger.kernel.org, arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, linux@arm.linux.org.uk, Ming Lei <tom.leiming@gmail.com>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Johannes Stezenbach <js@sig21.net>
+Cc: linux-embedded@vger.kernel.org, netdev@vger.kernel.org
 
-From: Ming Lei <tom.leiming@gmail.com>
+Hi,
 
-This patch uses kmalloc(size,GFP_ATOMIC) instead of kmalloc(size,GFP_KERNEL)
-to allocate memory for instance of struct power_state in pwrdms_setup(),
-since it may be called by pwrdm_for_each() with irq disabled.
 
-It is a easy fix for the following lockdep warning caused by
-kmalloc(size,GFP_KERNEL) in pwrdms_setup():
+Johannes Stezenbach wrote:
+> Hi,
+> 
+> a while ago I was working on a SoC with 200MHz ARM926EJ-S CPU
+> and integrated 100Mbit ethernet core, connected on internal
+> (fast) memory bus, with DMA.  With iperf I measured:
+> 
 
-Power Management for TI OMAP3.
-------------[ cut here ]------------
-WARNING: at kernel/lockdep.c:2282 lockdep_trace_alloc+0xe8/0xfc()
-Modules linked in:
-[<c0032ccc>] (unwind_backtrace+0x0/0xec) from [<c0056934>] (warn_slowpath_common+0x48/0x60)
-[<c0056934>] (warn_slowpath_common+0x48/0x60) from [<c007da10>] (lockdep_trace_alloc+0xe8/0xfc)
-[<c007da10>] (lockdep_trace_alloc+0xe8/0xfc) from [<c00cd9bc>] (kmem_cache_alloc+0x28/0x178)
-[<c00cd9bc>] (kmem_cache_alloc+0x28/0x178) from [<c000f184>] (pwrdms_setup+0x30/0xf8)
-[<c000f184>] (pwrdms_setup+0x30/0xf8) from [<c00381c4>] (pwrdm_for_each+0x64/0x84)
-[<c00381c4>] (pwrdm_for_each+0x64/0x84) from [<c000ef60>] (omap3_pm_init+0x3f4/0x5ac)
-[<c000ef60>] (omap3_pm_init+0x3f4/0x5ac) from [<c002c2c0>] (do_one_initcall+0x30/0x1d4)
-[<c002c2c0>] (do_one_initcall+0x30/0x1d4) from [<c00088d8>] (kernel_init+0xa4/0x118)
-[<c00088d8>] (kernel_init+0xa4/0x118) from [<c002ddf8>] (kernel_thread_exit+0x0/0x8)
----[ end trace 1e06f8d97dc5a19b ]---
+Did you used Iperf it is not the correct tool to find the performance of 
+ethernet. use tools like Smartbits or IXIA they are special hardware to 
+measure the performance . They will give you better results
 
----
-This patch is against linux-2.6.31-rc7.
+>   TCP RX ~70Mbit/sec  (iperf -s on SoC, iperf -c on destop PC)
+>   TCP TX ~56Mbit/sec  (iperf -s on destop PC, iperf -c o SoC)
 
-Signed-off-by: Ming Lei <tom.leiming@gmail.com>
----
- arch/arm/mach-omap2/pm34xx.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Did you stopped unwanted process in both PC as well as processor, make 
+sure PC has a bottle neck. Does it gives a through put of at least 
+95MBps. Is you system connected directly with crossover cables.
 
-diff --git a/arch/arm/mach-omap2/pm34xx.c b/arch/arm/mach-omap2/pm34xx.c
-index 488d595..d67b781 100644
---- a/arch/arm/mach-omap2/pm34xx.c
-+++ b/arch/arm/mach-omap2/pm34xx.c
-@@ -665,7 +665,7 @@ static int __init pwrdms_setup(struct powerdomain *pwrdm)
- 	if (!pwrdm->pwrsts)
- 		return 0;
- 
--	pwrst = kmalloc(sizeof(struct power_state), GFP_KERNEL);
-+	pwrst = kmalloc(sizeof(struct power_state), GFP_ATOMIC);
- 	if (!pwrst)
- 		return -ENOMEM;
- 	pwrst->pwrdm = pwrdm;
+> The CPU load during the iperf test is around
+> 1% user, 44% system, 4% irq, 48% softirq, with 7500 irqs/sec.
+
+Did you used vmast -- it is not the correct way to measure the cpu load
+or do you use top -- it takes lots of you system resource .. this can 
+affect ehternet performance
+
+> The kernel used in these measurements does not have iptables
+> support, I think packet filtering will slow it down noticably,
+> but I didn't actually try.
+
+Thats good. iptable will dramatically affect the performance. remove all 
+the iptables related modules if it is loaded before performing test
+
+   The ethernet driver uses NAPI,
+> but it doesn't seem to be a win judging from the irq/sec number.
+> The kernel was an ancient 2.6.20.
+> 
+not bad. worth upgrading.
+
+> I tried hard, but I couldn't find any performance figures for
+> comparison.  (All performance figures I found refer to 1Gbit
+> or 10Gbit server type systems.)
+
+surely you will not find the perf data for small low end processor 
+because they are not made fro that. and also this data is not some thing 
+sharable .they are the benchmark about their product.
+
+Industry is interested in high performance processor for network 
+product. beside ethernet they do have lot offloading engines.
+
+> What I'm interested in are some numbers for similar hardware,
+> to find out if my hardware and/or ethernet driver can be improved,
+> or if the CPU will always be the limiting factor.
+
+probably should be possible optimizing hardware+software but you have to 
+   pay for that.
+
+> I'd also be interested to know if hardware checksumming
+> support would improve throughput noticably in such a system,
+> or if it is only useful for 1Gbit and above.
+
+In my experience for your cpu 80% max of ehternet speed should be ok .. 
+don't expect more.
+
+> 
+> Did anyone actually manage to get close to 100Mbit/sec
+> with similar CPU resources?
+> 
+> 
+> TIA,
+> Johannes
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
 -- 
-1.6.0.GIT
-
+Thanks & Regards,
+H M Thalib.
