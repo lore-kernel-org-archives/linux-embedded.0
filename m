@@ -1,69 +1,76 @@
-From: Kevin Hilman <khilman@deeprootsystems.com>
-Subject: Re: [PATCH] OMAP3:PM: fix lockdep warning caused by omap3_pm_init
-Date: Fri, 28 Aug 2009 15:03:37 +0300
-Message-ID: <87pragywkm.fsf@deeprootsystems.com>
-References: <1250947226-2371-1-git-send-email-tom.leiming@gmail.com>
+From: Johannes Stezenbach <js@sig21.net>
+Subject: Re: 100Mbit ethernet performance on embedded devices
+Date: Fri, 28 Aug 2009 16:26:33 +0200
+Message-ID: <20090828142633.GA7375@sig21.net>
+References: <20090819145057.GA25400@sig21.net>
+ <4A96A871.3090002@gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1250947226-2371-1-git-send-email-tom.leiming@gmail.com> (tom leiming's message of "Sat\, 22 Aug 2009 21\:20\:26 +0800")
-Sender: linux-omap-owner@vger.kernel.org
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4A96A871.3090002@gmail.com>
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: tom.leiming@gmail.com
-Cc: peterz@infradead.org, linux-omap@vger.kernel.org, arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, linux@arm.linux.org.uk
+To: H M Thalib <hmthalib@gmail.com>
+Cc: linux-embedded@vger.kernel.org, netdev@vger.kernel.org
 
-tom.leiming@gmail.com writes:
+On Thu, Aug 27, 2009 at 09:08:25PM +0530, H M Thalib wrote:
+> Johannes Stezenbach wrote:
+> >
+> >a while ago I was working on a SoC with 200MHz ARM926EJ-S CPU
+> >and integrated 100Mbit ethernet core, connected on internal
+> >(fast) memory bus, with DMA.  With iperf I measured:
+> 
+> Did you used Iperf it is not the correct tool to find the
+> performance of ethernet. use tools like Smartbits or IXIA they are
+> special hardware to measure the performance . They will give you
+> better results
 
-> From: Ming Lei <tom.leiming@gmail.com>
->
-> This patch uses kmalloc(size,GFP_ATOMIC) instead of kmalloc(size,GFP_KERNEL)
-> to allocate memory for instance of struct power_state in pwrdms_setup(),
-> since it may be called by pwrdm_for_each() with irq disabled.
->
-> It is a easy fix for the following lockdep warning caused by
-> kmalloc(size,GFP_KERNEL) in pwrdms_setup():
->
-> Power Management for TI OMAP3.
-> ------------[ cut here ]------------
-> WARNING: at kernel/lockdep.c:2282 lockdep_trace_alloc+0xe8/0xfc()
-> Modules linked in:
-> [<c0032ccc>] (unwind_backtrace+0x0/0xec) from [<c0056934>] (warn_slowpath_common+0x48/0x60)
-> [<c0056934>] (warn_slowpath_common+0x48/0x60) from [<c007da10>] (lockdep_trace_alloc+0xe8/0xfc)
-> [<c007da10>] (lockdep_trace_alloc+0xe8/0xfc) from [<c00cd9bc>] (kmem_cache_alloc+0x28/0x178)
-> [<c00cd9bc>] (kmem_cache_alloc+0x28/0x178) from [<c000f184>] (pwrdms_setup+0x30/0xf8)
-> [<c000f184>] (pwrdms_setup+0x30/0xf8) from [<c00381c4>] (pwrdm_for_each+0x64/0x84)
-> [<c00381c4>] (pwrdm_for_each+0x64/0x84) from [<c000ef60>] (omap3_pm_init+0x3f4/0x5ac)
-> [<c000ef60>] (omap3_pm_init+0x3f4/0x5ac) from [<c002c2c0>] (do_one_initcall+0x30/0x1d4)
-> [<c002c2c0>] (do_one_initcall+0x30/0x1d4) from [<c00088d8>] (kernel_init+0xa4/0x118)
-> [<c00088d8>] (kernel_init+0xa4/0x118) from [<c002ddf8>] (kernel_thread_exit+0x0/0x8)
-> ---[ end trace 1e06f8d97dc5a19b ]---
->
-> ---
-> This patch is against linux-2.6.31-rc7.
->
-> Signed-off-by: Ming Lei <tom.leiming@gmail.com>
+iperf is close to what the targeted application of this system
+does -- receive a stream via TCP and process it.
 
-Looks good, I'll queue in my fixes for 2.6.32 queue.
+Busybox wget e.g. is not good for benchmarking, it has a too small
+receive buffer and adds a lot of syscall overhead.
 
-Kevin
+> >  TCP RX ~70Mbit/sec  (iperf -s on SoC, iperf -c on destop PC)
+> >  TCP TX ~56Mbit/sec  (iperf -s on destop PC, iperf -c o SoC)
+> 
+> Did you stopped unwanted process in both PC as well as processor,
+> make sure PC has a bottle neck. Does it gives a through put of at
+> least 95MBps. Is you system connected directly with crossover
+> cables.
 
-> ---
->  arch/arm/mach-omap2/pm34xx.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/arch/arm/mach-omap2/pm34xx.c b/arch/arm/mach-omap2/pm34xx.c
-> index 488d595..d67b781 100644
-> --- a/arch/arm/mach-omap2/pm34xx.c
-> +++ b/arch/arm/mach-omap2/pm34xx.c
-> @@ -665,7 +665,7 @@ static int __init pwrdms_setup(struct powerdomain *pwrdm)
->  	if (!pwrdm->pwrsts)
->  		return 0;
->  
-> -	pwrst = kmalloc(sizeof(struct power_state), GFP_KERNEL);
-> +	pwrst = kmalloc(sizeof(struct power_state), GFP_ATOMIC);
->  	if (!pwrst)
->  		return -ENOMEM;
->  	pwrst->pwrdm = pwrdm;
-> -- 
-> 1.6.0.GIT
+They are usually cpnnected via a 100Mbit switch, direct connection
+yields no measurable improvement, and the PC can RX/TX ~95Mbit/sec
+at close to 0% CPI load.
+
+> >The CPU load during the iperf test is around
+> >1% user, 44% system, 4% irq, 48% softirq, with 7500 irqs/sec.
+> 
+> Did you used vmast -- it is not the correct way to measure the cpu load
+> or do you use top -- it takes lots of you system resource .. this
+> can affect ehternet performance
+
+I used a small tool similar to busybox nmeter (except that
+it prints numbers instead of a bar). When this tool alone
+runs the system is 100% idle.
+
+> >I tried hard, but I couldn't find any performance figures for
+> >comparison.  (All performance figures I found refer to 1Gbit
+> >or 10Gbit server type systems.)
+> 
+> surely you will not find the perf data for small low end processor
+> because they are not made fro that. and also this data is not some
+> thing sharable .they are the benchmark about their product.
+
+I wouldn't trust manufacturer benchmakrs anyway.  But I was
+hoping to get some numbers from people working on similar
+networked embedded hsystems.  E.g. it is hard to believe
+that wireless routers running OpenWRT have trouble handling
+54Mbit on the *wired* interface with a few iptables rules
+enabled.
+
+
+Thanks,
+Johannes
