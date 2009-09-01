@@ -1,121 +1,85 @@
-From: Marc Andre Tanner <mat@brain-dump.org>
-Subject: [PATCH 2/7] printk: move printk to the end of the file
-Date: Wed,  2 Sep 2009 00:31:04 +0200
-Message-ID: <1251844269-12394-3-git-send-email-mat@brain-dump.org>
-References: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Re: [PATCH 7/7] printk: provide a filtering macro for printk
+Date: Tue, 1 Sep 2009 16:24:27 -0700
+Message-ID: <4A9DAD2B.3080909@am.sony.com>
+References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> <1251844269-12394-8-git-send-email-mat@brain-dump.org>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
+In-Reply-To: <1251844269-12394-8-git-send-email-mat@brain-dump.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
-Cc: mat@brain-dump.org
+To: Marc Andre Tanner <mat@brain-dump.org>
+Cc: linux-embedded@vger.kernel.org
 
-A later patch will #undef printk because the macro would otherwise
-conflict with the function definition. Moving the printk function
-to the end of the file makes sure that the macro is expanded within
-the rest of the file.
+Marc Andre Tanner wrote:
+> The macro filters out printk messages based on a configurable verbosity
+> level (CONFIG_PRINTK_VERBOSITY).
+> 
+> Signed-off-by: Marc Andre Tanner <mat@brain-dump.org>
+> ---
+>  include/linux/kernel.h |   24 ++++++++++++++++++++++++
+>  1 files changed, 24 insertions(+), 0 deletions(-)
+> 
+> diff --git a/include/linux/kernel.h b/include/linux/kernel.h
+> index c2b3047..1f5d01f 100644
+> --- a/include/linux/kernel.h
+> +++ b/include/linux/kernel.h
+> @@ -242,6 +242,30 @@ asmlinkage int printk(const char * fmt, ...)
+>  asmlinkage int printk_unfiltered(const char *fmt, ...)
+>  	__attribute__ ((format (printf, 1, 2))) __cold;
+>  
+> +#if defined(CONFIG_PRINTK_VERBOSITY) && CONFIG_PRINTK_VERBOSITY > 0
+> +/*
+> + * The idea here is to wrap the actual printk function with a macro which
+> + * will filter out all messages above a certain verbosity level. Because
+> + * the if condition evaluates to a constant expression the compiler will be
+> + * able to eliminate it and the resulting kernel image will be smaller.
+> + *
+> + * The check with sizeof(void*) should make sure that we don't operate on
+> + * pointers, which the compiler wouldn't be able to optimize out, but only
+> + * on string constants.
+> + */
+> +
+> +#include <linux/stringify.h>
+> +
+> +#define printk(fmt, ...) ({ 							 \
+> +	if (sizeof(fmt) == sizeof(void *) ||					 \
+> +	    (((const char *)(fmt))[0] != '<' && CONFIG_PRINTK_VERBOSITY >= 4) || \
+> +	    (((const char *)(fmt))[0] == '<' && 				 \
+> +	     ((const char *)(fmt))[1] <= *__stringify(CONFIG_PRINTK_VERBOSITY))) \
+> +		printk((fmt), ##__VA_ARGS__); 					 \
+> +})
+> +
+> +#endif /* CONFIG_PRINTK_VERBOSITY */
+> +
+>  extern struct ratelimit_state printk_ratelimit_state;
+>  extern int printk_ratelimit(void);
+>  extern bool printk_timed_ratelimit(unsigned long *caller_jiffies,
 
-Signed-off-by: Marc Andre Tanner <mat@brain-dump.org>
----
- kernel/printk.c |   72 ++++++++++++++++++++++++++++--------------------------
- 1 files changed, 37 insertions(+), 35 deletions(-)
 
-diff --git a/kernel/printk.c b/kernel/printk.c
-index b4d97b5..5455d41 100644
---- a/kernel/printk.c
-+++ b/kernel/printk.c
-@@ -551,40 +551,6 @@ static int have_callable_console(void)
- 	return 0;
- }
- 
--/**
-- * printk - print a kernel message
-- * @fmt: format string
-- *
-- * This is printk().  It can be called from any context.  We want it to work.
-- *
-- * We try to grab the console_sem.  If we succeed, it's easy - we log the output and
-- * call the console drivers.  If we fail to get the semaphore we place the output
-- * into the log buffer and return.  The current holder of the console_sem will
-- * notice the new output in release_console_sem() and will send it to the
-- * consoles before releasing the semaphore.
-- *
-- * One effect of this deferred printing is that code which calls printk() and
-- * then changes console_loglevel may break. This is because console_loglevel
-- * is inspected when the actual printing occurs.
-- *
-- * See also:
-- * printf(3)
-- *
-- * See the vsnprintf() documentation for format string extensions over C99.
-- */
--
--asmlinkage int printk(const char *fmt, ...)
--{
--	va_list args;
--	int r;
--
--	va_start(args, fmt);
--	r = vprintk(fmt, args);
--	va_end(args);
--
--	return r;
--}
--
- /* cpu currently holding logbuf_lock */
- static volatile unsigned int printk_cpu = UINT_MAX;
- 
-@@ -770,7 +736,6 @@ out_restore_irqs:
- 	preempt_enable();
- 	return printed_len;
- }
--EXPORT_SYMBOL(printk);
- EXPORT_SYMBOL(vprintk);
- 
- #else
-@@ -1337,3 +1302,40 @@ bool printk_timed_ratelimit(unsigned long *caller_jiffies,
- }
- EXPORT_SYMBOL(printk_timed_ratelimit);
- #endif
-+
-+#ifdef CONFIG_PRINTK
-+/**
-+ * printk - print a kernel message
-+ * @fmt: format string
-+ *
-+ * This is printk().  It can be called from any context.  We want it to work.
-+ *
-+ * We try to grab the console_sem.  If we succeed, it's easy - we log the output and
-+ * call the console drivers.  If we fail to get the semaphore we place the output
-+ * into the log buffer and return.  The current holder of the console_sem will
-+ * notice the new output in release_console_sem() and will send it to the
-+ * consoles before releasing the semaphore.
-+ *
-+ * One effect of this deferred printing is that code which calls printk() and
-+ * then changes console_loglevel may break. This is because console_loglevel
-+ * is inspected when the actual printing occurs.
-+ *
-+ * See also:
-+ * printf(3)
-+ *
-+ * See the vsnprintf() documentation for format string extensions over C99.
-+ */
-+
-+asmlinkage int printk(const char *fmt, ...)
-+{
-+	va_list args;
-+	int r;
-+
-+	va_start(args, fmt);
-+	r = vprintk(fmt, args);
-+	va_end(args);
-+
-+	return r;
-+}
-+EXPORT_SYMBOL(printk);
-+#endif
--- 
-1.6.3.3
+
+Some places in the kernel break the message into pieces, like so:
+
+printk(KERN_ERR, "Error: first part ");
+...
+printk(" more info for error.\n");
+
+These parts would not be handled consistently under certain
+conditions.
+
+It would be confusing to see only part of the message,
+but I don't know how often this construct is used.  Maybe
+another mechanism is needed to ensure that continuation
+printk lines have the same log level as their start strings.
+
+But, overall, very slick!  It's nice to see a solution that doesn't
+require changing all printks statements in the kernel.
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
