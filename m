@@ -1,7 +1,7 @@
 From: Marc Andre Tanner <mat@brain-dump.org>
-Subject: [PATCH 6/7] video/stk-webcam: change use of STK_ERROR
-Date: Wed,  2 Sep 2009 00:31:08 +0200
-Message-ID: <1251844269-12394-7-git-send-email-mat@brain-dump.org>
+Subject: [PATCH 4/7] drivers: replace printk with printk_unfiltered
+Date: Wed,  2 Sep 2009 00:31:06 +0200
+Message-ID: <1251844269-12394-5-git-send-email-mat@brain-dump.org>
 References: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
@@ -13,54 +13,84 @@ Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org
 Cc: mat@brain-dump.org
 
-Don't rely on the return value of STK_ERROR which is a wrapper
-around printk use a normal if clause instead.
+Use the unfiltered variant in cases where the return value
+is of interest.
 
 Signed-off-by: Marc Andre Tanner <mat@brain-dump.org>
 ---
- drivers/media/video/stk-webcam.c |   16 ++++++++--------
- 1 files changed, 8 insertions(+), 8 deletions(-)
+ drivers/char/mem.c                 |    2 +-
+ drivers/md/md.c                    |    2 +-
+ drivers/scsi/aic7xxx/aic79xx_osm.h |    2 +-
+ drivers/scsi/aic7xxx/aic7xxx_osm.h |    2 +-
+ kernel/lockdep.c                   |    4 ++--
+ 5 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/media/video/stk-webcam.c b/drivers/media/video/stk-webcam.c
-index b154bd9..ea7e70e 100644
---- a/drivers/media/video/stk-webcam.c
-+++ b/drivers/media/video/stk-webcam.c
-@@ -386,8 +386,8 @@ static void stk_isoc_handler(struct urb *urb)
+diff --git a/drivers/char/mem.c b/drivers/char/mem.c
+index afa8813..ba48b82 100644
+--- a/drivers/char/mem.c
++++ b/drivers/char/mem.c
+@@ -850,7 +850,7 @@ static ssize_t kmsg_write(struct file * file, const char __user * buf,
+ 	ret = -EFAULT;
+ 	if (!copy_from_user(tmp, buf, count)) {
+ 		tmp[count] = 0;
+-		ret = printk("%s", tmp);
++		ret = printk_unfiltered("%s", tmp);
+ 		if (ret > count)
+ 			/* printk can add a prefix */
+ 			ret = count;
+diff --git a/drivers/md/md.c b/drivers/md/md.c
+index 9dd8720..85c31bf 100644
+--- a/drivers/md/md.c
++++ b/drivers/md/md.c
+@@ -51,7 +51,7 @@
+ #include "bitmap.h"
  
- 	if (list_empty(&dev->sio_avail)) {
- 		/*FIXME Stop streaming after a while */
--		(void) (printk_ratelimit() &&
--		STK_ERROR("isoc_handler without available buffer!\n"));
-+		if (printk_ratelimit())
-+			STK_ERROR("isoc_handler without available buffer!\n");
- 		goto resubmit;
- 	}
- 	fb = list_first_entry(&dev->sio_avail,
-@@ -422,10 +422,10 @@ static void stk_isoc_handler(struct urb *urb)
- 			/* This marks a new frame */
- 			if (fb->v4lbuf.bytesused != 0
- 				&& fb->v4lbuf.bytesused != dev->frame_size) {
--				(void) (printk_ratelimit() &&
--				STK_ERROR("frame %d, "
--					"bytesused=%d, skipping\n",
--					i, fb->v4lbuf.bytesused));
-+				if (printk_ratelimit())
-+					STK_ERROR("frame %d, "
-+						"bytesused=%d, skipping\n",
-+						i, fb->v4lbuf.bytesused);
- 				fb->v4lbuf.bytesused = 0;
- 				fill = fb->buffer;
- 			} else if (fb->v4lbuf.bytesused == dev->frame_size) {
-@@ -450,8 +450,8 @@ static void stk_isoc_handler(struct urb *urb)
+ #define DEBUG 0
+-#define dprintk(x...) ((void)(DEBUG && printk(x)))
++#define dprintk(x...) ((void)(DEBUG && printk_unfiltered(x)))
  
- 		/* Our buffer is full !!! */
- 		if (framelen + fb->v4lbuf.bytesused > dev->frame_size) {
--			(void) (printk_ratelimit() &&
--			STK_ERROR("Frame buffer overflow, lost sync\n"));
-+			if (printk_ratelimit())
-+				STK_ERROR("Frame buffer overflow, lost sync\n");
- 			/*FIXME Do something here? */
- 			continue;
+ 
+ #ifndef MODULE
+diff --git a/drivers/scsi/aic7xxx/aic79xx_osm.h b/drivers/scsi/aic7xxx/aic79xx_osm.h
+index 55c1fe0..65a30c5 100644
+--- a/drivers/scsi/aic7xxx/aic79xx_osm.h
++++ b/drivers/scsi/aic7xxx/aic79xx_osm.h
+@@ -364,7 +364,7 @@ struct ahd_platform_data {
+ };
+ 
+ /************************** OS Utility Wrappers *******************************/
+-#define printf printk
++#define printf printk_unfiltered
+ #define M_NOWAIT GFP_ATOMIC
+ #define M_WAITOK 0
+ #define malloc(size, type, flags) kmalloc(size, flags)
+diff --git a/drivers/scsi/aic7xxx/aic7xxx_osm.h b/drivers/scsi/aic7xxx/aic7xxx_osm.h
+index 56f07e5..cf05c2b 100644
+--- a/drivers/scsi/aic7xxx/aic7xxx_osm.h
++++ b/drivers/scsi/aic7xxx/aic7xxx_osm.h
+@@ -369,7 +369,7 @@ struct ahc_platform_data {
+ };
+ 
+ /************************** OS Utility Wrappers *******************************/
+-#define printf printk
++#define printf printk_unfiltered
+ #define M_NOWAIT GFP_ATOMIC
+ #define M_WAITOK 0
+ #define malloc(size, type, flags) kmalloc(size, flags)
+diff --git a/kernel/lockdep.c b/kernel/lockdep.c
+index 8bbeef9..154756a 100644
+--- a/kernel/lockdep.c
++++ b/kernel/lockdep.c
+@@ -564,8 +564,8 @@ static void print_lock_class_header(struct lock_class *class, int depth)
+ 		if (class->usage_mask & (1 << bit)) {
+ 			int len = depth;
+ 
+-			len += printk("%*s   %s", depth, "", usage_str[bit]);
+-			len += printk(" at:\n");
++			len += printk_unfiltered("%*s   %s", depth, "", usage_str[bit]);
++			len += printk_unfiltered(" at:\n");
+ 			print_stack_trace(class->usage_traces + bit, len);
  		}
+ 	}
 -- 
 1.6.3.3
