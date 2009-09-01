@@ -1,46 +1,68 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
-Subject: Re: [RFC|PATCH] Compile time printk verbosity
-Date: Tue, 1 Sep 2009 19:37:27 -0400
-Message-ID: <8bd0f97a0909011637p1d97b3cft91708225c7514f9f@mail.gmail.com>
-References: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
+From: "H Hartley Sweeten" <hartleys@visionengravers.com>
+Subject: RE: [PATCH 7/7] printk: provide a filtering macro for printk
+Date: Tue, 1 Sep 2009 19:32:25 -0400
+Message-ID: <BD79186B4FD85F4B8E60E381CAEE190901C55CD3@mi8nycmail19.Mi8.com>
+References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> <1251844269-12394-8-git-send-email-mat@brain-dump.org> <4A9DAD2B.3080909@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :from:date:message-id:subject:to:cc:content-type
-         :content-transfer-encoding;
-        bh=MHo6ntOCYnyy1wVMLcpJAlmBIHpFW11V6FmqKkJwbVY=;
-        b=YT6muQKGS10TePdVKOLkijcSha7UgB/gFvQ4W5T72kD0BDdbr5OG5kIxeMov9hYA6u
-         cxNRrnqzFc8+vcszmp4czG6uNZlGnm2tqZ39zFjKDBsHwyBrCmjhHu8wAtbeA+VrBexm
-         vqZOk+guGz2YfVndMo1T8PpMrVh3YykKYj/SI=
-In-Reply-To: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
+Content-class: urn:content-classes:message
+In-Reply-To: <4A9DAD2B.3080909@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Marc Andre Tanner <mat@brain-dump.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Tim Bird <tim.bird@am.sony.com>, Marc Andre Tanner <mat@brain-dump.org>
 Cc: linux-embedded@vger.kernel.org
 
-On Tue, Sep 1, 2009 at 18:31, Marc Andre Tanner wrote:
-> This series adds a configuration option to selectively compile out
-> printk message strings based on a verbosity level.
->
-> This works by wrapping printk with a macro which evaluates to a
-> constant if condition which the compiler will be able to optimize
-> out.
->
-> However because printk might be wrapped by a macro it no longer has
-> a return value. This means that constructs like the following ones
-> don't work:
->
-> =C2=A0 ((void)(SOME_RANDOM_DEBUG_FLAG && printk(...));
->
-> =C2=A0 some_random_variable =3D printk(...);
->
-> Therefore printk_unfiltered is introduced which is just an alias
-> to the standard printk function but not wrapped by a macro.
-
-why dont you return 0 if it gets optimized away ?  then you wont have
-to screw with external code at all and things "just work".
--mike
+T24gVHVlc2RheSwgU2VwdGVtYmVyIDAxLCAyMDA5IDQ6MjQgUE0sIFRpbSBCaXJkIHdyb3RlOg0K
+PiBNYXJjIEFuZHJlIFRhbm5lciB3cm90ZToNCj4+IFRoZSBtYWNybyBmaWx0ZXJzIG91dCBwcmlu
+dGsgbWVzc2FnZXMgYmFzZWQgb24gYSBjb25maWd1cmFibGUgdmVyYm9zaXR5DQo+PiBsZXZlbCAo
+Q09ORklHX1BSSU5US19WRVJCT1NJVFkpLg0KPj4NCj4+IFNpZ25lZC1vZmYtYnk6IE1hcmMgQW5k
+cmUgVGFubmVyIDxtYXRAYnJhaW4tZHVtcC5vcmc+DQo+PiAtLS0NCj4+ICBpbmNsdWRlL2xpbnV4
+L2tlcm5lbC5oIHwgICAyNCArKysrKysrKysrKysrKysrKysrKysrKysNCj4+ICAxIGZpbGVzIGNo
+YW5nZWQsIDI0IGluc2VydGlvbnMoKyksIDAgZGVsZXRpb25zKC0pDQo+PiANCj4+IGRpZmYgLS1n
+aXQgYS9pbmNsdWRlL2xpbnV4L2tlcm5lbC5oIGIvaW5jbHVkZS9saW51eC9rZXJuZWwuaA0KPj4g
+aW5kZXggYzJiMzA0Ny4uMWY1ZDAxZiAxMDA2NDQNCj4+IC0tLSBhL2luY2x1ZGUvbGludXgva2Vy
+bmVsLmgNCj4+ICsrKyBiL2luY2x1ZGUvbGludXgva2VybmVsLmgNCj4+IEBAIC0yNDIsNiArMjQy
+LDMwIEBAIGFzbWxpbmthZ2UgaW50IHByaW50ayhjb25zdCBjaGFyICogZm10LCAuLi4pDQo+PiAg
+YXNtbGlua2FnZSBpbnQgcHJpbnRrX3VuZmlsdGVyZWQoY29uc3QgY2hhciAqZm10LCAuLi4pDQo+
+PiAgCV9fYXR0cmlidXRlX18gKChmb3JtYXQgKHByaW50ZiwgMSwgMikpKSBfX2NvbGQ7DQo+PiAg
+DQo+PiArI2lmIGRlZmluZWQoQ09ORklHX1BSSU5US19WRVJCT1NJVFkpICYmIENPTkZJR19QUklO
+VEtfVkVSQk9TSVRZID4gMA0KPj4gKy8qDQo+PiArICogVGhlIGlkZWEgaGVyZSBpcyB0byB3cmFw
+IHRoZSBhY3R1YWwgcHJpbnRrIGZ1bmN0aW9uIHdpdGggYSBtYWNybyB3aGljaA0KPj4gKyAqIHdp
+bGwgZmlsdGVyIG91dCBhbGwgbWVzc2FnZXMgYWJvdmUgYSBjZXJ0YWluIHZlcmJvc2l0eSBsZXZl
+bC4gQmVjYXVzZQ0KPj4gKyAqIHRoZSBpZiBjb25kaXRpb24gZXZhbHVhdGVzIHRvIGEgY29uc3Rh
+bnQgZXhwcmVzc2lvbiB0aGUgY29tcGlsZXIgd2lsbCBiZQ0KPj4gKyAqIGFibGUgdG8gZWxpbWlu
+YXRlIGl0IGFuZCB0aGUgcmVzdWx0aW5nIGtlcm5lbCBpbWFnZSB3aWxsIGJlIHNtYWxsZXIuDQo+
+PiArICoNCj4+ICsgKiBUaGUgY2hlY2sgd2l0aCBzaXplb2Yodm9pZCopIHNob3VsZCBtYWtlIHN1
+cmUgdGhhdCB3ZSBkb24ndCBvcGVyYXRlIG9uDQo+PiArICogcG9pbnRlcnMsIHdoaWNoIHRoZSBj
+b21waWxlciB3b3VsZG4ndCBiZSBhYmxlIHRvIG9wdGltaXplIG91dCwgYnV0IG9ubHkNCj4+ICsg
+KiBvbiBzdHJpbmcgY29uc3RhbnRzLg0KPj4gKyAqLw0KPj4gKw0KPj4gKyNpbmNsdWRlIDxsaW51
+eC9zdHJpbmdpZnkuaD4NCj4+ICsNCj4+ICsjZGVmaW5lIHByaW50ayhmbXQsIC4uLikgKHsgCQkJ
+CQkJCSBcDQo+PiArCWlmIChzaXplb2YoZm10KSA9PSBzaXplb2Yodm9pZCAqKSB8fAkJCQkJIFwN
+Cj4+ICsJICAgICgoKGNvbnN0IGNoYXIgKikoZm10KSlbMF0gIT0gJzwnICYmIENPTkZJR19QUklO
+VEtfVkVSQk9TSVRZID49IDQpIHx8IFwNCj4+ICsJICAgICgoKGNvbnN0IGNoYXIgKikoZm10KSlb
+MF0gPT0gJzwnICYmIAkJCQkgXA0KPj4gKwkgICAgICgoY29uc3QgY2hhciAqKShmbXQpKVsxXSA8
+PSAqX19zdHJpbmdpZnkoQ09ORklHX1BSSU5US19WRVJCT1NJVFkpKSkgXA0KPj4gKwkJcHJpbnRr
+KChmbXQpLCAjI19fVkFfQVJHU19fKTsgCQkJCQkgXA0KPj4gK30pDQo+PiArDQo+PiArI2VuZGlm
+IC8qIENPTkZJR19QUklOVEtfVkVSQk9TSVRZICovDQo+PiArDQo+PiAgZXh0ZXJuIHN0cnVjdCBy
+YXRlbGltaXRfc3RhdGUgcHJpbnRrX3JhdGVsaW1pdF9zdGF0ZTsNCj4+ICBleHRlcm4gaW50IHBy
+aW50a19yYXRlbGltaXQodm9pZCk7DQo+PiAgZXh0ZXJuIGJvb2wgcHJpbnRrX3RpbWVkX3JhdGVs
+aW1pdCh1bnNpZ25lZCBsb25nICpjYWxsZXJfamlmZmllcywNCj4NCj4NCj4NCj4gU29tZSBwbGFj
+ZXMgaW4gdGhlIGtlcm5lbCBicmVhayB0aGUgbWVzc2FnZSBpbnRvIHBpZWNlcywgbGlrZSBzbzoN
+Cj4NCj4gcHJpbnRrKEtFUk5fRVJSLCAiRXJyb3I6IGZpcnN0IHBhcnQgIik7DQo+IC4uLg0KPiBw
+cmludGsoIiBtb3JlIGluZm8gZm9yIGVycm9yLlxuIik7DQoNClRlY2huaWNhbGx5LCBzaG91bGRu
+J3QgdGhlIHNlY29uZCBwYXJ0IG9mIHRoZSBtZXNzYWdlIGFjdHVhbGx5IGJlOg0KDQpwcmludGso
+S0VSTl9DT05UICIgbW9yZSBpbmZvIGZvciBlcnJvci5cbiIpOw0KDQpNYXliZSBzb21lIG1lY2hh
+bmlzbSBjb3VsZCBiZSBjcmVhdGVkIHRvIGhhbmRsZSB0aGUgY29udGludWVkIG1lc3NhZ2UNCmlm
+IHRoZXkgaGF2ZSB0aGUgS0VSTl9DT05UPw0KDQo+IFRoZXNlIHBhcnRzIHdvdWxkIG5vdCBiZSBo
+YW5kbGVkIGNvbnNpc3RlbnRseSB1bmRlciBjZXJ0YWluDQo+IGNvbmRpdGlvbnMuDQo+DQo+IEl0
+IHdvdWxkIGJlIGNvbmZ1c2luZyB0byBzZWUgb25seSBwYXJ0IG9mIHRoZSBtZXNzYWdlLA0KPiBi
+dXQgSSBkb24ndCBrbm93IGhvdyBvZnRlbiB0aGlzIGNvbnN0cnVjdCBpcyB1c2VkLiAgTWF5YmUN
+Cj4gYW5vdGhlciBtZWNoYW5pc20gaXMgbmVlZGVkIHRvIGVuc3VyZSB0aGF0IGNvbnRpbnVhdGlv
+bg0KPiBwcmludGsgbGluZXMgaGF2ZSB0aGUgc2FtZSBsb2cgbGV2ZWwgYXMgdGhlaXIgc3RhcnQg
+c3RyaW5ncy4NCj4NCj4gQnV0LCBvdmVyYWxsLCB2ZXJ5IHNsaWNrISAgSXQncyBuaWNlIHRvIHNl
+ZSBhIHNvbHV0aW9uIHRoYXQgZG9lc24ndA0KPiByZXF1aXJlIGNoYW5naW5nIGFsbCBwcmludGtz
+IHN0YXRlbWVudHMgaW4gdGhlIGtlcm5lbC4NCg0KSSBoYXZlbid0IGxvb2tlZCBvdmVyIHRoaXMg
+cGF0Y2ggc2VyaWVzIHlldCBidXQgZG9lcyBpdCB3b3JrIHdpdGggdGhlDQpwcl88bGV2ZWw+IG1h
+Y3JvcyAocHJfaW5mbywgcHJfZXJyLCBldGMuKT8NCg0KUmVnYXJkcywNCkhhcnRsZXkNCg==
