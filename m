@@ -1,7 +1,7 @@
 From: Marc Andre Tanner <mat@brain-dump.org>
-Subject: [PATCH 3/5] printk: introduce printk_unfiltered as an alias to printk
-Date: Wed,  2 Sep 2009 16:25:03 +0200
-Message-ID: <1251901505-4313-4-git-send-email-mat@brain-dump.org>
+Subject: [PATCH 2/5] printk: move printk to the end of the file
+Date: Wed,  2 Sep 2009 16:25:02 +0200
+Message-ID: <1251901505-4313-3-git-send-email-mat@brain-dump.org>
 References: <1251901505-4313-1-git-send-email-mat@brain-dump.org>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1251901505-4313-1-git-send-email-mat@brain-dump.org>
@@ -13,85 +13,109 @@ Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org
 Cc: mat@brain-dump.org
 
-The standard printk function will be wrapped by a macro which
-filters out messages above a certain verbosity level. Because
-this might not be desired in certain situations we provide an
-unfiltered variant.
+A later patch will #undef printk because the macro would otherwise
+conflict with the function definition. Moving the printk function
+to the end of the file makes sure that the macro is expanded within
+the rest of the file.
 
 Signed-off-by: Marc Andre Tanner <mat@brain-dump.org>
 ---
- include/linux/kernel.h |    5 +++++
- kernel/printk.c        |   23 +++++++++++++++++++++++
- 2 files changed, 28 insertions(+), 0 deletions(-)
+ kernel/printk.c |   72 ++++++++++++++++++++++++++++--------------------------
+ 1 files changed, 37 insertions(+), 35 deletions(-)
 
-diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-index d6320a3..c2b3047 100644
---- a/include/linux/kernel.h
-+++ b/include/linux/kernel.h
-@@ -239,6 +239,8 @@ asmlinkage int vprintk(const char *fmt, va_list args)
- 	__attribute__ ((format (printf, 1, 0)));
- asmlinkage int printk(const char * fmt, ...)
- 	__attribute__ ((format (printf, 1, 2))) __cold;
-+asmlinkage int printk_unfiltered(const char *fmt, ...)
-+	__attribute__ ((format (printf, 1, 2))) __cold;
- 
- extern struct ratelimit_state printk_ratelimit_state;
- extern int printk_ratelimit(void);
-@@ -265,6 +267,9 @@ static inline int vprintk(const char *s, va_list args) { return 0; }
- static inline int printk(const char *s, ...)
- 	__attribute__ ((format (printf, 1, 2)));
- static inline int __cold printk(const char *s, ...) { return 0; }
-+static inline int printk_unfiltered(const char *s, ...)
-+	__attribute__ ((format (printf, 1, 2)));
-+static inline int __cold printk_unfiltered(const char *s, ...) { return 0; }
- static inline int printk_ratelimit(void) { return 0; }
- static inline bool printk_timed_ratelimit(unsigned long *caller_jiffies, \
- 					  unsigned int interval_msec)	\
 diff --git a/kernel/printk.c b/kernel/printk.c
-index 5455d41..0a2f654 100644
+index b4d97b5..5455d41 100644
 --- a/kernel/printk.c
 +++ b/kernel/printk.c
-@@ -1310,6 +1310,11 @@ EXPORT_SYMBOL(printk_timed_ratelimit);
-  *
-  * This is printk().  It can be called from any context.  We want it to work.
-  *
-+ * Note that depending on the kernel configuration printk might be wrapped by
-+ * a macro which will filter out messages above a certain verbosity level.
-+ * In cases where it's important that the message will get through independenly
-+ * of the configuration setting printk_unfiltered should be used instead.
-+ *
-  * We try to grab the console_sem.  If we succeed, it's easy - we log the output and
-  * call the console drivers.  If we fail to get the semaphore we place the output
-  * into the log buffer and return.  The current holder of the console_sem will
-@@ -1326,6 +1331,14 @@ EXPORT_SYMBOL(printk_timed_ratelimit);
-  * See the vsnprintf() documentation for format string extensions over C99.
-  */
- 
-+/*
-+ * We need to #undef the printk macro from <linux/kernel.h> because
-+ * it would otherwise conflict with the function implementation.
-+ */
-+#ifdef printk
-+# undef printk
-+#endif
-+
- asmlinkage int printk(const char *fmt, ...)
- {
- 	va_list args;
-@@ -1338,4 +1351,14 @@ asmlinkage int printk(const char *fmt, ...)
- 	return r;
+@@ -551,40 +551,6 @@ static int have_callable_console(void)
+ 	return 0;
  }
- EXPORT_SYMBOL(printk);
+ 
+-/**
+- * printk - print a kernel message
+- * @fmt: format string
+- *
+- * This is printk().  It can be called from any context.  We want it to work.
+- *
+- * We try to grab the console_sem.  If we succeed, it's easy - we log the output and
+- * call the console drivers.  If we fail to get the semaphore we place the output
+- * into the log buffer and return.  The current holder of the console_sem will
+- * notice the new output in release_console_sem() and will send it to the
+- * consoles before releasing the semaphore.
+- *
+- * One effect of this deferred printing is that code which calls printk() and
+- * then changes console_loglevel may break. This is because console_loglevel
+- * is inspected when the actual printing occurs.
+- *
+- * See also:
+- * printf(3)
+- *
+- * See the vsnprintf() documentation for format string extensions over C99.
+- */
+-
+-asmlinkage int printk(const char *fmt, ...)
+-{
+-	va_list args;
+-	int r;
+-
+-	va_start(args, fmt);
+-	r = vprintk(fmt, args);
+-	va_end(args);
+-
+-	return r;
+-}
+-
+ /* cpu currently holding logbuf_lock */
+ static volatile unsigned int printk_cpu = UINT_MAX;
+ 
+@@ -770,7 +736,6 @@ out_restore_irqs:
+ 	preempt_enable();
+ 	return printed_len;
+ }
+-EXPORT_SYMBOL(printk);
+ EXPORT_SYMBOL(vprintk);
+ 
+ #else
+@@ -1337,3 +1302,40 @@ bool printk_timed_ratelimit(unsigned long *caller_jiffies,
+ }
+ EXPORT_SYMBOL(printk_timed_ratelimit);
+ #endif
 +
-+/*
-+ * Because printk might be wrapped by a macro which will filter out messages
-+ * above a certain verbosity level we provide an unfiltered variant for use
-+ * cases where the filtering isn't desired.
++#ifdef CONFIG_PRINTK
++/**
++ * printk - print a kernel message
++ * @fmt: format string
++ *
++ * This is printk().  It can be called from any context.  We want it to work.
++ *
++ * We try to grab the console_sem.  If we succeed, it's easy - we log the output and
++ * call the console drivers.  If we fail to get the semaphore we place the output
++ * into the log buffer and return.  The current holder of the console_sem will
++ * notice the new output in release_console_sem() and will send it to the
++ * consoles before releasing the semaphore.
++ *
++ * One effect of this deferred printing is that code which calls printk() and
++ * then changes console_loglevel may break. This is because console_loglevel
++ * is inspected when the actual printing occurs.
++ *
++ * See also:
++ * printf(3)
++ *
++ * See the vsnprintf() documentation for format string extensions over C99.
 + */
 +
-+asmlinkage int printk_unfiltered(const char *fmt, ...)
-+	__attribute__((alias("printk")));
-+EXPORT_SYMBOL(printk_unfiltered);
- #endif
++asmlinkage int printk(const char *fmt, ...)
++{
++	va_list args;
++	int r;
++
++	va_start(args, fmt);
++	r = vprintk(fmt, args);
++	va_end(args);
++
++	return r;
++}
++EXPORT_SYMBOL(printk);
++#endif
 -- 
 1.6.3.3
