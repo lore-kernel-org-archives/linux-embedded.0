@@ -1,85 +1,62 @@
-From: Marc Andre Tanner <mat@brain-dump.org>
-Subject: Re: [PATCH 1/5] printk: introduce CONFIG_PRINTK_VERBOSITY
-Date: Wed, 2 Sep 2009 19:32:49 +0200
-Message-ID: <20090902173249.GB5811@debbook.brain-dump.org>
-References: <1251901505-4313-1-git-send-email-mat@brain-dump.org>
- <1251901505-4313-2-git-send-email-mat@brain-dump.org>
- <4A9EA0D6.2030504@gmail.com>
+From: "H Hartley Sweeten" <hartleys@visionengravers.com>
+Subject: RE: [PATCH 7/7] printk: provide a filtering macro for printk
+Date: Wed, 2 Sep 2009 14:22:52 -0400
+Message-ID: <BD79186B4FD85F4B8E60E381CAEE190901C55DE5@mi8nycmail19.Mi8.com>
+References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> <1251844269-12394-8-git-send-email-mat@brain-dump.org> <4A9DAD2B.3080909@am.sony.com> <BD79186B4FD85F4B8E60E381CAEE190901C55CD3@mi8nycmail19.Mi8.com> <20090902130943.GE2736@debbook.brain-dump.org> <4A9EA5C9.3010900@am.sony.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4A9EA0D6.2030504@gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753281AbZIBSW5@vger.kernel.org>
+Content-class: urn:content-classes:message
+In-Reply-To: <4A9EA5C9.3010900@am.sony.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: linux-embedded@vger.kernel.org
+To: Tim Bird <tim.bird@am.sony.com>, Marc Andre Tanner <mat@brain-dump.org>
+Cc: linux-embedded@vger.kernel.org, Ingo Molnar <mingo@elte.hu>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Wed, Sep 02, 2009 at 06:44:06PM +0200, Marco Stornelli wrote:
-> Marc Andre Tanner ha scritto:
-> > Introduce a config option which allows to selectively compile out
-> > printk messages based on a specified verbosity level.
-> > 
-> > Signed-off-by: Marc Andre Tanner <mat@brain-dump.org>
-> > ---
-> >  init/Kconfig |   29 +++++++++++++++++++++++++++++
-> >  1 files changed, 29 insertions(+), 0 deletions(-)
-> > 
-> > diff --git a/init/Kconfig b/init/Kconfig
-> > index 3f7e609..549ed95 100644
-> > --- a/init/Kconfig
-> > +++ b/init/Kconfig
-> > @@ -833,6 +833,35 @@ config PRINTK
-> >  	  very difficult to diagnose system problems, saying N here is
-> >  	  strongly discouraged.
-> >  
-> > +config PRINTK_VERBOSITY
-> > +	int "Printk compile time verbosity"
-> > +	depends on EMBEDDED && PRINTK
-> > +	range 0 7
-> > +	default 0
-> > +	help
-> > +
-> > +	  Select the maximum printk verbosity level to be compiled into
-> > +	  the kernel.
-> > +
-> > + 	  Messages above the specified verbosity level are removed from
-> > + 	  the kernel at compile time. This reduces the kernel image size
-> > + 	  at the cost of a calmer kernel.
-> > +
-> > + 	  Possible verbosity levels are listed below. Note that messages
-> > +	  without an explicit loglevel will be classified as KERN_WARNING.
-> > +
-> > +	   0  Disable this feature and compile all messages in.
-> > +
-> > + 	   1  KERN_ALERT        /* action must be taken immediately  */
-> > + 	   2  KERN_CRIT         /* critical conditions               */
-> > + 	   3  KERN_ERR          /* error conditions                  */
-> > + 	   4  KERN_WARNING      /* warning conditions                */
-> > + 	   5  KERN_NOTICE       /* normal but significant condition  */
-> > + 	   6  KERN_INFO         /* informational                     */
-> > + 	   7  KERN_DEBUG        /* debug-level messages              */
-> > +
-> > +	  If unsure, just move on and leave this option alone.
-> > +
-> >  config BUG
-> >  	bool "BUG() support" if EMBEDDED
-> >  	default y
-> 
-> If there are some problems to handle KERN_CONT you should say something
-> here.
-
-ACK.
-
-> You should even add in cc: the kernel ML, however it seems a good
-> work.
-
-Well I first wanted to get some feedback from the embedded people.
-I will probably send it to LKML after the 2.6.31 release, don't know
-how the chances for inclusion are though.
-
-Marc 
-
--- 
- Marc Andre Tanner >< http://www.brain-dump.org/ >< GPG key: CF7D56C0
+T24gV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMDIsIDIwMDkgMTA6MDUgQU0sIFRpbSBCaXJkIHdyb3Rl
+Og0KPiBNYXJjIEFuZHJlIFRhbm5lciB3cm90ZToNCj4+IE9uIFR1ZSwgU2VwIDAxLCAyMDA5IGF0
+IDA3OjMyOjI1UE0gLTA0MDAsIEggSGFydGxleSBTd2VldGVuIHdyb3RlOg0KPj4+IE9uIFR1ZXNk
+YXksIFNlcHRlbWJlciAwMSwgMjAwOSA0OjI0IFBNLCBUaW0gQmlyZCB3cm90ZToNCj4+Pj4gU29t
+ZSBwbGFjZXMgaW4gdGhlIGtlcm5lbCBicmVhayB0aGUgbWVzc2FnZSBpbnRvIHBpZWNlcywgbGlr
+ZSBzbzoNCj4+Pj4NCj4+Pj4gcHJpbnRrKEtFUk5fRVJSLCAiRXJyb3I6IGZpcnN0IHBhcnQgIik7
+DQo+Pj4+IC4uLg0KPj4+PiBwcmludGsoIiBtb3JlIGluZm8gZm9yIGVycm9yLlxuIik7DQo+Pj4g
+VGVjaG5pY2FsbHksIHNob3VsZG4ndCB0aGUgc2Vjb25kIHBhcnQgb2YgdGhlIG1lc3NhZ2UgYWN0
+dWFsbHkgYmU6DQo+Pj4NCj4+PiBwcmludGsoS0VSTl9DT05UICIgbW9yZSBpbmZvIGZvciBlcnJv
+ci5cbiIpOw0KPj4+DQo+Pj4gTWF5YmUgc29tZSBtZWNoYW5pc20gY291bGQgYmUgY3JlYXRlZCB0
+byBoYW5kbGUgdGhlIGNvbnRpbnVlZCBtZXNzYWdlDQo+Pj4gaWYgdGhleSBoYXZlIHRoZSBLRVJO
+X0NPTlQ/DQo+PiANCj4+IFllcyBpdCdzIHRydWUgdGhhdCBLRVJOX0NPTlQgaXNuJ3QgaGFuZGxl
+ZCBjb3JyZWN0bHksIGJ1dCBJIGRvbid0IHNlZSBhIHdheQ0KPj4gdG8gY2hhbmdlIHRoYXQuDQo+
+PiANCj4+Pj4gVGhlc2UgcGFydHMgd291bGQgbm90IGJlIGhhbmRsZWQgY29uc2lzdGVudGx5IHVu
+ZGVyIGNlcnRhaW4NCj4+Pj4gY29uZGl0aW9ucy4NCj4+Pj4NCj4+Pj4gSXQgd291bGQgYmUgY29u
+ZnVzaW5nIHRvIHNlZSBvbmx5IHBhcnQgb2YgdGhlIG1lc3NhZ2UsDQo+Pj4+IGJ1dCBJIGRvbid0
+IGtub3cgaG93IG9mdGVuIHRoaXMgY29uc3RydWN0IGlzIHVzZWQuICANCj4+IA0KPj4gJCBncmVw
+IC1SIEtFUk5fQ09OVCBsaW51eC0yLjYgfCB3YyAtbA0KPj4gMzczDQo+PiANCj4+Pj4gTWF5YmUN
+Cj4+Pj4gYW5vdGhlciBtZWNoYW5pc20gaXMgbmVlZGVkIHRvIGVuc3VyZSB0aGF0IGNvbnRpbnVh
+dGlvbg0KPj4+PiBwcmludGsgbGluZXMgaGF2ZSB0aGUgc2FtZSBsb2cgbGV2ZWwgYXMgdGhlaXIg
+c3RhcnQgc3RyaW5ncy4NCj4+IA0KPj4gSSBjdXJyZW50bHkgZG9uJ3Qgc2VlIGEgd2F5IHRvIGFj
+aGlldmUgdGhpcyB3aXRoIHRoZSBDUFAuDQo+DQo+IElmIGl0J3MgdGhhdCBmZXcsIHRoZW4gbWF5
+YmUgaXQncyBPSyB0byBhY3R1YWxseSBjaGFuZ2UNCj4gdGhlIGNvZGUgZm9yIHRob3NlIHByaW50
+ayBzdGF0ZW1lbnRzLiAoSGVjaywgdGhlc2UgbG9jYXRpb25zDQo+IHdlcmUgYWxsIGNoYW5nZWQg
+aW4gdGhlIGxhc3QgMiB5ZWFycyBhbnl3YXkuKQ0KPiANCj4gSSdtIGp1c3QgYnJhaW5zdG9ybWlu
+ZyBoZXJlLCBidXQgaG93IGFib3V0IGNoYW5naW5nIHRoZW0gZnJvbToNCj4gICBwcmludGsoS0VS
+Tl9JTkZPICJmb28iKTsNCj4gICBwcmludGsoS0VSTl9DT05UICJiYXJcbiIpOw0KPiB0bzoNCj4g
+ICBwcmludGsoS0VSTl9JTkZPICJmb28iKTsNCj4gICBwcmludGtfY29udChLRVJOX0lORk8gImJh
+clxuIik7DQo+IA0KDQpVbmZvcnR1bmF0ZWx5IG5vdCBhbGwgdGhlIGNvbnRpbnVlZCBwcmludGsg
+c3RhdGVtZW50cyBpbiB0aGUga2VybmVsIGFyZQ0KcHJvcGVybHkgdGFnZ2VkIHdpdGggS0VSTl9D
+T05UIChvciBwcl9jb250LCBldGMuKS4NCg0KPiBUaGlzIHdheSB0aGUgY29udGludWF0aW9uIGxp
+bmUgaGFzIHRoZSBsb2cgbGV2ZWwsIGFuZCBjYW4NCj4gYmUgY29uZGl0aW9uYWxseSBjb21waWxl
+ZCBiYXNlZCBvbiB0aGUgVkVSQk9TSVRZIGxldmVsLiAgQSBsaXR0bGUNCj4gbWFnaWMgd291bGQg
+YmUgbmVlZGVkIHRvIHN0cmlwIHRoZSBmaXJzdCAzIGNoYXJzIG9mIHRoZSBmbXQNCj4gc3RyaW5n
+IGluIHByaW50a19jb250KCkuDQo+IA0KPiBJIHRoaW5rIHRoaXMgbWFrZXMgdGhlIHByaW50ayBt
+ZXNzYWdlcyBhIGJpdCBtb3JlIGNvbnNpc3RlbnQgYW55d2F5LA0KPiBhbmQgc3RpbGwgbWFya3Mg
+bGluZXMgdGhhdCBhcmUgY29udGludWF0aW9uIGxpbmVzLg0KPiANCj4+Pj4gQnV0LCBvdmVyYWxs
+LCB2ZXJ5IHNsaWNrISAgSXQncyBuaWNlIHRvIHNlZSBhIHNvbHV0aW9uIHRoYXQgZG9lc24ndA0K
+Pj4+PiByZXF1aXJlIGNoYW5naW5nIGFsbCBwcmludGtzIHN0YXRlbWVudHMgaW4gdGhlIGtlcm5l
+bC4NCj4+IA0KPj4gWWVzIHRoYXQncyB3aGF0IEkgdGhvdWdodCB0b28uIFRoYW5rcyB0byB0aGUg
+Y29tbWVudHMgc28gZmFyIHRoZSBuZXh0IA0KPj4gdmVyc2lvbiBvZiB0aGUgcGF0Y2ggd2lsbCBj
+b250YWluIGV2ZW4gbGVzcyBjaGFuZ2VzIHRvIHRoZSByZXN0IG9mIHRoZSANCj4+IGtlcm5lbC4N
+Cj4+ICANCj4+PiBJIGhhdmVuJ3QgbG9va2VkIG92ZXIgdGhpcyBwYXRjaCBzZXJpZXMgeWV0IGJ1
+dCBkb2VzIGl0IHdvcmsgd2l0aCB0aGUNCj4+PiBwcl88bGV2ZWw+IG1hY3JvcyAocHJfaW5mbywg
+cHJfZXJyLCBldGMuKT8NCj4+IA0KPj4gSXQgc2hvdWxkIHdvcmssIHllcy4NCg0KUmVnYXJkcywN
+CkhhcnRsZXkNCg==
