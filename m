@@ -1,68 +1,58 @@
-From: "H Hartley Sweeten" <hartleys@visionengravers.com>
-Subject: RE: [PATCH 7/7] printk: provide a filtering macro for printk
-Date: Tue, 1 Sep 2009 19:32:25 -0400
-Message-ID: <BD79186B4FD85F4B8E60E381CAEE190901C55CD3@mi8nycmail19.Mi8.com>
-References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> <1251844269-12394-8-git-send-email-mat@brain-dump.org> <4A9DAD2B.3080909@am.sony.com>
+From: Aras Vaichas <arasv@magellan-technology.com>
+Subject: Re: 100Mbit ethernet performance on embedded devices
+Date: Wed, 2 Sep 2009 15:09:05 +1000
+Message-ID: <ed62800909012209vb4d32bcp9d43f1bdd837de6b@mail.gmail.com>
+References: <20090819145057.GA25400@sig21.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-class: urn:content-classes:message
-In-Reply-To: <4A9DAD2B.3080909@am.sony.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20090819145057.GA25400@sig21.net>
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>, Marc Andre Tanner <mat@brain-dump.org>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Johannes Stezenbach <js@sig21.net>
+Cc: linux-embedded@vger.kernel.org, netdev@vger.kernel.org
 
-T24gVHVlc2RheSwgU2VwdGVtYmVyIDAxLCAyMDA5IDQ6MjQgUE0sIFRpbSBCaXJkIHdyb3RlOg0K
-PiBNYXJjIEFuZHJlIFRhbm5lciB3cm90ZToNCj4+IFRoZSBtYWNybyBmaWx0ZXJzIG91dCBwcmlu
-dGsgbWVzc2FnZXMgYmFzZWQgb24gYSBjb25maWd1cmFibGUgdmVyYm9zaXR5DQo+PiBsZXZlbCAo
-Q09ORklHX1BSSU5US19WRVJCT1NJVFkpLg0KPj4NCj4+IFNpZ25lZC1vZmYtYnk6IE1hcmMgQW5k
-cmUgVGFubmVyIDxtYXRAYnJhaW4tZHVtcC5vcmc+DQo+PiAtLS0NCj4+ICBpbmNsdWRlL2xpbnV4
-L2tlcm5lbC5oIHwgICAyNCArKysrKysrKysrKysrKysrKysrKysrKysNCj4+ICAxIGZpbGVzIGNo
-YW5nZWQsIDI0IGluc2VydGlvbnMoKyksIDAgZGVsZXRpb25zKC0pDQo+PiANCj4+IGRpZmYgLS1n
-aXQgYS9pbmNsdWRlL2xpbnV4L2tlcm5lbC5oIGIvaW5jbHVkZS9saW51eC9rZXJuZWwuaA0KPj4g
-aW5kZXggYzJiMzA0Ny4uMWY1ZDAxZiAxMDA2NDQNCj4+IC0tLSBhL2luY2x1ZGUvbGludXgva2Vy
-bmVsLmgNCj4+ICsrKyBiL2luY2x1ZGUvbGludXgva2VybmVsLmgNCj4+IEBAIC0yNDIsNiArMjQy
-LDMwIEBAIGFzbWxpbmthZ2UgaW50IHByaW50ayhjb25zdCBjaGFyICogZm10LCAuLi4pDQo+PiAg
-YXNtbGlua2FnZSBpbnQgcHJpbnRrX3VuZmlsdGVyZWQoY29uc3QgY2hhciAqZm10LCAuLi4pDQo+
-PiAgCV9fYXR0cmlidXRlX18gKChmb3JtYXQgKHByaW50ZiwgMSwgMikpKSBfX2NvbGQ7DQo+PiAg
-DQo+PiArI2lmIGRlZmluZWQoQ09ORklHX1BSSU5US19WRVJCT1NJVFkpICYmIENPTkZJR19QUklO
-VEtfVkVSQk9TSVRZID4gMA0KPj4gKy8qDQo+PiArICogVGhlIGlkZWEgaGVyZSBpcyB0byB3cmFw
-IHRoZSBhY3R1YWwgcHJpbnRrIGZ1bmN0aW9uIHdpdGggYSBtYWNybyB3aGljaA0KPj4gKyAqIHdp
-bGwgZmlsdGVyIG91dCBhbGwgbWVzc2FnZXMgYWJvdmUgYSBjZXJ0YWluIHZlcmJvc2l0eSBsZXZl
-bC4gQmVjYXVzZQ0KPj4gKyAqIHRoZSBpZiBjb25kaXRpb24gZXZhbHVhdGVzIHRvIGEgY29uc3Rh
-bnQgZXhwcmVzc2lvbiB0aGUgY29tcGlsZXIgd2lsbCBiZQ0KPj4gKyAqIGFibGUgdG8gZWxpbWlu
-YXRlIGl0IGFuZCB0aGUgcmVzdWx0aW5nIGtlcm5lbCBpbWFnZSB3aWxsIGJlIHNtYWxsZXIuDQo+
-PiArICoNCj4+ICsgKiBUaGUgY2hlY2sgd2l0aCBzaXplb2Yodm9pZCopIHNob3VsZCBtYWtlIHN1
-cmUgdGhhdCB3ZSBkb24ndCBvcGVyYXRlIG9uDQo+PiArICogcG9pbnRlcnMsIHdoaWNoIHRoZSBj
-b21waWxlciB3b3VsZG4ndCBiZSBhYmxlIHRvIG9wdGltaXplIG91dCwgYnV0IG9ubHkNCj4+ICsg
-KiBvbiBzdHJpbmcgY29uc3RhbnRzLg0KPj4gKyAqLw0KPj4gKw0KPj4gKyNpbmNsdWRlIDxsaW51
-eC9zdHJpbmdpZnkuaD4NCj4+ICsNCj4+ICsjZGVmaW5lIHByaW50ayhmbXQsIC4uLikgKHsgCQkJ
-CQkJCSBcDQo+PiArCWlmIChzaXplb2YoZm10KSA9PSBzaXplb2Yodm9pZCAqKSB8fAkJCQkJIFwN
-Cj4+ICsJICAgICgoKGNvbnN0IGNoYXIgKikoZm10KSlbMF0gIT0gJzwnICYmIENPTkZJR19QUklO
-VEtfVkVSQk9TSVRZID49IDQpIHx8IFwNCj4+ICsJICAgICgoKGNvbnN0IGNoYXIgKikoZm10KSlb
-MF0gPT0gJzwnICYmIAkJCQkgXA0KPj4gKwkgICAgICgoY29uc3QgY2hhciAqKShmbXQpKVsxXSA8
-PSAqX19zdHJpbmdpZnkoQ09ORklHX1BSSU5US19WRVJCT1NJVFkpKSkgXA0KPj4gKwkJcHJpbnRr
-KChmbXQpLCAjI19fVkFfQVJHU19fKTsgCQkJCQkgXA0KPj4gK30pDQo+PiArDQo+PiArI2VuZGlm
-IC8qIENPTkZJR19QUklOVEtfVkVSQk9TSVRZICovDQo+PiArDQo+PiAgZXh0ZXJuIHN0cnVjdCBy
-YXRlbGltaXRfc3RhdGUgcHJpbnRrX3JhdGVsaW1pdF9zdGF0ZTsNCj4+ICBleHRlcm4gaW50IHBy
-aW50a19yYXRlbGltaXQodm9pZCk7DQo+PiAgZXh0ZXJuIGJvb2wgcHJpbnRrX3RpbWVkX3JhdGVs
-aW1pdCh1bnNpZ25lZCBsb25nICpjYWxsZXJfamlmZmllcywNCj4NCj4NCj4NCj4gU29tZSBwbGFj
-ZXMgaW4gdGhlIGtlcm5lbCBicmVhayB0aGUgbWVzc2FnZSBpbnRvIHBpZWNlcywgbGlrZSBzbzoN
-Cj4NCj4gcHJpbnRrKEtFUk5fRVJSLCAiRXJyb3I6IGZpcnN0IHBhcnQgIik7DQo+IC4uLg0KPiBw
-cmludGsoIiBtb3JlIGluZm8gZm9yIGVycm9yLlxuIik7DQoNClRlY2huaWNhbGx5LCBzaG91bGRu
-J3QgdGhlIHNlY29uZCBwYXJ0IG9mIHRoZSBtZXNzYWdlIGFjdHVhbGx5IGJlOg0KDQpwcmludGso
-S0VSTl9DT05UICIgbW9yZSBpbmZvIGZvciBlcnJvci5cbiIpOw0KDQpNYXliZSBzb21lIG1lY2hh
-bmlzbSBjb3VsZCBiZSBjcmVhdGVkIHRvIGhhbmRsZSB0aGUgY29udGludWVkIG1lc3NhZ2UNCmlm
-IHRoZXkgaGF2ZSB0aGUgS0VSTl9DT05UPw0KDQo+IFRoZXNlIHBhcnRzIHdvdWxkIG5vdCBiZSBo
-YW5kbGVkIGNvbnNpc3RlbnRseSB1bmRlciBjZXJ0YWluDQo+IGNvbmRpdGlvbnMuDQo+DQo+IEl0
-IHdvdWxkIGJlIGNvbmZ1c2luZyB0byBzZWUgb25seSBwYXJ0IG9mIHRoZSBtZXNzYWdlLA0KPiBi
-dXQgSSBkb24ndCBrbm93IGhvdyBvZnRlbiB0aGlzIGNvbnN0cnVjdCBpcyB1c2VkLiAgTWF5YmUN
-Cj4gYW5vdGhlciBtZWNoYW5pc20gaXMgbmVlZGVkIHRvIGVuc3VyZSB0aGF0IGNvbnRpbnVhdGlv
-bg0KPiBwcmludGsgbGluZXMgaGF2ZSB0aGUgc2FtZSBsb2cgbGV2ZWwgYXMgdGhlaXIgc3RhcnQg
-c3RyaW5ncy4NCj4NCj4gQnV0LCBvdmVyYWxsLCB2ZXJ5IHNsaWNrISAgSXQncyBuaWNlIHRvIHNl
-ZSBhIHNvbHV0aW9uIHRoYXQgZG9lc24ndA0KPiByZXF1aXJlIGNoYW5naW5nIGFsbCBwcmludGtz
-IHN0YXRlbWVudHMgaW4gdGhlIGtlcm5lbC4NCg0KSSBoYXZlbid0IGxvb2tlZCBvdmVyIHRoaXMg
-cGF0Y2ggc2VyaWVzIHlldCBidXQgZG9lcyBpdCB3b3JrIHdpdGggdGhlDQpwcl88bGV2ZWw+IG1h
-Y3JvcyAocHJfaW5mbywgcHJfZXJyLCBldGMuKT8NCg0KUmVnYXJkcywNCkhhcnRsZXkNCg==
+On Thu, Aug 20, 2009 at 12:50 AM, Johannes Stezenbach <js@sig21.net> wr=
+ote:
+>
+> Hi,
+>
+> a while ago I was working on a SoC with 200MHz ARM926EJ-S CPU
+> and integrated 100Mbit ethernet core, connected on internal
+> (fast) memory bus, with DMA. =A0With iperf I measured:
+>
+> =A0TCP RX ~70Mbit/sec =A0(iperf -s on SoC, iperf -c on destop PC)
+> =A0TCP TX ~56Mbit/sec =A0(iperf -s on destop PC, iperf -c o SoC)
+>
+> What I'm interested in are some numbers for similar hardware,
+> to find out if my hardware and/or ethernet driver can be improved,
+> or if the CPU will always be the limiting factor.
+> I'd also be interested to know if hardware checksumming
+> support would improve throughput noticably in such a system,
+> or if it is only useful for 1Gbit and above.
+>
+> Did anyone actually manage to get close to 100Mbit/sec
+> with similar CPU resources?
+
+No, but I can share results.
+
+AT91RM9200 (ARM920T), 180MHz
+Davicom 9161 PHY
+Linux 2.6.26.3
+
+CONFIG_NETFILTER=3Dy
+CONFIG_NETFILTER_ADVANCED=3Dy
+
+# uptime; iperf -s; uptime
+=A000:07:33 up 7 min, load average: 0.02, 0.10, 0.07
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[=A0 4] local 169.254.0.235 port 5001 connected with 169.254.0.2 port 5=
+0762
+[ ID] Interval=A0=A0=A0=A0=A0=A0 Transfer=A0=A0=A0=A0 Bandwidth
+[=A0 4]=A0 0.0-10.0 sec=A0 58.6 MBytes=A0 49.1 Mbits/sec
+
+=A000:07:46 up 7 min, load average: 0.17, 0.13, 0.08
