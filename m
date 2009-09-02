@@ -1,28 +1,51 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: [PATCH 7/7] printk: provide a filtering macro for printk
-Date: Wed, 2 Sep 2009 15:30:39 +0100
-Message-ID: <20090902143039.GA18945@shareable.org>
-References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> <1251844269-12394-8-git-send-email-mat@brain-dump.org> <20090901233542.GA1321@shareable.org> <20090902090313.GB2736@debbook.brain-dump.org> <20090902110640.GA22602@shareable.org> <4A9E6447.1000705@billgatliff.com> <20090902124401.GA1835@debbook.brain-dump.org> <8bd0f97a0909020554j9ebdf54v813a6ec74c5c1e7c@mail.gmail.com>
-Mime-Version: 1.0
+From: Marc Andre Tanner <mat@brain-dump.org>
+Subject: [RFC|PATCHv2] Compile time printk verbosity
+Date: Wed,  2 Sep 2009 16:25:00 +0200
+Message-ID: <1251901505-4313-1-git-send-email-mat@brain-dump.org>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <8bd0f97a0909020554j9ebdf54v813a6ec74c5c1e7c@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Marc Andre Tanner <mat@brain-dump.org>, Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
+To: linux-embedded@vger.kernel.org
+Cc: mat@brain-dump.org
 
-Mike Frysinger wrote:
-> it depends completely on how the macro is intended to be used.  if you
-> want to maintain the "this macro has a return value", then you have to
-> use ({...}).  if you want the macro to return a void, then you have to
-> use do{...}while(0).
+This series adds a configuration option to selectively compile out
+printk message strings based on a verbosity level.
 
-Actually no.  The difference is do {...} while(0) is a _statement_ and
-cannot be used in an expression.  Whereas a void value can be used in
-expressions like A?B:C, (A,B) and returned from a function, it just
-has type void.
+This works by wrapping printk with a macro which evaluates to a 
+constant if condition which the compiler will be able to optimize 
+out.
 
--- Jamie
+For situation were this filtering mechanism is not desired an 
+unfiltered variant is introduced: printk_unfiltered.
+
+Currently the unfiltered variant is only used within
+drivers/char/mem.c because we don't want to filter user space
+data which comes is sent to /dev/kmsg.
+
+Are there other places where the unfiltered variant should be used?
+
+A known problem is that KERN_CONT messages aren't handled correctly.
+
+The series was compile tested with make allyesconfig for x86 and 
+arm (with a cross compiler) but I might have missed something.
+
+Thanks to Mike Frysinger and Jamie Lokier for their suggestions for
+improvement. 
+
+All kinds of comments are welcome.
+
+Marc Andre Tanner (5):
+      printk: introduce CONFIG_PRINTK_VERBOSITY
+      printk: move printk to the end of the file
+      printk: introduce printk_unfiltered as an alias to printk
+      char/mem: replace printk with printk_unfiltered
+      printk: provide a filtering macro for printk
+
+ drivers/char/mem.c     |    2 +-
+ include/linux/kernel.h |   28 ++++++++++++++
+ init/Kconfig           |   28 ++++++++++++++
+ kernel/printk.c        |   95 ++++++++++++++++++++++++++++++------------------
+ 4 files changed, 117 insertions(+), 36 deletions(-)
