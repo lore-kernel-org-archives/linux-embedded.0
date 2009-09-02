@@ -1,11 +1,8 @@
-From: Marc Andre Tanner <mat@brain-dump.org>
+From: Jamie Lokier <jamie@shareable.org>
 Subject: Re: [PATCH 7/7] printk: provide a filtering macro for printk
-Date: Wed, 2 Sep 2009 11:54:49 +0200
-Message-ID: <20090902095449.GD2736@debbook.brain-dump.org>
-References: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
- <1251844269-12394-8-git-send-email-mat@brain-dump.org>
- <20090901233542.GA1321@shareable.org>
- <20090902090313.GB2736@debbook.brain-dump.org>
+Date: Wed, 2 Sep 2009 12:06:40 +0100
+Message-ID: <20090902110640.GA22602@shareable.org>
+References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> <1251844269-12394-8-git-send-email-mat@brain-dump.org> <20090901233542.GA1321@shareable.org> <20090902090313.GB2736@debbook.brain-dump.org>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
@@ -14,22 +11,10 @@ Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Jamie Lokier <jamie@shareable.org>
+To: Marc Andre Tanner <mat@brain-dump.org>
 Cc: linux-embedded@vger.kernel.org
 
-On Wed, Sep 02, 2009 at 11:03:13AM +0200, Marc Andre Tanner wrote:
-> On Wed, Sep 02, 2009 at 12:35:42AM +0100, Jamie Lokier wrote:
-> > Marc Andre Tanner wrote:
-> > > + * The check with sizeof(void*) should make sure that we don't operate on
-> > > + * pointers, which the compiler wouldn't be able to optimize out, but only
-> > > + * on string constants.
-> > 
-> > Take a look at __builtin_constant_p in the GCC manual.
-> > 
-> > You'll probably find that wrapping the whole of the rest of the
-> > expression (without the sizeof) in __builtin_constant_p is a good
-> > way to know when to depend on the result of the expression.
-> 
+Marc Andre Tanner wrote:
 > Thanks, so if I understood it correctly this should be used like this:
 > 
 > #define PRINTK_FILTER(fmt) (							\
@@ -40,17 +25,12 @@ On Wed, Sep 02, 2009 at 11:03:13AM +0200, Marc Andre Tanner wrote:
 > 
 > #define printk(fmt, ...) ({ 							\
 > 	if (__builtin_constant_p(PRINTK_FILTER(fmt)) && PRINTK_FILTER(fmt))	\
-
-This should have been:
-	
- 	if (!__builtin_constant_p(PRINTK_FILTER(fmt)) || PRINTK_FILTER(fmt))	\
-
 > 		printk((fmt), ##__VA_ARGS__); 					\
 > })
 > 
 > The sizeof check wouldn't be necessary. Is this correct?
 
-Marc
+Looks good, except that I think kernel style is to use "do {...} while
+(0)" rather than "({ ... })"
 
--- 
- Marc Andre Tanner >< http://www.brain-dump.org/ >< GPG key: CF7D56C0
+-- Jamie
