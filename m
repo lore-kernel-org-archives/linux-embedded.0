@@ -1,84 +1,56 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
-Subject: Re: [RFC|PATCH] Compile time printk verbosity
-Date: Wed, 2 Sep 2009 05:56:34 -0400
-Message-ID: <8bd0f97a0909020256o2426d932x507f1193fa01c34c@mail.gmail.com>
-References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> 
-	<8bd0f97a0909011637p1d97b3cft91708225c7514f9f@mail.gmail.com> 
-	<20090902085749.GA2736@debbook.brain-dump.org> <8bd0f97a0909020211m5636880cp6d9c0a63b7fe71e3@mail.gmail.com> 
-	<20090902094343.GC2736@debbook.brain-dump.org>
+From: Marc Andre Tanner <mat@brain-dump.org>
+Subject: Re: [PATCH 7/7] printk: provide a filtering macro for printk
+Date: Wed, 2 Sep 2009 11:54:49 +0200
+Message-ID: <20090902095449.GD2736@debbook.brain-dump.org>
+References: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
+ <1251844269-12394-8-git-send-email-mat@brain-dump.org>
+ <20090901233542.GA1321@shareable.org>
+ <20090902090313.GB2736@debbook.brain-dump.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :from:date:message-id:subject:to:cc:content-type
-         :content-transfer-encoding;
-        bh=F4wePVjJNZXI+OaML5/ER5d2Zq58g6A+Kkndl8DOQIM=;
-        b=ZvLTrLMQQqu1VtmITplDG2V7zMo6ycLBaFXSqFNscuZsbh9QAqONJiAgRuLx0vzWmO
-         BxIdz5ExiYpvz5BhBgh/CM2FfVkxjUmSvIdjvyLH/27IS7BzR7rFv2m1Mr1b3w2Bd6fn
-         Q93X7jgveQFyDzBjvyONcJ1zBqtND8oBAx9ZE=
-In-Reply-To: <20090902094343.GC2736@debbook.brain-dump.org>
+Content-Disposition: inline
+In-Reply-To: <20090902090313.GB2736@debbook.brain-dump.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Marc Andre Tanner <mat@brain-dump.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Jamie Lokier <jamie@shareable.org>
 Cc: linux-embedded@vger.kernel.org
 
-On Wed, Sep 2, 2009 at 05:47, Marc Andre Tanner wrote:
-> On Wed, Sep 02, 2009 at 05:11:12AM -0400, Mike Frysinger wrote:
->> On Wed, Sep 2, 2009 at 04:57, Marc Andre Tanner wrote:
->> > On Tue, Sep 01, 2009 at 07:37:27PM -0400, Mike Frysinger wrote:
->> >> On Tue, Sep 1, 2009 at 18:31, Marc Andre Tanner wrote:
->> >> > This series adds a configuration option to selectively compile =
-out
->> >> > printk message strings based on a verbosity level.
->> >> >
->> >> > This works by wrapping printk with a macro which evaluates to a
->> >> > constant if condition which the compiler will be able to optimi=
-ze
->> >> > out.
->> >> >
->> >> > However because printk might be wrapped by a macro it no longer=
- has
->> >> > a return value. This means that constructs like the following o=
-nes
->> >> > don't work:
->> >> >
->> >> > =C2=A0 ((void)(SOME_RANDOM_DEBUG_FLAG && printk(...));
->> >> >
->> >> > =C2=A0 some_random_variable =3D printk(...);
->> >> >
->> >> > Therefore printk_unfiltered is introduced which is just an alia=
-s
->> >> > to the standard printk function but not wrapped by a macro.
->> >>
->> >> why dont you return 0 if it gets optimized away ? =C2=A0then you =
-wont have
->> >> to screw with external code at all and things "just work".
->> >
->> > This won't work because it would for example also return from func=
-tions
->> > which call printk but aren't checking for the return value (which =
-is
->> > the common case).
->>
->> why would it matter ?
->>
->> ({
->> =C2=A0 =C2=A0 int __printk_ret =3D 0;
->> =C2=A0 =C2=A0 if (crazy stuff you're adding)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 __printk_ret =3D printk(.....);
->> =C2=A0 =C2=A0 __printk_ret;
->> })
->
-> Yes I missunderstood your "return 0" statement in the first mail.
-> The same effect could also be achieved by:
->
-> ((crazy stuff) ? printk(...) : 0;
+On Wed, Sep 02, 2009 at 11:03:13AM +0200, Marc Andre Tanner wrote:
+> On Wed, Sep 02, 2009 at 12:35:42AM +0100, Jamie Lokier wrote:
+> > Marc Andre Tanner wrote:
+> > > + * The check with sizeof(void*) should make sure that we don't operate on
+> > > + * pointers, which the compiler wouldn't be able to optimize out, but only
+> > > + * on string constants.
+> > 
+> > Take a look at __builtin_constant_p in the GCC manual.
+> > 
+> > You'll probably find that wrapping the whole of the rest of the
+> > expression (without the sizeof) in __builtin_constant_p is a good
+> > way to know when to depend on the result of the expression.
+> 
+> Thanks, so if I understood it correctly this should be used like this:
+> 
+> #define PRINTK_FILTER(fmt) (							\
+> 	(((const char *)(fmt))[0] != '<' && CONFIG_PRINTK_VERBOSITY >= 4) ||	\
+> 	(((const char *)(fmt))[0] == '<' && 					\
+> 	 ((const char *)(fmt))[1] <= *__stringify(CONFIG_PRINTK_VERBOSITY))	\
+> )
+> 
+> #define printk(fmt, ...) ({ 							\
+> 	if (__builtin_constant_p(PRINTK_FILTER(fmt)) && PRINTK_FILTER(fmt))	\
 
-while true, i thought your (crazy stuff) pretty verbose and the
-tertiary operator might get swallowed in the noise.  not that it
-matters that much to me as this is now a pure style choice ... your
-patch, you pick.
--mike
+This should have been:
+	
+ 	if (!__builtin_constant_p(PRINTK_FILTER(fmt)) || PRINTK_FILTER(fmt))	\
+
+> 		printk((fmt), ##__VA_ARGS__); 					\
+> })
+> 
+> The sizeof check wouldn't be necessary. Is this correct?
+
+Marc
+
+-- 
+ Marc Andre Tanner >< http://www.brain-dump.org/ >< GPG key: CF7D56C0
