@@ -1,69 +1,61 @@
 From: Marc Andre Tanner <mat@brain-dump.org>
 Subject: Re: [PATCH 7/7] printk: provide a filtering macro for printk
-Date: Wed, 2 Sep 2009 15:09:43 +0200
-Message-ID: <20090902130943.GE2736@debbook.brain-dump.org>
+Date: Wed, 2 Sep 2009 16:07:00 +0200
+Message-ID: <20090902140227.GA2894@debbook.brain-dump.org>
 References: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
  <1251844269-12394-8-git-send-email-mat@brain-dump.org>
- <4A9DAD2B.3080909@am.sony.com>
- <BD79186B4FD85F4B8E60E381CAEE190901C55CD3@mi8nycmail19.Mi8.com>
+ <20090901233542.GA1321@shareable.org>
+ <20090902090313.GB2736@debbook.brain-dump.org>
+ <20090902110640.GA22602@shareable.org>
+ <4A9E6447.1000705@billgatliff.com>
+ <20090902124401.GA1835@debbook.brain-dump.org>
+ <8bd0f97a0909020554j9ebdf54v813a6ec74c5c1e7c@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE190901C55CD3@mi8nycmail19.Mi8.com>
+In-Reply-To: <8bd0f97a0909020554j9ebdf54v813a6ec74c5c1e7c@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded@vger.kernel.org
+content-type: text/plain
+To: Mike Frysinger <vapier.adi@gmail.com>
+Cc: Bill Gatliff <bgat@billgatliff.com>, Jamie Lokier <jamie@shareable.org>, linux-embedded@vger.kernel.org
 
-On Tue, Sep 01, 2009 at 07:32:25PM -0400, H Hartley Sweeten wrote:
-> On Tuesday, September 01, 2009 4:24 PM, Tim Bird wrote:
-> > Some places in the kernel break the message into pieces, like so:
+On Wed, Sep 02, 2009 at 08:54:47AM -0400, Mike Frysinger wrote:
+> On Wed, Sep 2, 2009 at 08:44, Marc Andre Tanner wrote:
+> > On Wed, Sep 02, 2009 at 07:25:43AM -0500, Bill Gatliff wrote:
+> >> Jamie Lokier wrote:
+> >> >Looks good, except that I think kernel style is to use "do {...} =
+while
+> >> >(0)" rather than "({ ... })"
+> >>
+> >> And IIRC, there was some reason for the do{...} while(0) that made
+> >> other alternatives not work. =A0So it might be more than just styl=
+e at
+> >> issue.
 > >
-> > printk(KERN_ERR, "Error: first part ");
-> > ...
-> > printk(" more info for error.\n");
-> 
-> Technically, shouldn't the second part of the message actually be:
-> 
-> printk(KERN_CONT " more info for error.\n");
-> 
-> Maybe some mechanism could be created to handle the continued message
-> if they have the KERN_CONT?
-
-Yes it's true that KERN_CONT isn't handled correctly, but I don't see a way
-to change that.
-
-> > These parts would not be handled consistently under certain
-> > conditions.
+> > Do you remember the reason? I found the oposite to be ture, I actua=
+lly
+> > started with the do { } while(0) construct but it failed in certain
+> > situations so I wrapped it with ({ }) and then later removed
+> > the now useless do { } while(0).
 > >
-> > It would be confusing to see only part of the message,
-> > but I don't know how often this construct is used.  
+> > By the way printk_once which is defined a few lines further down in
+> > kernel.h also uses ({ }).
+> >
+> > Anyway the next version of my patch will no longer need it.
+>=20
+> it depends completely on how the macro is intended to be used.  if yo=
+u
+> want to maintain the "this macro has a return value", then you have t=
+o
+> use ({...}).  if you want the macro to return a void, then you have t=
+o
+> use do{...}while(0).
 
-$ grep -R KERN_CONT linux-2.6 | wc -l
-373
+Ok, thanks for the clarification. This makes sense.
 
-> > Maybe
-> > another mechanism is needed to ensure that continuation
-> > printk lines have the same log level as their start strings.
-
-I currently don't see a way to achieve this with the CPP.
-
-> > But, overall, very slick!  It's nice to see a solution that doesn't
-> > require changing all printks statements in the kernel.
-
-Yes that's what I thought too. Thanks to the comments so far the next 
-version of the patch will contain even less changes to the rest of the 
-kernel.
- 
-> I haven't looked over this patch series yet but does it work with the
-> pr_<level> macros (pr_info, pr_err, etc.)?
-
-It should work, yes.
-
-Regards,
 Marc
 
--- 
+--=20
  Marc Andre Tanner >< http://www.brain-dump.org/ >< GPG key: CF7D56C0
