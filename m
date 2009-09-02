@@ -1,7 +1,7 @@
 From: Marc Andre Tanner <mat@brain-dump.org>
-Subject: [PATCH 1/5] printk: introduce CONFIG_PRINTK_VERBOSITY
-Date: Wed,  2 Sep 2009 16:25:01 +0200
-Message-ID: <1251901505-4313-2-git-send-email-mat@brain-dump.org>
+Subject: [PATCH 4/5] char/mem: replace printk with printk_unfiltered
+Date: Wed,  2 Sep 2009 16:25:04 +0200
+Message-ID: <1251901505-4313-5-git-send-email-mat@brain-dump.org>
 References: <1251901505-4313-1-git-send-email-mat@brain-dump.org>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1251901505-4313-1-git-send-email-mat@brain-dump.org>
@@ -13,53 +13,25 @@ Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org
 Cc: mat@brain-dump.org
 
-Introduce a config option which allows to selectively compile out
-printk messages based on a specified verbosity level.
+We don't want to filter user space data which comes from /dev/kmsg.
 
 Signed-off-by: Marc Andre Tanner <mat@brain-dump.org>
 ---
- init/Kconfig |   29 +++++++++++++++++++++++++++++
- 1 files changed, 29 insertions(+), 0 deletions(-)
+ drivers/char/mem.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/init/Kconfig b/init/Kconfig
-index 3f7e609..549ed95 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -833,6 +833,35 @@ config PRINTK
- 	  very difficult to diagnose system problems, saying N here is
- 	  strongly discouraged.
- 
-+config PRINTK_VERBOSITY
-+	int "Printk compile time verbosity"
-+	depends on EMBEDDED && PRINTK
-+	range 0 7
-+	default 0
-+	help
-+
-+	  Select the maximum printk verbosity level to be compiled into
-+	  the kernel.
-+
-+ 	  Messages above the specified verbosity level are removed from
-+ 	  the kernel at compile time. This reduces the kernel image size
-+ 	  at the cost of a calmer kernel.
-+
-+ 	  Possible verbosity levels are listed below. Note that messages
-+	  without an explicit loglevel will be classified as KERN_WARNING.
-+
-+	   0  Disable this feature and compile all messages in.
-+
-+ 	   1  KERN_ALERT        /* action must be taken immediately  */
-+ 	   2  KERN_CRIT         /* critical conditions               */
-+ 	   3  KERN_ERR          /* error conditions                  */
-+ 	   4  KERN_WARNING      /* warning conditions                */
-+ 	   5  KERN_NOTICE       /* normal but significant condition  */
-+ 	   6  KERN_INFO         /* informational                     */
-+ 	   7  KERN_DEBUG        /* debug-level messages              */
-+
-+	  If unsure, just move on and leave this option alone.
-+
- config BUG
- 	bool "BUG() support" if EMBEDDED
- 	default y
+diff --git a/drivers/char/mem.c b/drivers/char/mem.c
+index afa8813..ba48b82 100644
+--- a/drivers/char/mem.c
++++ b/drivers/char/mem.c
+@@ -850,7 +850,7 @@ static ssize_t kmsg_write(struct file * file, const char __user * buf,
+ 	ret = -EFAULT;
+ 	if (!copy_from_user(tmp, buf, count)) {
+ 		tmp[count] = 0;
+-		ret = printk("%s", tmp);
++		ret = printk_unfiltered("%s", tmp);
+ 		if (ret > count)
+ 			/* printk can add a prefix */
+ 			ret = count;
 -- 
 1.6.3.3
