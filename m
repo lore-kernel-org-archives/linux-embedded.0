@@ -1,49 +1,54 @@
-From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-Subject: Re: [PATCH 4/6 v2] Add support for LZO-compressed kernels for ARM
-Date: Fri, 4 Sep 2009 17:31:17 +0200
-Message-ID: <20090904153117.GG18963@pc-ras4041.res.insa>
-References: <20090731093107.GA29704@merkur.ravnborg.org>
- <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>
- <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com>
- <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com>
- <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com>
- <20090806224055.GH31579@n2100.arm.linux.org.uk>
- <20090814100828.GD5985@pc-ras4041.res.insa>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: New fast(?)-boot results on ARM
+Date: Fri, 4 Sep 2009 18:16:26 +0200
+Message-ID: <20090904161626.GD3207@pengutronix.de>
+References: <20090814170228.GM13320@pengutronix.de> <1158166a0908141304y70300ab3p899b0d4609efded9@mail.gmail.com> <20090814204305.GA31727@pengutronix.de> <20090815103532.GA5596@sig21.net>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="lc9FT7cWel8HagAv"
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S932673AbZIDQRP@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20090814100828.GD5985@pc-ras4041.res.insa>
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <20090815103532.GA5596@sig21.net>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: sam@ravnborg.org, hpa@zytor.com, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
+To: Johannes Stezenbach <js@sig21.net>
+Cc: Robert Schwebel <r.schwebel@pengutronix.de>, Denys Vlasenko <vda.linux@googlemail.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
 
-On Fri, Aug 14, 2009 at 12:08:28PM +0200, Albin Tonnerre wrote :
-> This is the second part of patch. This part includes:
->  - changes to ach/arch/boot/Makefile to make it easier to add new
->    compression types
->  - new piggy.lzo.S necessary for lzo compression
->  - changes in arch/arm/boot/compressed/misc.c to allow the use of lzo or
->    gzip, depending on the config
->  - Kconfig support
-> 
-> Signed-off-by: Albin Tonnerre <albin.tonnerre@free-electrons.com>
-> ---
-> Changes:
->  Compiling with -Os failed due to missing __aeabi_uidivmod.
->  Link using arch/arm/lib/lib1funcs.o which provides this symbol, and
->  define a dummy __div0 function in arch/arm/boot/compressed/misc.c, as
->  this symbol is required by lib1funcs.
 
-Hi Russell,
-Does that solve the concerns/issues you had with this patch?
-If so, it might be worth getting the updaed version in Andrew's branch.
+--lc9FT7cWel8HagAv
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+
+> Now that microcom is in Debian sid (thanks!), where can I find ptx_ts?
+> It seems to be quite useful.
+
+Back from the holidays, so here it is:
+
+http://pengutronix.de/software/ptx_ts/index_en.html
+
+Hope it can be useful...
 
 Regards,
--- 
-Albin Tonnerre, Free Electrons
-Kernel, drivers and embedded Linux development,
-consulting, training and support.
-http://free-electrons.com
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--lc9FT7cWel8HagAv
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkqhPVoACgkQD27XaX1/VRug8wCePMT1RCsKrHVtNXhfbi37xWm3
+1eUAn11PTH1EohdwRK5mvpGFwpfM9loQ
+=4nAV
+-----END PGP SIGNATURE-----
+
+--lc9FT7cWel8HagAv--
