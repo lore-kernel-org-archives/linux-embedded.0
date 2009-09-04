@@ -1,140 +1,49 @@
-From: Marc Andre Tanner <mat@brain-dump.org>
-Subject: Re: [PATCH 7/7] printk: provide a filtering macro for printk
-Date: Fri, 4 Sep 2009 16:05:16 +0200
-Message-ID: <20090904140516.GA6524@debbook.brain-dump.org>
-References: <1251844269-12394-1-git-send-email-mat@brain-dump.org>
- <1251844269-12394-8-git-send-email-mat@brain-dump.org>
- <4A9DAD2B.3080909@am.sony.com>
- <BD79186B4FD85F4B8E60E381CAEE190901C55CD3@mi8nycmail19.Mi8.com>
- <20090902130943.GE2736@debbook.brain-dump.org>
- <4A9EA5C9.3010900@am.sony.com>
- <BD79186B4FD85F4B8E60E381CAEE190901C55DE5@mi8nycmail19.Mi8.com>
+From: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+Subject: Re: [PATCH 4/6 v2] Add support for LZO-compressed kernels for ARM
+Date: Fri, 4 Sep 2009 17:31:17 +0200
+Message-ID: <20090904153117.GG18963@pc-ras4041.res.insa>
+References: <20090731093107.GA29704@merkur.ravnborg.org>
+ <1249311501-23102-1-git-send-email-albin.tonnerre@free-electrons.com>
+ <1249311501-23102-2-git-send-email-albin.tonnerre@free-electrons.com>
+ <1249311501-23102-3-git-send-email-albin.tonnerre@free-electrons.com>
+ <1249311501-23102-4-git-send-email-albin.tonnerre@free-electrons.com>
+ <20090806224055.GH31579@n2100.arm.linux.org.uk>
+ <20090814100828.GD5985@pc-ras4041.res.insa>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE190901C55DE5@mi8nycmail19.Mi8.com>
+In-Reply-To: <20090814100828.GD5985@pc-ras4041.res.insa>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded@vger.kernel.org, Ingo Molnar <mingo@elte.hu>, linux kernel <linux-kernel@vger.kernel.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: sam@ravnborg.org, hpa@zytor.com, alain@knaff.lu, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
 
-On Wed, Sep 02, 2009 at 02:22:52PM -0400, H Hartley Sweeten wrote:
-> On Wednesday, September 02, 2009 10:05 AM, Tim Bird wrote:
-> > Marc Andre Tanner wrote:
-> >> On Tue, Sep 01, 2009 at 07:32:25PM -0400, H Hartley Sweeten wrote:
-> >>> On Tuesday, September 01, 2009 4:24 PM, Tim Bird wrote:
-> >>>> Some places in the kernel break the message into pieces, like so:
-> >>>>
-> >>>> printk(KERN_ERR, "Error: first part ");
-> >>>> ...
-> >>>> printk(" more info for error.\n");
-> >>> Technically, shouldn't the second part of the message actually be:
-> >>>
-> >>> printk(KERN_CONT " more info for error.\n");
-> >>>
-> >>> Maybe some mechanism could be created to handle the continued message
-> >>> if they have the KERN_CONT?
-> >> 
-> >> Yes it's true that KERN_CONT isn't handled correctly, but I don't see a way
-> >> to change that.
-> >> 
-> >>>> These parts would not be handled consistently under certain
-> >>>> conditions.
-> >>>>
-> >>>> It would be confusing to see only part of the message,
-> >>>> but I don't know how often this construct is used.  
-> >> 
-> >> $ grep -R KERN_CONT linux-2.6 | wc -l
-> >> 373
-> >> 
-> >>>> Maybe
-> >>>> another mechanism is needed to ensure that continuation
-> >>>> printk lines have the same log level as their start strings.
-> >> 
-> >> I currently don't see a way to achieve this with the CPP.
-> >
-> > If it's that few, then maybe it's OK to actually change
-> > the code for those printk statements. (Heck, these locations
-> > were all changed in the last 2 years anyway.)
-> > 
-> > I'm just brainstorming here, but how about changing them from:
-> >   printk(KERN_INFO "foo");
-> >   printk(KERN_CONT "bar\n");
-> > to:
-> >   printk(KERN_INFO "foo");
-> >   printk_cont(KERN_INFO "bar\n");
+On Fri, Aug 14, 2009 at 12:08:28PM +0200, Albin Tonnerre wrote :
+> This is the second part of patch. This part includes:
+>  - changes to ach/arch/boot/Makefile to make it easier to add new
+>    compression types
+>  - new piggy.lzo.S necessary for lzo compression
+>  - changes in arch/arm/boot/compressed/misc.c to allow the use of lzo or
+>    gzip, depending on the config
+>  - Kconfig support
 > 
-> Unfortunately not all the continued printk statements in the kernel are
-> properly tagged with KERN_CONT (or pr_cont, etc.).
+> Signed-off-by: Albin Tonnerre <albin.tonnerre@free-electrons.com>
+> ---
+> Changes:
+>  Compiling with -Os failed due to missing __aeabi_uidivmod.
+>  Link using arch/arm/lib/lib1funcs.o which provides this symbol, and
+>  define a dummy __div0 function in arch/arm/boot/compressed/misc.c, as
+>  this symbol is required by lib1funcs.
 
-Yes and a quick search revealed that there are actually quite a lot of
-those untagged messages.
+Hi Russell,
+Does that solve the concerns/issues you had with this patch?
+If so, it might be worth getting the updaed version in Andrew's branch.
 
-As I needed some distraction from some other work I played around a bit
-more with a solution which wouldn't require to change existing kernel
-code. It uses a variable which would have to be available in every
-function to store the loglevel of messages which are split over multiple
-printk calls. Here is what I came up with so far:
-
-#define PRINTK_IS_LINE(fmt) (					\
-	((const char*)(fmt))[sizeof((fmt)) - 2] == '\n'		\
-)
-
-#define PRINTK_LEVEL(fmt) (					\
-	(((const char *)(fmt))[0] == '<' &&			\
-	 ((const char *)(fmt))[1] >= '0' &&			\
-	 ((const char *)(fmt))[1] <= '9'			\
-	) ? ((const char *)(fmt))[1] - '0' : 4			\
-)
-
-#define printk(fmt, ...) ({ 								\
-	int __printk_ret = 0;								\
-	int __printk_level = __printk_cont_level;					\
-											\
-	if (__builtin_constant_p((fmt)) && ((fmt))) {					\
-		/* check if we are dealing with a line ending */			\
-		if (PRINTK_IS_LINE((fmt))) {						\
-			/* check if it was a whole line */				\
-			if (__printk_cont_level == -1)					\
-				__printk_level = PRINTK_LEVEL((fmt));			\
-			__printk_cont_level = -1;					\
-		} else if (__printk_cont_level == -1) /* first part of a line? */	\
-			__printk_level = __printk_cont_level = PRINTK_LEVEL((fmt));	\
-	}										\
-											\
-	if (!__builtin_constant_p((fmt)) || __printk_level <= CONFIG_PRINTK_VERBOSITY)	\
-		__printk_ret = printk((fmt), ##__VA_ARGS__); 				\
-											\
-	__printk_ret;									\
-})
-
-Apart from the fact that it's getting uglier it obviously depends on
-the availability of __printk_cont_level (which would get compiled out,
-at least I hope so) in every function. 
-
-So
-
-void demo() {
-	...
-}
-
-would have to become:
-
-void demo() {
-	int __printk_cont_level = -1;
-	...	
-}
-
-I don't know whether this is possible at all through some kind of gcc
-magic. There is also the problem of introducing warnings when 
-__prink_cont_level isn't used in a function but I guess this could be
-dealt with some __attribute__ setting.
-
-Anyway just wanted to share the results of a brainstorming session.
-
-Marc 
-
+Regards,
 -- 
- Marc Andre Tanner >< http://www.brain-dump.org/ >< GPG key: CF7D56C0
+Albin Tonnerre, Free Electrons
+Kernel, drivers and embedded Linux development,
+consulting, training and support.
+http://free-electrons.com
