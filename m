@@ -1,54 +1,101 @@
-From: Denys Vlasenko <vda.linux@googlemail.com>
-Subject: Re: New fast(?)-boot results on ARM
-Date: Thu, 10 Sep 2009 02:03:42 +0200
-Message-ID: <200909100203.42235.vda.linux@googlemail.com>
-References: <20090814170228.GM13320@pengutronix.de> <20090904161626.GD3207@pengutronix.de> <20090909143354.GA15973@sig21.net>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: Re: [PATCH 7/7] printk: provide a filtering macro for printk
+Date: Thu, 10 Sep 2009 11:22:10 +0200 (CEST)
+Message-ID: <alpine.LRH.2.00.0909101118420.31704@vixen.sonytel.be>
+References: <1251844269-12394-1-git-send-email-mat@brain-dump.org> <1251844269-12394-8-git-send-email-mat@brain-dump.org> <4A9DAD2B.3080909@am.sony.com> <BD79186B4FD85F4B8E60E381CAEE190901C55CD3@mi8nycmail19.Mi8.com> <20090902130943.GE2736@debbook.brain-dump.org>
+ <4A9EA5C9.3010900@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:received:received:from:to:subject:date
-         :user-agent:cc:references:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:content-disposition:message-id;
-        bh=NgiYDIGgfwwx6aWUcr441MVfLxGf70nc7bEY6UiR+qY=;
-        b=jHts2dIqxVikpcgug9djk/v7gEEVkuN8TCxnMHBzU4DVgdZiKaga2lJeAStVPiocke
-         e9v9e7vj/tsCCzdp/cynvtNVNq+n1OS/5OJhugvriypaZxz7oU+aIQAKNzKjKSrRwVMP
-         vvUxQRgi3En2GJk+A1kJQLec1jFDfYGju+V7U=
-In-Reply-To: <20090909143354.GA15973@sig21.net>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754575AbZIJJWG@vger.kernel.org>
+In-Reply-To: <4A9EA5C9.3010900@am.sony.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Johannes Stezenbach <js@sig21.net>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Robert Schwebel <r.schwebel@pengutronix.de>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>, Tim Bird <tim.bird@am.sony.com>, kernel@pengutronix.de
+Content-Type: TEXT/PLAIN; charset="utf-8"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Marc Andre Tanner <mat@brain-dump.org>, H Hartley Sweeten <hartleys@visionengravers.com>, linux-embedded@vger.kernel.org, Ingo Molnar <mingo@elte.hu>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Wednesday 09 September 2009 16:33, Johannes Stezenbach wrote:
-> Sorry for slow reply.
-> 
-> On Fri, Sep 04, 2009 at 06:16:26PM +0200, Wolfram Sang wrote:
-> > 
-> > > Now that microcom is in Debian sid (thanks!), where can I find ptx_ts?
-> > > It seems to be quite useful.
-> > 
-> > Back from the holidays, so here it is:
-> > 
-> > http://pengutronix.de/software/ptx_ts/index_en.html
-> > 
-> > Hope it can be useful...
-> 
-> Yes, it is.  Thanks!
-> 
-> BTW, some feedback about microcom:
-> 
-> - the choice of ^\ as an escape charater is unfortunate since that
->   is usually mapped to set SIGQUIT in the tty; a btter choice would
->   be ^] (like telnet) or ^A (like minicom)
-> - typing the escape character immediate causes the menu to be displayed,
->   so one cannot send a break sequence for SysRq without cluttering up the screen
-> 
-> Would you take patches for that?
+On Wed, 2 Sep 2009, Tim Bird wrote:
+> Marc Andre Tanner wrote:
+> > On Tue, Sep 01, 2009 at 07:32:25PM -0400, H Hartley Sweeten wrote:
+> >> On Tuesday, September 01, 2009 4:24 PM, Tim Bird wrote:
+> >>> Some places in the kernel break the message into pieces, like so:
+> >>>
+> >>> printk(KERN_ERR, "Error: first part ");
+> >>> ...
+> >>> printk(" more info for error.\n");
+> >> Technically, shouldn't the second part of the message actually be:
+> >>
+> >> printk(KERN_CONT " more info for error.\n");
+> >>
+> >> Maybe some mechanism could be created to handle the continued mess=
+age
+> >> if they have the KERN_CONT?
+> >=20
+> > Yes it's true that KERN_CONT isn't handled correctly, but I don't s=
+ee a way
+> > to change that.
+> >=20
+> >>> These parts would not be handled consistently under certain
+> >>> conditions.
+> >>>
+> >>> It would be confusing to see only part of the message,
+> >>> but I don't know how often this construct is used. =20
+> >=20
+> > $ grep -R KERN_CONT linux-2.6 | wc -l
+> > 373
+> >=20
+> >>> Maybe
+> >>> another mechanism is needed to ensure that continuation
+> >>> printk lines have the same log level as their start strings.
+> >=20
+> > I currently don't see a way to achieve this with the CPP.
+>=20
+> If it's that few, then maybe it's OK to actually change
+> the code for those printk statements. (Heck, these locations
+> were all changed in the last 2 years anyway.)
+>=20
+> I'm just brainstorming here, but how about changing them from:
+>   printk(KERN_INFO "foo");
+>   printk(KERN_CONT "bar\n");
+> to:
+>   printk(KERN_INFO "foo");
+>   printk_cont(KERN_INFO "bar\n");
+>=20
+> This way the continuation line has the log level, and can
+> be conditionally compiled based on the VERBOSITY level.  A little
+> magic would be needed to strip the first 3 chars of the fmt
+> string in printk_cont().
 
-Sure.
---
-vda
+You could strip the first 3 chars by adding 3 to the pointer. Which wil=
+l
+fail horribly if the KERN_* is forgotten and the format string is very =
+short.
+And the KERN_* still consumes memory.
+
+Or make the KERN_* an explicit first parameter:
+
+    printk_cont(KERN_INFO, "bar\n");
+
+Is "strcmp(p, KERN_INFO)" optimized away for constant strings?
+
+> I think this makes the printk messages a bit more consistent anyway,
+> and still marks lines that are continuation lines.
+
+With kind regards,
+
+Geert Uytterhoeven
+Software Architect
+Techsoft Centre
+
+Technology and Software Centre Europe
+The Corporate Village =C2=B7 Da Vincilaan 7-D1 =C2=B7 B-1935 Zaventem =C2=
+=B7 Belgium
+
+Phone:    +32 (0)2 700 8453
+=46ax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven@sonycom.com
+Internet: http://www.sony-europe.com/
+
+A division of Sony Europe (Belgium) N.V.
+VAT BE 0413.825.160 =C2=B7 RPR Brussels
+=46ortis =C2=B7 BIC GEBABEBB =C2=B7 IBAN BE41293037680010
