@@ -1,41 +1,82 @@
-From: Peter Korsgaard <jacmet@sunsite.dk>
-Subject: Re: GPIO driver for MPC8313.
-Date: Mon, 28 Sep 2009 07:16:55 +0200
-Message-ID: <87vdj3sl6g.fsf@macbook.be.48ers.dk>
-References: <cb9ecdfa0909222055x1d691698sb516b5b8f5f81d@mail.gmail.com>
-	<87y6o6rvvc.fsf@macbook.be.48ers.dk>
-	<cb9ecdfa0909230352w77a37f59h3c7f1e146121f9f6@mail.gmail.com>
-	<87r5txrkfz.fsf@macbook.be.48ers.dk>
-	<cb9ecdfa0909230820k6ebbd589o409e58e2d9b6740c@mail.gmail.com>
-	<cb9ecdfa0909271943o6133f5c8r9b25a25140e7842f@mail.gmail.com>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: [ANNOUNCE] Embedded Linux Conference Europe Program Announced
+Date: Tue, 29 Sep 2009 09:38:29 -0700
+Message-ID: <4AC23805.6020208@am.sony.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:sender:received:to:cc:subject
-         :references:from:date:in-reply-to:message-id:user-agent:mime-version
-         :content-type;
-        bh=YlcNQfDlkX85w4WIPyvOIpW7dp3KaHixMTeeb1O4NAo=;
-        b=qi/ex3NSpSGyxGsDBSSCcIMfHKgGPiGknV0moz3qXDzqSuesvZ2HmsPTl0w942CmP7
-         VHj6jIoC441nYCb1Y6L3TzYeoHAUjTici2jJu2gSDxFomRUjnhefC5RMF3zc5pW0uVWL
-         Ij+HBALqjpfxxfw7+WgfpvjduydKfzbe5YCMk=
-In-Reply-To: <cb9ecdfa0909271943o6133f5c8r9b25a25140e7842f@mail.gmail.com> (Johnny Hung's message of "Mon\, 28 Sep 2009 10\:43\:00 +0800")
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Johnny Hung <johnny.hacking@gmail.com>
-Cc: linuxppc-dev@lists.ozlabs.org, linux-embedded@vger.kernel.org
+To: linux-embedded <linux-embedded@vger.kernel.org>
 
->>>>> "Johnny" == Johnny Hung <johnny.hacking@gmail.com> writes:
+Sorry in advance for this non-technical post, but I figured
+some embedded kernel developers (especially in Europe) might
+be interested in this.
 
- Johnny> The kerne source I used now is 2.6.23 with MPC8313-erdb
- Johnny> pached. I think I should port 2.6.28 gpio function back to
- Johnny> 2.6.23. Is it a common way to implement it in the kernel I used
- Johnny> or I should port MPC8313-erdb pached to 2.6.28 opposite?
+== SUMMARY
 
-It shouldn't be that hard to back port, but I would certainly go for
-2.6.28 (or rather 2.6.31) unless something keeps you at 2.6.23.
+The CE Linux Forum is happy to announce the program for
+Embedded Linux Conference Europe, 2009.  This event, located
+this year in Grenoble, France, brings together embedded Linux
+experts from Europe and around the world.
 
--- 
-Bye, Peter Korsgaard
+A full list of sessions is available at:
+http://www.embeddedlinuxconference.com/elc_europe09/sessions.html
+and for program details, see:
+http://www.embeddedlinuxconference.com/elc_europe09/program.html
+
+Registration is now open at the above web site.
+
+== PROGRAM HIGHLIGHTS
+
+Authors of some of the most useful and important resource books
+in the Linux industry will be there, as well as developers and
+experts from companies like: Philips, Sony, ST Microelectronics,
+Free Electrons, Mentor Graphics MontaVista, Pengutronix, and Wind River.
+
+The conference will host over 40 sessions, including presentations,
+Birds-of-a-Feather sessions, keynotes and tutorials.  The sessions
+will cover such wide-ranging topics as:
+ * Board bring-up and porting
+ * Realtime performance
+ * Core kernel features
+ * Graphics and video
+ * Fast booting
+ * Tracing
+ * Embedded distributions and build systems
+ * Bootloaders and bootloader interfaces (device tree)
+ * Security
+ * Android !!
+     and much more.
+
+Here are some of the embedded Linux experts presenting at
+this event:
+ * Jon Masters - Kernel hacker and co-author of "Building Embedded
+Linux Systems"
+ * Phillipe Gerum - Founder and lead maintainer of the Adeos and
+Xenomai projects. Also a co-author of "Building Embedded Linux Systems"
+ * Allessandro Rubini - Author of 1st edition of "Linux Device Drivers"
+ * Gilad Ben-Yossef - Co-founder of Codefidence LTD, and co-author of
+"Building Embedded Linux Systems"
+ * Matt Porter - Long-term kernel contributor, now at Mentor Graphics
+and previously at MontaVista Software and Motorola Computer Group.
+ * Alex de Vries - Chief Technologist for Wind River Systems
+ * Frank Rowand - Realtime Linux practitioner at Sony Corporation
+
+Registration includes access to all sessions, demos, BOF meetings,
+lunch and snacks each day, and a fun social event Thursday night.
+
+To register, please follow the link at:
+http://www.embeddedlinuxconference.com/elc_europe09/registration1.html
+
+If you have any questions, send e-mail to elce-09@tree.celinuxforum.org.
+
+I hope you can make it!
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
