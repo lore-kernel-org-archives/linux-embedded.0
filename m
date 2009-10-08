@@ -1,82 +1,84 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: [ANNOUNCE] Embedded Linux Conference Europe Program Announced
-Date: Tue, 29 Sep 2009 09:38:29 -0700
-Message-ID: <4AC23805.6020208@am.sony.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [RFC] misc/at24: add experimental OF support for the generic 
+	eeprom driver
+Date: Thu, 8 Oct 2009 09:48:50 -0600
+Message-ID: <fa686aa40910080848r459c47baob73fc70a95a08604@mail.gmail.com>
+References: <1255010672-21656-1-git-send-email-w.sang@pengutronix.de> 
+	<20091008143301.GA6084@oksana.dev.rtsoft.ru>
+	<fa686aa40910080753v6f597b0h4ce835db9f7a653@mail.gmail.com> 
+	<20091008151007.GA21328@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <20091008151007.GA21328@oksana.dev.rtsoft.ru>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Sender: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org
+Errors-To: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org
+To: avorontsov@ru.mvista.com
+Cc: linuxppc-dev@ozlabs.org, devicetree-discuss@ozlabs.org, linux-embedded@vger.kernel.org, linux-i2c@vger.kernel.org
 
-Sorry in advance for this non-technical post, but I figured
-some embedded kernel developers (especially in Europe) might
-be interested in this.
+On Thu, Oct 8, 2009 at 9:10 AM, Anton Vorontsov
+<avorontsov@ru.mvista.com> wrote:
+> On Thu, Oct 08, 2009 at 08:53:46AM -0600, Grant Likely wrote:
+> [...]
+>> Please don't. =A0It is such a small amount of code,
+>
+> It's *always* a small amound of code, at a start. Then we get
+> floppy disk drivers and the tty layer. ;-)
 
-== SUMMARY
+Holy straw man argument Batman!
 
-The CE Linux Forum is happy to announce the program for
-Embedded Linux Conference Europe, 2009.  This event, located
-this year in Grenoble, France, brings together embedded Linux
-experts from Europe and around the world.
+But the focus is still on creating pdata.  If a translator gets too
+big, then sure, split it into a separate file.  Until then, there I
+see no good reason to do so now.
 
-A full list of sessions is available at:
-http://www.embeddedlinuxconference.com/elc_europe09/sessions.html
-and for program details, see:
-http://www.embeddedlinuxconference.com/elc_europe09/program.html
+>
+> [...]
+>> Driver writers shouldn't have to
+>> write anything more than a tiny function to populate pdata from the
+>> device tree. =A0Managing that pdata instance needs to be done with
+>> common infrastructure (but I don't have a firm idea about how it
+>> should look yet). =A0In the mean time I think Wolfram's approach has
+>> lower impact.
+>
+> If I wasn't a PPC/OF guy to some degree, I'd hate PPC/OF people
+> for bringing arch-specific details into a generic code... :-P
 
-Registration is now open at the above web site.
+No, this goes beyond PPC/OF.  The real issue is that it is no longer a
+safe assumption that pdata will be a static data structure in platform
+code.  The number of possible data sources is going to get larger, not
+smaller.  OF is just one.  UEFI is another.  Translating that data
+into pdata will be the problem that comes up over and over again.
+However, translation code is still driver specific, so it belongs with
+the driver that it translates code for.
 
-== PROGRAM HIGHLIGHTS
+So, in my opinion, translation code must:
+1. be *tiny* -- should be trivial to add to a driver without impacting
+common code
+2. live with the driver that it translates data for; ideally in the
+same .c file for drivers that are small.
 
-Authors of some of the most useful and important resource books
-in the Linux industry will be there, as well as developers and
-experts from companies like: Philips, Sony, ST Microelectronics,
-Free Electrons, Mentor Graphics MontaVista, Pengutronix, and Wind River.
+> No matter how small the OF code is, I believe we shouldn't put it
+> into the generic code. Take a look at mmc_spi case again, it can be
+> easily extended to any arch, because there is no arch-specific stuff,
+> but a "get/put" pattern for platform data.
 
-The conference will host over 40 sessions, including presentations,
-Birds-of-a-Feather sessions, keynotes and tutorials.  The sessions
-will cover such wide-ranging topics as:
- * Board bring-up and porting
- * Realtime performance
- * Core kernel features
- * Graphics and video
- * Fast booting
- * Tracing
- * Embedded distributions and build systems
- * Bootloaders and bootloader interfaces (device tree)
- * Security
- * Android !!
-     and much more.
+I'm not disagreeing with you that the arch specific stuff should be
+logically separated from the generic code.  But I don't agree that it
+belongs in a separate file.  And I also think that the mmc_spi
+implementation uses too much code.  There must be a better way.
 
-Here are some of the embedded Linux experts presenting at
-this event:
- * Jon Masters - Kernel hacker and co-author of "Building Embedded
-Linux Systems"
- * Phillipe Gerum - Founder and lead maintainer of the Adeos and
-Xenomai projects. Also a co-author of "Building Embedded Linux Systems"
- * Allessandro Rubini - Author of 1st edition of "Linux Device Drivers"
- * Gilad Ben-Yossef - Co-founder of Codefidence LTD, and co-author of
-"Building Embedded Linux Systems"
- * Matt Porter - Long-term kernel contributor, now at Mentor Graphics
-and previously at MontaVista Software and Motorola Computer Group.
- * Alex de Vries - Chief Technologist for Wind River Systems
- * Frank Rowand - Realtime Linux practitioner at Sony Corporation
+g.
 
-Registration includes access to all sessions, demos, BOF meetings,
-lunch and snacks each day, and a fun social event Thursday night.
+-- =
 
-To register, please follow the link at:
-http://www.embeddedlinuxconference.com/elc_europe09/registration1.html
-
-If you have any questions, send e-mail to elce-09@tree.celinuxforum.org.
-
-I hope you can make it!
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
