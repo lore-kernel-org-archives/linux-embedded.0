@@ -1,106 +1,94 @@
-From: Anton Vorontsov <avorontsov-hkdhdckH98+B+jHODAdFcQ@public.gmane.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
 Subject: Re: [RFC] misc/at24: add experimental OF support for the generic
 	eeprom driver
-Date: Fri, 9 Oct 2009 02:20:43 +0400
-Message-ID: <20091008222042.GA10743@oksana.dev.rtsoft.ru>
+Date: Fri, 9 Oct 2009 07:14:09 +0200
+Message-ID: <20091009051409.GA2361@pengutronix.de>
 References: <1255010672-21656-1-git-send-email-w.sang@pengutronix.de>
 	<20091008143301.GA6084@oksana.dev.rtsoft.ru>
 	<fa686aa40910080753v6f597b0h4ce835db9f7a653@mail.gmail.com>
 	<20091008151007.GA21328@oksana.dev.rtsoft.ru>
 	<fa686aa40910080848r459c47baob73fc70a95a08604@mail.gmail.com>
-Reply-To: avorontsov-hkdhdckH98+B+jHODAdFcQ@public.gmane.org
+	<20091008202723.GA8116@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <fa686aa40910080848r459c47baob73fc70a95a08604-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Type: multipart/mixed; boundary="===============4963436087820861936=="
+Return-path: <linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <20091008202723.GA8116@pengutronix.de>
 List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Cc: linuxppc-dev-mnsaURCQ41sdnm+yROfE0A@public.gmane.org, devicetree-discuss-mnsaURCQ41sdnm+yROfE0A@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Sender: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org
+Errors-To: linuxppc-dev-bounces+glppd-linuxppc64-dev=m.gmane.org@lists.ozlabs.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: linuxppc-dev@ozlabs.org, devicetree-discuss@ozlabs.org, linux-i2c@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Thu, Oct 08, 2009 at 09:48:50AM -0600, Grant Likely wrote:
-> On Thu, Oct 8, 2009 at 9:10 AM, Anton Vorontsov
-[...]
-> > It's *always* a small amound of code, at a start. Then we get
-> > floppy disk drivers and the tty layer. ;-)
-> 
-> Holy straw man argument Batman!
-> 
-> But the focus is still on creating pdata.  If a translator gets too
-> big, then sure, split it into a separate file.  Until then, there I
-> see no good reason to do so now.
 
-Luckily, I'm not at24 driver maintainer (Wolfram himself is ;-),
-but as a maintainer of driver "Foo", I would not want to see
-completely unfamiliar "Bar" in my shiny driver.
+--===============4963436087820861936==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="TB36FDmn/VVEgNH/"
+Content-Disposition: inline
 
-Another plus is that you can bypass (or almost bypass) subsystem
-maintainers when merging OF-specific patches (since he/she couldn't
-possibly care less about all these weird arch internals. But again,
-this doesn't work for this particular driver since Wolfram is the
-maintainer :-).
 
-> > If I wasn't a PPC/OF guy to some degree, I'd hate PPC/OF people
-> > for bringing arch-specific details into a generic code... :-P
-> 
-> No, this goes beyond PPC/OF.  The real issue is that it is no longer a
-> safe assumption that pdata will be a static data structure in platform
-> code.  The number of possible data sources is going to get larger, not
-> smaller.  OF is just one.  UEFI is another.  Translating that data
-> into pdata will be the problem that comes up over and over again.
-> However, translation code is still driver specific,
-> so it belongs with the driver that it translates code for.
+--TB36FDmn/VVEgNH/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Wait... The translation code depends on a platform, and on a
-platform_data structure, the same as non-OF arch-specific code
-depends on it. How is it different from a static platform data
-in the arch/ code? We don't put static platform data into the
-drivers and surround them with ugly #ifdefs+machine_is()...
+> Will check this tomorrow.
 
-> So, in my opinion, translation code must:
-> 1. be *tiny*
+And while doing this and figuring the pro/cons of those methods, I stumbled=
+ over this commit:
 
-Yeah, dream on. ;-) It's tiny when all you have is of_get_property(),
-I'd like to see the code when you'll have GPIOs, IRQs, and platform-
-specific fixups.
+	gpio: pca953x: Get platform_data from OpenFirmware
+	(1965d30356c1c65660ba3330927671cfe81acdd5)
 
-You might say that at24 doesn't need that stuff, but it does.
-Suppose AT24's WP pin is connected to a GPIO, and without
-'read-only' property I'd like the driver to pull the pin low,
-and vice versa: with 'read-only' specifier, WP should be tied
-high. Or if WP is controlled by a switch/jumper, GPIO can be
-used to read current WP state.
+It looks to me that it missed all people involved in OF/DT-development and =
+now we
+have undocumented and IMO questionable properties in the kernel.
 
-> -- should be trivial to add to a driver without impacting
-> common code
+Conclusions I draw:
 
-This is doable, yes.
+a) we better solve the pdata-problem rather sooner than later ;)
+b) we need to spread the word about devicetree-discuss
+c) more documentation may help, too
 
-> > No matter how small the OF code is, I believe we shouldn't put it
-> > into the generic code. Take a look at mmc_spi case again, it can be
-> > easily extended to any arch, because there is no arch-specific stuff,
-> > but a "get/put" pattern for platform data.
-> 
-> I'm not disagreeing with you that the arch specific stuff should be
-> logically separated from the generic code.  But I don't agree that it
-> belongs in a separate file.  And I also think that the mmc_spi
-> implementation uses too much code.  There must be a better way.
+I know, 'send patches'...
 
-I wonder how you'd shrink the mmc_spi bindings, can you elaborate?
+Regards,
 
-Thanks,
+   Wolfram
 
--- 
-Anton Vorontsov
-email: cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-irc://irc.freenode.net/bd2
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--TB36FDmn/VVEgNH/
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkrOxqEACgkQD27XaX1/VRtfIgCgxkVLjSvyhESdWX4zl30z7TVU
+o+cAoIVf/pKmZnENA/PTqnZrKRSN+BqH
+=6cNt
+-----END PGP SIGNATURE-----
+
+--TB36FDmn/VVEgNH/--
+
+--===============4963436087820861936==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Linuxppc-dev mailing list
+Linuxppc-dev@lists.ozlabs.org
+https://lists.ozlabs.org/listinfo/linuxppc-dev
+--===============4963436087820861936==--
