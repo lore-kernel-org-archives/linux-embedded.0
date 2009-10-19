@@ -1,11 +1,11 @@
 From: Mike Frysinger <vapier.adi@gmail.com>
-Subject: Re: [[RFC] 5/5] Incorporate PWM API code into KBuild
-Date: Mon, 19 Oct 2009 18:30:33 -0400
-Message-ID: <8bd0f97a0910191530k4b30a4a5ra115a1b528f59ebf@mail.gmail.com>
+Subject: Re: [[RFC] 3/5] Expunge old Atmel PWMC driver, replacing it with one 
+	that conforms to the PWM API
+Date: Mon, 19 Oct 2009 18:34:29 -0400
+Message-ID: <8bd0f97a0910191534y12f9b6b9g1181507b20b50f80@mail.gmail.com>
 References: <1255984366-26952-1-git-send-email-bgat@billgatliff.com> 
 	<1255984366-26952-2-git-send-email-bgat@billgatliff.com> <1255984366-26952-3-git-send-email-bgat@billgatliff.com> 
-	<1255984366-26952-4-git-send-email-bgat@billgatliff.com> <1255984366-26952-5-git-send-email-bgat@billgatliff.com> 
-	<1255984366-26952-6-git-send-email-bgat@billgatliff.com>
+	<1255984366-26952-4-git-send-email-bgat@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -14,11 +14,11 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:mime-version:received:in-reply-to:references
          :from:date:message-id:subject:to:cc:content-type
          :content-transfer-encoding;
-        bh=YyjQJAdIPydh8hsSg9Xl8ok4NbAiuGUi1CxLTQrrPyc=;
-        b=DoNKAzM+9ME0Jt23xTcFBCDIa8XvbGdXlLPxVA1K+nZPTZ0e07Ll/PFCJDiMo5JwYd
-         ChHAWlS192r6vRxz29Pj8qDNuw3ddit7WFL6bNTKZTA/B0dybSRSMDgqwAYClp7MrFxx
-         /G/Z1WXmp5KbNWLS7c5jD5Srt7dAKwCne54MQ=
-In-Reply-To: <1255984366-26952-6-git-send-email-bgat@billgatliff.com>
+        bh=ByC0becMF+A20O2FJoTWBVgT4XVPNthKtVAw3xee50E=;
+        b=HzA6YgJFh9esDBBCjFxVQIeQu0RsffCKbJA7L8Hj6YxOVTwH7Ng2LKNehP1K0u5CcV
+         DZnDoIA9MtIPym5iKSRqzPVcuSlfaQyFtdg622lmbmdGEjxWGaXUUSNXt7aSavT2aat6
+         AS1ih4ZJ2md+Sd9HZr+eGc12y+SpqF53RvaZs=
+In-Reply-To: <1255984366-26952-4-git-send-email-bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="utf-8"
@@ -26,39 +26,48 @@ To: Bill Gatliff <bgat@billgatliff.com>
 Cc: linux-embedded@vger.kernel.org
 
 On Mon, Oct 19, 2009 at 16:32, Bill Gatliff wrote:
-> --- a/drivers/Makefile
-> +++ b/drivers/Makefile
-> @@ -6,6 +6,8 @@
-> =C2=A0#
->
-> =C2=A0obj-y =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0+=3D gpio/
-> +obj-$(CONFIG_GENERIC_PWM) =C2=A0 =C2=A0 =C2=A0+=3D pwm/
-> +
-> =C2=A0obj-$(CONFIG_PCI) =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0+=3D pci/
-
-spurious new line
-
 > --- /dev/null
-> +++ b/drivers/pwm/Kconfig
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 software controlled power-efficent back=
-lights on LCD
+> +++ b/drivers/pwm/atmel-pwm.c
+> + =C2=A0 =C2=A0 =C2=A0 const struct atmel_pwm *ap
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D container_of(p=
+->pwm, struct atmel_pwm, pwm);
 
-efficient
+make a helper ?
 
-> --- /dev/null
-> +++ b/drivers/pwm/Makefile
-> @@ -0,0 +1,7 @@
-> +#
-> +# Makefile for pwm devices
-> +#
-> +obj-y :=3D pwm.o
-> +
-> +obj-$(CONFIG_ATMEL_PWM) =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0+=3D atmel-pwm.o
-> +obj-$(CONFIG_GPIO_PWM) =C2=A0 =C2=A0 =C2=A0 =C2=A0 +=3D gpio.o
-> \ No newline at end of file
+> + =C2=A0 =C2=A0 =C2=A0 pr_debug("%s:%d sync_mask %x\n",
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0p->pwm->bus_=
+id, p->chan, ap->sync_mask[p->chan]);
 
-there should be a newline at the end of the file
+all of the pr_* funcs in this driver should be dev_* funcs
+
+> +static int __init
+> +atmel_pwmc_probe(struct platform_device *pdev)
+
+__devinit
+
+> + =C2=A0 =C2=A0 =C2=A0 ap->clk =3D clk_get(&pdev->dev, "pwm_clk");
+> + =C2=A0 =C2=A0 =C2=A0 if (IS_ERR(ap->clk)) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 pr_info("%s: clk_g=
+et error %ld\n",
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 ap->pwm.bus_id, PTR_ERR(ap->clk));
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_clk_get;
+
+shouldnt it be:
+  ret =3D PTR_ERR(ap->clk);
+
+> +static struct platform_driver atmel_pwm_driver =3D {
+> + =C2=A0 =C2=A0 =C2=A0 .driver =3D {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 .name =3D "atmel_p=
+wmc",
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 .owner =3D THIS_MO=
+DULE,
+> + =C2=A0 =C2=A0 =C2=A0 },
+
+no need for .owner ?
+
+> +static void atmel_pwm_exit(void)
+
+__exit
 -mike
