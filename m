@@ -1,29 +1,17 @@
 From: Francesco VIRLINZI <francesco.virlinzi@st.com>
 Subject: [Proposal] [PATCH] generic clock framework
-Date: Tue, 10 Nov 2009 15:00:59 +0100
-Message-ID: <4AF9721B.4070203@st.com>
+Date: Tue, 10 Nov 2009 16:06:29 +0100
+Message-ID: <4AF98175.4090205@st.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="------------030909070008040302040602"
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>, 
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>, 
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org, Linux-sh <linux-sh@vger.kernel.org>, linux-embedded@vger.kernel.org
+Content-Type: multipart/mixed;
+ boundary="------------020509060101020002070207"
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+To: Linux-sh <linux-sh@vger.kernel.org>, linux-embedded@vger.kernel.org
 
 This is a multi-part message in MIME format.
---------------030909070008040302040602
-Content-Type: multipart/alternative;
- boundary="------------020005060407040501000307"
-
-
---------------020005060407040501000307
+--------------020509060101020002070207
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 
@@ -82,81 +70,8 @@ to extend/fix/share it.
 Regards
   Francesco
 
---------------020005060407040501000307
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-</head>
-<body text="#000000" bgcolor="#ffffff">
-<big><big><tt>Hi all<br>
-<br>
-I'm Francesco and I work in STMicroelectronics<br>
-<br>
-In the last ELC-E_2009 I spoke on a generic clock framework I'm working
-on<br>
-&nbsp;(see
-<a class="moz-txt-link-freetext" href="http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2009Presentations?action=AttachFile&amp;do=view&amp;target=ELC_E_2009_Generic_Clock_Framework.pdf">http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2009Presentations?action=AttachFile&amp;do=view&amp;target=ELC_E_2009_Generic_Clock_Framework.pdf</a>).<br>
-<br>
-</tt><tt>I wrote the gcf to manage both clocks the platform_devices
-during a clock operation.<br>
-<br>
-</tt><tt>The main features are:<br>
-&nbsp;- it's integrated in the LDM<br>
-</tt></big></big><big><big><tt>&nbsp;- it tracks the clock-to-clock
-relationship<br>
-&nbsp;- it tracks the clock-to-device relationship<br>
-<br>
-</tt></big></big><big><big><tt>&nbsp;- it has sysfs interface<br>
-&nbsp;- - the user can navigate the clock tree under /sys/clocks/...<br>
-<br>
-&nbsp;- it uses the linux API (&lt;linux/clk.h&gt;) with some extra
-functions (to register/unregister a clock<br>
-&nbsp;&nbsp; and other utility functions as clk_for_each())<br>
-<br>
-&nbsp;- it involves the platform_device and the platform_driver in the clock
-propagation.<br>
-&nbsp;- - basically each clock operation is managed as a transaction which
-evolves step by step.<br>
-&nbsp;- - </tt><tt>all the clock rates are evaluated (before the clk
-operation is actually done)<br>
-</tt><tt>&nbsp;- - each platform_device can check (</tt><tt>before the clk
-operation is </tt></big></big><big><big><tt>actually</tt></big></big><big><big><tt>
-done</tt><tt>) the clk environment<br>
-&nbsp;&nbsp;&nbsp;&nbsp; it will have at the end of clock operation and if required it can
-reject the operation.<br>
-&nbsp;- - each clock operation is </tt></big></big><big><big><tt>actually</tt></big></big><big><big><tt>
-executed only if all the </tt><tt>platform_</tt><tt>devices accept the
-operation it-self<br>
-<br>
-<br>
-Moreover a common clock framework could be used to avoid a lot of
-duplicated and/or similar code<br>
-&nbsp;just a grep of 'EXPORT_SYMBOL\(clk_enable' under arch/arm finds 22
-entries.<br>
-<br>
-The patch is based on a 2.6.30 kernel also if it has a preliminary
-integration with the PM_RUNTIME<br>
-&nbsp;support.<br>
-<br>
-It works on our st40 (an sh4 cpu based system) no test/porting was done
-on any ARM platform.<br>
-<br>
-It would be mainly a starting point for a discussion and I'm available
-to extend/fix/share it.<br>
-<br>
-Regards<br>
-&nbsp;Francesco</tt></big></big><br>
-</body>
-</html>
-
---------------020005060407040501000307--
-
---------------030909070008040302040602
+--------------020509060101020002070207
 Content-Type: text/plain;
  name="0001-generic-clock-framework.patch"
 Content-Transfer-Encoding: 7bit
@@ -3236,16 +3151,6 @@ index 0682ecc..4254c5f 100644
 1.6.2.5
 
 
---------------030909070008040302040602
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
 
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
---------------030909070008040302040602--
-
+--------------020509060101020002070207--
