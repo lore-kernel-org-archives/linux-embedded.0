@@ -1,76 +1,51 @@
-From: Paul Gortmaker <paul.gortmaker@windriver.com>
+From: David VomLehn <dvomlehn@cisco.com>
 Subject: Re: [PATCH, RFC] panic-note: Annotation from user space for panics
-Date: Thu, 12 Nov 2009 14:50:41 -0500
-Message-ID: <4AFC6711.1090405@windriver.com>
-References: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net>
+Date: Thu, 12 Nov 2009 16:56:49 -0500
+Message-ID: <20091112215649.GA28349@dvomlehn-lnx2.corp.sa.net>
+References: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net> <4AFC4D31.2000101@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net>
+Content-Disposition: inline
+In-Reply-To: <4AFC4D31.2000101@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: David VomLehn <dvomlehn@cisco.com>
-Cc: linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, linux-kernel@vger.kernel.org, mpm@selenic.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, linux-kernel@vger.kernel.org, mpm@selenic.com, paul.gortmaker@windriver.com
 
-David VomLehn wrote:
-> Allows annotation of panics to include platform information. It's no big
-> deal to collect information, but way helpful when you are collecting
-> failure reports from a eventual base of millions of systems deployed in
-> other people's homes.
-> 
-> One of the biggest reasons this is an RFC is that I'm uncomfortable with
-> putting the pseudo-file that holds the annotation information in /proc.
-> Different layers of the software stack may drop dynamic information, such
-> as DHCP-supplied IP addresses, in here as they come up. This means it's
-> necessary to be able to append to the end of the annotation, so this looks
-> much more like a real file than a sysctl file.  It also has multiple lines,
-> which doesn't look a sysctl file. Annotation can be viewed as a debug thing,
-> so maybe it belongs in debugfs, but people seem to be doing somewhat different
-> things with that filesystem.
-> 
-> So, suggestions on this issue, and any others are most welcome. If there a
-> better way to do this, I'll be happy to use it.
-> 
-> Signed-off-by: David VomLehn <dvomlehn@cisco.com>
-> ---
+(Switched from top posting)
 
-> --- a/kernel/panic.c
-> +++ b/kernel/panic.c
-> @@ -70,6 +70,7 @@ NORET_TYPE void panic(const char * fmt, ...)
->  	vsnprintf(buf, sizeof(buf), fmt, args);
->  	va_end(args);
->  	printk(KERN_EMERG "Kernel panic - not syncing: %s\n",buf);
-> +	panic_note_print();
->  #ifdef CONFIG_DEBUG_BUGVERBOSE
->  	dump_stack();
->  #endif
+On Thu, Nov 12, 2009 at 01:00:17PM -0500, Marco Stornelli wrote:
+> David VomLehn ha scritto:
+> > Allows annotation of panics to include platform information. It's no big
+> > deal to collect information, but way helpful when you are collecting
+> > failure reports from a eventual base of millions of systems deployed in
+> > other people's homes.
+> > 
+> Sincerely, I don't understand why we should involve the kernel to gather
+> this kind of information when we can use other (user-space) tools, only
+> to have "all" in a single report maybe? I think it's a bit weak reason
+> to include this additional behavior in the kernel.
 
+Good question. Some more detail on our application might help. In some
+situations, we may have no disk and only enough flash for the bootloader.
+The kernel is downloaded over the network. When we get to user space, we
+initialize a number of things dynamically. For example, we dynamically
+compute some MAC address, and most of the IP addresses are obtained with
+DHCP. This are very useful to have for panic analysis.
 
-Why hook into panic() directly like this, vs. using the panic
-notifier list? If you use that, and then put the data handling
-magic that you need into your own kernel module that knows how
-to interface with the reporting apps that you have, you can
-do the whole thing without having to alter existing code, I think.
+Since there is neither flash nor disk, user space has no place to store
+this information, should the kernel panic. When we come back up, we will get
+different MAC and IP addresses. Storing them in memory is our only hope.
 
-Paul.
+Fortunately, there is a section of RAM that the bootloader promises not
+to overwrite. On a panic, we capture the messages written on the console
+and store them in the protected area. If the information from the
+/proc file is written as part of the panic, we will capture it, too.
 
-> diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
-> index 30df586..bade7a1 100644
-> --- a/lib/Kconfig.debug
-> +++ b/lib/Kconfig.debug
-> @@ -1045,6 +1045,14 @@ config DMA_API_DEBUG
->  	  This option causes a performance degredation.  Use only if you want
->  	  to debug device drivers. If unsure, say N.
->  
-> +config PANIC_NOTE
-> +	bool "Create file for user space data to be reported at panic time"
-> +	default n
-> +	help
-> +	  This creates a pseudo-file, named /proc/panic_note, into which
-> +	  user space data can be written. If a panic occurs, the contents
-> +	  of the file will be included in the failure report.
-> +
->  source "samples/Kconfig"
->  
->  source "lib/Kconfig.kgdb"
+There is a later email suggesting this be done in a panic notifier, and I
+think that's a better approach. Then, instead of having this be a /proc file,
+we could have a pseudo-device in /dev.
+
+> Marco
