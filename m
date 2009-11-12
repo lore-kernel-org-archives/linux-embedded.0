@@ -1,51 +1,33 @@
 From: David VomLehn <dvomlehn@cisco.com>
 Subject: Re: [PATCH, RFC] panic-note: Annotation from user space for panics
-Date: Thu, 12 Nov 2009 16:56:49 -0500
-Message-ID: <20091112215649.GA28349@dvomlehn-lnx2.corp.sa.net>
-References: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net> <4AFC4D31.2000101@gmail.com>
+Date: Thu, 12 Nov 2009 16:58:40 -0500
+Message-ID: <20091112215840.GB28349@dvomlehn-lnx2.corp.sa.net>
+References: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net> <1258049211.10621.40.camel@calx>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4AFC4D31.2000101@gmail.com>
+In-Reply-To: <1258049211.10621.40.camel@calx>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, linux-kernel@vger.kernel.org, mpm@selenic.com, paul.gortmaker@windriver.com
+To: Matt Mackall <mpm@selenic.com>
+Cc: linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, linux-kernel@vger.kernel.org, paul.gortmaker@windriver.com
 
-(Switched from top posting)
-
-On Thu, Nov 12, 2009 at 01:00:17PM -0500, Marco Stornelli wrote:
-> David VomLehn ha scritto:
+On Thu, Nov 12, 2009 at 01:06:51PM -0500, Matt Mackall wrote:
+> On Wed, 2009-11-11 at 21:13 -0500, David VomLehn wrote:
 > > Allows annotation of panics to include platform information. It's no big
 > > deal to collect information, but way helpful when you are collecting
 > > failure reports from a eventual base of millions of systems deployed in
 > > other people's homes.
-> > 
-> Sincerely, I don't understand why we should involve the kernel to gather
-> this kind of information when we can use other (user-space) tools, only
-> to have "all" in a single report maybe? I think it's a bit weak reason
-> to include this additional behavior in the kernel.
+> 
+> I'd like to hear a bit more use case motivation on this feature. Also,
+> why do you want more than a page?
 
-Good question. Some more detail on our application might help. In some
-situations, we may have no disk and only enough flash for the bootloader.
-The kernel is downloaded over the network. When we get to user space, we
-initialize a number of things dynamically. For example, we dynamically
-compute some MAC address, and most of the IP addresses are obtained with
-DHCP. This are very useful to have for panic analysis.
+Hopefully, I have addressed the first question in my previous email. As
+for the second, I doubt there is a need for more than a page. I just picked
+a value to start developing with. This is still a work in progress...
 
-Since there is neither flash nor disk, user space has no place to store
-this information, should the kernel panic. When we come back up, we will get
-different MAC and IP addresses. Storing them in memory is our only hope.
+> http://selenic.com : development and support for Mercurial and Linux
 
-Fortunately, there is a section of RAM that the bootloader promises not
-to overwrite. On a panic, we capture the messages written on the console
-and store them in the protected area. If the information from the
-/proc file is written as part of the panic, we will capture it, too.
-
-There is a later email suggesting this be done in a panic notifier, and I
-think that's a better approach. Then, instead of having this be a /proc file,
-we could have a pseudo-device in /dev.
-
-> Marco
+David VL
