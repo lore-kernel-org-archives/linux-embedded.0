@@ -1,56 +1,42 @@
-From: "Shargorodsky Atal (EXT-Teleca/Helsinki)" 
-	<ext-atal.shargorodsky@nokia.com>
+From: Simon Kagstrom <simon.kagstrom@netinsight.net>
 Subject: Re: [PATCH, RFC] panic-note: Annotation from user space for panics
-Date: Fri, 13 Nov 2009 13:50:36 +0200
-Message-ID: <1258113036.5987.18.camel@atal-desktop>
+Date: Fri, 13 Nov 2009 12:59:46 +0100
+Message-ID: <20091113125946.5353164c@marrow.netinsight.se>
 References: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net>
-	 <4AFC6711.1090405@windriver.com>
-	 <20091112220925.GC28349@dvomlehn-lnx2.corp.sa.net>
+	<4AFC4D31.2000101@gmail.com>
+	<20091112215649.GA28349@dvomlehn-lnx2.corp.sa.net>
+	<20091113091031.3f6d4bba@marrow.netinsight.se>
+	<1258112748.21596.1227.camel@localhost>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754299AbZKMLwn@vger.kernel.org>
-In-Reply-To: <20091112220925.GC28349@dvomlehn-lnx2.corp.sa.net>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755408AbZKML7s@vger.kernel.org>
+In-Reply-To: <1258112748.21596.1227.camel@localhost>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: ext David VomLehn <dvomlehn@cisco.com>
-Cc: Paul Gortmaker <paul.gortmaker@windriver.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "dwm2@infradead.org" <dwm2@infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "mpm@selenic.com" <mpm@selenic.com>
+To: dedekind1@gmail.com
+Cc: David VomLehn <dvomlehn@cisco.com>, Marco Stornelli <marco.stornelli@gmail.com>, linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwmw2@infradead.org, linux-kernel@vger.kernel.org, mpm@selenic.com, paul.gortmaker@windriver.com, "Shargorodsky Atal (EXT-Teleca/Helsinki)" <ext-atal.shargorodsky@nokia.com>
 
-On Thu, 2009-11-12 at 23:09 +0100, ext David VomLehn wrote:
-> On Thu, Nov 12, 2009 at 02:50:41PM -0500, Paul Gortmaker wrote:
-> > David VomLehn wrote:
-> >> Allows annotation of panics to include platform information. It's no big
-> >> deal to collect information, but way helpful when you are collecting
-> >> failure reports from a eventual base of millions of systems deployed in
-> >> other people's homes.
-> ...
-> > Why hook into panic() directly like this, vs. using the panic
-> > notifier list? If you use that, and then put the data handling
-> > magic that you need into your own kernel module that knows how
-> > to interface with the reporting apps that you have, you can
-> > do the whole thing without having to alter existing code, I think.
-> 
-> I agree--a panic notifier list is probably a better approach.
-> 
+(Also fix David Woodhouses address and add Atal)
 
-That's what we currently use:
+On Fri, 13 Nov 2009 13:45:48 +0200
+Artem Bityutskiy <dedekind1@gmail.com> wrote:
 
-http://marc.info/?l=linux-kernel&m=125655380512117&w=2
+> So we really need to print some user-space supplied information during
+> the panic, and then we store it on flash with mtdoops, and the later,
+> when the device has network access we send whole bunch of oopses via the
+> network.
 
-Very simple and does the job.
-Requires to rearrange the panic code a bit, though.
-Namely, to move notifiers invocation before the call to kmsg_dump().
-Dumpers were introduced by Simon Kagstrom here:
+Yes, I see that your case would have to be handled differently. A
+complication (which I believe was discussed before) is that kmsg_dump()
+is done before the panic notifiers are called.
 
-http://marc.info/?l=linux-kernel&m=125569530109871&w=2
+The reason I put it there is to have it before crash_kexec(), so I
+guess we'll have to take up the discussion on what to do with it. For
+me it now seems like it would be OK to move kmsg_dump() down below the
+panic notifiers.
 
+If you have a kdump kernel to load, then you will most likely not need
+the kmsg dumped data anyway.
 
-Regards,
-Atal
-
-> David VL
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+// Simon
