@@ -1,92 +1,85 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 0/6] Generic PWM API implementation
-Date: Sat, 14 Nov 2009 00:55:17 -0700
-Message-ID: <fa686aa40911132355t3b79fe46m90005ecba453dcc1@mail.gmail.com>
-References: <cover.1224093510.git.bgat@billgatliff.com> <fa686aa40911131108o301efa1ew5c0ab31184aa7f75@mail.gmail.com> 
-	<8bd0f97a0911132022pf743558lfef1402125d4b60b@mail.gmail.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: Re: [PATCH, RFC] panic-note: Annotation from user space for panics
+Date: Sat, 14 Nov 2009 09:28:04 +0100
+Message-ID: <4AFE6A14.4010507@gmail.com>
+References: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net>	 <4AFC4D31.2000101@gmail.com>	 <20091112215649.GA28349@dvomlehn-lnx2.corp.sa.net>	 <20091113091031.3f6d4bba@marrow.netinsight.se> <1258112748.21596.1227.camel@localhost>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8bd0f97a0911132022pf743558lfef1402125d4b60b@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=7d/3LagYFMVKsQUVXYHHrYkw/akee2bCgtkzbPwZsoU=;
+        b=MaA6S40nBBJ3efj4ArJSRVY3ZlaTme+eLoOCz/nWbTtF5LenXVqaFwC8z7owvKgtKa
+         6LpQ+7pnIQR/qMg72dfdc90+ltTjPCnrfasIx0Ml7h/9yKaBVnAKfIk22MfTNvsDkrHf
+         zVrShuglODw85FZfuchfon6w+m/uEkbQr+dRQ=
+In-Reply-To: <1258112748.21596.1227.camel@localhost>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org, David Brownell <dbrownell@users.sourceforge.net>
+Content-Type: text/plain; charset="us-ascii"
+To: dedekind1@gmail.com
+Cc: Simon Kagstrom <simon.kagstrom@netinsight.net>, David VomLehn <dvomlehn@cisco.com>, linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, linux-kernel@vger.kernel.org, mpm@selenic.com, paul.gortmaker@windriver.com
 
-On Fri, Nov 13, 2009 at 9:22 PM, Mike Frysinger <vapier.adi@gmail.com> =
-wrote:
-> On Fri, Nov 13, 2009 at 14:08, Grant Likely wrote:
->> On Wed, Oct 15, 2008 at 11:14 AM, Bill Gatliff wrote:
->>> This series implements a Generic PWM Device API, including referenc=
-e
->>> implementations for the Atmel PWMC device, an LED device, and an LE=
-D
->>> trigger. =A0It is based on linux-2.6.27.
->> [...]
->>> The implementation of the Generic PWM Device API is structurally
->>> similar to the generic GPIO API, except that the PWM code uses
->>> platform bus_id strings instead of integers to identify target
->>> deviices. =A0A configuration structure is also provided, both to
->>> facilitate atomic hardware state changes and so that the API can be
->>> extended in a source-code-compatible way to accomodate devices with
->>> features not anticipated by the current code.
+I think in general the procedure should be: at startup or event (for
+example acquired IP address from DHCP) user applications write in flash
+(better in persistent ram) a log with a tag or a timestamp or something
+like this, when there is a kernel panic, it is captured in a file stored
+together the log and when possible the system should send all via
+network for example. Are there problems that I can't see to follow this
+approach? When David says "...so this looks much more like a real file
+than a sysctl file" I quite agree, it seems a normal application/system
+log indeed.
+
+Marco
+
+Artem Bityutskiy wrote:
+> On Fri, 2009-11-13 at 09:10 +0100, Simon Kagstrom wrote:
+>> On Thu, 12 Nov 2009 16:56:49 -0500
+>> David VomLehn <dvomlehn@cisco.com> wrote:
 >>
->> I'm concerned about the approach taken here. =A0As I understand it, =
-the
->> PWM signals are very similar to GPIOs in that each PWM device contro=
-ls
->> an external signal line, just like GPIO lines. =A0The difference bei=
-ng
->> that PWMs cannot do input, and has additional capabilities (can be
->> programmed with a signal; not just on/off/tristate). =A0Actually, ma=
-ny
->> GPIOs have these properties too. =A0I've got a part with output-only
->> gpios, and gpio devices that also have a PWM.
+>>> Good question. Some more detail on our application might help. In some
+>>> situations, we may have no disk and only enough flash for the bootloader.
+>>> The kernel is downloaded over the network. When we get to user space, we
+>>> initialize a number of things dynamically. For example, we dynamically
+>>> compute some MAC address, and most of the IP addresses are obtained with
+>>> DHCP. This are very useful to have for panic analysis.
+>>>
+>>> Since there is neither flash nor disk, user space has no place to store
+>>> this information, should the kernel panic. When we come back up, we will get
+>>> different MAC and IP addresses. Storing them in memory is our only hope.
+>>>
+>>> Fortunately, there is a section of RAM that the bootloader promises not
+>>> to overwrite. On a panic, we capture the messages written on the console
+>>> and store them in the protected area. If the information from the
+>>> /proc file is written as part of the panic, we will capture it, too.
+>> Can't you solve this completely from userspace using phram and mtdoops
+>> instead? I.e., setup two phram areas
 >>
->> What is the reason for bringing in an entirely new framework instead
->> of extending the GPIO API or gpiolib? =A0I'm not too excited about
->> having two entirely different frameworks for what basically boils do=
-wn
->> to "numbered signal pins".
->
-> unifying resource management obviously makes sense so as to avoid
-> conflicts, but i dont think the fact that one pin can be multi purpos=
-e
-> means it should be entirely forced into the GPIO framework, nor do i
-> see any real gain for doing so.
-
-Common code is a big gain in and of itself.  It means less to develop,
-less to maintain, and fewer APIs in the kernel.  Right now, I don't
-see a fundamental difference is between GPIO and PWM pin management.
-It is essentially the same problem, and in many cases PWM pins can
-also be used as GPIOs.  I think the question should be flipped around;
-rather than asking for a compelling reason for them to be merged; I
-want to know the compelling reason to keep them separate.  What is the
-fundamental difference that keeps them apart?
-
-However, since it was mentioned, I do see some real gains for using
-the same infrastructure:
-- Devices using GPIO pins can easily be extended to take advantage of
-PWM modes.  i could see GPIO LEDs taking advantage of this for example
-- (as I already mentioned) PWM pins that can also behave as GPIOs
-don't need to register 2 interfaces.
-- All the existing support code for hooking up GPIO pins to other
-devices can be reused as is.
-- Individual platforms have the option of implementing the GPIO+PWM
-API directly (fast, but static), or they can hook in via GPIOLIB
-(dynamic; slower but pluggable)
-- All the OF device tree bindings for GPIOs also work with PWMs.
-
-What I would like to see is the PWM functions added to the GPIO API.
-GPIO drivers can then either implement them or not.  If a GPIO driver
-supports the PWM function, great.  If not, then it returns -EINVAL.
-Heck, I'll even got a driver right now that I'd use it with.  I'm more
-than happy to help code it up even.
-
-Cheers,
-g.
-
---=20
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+>> 	modprobe phram 4K@start-of-your-area,4K@start-of-your-area+4K    # Can't remember the exact syntax!
+>>
+>> you'll then get /dev/mtdX and /dev/mtdX+1 for these two. You can then do
+>>
+>> 	modprobe mtdoops mtddev=/dev/mtdX+1 dump_oops=0
+>>
+>> to load mtdoops to catch the panic in the second area, and just write
+>> your userspace messages to /dev/mtdX.
+> 
+> This might work for them, not sure, but not for us. We store panics on
+> flash, and later they are automatically sent to the panic collection
+> system via the network. And the complications are:
+> 
+> 1. There may be many panics before the device has network access and has
+> a chance to send the panics.
+> 2. User can re-flash the device with different SW inbetween.
+> 
+> So we really need to print some user-space supplied information during
+> the panic, and then we store it on flash with mtdoops, and the later,
+> when the device has network access we send whole bunch of oopses via the
+> network.
+> 
+>> One thing probably have to be fixed though: I don't think phram has a
+>> panic_write, which will be needed by mtdoops to catch the panic - this
+>> should be trivial to add though since it's plain RAM.
+> 
