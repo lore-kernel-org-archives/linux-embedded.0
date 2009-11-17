@@ -1,67 +1,48 @@
-From: Francesco VIRLINZI <francesco.virlinzi@st.com>
-Subject: [Proposal] [PATCH] [RESEND] generic clock framework
-Date: Mon, 16 Nov 2009 14:47:00 +0100
-Message-ID: <4B0157D4.2020100@st.com>
+From: David Brownell <david-b@pacbell.net>
+Subject: Re: [PATCH 0/6] Generic PWM API implementation
+Date: Tue, 17 Nov 2009 00:47:02 -0700
+Message-ID: <200911162347.02364.david-b@pacbell.net>
+References: <cover.1224093510.git.bgat@billgatliff.com> <8bd0f97a0911132022pf743558lfef1402125d4b60b@mail.gmail.com> <fa686aa40911132355t3b79fe46m90005ecba453dcc1@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <fa686aa40911132355t3b79fe46m90005ecba453dcc1@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Linux-sh <linux-sh@vger.kernel.org>, linux-embedded@vger.kernel.org, linux-arm-kernel@lists.infradead.o, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, linuxppc-de
+Content-Type: text/plain; charset="us-ascii"
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
 
-Hi all
+On Friday 13 November 2009, Grant Likely wrote:
+> 		  Right now, I don't
+> see a fundamental difference is between GPIO and PWM pin management.
+> It is essentially the same problem, and in many cases PWM pins can
+> also be used as GPIOs. 
 
-I'm Francesco and I work in STMicroelectronics
+Pin management for a given SoC is going to be relevant to setting
+every signal, no matter what peripheral it's associated with.  The
+same argument applies to an MDIO bus, I2C, 1-wire, and more.
 
-In the last ELC-E_2009 I spoke on a generic clock framework I'm working on
-  (see 
-http://tree.celinuxforum.org/CelfPubWiki/ELCEurope2009Presentations?action=AttachFile&do=view&target=ELC_E_2009_Generic_Clock_Framework.pdf). 
-
-
-I wrote the gcf to manage both clocks the platform_devices during a 
-clock operation.
-
-The main features are:
-  - it's integrated in the LDM
-  - it tracks the clock-to-clock relationship
-  - it tracks the clock-to-device relationship
-
-  - it has sysfs interface
-  - - the user can navigate the clock tree under /sys/clocks/...
-
-  - it uses the linux API (<linux/clk.h>) with some extra functions (to 
-register/unregister a clock
-    and other utility functions as clk_for_each())
-
-  - it involves the platform_device and the platform_driver in the clock 
-propagation.
-  - - basically each clock operation is managed as a transaction which 
-evolves step by step.
-  - - all the clock rates are evaluated (before the clk operation is 
-actually done)
-  - - each platform_device can check (before the clk operation is 
-actually done) the clk environment
-      it will have at the end of clock operation and if required it can 
-reject the operation.
-  - - each clock operation is actually executed only if all the 
-platform_devices accept the operation it-self
+And I don't buy it in those cases either.
 
 
-Moreover a common clock framework could be used to avoid a lot of 
-duplicated and/or similar code
-  just a grep of 'EXPORT_SYMBOL\(clk_enable' under arch/arm finds 22 
-entries.
+> I think the question should be flipped around; 
+> rather than asking for a compelling reason for them to be merged; I
+> want to know the compelling reason to keep them separate.  What is the
+> fundamental difference that keeps them apart?
 
-The patch is based on a 2.6.30 kernel also if it has a preliminary 
-integration with the PM_RUNTIME
-  support.
+PWM is about periodic signal generation without CPU intervention.
 
-It works on our st40 (an sh4 cpu based system) no test/porting was done 
-on other platforms.
+GPIO is about explicit CPU management/interrogation of single
+signals.
 
-It would be mainly a starting point for a discussion and I'm available 
-to extend/fix/share it.
 
-Regards
-  Francesco
+> What I would like to see is the PWM functions added to the GPIO API.
+
+No.  If you want a pin mux interface, come up with one of them.
+
+It shouldn't be a PWM interface, a GPIO interface, an I2C interface,
+a SPI interface, an MDIO interface, a 1-wire interface ... or any of
+dozens of other things.  It'd be purely for pinmux.
+
