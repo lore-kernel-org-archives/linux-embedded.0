@@ -1,58 +1,51 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [[RFC] 2/5] Emulates PWM hardware using a high-resolution timer
- and a GPIO pin
-Date: Tue, 17 Nov 2009 10:00:46 -0600
-Message-ID: <4B02C8AE.8050600@billgatliff.com>
-References: <1255984366-26952-1-git-send-email-bgat@billgatliff.com> <1255984366-26952-2-git-send-email-bgat@billgatliff.com> <1255984366-26952-3-git-send-email-bgat@billgatliff.com> <200911170029.36669.david-b@pacbell.net>
+From: David Brownell <david-b@pacbell.net>
+Subject: Re: [PATCH 0/6] Generic PWM API implementation
+Date: Tue, 17 Nov 2009 09:53:17 -0700
+Message-ID: <200911170853.17994.david-b@pacbell.net>
+References: <cover.1224093510.git.bgat@billgatliff.com> <200911162347.02364.david-b@pacbell.net> <4B02C5CF.2050102@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200911170029.36669.david-b@pacbell.net>
+In-Reply-To: <4B02C5CF.2050102@billgatliff.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: David Brownell <david-b@pacbell.net>
-Cc: linux-embedded@vger.kernel.org
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Mike Frysinger <vapier.adi@gmail.com>, linux-embedded@vger.kernel.org
 
-David Brownell wrote:
-> Worth highlighting that this is necessarily a "low quality"
-> PWM ... in the sense that it's got lots of jitter because
-> of needing CPU intervention in IRQ context, so it's subject
-> to delays from both IRQs being blocked and from other timer
-> driven activities firing first.
->   
+On Tuesday 17 November 2009, Bill Gatliff wrote:
+> David Brownell wrote:
+> >
+> > It'd be purely for pinmux.
+> >   
+> 
+> Ugh.  That would be a tough interface to design.
 
-Very, very good point.
+True.  That's part of why I object to wanting to combine
+it with GPIOs ... or, combine everything else with GPIOs
+too (like PWMs).
 
-The jitter can be quite low (100's of usecs) on a 200 MHz ARM9 chip, in
-fact, but you'll eat your battery alive if it's a portable device.  And
-the jitter will also destroy your waveform at high or low duty cycles.
+But Grant talks about wanting such things, and if he can
+deliver it, more power to him.
+ 
 
-> There are lots of applications where that jitter is enough
-> to preclude using this kind of PWM.  I get the feeling that
-> some of the Linux folk seeing "this PWM thing" are not very
-> cognizant of such issues ... they've not had to use PWM to
-> do anything where the jitter matters.  (Not that I have;
-> but I know that such apps are a motivation for most of the
-> PWM hardware on microcontrollers.  A few PWMs plus some
-> sensors, hall effect or QEI or whatever; then you get a
-> motor controller.)
->   
+> It makes me think of 
+> an old-time telephone switchboard, with an undefined number of wires and
+> an equally-undefined number of plugs to insert them into.
+> 
+> "Good morning, Mabel!  Give me SCL1 on AA25 please!  No, I don't know
+> who SCL1 is nor where AA25 is.  I'll be waiting."
 
-For some definitions of "motor controller".  :)
-
-You might even be able to use a GPIO-as-PWM signal to feed an R/C servo
-positioner, but the jitter there will be very visual when it occurs.
-
-Dimming control of LEDs and incandescent lamps can be very forgiving of
-jitter, but I was thinking more along the lines of "make this LED blink
-faster or slower" when I came up with the implementation.
+"What?  You're saying that I've got to take three other connections
+at the same time?  And cut these other two calls?  No, I only wanted
+to make that one call ..."
 
 
-
-b.g.
-
--- 
-Bill Gatliff
-bgat@billgatliff.com
+> 
+> 
+> :)
+> 
+> 
+> 
 
