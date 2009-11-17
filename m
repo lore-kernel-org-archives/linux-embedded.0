@@ -1,51 +1,58 @@
-From: David Brownell <david-b@pacbell.net>
-Subject: Re: [PATCH 0/6] Generic PWM API implementation
-Date: Tue, 17 Nov 2009 09:53:17 -0700
-Message-ID: <200911170853.17994.david-b@pacbell.net>
-References: <cover.1224093510.git.bgat@billgatliff.com> <200911162347.02364.david-b@pacbell.net> <4B02C5CF.2050102@billgatliff.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: Re: [PATCH, RFC] panic-note: Annotation from user space for panics
+Date: Tue, 17 Nov 2009 18:53:04 +0100
+Message-ID: <4B02E300.8080409@gmail.com>
+References: <20091112021322.GA6166@dvomlehn-lnx2.corp.sa.net>	 <4AFC4D31.2000101@gmail.com>	 <20091112215649.GA28349@dvomlehn-lnx2.corp.sa.net>	 <20091113091031.3f6d4bba@marrow.netinsight.se>	 <1258112748.21596.1227.camel@localhost> <4AFE6A14.4010507@gmail.com>	 <1258447997.27437.76.camel@localhost>	 <2ea1731b0911170445x13225c19w797388d2211de2d9@mail.gmail.com> <1258463404.27437.103.camel@localhost>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4B02C5CF.2050102@billgatliff.com>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755226AbZKQR7J@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=UJhEG14AqTSL4iV7yWTVIfRKxfJOUYZp8biU1X3z26A=;
+        b=FUyvDB1C+D8qSUKnWiQHJX89+z2B6yRSLjxzMiuQO/CYPs8iLO+9Bz6TMPNNeZf1So
+         CVKbmLfCv5bBKpoE2RWKH7qvZUU+GMPD6VBNy7xm80YNrWHjoNPGlZkB22bJYxNTk+HH
+         tI3t+GK+wWoDouE2g8YEXKh0qYgMjPSNKlj88=
+In-Reply-To: <1258463404.27437.103.camel@localhost>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Mike Frysinger <vapier.adi@gmail.com>, linux-embedded@vger.kernel.org
+To: dedekind1@gmail.com
+Cc: Simon Kagstrom <simon.kagstrom@netinsight.net>, David VomLehn <dvomlehn@cisco.com>, linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, linux-kernel@vger.kernel.org, mpm@selenic.com, paul.gortmaker@windriver.com
 
-On Tuesday 17 November 2009, Bill Gatliff wrote:
-> David Brownell wrote:
-> >
-> > It'd be purely for pinmux.
-> >   
+Artem Bityutskiy wrote:
+> On Tue, 2009-11-17 at 13:45 +0100, Marco Stornelli wrote:
+>> 2009/11/17 Artem Bityutskiy <dedekind1@gmail.com>:
+>
+> We need to store this information of NAND flash. Implementing logs on
+> NAND flash is about handling bad blocks, choosing format of records, and
+> may be even handling wear-levelling. This is not that simple.
 > 
-> Ugh.  That would be a tough interface to design.
-
-True.  That's part of why I object to wanting to combine
-it with GPIOs ... or, combine everything else with GPIOs
-too (like PWMs).
-
-But Grant talks about wanting such things, and if he can
-deliver it, more power to him.
- 
-
-> It makes me think of 
-> an old-time telephone switchboard, with an undefined number of wires and
-> an equally-undefined number of plugs to insert them into.
-> 
-> "Good morning, Mabel!  Give me SCL1 on AA25 please!  No, I don't know
-> who SCL1 is nor where AA25 is.  I'll be waiting."
-
-"What?  You're saying that I've got to take three other connections
-at the same time?  And cut these other two calls?  No, I only wanted
-to make that one call ..."
-
-
-> 
-> 
-> :)
-> 
-> 
+> And then I have match oops to the userspace environment prints, using I
+> guess timestamps, which is also about complications in userspace.
 > 
 
+Indeed my suggestion was to use a persistent ram, not difficult to use.
+
+>>> This patch solves the problem gracefully, and I'd rather demand you to point what
+>>> is the technical problem with the patches.
+>>>
+>> Simply because I think that we should avoid to include in the kernel
+>> things we can do in a simply way at user space level.
+> 
+> If it is much easier to have in the kernel, then this argument does not
+> work, IMHO.
+> 
+>>  I think this
+>> patch is well done but it's one of the patches that are solutions "for
+>> embedded only", but it's only my opinion.
+> 
+> Also IMHO, but having embedded-only things is not bad at all.
+> 
+
+In the past other patches are not accepted in main line for this, maybe
+you'll be luckier.
+
+Marco
