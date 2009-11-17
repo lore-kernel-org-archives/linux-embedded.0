@@ -1,68 +1,56 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PATCH 0/6] Generic PWM API implementation
-Date: Tue, 17 Nov 2009 09:54:14 -0600
-Message-ID: <4B02C726.6070607@billgatliff.com>
-References: <cover.1224093510.git.bgat@billgatliff.com> <fa686aa40911131108o301efa1ew5c0ab31184aa7f75@mail.gmail.com> <200911170027.38664.david-b@pacbell.net>
+Subject: Re: [[RFC] 2/5] Emulates PWM hardware using a high-resolution timer
+ and a GPIO pin
+Date: Tue, 17 Nov 2009 10:00:46 -0600
+Message-ID: <4B02C8AE.8050600@billgatliff.com>
+References: <1255984366-26952-1-git-send-email-bgat@billgatliff.com> <1255984366-26952-2-git-send-email-bgat@billgatliff.com> <1255984366-26952-3-git-send-email-bgat@billgatliff.com> <200911170029.36669.david-b@pacbell.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200911170027.38664.david-b@pacbell.net>
+In-Reply-To: <200911170029.36669.david-b@pacbell.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: David Brownell <david-b@pacbell.net>
-Cc: Grant Likely <grant.likely@secretlab.ca>, linux-embedded@vger.kernel.org, Mike Frysinger <vapier.adi@gmail.com>
+Cc: linux-embedded@vger.kernel.org
 
 David Brownell wrote:
-> On Friday 13 November 2009, Grant Likely wrote:
->   
->> I'm concerned about the approach taken here.  As I understand it, the
->> PWM signals are very similar to GPIOs in that each PWM device controls
->> an external signal line, just like GPIO lines.
->>     
->
-> PWM is not GPIO, and doesn't fit into a GPIO framework.
->
-> Since *everything* boils down to one or more signal lines,
-> your argument leads directly to Linux having no native
-> hardware interface except GPIOs.  Not ... practical. ;)
+> Worth highlighting that this is necessarily a "low quality"
+> PWM ... in the sense that it's got lots of jitter because
+> of needing CPU intervention in IRQ context, so it's subject
+> to delays from both IRQs being blocked and from other timer
+> driven activities firing first.
 >   
 
-Wait.  Isn't that what Ubicom's chips do?  :)
+Very, very good point.
 
+The jitter can be quite low (100's of usecs) on a 200 MHz ARM9 chip, in
+fact, but you'll eat your battery alive if it's a portable device.  And
+the jitter will also destroy your waveform at high or low duty cycles.
 
-> If you want to combine PWM with something else ... timers would
-> be a better target.  They're both fundamentally about periodic
-> phenomena.  And quite a lot of timers support PWM output modes...
->
-> (A generic interface to hardware timers is lacking, too.)
+> There are lots of applications where that jitter is enough
+> to preclude using this kind of PWM.  I get the feeling that
+> some of the Linux folk seeing "this PWM thing" are not very
+> cognizant of such issues ... they've not had to use PWM to
+> do anything where the jitter matters.  (Not that I have;
+> but I know that such apps are a motivation for most of the
+> PWM hardware on microcontrollers.  A few PWMs plus some
+> sensors, hall effect or QEI or whatever; then you get a
+> motor controller.)
 >   
 
-True, and I have code (not yet published) to support a couple of
-timer/counter peripherals under the PWM interface.  So for that
-functionality at least, I don't think a more generic or standalone API
-is necessary.
+For some definitions of "motor controller".  :)
 
-I don't know how to define a generic interface for the counter a.k.a.
-"input capture" behavior of such devices, though.  Still an unsolved
-problem, but I don't think it will be a part of the PWM API.  It's a
-different metaphor.
+You might even be able to use a GPIO-as-PWM signal to feed an R/C servo
+positioner, but the jitter there will be very visual when it occurs.
+
+Dimming control of LEDs and incandescent lamps can be very forgiving of
+jitter, but I was thinking more along the lines of "make this LED blink
+faster or slower" when I came up with the implementation.
 
 
-> GPIOs, on the other hand, are packaged for manual bit
-> twiddling.  While it's possible to create low-speed
-> implementations of serial protocols using GPIOs (like
-> 2-wire/I2C, one-wire, and various SPI variants), those
-> are explicitly the high-overhead (and low performance)
-> substitutes, to be used only when native hardware isn't
-> available (or is broken etc).
->   
 
-And when using GPIO to generate I2C or SPI signals, you don't do it
-through the GPIO interface--- you do it through the I2C or SPI
-interface, and a driver behind that API talks to the GPIO API.... or to
-a different driver if you change your mind.  Same idea for the PWM API.
-
+b.g.
 
 -- 
 Bill Gatliff
