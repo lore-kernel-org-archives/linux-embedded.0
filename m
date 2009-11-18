@@ -1,53 +1,56 @@
-From: ebiederm@xmission.com (Eric W. Biederman)
-Subject: Re: [PATCH, RFC] panic-note: Annotation from user space for panics
-Date: Wed, 18 Nov 2009 10:16:28 -0800
-Message-ID: <m1iqd77l6r.fsf@fess.ebiederm.org>
-References: <1258463404.27437.103.camel@localhost>
-	<m1pr7hf93s.fsf@fess.ebiederm.org>
-	<20091117235627.GA13469@dvomlehn-lnx2.corp.sa.net>
-	<m1iqd8ptg9.fsf@fess.ebiederm.org> <1258505777.3081.4.camel@calx>
-	<m1vdh7byva.fsf@fess.ebiederm.org> <4B043467.8000708@am.sony.com>
+From: Aras Vaichas <arasv@magellan-technology.com>
+Subject: Re: [[RFC] 2/5] Emulates PWM hardware using a high-resolution timer 
+	and a GPIO pin
+Date: Thu, 19 Nov 2009 08:02:46 +1100
+Message-ID: <ed62800911181302j7e1f22bera62b8846f29707fb@mail.gmail.com>
+References: <1255984366-26952-1-git-send-email-bgat@billgatliff.com>
+	 <1255984366-26952-2-git-send-email-bgat@billgatliff.com>
+	 <1255984366-26952-3-git-send-email-bgat@billgatliff.com>
+	 <200911170029.36669.david-b@pacbell.net>
+	 <4B02C8AE.8050600@billgatliff.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4B043467.8000708@am.sony.com> (Tim Bird's message of "Wed\, 18 Nov 2009 09\:52\:39 -0800")
+In-Reply-To: <4B02C8AE.8050600@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Matt Mackall <mpm@selenic.com>, David VomLehn <dvomlehn@cisco.com>, "dedekind1@gmail.com" <dedekind1@gmail.com>, Marco Stornelli <marco.stornelli@gmail.com>, Simon Kagstrom <simon.kagstrom@netinsight.net>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "dwm2@infradead.org" <dwm2@infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "paul.gortmaker@windriver.com" <paul.gortmaker@windriver.com>
+Content-Type: text/plain; charset="windows-1252"
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: David Brownell <david-b@pacbell.net>, linux-embedded@vger.kernel.org
 
-Tim Bird <tim.bird@am.sony.com> writes:
+2009/11/18 Bill Gatliff <bgat@billgatliff.com>
+> The jitter can be quite low (100's of usecs) on a 200 MHz ARM9 chip, =
+in
+> fact, but you'll eat your battery alive if it's a portable device. =A0=
+And
+> the jitter will also destroy your waveform at high or low duty cycles=
+=2E
 
-> Eric W. Biederman wrote:
->> Matt Mackall <mpm@selenic.com> writes:
->> 
->>> As much as I like kexec, it loses on memory footprint by about 100x.
->>> It's not appropriate for all use cases, especially things like
->>> consumer-grade wireless access points and phones.
->> 
->> In general I agree.  The cost of a second kernel and initrd can be
->> prohibitive in the smallest systems, and if you do a crash capture
->> with using a standalone app that is reinventing the wheel.
->> 
->> That said.  I can happily run kdump with only 16M-20M reserved.
->> So on many systems the cost is affordable.
->
-> Understood.  On some of my systems, the memory budget for the
-> entire system is 10M.  On most systems I work with, it is a
-> struggle to reserve even 64K for this feature.
+I agree with both of you, and I have physically tested bit-banged PWM
+with an LED, a servo and a speaker. In all cases the jitter is
+immediately obvious. The LED flickers noticeably (it is a very good
+candle effect and system load indicator), the speaker crackles with
+the white(ish) noise of the jitter, and the servo becomes unuseable.
 
-crash_kexec is really a glorified jump.  It is possible to do a lot in
-64K with a standalone application.  If reliable capture of kernel
-crashes is desirable to an embedded NAND device I expect a semi-general
-purpose dedicated application for capturing at least dmesg from the
-crashed kernel and write it to a file on a NAND filesystem could be
-worth someones time.
+It's pretty easy to do some math to prove it. Assume 100usec jitter.
 
-On general purpose hardware we use a kernel and an initrd simply to
-reduce the development work of supporting everything and the kitchen
-sink.  My impression is that embedded systems can afford a little more
-setup time, and a custom compilation, and that the hardware you would like
-to store things too is much more common.
+Say you want to run a speaker at 1kHz. You need a 50% duty cycle PWM
+running at a 1ms period. 100usec is a 10% error on 1ms. Therefore the
+frequency will shift by 10% or 100Hz. Frequency resolution of the
+human ear is 0.36 Hz within the octave of 1,000=962,000 Hz so you will
+notice a 100Hz shift. What you end up hearing is 1kHz + noise.  Look
+at it musically, C6 is 1046Hz and D6 is 1174Hz. So a jump of about
+130Hz is a full 2 semitones! Totally useless for playing any sort of
+music or pleasant sounding warning tones.
 
-Eric
+Servo motors require a 1ms to 2ms pulse to hold a position between
+about 0 and 180 degrees. A jitter of 100usec is physically equal to an
+error of 100usec/1ms =3D 10% on the servo output arm which is equal to
+10% x 180 degrees =3D 18degrees of positional error! It is alarming to
+watch what happens as the CPU is loaded.
+
+=46or non-commercial products these artifacts might be acceptable, but =
+I
+wouldn't use it for anything that a customer will comment on.
+
+Aras
