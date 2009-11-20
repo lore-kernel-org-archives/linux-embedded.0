@@ -1,60 +1,51 @@
-From: =?UTF-8?Q?Am=C3=A9rico_Wang?= <xiyou.wangcong@gmail.com>
-Subject: Re: How to move two valuables to x86 CPU register ebx, ecx by using 
-	AT&A inline asm.
-Date: Fri, 20 Nov 2009 14:48:28 +0800
-Message-ID: <2375c9f90911192248h368fa79di1761e7b4c479b25b@mail.gmail.com>
+From: Jiri Slaby <jirislaby@gmail.com>
+Subject: Re: How to move two valuables to x86 CPU register ebx, ecx by using
+ AT&A 	inline asm.
+Date: Fri, 20 Nov 2009 09:45:06 +0100
+Message-ID: <4B065712.4050202@gmail.com>
 References: <cb9ecdfa0911190150w4edbacdfp24a7069c618193f4@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753362AbZKTIpH@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=xCFdpwR8UDU0OTqk4Diz9CAcyq7ELntau2+K7Tfeey0=;
-        b=JNyFO5WAsHbSAHMsmndO6ZER6uFCR2Yxq4oZ3EhzAYKTgleiVjuY4wSRNqWOVtIgsn
-         lZMPRR9CNW2uZAPgQsiHfgyxzXeuHZiCEvWDyRjXbco28EN6/2SFO58OHXv+2gHFjp2C
-         Am/azV8QEMQbMeognU/4gYGQwztijW6wCp3+c=
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :x-enigmail-version:content-type:content-transfer-encoding;
+        bh=Vrg71SjtqtFaiPS8DutUaNAWUq6C9Le4ugpuOoRudVM=;
+        b=CtPbQzkk50iQZTdkqqpp3fr57Amt1IGl/bamD4MFwzKt1D1iUnGXBwt4/ScOKasFu5
+         ORp1LeCfAAhznSOm5VTQ31yze9NAQenYtCOnJgz+SX5dd77LJlV2RzZRn5VDF7xOxwyC
+         lh6SdkNyojs0mb4d2n8R2OKtsktfYsSvvquDc=
 In-Reply-To: <cb9ecdfa0911190150w4edbacdfp24a7069c618193f4@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 To: Johnny Hung <johnny.hacking@gmail.com>
 Cc: kernelnewbies@nl.linux.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Thu, Nov 19, 2009 at 5:50 PM, Johnny Hung <johnny.hacking@gmail.com>=
- wrote:
+On 11/19/2009 10:50 AM, Johnny Hung wrote:
 > Hi All:
-> =C2=A0 =C2=A0I want to move two local valuables to x86 arch CPU ebx, =
-ecx
+>     I want to move two local valuables to x86 arch CPU ebx, ecx
 > register and do outb cpu instruction by using AT&A inline asm in
-> kernel driver. =C2=A0The following code was I wrote but gcc report sy=
-ntax
+> kernel driver.  The following code was I wrote but gcc report syntax
 > error:
-
-You must mean AT&T.
-
-> =3D=3D
-> =C2=A0 =C2=A0unsigned int val =3D 10;
-> =C2=A0 =C2=A0unsigned int tmp =3D 5;
-> =C2=A0 =C2=A0....
-> =C2=A0 =C2=A0__asm__ volatile ("movl %0, %%ebx"
-
-You need to put "\n\t" in the end of each asm statement.
-
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"movl %1, %%ecx"
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"outb $0x27, $0xb2"
-
-
-This is wrong, 'outb' instruction cann't accept both of
-its operands as constants, IIRC.
-
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0:
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0:"r"(val), "r"(tmp)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0:"%ebx", "%ecx"
-> =C2=A0 );
->
+> ==
+>     unsigned int val = 10;
+>     unsigned int tmp = 5;
+>     ....
+>     __asm__ volatile ("movl %0, %%ebx"
+>           "movl %1, %%ecx"
+>           "outb $0x27, $0xb2"
+>           :
+>           :"r"(val), "r"(tmp)
+>           :"%ebx", "%ecx"
+>    );
+> 
 > Does anyone can point me out. Any reply is appreciated.
 
-Regards.
+Why not just:
+("outb $0x27, %%al" : : "a" (0xb2), "b"(val), "c" (tmp));
+-- 
+js
+Faculty of Informatics, Masaryk University
+Suse Labs, Novell
