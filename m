@@ -1,73 +1,97 @@
 From: Grant Likely <grant.likely@secretlab.ca>
 Subject: Re: [PATCH 0/6] Generic PWM API implementation
-Date: Fri, 20 Nov 2009 15:21:31 -0700
-Message-ID: <fa686aa40911201421k67d1de27u2c6dbe337989696b@mail.gmail.com>
+Date: Fri, 20 Nov 2009 15:49:32 -0700
+Message-ID: <fa686aa40911201449we09fe69i7c7601e705b9e39e@mail.gmail.com>
 References: <cover.1224093510.git.bgat@billgatliff.com> <fa686aa40911131108o301efa1ew5c0ab31184aa7f75@mail.gmail.com> 
-	<200911170027.38664.david-b@pacbell.net>
+	<4B02C3A6.5030000@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <200911170027.38664.david-b@pacbell.net>
+In-Reply-To: <4B02C3A6.5030000@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: David Brownell <david-b@pacbell.net>
-Cc: Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org, Mike Frysinger <vapier.adi@gmail.com>
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: linux-embedded@vger.kernel.org, Mike Frysinger <vapier.adi@gmail.com>, David Brownell <dbrownell@users.sourceforge.net>
 
-On Tue, Nov 17, 2009 at 1:27 AM, David Brownell <david-b@pacbell.net> w=
-rote:
-> On Friday 13 November 2009, Grant Likely wrote:
+On Tue, Nov 17, 2009 at 8:39 AM, Bill Gatliff <bgat@billgatliff.com> wr=
+ote:
+> Grant Likely wrote:
+>> Hi Bill
+>>
+>> On Wed, Oct 15, 2008 at 11:14 AM, Bill Gatliff <bgat@billgatliff.com=
+> wrote:
+>>
+>>> This series implements a Generic PWM Device API, including referenc=
+e
+>>> implementations for the Atmel PWMC device, an LED device, and an LE=
+D
+>>> trigger. =A0It is based on linux-2.6.27.
+>>>
+>> [...]
+>>
+>>> The implementation of the Generic PWM Device API is structurally
+>>> similar to the generic GPIO API, except that the PWM code uses
+>>> platform bus_id strings instead of integers to identify target
+>>> deviices. =A0A configuration structure is also provided, both to
+>>> facilitate atomic hardware state changes and so that the API can be
+>>> extended in a source-code-compatible way to accomodate devices with
+>>> features not anticipated by the current code.
+>>>
+>>
+>> Hey Bill,
+>>
 >> I'm concerned about the approach taken here. =A0As I understand it, =
 the
 >> PWM signals are very similar to GPIOs in that each PWM device contro=
 ls
->> an external signal line, just like GPIO lines.
->
-> PWM is not GPIO, and doesn't fit into a GPIO framework.
->
-> Since *everything* boils down to one or more signal lines,
-> your argument leads directly to Linux having no native
-> hardware interface except GPIOs. =A0Not ... practical. ;)
-
-I think you've missed my point and taken it to an illogical extreme to
-counter it.  I agree that PWMs are not GPIOs and visa versa.  However,
-*some* devices are both GPIOs and PWMs.  Also what is needed to manage
-GPIO and PWM pins is pretty much identical.
-
->> The difference being
+>> an external signal line, just like GPIO lines. =A0The difference bei=
+ng
 >> that PWMs cannot do input, and has additional capabilities (can be
->> programmed with a signal; not just on/off/tristate)
+>> programmed with a signal; not just on/off/tristate). =A0Actually, ma=
+ny
+>> GPIOs have these properties too. =A0I've got a part with output-only
+>> gpios, and gpio devices that also have a PWM.
 >
-> If you want to combine PWM with something else ... timers would
-> be a better target. =A0They're both fundamentally about periodic
-> phenomena. =A0And quite a lot of timers support PWM output modes...
+> It's true that PWM signals can be emitted via GPIO pins, and in fact =
+the
+> API code I submitted uses the GPIO API combined with an hrtimer to
+> generate a low-speed PWM output.
 >
-> (A generic interface to hardware timers is lacking, too.)
+> It's also true that things like LEDs might want to be driven by PWM
+> signals, and indeed LEDs can also be driven by GPIO pins.
 >
+> Finally, it's accurate to say that a lot of microcontrollers multiple=
+x
+> GPIO functions onto pins that also provide PWM functionality.
 >
->> What is the reason for bringing in an entirely new framework instead
->> of extending the GPIO API or gpiolib? =A0I'm not too excited about
->> having two entirely different frameworks for what basically boils do=
-wn
->> to "numbered signal pins".
->
-> You seem to mis-understand what PWM is all about, then.
-> The whole point of a PWM is to set up a periodic activity
-> that will run without CPU intervention.
+> But in my opinion, none of the above means that the PWM API and GPIO =
+API
+> should be coupled at the interface abstraction. =A0All it means is th=
+at in
+> some cases, one implementation might be able to "stand in" as an
+> embodiment of the other's interface. =A0And we all agree on that for =
+PWM
+> and GPIO.
 
-I understand that.
+I have no problem with the PWM API.  I think it describes most of the
+PWM *usage* requirements well, and I agree that GPIO devices can never
+implement the PWM API.
 
-> GPIOs, on the other hand, are packaged for manual bit
-> twiddling. =A0While it's possible to create low-speed
-> implementations of serial protocols using GPIOs (like
-> 2-wire/I2C, one-wire, and various SPI variants), those
-> are explicitly the high-overhead (and low performance)
-> substitutes, to be used only when native hardware isn't
-> available (or is broken etc).
+> Given a PWM-capable chip that you control over an I2C or SPI interfac=
+e,
+> I don't think anyone would argue that such chips should be viewed as =
+an
+> extension of the SPI or I2C APIs just because the chips use those
+> communications protocols.
 
-But that *isn't* the primary purpose of the GPIO subsystem.  All that
-stuff is layered on top of the GPIO pin management code and doesn't
-really play into this debate.
+Nor would I.
+
+> I think it's a similar argument for PWM and GPIO.
+
+I don't think that's true, but I'm approaching it from the viewpoint
+of managing pins; not the usage API.  ie. the difference between
+gpiolib (management) and the gpio api (usage).
 
 g.
 
