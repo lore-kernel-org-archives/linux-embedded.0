@@ -1,70 +1,72 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: How to move two valuables to x86 CPU register ebx, ecx by
- using AT&A inline asm.
-Date: Fri, 20 Nov 2009 10:43:40 +0000
-Message-ID: <1258713820.10091.487.camel@macbook.infradead.org>
-References: <cb9ecdfa0911190150w4edbacdfp24a7069c618193f4@mail.gmail.com>
-	 <4B05187F.6030809@einfochips.com>
-	 <cb9ecdfa0911190219r11fa165v331a590889edcfd0@mail.gmail.com>
-	 <4B051C40.5040003@einfochips.com>
-	 <cb9ecdfa0911190311j6cc50c34hfc7e398cbf0a1072@mail.gmail.com>
-	 <1258697050.16509.36.camel@sotona>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 0/6] Generic PWM API implementation
+Date: Fri, 20 Nov 2009 15:14:36 -0700
+Message-ID: <fa686aa40911201414u6a9023e6y9addc97635d1c88@mail.gmail.com>
+References: <cover.1224093510.git.bgat@billgatliff.com> <8bd0f97a0911132022pf743558lfef1402125d4b60b@mail.gmail.com> 
+	<fa686aa40911132355t3b79fe46m90005ecba453dcc1@mail.gmail.com> 
+	<200911162347.02364.david-b@pacbell.net>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1258697050.16509.36.camel@sotona>
+In-Reply-To: <200911162347.02364.david-b@pacbell.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: stas <stas@lvk.cs.msu.su>
-Cc: Johnny Hung <johnny.hacking@gmail.com>, Viral Mehta <viral.mehta@einfochips.com>, kernelnewbies@nl.linux.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: David Brownell <david-b@pacbell.net>
+Cc: Mike Frysinger <vapier.adi@gmail.com>, Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
 
-On Fri, 2009-11-20 at 09:04 +0300, stas wrote:
-> It seems to me that this example code is not free of errors. After the
-> third ":" we should list registers "ebx" and "ecx" to let gcc know
-> they could change in asm section.
-> 
-> __asm__ volatile (
->         "movl (%0), %%ebx\n\t"
->         "movl (%1), %%ecx\n\t"
->         "outl %%ebx, $0xb2\n\t"
->         "outl %%ecx, $0xb6\n\t"
-> 
-> 
->         :
->         : "r"(var_a), "r"(var_b)
->         : "ebx", "ecx" 
+On Tue, Nov 17, 2009 at 12:47 AM, David Brownell <david-b@pacbell.net> =
+wrote:
+> On Friday 13 November 2009, Grant Likely wrote:
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 Right now, I don't
+>> see a fundamental difference is between GPIO and PWM pin management.
+>> It is essentially the same problem, and in many cases PWM pins can
+>> also be used as GPIOs.
+>
+> Pin management for a given SoC is going to be relevant to setting
+> every signal, no matter what peripheral it's associated with. =A0The
+> same argument applies to an MDIO bus, I2C, 1-wire, and more.
+>
+> And I don't buy it in those cases either.
+>
+>
+>> I think the question should be flipped around;
+>> rather than asking for a compelling reason for them to be merged; I
+>> want to know the compelling reason to keep them separate. =A0What is=
+ the
+>> fundamental difference that keeps them apart?
+>
+> PWM is about periodic signal generation without CPU intervention.
+>
+> GPIO is about explicit CPU management/interrogation of single
+> signals.
 
-That's not good enough. Because the compiler could choose to use %ebx
-for passing in 'var_b', and then it would get clobbered before you move
-it to %ecx in the second instruction.
+Can also be viewed from the perspective: It is about putting a pin
+into a particular state until I explicitly tell you to change it.
+Whether that state be a GPIO input, a GPIO high, a GPIO low, or a PWM
+periodic.
 
-You'd need to make it an earlyclobber too.
+>> What I would like to see is the PWM functions added to the GPIO API.
+>
+> No. =A0If you want a pin mux interface, come up with one of them.
+>
+> It shouldn't be a PWM interface, a GPIO interface, an I2C interface,
+> a SPI interface, an MDIO interface, a 1-wire interface ... or any of
+> dozens of other things. =A0It'd be purely for pinmux.
 
-> 
-> The SAME code:
-> __asm__ volatile (
->         "outl %%ebx, $0xb2\n\t"
->         "outl %%ecx, $0xb6\n\t"
->         :
->         : "b"(var_a), "c"(var_b)
-> );
+I'm not talking about a pin mux interface.  I'm talking about discrete
+controllable entities.  I agree that pin muxing is an entirely
+different scope.  I'm also not talking about layers on top of the
+GPIO.  I'm talking about the management code to obtain a reference to
+the pin your interested in.  There is a non-trivial amount of code
+associated with getting a reference to a pin and the behaviour
+required is largely identical between GPIO and PWM.  I don't want to
+see a new subsystem that largely does the exact same job, but is
+different in subtle ways.  I think it should either be a unified
+PWM/GPIO pin management subsystem, or a common library used by each.
 
-That's the better approach, although yours didn't do what Johnny's
-original seemed to. Jiri Slaby posted something which looks correct.
+g.
 
-> /* taken from linux-2.6./include/asm-generic/io.h
-> If you want to use it in user-space just replace u8 with unsigned char,
-> u16 with unsigned short. In kernel space just insert #include directive.
-> */
-> static inline void outb(u8 v, u16 port)
-
-And that's just an entirely gratuitous use of our kernel nonsense-types.
-Just use the proper C types uint16_t and uint8_t instead.
-
-Or just 'unsigned char' and 'unsigned short', for that matter -- I
-believe Linux would blow up horribly if those types ever changed from
-8-bit and 16-bit respectively.
-
--- 
-dwmw2
+--=20
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
