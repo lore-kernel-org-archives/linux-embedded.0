@@ -1,50 +1,48 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+From: Albrecht =?iso-8859-1?b?RHJl3w==?= <albrecht.dress@arcor.de>
 Subject: Re: [PATCH 0/6] Generic PWM API implementation
-Date: Mon, 23 Nov 2009 18:09:20 +0000
-Message-ID: <20091123180920.GA1404@rakim.wolfsonmicro.main>
-References: <cover.1224093510.git.bgat@billgatliff.com>
- <fa686aa40911131108o301efa1ew5c0ab31184aa7f75@mail.gmail.com>
- <200911170027.38664.david-b@pacbell.net>
- <fa686aa40911201421k67d1de27u2c6dbe337989696b@mail.gmail.com>
- <20091123152943.GC3987@sirena.org.uk>
- <fa686aa40911230944o197c732bo2d2e5f0aacd936b7@mail.gmail.com>
+Date: Mon, 23 Nov 2009 21:51:26 +0100
+Message-ID: <1259009486.2170.4@antares>
+References: <fa686aa40911230939q3c65c681jee8c4098331f70ee@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/signed; protocol="application/pgp-signature";
+	micalg=PGP-SHA1; boundary="=-6J6tOFqakI3t3y4bIlJU"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <fa686aa40911230944o197c732bo2d2e5f0aacd936b7@mail.gmail.com>
+In-Reply-To: <fa686aa40911230939q3c65c681jee8c4098331f70ee@mail.gmail.com>
+	(from grant.likely@secretlab.ca on Mon Nov 23 18:39:22 2009)
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: David Brownell <david-b@pacbell.net>, Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org, Mike Frysinger <vapier.adi@gmail.com>
+To: linux-embedded@vger.kernel.org
 
-On Mon, Nov 23, 2009 at 10:44:25AM -0700, Grant Likely wrote:
+--=-6J6tOFqakI3t3y4bIlJU
+Content-Type: text/plain; charset=us-ascii; DelSp=Yes; Format=Flowed
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> Right, pin-mux is a different problem.  But there are also devices
-> that implement both PWM and GPIO functionality in the same IP block.
+Am 23.11.09 18:39 schrieb(en) Grant Likely:
+> There is no overlap here (except for the degenerate case of using a PWM a=
+s an output only GPIO... which is useful.  Board designers do crazy things)=
+.
 
-That's not the general case, though - most of the SoCs seem to have PWM
-as a separate IP block.  In the general case PWM and GPIO have nothing
-to do with each other.  
+But there may be cases where a device pin is used as GPIO *and* as pwm outp=
+ut.  Think of a relay output driver which may be used a state GPIO to indic=
+ate that the device is up, or as a pulsed heartbeat output (some safety sch=
+emes require that) for the =20
+same purpose, selected by a run-time (not device tree!) config option.
 
-> I think pin muxing, and pin controller drivers are different problem
-> domains and should be handled separately.
+I actually do exactly this with one of the Freescale 5200's pins, and would=
+ therefore also appreciate a "unified" approach.
 
-...
+Cheers, Albrecht.
 
-> Sorry. when I said pin management I meant how Linux keeps track of pin
-> controllers.  Not pin mux.  I should use different terminology perhaps
-> to reduce confusion.
+--=-6J6tOFqakI3t3y4bIlJU
+Content-Type: application/pgp-signature
 
-I have to confess I'm a bit lost as to what you mean by a "pin
-controller" as opposed to "pin mux" interface.  For a substantial
-proportion of ARMs they're going to be one and the same.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.12 (GNU/Linux)
 
-Judging from some of the other messages in the thread I suspect you're
-thinking of a much closer mapping between PWM and GPIO pins - many SoCs
-do have distinct PWM controllers that aren't terribly tied to a GPIO
-pin.  For them the whole concept of requesting a "pin" or having the PWM
-controller be tied to a particular pin is going to be at best confusing,
-you really do want to request the PWM controller itself and let the pin
-mux setup figure out where that emerges from the SoC.
+iD8DBQBLCvXOn/9unNAn/9ERAhEpAKCHLmjUXjQAxFlNhG6gO0yjWyZecgCfXM6C
+eCk1hSa1XX0U+VYrjBFezU0=
+=G+KO
+-----END PGP SIGNATURE-----
+
+--=-6J6tOFqakI3t3y4bIlJU--
