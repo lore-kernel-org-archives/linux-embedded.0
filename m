@@ -1,56 +1,75 @@
 From: David Brownell <david-b@pacbell.net>
 Subject: Re: [PATCH 0/6] Generic PWM API implementation
-Date: Sat, 28 Nov 2009 13:38:06 -0800
-Message-ID: <200911281338.06907.david-b@pacbell.net>
+Date: Sat, 28 Nov 2009 13:59:35 -0800
+Message-ID: <200911281359.35565.david-b@pacbell.net>
 References: <cover.1224093510.git.bgat@billgatliff.com> <4B0A9832.20908@billgatliff.com> <fa686aa40911230939q3c65c681jee8c4098331f70ee@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <fa686aa40911230939q3c65c681jee8c4098331f70ee@mail.gmail.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="iso-8859-1"
 To: Grant Likely <grant.likely@secretlab.ca>
 Cc: Bill Gatliff <bgat@billgatliff.com>, Mike Frysinger <vapier.adi@gmail.com>, linux-embedded@vger.kernel.org
 
-On Monday 23 November 2009, Grant Likely wrote: 
-> *however* I do agree that it is the responsibility of platform code to
-> set up chip-internal pin muxing and routing.
+On Monday 23 November 2009, Grant Likely wrote:
+> 			I take issue
+> with all the common code behind the API to make it work and to allow
+> GPIOs or PWMs to be registered at runtime. =A0The overlap is the code
+> and behaviour used to register pins and to obtain a reference to a
+> pin.
+>=20
+> On the PWM side; it's the code backing pwm_register().
+> pwm_unregister(), pwm_request(), pwm_free(), and the sysfs hooks.
+>=20
+> For GPIO; it's gpiochip_add(), gpiochip_remove(), gpio_request(),
+> gpio_free(), the sysfs hooks, and the device tree bindings.
+>=20
+> They perform exactly the same task. =A0The difference is that PWM
+> devices implement the PWM API and GPIO devices implement the GPIO API=
+;
+> but the behaviour needed to manage them is identical. =A0I don't like
+> the fact that it will be implemented twice with subtle differences
+> between them.
 
-Fo over 95% of systems, I'd agree -- given that "platform" code
-includes the arch/.../mach-X/board-Y.c files.  It's not realistic
-to expect boot loaders to always handle that stuff.  If for no
-other reason than the way they're produced:  get something that
-will boot <OS> and call it done.  There will be nuances that need
-to be corrected later.
-
-
-> Actually, further than 
-> that, I think it is actually firmware's responsibility to set up chip
-> internal pin muxing because it leads to more common platform code in
-> the kernel (less board specific fixups), but the kernel can fix it up
-> in a pinch.
-
-That something-less-than-5% remaining includes a lot of developer
-boards, where there are multiple viable configurations.  The OS
-needs to know which config it's going into at boot time.
-
-And there's even a crazed subset of that 5% which wants to do
-runtime reconfiguration.  Those folk do not accept static board
-configs, whether done by a bootloader or anything else.
-
-Some of that subset isn't entirely crazed.  I was reading a
-chip errata document not long ago, which pointed out an issue
-I've seen before:  suspend/resume cycles needed to reconfigure
-things dynamically, to prevent leakage.  That's board-specific
-and non-static.
+Most of that stuff sits inside sysfs.  What's actually sharable?
 
 
->  But I'm not arguing about the pin (hardware) setup code.
+> The argument has been made that the split is appropriate because the
+> use case between GPIO and PWM is considerably different, and to a
+> point I agree. =A0The PWM use case definitely requires a different AP=
+I.
+> However, the argument also makes the assumption that what is a GPIO
+> and what is a PWM can easily be pinned down. =A0For example, I've got
+> output only GPIOs, input only GPIOs, and a device that implements bot=
+h
+> PWM and GPIO behaviour (not pin muxing).
 
-That's good, since I don't think there's a Grand Scheme that
-can be agreed to in that space, either for boot time setup
-or runtime reconfiguration.  The hardware varies too much.
+In object oriented programming there's this thing called an "interface"=
+,
+and its application here is:  you write a driver implementing both
+the "gpio" and "pwm" interfaces.  Someone wanting a given behavior
+goes through that interface.
 
-- Dave
+
+> If a hard distinction is=20
+> made now to manage GPIO and PWM pins separately, what then do we do
+> with other similar-yet-different pin controllers? =A0What about a
+> multi-voltage output GPIO pin? =A0Or a Frequency generator pin? =A0Is=
+ it
+> appropriate to create a new subsystem for managing each one?
+
+None of those are particularly common.  The Linux approach is to come
+up with interfaces as needed ... then generalize once there's enough
+data, if indeed there is enough.  Just because you *can* come up with
+hardware doesn't mean it's widespread enough to need a shared API.
+
+
+> What an API can do is capture the common use cases, but it can never
+> capture the full range of behaviour implemented by a particular
+> device.
+
+Right, so you need to become accustomed to the notion that there
+can be platform-specific capabilities.  Kitchen-sink APIs are bad.
