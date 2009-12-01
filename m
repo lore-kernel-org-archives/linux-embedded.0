@@ -1,36 +1,54 @@
-From: David Brownell <david-b@pacbell.net>
-Subject: Re: [PATCH 0/6] Generic PWM API implementation
-Date: Sat, 28 Nov 2009 13:54:11 -0800
-Message-ID: <200911281354.11653.david-b@pacbell.net>
-References: <cover.1224093510.git.bgat@billgatliff.com> <fa686aa40911230944o197c732bo2d2e5f0aacd936b7@mail.gmail.com> <20091123180920.GA1404@rakim.wolfsonmicro.main>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: [ANNOUNCE] CELF open project proposal
+Date: Tue, 1 Dec 2009 15:47:10 -0800
+Message-ID: <4B15AAFE.4030705@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20091123180920.GA1404@rakim.wolfsonmicro.main>
-Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org, Mike Frysinger <vapier.adi@gmail.com>
+To: CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Monday 23 November 2009, Mark Brown wrote:
-> Judging from some of the other messages in the thread I suspect you're
-> thinking of a much closer mapping between PWM and GPIO pins - many SoCs
-> do have distinct PWM controllers that aren't terribly tied to a GPIO
-> pin. 
+Hey embedded Linux developers...
 
-Sometimes they can be coupled to one of several pins ... possibly
-even outputting to several at the same time.
+Are you itching to see some feature developed for embedded
+Linux?  Would you like to suggest that CELF spend their
+money on some specific project?  Would you like CELF to
+sponsor a project you are working on?
 
+Well, now is your chance!  This is the official announcement
+of a new plan by CELF, called the "Open Project Proposal".
 
-> For them the whole concept of requesting a "pin" or having the PWM 
-> controller be tied to a particular pin is going to be at best confusing,
-> you really do want to request the PWM controller itself and let the pin
-> mux setup figure out where that emerges from the SoC.
+The CELF Open Project Proposal is a process whereby members
+of the public submit to the CE Linux Forum ideas and
+proposals for projects that they think should be worked on
+to enhance embedded Linux.  The plan is to solicit ideas for
+our 2010 contract work projects. Areas of work can
+include the Linux kernel, graphics systems, toolchain work,
+or anything else that will help enhance Linux for use in
+embedded systems.
 
-Nicely put.  At some level one ends with something like "pwm.2 channel 3"
-getting allocated, and does not care about pins except as more low-level
-artifacts to be ignored outside of board setup code.
+Each year, CELF spends money on contract work to improve
+Linux for use in embedded systems. Some of the projects we
+have sponsored in the past include Linux-tiny, DirectFB
+enhancements, smem, and Squashfs mainlining.
 
-- Dave
+Usually, our process involves querying forum members about
+their desires and building a project list from that. This
+year, we are opening up the process and asking for your ideas
+and proposals as well.
+
+For details, see:
+http://elinux.org/CELF_Open_Project_Proposal_2010
+
+Proposal are welcome immediately...
+
+Thanks,
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Linux Forum
+Senior Staff Engineer, Sony Corporation of America
+=============================
