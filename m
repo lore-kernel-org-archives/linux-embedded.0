@@ -1,42 +1,39 @@
-From: Tim Bird <tim.bird@am.sony.com>
+From: Mike Frysinger <vapier.adi@gmail.com>
 Subject: Re: [ANNOUNCE] CELF open project proposal
-Date: Tue, 1 Dec 2009 17:05:36 -0800
-Message-ID: <4B15BD60.1070502@am.sony.com>
-References: <4B15AAFE.4030705@am.sony.com> <8bd0f97a0912011644g169f7309ubf893902698eb810@mail.gmail.com>
+Date: Wed, 2 Dec 2009 16:36:24 -0500
+Message-ID: <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com>
+References: <4B15AAFE.4030705@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <8bd0f97a0912011644g169f7309ubf893902698eb810@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :from:date:message-id:subject:to:cc:content-type
+         :content-transfer-encoding;
+        bh=PqhtxYSh8hnr+O8aHWfxihGpZB/l9pMz5d7OtAjLu+c=;
+        b=KP/6+/wEvasjGQEZ/x9PTKJCquVH2k1Zb5uVnaS2saDkaSxyqyzQJZjKxaZb0M/bvY
+         C559rUKEKR9O0o9KTVQ4r3/V5a4lzrEmj54RRx8bN2Zm9vW0wlOYuxzKnb37b9cyteed
+         16K1/joLrmDeG0P/I4NJgaiD7Y3YVMZplGrdU=
+In-Reply-To: <4B15AAFE.4030705@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: "Bird, Tim" <Timothy.Bird@am.sony.com>, CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Mike Frysinger wrote:
-> maybe i missed it, but there doesnt seem to be too much emphasis on
-> working with the respective projects and getting merged.  that seems
-> like one of the most important aspects of doing any enhancement work
-> as anything not merged means it'll quickly be left behind and largely
-> go to waste.
-I agree.
+On Tue, Dec 1, 2009 at 18:47, Tim Birdwrote:
+> Hey embedded Linux developers...
+>
+> Are you itching to see some feature developed for embedded
+> Linux? =C2=A0Would you like to suggest that CELF spend their
+> money on some specific project? =C2=A0Would you like CELF to
+> sponsor a project you are working on?
+>
+> Well, now is your chance! =C2=A0This is the official announcement
+> of a new plan by CELF, called the "Open Project Proposal".
 
-Many of our contracts have a financial incentive built in to
-get "mainlined". Some of our projects' sole objective is to
-mainline already existing stuff (like Linux-tiny and SquashFS).
-
-If anyone has a feature that already exists, but that they
-think should be merged with the relevant upstream project,
-that's a good candidate for a proposal.
-
-One obvious project, which I'm waiting to see if someone else
-submits, is to pay someone to mainline some of the outstanding
-Android patches into the Linux kernel.
- -- Tim
-
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+i know your e-mail intro states "embedded Linux" as does the wiki, but
+i'm gonna take a stab anyways.  does this apply to Linux only and not
+open source boot loaders (like U-Boot) ?
+-mike
