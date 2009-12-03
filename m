@@ -1,32 +1,40 @@
-From: David Woodhouse <dwmw2@infradead.org>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
 Subject: Re: [ANNOUNCE] CELF open project proposal
-Date: Thu, 03 Dec 2009 14:49:14 +0000
-Message-ID: <1259851754.16809.23.camel@macbook.infradead.org>
-References: <4B15AAFE.4030705@am.sony.com>
-	 <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com>
-	 <4B16E03D.3000202@am.sony.com>
-	 <ed62800912021827s6f25f063ke836fe1482cec028@mail.gmail.com>
-	 <alpine.LFD.2.00.0912030713300.10116@macbook.infradead.org>
-	 <20091203144232.GN14279@hansolo.jdub.homelinux.org>
+Date: Thu, 3 Dec 2009 21:51:40 +0100
+Message-ID: <20091203205140.GI22533@pengutronix.de>
+References: <4B15AAFE.4030705@am.sony.com> <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com> <4B16E03D.3000202@am.sony.com> <1259791190.3744.751.camel@macbook.infradead.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20091203144232.GN14279@hansolo.jdub.homelinux.org>
+Content-Disposition: inline
+In-Reply-To: <1259791190.3744.751.camel@macbook.infradead.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Josh Boyer <jwboyer@gmail.com>
-Cc: Aras Vaichas <arasv@magellan-technology.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: David Woodhouse <dwmw2@infradead.org>
+Cc: Tim Bird <tim.bird@am.sony.com>, Mike Frysinger <vapier.adi@gmail.com>, "Bird, Tim" <Timothy.Bird@am.sony.com>, CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Thu, 2009-12-03 at 09:42 -0500, Josh Boyer wrote:
-> > Is it heretical to suggest a BSD licence for that too, to encourage  
-> > adoption into other bootloaders? Or at least LGPL or the "GPL with 
-> > linking exception" licence that libstdc++/eCos/JFFS2 have.
-> 
-> Are you asking for a relicense of the existing UBI/UBIFS code?
+Hi David,
 
-I didn't think that would be reasonable. But if we're doing a simpler
-version which can exist in a bootloader, it might be a good idea.
+On Wed, Dec 02, 2009 at 09:59:50PM +0000, David Woodhouse wrote:
+> On Wed, 2009-12-02 at 13:46 -0800, Tim Bird wrote:
+> > It applies to anything in the "embedded Linux" ecosystem. This
+> > would very much include open source boot loaders like U-Boot.
+>
+> And coreboot.
+>
+> The world needs more coreboot.
 
+Did you have a look at u-boot-v2 (which is just in the process of being
+renamed to barebox)? We have it running on all kind of architectures
+(even x86 is working here recently, but the patches are not ready for
+mainline yet), and it feels much more linuxish than coreboot.
+
+http://www.celinuxforum.org/CelfPubWiki/ELCEurope2009Presentations?action=AttachFile&do=view&target=Hauer-U_BootV2.pdf
+
+Robert
 -- 
-dwmw2
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
