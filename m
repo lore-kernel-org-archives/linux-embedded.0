@@ -1,34 +1,43 @@
-From: Tim Bird <tim.bird@am.sony.com>
+From: Aras Vaichas <arasv@magellan-technology.com>
 Subject: Re: [ANNOUNCE] CELF open project proposal
-Date: Wed, 2 Dec 2009 15:30:18 -0800
-Message-ID: <4B16F88A.4010604@am.sony.com>
-References: <4B15AAFE.4030705@am.sony.com>	 <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com>	 <4B16E03D.3000202@am.sony.com> <1259791190.3744.751.camel@macbook.infradead.org>
+Date: Thu, 3 Dec 2009 13:27:57 +1100
+Message-ID: <ed62800912021827s6f25f063ke836fe1482cec028@mail.gmail.com>
+References: <4B15AAFE.4030705@am.sony.com>
+	 <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com>
+	 <4B16E03D.3000202@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1259791190.3744.751.camel@macbook.infradead.org>
+In-Reply-To: <4B16E03D.3000202@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: David Woodhouse <dwmw2@infradead.org>
-Cc: "Bird, Tim" <Timothy.Bird@am.sony.com>, Mike Frysinger <vapier.adi@gmail.com>, CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: linux-embedded <linux-embedded@vger.kernel.org>
 
-David Woodhouse wrote:
-> On Wed, 2009-12-02 at 13:46 -0800, Tim Bird wrote:
->> It applies to anything in the "embedded Linux" ecosystem.  This
->> would very much include open source boot loaders like U-Boot. 
-> 
-> And coreboot.
-> 
-> The world needs more coreboot.
+2009/12/3 Tim Bird <tim.bird@am.sony.com>
+>
+> Mike Frysinger wrote:
+> > i know your e-mail intro states "embedded Linux" as does the wiki, =
+but
+> > i'm gonna take a stab anyways. =A0does this apply to Linux only and=
+ not
+> > open source boot loaders (like U-Boot) ?
+>
+> It applies to anything in the "embedded Linux" ecosystem. =A0This
+> would very much include open source boot loaders like U-Boot.
 
-If coreboot were on ARM, it would be more interesting.
-That would make an interesting proposal, I suppose. :-)
- -- Tim
+I've got a list of "nice to haves"
 
+Any boot time speed up work.
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+Support for 2nd stage booting from NAND with newer filesystems such as
+UBIFS. i.e. simplified UBI/UBIFS read/write/format code in a small
+footprint.
+
+TFTP server in a boot loader (U-boot or other). i.e. allows you to
+push a firmware upgrade image to a device. I do know of a few of these
+but they are not open sourced.
+
+Just my 2 cents.
+
+Aras
