@@ -1,63 +1,57 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: [ANNOUNCE] CELF open project proposal
-Date: Thu, 3 Dec 2009 07:17:30 +0000 (GMT)
-Message-ID: <alpine.LFD.2.00.0912030713300.10116@macbook.infradead.org>
-References: <4B15AAFE.4030705@am.sony.com>  <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com>  <4B16E03D.3000202@am.sony.com> <ed62800912021827s6f25f063ke836fe1482cec028@mail.gmail.com>
+From: ladislav klenovic <lklenovic@gmail.com>
+Subject: Badness at net/sched/sch_generic.c:219
+Date: Thu, 3 Dec 2009 13:36:52 +0100
+Message-ID: <e46ca7a80912030436u21455741of01a18d92b5721dc@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-1688546212-537036160-1259824664=:10116"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <ed62800912021827s6f25f063ke836fe1482cec028@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:date:message-id:subject
+         :from:to:content-type;
+        bh=2C83GuVVzF7FIVbU8D0pZYD7Vcu4YiX2fYSVa+VoMxI=;
+        b=LRwGWSEj4rF/+7rxg5DDkF/Ta8Dc1pnGKcbiMDNuFdB+Zimk/xeAP4H9sHRJOvnBaJ
+         lUj+k5IyiwVxRhr5csBZSuSCX4yrdByUFcKA/Y+C0NH7kAgh3WsH4cDh3kWuNiqhwtQP
+         2a9gKC9/WGxc9zxKz+2j5c1jpPh99pdUOkeuk=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Aras Vaichas <arasv@magellan-technology.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
+I am running on mpc8272 with 2.6.27.25 kernel and use freescale
+ethernet driver.I got the following oops below after 2 days uptime.
+It happened only once and doesn't seem to be reproducible. Any idea
+what could happen there:
 
----1688546212-537036160-1259824664=:10116
-Content-Type: TEXT/PLAIN; charset="iso-8859-1"; format="flowed"
-Content-Transfer-Encoding: quoted-printable
+Badness at net/sched/sch_generic.c:219
+NIP: c0199014 LR: c0025c68 CTR: 00000001
+REGS: c02c3d90 TRAP: 0700   Tainted: P           (2.6.27.25-eboard-r17)
+MSR: 00029032 <EE,ME,IR,DR>  CR: 88002082  XER: 00000000
+TASK = c02a8578[0] 'swapper' THREAD: c02c2000
+GPR00: 00000000 c02c3e40 c02a8578 cf89e800 c02caef0 012e18ea 00000000 ffffffff
+GPR08: c02bd028 c02d0000 fffd2b0e 000d2f00 c3f2e7df 10090e0c 0fffb000 ffffffff
+GPR16: 00000000 007fff00 00000000 00000000 00000000 0fff82e4 00000000 007ffeb0
+GPR24: 00000000 00000000 c02cb060 c02d0000 c02c2000 c0198ee4 00000100 cf89e800
+NIP [c0199014] dev_watchdog+0x130/0x204
+LR [c0025c68] run_timer_softirq+0x12c/0x1b4
+Call Trace:
+[c02c3e40] [3fd54c78] 0x3fd54c78 (unreliable)
+[c02c3e50] [c0025c68] run_timer_softirq+0x12c/0x1b4
+[c02c3e80] [c0021494] __do_softirq+0x64/0xd4
+[c02c3ea0] [c00060fc] do_softirq+0x40/0x58
+[c02c3eb0] [c002132c] irq_exit+0x38/0x48
+[c02c3ec0] [c000cb64] timer_interrupt+0x138/0x150
+[c02c3ee0] [c000f708] ret_from_except+0x0/0x14
+--- Exception: 901 at cpu_idle+0x94/0xd8
+LR = cpu_idle+0x94/0xd8
+[c02c3fa0] [c0009140] cpu_idle+0xd4/0xd8 (unreliable)
+[c02c3fb0] [c0206c00] __got2_end+0x58/0x68
+[c02c3fc0] [c028181c] start_kernel+0x2b0/0x2c4
+[c02c3ff0] [00003438] 0x3438
+Instruction dump:
+48000050 801f0198 3d20c02b 817f019c 8129abd4 7c005a14 7d490051 40a00034
+3d20c02d 80099930 2f800000 40be0014 <0fe00000> 38000001 3d20c02d 90099930
 
-On Thu, 3 Dec 2009, Aras Vaichas wrote:
-
-> 2009/12/3 Tim Bird <tim.bird@am.sony.com>
->>
->> Mike Frysinger wrote:
->>> i know your e-mail intro states "embedded Linux" as does the wiki, but
->>> i'm gonna take a stab anyways. =A0does this apply to Linux only and not
->>> open source boot loaders (like U-Boot) ?
->>
->> It applies to anything in the "embedded Linux" ecosystem. =A0This
->> would very much include open source boot loaders like U-Boot.
->
-> I've got a list of "nice to haves"
->
-> Any boot time speed up work.
->
-> Support for 2nd stage booting from NAND with newer filesystems such as
-> UBIFS. i.e. simplified UBI/UBIFS read/write/format code in a small
-> footprint.
-
-Is it heretical to suggest a BSD licence for that too, to encourage=20
-adoption into other bootloaders? Or at least LGPL or the=20
-"GPL with linking exception" licence that libstdc++/eCos/JFFS2 have.
-
-> TFTP server in a boot loader (U-boot or other). i.e. allows you to
-> push a firmware upgrade image to a device. I do know of a few of these
-> but they are not open sourced.
-
-OpenFirmware copes with this quite nicely (or with http download, for that =
-
-matter). You can even flash a whole bunch of devices at once with=20
-multicast over the wireless. Somewhere there's a photo of me with a few=20
-hundred OLPC laptops laid out across the floor of main hall in a Mongolian =
-
-school, all sucking up their NAND image over the wireless.
-
-The world needs more OpenFirmware :)
-
---=20
-dwmw2
-
----1688546212-537036160-1259824664=:10116--
+--
+Ladislav
