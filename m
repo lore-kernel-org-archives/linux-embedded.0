@@ -1,52 +1,28 @@
-From: Alexander Clouter <alex@digriz.org.uk>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: [POWER] battery calibration parameters from sysfs
-Date: Fri, 4 Dec 2009 11:34:25 +0000
-Message-ID: <1n8nu6-4va.ln1@chipmunk.wormnet.eu>
-References: <A6D19A13FE030A409EC4362C172E091F0E0495F6@eseldmw101.eemea.ericsson.se>
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756164AbZLDMIb@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Date: Fri, 4 Dec 2009 14:17:32 +0000
+Message-ID: <20091204141731.GA5668@sirena.org.uk>
+References: <A6D19A13FE030A409EC4362C172E091F0E0495F6@eseldmw101.eemea.ericsson.se> <20091204104930.GA28625@sirena.org.uk>
+Mime-Version: 1.0
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20091204104930.GA28625@sirena.org.uk>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: linux-kernel@vger.kernel.org
-Cc: linux-embedded@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: cbou@mai.ru, dwmw2@infradead.org, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
 
-Linus Walleij <linus.walleij@stericsson.com> wrote:
-> 
-> [snipped]
-> 
-> Is probably not very elegant. (Or is it?) Would it be permissible to
-> pass in a table like:
-> 
-> cat >/sys/.../v_vs_cap <<EOF
-> x0,y0
-> x1,y1
-> x2,y2
-> EOF
-> 
-> And have the kernel parse x,y pairs up to EOF?
-> 
-> Or would it be preferable to do this thing by creating some
-> misc device node like /dev/battery0 and a custom ioctl()?
-> 
-> Or is there some other way I haven't thought of?
-> 
-Although I'm a 'nobody' I would probably go for:
-----
-echo x0,y0:x1,y1:....
-----
+On Fri, Dec 04, 2009 at 10:49:31AM +0000, Mark Brown wrote:
 
-Pairs are seperated by ':' whilst values with ','.  I guess you could 
-just use comma's all the way but I personally say that reduces 
-readability...also means that maybe one day you want to pass only one or 
-three values...the format could still work.
+> Isn't the standard thing here to handle this voltage to capacity mapping
+> in userspace if we're just extrapolating from experimental results?
+> Even with the "smart" batteries in PCs there are some accuracy concerns
+> and obviously the performance of the battery will change over time.
 
-Easy to parse, a one liner, no fixed length, fits in with the existing 
-use, etc etc.
-
-Cheers
-
--- 
-Alexander Clouter
-.sigmonster says: You'll be sorry...
+Actually, one further thing here - if this functionality is implemented
+in kernel then shouldn't it be a generic feature rather than part of the
+driver?  The idea of mapping battery voltages to capacity percentages
+isn't specific to a given charger and will apply to all batteries using
+the same technology.
