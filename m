@@ -1,42 +1,93 @@
-From: Robert Schwebel <r.schwebel@pengutronix.de>
-Subject: Re: [ANNOUNCE] CELF open project proposal
-Date: Fri, 4 Dec 2009 09:02:06 +0100
-Message-ID: <20091204080206.GK22533@pengutronix.de>
-References: <4B15AAFE.4030705@am.sony.com> <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com> <4B16E03D.3000202@am.sony.com> <ed62800912021827s6f25f063ke836fe1482cec028@mail.gmail.com> <20091203062503.4300CE6D391@gemini.denx.de> <9c9fda240912030538j14ea07bdr7fa2f4c1b902405c@mail.gmail.com> <20091203205447.GJ22533@pengutronix.de> <ed62800912031929i59f9d136s31f135ae6f56a884@mail.gmail.com>
+From: "Linus Walleij" <linus.walleij@stericsson.com>
+Subject: [POWER] battery calibration parameters from sysfs
+Date: Fri, 4 Dec 2009 11:42:22 +0100
+Message-ID: <A6D19A13FE030A409EC4362C172E091F0E0495F6@eseldmw101.eemea.ericsson.se>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <ed62800912031929i59f9d136s31f135ae6f56a884@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755222AbZLDKmV@vger.kernel.org>
+Content-class: urn:content-classes:message
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Aras Vaichas <arasv@magellan-technology.com>
-Cc: Kyungmin Park <kmpark@infradead.org>, linux-embedded <linux-embedded@vger.kernel.org>
+To: cbou@mai.ru, dwmw2@infradead.org
+Cc: LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
 
-On Fri, Dec 04, 2009 at 02:29:12PM +1100, Aras Vaichas wrote:
-> > In barebox (aka u-boot-v2) we have USB DFU support, in a very flexible
-> > way. Would that fit your needs?
->
-> That would probably be better than TFTP over ethernet. A USB DFU
-> upgrade would only require the microcontroller to be functioning for
-> the upgrade to work and it doesn't require TCP/IP stack or ethernet
-> chip drivers.
+Hi,
 
-Yup. Barebox has Kconfig as it's configuration system, so you can make
-components y/n/m. It follows the same module mechanism as the kernel, so
-you can insmod drivers if you need them.
+we're working on battery charging support for ST-Ericsson MFD ASICs
+like AB3100 and later series. I have this issue about battery
+calibration
+parameters that I need advice on, and more specifically on how to use
+sysfs to get that data in.
 
-> I maintain a family of devices which can be built with or without
-> ethernet. Currently we attach an ethernet daughterboard to the device
-> to bootstrap it, and for development, but remove it for commercial
-> use.
+Most devices of this kind does not need the stuff we're doing so we're
+the odd bird here. Other batteries are "smart" (contain factory
+calibration inside of them) or get calibration from some BIOS or such.
 
-Sounds like a usecase for insmod :-)
+In our code we have a number of (x,y) pair tables like this:
 
-rsc
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+/* Vbat mV to Battery capacity % */
+struct voltage_vs_capacity {
+	int voltage;
+	int capacity;
+};
+
+/*
+ * Default calibration table for voltage vs battery capacity.
+ * Voltage in millivolts, capacity given in permil.
+ */
+struct voltage_vs_capacity voltage_to_battery_capacity_init[] = {
+	{ 4177, 1000 },
+	{ 4070,  900 },
+	{ 3988,  800 },
+	{ 3834,  570 },
+	{ 3797,  470 },
+	{ 3768,  320 },
+	{ 3721,  190 },
+	{ 3633,   60 },
+	{ 3523,   30 },
+	{ 3200,    0 },
+};
+
+We then interpolate between two subsequent (xn,yn),(xn+1,yn+1)
+pairs to get a calibrated capacity value from the voltage
+level measured.
+
+This is all good as long as you compile the calibration into the kernel
+like this.
+
+However we want to override the default table with one fed in
+though e.g. sysfs, so calibration data for the battery can reside
+in the file system. NOTE: this table is NOT of fixed length, i.e.
+we don't know how many (x,y) pairs will be passed in.
+
+Whereas the rule for sysfs is one value per file, creating an arbitrary
+large hirarchy like this:
+
+/sys/.../v_vs_cap/x0
+/sys/.../v_vs_cap/y0
+/sys/.../v_vs_cap/x1
+/sys/.../v_vs_cap/y2
+...
+/sys/.../v_vs_cap/xN
+/sys/.../v_vs_cap/yN
+
+Is probably not very elegant. (Or is it?) Would it be permissible to
+pass in a table like:
+
+cat >/sys/.../v_vs_cap <<EOF
+x0,y0
+x1,y1
+x2,y2
+EOF
+
+And have the kernel parse x,y pairs up to EOF?
+
+Or would it be preferable to do this thing by creating some
+misc device node like /dev/battery0 and a custom ioctl()?
+
+Or is there some other way I haven't thought of?
+
+Yours,
+Linus Walleij
+ST-Ericsson
