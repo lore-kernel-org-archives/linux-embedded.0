@@ -1,60 +1,61 @@
 From: Kyungmin Park <kmpark@infradead.org>
 Subject: Re: [ANNOUNCE] CELF open project proposal
-Date: Fri, 4 Dec 2009 23:22:20 +0900
-Message-ID: <9c9fda240912040622r470d4d0ar385966608cb5384e@mail.gmail.com>
+Date: Fri, 4 Dec 2009 23:39:10 +0900
+Message-ID: <9c9fda240912040639n3126f7cbv5de06ac0fc600bec@mail.gmail.com>
 References: <4B15AAFE.4030705@am.sony.com>
 	 <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com>
 	 <4B16E03D.3000202@am.sony.com>
 	 <ed62800912021827s6f25f063ke836fe1482cec028@mail.gmail.com>
 	 <20091203062503.4300CE6D391@gemini.denx.de>
 	 <9c9fda240912030538j14ea07bdr7fa2f4c1b902405c@mail.gmail.com>
-	 <8bd0f97a0912030550q5ea22b17w695318e8cd536abc@mail.gmail.com>
+	 <20091203205447.GJ22533@pengutronix.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:mime-version:sender:received:in-reply-to
          :references:date:x-google-sender-auth:message-id:subject:from:to:cc
-         :content-type:content-transfer-encoding;
-        bh=PE+C/vTQWvZ48xfC5j6PjuJ+VkMiwIeGf34I4IDp/RA=;
-        b=U2zfM8+N+wgd3jEmkCWCLqRoX5/ex4teHPHgQqZjGYsBK0+qTfMmQBDPRZ2pA0hAH/
-         iyYoaM9VhA/K6MnliHKB3LVrTHPNfP2KU7oRgaIWdxeyI1isUtRMC6M2TTNBXY0spkVs
-         KxN60OQKS1UhZRW1ky0AqkZ12ioyyK5m1ZOno=
-In-Reply-To: <8bd0f97a0912030550q5ea22b17w695318e8cd536abc@mail.gmail.com>
+         :content-type;
+        bh=uKJackEs6fDZm/MHgud3n5pqbvjNhMQDJDtb+J093fA=;
+        b=p5JtKrLJdNlOYRlJj15ZQcJzvBnLwB8NOKmdKCDo9Fhb98AMJvE6P+aFhgoKSA80Qq
+         IibCG7vYbrOMdh3q0a66c9GoueeSsJ794QN542ctcOJaiNutTdn8Frbdw9keCTZOfkvk
+         GFLmObg6OmRZcs3rUIX9MvBtUcC4eJsO1q+Ws=
+In-Reply-To: <20091203205447.GJ22533@pengutronix.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Wolfgang Denk <wd@denx.de>, Aras Vaichas <arasv@magellan-technology.com>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Robert Schwebel <r.schwebel@pengutronix.de>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>
 
-On Thu, Dec 3, 2009 at 10:50 PM, Mike Frysinger <vapier.adi@gmail.com> =
-wrote:
-> On Thu, Dec 3, 2009 at 08:38, Kyungmin Park wrote:
->> On Thu, Dec 3, 2009 at 3:25 PM, Wolfgang Denk wrote:
->>> Aras Vaichas wrote:
->>>> Support for 2nd stage booting from NAND with newer filesystems suc=
-h as
->>>> UBIFS. i.e. simplified UBI/UBIFS read/write/format code in a small
->>>> footprint.
->>>>
->>>> TFTP server in a boot loader (U-boot or other). i.e. allows you to
->>>> push a firmware upgrade image to a device. I do know of a few of t=
-hese
->>>> but they are not open sourced.
->>>
->>> U-Boot supports both TFTP (and NFS) downlod, and UBI/UBIFS.
->>
->> How about the TFTP over USB? It's required feature for no ethernet d=
-evices
+On Fri, Dec 4, 2009 at 5:54 AM, Robert Schwebel
+<r.schwebel@pengutronix.de> wrote:
+> On Thu, Dec 03, 2009 at 10:38:07PM +0900, Kyungmin Park wrote:
+>> How about the TFTP over USB? It's required feature for no ethernet devices
 >
-> you'll have to be more specific if you want a real answer. =A0U-Boot =
-has
-> USB Ethernet gadget support already.
+> In barebox (aka u-boot-v2) we have USB DFU support, in a very flexible
+> way. Would that fit your needs?
 
-Yes I see the u-boot-usb cdc branch, but it doesn't support the RNDIS
-feature. The real or wanted use case is that I receive the kernel and
-system image from tftp over USB from tftpserver via windows.
+I will check the USB DFU. Thanks for info.
+
+>
+>> I wish some filesystem to share between u-boot and kernel. Of course
+>> ext2 or fat is possbile. but current u-boot implementation depends on
+>> block device or NOR device. not for NAND/OneNAND devices.
+>
+> That would indeed be interesting.
+
+More required feature is we can update the file instead of partition.
+Remove or update the file itself.
+>
+>> Finally very very small jpeg or png library for u-boot (under 30KiB).
+>
+> What's your use case for that, a splash screen?
+
+and charging animation. bootloader can support the battery charging feature.
+That's the another reason to use sharable filesystem at bootloader.
+We store the charging images to shareable filesystem and display it at
+bootloader using graphics library.
 
 Thank you,
 Kyungmin Park
