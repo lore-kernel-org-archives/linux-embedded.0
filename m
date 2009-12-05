@@ -1,61 +1,99 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [ANNOUNCE] CELF open project proposal
-Date: Fri, 4 Dec 2009 23:39:10 +0900
-Message-ID: <9c9fda240912040639n3126f7cbv5de06ac0fc600bec@mail.gmail.com>
-References: <4B15AAFE.4030705@am.sony.com>
-	 <8bd0f97a0912021336xf1ef7ebmfb502efabec187cb@mail.gmail.com>
-	 <4B16E03D.3000202@am.sony.com>
-	 <ed62800912021827s6f25f063ke836fe1482cec028@mail.gmail.com>
-	 <20091203062503.4300CE6D391@gemini.denx.de>
-	 <9c9fda240912030538j14ea07bdr7fa2f4c1b902405c@mail.gmail.com>
-	 <20091203205447.GJ22533@pengutronix.de>
+From: "Linus Walleij" <linus.walleij@stericsson.com>
+Subject: RE: [POWER] battery calibration parameters from sysfs
+Date: Sat, 5 Dec 2009 14:08:11 +0100
+Message-ID: <A6D19A13FE030A409EC4362C172E091F0E071EB9@eseldmw101.eemea.ericsson.se>
+References: <A6D19A13FE030A409EC4362C172E091F0E0495F6@eseldmw101.eemea.ericsson.se> <20091204104930.GA28625@sirena.org.uk>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:sender:received:in-reply-to
-         :references:date:x-google-sender-auth:message-id:subject:from:to:cc
-         :content-type;
-        bh=uKJackEs6fDZm/MHgud3n5pqbvjNhMQDJDtb+J093fA=;
-        b=p5JtKrLJdNlOYRlJj15ZQcJzvBnLwB8NOKmdKCDo9Fhb98AMJvE6P+aFhgoKSA80Qq
-         IibCG7vYbrOMdh3q0a66c9GoueeSsJ794QN542ctcOJaiNutTdn8Frbdw9keCTZOfkvk
-         GFLmObg6OmRZcs3rUIX9MvBtUcC4eJsO1q+Ws=
-In-Reply-To: <20091203205447.GJ22533@pengutronix.de>
+Content-class: urn:content-classes:message
+In-Reply-To: <20091204104930.GA28625@sirena.org.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Robert Schwebel <r.schwebel@pengutronix.de>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: cbou@mai.ru, dwmw2@infradead.org, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
 
-On Fri, Dec 4, 2009 at 5:54 AM, Robert Schwebel
-<r.schwebel@pengutronix.de> wrote:
-> On Thu, Dec 03, 2009 at 10:38:07PM +0900, Kyungmin Park wrote:
->> How about the TFTP over USB? It's required feature for no ethernet devices
->
-> In barebox (aka u-boot-v2) we have USB DFU support, in a very flexible
-> way. Would that fit your needs?
+Thanks Mark, prompt answers as always.
 
-I will check the USB DFU. Thanks for info.
+[Mark Brown]
+> [Linus Walleij]
+> > In our code we have a number of (x,y) pair tables like this:
+> 
+> > /* Vbat mV to Battery capacity % */
+> > struct voltage_vs_capacity {
+> > 	int voltage;
+> > 	int capacity;
+> > };
+> 
+> Isn't the standard thing here to handle this voltage to 
+> capacity mapping in userspace if we're just extrapolating
+> from experimental results?
 
->
->> I wish some filesystem to share between u-boot and kernel. Of course
->> ext2 or fat is possbile. but current u-boot implementation depends on
->> block device or NOR device. not for NAND/OneNAND devices.
->
-> That would indeed be interesting.
+That's an easy solution of course, but then the sysfs files
+specified by the power subsystem, i.e. all "charge_*",
+"energy_*", "capacity" and "time_to_*" loose their meaning
+and must be ignored by userspace.
 
-More required feature is we can update the file instead of partition.
-Remove or update the file itself.
->
->> Finally very very small jpeg or png library for u-boot (under 30KiB).
->
-> What's your use case for that, a splash screen?
+Also this was just an example, we have similar calibration
+for the temperature sensor, and thus the "temp" sysfs file
+also loose its meaning.
 
-and charging animation. bootloader can support the battery charging feature.
-That's the another reason to use sharable filesystem at bootloader.
-We store the charging images to shareable filesystem and display it at
-bootloader using graphics library.
+Since there is a plethora of userspace apps that just
+interface these files directly (gnome-power-manager and
+the Android stack come to mind) all these will have to
+be patches to accept a calibrated value from somewhere
+else if we shall use them with our hardware.
 
-Thank you,
-Kyungmin Park
+But as you say:
+
+> Even with the "smart" batteries in PCs there are some 
+> accuracy concerns and obviously the performance of the
+> battery will change over time.
+> ...
+> Actually, one further thing here - if this functionality
+> is implemented in kernel then shouldn't it be a generic
+> feature rather than part of the driver?  The idea of
+> mapping battery voltages to capacity percentages isn't
+> specific to a given charger and will apply to all
+> batteries using the same technology.
+
+Surely, we'd be happy to do it that way if desired.
+What about drivers/power/battery_lib.c?
+
+(And getting algorithms in place for gradually
+adjusting the capacity levels as compared to factory
+settings for PC batteries would perhaps end up in the
+same place then.)
+
+We have other odd code. Actually we have full software-
+controlled CC/CV charging in our driver, and that
+would *definately* go in such a library if it was
+to end up in kernelspace. We have actually
+pushed that to userspace, while I still tend to think
+that the kernel (with right parameters) should be able
+to charge a battery. But, well.
+
+As for the calibration format, after reading up on the
+latest sysfs doc I saw:
+
+Documentation/filesystems/sysfs.txt:
+"Attributes should be ASCII text files, preferably with
+only one value per file. It is noted that it may not be
+efficient to contain only one value per file, so it is
+socially acceptable to express an array of values of the
+same type."
+
+This is close to that, an array of two types (x,y)(x,y)
+voltage,capacity,voltage,capacity etc. Pushing them in
+two files
+
+/sys/.../v_vs_cap_v
+/sys/.../v_vs_cap_cap
+
+and then make sure we write as many values to each array
+is uglier IMHO.
+
+
+Yours,
+Linus Walleij
