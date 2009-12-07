@@ -1,7 +1,7 @@
 From: root <root@lougher.demon.co.uk>
-Subject: [PATCH 07/9] lzma: Make lzma available to non initramfs/initrd code
+Subject: [PATCH 6/9] Squashfs: add support for LZMA compressed filesystems
 Date: Mon, 07 Dec 2009 08:25:54 +0000
-Message-ID: <E1NHYuo-00028i-Ex@dylan.lougher.demon.co.uk>
+Message-ID: <E1NHYuo-00028c-D2@dylan.lougher.demon.co.uk>
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -11,180 +11,225 @@ Content-Transfer-Encoding: 7bit
 To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, tim.bird@am.sony.com
 
 
-Add a config option DECOMPRESS_LZMA_NEEDED which allows subsystems to
-specify they need the unlzma code.  Normally decompress_unlzma.c is
-compiled with __init and unlzma is not exported to modules.
-
-Move INIT definition into separate header files for bzip2/lzma/inflate
-so it can be defined differently for each decompressor.
-
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- include/linux/decompress/bunzip2_mm.h |   12 ++++++++++++
- include/linux/decompress/inflate_mm.h |   12 ++++++++++++
- include/linux/decompress/mm.h         |    3 ---
- include/linux/decompress/unlzma_mm.h  |   20 ++++++++++++++++++++
- lib/Kconfig                           |    3 +++
- lib/decompress_bunzip2.c              |    1 +
- lib/decompress_inflate.c              |    1 +
- lib/decompress_unlzma.c               |    6 +++++-
- 8 files changed, 54 insertions(+), 4 deletions(-)
- create mode 100644 include/linux/decompress/bunzip2_mm.h
- create mode 100644 include/linux/decompress/inflate_mm.h
- create mode 100644 include/linux/decompress/unlzma_mm.h
+ fs/squashfs/Kconfig        |    5 ++
+ fs/squashfs/Makefile       |    1 +
+ fs/squashfs/decompressor.c |    4 +
+ fs/squashfs/lzma_wrapper.c |  151 ++++++++++++++++++++++++++++++++++++++++++++
+ fs/squashfs/squashfs.h     |    3 +
+ 5 files changed, 164 insertions(+), 0 deletions(-)
+ create mode 100644 fs/squashfs/lzma_wrapper.c
 
-diff --git a/include/linux/decompress/bunzip2_mm.h b/include/linux/decompress/bunzip2_mm.h
-new file mode 100644
-index 0000000..cac6fef
---- /dev/null
-+++ b/include/linux/decompress/bunzip2_mm.h
-@@ -0,0 +1,12 @@
-+#ifndef BUNZIP2_MM_H
-+#define BUNZIP2_MM_H
+diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
+index 25a00d1..0294aa2 100644
+--- a/fs/squashfs/Kconfig
++++ b/fs/squashfs/Kconfig
+@@ -26,6 +26,11 @@ config SQUASHFS
+ 
+ 	  If unsure, say N.
+ 
++config SQUASHFS_LZMA
++	bool "Include support for LZMA compressed file systems"
++	depends on SQUASHFS
++	select DECOMPRESS_LZMA
 +
-+#ifdef STATIC
-+/* Code active when included from pre-boot environment: */
-+#define INIT
+ config SQUASHFS_EMBEDDED
+ 
+ 	bool "Additional option for memory-constrained systems" 
+diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
+index df8a19e..45aaefd 100644
+--- a/fs/squashfs/Makefile
++++ b/fs/squashfs/Makefile
+@@ -5,3 +5,4 @@
+ obj-$(CONFIG_SQUASHFS) += squashfs.o
+ squashfs-y += block.o cache.o dir.o export.o file.o fragment.o id.o inode.o
+ squashfs-y += namei.o super.o symlink.o zlib_wrapper.o decompressor.o
++squashfs-$(CONFIG_SQUASHFS_LZMA) += lzma_wrapper.o
+diff --git a/fs/squashfs/decompressor.c b/fs/squashfs/decompressor.c
+index 157478d..0b6ad9b 100644
+--- a/fs/squashfs/decompressor.c
++++ b/fs/squashfs/decompressor.c
+@@ -50,7 +50,11 @@ static const struct squashfs_decompressor squashfs_unknown_comp_ops = {
+ 
+ static const struct squashfs_decompressor *decompressor[] = {
+ 	&squashfs_zlib_comp_ops,
++#ifdef CONFIG_SQUASHFS_LZMA
++	&squashfs_lzma_comp_ops,
 +#else
-+/* Compile for initramfs/initrd code only */
-+#define INIT __init
+ 	&squashfs_lzma_unsupported_comp_ops,
 +#endif
-+
-+#endif
-diff --git a/include/linux/decompress/inflate_mm.h b/include/linux/decompress/inflate_mm.h
+ 	&squashfs_lzo_unsupported_comp_ops,
+ 	&squashfs_unknown_comp_ops
+ };
+diff --git a/fs/squashfs/lzma_wrapper.c b/fs/squashfs/lzma_wrapper.c
 new file mode 100644
-index 0000000..ca4a2ae
+index 0000000..cef06d6
 --- /dev/null
-+++ b/include/linux/decompress/inflate_mm.h
-@@ -0,0 +1,12 @@
-+#ifndef INFLATE_MM_H
-+#define INFLATE_MM_H
++++ b/fs/squashfs/lzma_wrapper.c
+@@ -0,0 +1,151 @@
++/*
++ * Squashfs - a compressed read only filesystem for Linux
++ *
++ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
++ * Phillip Lougher <phillip@lougher.demon.co.uk>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2,
++ * or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
++ *
++ * lzma_wrapper.c
++ */
 +
-+#ifdef STATIC
-+/* Code active when included from pre-boot environment: */
-+#define INIT
-+#else
-+/* Compile for initramfs/initrd code only */
-+#define INIT __init
-+#endif
++#include <asm/unaligned.h>
++#include <linux/buffer_head.h>
++#include <linux/mutex.h>
++#include <linux/vmalloc.h>
++#include <linux/decompress/unlzma.h>
 +
-+#endif
-diff --git a/include/linux/decompress/mm.h b/include/linux/decompress/mm.h
-index 12ff8c3..80f5ba4 100644
---- a/include/linux/decompress/mm.h
-+++ b/include/linux/decompress/mm.h
-@@ -53,8 +53,6 @@ static void free(void *where)
- 
- #define set_error_fn(x)
- 
--#define INIT
--
- #else /* STATIC */
- 
- /* Code active when compiled standalone for use when loading ramdisk: */
-@@ -77,7 +75,6 @@ static void free(void *where)
- static void(*error)(char *m);
- #define set_error_fn(x) error = x;
- 
--#define INIT __init
- #define STATIC
- 
- #include <linux/init.h>
-diff --git a/include/linux/decompress/unlzma_mm.h b/include/linux/decompress/unlzma_mm.h
-new file mode 100644
-index 0000000..859287e
---- /dev/null
-+++ b/include/linux/decompress/unlzma_mm.h
-@@ -0,0 +1,20 @@
-+#ifndef UNLZMA_MM_H
-+#define UNLZMA_MM_H
++#include "squashfs_fs.h"
++#include "squashfs_fs_sb.h"
++#include "squashfs_fs_i.h"
++#include "squashfs.h"
++#include "decompressor.h"
 +
-+#ifdef STATIC
++struct squashfs_lzma {
++	void	*input;
++	void	*output;
++};
 +
-+/* Code active when included from pre-boot environment: */
-+#define INIT
++/* decompress_unlzma.c is currently non re-entrant... */
++DEFINE_MUTEX(lzma_mutex);
 +
-+#elif defined(CONFIG_DECOMPRESS_LZMA_NEEDED)
++/* decompress_unlzma.c doesn't provide any context in its callbacks... */
++static int lzma_error;
 +
-+/* Make it available to non initramfs/initrd code */
-+#define INIT
-+#include <linux/module.h>
-+#else
++static void error(char *m)
++{
++	ERROR("unlzma error: %s\n", m);
++	lzma_error = 1;
++}
 +
-+/* Compile for initramfs/initrd code only */
-+#define INIT __init
-+#endif
 +
-+#endif
-diff --git a/lib/Kconfig b/lib/Kconfig
-index bb1326d..25e7f28 100644
---- a/lib/Kconfig
-+++ b/lib/Kconfig
-@@ -117,6 +117,9 @@ config DECOMPRESS_BZIP2
- config DECOMPRESS_LZMA
- 	tristate
- 
-+config DECOMPRESS_LZMA_NEEDED
-+	 boolean
++static void *lzma_init(struct squashfs_sb_info *msblk)
++{
++	struct squashfs_lzma *stream = kzalloc(sizeof(*stream), GFP_KERNEL);
++	if (stream == NULL)
++		goto failed;
++	stream->input = vmalloc(msblk->block_size);
++	if (stream->input == NULL)
++		goto failed;
++	stream->output = vmalloc(msblk->block_size);
++	if (stream->output == NULL)
++		goto failed2;
 +
- #
- # Generic allocator support is selected if needed
- #
-diff --git a/lib/decompress_bunzip2.c b/lib/decompress_bunzip2.c
-index 600f473..6eb6433 100644
---- a/lib/decompress_bunzip2.c
-+++ b/lib/decompress_bunzip2.c
-@@ -52,6 +52,7 @@
- #include <linux/slab.h>
- #endif /* STATIC */
++	return stream;
++
++failed2:
++	vfree(stream->input);
++failed:
++	ERROR("failed to allocate lzma workspace\n");
++	kfree(stream);
++	return NULL;
++}
++
++
++static void lzma_free(void *strm)
++{
++	struct squashfs_lzma *stream = strm;
++
++	if (stream) {
++		vfree(stream->input);
++		vfree(stream->output);
++	}
++	kfree(stream);
++}
++
++
++static int lzma_uncompress(struct squashfs_sb_info *msblk, void **buffer,
++	struct buffer_head **bh, int b, int offset, int length, int srclength,
++	int pages)
++{
++	struct squashfs_lzma *stream = msblk->stream;
++	void *buff = stream->input;
++	int avail, i, bytes = length, res;
++
++	mutex_lock(&lzma_mutex);
++
++	for (i = 0; i < b; i++) {
++		wait_on_buffer(bh[i]);
++		if (!buffer_uptodate(bh[i]))
++			goto block_release;
++
++		avail = min(bytes, msblk->devblksize - offset);
++		memcpy(buff, bh[i]->b_data + offset, avail);
++		buff += avail;
++		bytes -= avail;
++		offset = 0;
++		put_bh(bh[i]);
++	}
++
++	lzma_error = 0;
++	res = unlzma(stream->input, length, NULL, NULL, stream->output, NULL,
++							error);
++	if (res || lzma_error)
++		goto failed;
++
++	/* uncompressed size is stored in the LZMA header (5 byte offset) */
++	res = bytes = get_unaligned_le32(stream->input + 5);
++	for (i = 0, buff = stream->output; bytes && i < pages; i++) {
++		avail = min_t(int, bytes, PAGE_CACHE_SIZE);
++		memcpy(buffer[i], buff, avail);
++		buff += avail;
++		bytes -= avail;
++	}
++	if (bytes)
++		goto failed;
++
++	mutex_unlock(&lzma_mutex);
++	return res;
++
++block_release:
++	for (; i < b; i++)
++		put_bh(bh[i]);
++
++failed:
++	mutex_unlock(&lzma_mutex);
++
++	ERROR("lzma decompression failed, data probably corrupt\n");
++	return -EIO;
++}
++
++const struct squashfs_decompressor squashfs_lzma_comp_ops = {
++	.init = lzma_init,
++	.free = lzma_free,
++	.decompress = lzma_uncompress,
++	.id = LZMA_COMPRESSION,
++	.name = "lzma",
++	.supported = 1
++};
++
+diff --git a/fs/squashfs/squashfs.h b/fs/squashfs/squashfs.h
+index fe2587a..d094886 100644
+--- a/fs/squashfs/squashfs.h
++++ b/fs/squashfs/squashfs.h
+@@ -94,3 +94,6 @@ extern const struct address_space_operations squashfs_symlink_aops;
  
-+#include <linux/decompress/bunzip2_mm.h>
- #include <linux/decompress/mm.h>
- 
- #ifndef INT_MAX
-diff --git a/lib/decompress_inflate.c b/lib/decompress_inflate.c
-index fc686c7..cb6bcab 100644
---- a/lib/decompress_inflate.c
-+++ b/lib/decompress_inflate.c
-@@ -23,6 +23,7 @@
- 
- #endif /* STATIC */
- 
-+#include <linux/decompress/inflate_mm.h>
- #include <linux/decompress/mm.h>
- 
- #define GZIP_IOBUF_SIZE (16*1024)
-diff --git a/lib/decompress_unlzma.c b/lib/decompress_unlzma.c
-index ca82fde..a614b26 100644
---- a/lib/decompress_unlzma.c
-+++ b/lib/decompress_unlzma.c
-@@ -36,6 +36,7 @@
- #include <linux/slab.h>
- #endif /* STATIC */
- 
-+#include <linux/decompress/unlzma_mm.h>
- #include <linux/decompress/mm.h>
- 
- #define	MIN(a, b) (((a) < (b)) ? (a) : (b))
-@@ -531,7 +532,7 @@ static inline void INIT process_bit1(struct writer *wr, struct rc *rc,
- 
- 
- 
--STATIC inline int INIT unlzma(unsigned char *buf, int in_len,
-+STATIC int INIT unlzma(unsigned char *buf, int in_len,
- 			      int(*fill)(void*, unsigned int),
- 			      int(*flush)(void*, unsigned int),
- 			      unsigned char *output,
-@@ -652,6 +653,9 @@ exit_1:
- exit_0:
- 	return ret;
- }
-+#if defined(CONFIG_DECOMPRESS_LZMA_NEEDED) && !defined(PREBOOT)
-+EXPORT_SYMBOL(unlzma);
-+#endif
- 
- #ifdef PREBOOT
- STATIC int INIT decompress(unsigned char *buf, int in_len,
+ /* zlib_wrapper.c */
+ extern const struct squashfs_decompressor squashfs_zlib_comp_ops;
++
++/* lzma wrapper.c */
++extern const struct squashfs_decompressor squashfs_lzma_comp_ops;
 -- 
 1.6.3.3
 
