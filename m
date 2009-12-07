@@ -1,57 +1,46 @@
-From: root <root@lougher.demon.co.uk>
-Subject: [PATCH 5/9] Squashfs: make decompressor init function pass superblock info
-Date: Mon, 07 Dec 2009 08:25:54 +0000
-Message-ID: <E1NHYuo-00028W-B2@dylan.lougher.demon.co.uk>
+From: Peter Korsgaard <jacmet@sunsite.dk>
+Subject: Re: [PATCH 0/9] Squashfs: Add support for LZMA compressed filesystems
+Date: Mon, 07 Dec 2009 09:47:17 +0100
+Message-ID: <87tyw3p3vu.fsf@macbook.be.48ers.dk>
+References: <E1NHYun-000287-Vq@dylan.lougher.demon.co.uk>
+Mime-Version: 1.0
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:sender:received:from:to:cc
+         :subject:references:date:in-reply-to:message-id:user-agent
+         :mime-version:content-type;
+        bh=fu4IGlBjHxSXEXtdWtipx2dmwcvra9Wp9imOn70Etb8=;
+        b=xj/OqDjQawaaAXaefoefUkdMW/zFAYoOUzSOPgg3re+1W7JU/cAzqne6clImS1Lata
+         U+KzwgcqGtxwiMpL6C9u0yAKh+rPV2rid2a5WwBfahwgP1/5sK8jw87rQuyeBpsT9dUL
+         yfmyAxPgXAvCCd+3g9Vqxn9b3659akeVeLAVI=
+In-Reply-To: <E1NHYun-000287-Vq@dylan.lougher.demon.co.uk>
+	(root@lougher.demon.co.uk's message of "Mon, 07 Dec 2009 08:25:53
+	+0000")
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, tim.bird@am.sony.com
+To: phillip@lougher.demon.co.uk
+Cc: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, tim.bird@am.sony.com
 
+>>>>> "root" == root  <root@lougher.demon.co.uk> writes:
 
-Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
----
- fs/squashfs/decompressor.h |    4 ++--
- fs/squashfs/zlib_wrapper.c |    2 +-
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ root> Hi,
+ root> The following patches add LZMA decompression support to Squashfs, using the
+ root> in-kernel LZMA decompression library.
 
-diff --git a/fs/squashfs/decompressor.h b/fs/squashfs/decompressor.h
-index 778760c..7425f80 100644
---- a/fs/squashfs/decompressor.h
-+++ b/fs/squashfs/decompressor.h
-@@ -24,7 +24,7 @@
-  */
- 
- struct squashfs_decompressor {
--	void	*(*init)(void);
-+	void	*(*init)(struct squashfs_sb_info *);
- 	void	(*free)(void *);
- 	int	(*decompress)(struct squashfs_sb_info *, void **,
- 		struct buffer_head **, int, int, int, int, int);
-@@ -35,7 +35,7 @@ struct squashfs_decompressor {
- 
- static inline void *squashfs_decompressor_init(struct squashfs_sb_info *msblk)
- {
--	return msblk->decompressor->init();
-+	return msblk->decompressor->init(msblk);
- }
- 
- static inline void squashfs_decompressor_free(struct squashfs_sb_info *msblk,
-diff --git a/fs/squashfs/zlib_wrapper.c b/fs/squashfs/zlib_wrapper.c
-index 381768c..4dd70e0 100644
---- a/fs/squashfs/zlib_wrapper.c
-+++ b/fs/squashfs/zlib_wrapper.c
-@@ -32,7 +32,7 @@
- #include "squashfs.h"
- #include "decompressor.h"
- 
--static void *zlib_init(void)
-+static void *zlib_init(struct squashfs_sb_info *dummy)
- {
- 	z_stream *stream = kmalloc(sizeof(z_stream), GFP_KERNEL);
- 	if (stream == NULL)
+ root> The patches also add a decompression framework to Squashfs.
+ root> This allows LZMA decompression to be added cleanly, and it allows
+ root> additional decompressors to be easily added in the future.
+
+ root> To enable the in-kernel LZMA decompression code to be used by Squashfs,
+ root> there are two patches to the lzma code itself: one to make lzma available
+ root> to non-init code, and one to make lzma reentrant.  These are obviously
+ root> not restricted to Squashfs, but are needed by any non-init code that
+ root> may wish to use lzma compression.
+
+Nice, do you also have an mksquashfs with lzma support?
+
 -- 
-1.6.3.3
-
+Bye, Peter Korsgaard
