@@ -1,58 +1,54 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: [PATCH 0/9] Squashfs: Add support for LZMA compressed filesystems
-Date: Tue, 08 Dec 2009 17:59:01 +0000
-Message-ID: <4B1E93E5.8090104@lougher.demon.co.uk>
-References: <E1NHYun-000287-Vq@dylan.lougher.demon.co.uk> <87tyw3p3vu.fsf@macbook.be.48ers.dk>
+Subject: Re: [PATCH 1/9] Squashfs: move zlib decompression wrapper code into
+ a separate file
+Date: Tue, 08 Dec 2009 22:20:18 +0000
+Message-ID: <4B1ED122.3040309@lougher.demon.co.uk>
+References: <E1NHTHg-0001sM-NQ@dylan.lougher.demon.co.uk> <20091207145705.cd30cae8.akpm@linux-foundation.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <87tyw3p3vu.fsf@macbook.be.48ers.dk>
+In-Reply-To: <20091207145705.cd30cae8.akpm@linux-foundation.org>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Peter Korsgaard <jacmet@sunsite.dk>
+To: Andrew Morton <akpm@linux-foundation.org>
 Cc: linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, tim.bird@am.sony.com
 
-Peter Korsgaard wrote:
->>>>>> "root" == root  <root@lougher.demon.co.uk> writes:
+Andrew Morton wrote:
+> On Mon, 07 Dec 2009 02:25:08 +0000
+> Phillip Lougher <phillip@lougher.demon.co.uk> wrote:
 > 
->  root> Hi,
->  root> The following patches add LZMA decompression support to Squashfs, using the
->  root> in-kernel LZMA decompression library.
+>> +
+>> +int zlib_uncompress(struct squashfs_sb_info *msblk, void **buffer,
+>> +	struct buffer_head **bh, int b, int offset, int length, int srclength,
+>> +	int pages)
 > 
->  root> The patches also add a decompression framework to Squashfs.
->  root> This allows LZMA decompression to be added cleanly, and it allows
->  root> additional decompressors to be easily added in the future.
+> This isn't a very good function name.  zlib_uncompress() now becomes a
+> kernel-wide identifier, but it's part of squashfs, not part of zlib.
 > 
->  root> To enable the in-kernel LZMA decompression code to be used by Squashfs,
->  root> there are two patches to the lzma code itself: one to make lzma available
->  root> to non-init code, and one to make lzma reentrant.  These are obviously
->  root> not restricted to Squashfs, but are needed by any non-init code that
->  root> may wish to use lzma compression.
-> 
-> Nice, do you also have an mksquashfs with lzma support?
+> Maybe that gets fixed in a later patch.  If so, thwap me.
 > 
 
-Yes, in Squashfs CVS (http://sourceforge.net/projects/squashfs/develop).
-You'll need to edit the squashfs-tools Makefile to enable LZMA support.
-The comments in the Makefile should, hopefully, explain how to
-build LZMA support into Mksquashfs/Unsquashfs.
+Yes, they get fixed up in [PATCH 3/9] Squashfs: add a decompressor framework.
+That patch makes the functions static, and instead exports them via a
+suitably named decompressor ops structure.
 
-Once built-in, LZMA support can be specified using the -comp lzma option, i.e.
++const struct squashfs_decompressor squashfs_zlib_comp_ops = {
++	.init = zlib_init,
++	.free = zlib_free,
++	.decompress = zlib_uncompress,
++	.id = ZLIB_COMPRESSION,
++	.name = "zlib",
++	.supported = 1
++};
 
-mksquashfs dir dir.img -comp lzma
+I split the patches up to make them easier to review.  The first two patches
+move the zlib code out to a separate file (ready for adding the framework).
+The third patch adds the framework.  At the time of the second patch, however,
+to not break compilation, the functions have to be global.  In hindsight
+I should have made named the functions squashfs_xxx, and removed the squashfs_
+when they were made static in the third patch.
 
-Unsquashfs doesn't need any extra options, it automatically detects which
-compression has been used.
-
-You can tell which compression algorithms Mksquashfs/Unsquashfs support by
-just typing the command on its own (i.e. mksquashfs, or unsquashfs).  The
-(de-)compressors available are displayed at the end of the output.
+Thanks
 
 Phillip
-
-
-
-
-
-
