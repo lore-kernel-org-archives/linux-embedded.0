@@ -1,62 +1,47 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 1/9] Squashfs: move zlib decompression wrapper code into a 
-	separate file
-Date: Thu, 10 Dec 2009 11:01:23 +0100
-Message-ID: <10f740e80912100201l6d83588evff46e95ec96d0aed@mail.gmail.com>
-References: <E1NHTHg-0001sM-NQ@dylan.lougher.demon.co.uk>
-	 <20091207145705.cd30cae8.akpm@linux-foundation.org>
-	 <4B1ED122.3040309@lougher.demon.co.uk>
-	 <1260352852.19669.1253.camel@localhost>
-	 <4B2042FA.8080406@lougher.demon.co.uk>
+From: Simon Kagstrom <simon.kagstrom@netinsight.net>
+Subject: Squashfs performance (3.3 vs 4.0 in mainline)
+Date: Thu, 10 Dec 2009 15:02:43 +0100
+Message-ID: <20091210150243.2ed788f4@marrow.netinsight.se>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:sender:received:in-reply-to
-         :references:date:x-google-sender-auth:message-id:subject:from:to:cc
-         :content-type;
-        bh=OK5DESAGOu8W7qblGyVikGfbDrtV7gsUW3HVDIhCeBs=;
-        b=qf9Wu8/e91RbKynjYqVlxbVj73BZfv6sbdLaEn4RchcpiDkolLuz9uqXGgccyICIjS
-         63uxU5gtodxFnxbc4kXZbJ/Pol1OMwKR94m87vt+iJ4iErSmAjwthwMBJh1s6EJYNRhX
-         QNjUcB4nF7FNyUe9WwSjJevMZy1G0i4A3JcRg=
-In-Reply-To: <4B2042FA.8080406@lougher.demon.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: dedekind1@gmail.com, Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, Tim Bird <tim.bird@am.sony.com>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Felix Fietkau <nbd@openwrt.org>
+To: linux-embedded <linux-embedded@vger.kernel.org>
+Cc: Phillip Lougher <phillip@lougher.demon.co.uk>
 
-Hi Phillip,
+Hi!
 
-On Thu, Dec 10, 2009 at 01:38, Phillip Lougher
-<phillip@lougher.demon.co.uk> wrote:
-> Artem Bityutskiy wrote:
->>
->> Did you consider using cryptoapi? UBIFS uses zlib/lzo in cryptoapi - it
->> is a very clean way.
+I'm running 2.6.31 on a slow ARM platform and using squashfs 4.0 as
+shipped with the kernel. It's a Sharp LH79524, so the architecture
+itself isn't mainlined yet.
 
-Exactly my question, as that's why the Crypto API was extended with
-support for partial (de)compression in the first place ;-)
+Squashfs works well, but I've noted a performance regression compared
+to the out-of-tree squashfs 3.3 which we ran on 2.6.23. The new kernel
+is faster until the squashfs root filesystem is mounted, but after that
+it goes downhill. Especially mounting takes a lot more time with the
+new:
 
-In addition, using the Crypto API has the advantage that Squashfs will
-use hardware decompression if/when available.
+2.6.23 / 3.3:
 
-> Yes I did consider using the cryptoapi, but this doesn't have support for
-> lzma in mainline.
+  [ 0.01]: [    1.250000] RAMDISK: squashfs filesystem found at block 0
+  [ 0.01]: [    1.260000] RAMDISK: Loading 2156KiB [1 disk] into ram disk... done.
+  [ 1.39]: [    2.650000] VFS: Mounted root (squashfs filesystem) readonly.
+  [ 0.01]: [    2.660000] Freeing init memory: 80K
 
-IIRC, Felix Fietkau added support for that for OpenWRT...
+2.6.31 / 4.0:
 
-> My aim is add lzma filesystem support to Squashfs using the existing kernel
-> lzma iplementation, and to make as few changes to that as necessary.
+  [ 0.00]: [    1.080000] RAMDISK: squashfs filesystem found at block 0
+  [ 0.01]: [    1.090000] RAMDISK: Loading 2372KiB [1 disk] into ram disk... done.
+  [ 2.79]: [    3.880000] VFS: Mounted root (squashfs filesystem) readonly on device 1:0.
+  [ 0.01]: [    3.890000] Freeing init memory: 80K
 
-Gr{oetje,eeting}s,
+(The first column is the time difference compared to last timestamp).
+Are there any general changes which could have caused this difference?
 
-						Geert
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+I've tried with various mksquashfs options, and -noI makes it somewhat
+faster (and larger), but not near the old version.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-							    -- Linus Torvalds
+// Simon
