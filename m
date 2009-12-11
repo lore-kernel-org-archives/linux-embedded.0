@@ -1,8 +1,8 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V2 6/8] lzma: Make lzma available to non initramfs/initrd code
+Subject: [PATCH V2 1/8] Squashfs: move zlib decompression wrapper code into a separate file
 Date: Fri, 11 Dec 2009 01:34:08 +0000
-Message-ID: <E1NIuOW-0001ol-RC@dylan.lougher.demon.co.uk>
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1762213AbZLKBeQ@vger.kernel.org>
+Message-ID: <E1NIuOW-0001oJ-Bb@dylan.lougher.demon.co.uk>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S933486AbZLKBfN@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
@@ -11,179 +11,253 @@ Content-Transfer-Encoding: 7bit
 To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, tim.bird@am.sony.com
 
 
-Add a config option DECOMPRESS_LZMA_NEEDED which allows subsystems to
-specify they need the unlzma code.  Normally decompress_unlzma.c is
-compiled with __init and unlzma is not exported to modules.
-
-Move INIT definition into separate header files for bzip2/lzma/inflate
-so it can be defined differently for each decompressor.
-
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- include/linux/decompress/bunzip2_mm.h |   12 ++++++++++++
- include/linux/decompress/inflate_mm.h |   12 ++++++++++++
- include/linux/decompress/mm.h         |    3 ---
- include/linux/decompress/unlzma_mm.h  |   20 ++++++++++++++++++++
- lib/Kconfig                           |    3 +++
- lib/decompress_bunzip2.c              |    1 +
- lib/decompress_inflate.c              |    1 +
- lib/decompress_unlzma.c               |    6 +++++-
- 8 files changed, 54 insertions(+), 4 deletions(-)
- create mode 100644 include/linux/decompress/bunzip2_mm.h
- create mode 100644 include/linux/decompress/inflate_mm.h
- create mode 100644 include/linux/decompress/unlzma_mm.h
+ fs/squashfs/Makefile       |    2 +-
+ fs/squashfs/block.c        |   74 ++----------------------------
+ fs/squashfs/squashfs.h     |    4 ++
+ fs/squashfs/zlib_wrapper.c |  109 ++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 118 insertions(+), 71 deletions(-)
+ create mode 100644 fs/squashfs/zlib_wrapper.c
 
-diff --git a/include/linux/decompress/bunzip2_mm.h b/include/linux/decompress/bunzip2_mm.h
-new file mode 100644
-index 0000000..cac6fef
---- /dev/null
-+++ b/include/linux/decompress/bunzip2_mm.h
-@@ -0,0 +1,12 @@
-+#ifndef BUNZIP2_MM_H
-+#define BUNZIP2_MM_H
-+
-+#ifdef STATIC
-+/* Code active when included from pre-boot environment: */
-+#define INIT
-+#else
-+/* Compile for initramfs/initrd code only */
-+#define INIT __init
-+#endif
-+
-+#endif
-diff --git a/include/linux/decompress/inflate_mm.h b/include/linux/decompress/inflate_mm.h
-new file mode 100644
-index 0000000..ca4a2ae
---- /dev/null
-+++ b/include/linux/decompress/inflate_mm.h
-@@ -0,0 +1,12 @@
-+#ifndef INFLATE_MM_H
-+#define INFLATE_MM_H
-+
-+#ifdef STATIC
-+/* Code active when included from pre-boot environment: */
-+#define INIT
-+#else
-+/* Compile for initramfs/initrd code only */
-+#define INIT __init
-+#endif
-+
-+#endif
-diff --git a/include/linux/decompress/mm.h b/include/linux/decompress/mm.h
-index 12ff8c3..80f5ba4 100644
---- a/include/linux/decompress/mm.h
-+++ b/include/linux/decompress/mm.h
-@@ -53,8 +53,6 @@ static void free(void *where)
+diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
+index 70e3244..a397e6f 100644
+--- a/fs/squashfs/Makefile
++++ b/fs/squashfs/Makefile
+@@ -4,4 +4,4 @@
  
- #define set_error_fn(x)
+ obj-$(CONFIG_SQUASHFS) += squashfs.o
+ squashfs-y += block.o cache.o dir.o export.o file.o fragment.o id.o inode.o
+-squashfs-y += namei.o super.o symlink.o
++squashfs-y += namei.o super.o symlink.o zlib_wrapper.o
+diff --git a/fs/squashfs/block.c b/fs/squashfs/block.c
+index 2a79603..b8addfd 100644
+--- a/fs/squashfs/block.c
++++ b/fs/squashfs/block.c
+@@ -29,7 +29,6 @@
+ #include <linux/fs.h>
+ #include <linux/vfs.h>
+ #include <linux/slab.h>
+-#include <linux/mutex.h>
+ #include <linux/string.h>
+ #include <linux/buffer_head.h>
+ #include <linux/zlib.h>
+@@ -153,72 +152,10 @@ int squashfs_read_data(struct super_block *sb, void **buffer, u64 index,
+ 	}
  
--#define INIT
+ 	if (compressed) {
+-		int zlib_err = 0, zlib_init = 0;
 -
- #else /* STATIC */
+-		/*
+-		 * Uncompress block.
+-		 */
+-
+-		mutex_lock(&msblk->read_data_mutex);
+-
+-		msblk->stream.avail_out = 0;
+-		msblk->stream.avail_in = 0;
+-
+-		bytes = length;
+-		do {
+-			if (msblk->stream.avail_in == 0 && k < b) {
+-				avail = min(bytes, msblk->devblksize - offset);
+-				bytes -= avail;
+-				wait_on_buffer(bh[k]);
+-				if (!buffer_uptodate(bh[k]))
+-					goto release_mutex;
+-
+-				if (avail == 0) {
+-					offset = 0;
+-					put_bh(bh[k++]);
+-					continue;
+-				}
+-
+-				msblk->stream.next_in = bh[k]->b_data + offset;
+-				msblk->stream.avail_in = avail;
+-				offset = 0;
+-			}
+-
+-			if (msblk->stream.avail_out == 0 && page < pages) {
+-				msblk->stream.next_out = buffer[page++];
+-				msblk->stream.avail_out = PAGE_CACHE_SIZE;
+-			}
+-
+-			if (!zlib_init) {
+-				zlib_err = zlib_inflateInit(&msblk->stream);
+-				if (zlib_err != Z_OK) {
+-					ERROR("zlib_inflateInit returned"
+-						" unexpected result 0x%x,"
+-						" srclength %d\n", zlib_err,
+-						srclength);
+-					goto release_mutex;
+-				}
+-				zlib_init = 1;
+-			}
+-
+-			zlib_err = zlib_inflate(&msblk->stream, Z_SYNC_FLUSH);
+-
+-			if (msblk->stream.avail_in == 0 && k < b)
+-				put_bh(bh[k++]);
+-		} while (zlib_err == Z_OK);
+-
+-		if (zlib_err != Z_STREAM_END) {
+-			ERROR("zlib_inflate error, data probably corrupt\n");
+-			goto release_mutex;
+-		}
+-
+-		zlib_err = zlib_inflateEnd(&msblk->stream);
+-		if (zlib_err != Z_OK) {
+-			ERROR("zlib_inflate error, data probably corrupt\n");
+-			goto release_mutex;
+-		}
+-		length = msblk->stream.total_out;
+-		mutex_unlock(&msblk->read_data_mutex);
++		length = squashfs_zlib_uncompress(msblk, buffer, bh, b, offset,
++			 length, srclength, pages);
++		if (length < 0)
++			goto read_failure;
+ 	} else {
+ 		/*
+ 		 * Block is uncompressed.
+@@ -255,9 +192,6 @@ int squashfs_read_data(struct super_block *sb, void **buffer, u64 index,
+ 	kfree(bh);
+ 	return length;
  
- /* Code active when compiled standalone for use when loading ramdisk: */
-@@ -77,7 +75,6 @@ static void free(void *where)
- static void(*error)(char *m);
- #define set_error_fn(x) error = x;
+-release_mutex:
+-	mutex_unlock(&msblk->read_data_mutex);
+-
+ block_release:
+ 	for (; k < b; k++)
+ 		put_bh(bh[k]);
+diff --git a/fs/squashfs/squashfs.h b/fs/squashfs/squashfs.h
+index 0e9feb6..ba87db6 100644
+--- a/fs/squashfs/squashfs.h
++++ b/fs/squashfs/squashfs.h
+@@ -70,6 +70,10 @@ extern struct inode *squashfs_iget(struct super_block *, long long,
+ 				unsigned int);
+ extern int squashfs_read_inode(struct inode *, long long);
  
--#define INIT __init
- #define STATIC
- 
- #include <linux/init.h>
-diff --git a/include/linux/decompress/unlzma_mm.h b/include/linux/decompress/unlzma_mm.h
++/* zlib_wrapper.c */
++extern int squashfs_zlib_uncompress(struct squashfs_sb_info *, void **,
++				struct buffer_head **, int, int, int, int, int);
++
+ /*
+  * Inodes and files operations
+  */
+diff --git a/fs/squashfs/zlib_wrapper.c b/fs/squashfs/zlib_wrapper.c
 new file mode 100644
-index 0000000..859287e
+index 0000000..3be9964
 --- /dev/null
-+++ b/include/linux/decompress/unlzma_mm.h
-@@ -0,0 +1,20 @@
-+#ifndef UNLZMA_MM_H
-+#define UNLZMA_MM_H
++++ b/fs/squashfs/zlib_wrapper.c
+@@ -0,0 +1,109 @@
++/*
++ * Squashfs - a compressed read only filesystem for Linux
++ *
++ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
++ * Phillip Lougher <phillip@lougher.demon.co.uk>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2,
++ * or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
++ *
++ * zlib_wrapper.c
++ */
 +
-+#ifdef STATIC
 +
-+/* Code active when included from pre-boot environment: */
-+#define INIT
++#include <linux/mutex.h>
++#include <linux/buffer_head.h>
++#include <linux/zlib.h>
 +
-+#elif defined(CONFIG_DECOMPRESS_LZMA_NEEDED)
++#include "squashfs_fs.h"
++#include "squashfs_fs_sb.h"
++#include "squashfs_fs_i.h"
++#include "squashfs.h"
 +
-+/* Make it available to non initramfs/initrd code */
-+#define INIT
-+#include <linux/module.h>
-+#else
++int squashfs_zlib_uncompress(struct squashfs_sb_info *msblk, void **buffer,
++	struct buffer_head **bh, int b, int offset, int length, int srclength,
++	int pages)
++{
++	int zlib_err = 0, zlib_init = 0;
++	int avail, bytes, k = 0, page = 0;
 +
-+/* Compile for initramfs/initrd code only */
-+#define INIT __init
-+#endif
++	mutex_lock(&msblk->read_data_mutex);
 +
-+#endif
-diff --git a/lib/Kconfig b/lib/Kconfig
-index bb1326d..25e7f28 100644
---- a/lib/Kconfig
-+++ b/lib/Kconfig
-@@ -117,6 +117,9 @@ config DECOMPRESS_BZIP2
- config DECOMPRESS_LZMA
- 	tristate
- 
-+config DECOMPRESS_LZMA_NEEDED
-+	 boolean
++	msblk->stream.avail_out = 0;
++	msblk->stream.avail_in = 0;
 +
- #
- # Generic allocator support is selected if needed
- #
-diff --git a/lib/decompress_bunzip2.c b/lib/decompress_bunzip2.c
-index 600f473..6eb6433 100644
---- a/lib/decompress_bunzip2.c
-+++ b/lib/decompress_bunzip2.c
-@@ -52,6 +52,7 @@
- #include <linux/slab.h>
- #endif /* STATIC */
- 
-+#include <linux/decompress/bunzip2_mm.h>
- #include <linux/decompress/mm.h>
- 
- #ifndef INT_MAX
-diff --git a/lib/decompress_inflate.c b/lib/decompress_inflate.c
-index fc686c7..cb6bcab 100644
---- a/lib/decompress_inflate.c
-+++ b/lib/decompress_inflate.c
-@@ -23,6 +23,7 @@
- 
- #endif /* STATIC */
- 
-+#include <linux/decompress/inflate_mm.h>
- #include <linux/decompress/mm.h>
- 
- #define GZIP_IOBUF_SIZE (16*1024)
-diff --git a/lib/decompress_unlzma.c b/lib/decompress_unlzma.c
-index ca82fde..a614b26 100644
---- a/lib/decompress_unlzma.c
-+++ b/lib/decompress_unlzma.c
-@@ -36,6 +36,7 @@
- #include <linux/slab.h>
- #endif /* STATIC */
- 
-+#include <linux/decompress/unlzma_mm.h>
- #include <linux/decompress/mm.h>
- 
- #define	MIN(a, b) (((a) < (b)) ? (a) : (b))
-@@ -531,7 +532,7 @@ static inline void INIT process_bit1(struct writer *wr, struct rc *rc,
- 
- 
- 
--STATIC inline int INIT unlzma(unsigned char *buf, int in_len,
-+STATIC int INIT unlzma(unsigned char *buf, int in_len,
- 			      int(*fill)(void*, unsigned int),
- 			      int(*flush)(void*, unsigned int),
- 			      unsigned char *output,
-@@ -652,6 +653,9 @@ exit_1:
- exit_0:
- 	return ret;
- }
-+#if defined(CONFIG_DECOMPRESS_LZMA_NEEDED) && !defined(PREBOOT)
-+EXPORT_SYMBOL(unlzma);
-+#endif
- 
- #ifdef PREBOOT
- STATIC int INIT decompress(unsigned char *buf, int in_len,
++	bytes = length;
++	do {
++		if (msblk->stream.avail_in == 0 && k < b) {
++			avail = min(bytes, msblk->devblksize - offset);
++			bytes -= avail;
++			wait_on_buffer(bh[k]);
++			if (!buffer_uptodate(bh[k]))
++				goto release_mutex;
++
++			if (avail == 0) {
++				offset = 0;
++				put_bh(bh[k++]);
++				continue;
++			}
++
++			msblk->stream.next_in = bh[k]->b_data + offset;
++			msblk->stream.avail_in = avail;
++			offset = 0;
++		}
++
++		if (msblk->stream.avail_out == 0 && page < pages) {
++			msblk->stream.next_out = buffer[page++];
++			msblk->stream.avail_out = PAGE_CACHE_SIZE;
++		}
++
++		if (!zlib_init) {
++			zlib_err = zlib_inflateInit(&msblk->stream);
++			if (zlib_err != Z_OK) {
++				ERROR("zlib_inflateInit returned unexpected "
++					"result 0x%x, srclength %d\n",
++					zlib_err, srclength);
++				goto release_mutex;
++			}
++			zlib_init = 1;
++		}
++
++		zlib_err = zlib_inflate(&msblk->stream, Z_SYNC_FLUSH);
++
++		if (msblk->stream.avail_in == 0 && k < b)
++			put_bh(bh[k++]);
++	} while (zlib_err == Z_OK);
++
++	if (zlib_err != Z_STREAM_END) {
++		ERROR("zlib_inflate error, data probably corrupt\n");
++		goto release_mutex;
++	}
++
++	zlib_err = zlib_inflateEnd(&msblk->stream);
++	if (zlib_err != Z_OK) {
++		ERROR("zlib_inflate error, data probably corrupt\n");
++		goto release_mutex;
++	}
++
++	mutex_unlock(&msblk->read_data_mutex);
++	return msblk->stream.total_out;
++
++release_mutex:
++	mutex_unlock(&msblk->read_data_mutex);
++
++	for (; k < b; k++)
++		put_bh(bh[k]);
++
++	return -EIO;
++}
 -- 
 1.6.3.3
