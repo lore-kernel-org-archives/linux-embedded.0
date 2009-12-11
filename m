@@ -1,47 +1,50 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: [PATCH 1/9] Squashfs: move zlib decompression wrapper code into
- a 	separate file
-Date: Thu, 10 Dec 2009 23:20:41 +0000
-Message-ID: <4B218249.4040501@lougher.demon.co.uk>
-References: <E1NHTHg-0001sM-NQ@dylan.lougher.demon.co.uk>	 <20091207145705.cd30cae8.akpm@linux-foundation.org>	 <4B1ED122.3040309@lougher.demon.co.uk>	 <1260352852.19669.1253.camel@localhost>	 <4B2042FA.8080406@lougher.demon.co.uk> <10f740e80912100201l6d83588evff46e95ec96d0aed@mail.gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <10f740e80912100201l6d83588evff46e95ec96d0aed@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Subject: [PATCH V2 0/9] Squashfs: Add support for LZMA compressed filesystems
+Date: Fri, 11 Dec 2009 01:34:08 +0000
+Message-ID: <E1NIuOW-0001oE-7h@dylan.lougher.demon.co.uk>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1762196AbZLKBeI@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: dedekind1@gmail.com, Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, Tim Bird <tim.bird@am.sony.com>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Felix Fietkau <nbd@openwrt.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: akpm@linux-foundation.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, phillip.lougher@gmail.com, tim.bird@am.sony.com
 
-Geert Uytterhoeven wrote:
-> Hi Phillip,
-> 
-> On Thu, Dec 10, 2009 at 01:38, Phillip Lougher
-> <phillip@lougher.demon.co.uk> wrote:
->> Artem Bityutskiy wrote:
->>> Did you consider using cryptoapi? UBIFS uses zlib/lzo in cryptoapi - it
->>> is a very clean way.
-> 
-> Exactly my question, as that's why the Crypto API was extended with
-> support for partial (de)compression in the first place ;-)
-> 
+Hi,
 
-Your cryptoapi patches are on my "must do something about them" list, I've
-not forgotten them :-)   The lack of lzma in the crypotapi made moving
-solely to the cryptoapi difficult, when I wanted to add lzma decompression
-support.
+This a respin of my LZMA decompression support patches, taking into
+account Andrew Morton's comments regarding poorly named globals:
 
-The decompressor framework is my _solution_ to this problem.  This allows
-cryptoapi support to be added as additional decompression_wrapper, with
-multiple compression types using the crptoapi wrapper as appropriate.
-This has the advantage it allows Squashfs to use the cryptoapi (with
-its advantages), without needlessly restricting Squashfs to the
-compression algorithms supported by the cryptoapi.
+Changes:
+	1. zlib_uncompress() renamed to squashfs_zlib_uncompress() (patch 1)
+	2. zlib_init() and zlib_free() renamed to squashfs_zlib_init() and
+	   squashfs_zlib_free() (patch 2)
+	3. Merged patch 7 (make decompressor init function pass superblock
+	   info) into patch 3.  This was a development commit which
+	   should not have been a separate patch for review
 
-Let's get this mainlined, and then we can work on getting your
-cryptoapi patches integrated into that.  That'll make me happy,
-and hopefully you'll be happy too?
+Original patch series info:
+
+The following patches add LZMA decompression support to Squashfs, using the
+in-kernel LZMA decompression library.
+
+The patches also add a decompression framework to Squashfs.
+This allows LZMA decompression to be added cleanly, and it allows
+additional decompressors to be easily added in the future.
+
+To enable the in-kernel LZMA decompression code to be used by Squashfs,
+there are two patches to the lzma code itself: one to make lzma available
+to non-init code, and one to make lzma reentrant.  These are obviously
+not restricted to Squashfs, but are needed by any non-init code that
+may wish to use lzma compression.
+
+These patches are available in my squashfs-devel git tree in a slightly
+different format (these patches have been refactored for posting, they'll
+be put into a git tree ASAP).
+
+http://git.kernel.org/?p=linux/kernel/git/pkl/squashfs-devel.git;a=summary
+
+I would like to thank the CE Linux Forum (CELF) for supporting this work.
 
 Thanks
 
