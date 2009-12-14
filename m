@@ -1,57 +1,91 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH 3/3] initramfs: add missing decompressor error check
-Date: Mon, 14 Dec 2009 21:45:19 +0000
-Message-ID: <4b26b1ef.0+ZWxT6886olqcSc%phillip@lougher.demon.co.uk>
+From: Aras Vaichas <arasv@magellan-technology.com>
+Subject: Re: [POWER] battery calibration parameters from sysfs
+Date: Tue, 15 Dec 2009 10:43:21 +1100
+Message-ID: <ed62800912141543v2ab7ef63v4b6b2c33018b3296@mail.gmail.com>
+References: <A6D19A13FE030A409EC4362C172E091F0E0495F6@eseldmw101.eemea.ericsson.se>
+	 <20091204104930.GA28625@sirena.org.uk>
+	 <A6D19A13FE030A409EC4362C172E091F0E071EB9@eseldmw101.eemea.ericsson.se>
+	 <20091207114825.GA26965@rakim.wolfsonmicro.main>
+	 <A6D19A13FE030A409EC4362C172E091F0E0A1FA1@eseldmw101.eemea.ericsson.se>
+	 <20091207165628.GA24981@rakim.wolfsonmicro.main>
+	 <20091213132413.GB1437@ucw.cz>
+	 <20091214121247.GB22388@rakim.wolfsonmicro.main>
+	 <20091214212257.GA9213@elf.ucw.cz>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20091214212257.GA9213@elf.ucw.cz>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
-Cc: phillip@lougher.demon.co.uk, mingo@elte.hu, albin.tonnerre@free-electrons.com
+Content-Type: text/plain; charset="iso-8859-1"
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Linus Walleij <linus.walleij@stericsson.com>, cbou@mail.ru, dwmw2@infradead.org, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Brian Swetland <swetland@google.com>, rpurdie@rpsys.net, lenz@cs.wisc.edu, Dirk@opfer-online.de, arminlitzel@web.de, Cyril Hrubis <metan@ucw.cz>, thommycheck@gmail.com, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, dbaryshkov@gmail.com, omegamoon@gmail.com, eric.y.miao@gmail.com, utx@penguin.cz, zaurus-devel@lists.linuxtogo.org
 
+2009/12/15 Pavel Machek <pavel@ucw.cz>:
+> Hi!
+>
+>> > > I'm not sure how familiar you are with the issues surrounding tr=
+ying to
+>> > > do a voltage to charge mapping for a battery but it's much more =
+complex
+>> > > than a simple table if you want to get it accurate. =A0There's a=
+ lot
+>> > > of
+>>
+>> > Well... current zaurus kernels use _huge_ table that maps voltage =
+to
+>> > battery %... and that table is linear function :-(.
+>>
+>> > Do you have some papers on that?
+>>
+>> Something like "Measure Battery Capacity Precisely in Medical Design=
+"
+>> by Bernd Krafthoefer in Power Electronics Technology Jan 2005 might =
+be
+>> useful here.
+>
+> Well, that would really require extensive hardware modifications: it
+> needs _way_ more accurate ADCs on battery for a start, and a way to
+> generate huge load.
 
-The decompressors return error by calling a supplied error function, and/or
-by returning an error return value.  The initramfs code, however, fails to
-check the exit code returned by the decompressor, and only checks the error
-status set by calling the error function.
+I've worked on several battery powered devices and battery monitoring
+is very hard to achieve without a deep understanding of the chemistry,
+circuitry and the algorithms. Large current loads can cause the
+battery voltage to drop and therefore there can be a significant
+voltage drop between measuring the quiescent and the loaded battery
+voltages.  I once did try to implement an algorithm which took into
+account the different battery voltage during heavy current drain but
+it's hard to know how to interpret that data.  One of the RFID systems
+I worked on could run the user interface for days on a low battery but
+a single RFID read would cause the system to die due to the internal
+resistance current drop ...
 
-This patch adds a return code check and calls the error function.
+One of the easiest ways to monitor the battery is with a coulomb
+counting method (accumulate current going into and out of the battery)
+e.g. "LTC4150 - Coulomb Counter/Battery Gas Gauge"
+http://www.linear.com/pc/productDetail.jsp?navId=3DH0,C1,C1003,C1037,C1=
+134,P2354
 
-Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
----
- init/initramfs.c |   10 ++++++----
- 1 files changed, 6 insertions(+), 4 deletions(-)
+As long as you aren't draining very large amounts of current from the
+battery, the accumulated current measurement should be almost equal to
+the amp-hour rating of the battery.
 
-diff --git a/init/initramfs.c b/init/initramfs.c
-index 4c00edc..b37d34b 100644
---- a/init/initramfs.c
-+++ b/init/initramfs.c
-@@ -413,7 +413,7 @@ static unsigned my_inptr;   /* index of next byte to be processed in inbuf */
- 
- static char * __init unpack_to_rootfs(char *buf, unsigned len)
- {
--	int written;
-+	int written, res;
- 	decompress_fn decompress;
- 	const char *compress_name;
- 	static __initdata char msg_buf[64];
-@@ -445,10 +445,12 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
- 		}
- 		this_header = 0;
- 		decompress = decompress_method(buf, len, &compress_name);
--		if (decompress)
--			decompress(buf, len, NULL, flush_buffer, NULL,
-+		if (decompress) {
-+			res = decompress(buf, len, NULL, flush_buffer, NULL,
- 				   &my_inptr, error);
--		else if (compress_name) {
-+			if (res)
-+				error("decompressor failed");
-+		} else if (compress_name) {
- 			if (!message) {
- 				snprintf(msg_buf, sizeof msg_buf,
- 					 "compression method %s not configured",
--- 
-1.6.3.3
+Unfortunately the simple coulomb counting chips have the disadvantage
+that the CPU has to be running to accumulate the pulses. Of course,
+the pulses could wake the CPU from a suspend mode, but I'd rather not
+do that just to add "one" to a counter ...
+
+=46inally we decided on a fully integrated "smart" battery monitor
+device like the DS2782
+http://www.maxim-ic.com/quick_view2.cfm/qv_pk/4779. This chip has
+Linux device driver support, I got the driver from Ryan Mallon at
+Bluewater Systems. It was fairly complex to set up and calibrate but
+we now use it in a commercial product.
+
+I recommend having a look at the datasheet for the DS2782 to see what
+methods they use for determining the remaining charge in a battery and
+to get an idea of the complexity of the problem.
+
+Good luck!
+
+Aras Vaichas
