@@ -1,46 +1,51 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [POWER] battery calibration parameters from sysfs
-Date: Mon, 14 Dec 2009 22:22:57 +0100
-Message-ID: <20091214212257.GA9213@elf.ucw.cz>
-References: <A6D19A13FE030A409EC4362C172E091F0E0495F6@eseldmw101.eemea.ericsson.se>
- <20091204104930.GA28625@sirena.org.uk>
- <A6D19A13FE030A409EC4362C172E091F0E071EB9@eseldmw101.eemea.ericsson.se>
- <20091207114825.GA26965@rakim.wolfsonmicro.main>
- <A6D19A13FE030A409EC4362C172E091F0E0A1FA1@eseldmw101.eemea.ericsson.se>
- <20091207165628.GA24981@rakim.wolfsonmicro.main>
- <20091213132413.GB1437@ucw.cz>
- <20091214121247.GB22388@rakim.wolfsonmicro.main>
+From: Phillip Lougher <phillip@lougher.demon.co.uk>
+Subject: [PATCH 1/3] bzip2/lzma/gzip: pre-boot malloc doesn't return NULL
+ on failure
+Date: Mon, 14 Dec 2009 21:45:19 +0000
+Message-ID: <4b26b1ef.hIInb2AYPMtImAJO%phillip@lougher.demon.co.uk>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20091214121247.GB22388@rakim.wolfsonmicro.main>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Linus Walleij <linus.walleij@stericsson.com>, cbou@mail.ru, dwmw2@infradead.org, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org, Brian Swetland <swetland@google.com>, rpurdie@rpsys.net, lenz@cs.wisc.edu, Dirk@Opfer-Online.de, arminlitzel@web.de, Cyril Hrubis <metan@ucw.cz>, thommycheck@gmail.com, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, dbaryshkov@gmail.com, omegamoon@gmail.com, eric.y.miao@gmail.com, utx@penguin.cz, zaurus-devel@lists.linuxtogo.org
+To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
+Cc: phillip@lougher.demon.co.uk, mingo@elte.hu, albin.tonnerre@free-electrons.com
 
-Hi!
 
-> > > I'm not sure how familiar you are with the issues surrounding trying to
-> > > do a voltage to charge mapping for a battery but it's much more complex
-> > > than a simple table if you want to get it accurate.  There's a lot
-> > > of
-> 
-> > Well... current zaurus kernels use _huge_ table that maps voltage to
-> > battery %... and that table is linear function :-(.
-> 
-> > Do you have some papers on that?
-> 
-> Something like "Measure Battery Capacity Precisely in Medical Design"
-> by Bernd Krafthoefer in Power Electronics Technology Jan 2005 might be
-> useful here.
+The trivial malloc implementation used in the pre-boot environment by the
+decompressors returns a bad pointer on failure (falling through after
+calling error).  This is doubly wrong - the callers expect malloc to
+return NULL on failure, second the error function is intended to be
+used by the decompressors to propagate errors to *their* callers.  The
+decompressors have no access to any state set by the error function.
 
-Well, that would really require extensive hardware modifications: it
-needs _way_ more accurate ADCs on battery for a start, and a way to
-generate huge load.
+Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
+---
+ include/linux/decompress/mm.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/include/linux/decompress/mm.h b/include/linux/decompress/mm.h
+index 12ff8c3..5032b9a 100644
+--- a/include/linux/decompress/mm.h
++++ b/include/linux/decompress/mm.h
+@@ -25,7 +25,7 @@ static void *malloc(int size)
+ 	void *p;
+ 
+ 	if (size < 0)
+-		error("Malloc error");
++		return NULL;
+ 	if (!malloc_ptr)
+ 		malloc_ptr = free_mem_ptr;
+ 
+@@ -35,7 +35,7 @@ static void *malloc(int size)
+ 	malloc_ptr += size;
+ 
+ 	if (free_mem_end_ptr && malloc_ptr >= free_mem_end_ptr)
+-		error("Out of memory");
++		return NULL;
+ 
+ 	malloc_count++;
+ 	return p;
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+1.6.3.3
