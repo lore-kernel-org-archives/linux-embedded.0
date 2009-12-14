@@ -1,34 +1,29 @@
-From: Arkadiusz =?UTF-8?B?TWnFm2tpZXdpY3o=?= <arekm@maven.pl>
-Subject: Re: [PATCH 0/9] Squashfs: Add support for LZMA compressed filesystems
-Date: Sun, 13 Dec 2009 21:13:53 +0100
-Message-ID: <hg3hu0$8h1$1@ger.gmane.org>
-References: <E1NHYun-000287-Vq@dylan.lougher.demon.co.uk> <87tyw3p3vu.fsf@macbook.be.48ers.dk> <4B1E93E5.8090104@lougher.demon.co.uk>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [POWER] battery calibration parameters from sysfs
+Date: Mon, 14 Dec 2009 11:50:24 +0000
+Message-ID: <20091214115023.GA22388@rakim.wolfsonmicro.main>
+References: <A6D19A13FE030A409EC4362C172E091F0E0495F6@eseldmw101.eemea.ericsson.se>
+ <20091204104930.GA28625@sirena.org.uk>
+ <A6D19A13FE030A409EC4362C172E091F0E071EB9@eseldmw101.eemea.ericsson.se>
+ <20091207114825.GA26965@rakim.wolfsonmicro.main>
+ <A6D19A13FE030A409EC4362C172E091F0E0A1FA1@eseldmw101.eemea.ericsson.se>
+ <20091213131921.GA1437@ucw.cz>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754175AbZLMUO1@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20091213131921.GA1437@ucw.cz>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="macroman"
-To: linux-kernel@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Linus Walleij <linus.walleij@stericsson.com>, cbou@mail.ru, dwmw2@infradead.org, LKML <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
 
-Phillip Lougher wrote:
+On Sun, Dec 13, 2009 at 02:19:22PM +0100, Pavel Machek wrote:
 
-> Peter Korsgaard wrote:
+> ...but then there are all the systems that rely on /proc/apm
+> emulation, like openembedded popular on sharp zaurus...
 
->> Nice, do you also have an mksquashfs with lzma support?
->>=20
->=20
-> Yes, in Squashfs CVS (http://sourceforge.net/projects/squashfs/develo=
-p).
-
-Any reason for not using much nicer xz library instead of lzma sdk ?=20
-
-http://tukaani.org/xz/
-
-> Phillip
-
-
---=20
-Arkadiusz Mi=C5=9Bkiewicz        PLD/Linux Team
-arekm / maven.pl            http://ftp.pld-linux.org/
+OpenEmbedded is a meta-distribution so doesn't use any particular
+software here - I suspect you're referring to things like the GPE stack
+which isn't so actively developed these days.
