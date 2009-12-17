@@ -1,58 +1,78 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: Project Proposal: add sleeping spinlocks to mainline kernel
-Date: Thu, 17 Dec 2009 10:45:06 -0800
-Message-ID: <4B2A7C32.10109@am.sony.com>
-References: <4B296390.3090004@am.sony.com> <63386a3d0912170154k6521433fl90b2ae96efb70a34@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: CELF Project Proposal: Create a watchdog framework for the Linux
+	kernel
+Date: Fri, 18 Dec 2009 00:02:15 +0100
+Message-ID: <20091217230215.GC23944@pengutronix.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="DSayHWYpDlRfCAAQ"
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <63386a3d0912170154k6521433fl90b2ae96efb70a34@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>
+To: celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
 
-Linus Walleij wrote:
-> 2009/12/16 Tim Bird <tim.bird@am.sony.com>:
-> 
->> Summary: add sleeping spinlocks to the mainline kernel
-> 
-> If realtime performance overall is a big deal for CELF I would suggest
-> adding "Kill-the-BKL" to the suggested projects. There are still some
-> RTOS people using the BKL as an argument to flak the Linux kernel,
-> c.f.
-> http://www.freescale.com/files/32bit/doc/ref_manual/EMBMCRM.pdf
-> (section 5.2)
 
-The only reference I could find in section 5.2 to BKL was
-an OSE BKL.  Maybe I missed the reference to the Linux BKL.
-(I looked pretty quickly).
+--DSayHWYpDlRfCAAQ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-However, agree that BKL reduction is a worthy goal.
+Proposer: Wolfram Sang
 
-> 
-> Another item could be to go through some common embedded
-> arch drivers and switch them from request_irq() to request_threaded_irq()
-> just based on the observation that almost nobody actually use that
-> in the mainline kernel, though I'm sure they should,
-> if realtime is a desired feature.
-> (The wm8350-core driver is an excellent example of a situation where
-> it is used properly.)
+Summary: Create a watchdog framework for the Linux kernel
 
-Likely, CELF would be most interested in switching to using
-threaded interrupts in places where the drivers were commonly
-used in embedded devices.  This would require some analysis.
-But this is another good suggestion.
+Description: The watchdog API of the Linux kernel is documented and used for
+years. Yet, there is no abstraction for its common functionality (open, wri=
+te,
+ioctl, close), so every watchdog driver has to implement those methods on i=
+ts
+own. In addition to the vast amount of code duplication in the kernel sourc=
+e,
+this is also error-prone as there are subtle corner-cases in handling the
+watchdog and the userspace-input correctly. Although there is code review f=
+or
+new drivers, it seems very desirable to improve the situation as a whole.
 
-> NB: I'm not a member of the CE Linux Forum and nor is my company
-> so I'm just talking freely here. (linux-embedded is public, hehe.)
+There have been two approaches for a generic watchdog framework, one from A=
+lan
+Cox and one from Wim van Sebroeck, the current watchdog maintainer. Sadly,
+nothing from those have made it to mainline so far. This is a bit surprisin=
+g;
+although watchdogs are usually rather simple devices, they are crucial for =
+the
+stability concept of an enormous number of devices. The benefit of this
+proposal is to have a rock-solid, well maintainable and trustworthy watchdog
+framework, which makes writing new drivers faster and less error-prone.
 
-The feedback is much appreciated!
- -- Tim
+Related work:
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Corporation of America
-=============================
+ * Proposal by Alan Cox:
+        http://git.kernel.org/?p=3Dlinux/kernel/git/wim/linux-2.6-watchdog-=
+next.git;a=3Dshortlog;h=3Drefs/heads/alan-generic-watchdog
+
+ * Proposal by Wim van Sebroeck:
+        http://git.kernel.org/?p=3Dlinux/kernel/git/wim/linux-2.6-watchdog-=
+next.git;a=3Dshortlog;h=3Drefs/heads/wim-generic-watchdog
+
+Scope:
+        My estimation would be 4 weeks of development and testing
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--DSayHWYpDlRfCAAQ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAksquHcACgkQD27XaX1/VRuKCgCfQij4v7d8r5BuZGt+L9GgdcK2
+A2sAoLKXUHsfVpl22YGCqmLOxOTdCHSj
+=W97t
+-----END PGP SIGNATURE-----
+
+--DSayHWYpDlRfCAAQ--
