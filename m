@@ -1,26 +1,22 @@
 From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: CELF Project Proposal: Create a watchdog framework for the Linux
- kernel
-Date: Thu, 17 Dec 2009 15:10:46 -0800
-Message-ID: <4B2ABA76.9050206@am.sony.com>
-References: <20091217230215.GC23944@pengutronix.de>
+Subject: Re: CELF Project Proposal- Refactoring Qi, lightweight bootloader
+Date: Thu, 17 Dec 2009 15:13:54 -0800
+Message-ID: <4B2ABB32.6010804@am.sony.com>
+References: <4B29EC68.1040109@0xlab.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20091217230215.GC23944@pengutronix.de>
+In-Reply-To: <4B29EC68.1040109@0xlab.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "celinux-dev@tree.celinuxforum.org" <celinux-dev@tree.celinuxforum.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+To: Matt Hsu <matt@0xlab.org>
+Cc: "celinux-dev@tree.celinuxforum.org" <celinux-dev@tree.celinuxforum.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "Bird, Tim" <Timothy.Bird@am.sony.com>, Andy Green <andy@warmcat.com>
 
-Wolfram Sang wrote:
-> Summary: Create a watchdog framework for the Linux kernel
-
-Interesting.  I've created a page for this proposal at:
-http://elinux.org/CELF_Project_Proposal/Create_a_watchdog_framework_for_the_Linux_kernel
-
- -- Tim
+Matt Hsu wrote:
+> Summary: Refactoring Qi, lightweight bootloader.
+I've created a page for this at:
+http://elinux.org/CELF_Project_Proposal/Refactor_the_Qi_lightweight_bootloader
 
 =============================
 Tim Bird
