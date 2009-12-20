@@ -1,64 +1,40 @@
-From: Raffaele Recalcati <lamiaposta71@gmail.com>
-Subject: Re: CELF Project Proposal - Feasibility analisys of Android 
-	introduction in a completely tested industrial device
-Date: Sat, 19 Dec 2009 16:46:39 +0100
-Message-ID: <ade1bdc0912190746h320ef36fpc01f3976d78aae65@mail.gmail.com>
-References: <ade1bdc0912180814m7fd3c02cp7d99a1943c2da37e@mail.gmail.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: CELF Project proposal: UBIFS mount-time speedups
+Date: Sun, 20 Dec 2009 14:46:08 +0900
+Message-ID: <9c9fda240912192146u7e815d80o6915db5506336ba0@mail.gmail.com>
+References: <4B26ECBD.9030005@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:message-id:subject:from:to:content-type
-         :content-transfer-encoding;
-        bh=5n02aBL97E1RvDiy4RUTkNFt8Yk3VyM4W74hz7AT4ec=;
-        b=EM9GkjlhXB6lH+uJRf6vL0M4AoG+fj6+F6yz6O4zC+UkOXX5LwXvMVrlBgFnbk0lmg
-         oj16fi9XXWjXPgNvGLMV67YRq2VM/bQVP0LtPKvS97isQwd5OjsQ5QQvgGX9o4aAg5q9
-         QaRqH+0vo/jsW4YornIo+xFBCy5psbObn6lU4=
-In-Reply-To: <ade1bdc0912180814m7fd3c02cp7d99a1943c2da37e@mail.gmail.com>
+        h=domainkey-signature:mime-version:sender:received:in-reply-to
+         :references:date:x-google-sender-auth:message-id:subject:from:to:cc
+         :content-type;
+        bh=g6sSAXEdap4j1Kbs4lBU+gyvfCCzclAbfnYhpJGwr4E=;
+        b=ma2XDFrr6Xm07/5TApdauSUJ3DIoU76LkaNmFq4aZvoZMds1eNgvv972cZXwKstrIW
+         72krlE0WuM1owTluxlYNvTck5EGWPZ+73bZdZ6w3ZZ7+OUJ+3sn8zT4R02uHgvvwPUbG
+         veZfvJfsgx3vQ/SYWY69SKEDIaTsbVQuq9KAM=
+In-Reply-To: <4B26ECBD.9030005@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>, elc10@tree.celinuxforum.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded <linux-embedded@vger.kernel.org>
+Cc: Tim Bird <tim.bird@am.sony.com>
 
-2009/12/18 Raffaele Recalcati <lamiaposta71@gmail.com>:
-> Summary: Feasibility analisys of Android introduction in a completely
-> tested industrial device.
->
-> Description: By now Android has been ported to 600Mhz Cortex A8 cpu o=
-r similar.
-> The declared Android requirements are instead lower, about 200Mhz Arm=
-9
-> cpu with 100Mhz Ram bus.
-> So I think the growing interest in this O.S. lacks some porting to
-> less powerful cpus.
-> The reasons to do this porting are commercial because of Google marke=
-t
-> power, but are also technnical, because Android debugging environment
-> is very nice for not embedded developers.
-> This could help the diffusion of opensource embedded Linux.
->
-> The porting will be maybe against the 2.6.31 kernel for pxa270.
-> The idea is to preserve industrial tested development but adding
-> Android graphical interface.
->
-> The cpu dependency of the porting will be as small as possible.
->
-> Related work:
-> =A0* Android Porting - http://www.kandroid.org/<wbr></wbr>android_pdk=
-/
-> =A0* Android Pxa270 - http://android-pxa270.sourceforge.net/
->
-> Scope:
-> This should take more than 1 month for feasibility analysis.
->
->
-> --
+Summary: UBI block mapping on flash (UBI2 requirement)
 
+Proposer: Kyungmin Park
 
-Anybody can give me his idea about this proposal?
-Thx
+Description: UBI scans all physical block at boot time. and maintain it at RAM.
+Usually this scan time takes almost 2 or more seconds. To reduce the this time
+UBI maintain block mapping information on flash and use it at next boot time.
 
-Bye,
-Recalcati
+Also it have to support or provide rescan mechanism at runtime to use
+single image into another flash
+
+* UBI2
+** see portions of
+http://www.mjmwired.net/kernel/Documentation/filesystems/ubifs.txt
+
+Scope: This project might take about 2 months.
