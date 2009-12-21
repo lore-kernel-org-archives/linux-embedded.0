@@ -1,140 +1,169 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight bootloader
-Date: Mon, 21 Dec 2009 02:00:09 -0600
-Message-ID: <200912210200.10047.rob@landley.net>
-References: <4B29EC68.1040109@0xlab.org> <200912202045.37159.rob@landley.net> <4B2F0CDB.3050305@0xlab.org>
+From: Andy Green <andy@warmcat.com>
+Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight
+ bootloader
+Date: Mon, 21 Dec 2009 09:54:22 +0000
+Message-ID: <4B2F45CE.8060903@warmcat.com>
+References: <4B29EC68.1040109@0xlab.org> <200912202045.37159.rob@landley.net> <4B2F0CDB.3050305@0xlab.org> <200912210200.10047.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4B2F0CDB.3050305@0xlab.org>
-Content-Disposition: inline
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:sender:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=AjFl4yW47rbF+C8Krra1YwTJlk+zbpo3Zo5Xnx80pCI=;
+        b=Pu/pcSSs+b7gE5898hN5qVAIGQ4tmLJhiDw+Lq1AxOEL5itptDe9ApvuXGvU50u5kS
+         WhGelPAwwlWbZE5LUYZzAKFRsaVVRhIpi4BnXk1QFUC1YFg2bny1ua+SKuIoATuvFSv1
+         P8O83etc/Rq0uVxI/XAQ+e+eVOdJrFnsm/OxQ=
+In-Reply-To: <200912210200.10047.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: Matt Hsu <matt@0xlab.org>
-Cc: celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org, Andy Green <andy@warmcat.com>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Rob Landley <rob@landley.net>
+Cc: Matt Hsu <matt@0xlab.org>, celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
 
-On Sunday 20 December 2009 23:51:23 Matt Hsu wrote:
-> Rob Landley wrote:
-> > However, if that's your minimum then you can't use the bootloader to
-> > re-flash the device, which is kind of handy.  (It gives you an
-> > un-bricking fallback short of pulling out a jtag.)
+On 12/21/09 08:00, Somebody in the thread at some point said:
+
+Hi Rob -
+
+>>> However, if that's your minimum then you can't use the bootloader to
+>>> re-flash the device, which is kind of handy.  (It gives you an
+>>> un-bricking fallback short of pulling out a jtag.)
+
+There is a simple and much more flexible alternative to have a "recovery 
+rootfs" on the device that can be selected, by holding down a button or 
+somesuch which is understood by Qi.  That gives you ALL the options 
+possible in Linux like network connectivity for your recovery without 
+doubling the support load in having a "smart" bootloader and its 
+different drivers to deal with.
+
+>>      Well, Boot from SD is your good friend.
 >
->     Hi Rob,
+> Ok, not aiming to be a generic bootloader then.  You're only trying to support
+> hardware that has the flash equivalent of a floppy drive.  Got it.
+
+No, Qi will boot from onboard NAND or NOR as well as SD.
+
+For other reasons -- eg, unbrickability -- true boot from SD is very 
+powerful.  By "true boot from SD" I mean the on-CPU ROM is pulling a 
+bootloader from SD so the entire software environment is coming from there.
+
+>>      If you look at the platform that Qi which is supported, most of them
+>> all have this feature.
 >
->     Well, Boot from SD is your good friend.
+> Because if they didn't you wouldn't support them?  Bit of a selection bias
+> there...
 
-Ok, not aiming to be a generic bootloader then.  You're only trying to support 
-hardware that has the flash equivalent of a floppy drive.  Got it.
+Naturally enough we only added support for devices we are using in the 
+real world :-)
 
->     If you look at the platform that Qi which is supported, most of them
-> all have this feature.
+All the devices Qi target have what Samsung called "steppingstone", some 
+small SRAM on the die that can hold your core bootloader startup from 
+NAND or SD (since you cannot execute direct from NAND).  That's probably 
+a better one-liner to describe the scope of it.
 
-Because if they didn't you wouldn't support them?  Bit of a selection bias 
-there...
+> Life is a bit easier if you can stick a USB port on your device and boot from
+> a USB stick or cdrom.  Most of the SoCs coming down the pipe support USB too,
+> but your wiki doesn't seem to consider this an interesting case...
 
-Life is a bit easier if you can stick a USB port on your device and boot from 
-a USB stick or cdrom.  Most of the SoCs coming down the pipe support USB too, 
-but your wiki doesn't seem to consider this an interesting case...
+To be clear Openmoko Wiki isn't "our Wiki".  Qi got started there to 
+solve the difficulties created by having basically a second Linux on the 
+device in the form of U-Boot.  But the main work on Qi is done now at 
+warmcat and Matt's OMAP branch.  Openmoko doesn't seem to be in the 
+phone business any more.
 
->     If you notice the trend of SoC, booting from peripherals becomes a
-> must.
+> Depending on the kernel to reflash the device means that if you reflash the
+> device with a kernel that doesn't work, what you have is a brick.  There's
 
-Depends how cheap you want your hardware to be, and whether you can afford 
-separate development and deployment boards.
+That does not follow if you have a recovery kernel + initrd / rootfs in 
+another partition that can be selected by holding down a key.
 
-Software development is a bit easier when you can spec adding a extra few 
-dollars worth of hardware to your device rather than redoing its software.  I 
-tend to deal with people who repurpose existing cheap plastic crap already 
-being knocked out in huge quantities somewhere in china.  (Their hardware 
-contribution _might_ be a different plastic case for the thing.)  I've also 
-dealt with highly integrated little suckers that haven't got _space_ for an sd 
-card.  Since I one day dream of following Moore's Law down to "disposable 
-computing", I'm reluctant to discard these cases as uninteresting.
-
->     Once you step into kernel via Qi, kernel provides you everything
-> such as mtd utils to re-flash device.
->     We don't need to support programming the device in the bootloader
-> anymore.
-
-Depending on the kernel to reflash the device means that if you reflash the 
-device with a kernel that doesn't work, what you have is a brick.  There's 
-lots and lots of reasons for a kernel not to work, and a 2.6 kernel kernel 
-takes up around a megabyte on a device that may only have 2 or 4 megs of ram 
-so keeping an old one around at all times isn't feasible.  So without some 
-kind of fallback (such as a little ~32k bootloader at the start of flash that 
-you never overwrite, in its own little erase block), every time you install a 
-new kernel you risk bricking the device.  (If you only care about devices that 
-have 2 gigs of flash, life is much easier.)
-
->     Don't reinvent the wheel.
-
-There are how many existing bootloaders out there already?
-
-> > Looking at the screen shot there, you've got code to parse ext2
-> > filesystems. What is your definition of "minimal"?
+> new kernel you risk bricking the device.  (If you only care about devices that
+> have 2 gigs of flash, life is much easier.)
 >
->     Enough to boot into Linux.
-
-You need to parse an ext2 filesystem to boot into linux?  (I'm not saying it's 
-a _bad_ thing, I'm just not seeing how it's "minimal".)
-
-> > Rationale for not providing a boot menu is you don't want to mess with
-> > video init.
+>>      Don't reinvent the wheel.
 >
->     Nope, the centric idea of Qi, is let kernel deal with everything it
-> could handle.
+> There are how many existing bootloaders out there already?
 
-So the fact the kernel can provide a serial console means you shouldn't?
+So what?
 
->     The video init should be handled by kernel stead of bootloader.
+As described the advantages of Qi's debloated and Linux-centric 
+philosophy came from having our noses pushed for months into the world 
+of crap coming from supporting multiple drivers and power behaviours 
+spread over U-Boot and Linux.
 
-Oh agreed.  What that has to do with a command line interpreter on the serial 
-console was my question.
+We did not find any existing open ARM bootloader that had a solid 
+internal structure and avoided the bloat.
 
-Personally, i'm used to embedded devices being headless.  (I tend to consider 
-the iPhone the next stage in the mainframe->micro->mini evolution and it'll 
-soon be "just another PC" target when they get the ergonomics worked out.  
-Heck, give those suckers a USB port and you could give 'em a big keyboard and 
-display today, and they could even charge themselves through the thing.  Way 
-more powerful than my first 386 PC.  Actually about as powerful as the laptop I 
-had circa 2002 or 2003.)
+Therefore we made one that proves that it is possible to push most of 
+the features of U-Boot and other heavy bootloaders to Linux.
 
->     The following clip demonstrate the advantage of Qi bootloader:
+>>> Looking at the screen shot there, you've got code to parse ext2
+>>> filesystems. What is your definition of "minimal"?
+
+Yes the main tenet is it has got to "load" and "boot" the kernel.  If 
+the kernel is on ext* then that's part of its remit.
+
+>>      Enough to boot into Linux.
 >
->     http://www.youtube.com/watch?v=ol9LWBKXXwQ&feature=related
+> You need to parse an ext2 filesystem to boot into linux?  (I'm not saying it's
+> a _bad_ thing, I'm just not seeing how it's "minimal".)
+
+The ext* code is tight (taken from U-Boot and cleaned up).
+
+With VFAT, ext*, memory test, all of the features Qi comes to 28KBytes 
+typical binary.
+
+>>> Rationale for not providing a boot menu is you don't want to mess with
+>>> video init.
+>>
+>>      Nope, the centric idea of Qi, is let kernel deal with everything it
+>> could handle.
 >
->     - Faster booting time
+> So the fact the kernel can provide a serial console means you shouldn't?
 
-I.E. you enable the cpu cache during kernel decompression.
+Qi provides serial output for diagnosis of the boot action.  But not input.
 
-I believe the u-boot guy just posted that as a todo item, and that falls on 
-the coreboot side of bootloading, which really should be broken out into its 
-own little project someday...
+But the answer to your rhetorical question is "yes".  It costs mindspace 
+and support effort to support and work with these complex chunks of 
+software, it's real money.
 
-The other delay in something like u-boot is it pausing to see if it gets an 
-"esc" or similar from the serial console, so it can be interrupted and provide 
-a prompt.  That's a configurable delay which can be removed if it really bugs 
-you.
+Turn your question around, what is your rationale for duplicating the 
+stuff that Linux does great into a bloated bootloader with its own 
+shell?  If you look at each of the features in a bootloader like U-Boot 
+that is not directly needed for "load" and "boot", they each have a more 
+powerful counterpart in Linux already.  You have to support the Linux 
+version on your Linux box, just simplify it down to that alone.
 
->     - Get rid of flash on display device when stepping into kernel
+>>      The video init should be handled by kernel stead of bootloader.
 >
->     Hope these could clear your doubt.
+> Oh agreed.  What that has to do with a command line interpreter on the serial
+> console was my question.
 
-Your proposal confused me when it said things like "improve portability" and 
-"make people spend less time on bootloader development", so I thought you were 
-aiming at something more generic.  But this bootloader is not intended to ever 
-apply to something like a hammer board, or any existing linksys-class router, 
-most current cell phones, devices like handheld game consoles where the sd 
-card stores data but not the operating system (due to the thing still needing 
-to work when you swap sd cards)...
+First maybe it's on you to explain why, other than habit, you think that 
+is worth the bloat.
 
-My mistake.  You're creating a bootloader specifically tailored to booting from 
-sd cards.  Might want to make that clear on the web page.
+> I.E. you enable the cpu cache during kernel decompression.
 
->     Cheers,
->     Matt
+You are assuming wrongly that the kernel is compressed.  On iMX31 I use 
+Qi with uncompressed 3MByte kernel from SD Card, it's booted to shell 
+from cold in 2.5s.  In any event with compressed kernels, we use the 
+kernel uncompress, it's not done in Qi.
 
-Rob
--- 
-Latency is more important than throughput. It's that simple. - Linus Torvalds
+> aiming at something more generic.  But this bootloader is not intended to ever
+> apply to something like a hammer board, or any existing linksys-class router,
+> most current cell phones, devices like handheld game consoles where the sd
+> card stores data but not the operating system (due to the thing still needing
+> to work when you swap sd cards)...
+>
+> My mistake.  You're creating a bootloader specifically tailored to booting from
+> sd cards.  Might want to make that clear on the web page.
+
+Apologies for throwing you back into confusion and doubt by the fact Qi 
+boots fine from NAND, NOR and SD.
+
+Actually Qi will work fine on most current ARM-based cellphones and game 
+consoles with NAND or NOR.
+
+-Andy
