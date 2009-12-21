@@ -1,40 +1,49 @@
-From: Wookey <wookey@wookware.org>
-Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi,
-	lightweight bootloader
-Date: Mon, 21 Dec 2009 20:49:08 +0000
-Message-ID: <20091221204908.GR7001@dream.aleph1.co.uk>
-References: <4B29EC68.1040109@0xlab.org> <200912202045.37159.rob@landley.net>
+From: Wolfgang Denk <wd@denx.de>
+Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight bootloader
+Date: Mon, 21 Dec 2009 22:38:29 +0100
+Message-ID: <20091221213829.1A8B93F6EF@gemini.denx.de>
+References: <4B29EC68.1040109@0xlab.org> <4B29F834.90108@warmcat.com> <20091221193038.38CB63F6EF@gemini.denx.de> <4B2FD7DB.10008@warmcat.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <200912202045.37159.rob@landley.net>
+In-reply-to: <4B2FD7DB.10008@warmcat.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
+To: Andy Green <andy@warmcat.com>
+Cc: Matt Hsu <matt@0xlab.org>, linux-embedded@vger.kernel.org, celinux-dev@tree.celinuxforum.org
 
-+++ Rob Landley [2009-12-20 20:45 -0600]:
-> On Thursday 17 December 2009 02:31:36 Matt Hsu wrote:
+Dear Andy Green,
+
+In message <4B2FD7DB.10008@warmcat.com> you wrote:
 > 
-> I still live in hope that somebody will split the first part (coreboot) out 
-> from the second part (grub) in embedded bootloaders.  
+> >> Another big problem with U-Boot was the inability to update the
+> >> bootloader from the Linux world.  Instead the bootloader was treated
+...
+> I was talking about GTA02 specifically here, it was (and still is AFAIK) 
+> only updateable by DFU for the bootloader.  We had kernels with soft ECC 
+> that differed from the ECC / bad block marking generated and used by the 
+> s3c2442 NAND hardware unit.  If U-Boot wrote it, it could at least read 
+> it again.  So DFU was / is the only official way to update GTA02 bootloader.
 
-blob took this approach a long time ago (started 2000-ish) trying very
-hard not to do any more than was needed in the normal version, and
-having a uploadable extra part for interactive stuff but was only
-adopted on a fairly small number of platforms.
+This only means that the ports of U-Boot and Linux to that hardware
+were inconsistent, which means that at least one of them can be
+considered broken. [And I'm tempted to add that this might eventually
+be a consequence of the fact that all this work was done without ever
+getting in touch with the U-Boot community. Likewise, no code or
+fixes have been contributed back into mainline.]
 
-Popular bootloaders always grow more bits and more hardware support
-until they are no longer small. It's a very difficult trend to resist,
-although good architecture helps.
 
-The codebase is still there: http://sourceforge.net/projects/blob/
+I think it's unfair to blame U-Boot for a poor on incorrect
+implementation of the NAND driver on this specific hardware.
 
-I always thought it was good code (especially since I've had far too
-much to do with bootldr (from familiar) for the last few years (yuk!)).
 
-Wookey
+Best regards,
+
+Wolfgang Denk
+
 -- 
-Principal hats:  iEndian - Balloonboard - Toby Churchill - Emdebian
-http://wookware.org/
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+It's hard to make a program foolproof because fools are so ingenious.
