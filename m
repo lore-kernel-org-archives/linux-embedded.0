@@ -1,94 +1,90 @@
-From: Andy Green <andy@warmcat.com>
-Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight
- bootloader
-Date: Wed, 23 Dec 2009 08:48:22 +0000
-Message-ID: <4B31D956.9020907@warmcat.com>
-References: <4B29EC68.1040109@0xlab.org> <200912202045.37159.rob@landley.net> <20091223022837.GE19806@shareable.org>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
+Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi,
+	lightweight bootloader
+Date: Wed, 23 Dec 2009 09:56:07 +0100
+Message-ID: <20091223085607.GE22533@pengutronix.de>
+References: <20091221193038.38CB63F6EF@gemini.denx.de> <4B2FD7DB.10008@warmcat.com> <20091221213829.1A8B93F6EF@gemini.denx.de> <4B2FF8E7.505@warmcat.com> <20091221231922.GO22533@pengutronix.de> <4B3081C3.3000909@warmcat.com> <20091222111250.GW22533@pengutronix.de> <4B3146E9.3010101@warmcat.com> <20091222232804.GB22533@pengutronix.de> <4B31D6F0.2040009@warmcat.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:received:received:sender:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=yFczs92s/MxbgyUqA27+k5D671YKXIBEJGrXjnyE41s=;
-        b=xknLFEFBvc3np01sLt1EkeqHY/DVC9qFtutF8jQWm+5gV9OnfUz52ZFZpeevrDB+gb
-         GPITdQIHmPtEOJyup0skdhcmmMYnVt2LW302TVcRW+mv51JS+M3VQ1KxU31FML8bfuZa
-         T+998HmVc3qNt6FkYxJGmBx1z/OFS22qU6IiM=
-In-Reply-To: <20091223022837.GE19806@shareable.org>
+Content-Disposition: inline
+In-Reply-To: <4B31D6F0.2040009@warmcat.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Jamie Lokier <jamie@shareable.org>
-Cc: Rob Landley <rob@landley.net>, celinux-dev@tree.celinuxforum.org, Matt Hsu <matt@0xlab.org>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Andy Green <andy@warmcat.com>
+Cc: Wolfgang Denk <wd@denx.de>, celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
 
-On 12/23/09 02:28, Somebody in the thread at some point said:
+On Wed, Dec 23, 2009 at 08:38:08AM +0000, Andy Green wrote:
+> I don't know or care when I get the binary packages from a repo where
+> they're already built. The whole point of a distro solution is someone
+> did all the work for you. You're only thinking about mass rebuild
+> yourself because it's the buildroot mindset, that whole task
+> disappears  with a distro basis.
 
-Hi -
+If you don't step into for example toolchain problems or other crazy
+things...
 
-> No TCP/IP, no TFTP, not even BOOTP (but it's a nice bonus), no command
-> line interpreter (just a GPIO on board to boot into "unbrick me" mode
-> :-), and most strikingly _no_ flash driver for flash chip du jour.
+> You can emulate "issue 6 monthly rootfs tarball updates" by just
+> updating the stable package repo at long intervals with well-tested
+> packagesets. At the same time you can offer other repos with newer
+> features earlier, get changed packages tested easier, confirm
+> patchlevel on test systems, etc.
+
+Yes, that's a valuable option.
+
+> I take your point but actually there's no reason the *bootloader*
+> needs that when the bootloader is focussed solely on booting Linux.
+> *Linux* might want an equipment list from the board, but then
+> typically you would build all the drivers and they can simply probe
+> and fail if its not there on the board.
+
+The oftree is currently provided by the bootloader, and much of what it
+contains is unprobable peripherals, i.e. the IP cores in the SoC cpus.
+For example for i.MX (which we happen to maintain in the mainline),
+there is a strong aim for having one kernel that runs on as many devices
+as possible. If you want to do this and if you can't probe significant
+parts of the hardware, you need an instance outside of the kernel who
+tells you what's actually there.
+
+> I'm not sure I managed to give the flavour of a bunch of hardware guys
+> half a world away rotating in and out on Military service. Even
+> patches internally aren't happening, Mainline isn't an answer.
+
+Well, there are many projects out there which are not so secret that one
+cannot expose the kernel drivers. And even if they are, it is possible
+to establish a peer-review culture inside of a corporation. But you
+won't get the full power of community review. That's the trade off one
+has to accept for having secrets :-) But quality is generally a big
+issue.
+
+> > > bus driver back into the bootloader. But actually, normal
+> > > customers don't care about 200ms on boot either way. They can get
+> > > the thing to market quicker and so cheaper and more reliably
+> > > without that stuff in the bootloader.
+> >
+> > That's a matter of the definition of "normal customers" :-)
 >
-> To flash it you send a kernel to boot from RAM which is capable of
-> flashing it.
+> What I mean by it is for geeks like us, it's interesting to see how
+> fast it will go. The actual customer cannot tell 200ms by eye he will
+> accept it if it's not passing his threshold of being "too slow". But
+> he will like getting it shipping earlier because the bootloader is
+> almost invisible in dev effort and in management of production.
 
-Sorry I missed where this kernel appears from and the bootloader that 
-spawned it, since both could get trashed.  That is actually a conundrum 
-on a lot of systems and some of the solutions (write-once backup 
-bootloader) in the long run lead to other issues.
+We have customers who care about "splash in 0.5 s" vs. "shell runs after
+3 s, then qt starts". People may be used to that kind of noticable boot
+time in the phone business, but in the industry (where embedded Linux
+boxes are even more "devices" than computers) they often are not.
 
-True SD Boot does truly deliver unbrickability if you are willing to 
-swap out or reformat the SD card.
+Do you remember the times when we had analog TV? We could zap through 5
+channels in under 3 seconds. *That's* performance :-) My sattelite
+receiver needs about 10 seconds to boot. Sometimes it feels like
+innovation goes backwards.
 
->>> http://wiki.openmoko.org/wiki/Qi
->>
->> Looking at the screen shot there, you've got code to parse ext2 filesystems.
->> What is your definition of "minimal"?
->
-> Ew, ext2 doesn't even satisfy powerfail-during-kernel-upgrade safety.
-
-It's just misleading (but accurate).  ext2 is the "lowest common 
-denominator" read-only parsing that actually supports ext3 and ext4 if 
-you are careful about the formatting options.  So the actual filesystem 
-is ext3 or ext4 typically (ext3 in GTA02 case), it's not that the 
-bootloader is mandating specifically ext2.
-
-> I agree it does beg the question of what is "minimal".
->
-> The proposal did explain quite well what Qi aims for: not duplicating
-> lots of kernel drivers badly.  If it succeeds in the area of flash
-> writing, network drivers, network protocols and so on it would be no
-> bad thing.
-
-Thanks.
-
-> One area for potential common ground among bootloaders could be to
-> share the code for parsing filesystems.  It'd be great to see that in
-> a library shared by GRUB, Qi, U-boot and so on as it's not device
-> specific at all and not particularly large, but not so trivial that
-> it's good to have lots of clones.
-
-Yeah it's not a bad idea.
-
-> It's possible to boot without parsing filesystems, but that is one
-> rather nice feature, and with the right filesystems it can make system
-> updates powerfail-safe.
-
-Bootloader is tricky, but actually on this iMX31 device Fedora is used, 
-yum update keeps the last 3 kernels around and our kernel package 
-follows that.  So it's possible to have backup kernels automatically 
-integrated into the bootloader and packaging system.
-
->> Rationale for not providing a boot menu is you don't want to mess with video
->> init.  I don't think I've actually seen an embedded bootloader that messes
->> with video, they do serial console instead, and you have a screen shot of
->> serial console messages so apparently the serial driver part is there...
->
-> In perspective, serial is usually quite simple.  Output only serial is
-> even simpler, though :-)
-
-Totally agree!
-
--Andy
+Cheers,
+rsc
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
