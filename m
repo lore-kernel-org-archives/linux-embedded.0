@@ -1,9 +1,9 @@
 From: Andy Green <andy@warmcat.com>
 Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight
  bootloader
-Date: Sun, 27 Dec 2009 09:54:51 +0000
-Message-ID: <4B372EEB.2000902@warmcat.com>
-References: <4B29EC68.1040109@0xlab.org> <20091222111250.GW22533@pengutronix.de> <4B3146E9.3010101@warmcat.com> <200912270117.18130.rob@landley.net>
+Date: Sun, 27 Dec 2009 10:09:23 +0000
+Message-ID: <4B373253.9050006@warmcat.com>
+References: <20091221193038.38CB63F6EF@gemini.denx.de> <20091223085607.GE22533@pengutronix.de> <4B31E2F2.4010206@warmcat.com> <200912270127.35414.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -12,42 +12,79 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:sender:message-id:date:from
          :user-agent:mime-version:to:cc:subject:references:in-reply-to
          :content-type:content-transfer-encoding;
-        bh=EgKvuFwkxxu9iA++nsVLxhLaZzsw3a/A6tcTSWsaSUc=;
-        b=lVO1T7fadoLFwitCIG7LfNCoKkDc0m8rXFukwVlEe9F76H8WR9Vzf3GuzrKMaFnkEe
-         Y7lMnwJDv2sVdl8u6CqQ0KA5zYBVd9fvLvmMwtGqjHDX7y4rYpQAGhjMYnHcwalMVIyz
-         akXspNmtuTeojzdDIID7zVb9Ihl6OxD7z7hl4=
-In-Reply-To: <200912270117.18130.rob@landley.net>
+        bh=aFvBeTNjdPe33HxA0Ts1WLJVRa5OnNIwcaButdPG3FU=;
+        b=hVayAxPbOnkuiwcdqaCWtTbBHLe3maqj75wIH/2slgHp5FJUQ/ytN5XtT3taTvagVl
+         5DiZuZQD5Sa0S7lMtvL0Wqaf07oPnDIIm/Cm58gGF6t7eEQ5p+WaGvU3IQc4V3aBfd3g
+         EHAKmRIxr1hR5dKHGxyqMCgmbwX1x78QVkG40=
+In-Reply-To: <200912270127.35414.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: Rob Landley <rob@landley.net>
 Cc: celinux-dev@tree.celinuxforum.org, Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded@vger.kernel.org
 
-On 12/27/09 07:17, Somebody in the thread at some point said:
+On 12/27/09 07:27, Somebody in the thread at some point said:
 
 Hi Rob -
 
->> Fedora provides a whole solution there, with the restriction it's
->> designed for native build, not cross.
+>> Again this is buildroot thinking.  The distro provides both the native
+>> and cross toolchains for you.  You're going to want to use the same
+>> distro as you normally use on your box so the cross toolchain installs
+>> as a package there.
 >
-> QEMU: it's not just for breakfast anymore.
+> Because boards that use things like uClibc and busybox just aren't interesting
+> to you?
 
-That's right Qemu often requires lunch, teatime and supper too to build 
-anything :-)
+I used them both before, but I can say with confidence if the platform 
+will take glibc and bash, most people will expect more complete, in that 
+sense, more reliable, performance from those.
 
-Newer ARM platforms like Cortex8+ and the Marvell Sheevaplug will 
-outstrip emulated performance on a normal PC.  There are 2GHz multi-core 
-ARMs coming as well apparently.  So I took the view I should ignore Qemu 
-and get an early start on the true native build that will be the future 
-of "native build" as opposed to cross due to that.
+It breaks down at stock distro init because it's painfully slow.  But 
+otherwise there are real advantages in having the full-strength versions 
+of everything.
 
-The point of the distro is you just let them build the bulk of it, just 
-installing binary packages.  You're only rebuilding the bits you are 
-changing for your application.  For a lot of cases that's a few small 
-app packages that are mainly linking against stuff from the distro and 
-they're not too bad to do natively.  (In addition my workflow is to edit 
-on a host PC and use scripts to teleport a source tree tarball to the 
-device where it's built as a package every time and installed together 
-with its -devel, so everything is always under package control).
+> Please don't confuse "development environment" with "build environment".  A
+
+Since I didn't use either term, I don't know why you think I'm confusing 
+them.
+
+> development environment has xterms and IDEs and visual diff tools and a web
+> browser and PDF viewer and so on.  A build environment just compiles stuff to
+> produce executables.  (Even on x86, your fire breathing SMP build server in the
+> back room isn't necessarily something you're going to VNC into and boot a
+> desktop on.)
+
+As I said in the other reply, my workflow is to edit a package's source 
+tree on a host (so you can use any editor on your host not just kate / 
+fish:// ) and by host script with scp and ssh get the current tree 
+package-built and installed on the device in one step.
+
+So I hope it's clear there is solid separation between what you're 
+calling "development environment" and "build environment" to the point 
+they have nothing to do with each other except ssh-based script to get 
+stuff built.
+
+> I agree it's nice to have a build environment compatible with your deployment
+> environment, and distros certainly have their advantages, but you may not want
+> to actually _deploy_ 48 megabytes of /var/lib/apt from Ubuntu in an embedded
+> device.
+
+I did say in the thread you want ARM11+ basis and you need 100-200MBytes 
+rootfs space to get the advantages of the distro basis.  If you have 
+something weaker (even ARM9 since stock Fedora is ARMv5+ instruction set 
+by default) then you have to do things the old way and recook everything 
+yourself one way or another.
+
+Even now there are plenty of suitable platforms that will work with it, 
+and over time they will only increase.  Nothing seems to totally die out 
+(8051-based micros are still in the market) but each time something new 
+comes in at the top it grabs some of the market and the older ones shrink.
+
+It boils down to the point that if you just treat the ARM11+ platforms 
+like the previous generation and stick fat bootloaders and buildroot 
+blobs on them, you are going to miss out on an epochal simplification 
+where embedded Linux largely becomes like desktop Linux in workflow, 
+quality and reliability of update mechanisms, and effort needed to bring 
+up a box / device.
 
 -Andy
