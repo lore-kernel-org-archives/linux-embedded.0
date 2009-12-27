@@ -1,50 +1,53 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight bootloader
-Date: Sun, 27 Dec 2009 01:27:34 -0600
-Message-ID: <200912270127.35414.rob@landley.net>
-References: <20091221193038.38CB63F6EF@gemini.denx.de> <20091223085607.GE22533@pengutronix.de> <4B31E2F2.4010206@warmcat.com>
+From: Andy Green <andy@warmcat.com>
+Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight
+ bootloader
+Date: Sun, 27 Dec 2009 09:54:51 +0000
+Message-ID: <4B372EEB.2000902@warmcat.com>
+References: <4B29EC68.1040109@0xlab.org> <20091222111250.GW22533@pengutronix.de> <4B3146E9.3010101@warmcat.com> <200912270117.18130.rob@landley.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4B31E2F2.4010206@warmcat.com>
-Content-Disposition: inline
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:received:received:sender:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=EgKvuFwkxxu9iA++nsVLxhLaZzsw3a/A6tcTSWsaSUc=;
+        b=lVO1T7fadoLFwitCIG7LfNCoKkDc0m8rXFukwVlEe9F76H8WR9Vzf3GuzrKMaFnkEe
+         Y7lMnwJDv2sVdl8u6CqQ0KA5zYBVd9fvLvmMwtGqjHDX7y4rYpQAGhjMYnHcwalMVIyz
+         akXspNmtuTeojzdDIID7zVb9Ihl6OxD7z7hl4=
+In-Reply-To: <200912270117.18130.rob@landley.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: celinux-dev@tree.celinuxforum.org
-Cc: Andy Green <andy@warmcat.com>, Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Rob Landley <rob@landley.net>
+Cc: celinux-dev@tree.celinuxforum.org, Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded@vger.kernel.org
 
-On Wednesday 23 December 2009 03:29:22 Andy Green wrote:
-> On 12/23/09 08:56, Somebody in the thread at some point said:
+On 12/27/09 07:17, Somebody in the thread at some point said:
+
+Hi Rob -
+
+>> Fedora provides a whole solution there, with the restriction it's
+>> designed for native build, not cross.
 >
-> Hi -
->
-> >> yourself because it's the buildroot mindset, that whole task
-> >> disappears  with a distro basis.
-> >
-> > If you don't step into for example toolchain problems or other crazy
-> > things...
->
-> Again this is buildroot thinking.  The distro provides both the native
-> and cross toolchains for you.  You're going to want to use the same
-> distro as you normally use on your box so the cross toolchain installs
-> as a package there.
+> QEMU: it's not just for breakfast anymore.
 
-Because boards that use things like uClibc and busybox just aren't interesting 
-to you?
+That's right Qemu often requires lunch, teatime and supper too to build 
+anything :-)
 
-Please don't confuse "development environment" with "build environment".  A 
-development environment has xterms and IDEs and visual diff tools and a web 
-browser and PDF viewer and so on.  A build environment just compiles stuff to 
-produce executables.  (Even on x86, your fire breathing SMP build server in the 
-back room isn't necessarily something you're going to VNC into and boot a 
-desktop on.)
+Newer ARM platforms like Cortex8+ and the Marvell Sheevaplug will 
+outstrip emulated performance on a normal PC.  There are 2GHz multi-core 
+ARMs coming as well apparently.  So I took the view I should ignore Qemu 
+and get an early start on the true native build that will be the future 
+of "native build" as opposed to cross due to that.
 
-I agree it's nice to have a build environment compatible with your deployment 
-environment, and distros certainly have their advantages, but you may not want 
-to actually _deploy_ 48 megabytes of /var/lib/apt from Ubuntu in an embedded 
-device.
+The point of the distro is you just let them build the bulk of it, just 
+installing binary packages.  You're only rebuilding the bits you are 
+changing for your application.  For a lot of cases that's a few small 
+app packages that are mainly linking against stuff from the distro and 
+they're not too bad to do natively.  (In addition my workflow is to edit 
+on a host PC and use scripts to teleport a source tree tarball to the 
+device where it's built as a package every time and installed together 
+with its -devel, so everything is always under package control).
 
-Rob
--- 
-Latency is more important than throughput. It's that simple. - Linus Torvalds
+-Andy
