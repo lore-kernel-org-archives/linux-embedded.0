@@ -1,12 +1,12 @@
 From: Rob Landley <rob@landley.net>
 Subject: Re: [Celinux-dev] CELF Project Proposal- Refactoring Qi, lightweight bootloader
-Date: Sun, 27 Dec 2009 17:15:53 -0600
-Message-ID: <200912271715.54249.rob@landley.net>
-References: <4B29EC68.1040109@0xlab.org> <200912270117.18130.rob@landley.net> <4B372EEB.2000902@warmcat.com>
+Date: Sun, 27 Dec 2009 18:21:37 -0600
+Message-ID: <200912271821.38258.rob@landley.net>
+References: <20091221193038.38CB63F6EF@gemini.denx.de> <200912270127.35414.rob@landley.net> <4B373253.9050006@warmcat.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4B372EEB.2000902@warmcat.com>
+In-Reply-To: <4B373253.9050006@warmcat.com>
 Content-Disposition: inline
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -14,105 +14,95 @@ Content-Type: Text/Plain; charset="us-ascii"
 To: Andy Green <andy@warmcat.com>
 Cc: celinux-dev@tree.celinuxforum.org, Robert Schwebel <r.schwebel@pengutronix.de>, linux-embedded@vger.kernel.org
 
-On Sunday 27 December 2009 03:54:51 Andy Green wrote:
-> On 12/27/09 07:17, Somebody in the thread at some point said:
+On Sunday 27 December 2009 04:09:23 Andy Green wrote:
+> > I agree it's nice to have a build environment compatible with your
+> > deployment environment, and distros certainly have their advantages, but
+> > you may not want to actually _deploy_ 48 megabytes of /var/lib/apt from
+> > Ubuntu in an embedded device.
 >
-> Hi Rob -
+> I did say in the thread you want ARM11+ basis and you need 100-200MBytes
+> rootfs space to get the advantages of the distro basis.  If you have
+> something weaker (even ARM9 since stock Fedora is ARMv5+ instruction set
+> by default) then you have to do things the old way and recook everything
+> yourself one way or another.
 
-Before replying, I note that Mark Miller and I gave a presentation entitled 
-"Developing for non-x86 targets using QEMU" Ohio LinuxFest in October.
+I started programming on a commodore 64.  By modern standards, that system is 
+so far down into "embedded" territory it's barely a computer.  And yet people 
+did development on it.
 
-  http://impactlinux.com/fwl/downloads/presentation.pdf
-  http://impactlinux.com/fwl/presentation.html
+  http://landley.net/history/catfire/wheniwasaboy.mp3
 
-There's even horribly mangled audio of our rushed 1 hour presentation.  (The 
-slides are for a day-long course and we had 55 minutes to give a talk, so we 
-skimmed like mad.  Unfortunately, the netbook they used for audio recording 
-had the mother of all latency spikes whenever the cache flush did an actual 
-flash erase and write, so there are regular audio dropouts the whole way 
-through.)  Still, it's somewhere under:
+That said, you can follow Moore's Law in two directions: either it makes stuff 
+twice as powerful every 18 months or it makes the same amount of power half 
+the price.
 
-  http://www.archive.org/details/OhioLinuxfest2009
+What really interests me is disposable computing.  Once upon a time swiss 
+watches were these amazingly valuable things (which Rolex and friends try to 
+cling to even today by gold-plating the suckers), but these days you can get a 
+cheap little LCD clock as a happy meal toy.  The cheapest crappiest machines 
+capable of running Linux are 32-bit boxes with 4 gigs of ram, which were high-
+end server systems circa 1987 that cost maybe about $5k (adjusted for inflation 
+anyway).  These days, the cheapest low-end Linux boxes (of the "repurposed 
+router" variety) are what, about $35 new?  Moore's Law says that 21 years is 
+14 doublings, which would be 1) $2500, 2) $1250, 3) $635, 4) $312, 5) $156, 6) 
+$87, 7) $39, 8) $19, 9) $9.76, 10) $4.88, 11) $2.44, 12) $1.22, 13) $0.61, 14) 
+$0.31.
 
-I've also spent the last few years developing a project that produces native 
-built environments for various QEMU targets and documents how to bootstrap 
-various distros under them:
+So in 2009 that $5000 worth of computing power should actually cost about 30 
+cents, and should _be_ disposable.  In reality, the CPU in that router is 
+clocked 20 times faster than a Compaq deskpro 386, you get 4 to 8 times the 
+memory, they added networking hardware, and so on.  And there are fixed costs 
+for a case and power supply that don't care about Moore's Law, plus up-front 
+costs to any design that need to be amortized over a large production run to 
+become cheap, and so on.
 
-  http://impactlinux.com/fwl
+And the real outstanding research problems include ergonomic UI issues for 
+tiny portable devices, batteries wearing out after too many cycles, and the 
+fact that making "disposable" devices out of materials like cadmium is dubious 
+from environmental standpoint.  Oh, and of course there was the decade or two 
+companies like Intel lost going up a blind alley by bolting giant heat sinks 
+and fans onto abominations like the Pentium 4 and Itanic.  They didn't care 
+about power consumption at all until fairly recently, and are still backing 
+out of that cul-de-sac even today...
 
-So I do have some firsthand experience here.
+Still, I forsee a day when cereal boxes have a display on the front that 
+changes every 30 seconds to attract passerby, driven by the same amount of 
+circuitry and battery that makes the "free toy inside" blink an LED today.  (I 
+don't know what else that sort of thing will be used for, any more than people 
+predicted checking twitter from the iPhone,)
 
-> >> Fedora provides a whole solution there, with the restriction it's
-> >> designed for native build, not cross.
-> >
-> > QEMU: it's not just for breakfast anymore.
+This I'm reluctant to abandond the low-end and say "oh we have more power now, 
+only machines with X and Y are interesting".  The mainframe, minicomputer, and 
+micro (PC) guys each said that, and today the old PC form factor's getting 
+kicked into the server space by the iPhone and such.  I want to follow Moore's 
+Law down into disruptive technology territory and find _out_ what it does.
+
+> Even now there are plenty of suitable platforms that will work with it,
+> and over time they will only increase.
+
+You must be this tall to ride the computer.
+
+> Nothing seems to totally die out
+> (8051-based micros are still in the market)
+
+Mainframes are still on the market too.
+
+> but each time something new
+> comes in at the top it grabs some of the market and the older ones shrink.
 >
-> That's right Qemu often requires lunch, teatime and supper too to build
-> anything :-)
+> It boils down to the point that if you just treat the ARM11+ platforms
+> like the previous generation and stick fat bootloaders and buildroot
+> blobs on them, you are going to miss out on an epochal simplification
+> where embedded Linux largely becomes like desktop Linux in workflow,
+> quality and reliability of update mechanisms, and effort needed to bring
+> up a box / device.
 
-Which is why you hook it up to distcc so it can call out to the cross 
-compiler, which speeds up the build and lets you take advantage of SMP.  
-(Pages 217-226 of the above PDF.)
+New computing niches will develop new usage patterns.  The iPhone is currently 
+doing this, and is unlikely to be the last cycle.
 
-That's also why my FWL project uses a statically linked version of busybox, 
-because the static linking avoids the extra page retranslations on each exec 
-and thus sped up the ./configure stage by 20%.  (Pages 235-236 of PDF.)
-
-There's more things you can do to speed it up if you want to go down that 
-rabbit hole (which the presentation does), and there's more work being done in 
-qemu.  (TCG was originally a performance hit but has improved since, although 
-it varies widely by platform and is its own rabbit hole.  Also switching to 
-gigabit NIC emulation with jumbo frames helped distcc a lot.)
-
-But in general, Moore's Law says that qemu on current PC hardware is about the 
-speed of current PC hardware seven years ago.  (And obviously nobody ever 
-built anything before 2003. :)
-
-> Newer ARM platforms like Cortex8+ and the Marvell Sheevaplug will
-> outstrip emulated performance on a normal PC.  There are 2GHz multi-core
-> ARMs coming as well apparently.  So I took the view I should ignore Qemu
-> and get an early start on the true native build that will be the future
-> of "native build" as opposed to cross due to that.
-
-Pages 24-34 of the above PDF go over this.  The first two pages are on the 
-advantages of native compiling on real hardware, the next eight pages are on 
-the disadvantages.  It can certainly be made to work, especially in a large 
-corporation willing to spend a lot of money on hardware as a _prerequisite_ to 
-choosing a deployment platform.
-
-For hobbyists, small businesses, and open source developers in general, there 
-are significant advantages to emulation.  (Page 208 comes to mind.)  And if you 
-_are_ going to throw money at hardware, x86-64 continues to have better 
-price/performance ratio, which was always its thing.
-
-> The point of the distro is you just let them build the bulk of it, just
-> installing binary packages.  You're only rebuilding the bits you are
-> changing for your application.
-
-Pages 68-71.  If your definition of embedded development is using off the shelf 
-hardware and installing prebuilt binary packages into it, life becomes a lot 
-easier, sure.
-
-> For a lot of cases that's a few small
-> app packages that are mainly linking against stuff from the distro and
-> they're not too bad to do natively.
-
-Pages 78-84
-
-> (In addition my workflow is to edit
-> on a host PC
-
-Pages 178-180
-
-> and use scripts to teleport a source tree tarball to the
-> device where it's built as a package every time and installed together
-> with its -devel,
-
-Pages 181-202
-
-> so everything is always under package control).
-
-Package control or source control?  (Different page ranges...)
+They'll also grow more powerful and expand into old niches the way "blade 
+servers" are constructed from laptop components and used for batch processing 
+today, but I personally find that less interesting.
 
 > -Andy
 
