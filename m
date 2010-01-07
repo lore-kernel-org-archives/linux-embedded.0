@@ -1,72 +1,43 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH V2 6/8] lzma: Make lzma available to non initramfs/initrd
- code
-Date: Thu, 07 Jan 2010 00:49:54 +0000
-Message-ID: <4b452fb2.pHrkBSPmj0OXtjq3%phillip@lougher.demon.co.uk>
+From: Hein_Tibosch <hein_tibosch@yahoo.es>
+Subject: Re: [PATCH V2 6/8] lzma: Make lzma ... thunderbird ok
+Date: Thu, 07 Jan 2010 15:43:52 +0800
+Message-ID: <4B4590B8.80604@yahoo.es>
+References: <E1NIuOW-0001ol-RC@dylan.lougher.demon.co.uk>	 <20100106140409.ba0f63d1.akpm@linux-foundation.org>	 <4B4528C8.3020603@lougher.demon.co.uk>	 <20100106163113.637e47db.akpm@linux-foundation.org> <bffbecbb1001061637i31260775ja14523458cc1ed51@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <bffbecbb1001061637i31260775ja14523458cc1ed51@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: albin.tonnerre@free-electrons.com, sfr@canb.auug.org.au, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-embedded@vger.kernel.org, akpm@linux-foundation.org
+To: Phillip Lougher <phillip.lougher@gmail.com>
+Cc: linux-embedded@vger.kernel.org
 
+On 7-1-2010 08:37, Phillip Lougher wrote:
+> Sorry, I was worried it might do that - the curse of Thunderbird.  I
+> normally use a
+> really dumb client like mailx to send patches, but I obviously didn't have the
+> email thread under mailx to do that.
+>   
+Thunderbird: not a real curse for patches. Try the following:
 
-Fix up patch resend using a nice and dumb email client.
-If I'm lucky, email readers may even get the threading right :-)
+Tools -> Options -> Advanced -> General -> Config Editor
 
-Phillip
+mailnews.send_plaintext_flowed  user  boolean  false
+mailnews.display.disable_flowed_support user  boolean  true
+mailnews.wraplength user integer 512
 
-From 1cf6d32e1427398368ff189aece68aa533092e98 Mon Sep 17 00:00:00 2001
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Date: Wed, 6 Jan 2010 23:50:12 +0000
-Subject: [PATCH] lzo: Fix-up add support for lzo compressed kernels patch
+And see this patch below:
 
-The add support for lzo compressed kernels patch relies on
-INIT and error definitions which have been moved to
-separate xxx_mm.h files for each decompressor.
-
-This patch adds a unlzo_mm.h file which supplies these
-definitions.
-
-Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
- include/linux/decompress/unlzo_mm.h |   13 +++++++++++++
- lib/decompress_unlzo.c              |    1 +
- 2 files changed, 14 insertions(+), 0 deletions(-)
- create mode 100644 include/linux/decompress/unlzo_mm.h
+diff --git a/thunderbird b/thunderbird
++++
+---
+	if (using_thunderbird) {
+		you can send patches safely
+	}
+---
 
-diff --git a/include/linux/decompress/unlzo_mm.h b/include/linux/decompress/unlzo_mm.h
-new file mode 100644
-index 0000000..27fe0ab
---- /dev/null
-+++ b/include/linux/decompress/unlzo_mm.h
-@@ -0,0 +1,13 @@
-+#ifndef UNLZO_MM_H
-+#define UNLZO_MM_H
-+
-+#ifdef STATIC
-+/* Code active when included from pre-boot environment: */
-+#define INIT
-+#else
-+/* Compile for initramfs/initrd code only */
-+#define INIT __init
-+static void(*error)(char *m);
-+#endif
-+
-+#endif
-diff --git a/lib/decompress_unlzo.c b/lib/decompress_unlzo.c
-index db521f4..edd82c3 100644
---- a/lib/decompress_unlzo.c
-+++ b/lib/decompress_unlzo.c
-@@ -39,6 +39,7 @@
- 
- #include <linux/types.h>
- #include <linux/lzo.h>
-+#include <linux/decompress/unlzo_mm.h>
- #include <linux/decompress/mm.h>
- 
- #include <linux/compiler.h>
--- 
-1.6.3.3
+Hein
+
 
