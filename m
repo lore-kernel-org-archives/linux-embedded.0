@@ -1,44 +1,64 @@
-From: David Brownell <david-b@pacbell.net>
-Subject: Re: flash_platform_data namespace collision
-Date: Sat, 16 Jan 2010 11:23:15 -0800
-Message-ID: <201001161123.15502.david-b@pacbell.net>
-References: <1263620475.29868.6280.camel@calx> <20100116110420.GB31282@flint.arm.linux.org.uk> <1263664079.29868.6289.camel@calx>
+From: Johnny Hung <johnny.hacking@gmail.com>
+Subject: jffs2_gcd_mtdx thread and umount problem.
+Date: Mon, 18 Jan 2010 15:04:28 +0800
+Message-ID: <cb9ecdfa1001172304q132d5324qa963d0d5cdfb7806@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1263664079.29868.6289.camel@calx>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Matt Mackall <mpm@selenic.com>
-Cc: Russell King <rmk+lkml@arm.linux.org.uk>, David Woodhouse <dwmw2@infradead.org>, Linux Mailing List <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=gamma;
+	h=domainkey-signature:mime-version:received:date:message-id:subject
+	:from:to:content-type;
+	bh=eKhKCjIY3XqmnCW0dMYX1Clj7RVtbxRtSInBe5rXcS4=;
+	b=U5dGHORH0+iq1DIBDJQvSB6Es53kaToeYanbCnuybPlmBphwfTM89GhtKCSzPd3TqX
+	ZeKsEiS/H6HBWlRCVbBD/7w7cMIkmJTp68A11Jpwc9dBNrEALxx2Q/Wjua16IxTdK9aj
+	AgVis55elezoJGcPpquCR1fwmdNpQ7UIrjATU=
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+To: linux-embedded@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-mtd@lists.infradead.org
 
-On Saturday 16 January 2010, Matt Mackall wrote:
-> On Sat, 2010-01-16 at 11:04 +0000, Russell King wrote:
-> > On Fri, Jan 15, 2010 at 11:41:15PM -0600, Matt Mackall wrote:
-> > > I've got a board here with SPI, NOR, and NAND flash devices and I've
-> > > just run into a namespace collision on flash_platform_data from
-> > 
-> > The one in arch/arm/include/asm/mach/flash.h is designed to have great
-> > appeal and flexibility across different platforms, and indeed we have
-> > at least 70 users across six different MTD NOR flash drivers and two
-> > MTD NAND drivers.
+Hi All,
 
-Yet it doesn't do what's needed for SPI flash (identify the chip type,
-when it can't probed); and for that application none of those methods
-are useful (and their slots are just wasted/confusing space).
+I have a customized MPC8313 (ppc arch) board with SPANSION 64MB NOR
+flash, everything works fine but I found a abnormal about JFFS2 flahs
+filesystem.
 
+The system will mount JFFS2 to /mnt/mtd when system boot up. I try to
+execute umount /mnt/mtd or sync or reboot right away after login then
+these commands hangs. Use ps command to check process status and is D
+(Uninterruptible sleep, usually IO). I try to kill jffs2_gcd_mtd4 and
+umount/reboot/syc commands execute successfully. I think
+jffs2_gcd_mtd4 (mount /dev/mtd4) do something in the background so I
+wait for 10 minutes after login and execute the same commands and it
+doesn't hangs.
 
-> > If anything, I believe that this header should move into linux/mtd/
-> > and become a standard structure for platforms to communicate their
-> > requirements to flash drivers.
-> 
-> Yeah, I think this is probably the way to go. Davids, any objections?
+The following procedure is I to make jffs2 file system and write to
+flash then mount to /mnt/mtd.
 
-I had similar thoughts when I first happened across that structure.
+1. mkfs.jffs2 -d mtd -e 0x20000 --pad 0x3080000 -o mtd.jffs2 (erase
+block size is 128KB and jffs2 partition size is 48.5MB)
 
-But such a move wouldn't resolve $SUBJECT ... which is IMO best addressed
-by the obvious rename of the one to spi_flash_platform_data.
+2. write jffs2 file system to flash in uboot.
+      tftpboot 200000 mtd.jffs2;                (load mtd.jffs2 to memory)
+      protect off f8f80000 fbffffff;
+      erase f8f80000 fbffffff;                       (erase all 48.5MB)
+      cp.b 200000 f8f80000 $filesize;     (program mtd.jffs2 to flash)
+      protect on f8f80000 fbffffff;
+      cmp.b 200000 f8f80000 $filesize
 
-- dave
+3. Add below in /etc/fstab file to mount to /mnt/mtd
+      /dev/mtdblock4  /mnt/mtd        jffs2   defaults        1       1
+
+Does anyone knows what purpose for jffs2_gcd_mtdx thread and why it
+cause umount/sync/reboot commands hangs it is reasonable or  something
+I did wrong?
+
+BRs, H. Johnny
