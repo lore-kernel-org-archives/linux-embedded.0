@@ -1,64 +1,32 @@
-From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Subject: Re: jffs2_gcd_mtdx thread and umount problem.
-Date: Mon, 18 Jan 2010 10:13:39 +0100
-Message-ID: <OF4F0C58C2.1BF896BC-ONC12576AF.0031AB45-C12576AF.0032B052@transmode.se>
-References: <cb9ecdfa1001172304q132d5324qa963d0d5cdfb7806@mail.gmail.com>	 <OF593A1F75.3C3C7D18-ONC12576AF.002B1239-C12576AF.002BB30A@transmode.se> <cb9ecdfa1001180026q5856b170t3f4c71191a7b99d8@mail.gmail.com>
+From: Johnny Hung <johnny.hacking@gmail.com>
+Subject: mount ramdisk rootfs /etc directory to jffs2 filesystem.
+Date: Tue, 19 Jan 2010 17:20:53 +0800
+Message-ID: <cb9ecdfa1001190120r593f7799sf566df5a855b8a54@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <cb9ecdfa1001180026q5856b170t3f4c71191a7b99d8@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:date:message-id:subject
+         :from:to:content-type;
+        bh=MpTIrmxRouDjM+yMeEiDtfbq5VJz451TwL0ydCB+rOM=;
+        b=ozE1ohsgBoO8LGHQdO6Vkjd3lHXgDS0QZuXvdNHceQjGQoAk4xtY8xjH/w/KUqCoXI
+         yp74YrQRrhbRvKShydzIfXbAoeB+5F4TlpoCSeX2Fmjijf7phLHg4SOFZ3pim49XSA3X
+         m2pWesqa9qMhPskhLvHwG49ybmQESnOnDnL6k=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Johnny Hung <johnny.hacking@gmail.com>
-Cc: linux-embedded@vger.kernel.org, linux-mtd@lists.infradead.org, linuxppc-dev@lists.ozlabs.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-mtd@lists.infradead.org, kernelnewbies <kernelnewbies@nl.linux.org>
 
-Johnny Hung <johnny.hacking@gmail.com> wrote on 18/01/2010 09:26:26:
->
-Please don't top post.
+Hi ALL,
 
-> Yes, umount / reboot command doesn't hang after first boot + wait for
-> 20 minutes. The jffs2_gcd_mtdx will re-erase empty blocks but how do =
-I
-> know it is finished?
+I have build an embedded Linux system and rootfs is a ramdisk. Ramdisk
+rootfs resides in memory so modify files is non-effective after a
+reboot. Some directories in rootfs, like /etc, /usr, ... are contain
+many application configuration files and I want to mount it to jffs2
+flash filesysyem so it will take effect after a reboot. Is it
+possible? I know the flash has write times limited so the log files
+(syslogd/klogd) should not store in flash. In general, how to deploy
+root file system for embedded linux with flash storage?
 
-You don't or just monitor jffs2_gcd_mtdx until it is finished.
-
->
-> BTW, why jffs2_gcd_mtd need to re-erase empty blocks and it will caus=
-e
-> some command cannot work if erase block is necessary. I mean many
-> pepple could meet this problem if it is need to erase empty block and
-> how do they overcome or workaround it.
-
-Because it might not be completely erased due to power failure in the
-middle of an erase. You get random bit flips if that happens.
-
-You can avoid this by writing clean markers in every empty block when y=
-ou
-install it, a bit messy though and it won't solve the general problem: =
-Try
-removing a few big files and then reboot, you will have to wait then to=
-o.
-If you don't use JFFS2 as a module and unload it, you can my old patch =
-which will
-solve both problems.
-
-    Jocke
->
-> Thank you so much, Jocke
-> BRs, H. Johnny
->
-> > I guess this is the first reboot after mounting a new JFFS2 FS?
-> > Then JFFS2 is reerasing empty blocks and you will have to wait
-> > until it is done.
-> >
-> > I posted a patch long ago for this, but it was racy w.r.t JFSS2 mod=
-ule unload so
-> > it didn't make it into the repo. Search the list for
-> > "[JFFS2] Stop erasing blocks when rebooting." to find my old patch
-> >
-> > =A0Jocke
-> >
-> >
->
+H. Johnny
