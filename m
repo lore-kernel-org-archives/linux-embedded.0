@@ -1,13 +1,13 @@
 From: "H Hartley Sweeten" <hartleys@visionengravers.com>
-Subject: RE: [PWM PATCH 0/5] Implements a common PWM API
-Date: Tue, 2 Feb 2010 12:44:23 -0500
-Message-ID: <BD79186B4FD85F4B8E60E381CAEE1909020E99C5@mi8nycmail19.Mi8.com>
-References: <cover.1265094517.git.bgat@billgatliff.com>
+Subject: RE: [PWM PATCH 3/5] Expunge old Atmel PWMC driver, replacing it with one that conforms to the PWM API
+Date: Tue, 2 Feb 2010 12:52:08 -0500
+Message-ID: <BD79186B4FD85F4B8E60E381CAEE1909020E99CD@mi8nycmail19.Mi8.com>
+References: <cover.1265094517.git.bgat@billgatliff.com> <f5be82a3ae501709e8568e9fa06ab036fd363567.1265094517.git.bgat@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-class: urn:content-classes:message
-In-Reply-To: <cover.1265094517.git.bgat@billgatliff.com>
+In-Reply-To: <f5be82a3ae501709e8568e9fa06ab036fd363567.1265094517.git.bgat@billgatliff.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -15,50 +15,67 @@ To: Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org
 
 On Tuesday, February 02, 2010 12:15 AM, Bill Gatliff wrote:
-> This patch series implements a common PWM API.  This series incorporates
-> the feedback from the linux-embedded mailing list and elsewhere; the author
-> greatly appreciates the efforts of everyone who reviewed the previous version
-> of this code.
-> 
-> Bill Gatliff (5):
->   API to consolidate PWM devices behind a common user and kernel
->     interface
->   Emulates PWM hardware using a high-resolution timer and a GPIO pin
->   Expunge old Atmel PWMC driver, replacing it with one that conforms to
->     the PWM API
->   PWM-based LED control
->   LED "dimmer" trigger
-> 
->  Documentation/pwm.txt       |  260 ++++++++++++++++++
->  drivers/leds/leds-pwm.c     |  224 +++++++++-------
->  drivers/leds/ledtrig-dim.c  |   95 +++++++
->  drivers/misc/Makefile       |    6 +-
->  drivers/misc/atmel_pwm.c    |  409 ----------------------------
->  drivers/pwm/atmel-pwm.c     |  589 ++++++++++++++++++++++++++++++++++++++++
->  drivers/pwm/gpio.c          |  307 +++++++++++++++++++++
->  drivers/pwm/pwm.c           |  633 +++++++++++++++++++++++++++++++++++++++++++
->  include/linux/pwm.h         |   31 --
->  include/linux/pwm/pwm-led.h |   34 +++
->  include/linux/pwm/pwm.h     |  170 ++++++++++++
->  11 files changed, 2217 insertions(+), 541 deletions(-)
->  create mode 100644 Documentation/pwm.txt
->  create mode 100644 drivers/leds/ledtrig-dim.c
+> Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
+> ---
+>  drivers/misc/Makefile    |    6 +-
+>  drivers/misc/atmel_pwm.c |  409 --------------------------------
+>  drivers/pwm/atmel-pwm.c  |  589 ++++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 594 insertions(+), 410 deletions(-)
 >  delete mode 100644 drivers/misc/atmel_pwm.c
 >  create mode 100644 drivers/pwm/atmel-pwm.c
->  create mode 100644 drivers/pwm/gpio.c
->  create mode 100644 drivers/pwm/pwm.c
->  delete mode 100644 include/linux/pwm.h
->  create mode 100644 include/linux/pwm/pwm-led.h
->  create mode 100644 include/linux/pwm/pwm.h
 
-I think the following files/patches are missing from this series:
+A couple quick comments, more after a better review.
 
-drivers/Kconfig
-drivers/Makefile
-drivers/leds/Kconfig
-drivers/leds/Makefile
-drivers/pwm/Kconfig
-drivers/pwm/Makefile
+[snip]
+
+> diff --git a/drivers/misc/atmel_pwm.c b/drivers/misc/atmel_pwm.c
+> deleted file mode 100644
+> index 6aa5294..0000000
+> --- a/drivers/misc/atmel_pwm.c
+> +++ /dev/null
+
+[snip]
+
+> -static struct platform_driver atmel_pwm_driver = {
+> -	.driver = {
+> -		.name = "atmel_pwm",
+> -		.owner = THIS_MODULE,
+> -	},
+
+[snip]
+
+> -MODULE_DESCRIPTION("Driver for AT32/AT91 PWM module");
+> -MODULE_LICENSE("GPL");
+> -MODULE_ALIAS("platform:atmel_pwm");
+> diff --git a/drivers/pwm/atmel-pwm.c b/drivers/pwm/atmel-pwm.c
+> new file mode 100644
+> index 0000000..a2a08c5
+> --- /dev/null
+> +++ b/drivers/pwm/atmel-pwm.c
+
+[snip]
+
+> +static struct platform_driver atmel_pwm_driver = {
+> +	.driver = {
+> +		.name = "atmel_pwmc",
+> +		.owner = THIS_MODULE,
+> +	},
+
+[snip]
+
+> +MODULE_AUTHOR("Bill Gatliff <bgat@billgatliff.com>");
+> +MODULE_DESCRIPTION("Driver for Atmel PWMC peripheral");
+> +MODULE_LICENSE("GPL");
+> +MODULE_ALIAS("platform:atmel_pwmc");
+
+You have a couple name changes here, were they intentional?
+
+    Filename: atmel_pwm.c        -> atmel-pwm.c
+ Driver name: atmel_pwm          -> atmel_pwmc
+Module alias: platform:atmel_pwm -> platform:atmel_pwmc
+
+Also, will this new driver still work for all the existing users of
+the old one?  Are there any platform changes that need to be done?
 
 Regards,
 Hartley
