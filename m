@@ -1,14 +1,17 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: [PWM PATCH 2/5] Emulates PWM hardware using a high-resolution timer and a GPIO pin
-Date: Tue,  2 Feb 2010 01:14:53 -0600
-Message-ID: <2d73f9b2fd175fd3e482920baebcd3028206f02e.1265094517.git.bgat@billgatliff.com>
+Subject: [PWM PATCH 5/5] LED "dimmer" trigger
+Date: Tue,  2 Feb 2010 01:14:56 -0600
+Message-ID: <75a85b8355e665288dc1d93070575e0299527dec.1265094518.git.bgat@billgatliff.com>
 References: <cover.1265094517.git.bgat@billgatliff.com>
  <c5873aa7c5d20254a9e54fc1ff179345b77c16b5.1265094517.git.bgat@billgatliff.com>
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <c5873aa7c5d20254a9e54fc1ff179345b77c16b5.1265094517.git.bgat@billgatliff.com>
+ <2d73f9b2fd175fd3e482920baebcd3028206f02e.1265094517.git.bgat@billgatliff.com>
+ <f5be82a3ae501709e8568e9fa06ab036fd363567.1265094517.git.bgat@billgatliff.com>
+ <ea8396130a30ab3ee72b009bfe5bb5f9d5449862.1265094518.git.bgat@billgatliff.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <ea8396130a30ab3ee72b009bfe5bb5f9d5449862.1265094518.git.bgat@billgatliff.com>
 In-Reply-To: <cover.1265094517.git.bgat@billgatliff.com>
 References: <cover.1265094517.git.bgat@billgatliff.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,322 +22,110 @@ Cc: linux-kernel@vger.kernel.org, Bill Gatliff <bgat@billgatliff.com>
 
 Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
 ---
- drivers/pwm/gpio.c |  307 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 307 insertions(+), 0 deletions(-)
- create mode 100644 drivers/pwm/gpio.c
+ drivers/leds/ledtrig-dim.c |   95 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 95 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/leds/ledtrig-dim.c
 
-diff --git a/drivers/pwm/gpio.c b/drivers/pwm/gpio.c
+diff --git a/drivers/leds/ledtrig-dim.c b/drivers/leds/ledtrig-dim.c
 new file mode 100644
-index 0000000..552ad1a
+index 0000000..299865b
 --- /dev/null
-+++ b/drivers/pwm/gpio.c
-@@ -0,0 +1,307 @@
++++ b/drivers/leds/ledtrig-dim.c
+@@ -0,0 +1,95 @@
 +/*
-+ * drivers/pwm/gpio.c
++ * LED Dim Trigger
 + *
-+ * Models a single-channel PWM device using a kernel interval timer
-+ * and a GPIO pin.
++ * Copyright (C) 2008 Bill Gatliff <bgat@billgatliff.com>
 + *
-+ * Copyright (C) 2010 Bill Gatliff <bgat@billgatliff.com>
++ * "Dims" an LED based on system load.  Derived from Atsushi Nemoto's
++ * ledtrig-heartbeat.c.
 + *
-+ * This program is free software; you may redistribute and/or modify
-+ * it under the terms of the GNU General Public License Version 2, as
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
 + * published by the Free Software Foundation.
 + *
-+ * This program is distributed in the hope that it will be useful, but
-+ * WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-+ * General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-+ * USA
 + */
-+
 +#include <linux/module.h>
++#include <linux/kernel.h>
 +#include <linux/init.h>
-+#include <linux/hrtimer.h>
-+#include <linux/err.h>
-+#include <linux/platform_device.h>
-+#include <linux/workqueue.h>
-+#include <mach/gpio.h>
-+#include <linux/pwm/pwm.h>
++#include <linux/timer.h>
++#include <linux/sched.h>
++#include <linux/leds.h>
 +
-+struct gpio_pwm {
-+	struct pwm_device pwm;
-+	struct hrtimer t;
-+	struct work_struct work;
-+	pwm_callback_t callback;
-+	int gpio;
-+	unsigned long polarity : 1;
-+	unsigned long active : 1;
++#include "leds.h"
++
++struct dim_trig_data {
++	struct timer_list timer;
 +};
 +
-+static inline struct gpio_pwm *to_gpio_pwm(const struct pwm_channel *p)
-+{
-+	return container_of(p->pwm, struct gpio_pwm, pwm);
-+}
 +
 +static void
-+gpio_pwm_work (struct work_struct *work)
++led_dim_function(unsigned long data)
 +{
-+	struct gpio_pwm *gp = container_of(work, struct gpio_pwm, work);
++	struct led_classdev *led_cdev = (struct led_classdev *)data;
++	struct dim_trig_data *dim_data = led_cdev->trigger_data;
++	unsigned int brightness;
 +
-+	if (gp->active)
-+		gpio_direction_output(gp->gpio, gp->polarity ? 1 : 0);
-+	else
-+		gpio_direction_output(gp->gpio, gp->polarity ? 0 : 1);
++	brightness = ((LED_FULL - LED_OFF) * avenrun[0]) / EXP_1;
++	if (brightness > LED_FULL)
++		brightness = LED_FULL;
++
++	led_set_brightness(led_cdev, brightness);
++	mod_timer(&dim_data->timer, jiffies + msecs_to_jiffies(500));
 +}
 +
-+static enum hrtimer_restart
-+gpio_pwm_timeout(struct hrtimer *t)
++
++static void
++dim_trig_activate(struct led_classdev *led_cdev)
 +{
-+	struct gpio_pwm *gp = container_of(t, struct gpio_pwm, t);
++	struct dim_trig_data *dim_data;
 +
-+	if (unlikely(gp->pwm.channels[0].duty_ticks == 0))
-+		gp->active = 0;
-+	else if (unlikely(gp->pwm.channels[0].duty_ticks
-+			  == gp->pwm.channels[0].period_ticks))
-+		gp->active = 1;
-+	else
-+		gp->active ^= 1;
++	dim_data = kzalloc(sizeof(*dim_data), GFP_KERNEL);
++	if (!dim_data)
++		return;
 +
-+	if (gpio_cansleep(gp->gpio))
-+		schedule_work(&gp->work);
-+	else
-+		gpio_pwm_work(&gp->work);
++	led_cdev->trigger_data = dim_data;
++	setup_timer(&dim_data->timer,
++		    led_dim_function, (unsigned long)led_cdev);
++	led_dim_function(dim_data->timer.data);
++}
 +
-+	if (!gp->active && gp->pwm.channels[0].callback)
-+		gp->pwm.channels[0].callback(&gp->pwm.channels[0]);
 +
-+	if (unlikely(!gp->active &&
-+		     (gp->pwm.channels[0].flags & BIT(FLAG_STOP)))) {
-+		clear_bit(FLAG_STOP, &gp->pwm.channels[0].flags);
-+		complete_all(&gp->pwm.channels[0].complete);
-+		return HRTIMER_NORESTART;
++static void
++dim_trig_deactivate(struct led_classdev *led_cdev)
++{
++	struct dim_trig_data *dim_data = led_cdev->trigger_data;
++
++	if (dim_data) {
++		del_timer_sync(&dim_data->timer);
++		kfree(dim_data);
 +	}
-+
-+	if (gp->active)
-+		hrtimer_start(&gp->t,
-+			      ktime_set(0, gp->pwm.channels[0].duty_ticks),
-+			      HRTIMER_MODE_REL);
-+	else
-+		hrtimer_start(&gp->t,
-+			      ktime_set(0,gp->pwm.channels[0].period_ticks
-+					- gp->pwm.channels[0].duty_ticks),
-+			      HRTIMER_MODE_REL);
-+	return HRTIMER_NORESTART;
 +}
 +
-+static void gpio_pwm_start(struct pwm_channel *p)
-+{
-+	struct gpio_pwm *gp = to_gpio_pwm(p);
 +
-+	gp->active = 0;
-+	gpio_pwm_timeout(&gp->t);
-+	pr_debug("%s:%d start, %lu ticks\n",
-+		 dev_name(p->pwm->dev), p->chan, p->duty_ticks);
-+}
-+
-+static int
-+gpio_pwm_config_nosleep(struct pwm_channel *p,
-+			struct pwm_channel_config *c)
-+{
-+	struct gpio_pwm *gp = to_gpio_pwm(p);
-+	int ret = 0;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&p->lock, flags);
-+
-+	switch (c->config_mask) {
-+
-+	case PWM_CONFIG_DUTY_TICKS:
-+		p->duty_ticks = c->duty_ticks;
-+		dev_dbg(p->pwm->dev, ":%d duty_ticks %lu\n",
-+			p->chan, p->duty_ticks);
-+		break;
-+
-+	case PWM_CONFIG_START:
-+		if (!hrtimer_active(&gp->t)) {
-+			gpio_pwm_start(p);
-+		}
-+		break;
-+	default:
-+		ret = -EINVAL;
-+		break;
-+	}
-+
-+	spin_unlock_irqrestore(&p->lock, flags);
-+	return ret;
-+}
-+
-+static int
-+gpio_pwm_stop_sync(struct pwm_channel *p)
-+{
-+	struct gpio_pwm *gp = to_gpio_pwm(p);
-+	int ret;
-+	int was_on = hrtimer_active(&gp->t);
-+
-+	if (was_on) {
-+		do {
-+			init_completion(&p->complete);
-+			set_bit(FLAG_STOP, &p->flags);
-+
-+			dev_dbg(p->pwm->dev, ":%d waiting on stop_sync completion...\n",
-+				p->chan);
-+
-+			ret = wait_for_completion_interruptible(&p->complete);
-+
-+			dev_dbg(p->pwm->dev, ":%d stop_sync complete (%d)\n",
-+				p->chan, ret);
-+
-+			if (ret)
-+				return ret;
-+		} while (p->flags & BIT(FLAG_STOP));
-+	}
-+
-+	dev_dbg(p->pwm->dev, ":%d stop_sync returning %d\n",
-+		p->chan, was_on);
-+
-+	return was_on;
-+}
-+
-+static int
-+gpio_pwm_config(struct pwm_channel *p,
-+		struct pwm_channel_config *c)
-+{
-+	struct gpio_pwm *gp = to_gpio_pwm(p);
-+	int was_on = 0;
-+
-+	if (p->pwm->config_nosleep) {
-+		if (!p->pwm->config_nosleep(p, c))
-+			return 0;
-+	}
-+
-+	might_sleep();
-+	dev_dbg(p->pwm->dev, ":%d config_mask %x\n",
-+		p->chan, c->config_mask);
-+
-+	was_on = gpio_pwm_stop_sync(p);
-+	if (was_on < 0)
-+		return was_on;
-+
-+	if (c->config_mask & PWM_CONFIG_PERIOD_TICKS)
-+		p->period_ticks = c->period_ticks;
-+
-+	if (c->config_mask & PWM_CONFIG_DUTY_TICKS)
-+		p->duty_ticks = c->duty_ticks;
-+
-+	if (c->config_mask & PWM_CONFIG_POLARITY)
-+		gp->polarity = c->polarity ? 1 : 0;
-+
-+	if ((c->config_mask & PWM_CONFIG_START)
-+	    || (was_on && !(c->config_mask & PWM_CONFIG_STOP)))
-+		gpio_pwm_start(p);
-+
-+	return 0;
-+}
-+
-+static int
-+gpio_pwm_set_callback(struct pwm_channel *p,
-+		      pwm_callback_t callback)
-+{
-+	struct gpio_pwm *gp = to_gpio_pwm(p);
-+	gp->callback = callback;
-+	return 0;
-+}
-+
-+static int
-+gpio_pwm_request(struct pwm_channel *p)
-+{
-+	p->tick_hz = 1000000000UL;
-+	return 0;
-+}
-+
-+static int __devinit
-+gpio_pwm_probe(struct platform_device *pdev)
-+{
-+	struct gpio_pwm *gp;
-+	struct gpio_pwm_platform_data *gpd = pdev->dev.platform_data;
-+	int ret = 0;
-+
-+	if (!gpd || gpio_request(gpd->gpio, dev_name(&pdev->dev)))
-+		return -EINVAL;
-+
-+	gp = kzalloc(sizeof(*gp), GFP_KERNEL);
-+	if (!gp) {
-+		ret = -ENOMEM;
-+		goto err_alloc;
-+	}
-+
-+	platform_set_drvdata(pdev, gp);
-+
-+	gp->pwm.bus_id = dev_name(&pdev->dev);
-+	gp->pwm.nchan = 1;
-+	gp->gpio = gpd->gpio;
-+
-+	INIT_WORK(&gp->work, gpio_pwm_work);
-+
-+	hrtimer_init(&gp->t, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-+	gp->t.function = gpio_pwm_timeout;
-+
-+	gp->pwm.owner = THIS_MODULE;
-+	gp->pwm.config_nosleep = gpio_pwm_config_nosleep;
-+	gp->pwm.config = gpio_pwm_config;
-+	gp->pwm.request = gpio_pwm_request;
-+	gp->pwm.set_callback = gpio_pwm_set_callback;
-+
-+	ret = pwm_register(&gp->pwm);
-+	if (ret)
-+		goto err_pwm_register;
-+
-+	return 0;
-+
-+err_pwm_register:
-+	kfree(gp);
-+err_alloc:
-+	return ret;
-+}
-+
-+static int __devexit
-+gpio_pwm_remove(struct platform_device *pdev)
-+{
-+	struct gpio_pwm *gp = platform_get_drvdata(pdev);
-+	int ret;
-+
-+	ret = pwm_unregister(&gp->pwm);
-+	hrtimer_cancel(&gp->t);
-+	cancel_work_sync(&gp->work);
-+	kfree(gp);
-+
-+	return 0;
-+}
-+
-+static struct platform_driver gpio_pwm_driver = {
-+	.driver = {
-+		.name = "gpio_pwm",
-+		.owner = THIS_MODULE,
-+	},
-+	.probe = gpio_pwm_probe,
-+	.remove = __devexit_p(gpio_pwm_remove),
++static struct led_trigger dim_led_trigger = {
++	.name     = "dim",
++	.activate = dim_trig_activate,
++	.deactivate = dim_trig_deactivate,
 +};
 +
-+static int __init gpio_pwm_init(void)
-+{
-+	return platform_driver_register(&gpio_pwm_driver);
-+}
-+module_init(gpio_pwm_init);
 +
-+static void __exit gpio_pwm_exit(void)
++static int __init dim_trig_init(void)
 +{
-+	platform_driver_unregister(&gpio_pwm_driver);
++	return led_trigger_register(&dim_led_trigger);
 +}
-+module_exit(gpio_pwm_exit);
++module_init(dim_trig_init);
++
++
++static void __exit dim_trig_exit(void)
++{
++	led_trigger_unregister(&dim_led_trigger);
++}
++module_exit(dim_trig_exit);
++
 +
 +MODULE_AUTHOR("Bill Gatliff <bgat@billgatliff.com>");
-+MODULE_DESCRIPTION("PWM output using GPIO and a high-resolution timer");
++MODULE_DESCRIPTION("Dim LED trigger");
 +MODULE_LICENSE("GPL");
-+MODULE_ALIAS("platform:gpio_pwm");
 -- 
 1.6.5
