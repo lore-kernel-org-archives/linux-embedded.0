@@ -1,62 +1,47 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: xilinx_spi in linux-next
-Date: Thu, 4 Feb 2010 07:36:05 -0700
-Message-ID: <fa686aa41002040636ubb0e156ybae9774b27bfe4f1@mail.gmail.com>
-References: <20100203201451.7e8368f7.akpm@linux-foundation.org> 
-	<4B6A8E4A.5020204@pelagicore.com>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: Re: [PWM PATCH 1/5] API to consolidate PWM devices behind a common
+ user and kernel interface
+Date: Thu, 04 Feb 2010 11:30:56 -0600
+Message-ID: <4B6B0450.4000507@billgatliff.com>
+References: <cover.1265094517.git.bgat@billgatliff.com> <c5873aa7c5d20254a9e54fc1ff179345b77c16b5.1265094517.git.bgat@billgatliff.com> <BD79186B4FD85F4B8E60E381CAEE190902152ADB@mi8nycmail19.Mi8.com> <4B6A5BAA.2030908@billgatliff.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4B6A8E4A.5020204@pelagicore.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4B6A5BAA.2030908@billgatliff.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: =?ISO-8859-1?Q?Richard_R=F6jfors?= <richard.rojfors@pelagicore.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Paul Mundt <lethal@linux-sh.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: H Hartley Sweeten <hartleys@visionengravers.com>
+Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-[cc'ing linux-kernel & linux-embedded]
-
-On Thu, Feb 4, 2010 at 2:07 AM, Richard R=F6jfors
-<richard.rojfors@pelagicore.com> wrote:
-> On 02/04/2010 05:14 AM, Andrew Morton wrote:
->>
->> Breaks sparc64 allmodconfig:
->>
->>
->> drivers/spi/xilinx_spi.c: In function `xspi_write32_be':
->> drivers/spi/xilinx_spi.c:108: error: implicit declaration of functio=
-n
->> `iowrite32be'
->> drivers/spi/xilinx_spi.c: In function `xspi_read32_be':
->> drivers/spi/xilinx_spi.c:113: error: implicit declaration of functio=
-n
->> `ioread32be'
+Bill Gatliff wrote:
+> H Hartley Sweeten wrote:
+>   
+>> Your older patch just used printk's to output the messages.  I think the
+>> Oops is being caused by the dev_<level>(pwm->dev, ...).  Where is pwm->dev
+>> being setup?
+>>   
+>>     
 >
-> I did a quick grep in the sparc's arch tree and the big endian versio=
-ns of
-> io(read/write) are not implemented. So the driver can not be compiled=
- on
-> sparc,
-> I think we have to put harder limits in the Kconfig. The driver has n=
-ot
-> worked on sparc
-> before anyway.
+> The intention was to save the result from device_create() called from
+> __pwm_create_sysfs(), but I'm suspicious that the patch I posted doesn't
+> have that code for some reason.  My local git repo here doesn't seem to
+> have it.  Hmmm...
+>   
 
-I can easily tighten up the Kconfig limits (ARM has the same problem),
-but I'd like to know what the right thing to do here is to write a
-portable driver.  This device is implemented on a Xilinx FPGA, so it
-is totally feasable it to be wired up to any architecture, especially
-on embedded stuff.  So far it works with PowerPC, Microblaze and x86,
-and it will most likely show up on ARM in the near future.
+No, that's not right.  Disregard the above.
 
-The most likely deviation is byte lane ordering either being big or
-little endian, hence the driver using both io{read,write}32() and
-io{read,write}32be(), but the 'be' variants aren't implemented on all
-architectures.  What's a driver author to do when trying to write
-portable code?
+If the PWM device in question is already known to the kernel, then
+before you call pwm_register() you must set pwm->dev to the address of
+that device structure.  I need to come up with a better way to handle this.
 
-g.
+If the PWM device isn't already known to the kernel as a true struct
+device, then I don't yet have a Plan B.  Drat.  :(
 
---=20
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+
+b.g.
+
+-- 
+Bill Gatliff
+bgat@billgatliff.com
+
