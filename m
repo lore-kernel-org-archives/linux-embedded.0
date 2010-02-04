@@ -1,47 +1,74 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PWM PATCH 1/5] API to consolidate PWM devices behind a common
- user and kernel interface
-Date: Thu, 04 Feb 2010 11:30:56 -0600
-Message-ID: <4B6B0450.4000507@billgatliff.com>
-References: <cover.1265094517.git.bgat@billgatliff.com> <c5873aa7c5d20254a9e54fc1ff179345b77c16b5.1265094517.git.bgat@billgatliff.com> <BD79186B4FD85F4B8E60E381CAEE190902152ADB@mi8nycmail19.Mi8.com> <4B6A5BAA.2030908@billgatliff.com>
+From: "H Hartley Sweeten" <hartleys@visionengravers.com>
+Subject: RE: [PWM PATCH 0/5] Implements a common PWM API
+Date: Thu, 4 Feb 2010 18:20:41 -0500
+Message-ID: <BD79186B4FD85F4B8E60E381CAEE190902152C2F@mi8nycmail19.Mi8.com>
+References: <cover.1265094517.git.bgat@billgatliff.com> <BD79186B4FD85F4B8E60E381CAEE1909020E99C5@mi8nycmail19.Mi8.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4B6A5BAA.2030908@billgatliff.com>
+Content-class: urn:content-classes:message
+In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE1909020E99C5@mi8nycmail19.Mi8.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+To: H Hartley Sweeten <hartleys@visionengravers.com>, Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-Bill Gatliff wrote:
-> H Hartley Sweeten wrote:
->   
->> Your older patch just used printk's to output the messages.  I think the
->> Oops is being caused by the dev_<level>(pwm->dev, ...).  Where is pwm->dev
->> being setup?
->>   
->>     
+On Tuesday, February 02, 2010 10:44 AM, H Hartley Sweeten wrote:
+> On Tuesday, February 02, 2010 12:15 AM, Bill Gatliff wrote:
+>> This patch series implements a common PWM API.  This series incorporates
+>> the feedback from the linux-embedded mailing list and elsewhere; the author
+>> greatly appreciates the efforts of everyone who reviewed the previous version
+>> of this code.
+>> 
+>> Bill Gatliff (5):
+>>   API to consolidate PWM devices behind a common user and kernel
+>>     interface
+>>   Emulates PWM hardware using a high-resolution timer and a GPIO pin
+>>   Expunge old Atmel PWMC driver, replacing it with one that conforms to
+>>     the PWM API
+>>   PWM-based LED control
+>>   LED "dimmer" trigger
+>> 
+>>  Documentation/pwm.txt       |  260 ++++++++++++++++++
+>>  drivers/leds/leds-pwm.c     |  224 +++++++++-------
+>>  drivers/leds/ledtrig-dim.c  |   95 +++++++
+>>  drivers/misc/Makefile       |    6 +-
+>>  drivers/misc/atmel_pwm.c    |  409 ----------------------------
+>>  drivers/pwm/atmel-pwm.c     |  589 ++++++++++++++++++++++++++++++++++++++++
+>>  drivers/pwm/gpio.c          |  307 +++++++++++++++++++++
+>>  drivers/pwm/pwm.c           |  633 +++++++++++++++++++++++++++++++++++++++++++
+>>  include/linux/pwm.h         |   31 --
+>>  include/linux/pwm/pwm-led.h |   34 +++
+>>  include/linux/pwm/pwm.h     |  170 ++++++++++++
+>>  11 files changed, 2217 insertions(+), 541 deletions(-)
+>>  create mode 100644 Documentation/pwm.txt
+>>  create mode 100644 drivers/leds/ledtrig-dim.c
+>>  delete mode 100644 drivers/misc/atmel_pwm.c
+>>  create mode 100644 drivers/pwm/atmel-pwm.c
+>>  create mode 100644 drivers/pwm/gpio.c
+>>  create mode 100644 drivers/pwm/pwm.c
+>>  delete mode 100644 include/linux/pwm.h
+>>  create mode 100644 include/linux/pwm/pwm-led.h
+>>  create mode 100644 include/linux/pwm/pwm.h
 >
-> The intention was to save the result from device_create() called from
-> __pwm_create_sysfs(), but I'm suspicious that the patch I posted doesn't
-> have that code for some reason.  My local git repo here doesn't seem to
-> have it.  Hmmm...
->   
+> I think the following files/patches are missing from this series:
+>
+> drivers/Kconfig
+> drivers/Makefile
+> drivers/leds/Kconfig
+> drivers/leds/Makefile
+> drivers/pwm/Kconfig
+> drivers/pwm/Makefile
 
-No, that's not right.  Disregard the above.
+Bill,
 
-If the PWM device in question is already known to the kernel, then
-before you call pwm_register() you must set pwm->dev to the address of
-that device structure.  I need to come up with a better way to handle this.
+When you do repost this series please make sure that pwm support can only be
+selected if CONFIG_SYSFS is enabled.  Your original patches did not have this.
 
-If the PWM device isn't already known to the kernel as a true struct
-device, then I don't yet have a Plan B.  Drat.  :(
+I look forward to seeing the update.
 
+BTW, setting pwm.dev = &pdev->dev in my driver did fix the Ooops.
 
-b.g.
-
--- 
-Bill Gatliff
-bgat@billgatliff.com
-
+Regards,
+Hartley
