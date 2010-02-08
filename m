@@ -1,44 +1,226 @@
-From: Rajkumar M <rajkumarm2@gmail.com>
-Subject: Re: Freescale MPC8313 TSEC SGMII problem.
-Date: Mon, 8 Feb 2010 04:58:36 +0000 (UTC)
-Message-ID: <loom.20100208T055813-443@post.gmane.org>
-References: <cb9ecdfa1001282229n21a11aa9sf15ebf279990862a@mail.gmail.com>
+From: Wu Fengguang <fengguang.wu@intel.com>
+Subject: Re: [PATCH 03/11] readahead: bump up the default readahead size
+Date: Mon, 8 Feb 2010 21:46:34 +0800
+Message-ID: <20100208134634.GA3024@localhost>
+References: <20100207041013.891441102@intel.com> <20100207041043.147345346@intel.com> <4B6FBB3F.4010701@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <4B6FBB3F.4010701@linux.vnet.ibm.com>
+Sender: owner-linux-mm@kvack.org
+List-Id: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Jens Axboe <jens.axboe@oracle.com>, Chris Mason <chris.mason@oracle.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Clemens Ladisch <clemens@ladisch.de>, Olivier Galibert <galibert@pobox.com>, Linux Memory Management List <linux-mm@kvack.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Matt Mackall <mpm@selenic.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-Johnny Hung <johnny.hacking <at> gmail.com> writes:
+Chris,
 
-> 
-> Hi All,
-> 
-> I have a Freescale MPC8313 customized board and want to confiugre
-> TSEC1 to SGMII. Would you please help me for this question,
-> 
-> 1). Is it possible for MPC8313 TSEC1 connect to Ethernet Switch by
-> SGMII (without phy), like below diagram.
-> 
-> [MPC8313 TSEC1]  <====SGMII====> [Ethernet Switch]
-> 
+Firstly inform the linux-embedded maintainers :)
 
-This is not possible. The MAC signals have to travel through SERDES, PCS layer
-and the rate adaptation blocks of the PHY. For instance, in the transmit
-direction, the differential pair transmit and transmit-clock signals are
-de-serialised and passed through PCS to recover the SGMII signals. This then
-passes through the rate adaptation block to output the data at the Ethernet port
-speed.
+I think it's a good suggestion to add a config option
+(CONFIG_READAHEAD_SIZE). Will update the patch..
 
+Thanks,
+Fengguang
 
-> 2). If yes in 1), how to configure it in MPC8313, as I know it can set
-> TSEC1 to SGMII in LTIB uboot setting. How about in Linux Kernel driver
-> ? Is it need extra setting or patch?
-> 
-> BRs, H. Johnny
-> 
+On Mon, Feb 08, 2010 at 03:20:31PM +0800, Christian Ehrhardt wrote:
+> This is related to our discussion from October 09 e.g.=20
+> http://lkml.indiana.edu/hypermail/linux/kernel/0910.1/01468.html
+>=20
+> I work for s390 where - as mainframe - we only have environments that=20
+> benefit from 512k readahead, but I still expect some embedded devices w=
+on't.
+> While my idea of making it configurable was not liked in the past, it=20
+> may be still useful when introducing this default change to let some=20
+> small devices choose without patching the src (a number field defaultin=
+g=20
+> to 512 and explaining the past of that value would be really nice).
+>=20
+> For the discussion of 512 vs. 128 I can add from my measurements that I=
+=20
+> have seen the following:
+> - 512 is by far superior to 128 for sequential reads
+> - improvements with iozone sequential read scaling from 1 to 64 paralle=
+l=20
+> processes up to +35%
+> - readahead sizes larger than 512 reevealed to not be "more useful" but=
+=20
+> increasing the chance of trashing in low mem systems
+>=20
+> So I appreciate this change with a little note that I would prefer a=20
+> config option.
+> -> tested & acked-by Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>
+>=20
+> Wu Fengguang wrote:
+>  >
+>  > Use 512kb max readahead size, and 32kb min readahead size.
+>  >
+>  > The former helps io performance for common workloads.
+>  > The latter will be used in the thrashing safe context readahead.
+>  >
+>  > -- Rationals on the 512kb size --
+>  >
+>  > I believe it yields more I/O throughput without noticeably increasin=
+g
+>  > I/O latency for today's HDD.
+>  >
+>  > For example, for a 100MB/s and 8ms access time HDD, its random IO or
+>  > highly concurrent sequential IO would in theory be:
+>  >
+>  > io_size KB  access_time  transfer_time  io_latency   util%  =20
+> throughput KB/s
+>  > 4           8             0.04           8.04        0.49%    497.57=
+=20
+>  > 8           8             0.08           8.08        0.97%    990.33=
+=20
+>  > 16          8             0.16           8.16        1.92%   1961.69
+>  > 32          8             0.31           8.31        3.76%   3849.62
+>  > 64          8             0.62           8.62        7.25%   7420.29
+>  > 128         8             1.25           9.25       13.51%  13837.84
+>  > 256         8             2.50          10.50       23.81%  24380.95
+>  > 512         8             5.00          13.00       38.46%  39384.62
+>  > 1024        8            10.00          18.00       55.56%  56888.89
+>  > 2048        8            20.00          28.00       71.43%  73142.86
+>  > 4096        8            40.00          48.00       83.33%  85333.33
+>  >
+>  > The 128KB =3D> 512KB readahead size boosts IO throughput from ~13MB/=
+s to
+>  > ~39MB/s, while merely increases (minimal) IO latency from 9.25ms to =
+13ms.
+>  >
+>  > As for SSD, I find that Intel X25-M SSD desires large readahead size
+>  > even for sequential reads:
+>  >
+>  >     rasize    1st run        2nd run
+>  >     ----------------------------------
+>  >       4k    123 MB/s    122 MB/s
+>  >      16k      153 MB/s    153 MB/s
+>  >      32k    161 MB/s    162 MB/s
+>  >      64k    167 MB/s    168 MB/s
+>  >     128k    197 MB/s    197 MB/s
+>  >     256k    217 MB/s    217 MB/s
+>  >     512k    238 MB/s    234 MB/s
+>  >       1M    251 MB/s    248 MB/s
+>  >       2M    259 MB/s    257 MB/s
+>  >          4M    269 MB/s    264 MB/s
+>  >       8M    266 MB/s    266 MB/s
+>  >
+>  > The two other impacts of an enlarged readahead size are
+>  >
+>  > - memory footprint (caused by readahead miss)
+>  >     Sequential readahead hit ratio is pretty high regardless of max
+>  >     readahead size; the extra memory footprint is mainly caused by
+>  >     enlarged mmap read-around.
+>  >     I measured my desktop:
+>  >     - under Xwindow:
+>  >         128KB readahead hit ratio =3D 143MB/230MB =3D 62%
+>  >         512KB readahead hit ratio =3D 138MB/248MB =3D 55%
+>  >           1MB readahead hit ratio =3D 130MB/253MB =3D 51%
+>  >     - under console: (seems more stable than the Xwindow data)
+>  >         128KB readahead hit ratio =3D 30MB/56MB   =3D 53%
+>  >           1MB readahead hit ratio =3D 30MB/59MB   =3D 51%
+>  >     So the impact to memory footprint looks acceptable.
+>  >
+>  > - readahead thrashing
+>  >     It will now cost 1MB readahead buffer per stream.  Memory tight
+>  >     systems typically do not run multiple streams; but if they do
+>  >     so, it should help I/O performance as long as we can avoid
+>  >     thrashing, which can be achieved with the following patches.
+>  >
+>  > -- Benchmarks by Vivek Goyal --
+>  >
+>  > I have got two paths to the HP EVA and got multipath device setup(dm=
+-3).
+>  > I run increasing number of sequential readers. File system is ext3 a=
+nd
+>  > filesize is 1G.
+>  > I have run the tests 3 times (3sets) and taken the average of it.
+>  >
+>  > Workload=3Dbsr      iosched=3Dcfq     Filesz=3D1G   bs=3D32K
+>  > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>  >                     2.6.33-rc5                2.6.33-rc5-readahead
+>  > job   Set NR  ReadBW(KB/s)   MaxClat(us)    ReadBW(KB/s)   MaxClat(u=
+s)
+>  > ---   --- --  ------------   -----------    ------------   ---------=
+--
+>  > bsr   3   1   141768         130965         190302         97937.3  =
+=20
+>  > bsr   3   2   131979         135402         185636         223286   =
+=20
+>  > bsr   3   4   132351         420733         185986         363658   =
+=20
+>  > bsr   3   8   133152         455434         184352         428478   =
+=20
+>  > bsr   3   16  130316         674499         185646         594311   =
+=20
+>  >
+>  > I ran same test on a different piece of hardware. There are few SATA=
+=20
+> disks
+>  > (5-6) in striped configuration behind a hardware RAID controller.
+>  >
+>  > Workload=3Dbsr      iosched=3Dcfq     Filesz=3D1G   bs=3D32K
+>  > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>  >                     2.6.33-rc5                2.6.33-rc5-readahead
+>  > job   Set NR  ReadBW(KB/s)   MaxClat(us)    ReadBW(KB/s)  =20
+> MaxClat(us)  =20
+>  > ---   --- --  ------------   -----------    ------------  =20
+> -----------  =20
+>  > bsr   3   1   147569         14369.7        160191        =20
+> 22752        =20
+>  > bsr   3   2   124716         243932         149343        =20
+> 184698       =20
+>  > bsr   3   4   123451         327665         147183        =20
+> 430875       =20
+>  > bsr   3   8   122486         455102         144568        =20
+> 484045       =20
+>  > bsr   3   16  117645         1.03957e+06    137485        =20
+> 1.06257e+06  =20
+>  >
+>  > Tested-by: Vivek Goyal <vgoyal@redhat.com>
+>  > CC: Jens Axboe <jens.axboe@oracle.com>
+>  > CC: Chris Mason <chris.mason@oracle.com>
+>  > CC: Peter Zijlstra <a.p.zijlstra@chello.nl>
+>  > CC: Martin Schwidefsky <schwidefsky@de.ibm.com>
+>  > CC: Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>
+>  > Signed-off-by: Wu Fengguang <fengguang.wu@intel.com>
+>  > ---
+>  >  include/linux/mm.h |    4 ++--
+>  >  1 file changed, 2 insertions(+), 2 deletions(-)
+>  >
+>  > --- linux.orig/include/linux/mm.h    2010-01-30 17:38:49.000000000 +=
+0800
+>  > +++ linux/include/linux/mm.h    2010-01-30 18:09:58.000000000 +0800
+>  > @@ -1184,8 +1184,8 @@ int write_one_page(struct page *page, in
+>  >  void task_dirty_inc(struct task_struct *tsk);
+>  >
+>  >  /* readahead.c */
+>  > -#define VM_MAX_READAHEAD    128    /* kbytes */
+>  > -#define VM_MIN_READAHEAD    16    /* kbytes (includes current page)=
+ */
+>  > +#define VM_MAX_READAHEAD    512    /* kbytes */
+>  > +#define VM_MIN_READAHEAD    32    /* kbytes (includes current page)=
+ */
+>  >
+>  >  int force_page_cache_readahead(struct address_space *mapping, struc=
+t=20
+> file *filp,
+>  >              pgoff_t offset, unsigned long nr_to_read);
+>  >
+>  >
+>=20
+> --=20
+>=20
+> Gr=C3=BCsse / regards, Christian Ehrhardt
+> IBM Linux Technology Center, Open Virtualization=20
 
-
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
