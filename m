@@ -1,226 +1,301 @@
-From: Wu Fengguang <fengguang.wu@intel.com>
-Subject: Re: [PATCH 03/11] readahead: bump up the default readahead size
-Date: Mon, 8 Feb 2010 21:46:34 +0800
-Message-ID: <20100208134634.GA3024@localhost>
-References: <20100207041013.891441102@intel.com> <20100207041043.147345346@intel.com> <4B6FBB3F.4010701@linux.vnet.ibm.com>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: [PWM PATCH 7/7] PWM API driver for MPC52xx GPT peripheral
+Date: Tue,  9 Feb 2010 14:46:34 -0600
+Message-ID: <c6c7ccbedbade4c8e4695f914d065d40b646587e.1265748264.git.bgat@billgatliff.com>
+References: <cover.1265748263.git.bgat@billgatliff.com>
+ <b7afd475c3fce08f459bceff7814de57ffce7bd0.1265748264.git.bgat@billgatliff.com>
+ <7178097a5a8af15f61656f11b6bef68b0da71498.1265748264.git.bgat@billgatliff.com>
+ <6ba8043e7749806f88b685ecd5ad7c4e1062bc91.1265748264.git.bgat@billgatliff.com>
+ <0b1e9d2f93d366f003348f4d31fdfbf8da4594b2.1265748264.git.bgat@billgatliff.com>
+ <e5f3ecb7c7220a75184525a71ca668f91e5667c7.1265748264.git.bgat@billgatliff.com>
+ <1b70ab4f8fdfc90eea12d6570be347f990abc8a9.1265748264.git.bgat@billgatliff.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <4B6FBB3F.4010701@linux.vnet.ibm.com>
-Sender: owner-linux-mm@kvack.org
-List-Id: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Jens Axboe <jens.axboe@oracle.com>, Chris Mason <chris.mason@oracle.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Clemens Ladisch <clemens@ladisch.de>, Olivier Galibert <galibert@pobox.com>, Linux Memory Management List <linux-mm@kvack.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Matt Mackall <mpm@selenic.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1b70ab4f8fdfc90eea12d6570be347f990abc8a9.1265748264.git.bgat@billgatliff.com>
+In-Reply-To: <cover.1265748263.git.bgat@billgatliff.com>
+References: <cover.1265748263.git.bgat@billgatliff.com>
+Sender: linux-kernel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset="utf-8"
+To: linux-embedded@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Bill Gatliff <bgat@billgatliff.com>
 
-Chris,
 
-Firstly inform the linux-embedded maintainers :)
+Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
+---
+ arch/powerpc/platforms/52xx/mpc52xx_gpt.c |  195 +++++++++++++++++++++=
++++++++-
+ 1 files changed, 193 insertions(+), 2 deletions(-)
 
-I think it's a good suggestion to add a config option
-(CONFIG_READAHEAD_SIZE). Will update the patch..
-
-Thanks,
-Fengguang
-
-On Mon, Feb 08, 2010 at 03:20:31PM +0800, Christian Ehrhardt wrote:
-> This is related to our discussion from October 09 e.g.=20
-> http://lkml.indiana.edu/hypermail/linux/kernel/0910.1/01468.html
->=20
-> I work for s390 where - as mainframe - we only have environments that=20
-> benefit from 512k readahead, but I still expect some embedded devices w=
-on't.
-> While my idea of making it configurable was not liked in the past, it=20
-> may be still useful when introducing this default change to let some=20
-> small devices choose without patching the src (a number field defaultin=
-g=20
-> to 512 and explaining the past of that value would be really nice).
->=20
-> For the discussion of 512 vs. 128 I can add from my measurements that I=
+diff --git a/arch/powerpc/platforms/52xx/mpc52xx_gpt.c b/arch/powerpc/p=
+latforms/52xx/mpc52xx_gpt.c
+index 6f8ebe1..b9aa4a5 100644
+--- a/arch/powerpc/platforms/52xx/mpc52xx_gpt.c
++++ b/arch/powerpc/platforms/52xx/mpc52xx_gpt.c
+@@ -1,6 +1,7 @@
+ /*
+  * MPC5200 General Purpose Timer device driver
+  *
++ * Copyright (c) 2010 Bill Gatliff <bgat@billgatliff.com>
+  * Copyright (c) 2009 Secret Lab Technologies Ltd.
+  * Copyright (c) 2008 Sascha Hauer <s.hauer@pengutronix.de>, Pengutron=
+ix
+  *
+@@ -50,6 +51,12 @@
+  * IO, or it can be an Open Collector (OC) output.  At the moment it i=
+s the
+  * responsibility of either the bootloader or the platform setup code =
+to set
+  * the output mode.  This driver does not change the output mode setti=
+ng.
++ *
++ * To use the PWM function, the following property must be added to
++ * the device tree node for the gpt device:
++ *     pwm-controller;
++ * TODO: we could set polarity, initial period and duty cycle, on/off,
++ * and whatnot inside the dts file...
+  */
 =20
-> have seen the following:
-> - 512 is by far superior to 128 for sequential reads
-> - improvements with iozone sequential read scaling from 1 to 64 paralle=
-l=20
-> processes up to +35%
-> - readahead sizes larger than 512 reevealed to not be "more useful" but=
+ #include <linux/device.h>
+@@ -65,11 +72,12 @@
+ #include <linux/watchdog.h>
+ #include <linux/miscdevice.h>
+ #include <linux/uaccess.h>
++#include <linux/pwm/pwm.h>
+ #include <asm/div64.h>
+ #include <asm/mpc52xx.h>
 =20
-> increasing the chance of trashing in low mem systems
->=20
-> So I appreciate this change with a little note that I would prefer a=20
-> config option.
-> -> tested & acked-by Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>
->=20
-> Wu Fengguang wrote:
->  >
->  > Use 512kb max readahead size, and 32kb min readahead size.
->  >
->  > The former helps io performance for common workloads.
->  > The latter will be used in the thrashing safe context readahead.
->  >
->  > -- Rationals on the 512kb size --
->  >
->  > I believe it yields more I/O throughput without noticeably increasin=
-g
->  > I/O latency for today's HDD.
->  >
->  > For example, for a 100MB/s and 8ms access time HDD, its random IO or
->  > highly concurrent sequential IO would in theory be:
->  >
->  > io_size KB  access_time  transfer_time  io_latency   util%  =20
-> throughput KB/s
->  > 4           8             0.04           8.04        0.49%    497.57=
+ MODULE_DESCRIPTION("Freescale MPC52xx gpt driver");
+-MODULE_AUTHOR("Sascha Hauer, Grant Likely, Albrecht Dre=C3=9F");
++MODULE_AUTHOR("Sascha Hauer, Grant Likely, Albrecht Dre=C3=9F, Bill Ga=
+tliff");
+ MODULE_LICENSE("GPL");
 =20
->  > 8           8             0.08           8.08        0.97%    990.33=
+ /**
+@@ -95,6 +103,9 @@ struct mpc52xx_gpt_priv {
+ #if defined(CONFIG_GPIOLIB)
+ 	struct of_gpio_chip of_gc;
+ #endif
++#if defined(CONFIG_GENERIC_PWM)
++	struct pwm_device pwm;
++#endif
+ };
 =20
->  > 16          8             0.16           8.16        1.92%   1961.69
->  > 32          8             0.31           8.31        3.76%   3849.62
->  > 64          8             0.62           8.62        7.25%   7420.29
->  > 128         8             1.25           9.25       13.51%  13837.84
->  > 256         8             2.50          10.50       23.81%  24380.95
->  > 512         8             5.00          13.00       38.46%  39384.62
->  > 1024        8            10.00          18.00       55.56%  56888.89
->  > 2048        8            20.00          28.00       71.43%  73142.86
->  > 4096        8            40.00          48.00       83.33%  85333.33
->  >
->  > The 128KB =3D> 512KB readahead size boosts IO throughput from ~13MB/=
-s to
->  > ~39MB/s, while merely increases (minimal) IO latency from 9.25ms to =
-13ms.
->  >
->  > As for SSD, I find that Intel X25-M SSD desires large readahead size
->  > even for sequential reads:
->  >
->  >     rasize    1st run        2nd run
->  >     ----------------------------------
->  >       4k    123 MB/s    122 MB/s
->  >      16k      153 MB/s    153 MB/s
->  >      32k    161 MB/s    162 MB/s
->  >      64k    167 MB/s    168 MB/s
->  >     128k    197 MB/s    197 MB/s
->  >     256k    217 MB/s    217 MB/s
->  >     512k    238 MB/s    234 MB/s
->  >       1M    251 MB/s    248 MB/s
->  >       2M    259 MB/s    257 MB/s
->  >          4M    269 MB/s    264 MB/s
->  >       8M    266 MB/s    266 MB/s
->  >
->  > The two other impacts of an enlarged readahead size are
->  >
->  > - memory footprint (caused by readahead miss)
->  >     Sequential readahead hit ratio is pretty high regardless of max
->  >     readahead size; the extra memory footprint is mainly caused by
->  >     enlarged mmap read-around.
->  >     I measured my desktop:
->  >     - under Xwindow:
->  >         128KB readahead hit ratio =3D 143MB/230MB =3D 62%
->  >         512KB readahead hit ratio =3D 138MB/248MB =3D 55%
->  >           1MB readahead hit ratio =3D 130MB/253MB =3D 51%
->  >     - under console: (seems more stable than the Xwindow data)
->  >         128KB readahead hit ratio =3D 30MB/56MB   =3D 53%
->  >           1MB readahead hit ratio =3D 30MB/59MB   =3D 51%
->  >     So the impact to memory footprint looks acceptable.
->  >
->  > - readahead thrashing
->  >     It will now cost 1MB readahead buffer per stream.  Memory tight
->  >     systems typically do not run multiple streams; but if they do
->  >     so, it should help I/O performance as long as we can avoid
->  >     thrashing, which can be achieved with the following patches.
->  >
->  > -- Benchmarks by Vivek Goyal --
->  >
->  > I have got two paths to the HP EVA and got multipath device setup(dm=
--3).
->  > I run increasing number of sequential readers. File system is ext3 a=
-nd
->  > filesize is 1G.
->  > I have run the tests 3 times (3sets) and taken the average of it.
->  >
->  > Workload=3Dbsr      iosched=3Dcfq     Filesz=3D1G   bs=3D32K
->  > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->  >                     2.6.33-rc5                2.6.33-rc5-readahead
->  > job   Set NR  ReadBW(KB/s)   MaxClat(us)    ReadBW(KB/s)   MaxClat(u=
-s)
->  > ---   --- --  ------------   -----------    ------------   ---------=
+ LIST_HEAD(mpc52xx_gpt_list);
+@@ -125,6 +136,10 @@ DEFINE_MUTEX(mpc52xx_gpt_list_mutex);
+=20
+ #define MPC52xx_GPT_STATUS_IRQMASK	(0x000f)
+=20
++#define MPC52xx_GPT_PWM_WIDTH_MASK	(0xffff0000)
++#define MPC52xx_GPT_PWM_PWMOP		(0x100)
++#define MPC52xx_GPT_PWM_LOAD		(0x1)
++
+ #define MPC52xx_GPT_CAN_WDT		(1 << 0)
+ #define MPC52xx_GPT_IS_WDT		(1 << 1)
+=20
+@@ -274,6 +289,182 @@ mpc52xx_gpt_irq_setup(struct mpc52xx_gpt_priv *gp=
+t, struct device_node *node)
+=20
+=20
+ /* -------------------------------------------------------------------=
 --
->  > bsr   3   1   141768         130965         190302         97937.3  =
-=20
->  > bsr   3   2   131979         135402         185636         223286   =
-=20
->  > bsr   3   4   132351         420733         185986         363658   =
-=20
->  > bsr   3   8   133152         455434         184352         428478   =
-=20
->  > bsr   3   16  130316         674499         185646         594311   =
-=20
->  >
->  > I ran same test on a different piece of hardware. There are few SATA=
-=20
-> disks
->  > (5-6) in striped configuration behind a hardware RAID controller.
->  >
->  > Workload=3Dbsr      iosched=3Dcfq     Filesz=3D1G   bs=3D32K
->  > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->  >                     2.6.33-rc5                2.6.33-rc5-readahead
->  > job   Set NR  ReadBW(KB/s)   MaxClat(us)    ReadBW(KB/s)  =20
-> MaxClat(us)  =20
->  > ---   --- --  ------------   -----------    ------------  =20
-> -----------  =20
->  > bsr   3   1   147569         14369.7        160191        =20
-> 22752        =20
->  > bsr   3   2   124716         243932         149343        =20
-> 184698       =20
->  > bsr   3   4   123451         327665         147183        =20
-> 430875       =20
->  > bsr   3   8   122486         455102         144568        =20
-> 484045       =20
->  > bsr   3   16  117645         1.03957e+06    137485        =20
-> 1.06257e+06  =20
->  >
->  > Tested-by: Vivek Goyal <vgoyal@redhat.com>
->  > CC: Jens Axboe <jens.axboe@oracle.com>
->  > CC: Chris Mason <chris.mason@oracle.com>
->  > CC: Peter Zijlstra <a.p.zijlstra@chello.nl>
->  > CC: Martin Schwidefsky <schwidefsky@de.ibm.com>
->  > CC: Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>
->  > Signed-off-by: Wu Fengguang <fengguang.wu@intel.com>
->  > ---
->  >  include/linux/mm.h |    4 ++--
->  >  1 file changed, 2 insertions(+), 2 deletions(-)
->  >
->  > --- linux.orig/include/linux/mm.h    2010-01-30 17:38:49.000000000 +=
-0800
->  > +++ linux/include/linux/mm.h    2010-01-30 18:09:58.000000000 +0800
->  > @@ -1184,8 +1184,8 @@ int write_one_page(struct page *page, in
->  >  void task_dirty_inc(struct task_struct *tsk);
->  >
->  >  /* readahead.c */
->  > -#define VM_MAX_READAHEAD    128    /* kbytes */
->  > -#define VM_MIN_READAHEAD    16    /* kbytes (includes current page)=
- */
->  > +#define VM_MAX_READAHEAD    512    /* kbytes */
->  > +#define VM_MIN_READAHEAD    32    /* kbytes (includes current page)=
- */
->  >
->  >  int force_page_cache_readahead(struct address_space *mapping, struc=
-t=20
-> file *filp,
->  >              pgoff_t offset, unsigned long nr_to_read);
->  >
->  >
->=20
-> --=20
->=20
-> Gr=C3=BCsse / regards, Christian Ehrhardt
-> IBM Linux Technology Center, Open Virtualization=20
-
++ * PWM API hooks
++ */
++#if defined(CONFIG_GENERIC_PWM)
++static inline struct mpc52xx_gpt_priv *pwm_to_mpc52xx_gpt(const struct=
+ pwm_channel *p)
++{
++	return container_of(p->pwm, struct mpc52xx_gpt_priv, pwm);
++}
++
++static int mpc52xx_gpt_pwm_request(struct pwm_channel *p)
++{
++	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
++
++	/* TODO: add hooks to prevent conflicts in use */
++	p->tick_hz =3D gpt->ipb_freq;
++	return 0;
++}
++
++static void mpc52xx_gpt_pwm_free(struct pwm_channel *p)
++{
++	/* TODO: add hooks to prevent conflicts in use */
++}
++
++static int __mpc52xx_gpt_pwm_config_period_ticks(struct pwm_channel *p=
+,
++					       struct pwm_channel_config *c)
++{
++	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
++	u64 prescale, count;
++
++	prescale =3D (c->period_ticks >> 16) + 1;
++	count =3D c->period_ticks;
++	do_div(count, prescale);
++	out_be32(&gpt->regs->count, prescale << 16 | count);
++
++	p->period_ticks =3D count * prescale;
++	dev_dbg(p->pwm->dev, "prescale %4x count %4x period_ticks %8x\n",
++		(unsigned int)prescale, (unsigned int)count,
++		(unsigned int)p->period_ticks);
++
++	return 0;
++}
++
++static int __mpc52xx_gpt_pwm_config_duty_ticks(struct pwm_channel *p,
++					       struct pwm_channel_config *c)
++{
++	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
++	unsigned long flags;
++	u64 width =3D c->duty_ticks;
++	u32 prescale, count;
++
++	spin_lock_irqsave(&gpt->lock, flags);
++
++	count =3D in_be32(&gpt->regs->count);
++	prescale =3D count >> 16;
++	count &=3D 0xffffUL;
++
++	/* TODO: this probably isn't the best place to do a divide... */
++	do_div(width, prescale);
++
++	clrsetbits_be32(&gpt->regs->pwm, MPC52xx_GPT_PWM_WIDTH_MASK,
++			MPC52xx_GPT_PWM_WIDTH_MASK & (width << 16));
++	spin_unlock_irqrestore(&gpt->lock, flags);
++
++	p->duty_ticks =3D width * prescale;
++	dev_dbg(p->pwm->dev, "prescale %4x count %4x width %4x duty_ticks %8x=
+\n",
++		(unsigned int)prescale, (unsigned int)count,
++		(unsigned int)width, (unsigned int)p->duty_ticks);
++
++	return 0;
++}
++
++static int __mpc52xx_gpt_pwm_config_polarity(struct pwm_channel *p,
++					     struct pwm_channel_config *c)
++{
++	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
++	unsigned long flags;
++
++	spin_lock_irqsave(&gpt->lock, flags);
++	if (c->polarity)
++		setbits32(&gpt->regs->pwm, MPC52xx_GPT_PWM_PWMOP);
++	else
++		clrbits32(&gpt->regs->pwm, MPC52xx_GPT_PWM_PWMOP);
++	spin_unlock_irqrestore(&gpt->lock, flags);
++	return 0;
++}
++
++static int __mpc52xx_gpt_pwm_start(struct pwm_channel *p)
++{
++	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
++	unsigned long flags;
++
++	spin_lock_irqsave(&gpt->lock, flags);
++	clrsetbits_be32(&gpt->regs->mode, MPC52xx_GPT_MODE_MS_MASK,
++		     MPC52xx_GPT_MODE_MS_PWM);
++	spin_unlock_irqrestore(&gpt->lock, flags);
++	return 0;
++}
++
++static int __mpc52xx_gpt_pwm_stop(struct pwm_channel *p)
++{
++	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
++	unsigned long flags;
++
++	spin_lock_irqsave(&gpt->lock, flags);
++	clrbits32(&gpt->regs->mode, MPC52xx_GPT_MODE_MS_MASK);
++	spin_unlock_irqrestore(&gpt->lock, flags);
++	return 0;
++}
++
++static int mpc52xx_gpt_pwm_config_nosleep(struct pwm_channel *p,
++					  struct pwm_channel_config *c)
++{
++	int ret =3D -EINVAL;
++
++	if (c->config_mask & PWM_CONFIG_PERIOD_TICKS)
++		if ((ret =3D __mpc52xx_gpt_pwm_config_period_ticks(p, c)))
++			goto done;
++
++	if (c->config_mask & PWM_CONFIG_DUTY_TICKS)
++		if ((ret =3D __mpc52xx_gpt_pwm_config_duty_ticks(p, c)))
++			goto done;
++
++	if (c->config_mask & PWM_CONFIG_POLARITY)
++		if ((ret =3D __mpc52xx_gpt_pwm_config_polarity(p, c)))
++			goto done;
++
++	if (c->config_mask & PWM_CONFIG_START)
++		if ((ret =3D __mpc52xx_gpt_pwm_start(p)))
++			goto done;
++
++	if (c->config_mask & PWM_CONFIG_STOP)
++		if ((ret =3D __mpc52xx_gpt_pwm_stop(p)))
++			goto done;
++
++done:
++	return ret;
++}
++
++static int mpc52xx_gpt_pwm_config(struct pwm_channel *p,
++				  struct pwm_channel_config *c)
++{
++	dev_dbg(p->pwm->dev, "config_mask %x\n", c->config_mask);
++
++	if (!mpc52xx_gpt_pwm_config_nosleep(p, c))
++		return 0;
++
++	might_sleep();
++
++	/* TODO: add other API entry points */
++
++	return -EINVAL;
++}
++
++static void
++mpc52xx_gpt_pwm_setup(struct mpc52xx_gpt_priv *gpt, struct device_node=
+ *node)
++{
++	if (!of_find_property(node, "pwm-controller", NULL))
++		return;
++
++	gpt->pwm.dev =3D gpt->dev;
++	gpt->pwm.bus_id =3D dev_name(gpt->dev);
++	gpt->pwm.nchan =3D 1;
++	gpt->pwm.owner =3D THIS_MODULE;
++
++	gpt->pwm.request =3D mpc52xx_gpt_pwm_request;
++	gpt->pwm.free =3D mpc52xx_gpt_pwm_free;
++	gpt->pwm.config_nosleep =3D mpc52xx_gpt_pwm_config_nosleep;
++	gpt->pwm.config =3D mpc52xx_gpt_pwm_config;
++
++	pwm_register(&gpt->pwm);
++}
++#else
++static void
++mpc52xx_gpt_pwm_setup(struct mpc52xx_gpt_priv *p, struct device_node *=
+np) {}
++#endif
++
++/* -------------------------------------------------------------------=
 --
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
+  * GPIOLIB hooks
+  */
+ #if defined(CONFIG_GPIOLIB)
+@@ -737,9 +928,9 @@ static int __devinit mpc52xx_gpt_probe(struct of_de=
+vice *ofdev,
+ 	}
+=20
+ 	dev_set_drvdata(&ofdev->dev, gpt);
+-
+ 	mpc52xx_gpt_gpio_setup(gpt, ofdev->node);
+ 	mpc52xx_gpt_irq_setup(gpt, ofdev->node);
++	mpc52xx_gpt_pwm_setup(gpt, ofdev->node);
+=20
+ 	mutex_lock(&mpc52xx_gpt_list_mutex);
+ 	list_add(&gpt->list, &mpc52xx_gpt_list);
+--=20
+1.6.5
