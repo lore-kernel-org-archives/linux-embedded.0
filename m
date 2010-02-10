@@ -1,111 +1,50 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PWM PATCH 2/7] Emulates PWM hardware using a high-resolution
- timer and a GPIO pin
-Date: Wed, 10 Feb 2010 07:42:57 -0600
-Message-ID: <4B72B7E1.40907@billgatliff.com>
-References: <cover.1265748263.git.bgat@billgatliff.com> <b7afd475c3fce08f459bceff7814de57ffce7bd0.1265748264.git.bgat@billgatliff.com> <7178097a5a8af15f61656f11b6bef68b0da71498.1265748264.git.bgat@billgatliff.com> <8B7FF140-BE6E-4AD1-86BC-161488675DFB@lvk.cs.msu.su>
+Subject: Re: [PWM PATCH 1/7] API to consolidate PWM devices behind a common
+ user and kernel interface
+Date: Wed, 10 Feb 2010 07:55:04 -0600
+Message-ID: <4B72BAB8.4090008@billgatliff.com>
+References: <cover.1265748263.git.bgat@billgatliff.com> <b7afd475c3fce08f459bceff7814de57ffce7bd0.1265748264.git.bgat@billgatliff.com> <BD79186B4FD85F4B8E60E381CAEE190902153279@mi8nycmail19.Mi8.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8B7FF140-BE6E-4AD1-86BC-161488675DFB@lvk.cs.msu.su>
+In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE190902153279@mi8nycmail19.Mi8.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "Stanislav O. Bezzubtsev" <stas@lvk.cs.msu.su>
+To: H Hartley Sweeten <hartleys@visionengravers.com>
 Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Stanislav O. Bezzubtsev wrote:
->> +
->> +struct gpio_pwm {
->> +	struct pwm_device pwm;
->> +	struct hrtimer t;
->>     
->
-> Wouldn't a little bit longer name "timer" instead of simple "t" increase readability?
->   
-
-Couldn't hurt.  Done.
-
->> +static void
->> +gpio_pwm_work (struct work_struct *work)
+H Hartley Sweeten wrote:
+>> +int pwm_set_polarity(struct pwm_channel *p,
+>> +		     int active_high)
 >> +{
->> +	struct gpio_pwm *gp = container_of(work, struct gpio_pwm, work);
->> +
->> +	if (gp->active)
->> +		gpio_direction_output(gp->gpio, gp->polarity ? 1 : 0);
->> +	else
->> +		gpio_direction_output(gp->gpio, gp->polarity ? 0 : 1);
+>> +	struct pwm_channel_config c = {
+>> +		.config_mask = PWM_CONFIG_POLARITY,
+>> +		.polarity = active_high,
+>> +	};
+>> +	return pwm_config(p, &c);
+>> +}
+>> +EXPORT_SYMBOL(pwm_set_polarity);
 >>     
 >
-> Maybe the following would be better:
-> gpio_direction_output(gp->gpio, gp->polarity ^ gp->active)
-> Instead of doing several comparisons.
->   
-
-... except that I'm trying to guarantee that only the values '1' or '0'
-get sent to gpio_direction_output.  There's nothing in the spec that
-says other values are legal, although I'll admit that any nonzero value
-is unlikely to cause problems.  Should I be pedantic here?
-
->> +
->> +	if (gp->active)
->> +		hrtimer_start(&gp->t,
->> +			      ktime_set(0, gp->pwm.channels[0].duty_ticks),
->> +			      HRTIMER_MODE_REL);
->> +	else
->> +		hrtimer_start(&gp->t,
->> +			      ktime_set(0,gp->pwm.channels[0].period_ticks
->> +					- gp->pwm.channels[0].duty_ticks),
->> +			      HRTIMER_MODE_REL);
->>     
+> Has the 'polarity' logic been verified?
 >
-> if (gp->active)
-> 	t =  ktime_set(0, gp->pwm.channels[0].duty_ticks));
-> else
-> 	t = ktime_set(0, gp->pwm.channels[0].period_ticks - gp->pwm.channels[0].duty_ticks));
+> pwm_set_polarity takes an active high flag that is passed to pwm_config.
+> A write to the sysfs 'polarity' file passes the value directly to pwm_config.
+> A read from the sysfs 'polarity' file returns struct pwm_channel ->active_low.
 >
-> htimer_start(&gp->t, t, HRTIMER_MODE_REL);
+> Seems like a mis-match in logic.
 >   
 
-Excellent.
+It was.  And on top of that, none of the drivers were reflecting their
+polarity in their pwm_channel structures.
 
+I renamed the channel structure variable to active_high for consistency,
+and updated each of the drivers to set that value consistent with their
+actual polarities.
 
->> +
->> +	ret = pwm_register(&gp->pwm);
->> +	if (ret)
->> +		goto err_pwm_register;
->> +
->> +	return 0;
->> +
->> +err_pwm_register:
->>     
->
-> platform_set_drvdata(pdev, 0);
->   
+Very good catch.
 
-Good catch!
-
-
->> +static int __devexit
->> +gpio_pwm_remove(struct platform_device *pdev)
->> +{
->> +	struct gpio_pwm *gp = platform_get_drvdata(pdev);
->> +	int ret;
->> +
->> +	ret = pwm_unregister(&gp->pwm);
->> +	hrtimer_cancel(&gp->t);
->> +	cancel_work_sync(&gp->work);
->>     
->
-> platform_set_drvdata(pdev, 0);
->   
-
-Ditto.
-
-> And there are too much pr_debug & dev_dbg calls. Several of them are inside critical sections or in functions called from critical sections (inside spin_lock_irqsave - spin_lock_irqrestore block I mean). Don't think it is good.
->   
-
-Ok.  Now that the code is relatively mature, they're unnecessary anyway.
 
 
 b.g.
