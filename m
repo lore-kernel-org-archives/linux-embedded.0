@@ -1,356 +1,315 @@
 From: "H Hartley Sweeten" <hartleys@visionengravers.com>
 Subject: RE: [PWM PATCH 1/7] API to consolidate PWM devices behind a common user and kernel interface
-Date: Wed, 10 Feb 2010 12:34:34 -0500
-Message-ID: <BD79186B4FD85F4B8E60E381CAEE190902153309@mi8nycmail19.Mi8.com>
-References: <cover.1265748263.git.bgat@billgatliff.com> <b7afd475c3fce08f459bceff7814de57ffce7bd0.1265748264.git.bgat@billgatliff.com> <BD79186B4FD85F4B8E60E381CAEE190902153279@mi8nycmail19.Mi8.com> <4B723239.4090802@billgatliff.com>
+Date: Wed, 10 Feb 2010 13:33:23 -0500
+Message-ID: <BD79186B4FD85F4B8E60E381CAEE190902153321@mi8nycmail19.Mi8.com>
+References: <cover.1265748263.git.bgat@billgatliff.com> <b7afd475c3fce08f459bceff7814de57ffce7bd0.1265748264.git.bgat@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-class: urn:content-classes:message
-In-Reply-To: <4B723239.4090802@billgatliff.com>
+In-Reply-To: <b7afd475c3fce08f459bceff7814de57ffce7bd0.1265748264.git.bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Bill Gatliff <bgat@billgatliff.com>, linux-embedded@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-On Tuesday, February 09, 2010 9:13 PM, Bill Gatliff wrote:
-> H Hartley Sweeten wrote:
->>> +
->>> +static int __pwm_create_sysfs(struct pwm_device *pwm);
->>> +
->>> +static const char *REQUEST_SYSFS = "sysfs";
->>>     
->>
->> Does this static string save that much?  It's only used two places in this
->> file.
->>   
->
-> It makes sure the same string is used in both places.  I do a strcmp on
-> it, so I wanted to make sure I didn't screw it up!
+On Tuesday, February 09, 2010 1:46 PM, Bill Gatliff wrote:
+> diff --git a/Documentation/pwm.txt b/Documentation/pwm.txt
+> new file mode 100644
+> index 0000000..2c41ca5
+> --- /dev/null
+> +++ b/Documentation/pwm.txt
 
-Ok.
+A couple minor comments below.
 
->>> +	p = kcalloc(pwm->nchan, sizeof(*p), GFP_KERNEL);
->>> +	if (!p)
->>> +	{
->>> +		pr_err("%s: ENOMEM\n", __func__);
->>> +		return -ENOMEM;
->>> +	}
->>>     
->>
->> I assume this pr_err is just a debug message and will be removed.
->> If not the '{' should be on the previous line.
->>   
->
-> Yes, it's a debug message.  I obviously don't clean up after myself very
-> well...
+> @@ -0,0 +1,260 @@
+> +                       Generic PWM Device API
+> +
+> +                          February 1, 2010
+> +                            Bill Gatliff
+> +                        <bgat@billgatliff.com>
+> +
+> +
+> +
+> +The code in drivers/pwm and include/linux/pwm/ implements an API for
+> +applications involving pulse-width-modulation signals.  This document
+> +describes how the API implementation facilitates both PWM-generating
+> +devices, and users of those devices.
+> +
+> +
+> +
+> +Motivation
+> +
+> +The primary goals for implementing the "generic PWM API" are to
+> +consolidate the various PWM implementations within a consistent and
+> +redundancy-reducing framework, and to facilitate the use of
+> +hotpluggable PWM devices.
+> +
+> +Previous PWM-related implementations within the Linux kernel achieved
+> +their consistency via cut-and-paste, but did not need to (and didn't)
+> +facilitate more than one PWM-generating device within the system---
+> +hotplug or otherwise.  The Generic PWM Device API might be most
+> +appropriately viewed as an update to those implementations, rather
+> +than a complete rewrite.
+> +
+> +
+> +
+> +Challenges
+> +
+> +One of the difficulties in implementing a generic PWM framework is the
+> +fact that pulse-width-modulation applications involve real-world
+> +signals, which often must be carefully managed to prevent destruction
+> +of hardware that is linked to those signals.  A DC motor that
+> +experiences a brief interruption in the PWM signal controlling it
+> +might destructively overheat; it could suddenly change speed, losing
+> +synchronization with a sensor; it could even suddenly change direction
+> +or torque, breaking the mechanical device connected to it.
+> +
+> +(A generic PWM device framework is not directly responsible for
+> +preventing the above scenarios: that responsibility lies with the
+> +hardware designer, and the application and driver authors.  But it
+> +must to the greatest extent possible make it easy to avoid such
+> +problems).
+> +
+> +A generic PWM device framework must accommodate the substantial
+> +differences between available PWM-generating hardware devices, without
+> +becoming sub-optimal for any of them.
+> +
+> +Finally, a generic PWM device framework must be relatively
+> +lightweight, computationally speaking.  Some PWM users demand
+> +high-speed outputs, plus the ability to regulate those outputs
+> +quickly.  A device framework must be able to "keep up" with such
+> +hardware, while still leaving time to do real work.
+> +
+> +The Generic PWM Device API is an attempt to meet all of the above
+> +requirements.  At its initial publication, the API was already in use
+> +managing small DC motors, sensors and solenoids through a
+> +custom-designed, optically-isolated H-bridge driver.
+> +
+> +
+> +
+> +Functional Overview
+> +
+> +The Generic PWM Device API framework is implemented in
+> +include/linux/pwm/pwm.h and drivers/pwm/pwm.c.  The functions therein
+> +use information from pwm_device, pwm_channel and pwm_channel_config
+> +structures to invoke services in PWM peripheral device drivers.
+> +Consult drivers/pwm/atmel-pwm.c for an example driver.
+> +
+> +There are two classes of adopters of the PWM framework:
+> +
+> +  "Users" -- those wishing to employ the API merely to produce PWM
+> +  signals; once they have identified the appropriate physical output
+> +  on the platform in question, they don't care about the details of
+> +  the underlying hardware
+> +
+> +  "Driver authors" -- those wishing to bind devices that can generate
+> +  PWM signals to the Generic PWM Device API, so that the services of
+> +  those devices become available to users. Assuming the hardware can
+> +  support the needs of a user, driver authors don't care about the
+> +  details of the user's application
+> +
+> +Generally speaking, users will first invoke pwm_request() to obtain a
+> +handle to a PWM device.  They will then pass that handle to functions
+> +like pwm_duty_ns() and pwm_period_ns() to set the duty cycle and
+> +period of the PWM signal, respectively.  They will also invoke
+> +pwm_start() and pwm_stop() to turn the signal on and off.
+> +
+> +The Generic PWM API framework also provides a sysfs interface to PWM
+> +devices, which is adequate for basic application needs and testing.
+> +
+> +Driver authors fill out a pwm_device structure, which describes the
+> +capabilities of the PWM hardware being constructed--- including the
+> +number of distinct output "channels" the peripheral offers.  They then
+> +invoke pwm_register() (usually from within their device's probe()
+> +handler) to make the PWM API aware of their device.  The framework
+> +will call back to the methods described in the pwm_device structure as
+> +users begin to configure and utilize the hardware.
+> +
+> +Note that PWM signals can be produced by a variety of peripherals,
+> +beyond the true "PWM hardware" offered by many system-on-chip devices.
+> +Other possibilities include timer/counters with compare-match
+> +capabilities, carefully-programmed synchronous serial ports
+> +(e.g. SPI), and GPIO pins driven by kernel interval timers.  With a
+> +proper pwm_device structure, these devices and pseudo-devices can all
+> +be accommodated by the Generic PWM Device API framework.
+> +
+> +
+> +
+> +Using the API to Generate PWM Signals -- Basic Functions for Users
+> +
+> +
+> +pwm_request() -- Returns a pwm_channel pointer, which is subsequently
+> +passed to the other user-related PWM functions.  Once requested, a PWM
+> +channel is marked as in-use and subsequent requests prior to
+> +pwm_free() will fail.
+> +
+> +The names used to refer to PWM devices are defined by driver authors.
+> +Typically they are platform device bus identifiers, and this
+> +convention is encouraged for consistency.
+> +
+> +
+> +pwm_free() -- Marks a PWM channel as no longer in use.  The PWM device
+> +is stopped before it is released by the API.
+> +
+> +
+> +pwm_period_ns() -- Specifies the PWM signal's period, in nanoseconds.
+> +
+> +
+> +pwm_duty_ns() -- Specifies the PWM signal's active duration, in nanoseconds.
+> +
+> +
+> +pwm_duty_percent() -- Specifies the PWM signal's active duration, as a
+> +percentage of the current period of the signal.  NOTE: this value is
+> +not recalculated if the period of the signal is subsequently changed.
+> +
+> +
+> +pwm_start(), pwm_stop() -- Turns the PWM signal on and off.  Except
+> +where stated otherwise by a driver author, signals are stopped at the
+> +end of the current period, at which time the output is set to its
+> +inactive state.
+> +
+> +
+> +pwm_polarity() -- Defines whether the PWM signal output's active
+> +region is "1" or "0".  A 10% duty-cycle, polarity=1 signal will
+> +conventionally be at 5V (or 3.3V, or 1000V, or whatever the platform
+> +hardware does) for 10% of the period.  The same configuration of a
+> +polarity=0 signal will be at 5V (or 3.3V, or ...) for 90% of the
+> +period.
+> +
+> +
+> +
+> +Using the API to Generate PWM Signals -- Advanced Functions
+> +
+> +
+> +pwm_config() -- Passes a pwm_channel_config structure to the
+> +associated device driver.  This function is invoked by pwm_start(),
+> +pwm_duty_ns(), etc. and is one of two main entry points to the PWM
+> +driver for the hardware being used.  The configuration change is
+> +guaranteed atomic if multiple configuration changes are specified.
+> +This function might sleep, depending on what the device driver has to
+> +do to satisfy the request.  All PWM device drivers must support this
+> +entry point.
+> +
+> +
+> +pwm_config_nosleep() -- Passes a pwm_channel_config structure to the
+> +associated device driver.  If the driver must sleep in order to
+> +implement the requested configuration change, -EWOULDBLOCK is
+> +returned.  Users may call this function from interrupt handlers, for
+> +example.  This is the other main entry point into the PWM hardware
+> +driver, but not all device drivers support this entry point.
+> +
+> +
+> +pwm_synchronize(), pwm_unsynchronize() -- "Synchronizes" two or more
+> +PWM channels, if the underlying hardware permits.  (If it doesn't, the
+> +framework facilitates emulating this capability but it is not yet
+> +implemented).  Synchronized channels will start and stop
+> +simultaneously when any single channel in the group is started or
+> +stopped.  Use pwm_unsynchronize(..., NULL) to completely detach a
+> +channel from any other synchronized channels.  By default, all PWM
+> +channels are unsynchronized.
+> +
+> +
+> +pwm_set_handler() -- Defines an end-of-period callback.  The indicated
+> +function will be invoked in a worker thread at the end of each PWM
+> +period, and can subsequently invoke pwm_config(), etc.  Must be used
+> +with extreme care for high-speed PWM outputs.  Set the handler
+> +function to NULL to un-set the handler.
 
-;-)
+This requires that the pwm producer can generate an interrupt signaling
+the end-of-period.  If so you might want to mention this so that driver
+writers don't spin their wheels trying to get the callback to work.  It's
+mentioned below but you might want to bring it up here.
 
->>> +	list_add_tail(&pwm->list, &pwm_device_list);
->>> +	ret = __pwm_create_sysfs(pwm);
->>> +	if (ret) {
->>> +		mutex_unlock(&device_list_mutex);
->>> +		pr_err("%s: err_create_sysfs\n", __func__);
->>>     
->>
->> Another debug message?
->>  
->
-> Yes.  Darn it.  :)
->
->
->>> +		goto err_create_sysfs;
->>> +	}
->>> +
->>> +	mutex_unlock(&device_list_mutex);
->>> +
->>> +	dev_info(pwm->dev, "%d channel%s\n", pwm->nchan,
->>> +		 pwm->nchan > 1 ? "s" : "");
->>> +	return 0;
->>>     
->>
->> I need to check the rest of the patch series but I assume you have
->> fixed the pwm->dev = NULL issue.
->>   
->
-> Yes.  Tested it properly, even!  :)
+> +
+> +
+> +
+> +Implementing a PWM Device API Driver -- Functions for Driver Authors
+> +
+> +
+> +Fill out the appropriate fields in a pwm_device structure, and submit
+> +to pwm_register():
+> +
 
-Ok.
+What about dev?  If it's missing you will get the oops.
 
->>> +
->>> +	p->requester = requester;
->>> +	if (!strcmp(requester, REQUEST_SYSFS))
->>> +		p->pid = current->pid;
->>>     
->>
->> This is new.. What's the reason for saving the pid?
->>   
->
-> I've gotten complaints from those who say, "Ok, so it reported 'sysfs'
-> back to me, but how can I be sure that it's because *I* own it now, and
-> not another user process?"  Seemed easy enough to add the PID so they
-> can check.  Of course, you could argue that I could report just the PID,
-> and skip the "sysfs" string altogether.  I'd be inclined to agree with you.
->
-> Of course, if you are like me and do the request with cat(1), then the
-> PID is pretty meaningless.  :)
+> +
+> +bus_id -- the plain-text name of the device.  Users will bind to a
+> +channel on the device using this name plus the channel number.  For
+> +example, the Atmel PWMC's bus_id is "atmel_pwmc", the same as used by
+> +the platform device driver (recommended).  The first device registered
+> +thereby receives bus_id "atmel_pwmc.0", which is what you put in
+> +pwm_device.bus_id.  Channels are then named "atmel_pwmc.0:[0-3]".
+> +(Hint: just use pdev->dev.bus_id in your probe() method).
 
-I would think a userspace request would typically use cat(1).  That's why
-I didn't understand why you are saving the pid.
+The hint doesn't work.  The bus_id needs to be a string, use dev_name
+or something along that line.
 
-More on this below.
+> +
+> +
+> +nchan -- the number of distinct output channels provided by the device.
+> +
+> +
+> +request -- (optional) Invoked each time a user requests a channel.
+> +Use to turn on clocks, clean up register states, etc.  The framework
+> +takes care of device locking/unlocking; you will see only successful
+> +requests.
+> +
+> +
+> +free -- (optional) Callback for each time a user relinquishes a
+> +channel.  The framework will have already stopped, unsynchronized and
+> +un-handled the channel.  Use to turn off clocks, etc. as necessary.
+> +
+> +
+> +synchronize, unsynchronize -- (optional) Callbacks to
+> +synchronize/unsynchronize channels.  Some devices provide this
+> +capability in hardware; for others, it can be emulated (see
+> +atmel_pwmc.c's sync_mask for an example).
+> +
+> +
+> +set_callback -- (optional) Invoked when a user requests a handler.  If
+> +the hardware supports an end-of-period interrupt, invoke the function
+> +indicated during your interrupt handler.  The callback function itself
+> +is always internal to the API, and does not map directly to the user's
+> +callback function.
 
->>> +
->>> +int pwm_set_polarity(struct pwm_channel *p,
->>> +		     int active_high)
->>> +{
->>> +	struct pwm_channel_config c = {
->>> +		.config_mask = PWM_CONFIG_POLARITY,
->>> +		.polarity = active_high,
->>> +	};
->>> +	return pwm_config(p, &c);
->>> +}
->>> +EXPORT_SYMBOL(pwm_set_polarity);
->>>     
->>
->> Has the 'polarity' logic been verified?
->>
->> pwm_set_polarity takes an active high flag that is passed to pwm_config.
->> A write to the sysfs 'polarity' file passes the value directly to pwm_config.
->> A read from the sysfs 'polarity' file returns struct pwm_channel ->active_low.
->>
->> Seems like a mis-match in logic.
->>   
->
-> It does, indeed!  I thought I had checked this before, but I just tried
-> it now again.  Not good news:
->
-> opusa5:/sys/class/pwm/f0000660.timer:0# echo 1 > polarity
-> opusa5:/sys/class/pwm/f0000660.timer:0# cat polarity
-> 1
-> opusa5:/sys/class/pwm/f0000660.timer:0# echo 0 > polarity
-> opusa5:/sys/class/pwm/f0000660.timer:0# cat polarity
-> 1
->
-> Good catch.  I'll have to track this one down.  I have verified that the
-> proper value gets out to the hardware, for all the existing drivers of
-> my own, anyway.  Some of my hardware simply won't work if the polarity
-> is wrong.
+See above.
 
-I thought I noticed this issue with your original patches.  Glad you
-were able to verify it.
+> +
+> +
+> +config -- Invoked to change the device configuration, always from a
+> +sleep-capable context.  All the changes indicated must be performed
+> +atomically, ideally synchronized to an end-of-period event (so that
+> +you avoid short or long output pulses).  You may sleep, etc. as
+> +necessary within this function.
+> +
+> +
+> +config_nosleep -- (optional) Invoked to change device configuration
+> +from within a context that is not allowed to sleep.  If you cannot
+> +perform the requested configuration changes without sleeping, return
+> +-EWOULDBLOCK.
 
->>> +static ssize_t pwm_run_store(struct device *dev,
->>> +			     struct device_attribute *attr,
->>> +			     const char *buf,
->>> +			     size_t len)
->>> +{
->>> +	struct pwm_channel *p = dev_get_drvdata(dev);
->>> +	if (sysfs_streq(buf, "1"))
->>> +		pwm_start(p);
->>> +	else if (sysfs_streq(buf, "0"))
->>> +		pwm_stop(p);
->>> +	return len;
->>> +}
->>> +static DEVICE_ATTR(run, 0200, NULL, pwm_run_store);
->>>     
->>
->> Any reason not to add a read operation?
->>   
->
-> Can't think of one.  Just haven't had a need for it myself, I suppose.
+If the pwm hardware does not implement this callback the API will
+return -EINVAL.  Does this need to be mentioned?
 
-Time will tell... It can easily be added later if needed.
+Also, it appears all your drivers first try to implement the pwm_config
+using the config_nosleep then fall back to the config inplementation.
+is this the desired standard?
 
->>> +static ssize_t pwm_request_store(struct device *dev,
->>> +				 struct device_attribute *attr,
->>> +				 const char *buf,
->>> +				 size_t len)
->>> +{
->>> +	struct pwm_channel *p = dev_get_drvdata(dev);
->>> +	pwm_free(p);
->>> +	return len;
->>> +}
->>> +static DEVICE_ATTR(request, 0644, pwm_request_show, pwm_request_store);
->>     
->>
->> Doing a read to request the channel and a write to free it seems wrong...
->>
->> I think you should be able to read the attr to get the current 'requester'
->> and write to it to set the 'requester'.  Kind of like the 'trigger' attr
->> for the leds.
->>
->> Also, if a kernel driver has requested the pwm channel wouldn't a read
->> of the attr free it?  This seems bad...
->>
->> Just my .02
->>   
->
-> A read from the attribute shows who the current requester is, and
-> implies that if the channel isn't currently owned by anyone else then
-> you'd like to own it.  This approach makes the locking operation atomic
-> in the (unlikely) situation where two user applications are going after
-> the same PWM channel at the same time.  It also means that I don't have
-> to do a write, followed by a read and compare in order to determine if I
-> now own the channel.
->
-> If the channel is owned when you read the attribute, then the current
-> owner is reported.
->
-> I guess I can see an advantage to writing a unique text string to the
-> attribute to indicate a request operation, and then reading back that
-> same text string to confirm that you own the channel.  And then you'd
-> write a null string to un-request it, perhaps?  Or would you have an
-> un-request attribute?
-
-Maybe change the attribute so that it works like the led trigger attribute.
-The list of available requesters returned would be something like the
-following:
-
-If the pwm channel is free.
-
-# cat request
-[none] sysfs			<- the channel is free
-# echo sysfs > request		<- request the channel for syfs use
-# cat request
-none [sysfs]			<- sysfs now owns the channel
-
-If the pwm channel is owned by a kernel driver, i.e. the pwm-led.c driver:
-
-# cat request
-[cur_led->name]			<- the pwm-led driver owns the channel
-
-I think the other attributes should also be removed then the channel is 
-owned by a kernel driver since that driver is actually in control of the 
-configuration.  I'm not sure if this is possible.
-
-Also, a better name for this attribute might be 'owner' or something along
-that line.
-
-As far as making the request atomic, a user application could always just
-'request' the channel without checking if it's available first.  If the
-channel is unavailable the request could return an error back to user space.
-
-The way it is now I think if a kernel driver were to request a channel,
-a user app could rip it away by doing:
-
-# cat request
-cur_led->name			<- the pwm-led driver owns the channel
-# echo anything > request	<- oops.. pwm_free just got called
-# cat request
-sysfs p->pid			<- sysfs now owns the channel
-
->>> +#include <linux/completion.h>
->>> +#include <linux/workqueue.h>
->>> +#include <linux/spinlock.h>
->>> +#include <linux/list.h>
->>>     
->>
->> Are these really needed in the header?  Other than <linux/list.h>, they are
->> already included in the .c file.
->>   
->
-> They certainly aren't _needed_ in the header, unless someone forgets to
-> include them before they include pwm.h.  Any idea what the convention is
-> on this?
-
-I think it's cleaner to require the .c file to include the necessary headers.
-The only reason I can see to have an include in a header is if there is a
-strict dependancy on that header, and normally this can be avoided.
-
->>> +
->>> +	int	(*request)	(struct pwm_channel *p);
->>> +	void	(*free)		(struct pwm_channel *p);
->>> +	int	(*config)	(struct pwm_channel *p,
->>> +				 struct pwm_channel_config *c);
->>> +	int	(*config_nosleep)(struct pwm_channel *p,
->>> +				  struct pwm_channel_config *c);
->>> +	int	(*synchronize)	(struct pwm_channel *p,
->>> +				 struct pwm_channel *to_p);
->>> +	int	(*unsynchronize)(struct pwm_channel *p,
->>> +				 struct pwm_channel *from_p);
->>> +	int	(*set_callback)	(struct pwm_channel *p,
->>> +				 pwm_callback_t callback);
->>>     
->>
->> These might be cleaner without the line breaks.
->>   
->
-> Yea, they just get kinda long...
-
-The longest is the (*config) one and it's 87 chars when pulled into
-one line.  That one, and a bunch of others, could be shortened by
-changing the pwm_channel_config name to pwm_config.
-
-BTW, there has been discussion and patches on lkml to increase
-the 80 character line limit.  Personaly I think it makes sense.
-My laptop and desktop both have a 1920 horizontal res but my
-Vertical res on the laptop is only 1080.  I would much rather
-read long, easy to read, lines and see more of them than read
-short, broken, lines and see less of them. ;-)
-
-
->>> +struct pwm_channel *
->>> +pwm_request(const char *bus_id, int chan,
->>> +	    const char *requester);
->>>     
->>
->> You use a mix of style in this patch set.
->>
->> <return type> <fn name> (...)
->>
->> and
->>
->> <return type>
->> <fn_name> (...)
->>
->> Makes reading a bit difficult.  Could you make them consistent?
->>   
->
-> I'm trying to keep the lines from growing too long.  But if you don't
-> mind them long, I can deal with it.  :)
-
-Well, going with the above comment, making all of these one line each
-makes them a lot easier to read and see what the API consists of.
-Also, grouping the common ones together makes more sense than having
-a white space between very function prototype, i.e.:
-
-struct pwm_channel *pwm_request(...)
-void pwm_free(...)
-
-int pwm_config_nosleep(...)
-int pwm_config(...)
-
-unsigned long pwm_ns_to_ticks(...)
-unsigned long pwm_ticks_to_ns(...)
-
-int pwm_set_period_ns(...)
-unsigned long int pwm_get_period_ns(...)	<- BTW, the 'int' is redundant
-
-int pwm_set_duty_ns(...)
-unsigned long pwm_get_duty_ns(...)
-
-int pwm_set_duty_percent(...)
-
-int pwm_set_polarity(...)
-
-int pwm_start(...)
-int pwm_stop(...)
-
-int pwm_set_handler(...)
-
-int pwm_synchronize(...)
-int pwm_unsynchronize(...)
-
->> Regards,
->> Hartley
->>   
->
-> Thanks sooo much for your reviews!
-
-My pleasure to help.
+> +
+> +
+> +
+> +Acknowledgements
+> +
+> +
+> +The author expresses his gratitude to the countless developers who
+> +have reviewed and submitted feedback on the various versions of the
+> +Generic PWM Device API code, and those who have submitted drivers and
+> +applications that use the framework.  You know who you are.  ;)
+> +
 
 Regards,
 Hartley
+
+ 
