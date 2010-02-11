@@ -1,66 +1,38 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PWM PATCH 1/5] API to consolidate PWM devices behind a common
- user and kernel interface
-Date: Thu, 11 Feb 2010 22:00:33 +0100
-Message-ID: <20100211210033.GB29159@elf.ucw.cz>
-References: <cover.1265094517.git.bgat@billgatliff.com>
- <c5873aa7c5d20254a9e54fc1ff179345b77c16b5.1265094517.git.bgat@billgatliff.com>
- <20100211200456.GA1487@ucw.cz>
- <4B746DEC.7080602@billgatliff.com>
+From: Matt Mackall <mpm@selenic.com>
+Subject: Re: [PATCH 03/11] readahead: bump up the default readahead size
+Date: Thu, 11 Feb 2010 15:37:34 -0600
+Message-ID: <1265924254.15603.79.camel@calx>
+References: <20100207041013.891441102@intel.com>
+	 <20100207041043.147345346@intel.com> <4B6FBB3F.4010701@linux.vnet.ibm.com>
+	 <20100208134634.GA3024@localhost>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4B746DEC.7080602@billgatliff.com>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20100208134634.GA3024@localhost>
+Sender: owner-linux-mm@kvack.org
+List-Id: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Wu Fengguang <fengguang.wu@intel.com>
+Cc: Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>, Andrew Morton <akpm@linux-foundation.org>, Jens Axboe <jens.axboe@oracle.com>, Chris Mason <chris.mason@oracle.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Clemens Ladisch <clemens@ladisch.de>, Olivier Galibert <galibert@pobox.com>, Linux Memory Management List <linux-mm@kvack.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-
-> >> +pwm_free() -- Marks a PWM channel as no longer in use.  The PWM device
-> >> +is stopped before it is released by the API.
-> >>     
-> >
-> > free is normally used for something else. Rename to open/close?
-
-> ... or request/release?
-
-Works for me.
-
-> >> +pwm_start(), pwm_stop() -- Turns the PWM signal on and off.  Except
-> >> +where stated otherwise by a driver author, signals are stopped at the
-> >> +end of the current period, at which time the output is set to its
-> >> +inactive state.
-> >>     
-> >
-> > What does it mean to stop a signal? What is the difference between 0%
-> > duty cycle and stop() ?
-> >   
+On Mon, 2010-02-08 at 21:46 +0800, Wu Fengguang wrote:
+> Chris,
 > 
-> Depends on the hardware.  For a true PWM peripheral, a 0% duty cycle
-> might still have the base peripheral clock for the device running. 
-> Whereas a pwm_stop() signal could be used to turn off the clock to the
-> peripheral.
-
-If it is just powersaving... I'd do it automatically when 0% duty is
-selected...? Or is that infeasible due to latency...?
-
-> > Is polarity realy required? Can't driver just replace duty with
-> > 100%-duty
+> Firstly inform the linux-embedded maintainers :)
 > 
-> Actually, yes in some cases.  Users can always do the 100%-duty math,
-> but some hardware asserts a specific output state when you stop the
-> peripheral that's potentially different from 0% duty.  Also, some
-> hardware begins the PWM cycle with the output high, while others do with
-> the output low.  It isn't necessarily the case that the user cares, but
-> I was thinking that having the API allow for different polarity might
-> prevent some applications having to optionally do the %duty vs.
-> 100-%duty conversion themselves.
+> I think it's a good suggestion to add a config option
+> (CONFIG_READAHEAD_SIZE). Will update the patch..
 
-Ok, ok, but this should go into the docs.
-								Pavel
+I don't have a strong opinion here beyond the nagging feeling that we
+should be using a per-bdev scaling window scheme rather than something
+static.
+
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+http://selenic.com : development and support for Mercurial and Linux
+
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
