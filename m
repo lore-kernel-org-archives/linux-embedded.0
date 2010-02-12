@@ -1,58 +1,55 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PWM PATCH 2/5] Emulates PWM hardware using a high-resolution
- timer and a GPIO pin
-Date: Fri, 12 Feb 2010 10:26:59 -0600
-Message-ID: <4B758153.2060209@billgatliff.com>
-References: <cover.1265094517.git.bgat@billgatliff.com> <2d73f9b2fd175fd3e482920baebcd3028206f02e.1265094517.git.bgat@billgatliff.com> <20100211200702.GB1487@ucw.cz> <4B746A02.9060306@billgatliff.com> <BD79186B4FD85F4B8E60E381CAEE190902153515@mi8nycmail19.Mi8.com>
+From: Matt Mackall <mpm@selenic.com>
+Subject: Re: [PATCH 03/11] readahead: bump up the default readahead size
+Date: Thu, 11 Feb 2010 18:04:31 -0600
+Message-ID: <1265933071.15603.129.camel@calx>
+References: <20100207041013.891441102@intel.com>
+	 <20100207041043.147345346@intel.com> <4B6FBB3F.4010701@linux.vnet.ibm.com>
+	 <20100208134634.GA3024@localhost> <1265924254.15603.79.camel@calx>
+	 <20100211234249.GE407@shareable.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE190902153515@mi8nycmail19.Mi8.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20100211234249.GE407@shareable.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: Pavel Machek <pavel@ucw.cz>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Wu Fengguang <fengguang.wu@intel.com>, Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>, Andrew Morton <akpm@linux-foundation.org>, Jens Axboe <jens.axboe@oracle.com>, Chris Mason <chris.mason@oracle.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Clemens Ladisch <clemens@ladisch.de>, Olivier Galibert <galibert@pobox.com>, Linux Memory Management List <linux-mm@kvack.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org
 
-H Hartley Sweeten wrote:
->
-> FWIW, the gpiolib API will accept any non-zero value to "set" a gpio pin
-> and a zero value to "clear" the pin.
->   
+On Thu, 2010-02-11 at 23:42 +0000, Jamie Lokier wrote:
+> Matt Mackall wrote:
+> > On Mon, 2010-02-08 at 21:46 +0800, Wu Fengguang wrote:
+> > > Chris,
+> > > 
+> > > Firstly inform the linux-embedded maintainers :)
+> > > 
+> > > I think it's a good suggestion to add a config option
+> > > (CONFIG_READAHEAD_SIZE). Will update the patch..
+> > 
+> > I don't have a strong opinion here beyond the nagging feeling that we
+> > should be using a per-bdev scaling window scheme rather than something
+> > static.
+> 
+> I agree with both.  100Mb/s isn't typical on little devices, even if a
+> fast ATA disk is attached.  I've got something here where the ATA
+> interface itself (on a SoC) gets about 10MB/s max when doing nothing
+> else, or 4MB/s when talking to the network at the same time.
+> It's not a modern design, but you know, it's junk we try to use :-)
+> 
+> It sounds like a calculation based on throughput and seek time or IOP
+> rate, and maybe clamped if memory is small, would be good.
+> 
+> Is the window size something that could be meaningfully adjusted
+> according to live measurements?
 
-It makes me sort of cringe to say this, but I'm going to assume that the
-API is intended to work that way so that I can take advantage of it. 
-But I'd love to someday have the reassurance that gpiolib really *is*
-intended to work that way (might be a bad idea though, see below).  Call
-me paranoid, but I've lost a lot of hair over the years undoing the
-damage of similar failed assumptions.
-
-I've found the Linux kernel code to be refreshingly forgiving of such
-things, however, so I'm willing to risk it this time.  :)
-
-> For that matter, some of the gpiolib drivers end up returning the bit
-> position mask for a given gpio pin and not 1 or 0.  For instance if the
-> gpio pin in question is bit 6 in an 8-bit register and it is set, a
-> __gpio_get_value will end up returning 0x40 and not '1'.
->   
-
-Who's to say that gpios should always be boolean?  On the output side, a
-"gpio" that's four bits wide might be a useful way of dealing with bar
-graphs, seven-segment displays, etc. (but more specialized abstractions
-might be more appropriate, of course).
-
-A two-bit "gpio" input might make it easier to deal with rotary encoders.
-
-But for now, GPIOs are assumed to be booleans and that's why I'm
-hesitant to feed the API non-boolean values.  Someday, those values
-might mean something subtly but disastrously different.  And given my
-luck lately with such things...
-
-
-b.g.
+I think so. You've basically got a few different things you want to
+balance: throughput, latency, and memory pressure. Successful readaheads
+expand the window, as do empty request queues, while long request queues
+and memory reclaim events collapse it. With any luck, we'll then
+automatically do the right thing with fast/slow devices on big/small
+boxes with varying load. And, like TCP, we don't need to 'know' anything
+about the hardware, except to watch what happens when we use it.
 
 -- 
-Bill Gatliff
-Embedded systems training and consulting
-http://billgatliff.com
-bgat@billgatliff.com
+http://selenic.com : development and support for Mercurial and Linux
+
