@@ -1,47 +1,87 @@
-From: "H Hartley Sweeten" <hartleys@visionengravers.com>
-Subject: RE: [PWM PATCH 2/5] Emulates PWM hardware using a high-resolution timer and a GPIO pin
-Date: Fri, 12 Feb 2010 08:53:30 -0500
-Message-ID: <BD79186B4FD85F4B8E60E381CAEE190902153515@mi8nycmail19.Mi8.com>
-References: <cover.1265094517.git.bgat@billgatliff.com> <2d73f9b2fd175fd3e482920baebcd3028206f02e.1265094517.git.bgat@billgatliff.com> <20100211200702.GB1487@ucw.cz> <4B746A02.9060306@billgatliff.com>
+From: Wu Fengguang <fengguang.wu@intel.com>
+Subject: Re: [PATCH 03/11] readahead: bump up the default readahead size
+Date: Fri, 12 Feb 2010 21:59:49 +0800
+Message-ID: <20100212135949.GA22686@localhost>
+References: <20100207041013.891441102@intel.com> <20100207041043.147345346@intel.com> <4B6FBB3F.4010701@linux.vnet.ibm.com> <20100208134634.GA3024@localhost> <1265924254.15603.79.camel@calx> <20100211234249.GE407@shareable.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-class: urn:content-classes:message
-In-Reply-To: <4B746A02.9060306@billgatliff.com>
+Content-Disposition: inline
+In-Reply-To: <20100211234249.GE407@shareable.org>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>, Pavel Machek <pavel@ucw.cz>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Jamie Lokier <jamie@shareable.org>
+Cc: Matt Mackall <mpm@selenic.com>, Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>, Andrew Morton <akpm@linux-foundation.org>, Jens Axboe <jens.axboe@oracle.com>, Chris Mason <chris.mason@oracle.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Clemens Ladisch <clemens@ladisch.de>, Olivier Galibert <galibert@pobox.com>, Linux Memory Management List <linux-mm@kvack.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-Thursday, February 11, 2010 1:35 PM, Bill Gatliff wrote:
-> Pavel Machek wrote:
->>> +static void
->>> +gpio_pwm_work (struct work_struct *work)
->>> +{
->>> +	struct gpio_pwm *gp = container_of(work, struct gpio_pwm, work);
->>> +
->>> +	if (gp->active)
->>> +		gpio_direction_output(gp->gpio, gp->polarity ? 1 : 0);
->>> +	else
->>> +		gpio_direction_output(gp->gpio, gp->polarity ? 0 : 1);
->>> +}
->>>     
->>
->> ...polarity ^ active ?
->>   
->
-> ... except that if polarity and/or active are >1, I don't send the
-> values 1 or 0 to gpio_direction_output.  I don't know if the API is
-> specifically intended to accept nonzero values that are greater than 1.
+On Fri, Feb 12, 2010 at 07:42:49AM +0800, Jamie Lokier wrote:
+> Matt Mackall wrote:
+> > On Mon, 2010-02-08 at 21:46 +0800, Wu Fengguang wrote:
+> > > Chris,
+> > > 
+> > > Firstly inform the linux-embedded maintainers :)
+> > > 
+> > > I think it's a good suggestion to add a config option
+> > > (CONFIG_READAHEAD_SIZE). Will update the patch..
+> > 
+> > I don't have a strong opinion here beyond the nagging feeling that we
+> > should be using a per-bdev scaling window scheme rather than something
+> > static.
 
-FWIW, the gpiolib API will accept any non-zero value to "set" a gpio pin
-and a zero value to "clear" the pin.
+It's good to do dynamic scaling -- in fact this patchset has code to do
+- scale down readahead size (per-bdev) for small devices
+- scale down readahead size (per-stream) to thrashing threshold
 
-For that matter, some of the gpiolib drivers end up returning the bit
-position mask for a given gpio pin and not 1 or 0.  For instance if the
-gpio pin in question is bit 6 in an 8-bit register and it is set, a
-__gpio_get_value will end up returning 0x40 and not '1'.
+At the same time, I'd prefer
+- to _only_ do scale down (below the default size) for low end
+- and have a uniform default readahead size for the mainstream
 
-Regards,
-Hartley
+IMHO scaling up automatically
+- would be risky
+- hurts to build one common expectation on Linux behavior
+  (not only developers, but also admins will run into the question:
+  "what on earth is the readahead size?")
+- and still not likely to please the high end guys ;)
+
+> I agree with both.  100Mb/s isn't typical on little devices, even if a
+> fast ATA disk is attached.  I've got something here where the ATA
+> interface itself (on a SoC) gets about 10MB/s max when doing nothing
+> else, or 4MB/s when talking to the network at the same time.
+> It's not a modern design, but you know, it's junk we try to use :-)
+
+Good to know this. I guess the same situation for some USB-capable
+wireless routers -- they typically don't have powerful hardware to
+exert the full 100MB/s disk speed.
+
+> It sounds like a calculation based on throughput and seek time or IOP
+> rate, and maybe clamped if memory is small, would be good.
+> 
+> Is the window size something that could be meaningfully adjusted
+> according to live measurements?
+
+We currently have live adjustment for
+- small devices
+- thrashed read streams
+
+We could add new adjustments based on throughput (estimation is the
+problem) and memory size.
+
+Note that it does not really hurt to have big _readahead_ size on low
+throughput or small memory conditions, because it's merely _max_
+readahead size, the actual readahead size scales up step-by-step, and
+scales down if thrashed, and the sequential readahead hit ratio is
+pretty high (so no memory/bandwidth is wasted).
+
+What may hurt is to have big mmap _readaround_ size. The larger
+readaround size, the more readaround miss ratio (but still not
+disastrous), hence more memory pages and bandwidth wasted. It's not a
+big problem for mainstream, however embedded systems may be more
+sensitive.
+
+I would guess most embedded systems put executables on MTD devices
+(anyone to confirm this?). And I wonder if MTDs have general
+characteristics that are suitable for smaller readahead/readaround
+size (the two sizes are bundled for simplicity)?
+
+Thanks,
+Fengguang
