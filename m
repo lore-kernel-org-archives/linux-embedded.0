@@ -1,165 +1,224 @@
-From: Wu Fengguang <fengguang.wu@intel.com>
-Subject: Re: [PATCH 03/11] readahead: bump up the default readahead size
-Date: Sun, 21 Feb 2010 10:25:25 +0800
-Message-ID: <20100221022525.GA6448@localhost>
-References: <20100207041013.891441102@intel.com> <20100207041043.147345346@intel.com> <4B6FBB3F.4010701@linux.vnet.ibm.com> <20100208134634.GA3024@localhost> <1265924254.15603.79.camel@calx> <20100211234249.GE407@shareable.org> <20100212135949.GA22686@localhost> <1266006023.15603.661.camel@calx>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: [PATCH]: Ram oops/panic logger
+Date: Sat, 06 Mar 2010 19:03:11 +0100
+Message-ID: <4B9298DF.3070507@gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1266006023.15603.661.camel@calx>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:content-type
+         :content-transfer-encoding;
+        bh=rlOnQw9NsfAVwOi1eQYATeos5PUnNiQFXhdkQ963Fe8=;
+        b=qQ/SeRt5XvS2bqXdLKsEzJyqA5+rnVsiaEkTEpRxr+CYJ0ldXR3oR4hp8WbpvTortj
+         qTgvxEZ6W9MjTe6UBCPkzdKYoxsIbTcM08J+BJrFHEfOdO9xQDfzy66fcoLUY4Kap0B3
+         6AHYP4NBoz6m9XfwdfR10mZ0/dlyA0axoXPFs=
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Matt Mackall <mpm@selenic.com>
-Cc: Jamie Lokier <jamie@shareable.org>, Christian Ehrhardt <ehrhardt@linux.vnet.ibm.com>, Andrew Morton <akpm@linux-foundation.org>, Jens Axboe <jens.axboe@oracle.com>, Chris Mason <chris.mason@oracle.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Martin Schwidefsky <schwidefsky@de.ibm.com>, Clemens Ladisch <clemens@ladisch.de>, Olivier Galibert <galibert@pobox.com>, Linux Memory Management List <linux-mm@kvack.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>
 
-Hi Matt,
+Ramoops, like mtdoops, can log oops/panic information but in RAM. It can
+be used with persistent RAM for systems without flash support. In
+addition, for this systems, with this driver, it's no more needed
+add to the kernel the mtd subsystem with advantage in footprint.
 
-On Sat, Feb 13, 2010 at 04:20:23AM +0800, Matt Mackall wrote:
-> On Fri, 2010-02-12 at 21:59 +0800, Wu Fengguang wrote:
-> > On Fri, Feb 12, 2010 at 07:42:49AM +0800, Jamie Lokier wrote:
-> > > Matt Mackall wrote:
-> > > > On Mon, 2010-02-08 at 21:46 +0800, Wu Fengguang wrote:
-> > > > > Chris,
-> > > > > 
-> > > > > Firstly inform the linux-embedded maintainers :)
-> > > > > 
-> > > > > I think it's a good suggestion to add a config option
-> > > > > (CONFIG_READAHEAD_SIZE). Will update the patch..
-> > > > 
-> > > > I don't have a strong opinion here beyond the nagging feeling that we
-> > > > should be using a per-bdev scaling window scheme rather than something
-> > > > static.
-> > 
-> > It's good to do dynamic scaling -- in fact this patchset has code to do
-> > - scale down readahead size (per-bdev) for small devices
-> 
-> I'm not sure device size is a great metric. It's only weakly correlated
+Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+--
 
-Yes, it's only weakly correlated. However device size is a good metric
-in itself -- when it's small, ie. Linus' 500KB sized USB device.
-
-> with the things we actually care about: memory pressure (small devices
-> are often attached to systems with small and therefore full memory) and
-> latency (small devices are often old and slow and attached to slow
-> CPUs). I think we should instead use hints about latency (large request
-> queues) and memory pressure (reclaim passes) directly.
-
-In principle I think it's OK to use memory pressure and IO latency as hints.
-
-1) memory pressure
-
-For read-ahead, the memory pressure is mainly readahead buffers
-consumed by too many concurrent streams. The context readahead in this
-patchset can adapt readahead size to thrashing threshold well.  So in
-principle we don't need to adapt the default _max_ read-ahead size to
-memory pressure.
-
-For read-around, the memory pressure is mainly read-around misses on
-executables/libraries. Which could be reduced by scaling down
-read-around size on fast "reclaim passes".
-
-The more straightforward solution could be to limit default
-read-around size proportional to available system memory, ie.
-                512MB mem => 512KB read-around size
-                128MB mem => 128KB read-around size
-                 32MB mem =>  32KB read-around size (minimal)
-
-2) IO latency
-
-We might estimate the average service time and throughput for IOs of
-different size, and choose the default readahead size based on
-- good throughput
-- low service time
-- reasonable size bounds
-
-IMHO the estimation should reflect the nature of the device, and do
-not depend on specific workloads. Some points:
-
-- in most cases, reducing readahead size on large request queues
-  (which is typical in large file servers) only hurts performance
-- we don't know whether the application is latency-sensitive (and to
-  what degree), hence no need to be over-zealous to optimize for latency
-- a dynamic changing readahead size is nightmare to benchmarks
-
-That means to avoid estimation when there are any concurrent
-reads/writes.  It also means that the estimation can be turned off for
-this boot after enough data have been collected and the averages go
-stable.
-
-> > - scale down readahead size (per-stream) to thrashing threshold
-> 
-> Yeah, I'm happy to call that part orthogonal to this discussion.
-> 
-> > At the same time, I'd prefer
-> > - to _only_ do scale down (below the default size) for low end
-> > - and have a uniform default readahead size for the mainstream
-> 
-> I don't think that's important, given that we're dynamically fiddling
-> with related things.
-
-Before we can dynamically tune things and do it smart enough, it would
-be good to have clear rules :)
-
-> > IMHO scaling up automatically
-> > - would be risky
-> 
-> What, explicitly, are the risks? If we bound the window with memory
-
-Risks could be readahead misses and higher latency. 
-Generally the risk:perf_gain ratio goes up for larger readahead size.
-
-> pressure and latency, I don't think it can get too far out of hand.
-> There are also some other bounds in here: we have other limits on how
-> big I/O requests can be.
-
-OK, if we do some bounds based mainly on foreseeable single device
-performance needs.. 16MB?
-
-> I'm happy to worry about only scaling down for now, but it's only a
-> matter of time before we have to bump the number up again.
-
-Agreed.
-
-> We've got an IOPS range from < 1 (mp3 player with power-saving
-> spin-down) to > 1M (high-end SSD). And the one that needs the most
-> readahead is the former! 
-
-We have laptop mode for the former, which will elevate readahead size
-and (legitimately) disregard IO performance impacts.
-
-> > I would guess most embedded systems put executables on MTD devices
-> > (anyone to confirm this?).
-> 
-> It's hard to generalize here. Even on flash devices, interleaving with
-> writes can result in high latencies that make it behave more like
-> spinning media, but there's no way to generalize about what the write
-> mix is going to be.
-
-I'd prefer to not consider impact of writes when choosing default
-readahead size.
-
-> >  And I wonder if MTDs have general
-> > characteristics that are suitable for smaller readahead/readaround
-> > size (the two sizes are bundled for simplicity)?
-> 
-> Perhaps, but the trend is definitely towards larger blocks here.
-
-OK.
-
-> > We could add new adjustments based on throughput (estimation is the
-> > problem) and memory size.
-> 
-> Note that throughput is not enough information here. More interesting is
-> the "bandwidth delay product" of the I/O path. If latency (of the whole
-> I/O stack) is zero, it's basically always better to read on demand. But
-> if every request takes 100ms whether it's for 4k or 4M (see optical
-> media), then you might want to consider reading 4M every time. And
-> latency is of course generally not independent of usage pattern. Which
-> is why I think TCP-like feedback scaling is the right approach.
-
-OK.
-
-Thanks,
-Fengguang
+diff -Nuar linux-2.6.33-orig/drivers/char/Kconfig linux-2.6.33/drivers/char/Kconfig
+--- linux-2.6.33-orig/drivers/char/Kconfig	2010-02-24 19:52:17.000000000 +0100
++++ linux-2.6.33/drivers/char/Kconfig	2010-02-28 10:47:29.000000000 +0100
+@@ -1105,5 +1105,12 @@
+ 
+ source "drivers/s390/char/Kconfig"
+ 
++config RAMOOPS
++	tristate "Log panic/oops to a RAM buffer"
++	default n
++	help
++	  This enables panic and oops messages to be logged to a circular
++	  buffer in RAM where it can be read back at some later point.
++
+ endmenu
+ 
+diff -Nuar linux-2.6.33-orig/drivers/char/Makefile linux-2.6.33/drivers/char/Makefile
+--- linux-2.6.33-orig/drivers/char/Makefile	2010-02-24 19:52:17.000000000 +0100
++++ linux-2.6.33/drivers/char/Makefile	2010-02-28 10:49:17.000000000 +0100
+@@ -107,6 +107,7 @@
+ obj-$(CONFIG_TCG_TPM)		+= tpm/
+ 
+ obj-$(CONFIG_PS3_FLASH)		+= ps3flash.o
++obj-$(CONFIG_RAMOOPS)		+= ramoops.o
+ 
+ obj-$(CONFIG_JS_RTC)		+= js-rtc.o
+ js-rtc-y = rtc.o
+diff -Nuar linux-2.6.33-orig/drivers/char/ramoops.c linux-2.6.33/drivers/char/ramoops.c
+--- linux-2.6.33-orig/drivers/char/ramoops.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.33/drivers/char/ramoops.c	2010-03-06 13:36:31.000000000 +0100
+@@ -0,0 +1,163 @@
++/*
++ * RAM Oops/Panic logger
++ *
++ * Copyright (C) 2009 Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ *
++ */
++
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/kmsg_dump.h>
++#include <linux/time.h>
++#include <linux/io.h>
++#include <linux/ioport.h>
++
++#define RAMOOPS_KERNMSG_HDR "===="
++#define RAMOOPS_HEADER_SIZE   (5 + sizeof(struct timeval))
++
++#define RECORD_SIZE 4096
++
++static ulong mem_address;
++module_param(mem_address, ulong, 0600);
++MODULE_PARM_DESC(mem_address,
++		"start of reserved RAM used to store oops/panic logs");
++
++static ulong mem_size;
++module_param(mem_size, ulong, 0600);
++MODULE_PARM_DESC(mem_size,
++		"size of reserved RAM used to store oops/panic logs");
++
++static int dump_oops = 1;
++module_param(dump_oops, int, 0600);
++MODULE_PARM_DESC(dump_oops,
++		"set to 1 to dump oopses, 0 to only dump panics (default 1)");
++
++static struct ramoops_context {
++	struct kmsg_dumper dump;
++	void *virt_addr;
++	phys_addr_t phys_addr;
++	unsigned long size;
++	int count;
++	int max_count;
++} oops_cxt;
++
++static void ramoops_do_dump(struct kmsg_dumper *dumper,
++		enum kmsg_dump_reason reason, const char *s1, unsigned long l1,
++		const char *s2, unsigned long l2)
++{
++	struct ramoops_context *cxt = container_of(dumper,
++			struct ramoops_context, dump);
++	unsigned long s1_start, s2_start;
++	unsigned long l1_cpy, l2_cpy;
++	int res;
++	char *buf;
++	struct timeval timestamp;
++
++	/* Only dump oopses if dump_oops is set */
++	if (reason == KMSG_DUMP_OOPS && !dump_oops)
++		return;
++
++	buf = (char *)(cxt->virt_addr + (cxt->count * RECORD_SIZE));
++	memset(buf, '\0', RECORD_SIZE);
++	res = sprintf(buf, "%s", RAMOOPS_KERNMSG_HDR);
++	buf += res;
++	do_gettimeofday(&timestamp);
++	res = sprintf(buf, "%lu.%lu\n", (long)timestamp.tv_sec, (long)timestamp.tv_usec);
++	buf += res;
++
++	l2_cpy = min(l2, (unsigned long)(RECORD_SIZE - RAMOOPS_HEADER_SIZE));
++	l1_cpy = min(l1, (unsigned long)(RECORD_SIZE - RAMOOPS_HEADER_SIZE) - l2_cpy);
++
++	s2_start = l2 - l2_cpy;
++	s1_start = l1 - l1_cpy;
++
++	memcpy(buf, s1 + s1_start, l1_cpy);
++	memcpy(buf + l1_cpy, s2 + s2_start, l2_cpy);
++
++	cxt->count = (cxt->count + 1) % cxt->max_count;
++}
++
++static int __init ramoops_init(void)
++{
++	struct ramoops_context *cxt = &oops_cxt;
++	int err = -EINVAL;
++
++	if (!mem_size) {
++		printk(KERN_ERR "Invalid size specification");
++		goto fail3;
++	}
++
++	rounddown_pow_of_two(mem_size);
++
++	if (mem_size < RECORD_SIZE) {
++		printk(KERN_ERR "size too small");
++		goto fail3;
++	}
++
++	cxt->max_count = mem_size / RECORD_SIZE;
++	cxt->count = 0;
++	cxt->size = mem_size;
++	cxt->phys_addr = mem_address;
++
++	err = request_mem_region(cxt->phys_addr, cxt->size, "ramoops");
++	if (!err) {
++		printk(KERN_ERR "ramoops: request mem region failed");
++		err = -EINVAL;
++		goto fail3;
++	}
++
++	cxt->virt_addr = ioremap(cxt->phys_addr,  cxt->size);
++	if (!cxt->virt_addr) {
++		printk(KERN_ERR "ramoops: ioremap failed");
++		goto fail2;
++	}
++
++	cxt->dump.dump = ramoops_do_dump;
++	err = kmsg_dump_register(&cxt->dump);
++	if (err) {
++		printk(KERN_ERR "ramoops: registering kmsg dumper failed");
++		goto fail1;
++	}
++
++	return 0;
++
++fail1:
++	iounmap(cxt->virt_addr);
++fail2:
++	release_mem_region(cxt->phys_addr, cxt->size);
++fail3:
++	return err;
++}
++
++static void __exit ramoops_exit(void)
++{
++	struct ramoops_context *cxt = &oops_cxt;
++
++	if (kmsg_dump_unregister(&cxt->dump) < 0)
++		printk(KERN_WARNING "ramoops: could not unregister kmsg_dumper\n");
++
++	iounmap(cxt->virt_addr);
++	release_mem_region(cxt->phys_addr, cxt->size);
++}
++
++
++module_init(ramoops_init);
++module_exit(ramoops_exit);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Marco Stornelli <marco.stornelli@gmail.com>");
++MODULE_DESCRIPTION("RAM Oops/Panic logger/driver");
