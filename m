@@ -1,7 +1,7 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH]: Ram oops/panic logger
-Date: Sat, 06 Mar 2010 19:03:11 +0100
-Message-ID: <4B9298DF.3070507@gmail.com>
+Subject: [PATCH v2] char drivers: Ram oops/panic logger
+Date: Tue, 09 Mar 2010 18:41:08 +0100
+Message-ID: <4B968834.3040609@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=rlOnQw9NsfAVwOi1eQYATeos5PUnNiQFXhdkQ963Fe8=;
-        b=qQ/SeRt5XvS2bqXdLKsEzJyqA5+rnVsiaEkTEpRxr+CYJ0ldXR3oR4hp8WbpvTortj
-         qTgvxEZ6W9MjTe6UBCPkzdKYoxsIbTcM08J+BJrFHEfOdO9xQDfzy66fcoLUY4Kap0B3
-         6AHYP4NBoz6m9XfwdfR10mZ0/dlyA0axoXPFs=
+        bh=vZgvt8Uc5ZSAgzvHMDByS47jzfVWVbOlvrGgFfJ4/SY=;
+        b=lB4PeL2BGWJEUTRmTp/7aRAVno88F2MR8bQaEi7A8QEZWly2FVMeuJiqzOvNgHMgxT
+         8EJ3jLfCuU5qU7OE7EXN0HrOSf9dMCgynKj1ScAYpAC194qM2Y3ACSgLx1JAAdQ6aZmX
+         /AtkZ+FjfLiOIEC/zrEhfScuE70m+FOFXsYEo=
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -26,12 +26,12 @@ addition, for this systems, with this driver, it's no more needed
 add to the kernel the mtd subsystem with advantage in footprint.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
---
+---
 
-diff -Nuar linux-2.6.33-orig/drivers/char/Kconfig linux-2.6.33/drivers/char/Kconfig
+diff -uprN linux-2.6.33-orig/drivers/char/Kconfig linux-2.6.33/drivers/char/Kconfig
 --- linux-2.6.33-orig/drivers/char/Kconfig	2010-02-24 19:52:17.000000000 +0100
 +++ linux-2.6.33/drivers/char/Kconfig	2010-02-28 10:47:29.000000000 +0100
-@@ -1105,5 +1105,12 @@
+@@ -1105,5 +1105,12 @@ config DEVPORT
  
  source "drivers/s390/char/Kconfig"
  
@@ -44,10 +44,10 @@ diff -Nuar linux-2.6.33-orig/drivers/char/Kconfig linux-2.6.33/drivers/char/Kcon
 +
  endmenu
  
-diff -Nuar linux-2.6.33-orig/drivers/char/Makefile linux-2.6.33/drivers/char/Makefile
+diff -uprN linux-2.6.33-orig/drivers/char/Makefile linux-2.6.33/drivers/char/Makefile
 --- linux-2.6.33-orig/drivers/char/Makefile	2010-02-24 19:52:17.000000000 +0100
 +++ linux-2.6.33/drivers/char/Makefile	2010-02-28 10:49:17.000000000 +0100
-@@ -107,6 +107,7 @@
+@@ -107,6 +107,7 @@ obj-$(CONFIG_HANGCHECK_TIMER)	+= hangche
  obj-$(CONFIG_TCG_TPM)		+= tpm/
  
  obj-$(CONFIG_PS3_FLASH)		+= ps3flash.o
@@ -55,10 +55,10 @@ diff -Nuar linux-2.6.33-orig/drivers/char/Makefile linux-2.6.33/drivers/char/Mak
  
  obj-$(CONFIG_JS_RTC)		+= js-rtc.o
  js-rtc-y = rtc.o
-diff -Nuar linux-2.6.33-orig/drivers/char/ramoops.c linux-2.6.33/drivers/char/ramoops.c
+diff -uprN linux-2.6.33-orig/drivers/char/ramoops.c linux-2.6.33/drivers/char/ramoops.c
 --- linux-2.6.33-orig/drivers/char/ramoops.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.33/drivers/char/ramoops.c	2010-03-06 13:36:31.000000000 +0100
-@@ -0,0 +1,163 @@
++++ linux-2.6.33/drivers/char/ramoops.c	2010-03-07 10:41:10.000000000 +0100
+@@ -0,0 +1,162 @@
 +/*
 + * RAM Oops/Panic logger
 + *
@@ -174,8 +174,7 @@ diff -Nuar linux-2.6.33-orig/drivers/char/ramoops.c linux-2.6.33/drivers/char/ra
 +	cxt->size = mem_size;
 +	cxt->phys_addr = mem_address;
 +
-+	err = request_mem_region(cxt->phys_addr, cxt->size, "ramoops");
-+	if (!err) {
++	if (!request_mem_region(cxt->phys_addr, cxt->size, "ramoops")) {
 +		printk(KERN_ERR "ramoops: request mem region failed");
 +		err = -EINVAL;
 +		goto fail3;
