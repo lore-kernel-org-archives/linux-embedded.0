@@ -1,97 +1,51 @@
-From: Peter Korsgaard <jacmet@sunsite.dk>
-Subject: [PATCH] devtmpfs: support !CONFIG_TMPFS
-Date: Fri, 12 Mar 2010 11:25:04 +0100
-Message-ID: <1268389504-22179-1-git-send-email-jacmet@sunsite.dk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:sender:received:from:to:cc
-         :subject:date:message-id:x-mailer;
-        bh=hMXAuuHLqnPabLjyE9pDCd77skbx6aDElCvnWsNoxEI=;
-        b=UgdIBMyWHh8Iupw+xKXRuBwWr03INY5dPw8zMOSjJmZ31poH4nqBTWB3lu8bgQqZid
-         prIHNoNt2udO3qdg9fjZRH4xtCxydKA25UrA1O9DaS4QV++qZ4Bx9Y7NObfPI7CKfSJJ
-         /JC61pczQsJLtjOMXRyxbUEWYtJ22L6g30AJY=
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Michael Tokarev <mjt@tls.msk.ru>
+Subject: Re: [PATCH] devtmpfs: support !CONFIG_TMPFS
+Date: Fri, 12 Mar 2010 14:28:08 +0300
+Message-ID: <4B9A2548.7050401@msgid.tls.msk.ru>
+References: <1268389504-22179-1-git-send-email-jacmet@sunsite.dk>
+Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-To: kay.sievers@vrfy.org, gregkh@suse.de, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
-Cc: Peter Korsgaard <jacmet@sunsite.dk>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <1268389504-22179-1-git-send-email-jacmet@sunsite.dk>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Peter Korsgaard <jacmet@sunsite.dk>
+Cc: kay.sievers@vrfy.org, gregkh@suse.de, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Make devtmpfs available on (embedded) configurations without SHMEM/TMPFS,
-using ramfs instead.
+Peter Korsgaard wrote:
+> Make devtmpfs available on (embedded) configurations without SHMEM/TMPFS,
+> using ramfs instead.
+> 
+> Saves ~15KB.
+> 
+> Signed-off-by: Peter Korsgaard <jacmet@sunsite.dk>
+[]> --- a/drivers/base/devtmpfs.c
+> +++ b/drivers/base/devtmpfs.c
+> @@ -44,7 +45,11 @@ __setup("devtmpfs.mount=", mount_param);
+>  static int dev_get_sb(struct file_system_type *fs_type, int flags,
+>  		      const char *dev_name, void *data, struct vfsmount *mnt)
+>  {
+> +#ifdef CONFIG_TMPFS
+>  	return get_sb_single(fs_type, flags, data, shmem_fill_super, mnt);
+> +#else
+> +	return get_sb_single(fs_type, flags, data, ramfs_fill_super, mnt);
+> +#endif
+>  }
 
-Saves ~15KB.
+May be completely not to the point or even wrong, but I were
+starring at this change for quite some time trying to understand
+what's the difference.  Can we do it like this:
 
-Signed-off-by: Peter Korsgaard <jacmet@sunsite.dk>
----
- drivers/base/Kconfig    |    2 +-
- drivers/base/devtmpfs.c |    5 +++++
- fs/ramfs/inode.c        |    2 +-
- include/linux/ramfs.h   |    2 ++
- 4 files changed, 9 insertions(+), 2 deletions(-)
+#ifdef CONFIG_TMPFS
+# define devtmpfs_fill_super shmem_fill_super
+#else
+# define devtmpfs_fill_super ramfs_fill_super
+#endif
+  	return get_sb_single(fs_type, flags, data, devtmpfs_fill_super, mnt);
 
-diff --git a/drivers/base/Kconfig b/drivers/base/Kconfig
-index fd52c48..7e33b16 100644
---- a/drivers/base/Kconfig
-+++ b/drivers/base/Kconfig
-@@ -18,7 +18,7 @@ config UEVENT_HELPER_PATH
- 
- config DEVTMPFS
- 	bool "Maintain a devtmpfs filesystem to mount at /dev"
--	depends on HOTPLUG && SHMEM && TMPFS
-+	depends on HOTPLUG
- 	help
- 	  This creates a tmpfs filesystem instance early at bootup.
- 	  In this filesystem, the kernel driver core maintains device
-diff --git a/drivers/base/devtmpfs.c b/drivers/base/devtmpfs.c
-index dac478c..6927262 100644
---- a/drivers/base/devtmpfs.c
-+++ b/drivers/base/devtmpfs.c
-@@ -20,6 +20,7 @@
- #include <linux/namei.h>
- #include <linux/fs.h>
- #include <linux/shmem_fs.h>
-+#include <linux/ramfs.h>
- #include <linux/cred.h>
- #include <linux/sched.h>
- #include <linux/init_task.h>
-@@ -44,7 +45,11 @@ __setup("devtmpfs.mount=", mount_param);
- static int dev_get_sb(struct file_system_type *fs_type, int flags,
- 		      const char *dev_name, void *data, struct vfsmount *mnt)
- {
-+#ifdef CONFIG_TMPFS
- 	return get_sb_single(fs_type, flags, data, shmem_fill_super, mnt);
-+#else
-+	return get_sb_single(fs_type, flags, data, ramfs_fill_super, mnt);
-+#endif
- }
- 
- static struct file_system_type dev_fs_type = {
-diff --git a/fs/ramfs/inode.c b/fs/ramfs/inode.c
-index a6090aa..1a5259a 100644
---- a/fs/ramfs/inode.c
-+++ b/fs/ramfs/inode.c
-@@ -213,7 +213,7 @@ static int ramfs_parse_options(char *data, struct ramfs_mount_opts *opts)
- 	return 0;
- }
- 
--static int ramfs_fill_super(struct super_block * sb, void * data, int silent)
-+int ramfs_fill_super(struct super_block *sb, void *data, int silent)
- {
- 	struct ramfs_fs_info *fsi;
- 	struct inode *inode = NULL;
-diff --git a/include/linux/ramfs.h b/include/linux/ramfs.h
-index 4e768dd..8600508 100644
---- a/include/linux/ramfs.h
-+++ b/include/linux/ramfs.h
-@@ -20,4 +20,6 @@ extern const struct file_operations ramfs_file_operations;
- extern const struct vm_operations_struct generic_file_vm_ops;
- extern int __init init_rootfs(void);
- 
-+int ramfs_fill_super(struct super_block *sb, void *data, int silent);
-+
- #endif
--- 
-1.7.0
+?
+
+Or maybe it's just me... ;)
+
+/mjt
