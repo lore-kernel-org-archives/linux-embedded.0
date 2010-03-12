@@ -1,52 +1,71 @@
-From: Kay Sievers <kay.sievers@vrfy.org>
-Subject: Re: [PATCH] devtmpfs: support !CONFIG_TMPFS
-Date: Fri, 12 Mar 2010 14:02:57 +0100
-Message-ID: <ac3eb2511003120502y2953ff0au81ee5c4d76261a87@mail.gmail.com>
-References: <1268389504-22179-1-git-send-email-jacmet@sunsite.dk> 
-	<4B9A2548.7050401@msgid.tls.msk.ru> <87aaud22jj.fsf@macbook.be.48ers.dk>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v2] char drivers: Ram oops/panic logger
+Date: Fri, 12 Mar 2010 14:48:54 -0800
+Message-ID: <20100312144854.cb94d9b4.akpm@linux-foundation.org>
+References: <4B968834.3040609@gmail.com>
+	<21eaeb5a1003091808s2d7638cxd524952a7d84b378@mail.gmail.com>
+	<2ea1731b1003100002w104633ffy1ae46ef3d245e5b5@mail.gmail.com>
+	<21eaeb5a1003100120x6cd3f69ak598954af3c9fe955@mail.gmail.com>
+	<2ea1731b1003100415i46dd8fcem85b85f49fb1a479@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87aaud22jj.fsf@macbook.be.48ers.dk>
+In-Reply-To: <2ea1731b1003100415i46dd8fcem85b85f49fb1a479@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Peter Korsgaard <jacmet@sunsite.dk>
-Cc: Michael Tokarev <mjt@tls.msk.ru>, gregkh@suse.de, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: Yuasa Yoichi <yuasa@linux-mips.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>
 
-On Fri, Mar 12, 2010 at 12:38, Peter Korsgaard <jacmet@sunsite.dk> wrot=
-e:
->>>>>> "Michael" =3D=3D Michael Tokarev <mjt@tls.msk.ru> writes:
-> =C2=A0>> +#ifdef CONFIG_TMPFS
-> =C2=A0>> return get_sb_single(fs_type, flags, data, shmem_fill_super,=
- mnt);
-> =C2=A0>> +#else
-> =C2=A0>> + =C2=A0 return get_sb_single(fs_type, flags, data, ramfs_fi=
-ll_super, mnt);
-> =C2=A0>> +#endif
-> =C2=A0>> }
->
-> =C2=A0Michael> May be completely not to the point or even wrong, but =
-I were
-> =C2=A0Michael> starring at this change for quite some time trying to =
-understand
-> =C2=A0Michael> what's the difference. =C2=A0Can we do it like this:
->
-> =C2=A0Michael> #ifdef CONFIG_TMPFS
-> =C2=A0Michael> # define devtmpfs_fill_super shmem_fill_super
-> =C2=A0Michael> #else
-> =C2=A0Michael> # define devtmpfs_fill_super ramfs_fill_super
-> =C2=A0Michael> #endif
-> =C2=A0Michael> =C2=A0 =C2=A0 =C2=A0 return get_sb_single(fs_type, fla=
-gs, data, devtmpfs_fill_super, mnt);
+On Wed, 10 Mar 2010 13:15:25 +0100
+Marco Stornelli <marco.stornelli@gmail.com> wrote:
 
-> Sure, if people find that cleaner - Kay?
+> 2010/3/10 Yuasa Yoichi <yuasa@linux-mips.org>:
+> > 2010/3/10 Marco Stornelli <marco.stornelli@gmail.com>:
+> >> 2010/3/10 Yuasa Yoichi <yuasa@linux-mips.org>:
+> >>> Hi,
+> >>>
+> >>> 2010/3/10 Marco Stornelli <marco.stornelli@gmail.com>:
+> >>>> Ramoops, like mtdoops, can log oops/panic information but in RAM.
+> >>>
+> >>> What is different from mtdoops + mtd-ram?
+> >>>
+> >>> Yoichi
+> >>>
+> >>
+> >> It can be used in a very easy way with persistent RAM for systems
+> >> without flash support. For this systems, with this driver, it's no
+> >> more needed add to the kernel the mtd subsystem with advantage in
+> >> footprint as I said in the description.
+> >
+> > right.
+> > But,
+> >
+> >> In addition, you can save
+> >> flash space and store this information only in RAM. I think it's very
+> >> useful for embedded systems.
+> >
+> > CONFIG_MTD_RAM uses only RAM.
+> > I think there's no big difference about this point.
+> >
+> 
+> I meant with the "classic" use of mtdoops, therefore with a flash
+> partition without use MTD_RAM. Using MTD_RAM, it's more or less the
+> same thing, with the exception of "where" you want deploy the log. For
+> example: if in your system you have got a nvram you can use it without
+> problem, you need to specify the address of the nvram to the module.
+> Very simple. I  think it's a small driver but very useful, feedback
+> from other embedded guys are welcome.
 
-=46or the style:
-  I would prefer your original version.
+Seems sensible to me.  If you have a machine whose memory is persistent
+across reboots then you reserve an arbitrary 4k hunk of memory for
+collecting oops traces, yes?
 
-=46or the patch:
-  Acked-by: Kay Sievers <kay.sievers@vrfy.org>
+What tools are used for displaying that memory on the next boot?  How
+do those tools distinguish between "valid oops trace" and "garbage
+because it was just powered on"?  A magic signature?
 
-Thanks,
-Kay
+Should the kernel provide the 4k of memory rather than (or in addition
+to) requiring that the system administrator reserve it and tell the
+kernel about it?  That'd be a matter of creating a linker section which
+isn't cleared out by the startup code.
