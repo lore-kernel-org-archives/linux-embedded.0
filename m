@@ -1,62 +1,50 @@
-From: Peter Korsgaard <jacmet@sunsite.dk>
-Subject: Re: [PATCH] devtmpfs: support !CONFIG_TMPFS
-Date: Tue, 16 Mar 2010 20:14:05 +0100
-Message-ID: <87wrxcgjuq.fsf@macbook.be.48ers.dk>
-References: <1268389504-22179-1-git-send-email-jacmet@sunsite.dk>
-	<20100316190005.GA32555@kroah.com>
+From: Vitaly Wool <vitalywool@gmail.com>
+Subject: Re: RFC: direct MTD support for SquashFS
+Date: Tue, 16 Mar 2010 22:18:31 +0300
+Message-ID: <acd2a5931003161218id7b0c4bp3b6dc366e4e56d5d@mail.gmail.com>
+References: <87vdcwv139.fsf@tac.ki.iif.hu> <87ljdsibqe.fsf@macbook.be.48ers.dk>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:sender:received:from:to:cc
-         :subject:references:date:in-reply-to:message-id:user-agent
-         :mime-version:content-type;
-        bh=QPfZqzBueJeV7kDv+1UeWKU4PYxgRrfv/m4suIZrw3w=;
-        b=q1dVuMv2TQC7mnrTWHJc76xYyumRa4J9tmr2tYCojmRQj/qbzfF29A356niuiy236P
-         D0KzOC9vPdInj5uX8yW86fMxuHRQ1awyMcVyZXMBwJPotz+pk7wYOdlh7MVujgGSUf5B
-         PRY0LXuLSW8p2g7jmfrMZop3oVR/sZiWFA7NA=
-In-Reply-To: <20100316190005.GA32555@kroah.com> (Greg KH's message of "Tue, 16
-	Mar 2010 12:00:05 -0700")
-Sender: linux-embedded-owner@vger.kernel.org
+        h=domainkey-signature:mime-version:received:in-reply-to:references
+         :date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=mH2CEZU1wDjWQ2UbEoaccFRYVn06GpJ/S4rZhKk0mkQ=;
+        b=sOMnr2Bbj/e/w5WAngcnoR8ds4A6mZeFmiN+dHnba0lrCnO/ygqsnFo2MgvaQqYzBb
+         vmK5pU9B7X1kDxPwyN6MWoZwfjt4V9+eaL6gX0x2yW0lZQot+/VDcfYKsnIfoLzAvCe0
+         znb7FyDJHG58xij+h1ABUA409Ok+hXpTi4yoM=
+In-Reply-To: <87ljdsibqe.fsf@macbook.be.48ers.dk>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Greg KH <greg@kroah.com>
-Cc: kay.sievers@vrfy.org, gregkh@suse.de, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Peter Korsgaard <jacmet@sunsite.dk>
+Cc: Ferenc Wagner <wferi@niif.hu>, Phillip Lougher <phillip@lougher.demon.co.uk>, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
->>>>> "Greg" == Greg KH <greg@kroah.com> writes:
+On Tue, Mar 16, 2010 at 5:26 PM, Peter Korsgaard <jacmet@sunsite.dk> wr=
+ote:
+>>>>>> "Ferenc" =3D=3D Ferenc Wagner <wferi@niif.hu> writes:
+> =A0Ferenc> For now, 2.6.34 gained pluggable decompressors, so this pa=
+tch
+> =A0Ferenc> does not apply anymore, though the main idea holds. =A0My
+> =A0Ferenc> questions: is the community interested in integrating some=
+thing
+> =A0Ferenc> like this, should this patch transformed into something
+> =A0Ferenc> acceptable, or am I a total lunatic? =A0I don't know a thi=
+ng
+> =A0Ferenc> about filesystem development, but willing to learn and
+> =A0Ferenc> refactor. =A0Comments welcome.
+>
+> Nice, I have been thinking about that as well. What kind of size savi=
+ngs
+> are you getting with this?
 
-Hi,
+Yeah, I'm interested in that as well.
 
- >> config DEVTMPFS
- >> bool "Maintain a devtmpfs filesystem to mount at /dev"
- >> -	depends on HOTPLUG && SHMEM && TMPFS
- >> +	depends on HOTPLUG
- >> help
- >> This creates a tmpfs filesystem instance early at bootup.
- >> In this filesystem, the kernel driver core maintains device
-
- Greg> With this patch, the Kconfig help text now is incorrect.
-
- Greg> Is there a way to explicitly call out in the Kconfig which way
- Greg> devtmpfs is being created?  How about a multiple selection that
- Greg> chooses either TMPFS or RAMFS, with the default being TMPFS?
-
-I don't think that's needed - If CONFIG_TMPFS isn't set, then ramfs
-pretends to be tmpfs anyway, see mm/shmem.c:
-
-static struct file_system_type tmpfs_fs_type = {
-	.name		= "tmpfs",
-	.get_sb		= ramfs_get_sb,
-	.kill_sb	= kill_litter_super,
-};
-
-So calling it tmpfs isn't really wrong.
-
- Greg> So care to redo this so that people can easily determine what is going
- Greg> to happen easier than this patch currently causes?
-
-We can change the help text to say tmpfs/ramfs if you prefer - OK?
-
--- 
-Bye, Peter Korsgaard
+~Vitaly
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
