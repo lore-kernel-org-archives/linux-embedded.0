@@ -1,43 +1,152 @@
-From: Peter Korsgaard <jacmet@sunsite.dk>
+From: Ferenc Wagner <wferi@niif.hu>
 Subject: Re: RFC: direct MTD support for SquashFS
-Date: Wed, 24 Mar 2010 12:35:21 +0100
-Message-ID: <87ljdihs06.fsf@macbook.be.48ers.dk>
+Date: Wed, 24 Mar 2010 14:48:09 +0100
+Message-ID: <87mxxxltk6.fsf@tac.ki.iif.hu>
 References: <87vdcwv139.fsf@tac.ki.iif.hu>
 	<87ljdsibqe.fsf@macbook.be.48ers.dk> <87r5nhziss.fsf@tac.ki.iif.hu>
 	<bffbecbb1003181440kc78f4dbvd25d4e2ea17b52e5@mail.gmail.com>
 	<8739zqpxxw.fsf@tac.ki.iif.hu> <4BA9A1BB.4000105@lougher.demon.co.uk>
-	<87y6hii5wq.fsf@macbook.be.48ers.dk> <871vfam00k.fsf@tac.ki.iif.hu>
 Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:sender:received:from:to:cc
-         :subject:references:date:in-reply-to:message-id:user-agent
-         :mime-version:content-type;
-        bh=PPz4OF8c/AUasJR7bNfTEfOcExRA3yC3zFFSVV00iao=;
-        b=KD7Tbz7b6sCU7Jr+kWP+cjtx3Q0KU7eFMoTC8PjwdN5Uag0KOQ8QNjA627Ir7YC4zL
-         mTAk/o2jtPpv6ckWxmYkkUj/NiOsqvCD7XboO/sT+rl7iTMJpqjP3oesV/wU3Okon75p
-         EwIqT+VCLE0Xdyv4v4LW8TxmDv0IcFaNiQ5Yk=
-In-Reply-To: <871vfam00k.fsf@tac.ki.iif.hu> (Ferenc Wagner's message of "Wed,
-	24 Mar 2010 12:28:43 +0100")
+In-Reply-To: <4BA9A1BB.4000105@lougher.demon.co.uk> (Phillip Lougher's message
+	of "Wed, 24 Mar 2010 05:23:07 +0000")
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Ferenc Wagner <wferi@niif.hu>
-Cc: linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: Phillip Lougher <phillip.lougher@gmail.com>, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
->>>>> "Ferenc" == Ferenc Wagner <wferi@niif.hu> writes:
+Phillip Lougher <phillip@lougher.demon.co.uk> writes:
 
-Hi,
+> Ferenc Wagner wrote:
+>
+>> Now with the patch series, sorry.
+>>
+>> Ferenc Wagner <wferi@niif.hu> writes:
+>>
+>>> I've got one more patch, which I forgot to export, to pull out the
+>>> common logic from the backend init functions back into squashfs_read_data().
+>>> With the bdev backend, that entails reading the first block twice in a
+>>> row most of the time.  This again could be worked around by extending
+>>> the backend interface, but I'm not sure if it's worth it.
+>>
+>> Here it is.  I also corrected the name of SQUASHFS_METADATA_SIZE, so it
+>> may as well compile now.
+>
+> Thanks for your patches.
+>
+> First things first.  Patch sending etiquette :-) [...]
 
- >> Again, what kind of size reduction can we expect from getting rid of
- >> the block layer?
+Points taken.  About the splits, they were the result of quite some
+rebasing: I tried to give each patch a unique focus, but apparently
+failed.  Only the last one touches substantial changed code, for the
+explicitly stated reason: it hurts performance.
 
- Ferenc> My size-optimized OpenWRT vmlinux shrank ~170 kB after disabling
- Ferenc> CONFIG_BLOCK.  Similarly for the memory consumption.
+> Frameworks are supposed to make the code cleaner, more understandable,
+> and generally better.
 
-Neat, thanks - That sounds worthwhile.
+This framework is about added flexibility.  I agree it requires some
+added complexity, but I hope we can manage it.
 
+> Unfortunately, I see no evidence of that in your patch.  Sorry to be
+> blunt, but there it is.
+
+No problem.
+
+> +       void	*(*init)(struct squashfs_sb_info *, u64, size_t);
+> +	void	(*free)(struct squashfs_sb_info *);
+> +	ssize_t	(*read)(struct squashfs_sb_info *, void **, size_t);
+> +	int	(*probe)(struct file_system_type *, int, const char *,
+> +				void*, struct vfsmount *);
+> +	void	(*kill)(struct squashfs_sb_info *);
+> +	loff_t  (*size)(const struct super_block *);
+> +	const char *(*devname)(const struct super_block *, char *);
+>
+> We move from a single read() function to requiring seven functions to do
+> the same work, just to add mtd support...
+
+Your single read() function also had separate init, read and free
+phases, with something generic in between.  I can try to invert the
+structure, but see below.
+
+> Reading the superblock changes into a 6 function deep nightmare
+> squashfs_find_backend -> probe -> get_sb_dev -> fill_bdev_super ->
+> squashfs_fill_super -> add_backend
+
+It's convoluted, but only moves original code around.  If you prefer, I
+can simplify that by embedding squashfs_sb_info into backend-specific
+structures and allocating those separately.  This would also get rid of
+some of the above 7 functions.
+
+> Reading a block now takes 3 function calls, init, read, and free.
+
+Actually, read must be called several times.  Are you worried by the
+cost of the indirect function calls?
+
+> Plus in your last commit you make the huge mistake of preferring code
+> elegance over performance, and resort to calling init, read, and free
+> *twice*, the first just to read *two* bytes (yes, 2 bytes).  Why do
+> you think the code was coded that way in the first place?  A fit of
+> absent mindedness perhaps?  No, for performance reasons.
+
+I also pointed this out, and that's mosly why I created a separate last
+patch.  I don't think it's optimal, but replicating the metadata length
+handling in the backends isn't either.  There's RFC in the subject after
+all...
+
+> You've totally broken all the read optimisations in zlib decompression
+> for block devices.  Buffer_heads are deliberately passed directly to
+> the zlib decompressor to allow it to optimise performance (pass the
+> buffer_head directly to zlib etc.).  Buffer_heads are exposed to the
+> decompressors without crappy go-between wrappers deliberately.
+
+At least this is something I noticed and expressed my concers about.
+You probably missed that due to the lots of scrolling required by my
+sub-par patch-posting technique. :)
+
+> Unfortunately there are lots of other instances where you've
+> eliminated carefully optimised code.
+
+Could you please provide some examples?
+
+> In short this doesn't pass my quality threshold or the make the
+> minimum changes necessary threshold.  I wouldn't consider asking Linus
+> to merge this.
+
+Please don't.  It's a proof of concept, nothing more.  Even a proof of a
+wrong concept.
+
+> BTW as a comparison, I have added MTD support to Squashfs twice in the
+> past, *with* bad block support.
+
+Unfortunately you aren't allowed to share those, if I read it right.
+
+> The latest has a diff patch of ~500 lines, with far less complexity
+> and code changes necessary.
+
+Sure, have a look at my very first patch: 3 files changed, 210
+insertions, 21 deletions.  And that didn't remove bdev support.
+
+> BTW2 as evidenced by your FIXME comments against my code in your patch,
+> you really have to get over the notion that if you don't understand it,
+> the code must be wrong.
+
+Sometimes those are FIXMEs to make finding them easier, and are
+questions really.  If you feel like answering them:
+
+/* FIXME: == s->s_blocksize(_bits)? */
+Why do you use devblksize and devblksize_log2 in squashfs_sb_info?
+Aren't they the same as sb->s_blocksize and sb->s_blocksize_bits, as
+their names suggest?
+
+/* FIXME: squashfs_put_super has meta_index instead */
+The failed_mount: part of squashfs_fill_super() is very similar to
+squashfs_put_super(), but frees meta_index instead of id_table.  Why?
+
+These are probably easy questions for people knowing the VFS layer well,
+but I am not one of those.  They just triggered my built-in pattern
+matcher.
 -- 
-Bye, Peter Korsgaard
+Regards,
+Feri.
