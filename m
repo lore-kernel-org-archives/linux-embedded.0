@@ -1,152 +1,293 @@
 From: Ferenc Wagner <wferi@niif.hu>
-Subject: Re: RFC: direct MTD support for SquashFS
-Date: Wed, 24 Mar 2010 14:48:09 +0100
-Message-ID: <87mxxxltk6.fsf@tac.ki.iif.hu>
-References: <87vdcwv139.fsf@tac.ki.iif.hu>
-	<87ljdsibqe.fsf@macbook.be.48ers.dk> <87r5nhziss.fsf@tac.ki.iif.hu>
-	<bffbecbb1003181440kc78f4dbvd25d4e2ea17b52e5@mail.gmail.com>
-	<8739zqpxxw.fsf@tac.ki.iif.hu> <4BA9A1BB.4000105@lougher.demon.co.uk>
-Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4BA9A1BB.4000105@lougher.demon.co.uk> (Phillip Lougher's message
-	of "Wed, 24 Mar 2010 05:23:07 +0000")
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH 3/3] squashfs: add MTD backend
+Date: Tue, 30 Mar 2010 15:32:49 +0200
+Message-ID: <1269955969-26123-4-git-send-email-wferi@niif.hu>
+References: <87mxxxltk6.fsf@tac.ki.iif.hu>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <87mxxxltk6.fsf@tac.ki.iif.hu>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Phillip Lougher <phillip.lougher@gmail.com>, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Phillip Lougher <phillip@lougher.demon.co.uk>, Phillip Lougher <phillip.lougher@gmail.com>, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: Ferenc Wagner <wferi@niif.hu>
 
-Phillip Lougher <phillip@lougher.demon.co.uk> writes:
+---
+ fs/squashfs/Kconfig    |    1 +
+ fs/squashfs/Makefile   |    1 +
+ fs/squashfs/backend.c  |   15 ++++
+ fs/squashfs/mtd.c      |  179 ++++++++++++++++++++++++++++++++++++++++++++++++
+ fs/squashfs/squashfs.h |    4 +
+ 5 files changed, 200 insertions(+), 0 deletions(-)
+ create mode 100644 fs/squashfs/mtd.c
 
-> Ferenc Wagner wrote:
->
->> Now with the patch series, sorry.
->>
->> Ferenc Wagner <wferi@niif.hu> writes:
->>
->>> I've got one more patch, which I forgot to export, to pull out the
->>> common logic from the backend init functions back into squashfs_read_data().
->>> With the bdev backend, that entails reading the first block twice in a
->>> row most of the time.  This again could be worked around by extending
->>> the backend interface, but I'm not sure if it's worth it.
->>
->> Here it is.  I also corrected the name of SQUASHFS_METADATA_SIZE, so it
->> may as well compile now.
->
-> Thanks for your patches.
->
-> First things first.  Patch sending etiquette :-) [...]
-
-Points taken.  About the splits, they were the result of quite some
-rebasing: I tried to give each patch a unique focus, but apparently
-failed.  Only the last one touches substantial changed code, for the
-explicitly stated reason: it hurts performance.
-
-> Frameworks are supposed to make the code cleaner, more understandable,
-> and generally better.
-
-This framework is about added flexibility.  I agree it requires some
-added complexity, but I hope we can manage it.
-
-> Unfortunately, I see no evidence of that in your patch.  Sorry to be
-> blunt, but there it is.
-
-No problem.
-
-> +       void	*(*init)(struct squashfs_sb_info *, u64, size_t);
-> +	void	(*free)(struct squashfs_sb_info *);
-> +	ssize_t	(*read)(struct squashfs_sb_info *, void **, size_t);
-> +	int	(*probe)(struct file_system_type *, int, const char *,
-> +				void*, struct vfsmount *);
-> +	void	(*kill)(struct squashfs_sb_info *);
-> +	loff_t  (*size)(const struct super_block *);
-> +	const char *(*devname)(const struct super_block *, char *);
->
-> We move from a single read() function to requiring seven functions to do
-> the same work, just to add mtd support...
-
-Your single read() function also had separate init, read and free
-phases, with something generic in between.  I can try to invert the
-structure, but see below.
-
-> Reading the superblock changes into a 6 function deep nightmare
-> squashfs_find_backend -> probe -> get_sb_dev -> fill_bdev_super ->
-> squashfs_fill_super -> add_backend
-
-It's convoluted, but only moves original code around.  If you prefer, I
-can simplify that by embedding squashfs_sb_info into backend-specific
-structures and allocating those separately.  This would also get rid of
-some of the above 7 functions.
-
-> Reading a block now takes 3 function calls, init, read, and free.
-
-Actually, read must be called several times.  Are you worried by the
-cost of the indirect function calls?
-
-> Plus in your last commit you make the huge mistake of preferring code
-> elegance over performance, and resort to calling init, read, and free
-> *twice*, the first just to read *two* bytes (yes, 2 bytes).  Why do
-> you think the code was coded that way in the first place?  A fit of
-> absent mindedness perhaps?  No, for performance reasons.
-
-I also pointed this out, and that's mosly why I created a separate last
-patch.  I don't think it's optimal, but replicating the metadata length
-handling in the backends isn't either.  There's RFC in the subject after
-all...
-
-> You've totally broken all the read optimisations in zlib decompression
-> for block devices.  Buffer_heads are deliberately passed directly to
-> the zlib decompressor to allow it to optimise performance (pass the
-> buffer_head directly to zlib etc.).  Buffer_heads are exposed to the
-> decompressors without crappy go-between wrappers deliberately.
-
-At least this is something I noticed and expressed my concers about.
-You probably missed that due to the lots of scrolling required by my
-sub-par patch-posting technique. :)
-
-> Unfortunately there are lots of other instances where you've
-> eliminated carefully optimised code.
-
-Could you please provide some examples?
-
-> In short this doesn't pass my quality threshold or the make the
-> minimum changes necessary threshold.  I wouldn't consider asking Linus
-> to merge this.
-
-Please don't.  It's a proof of concept, nothing more.  Even a proof of a
-wrong concept.
-
-> BTW as a comparison, I have added MTD support to Squashfs twice in the
-> past, *with* bad block support.
-
-Unfortunately you aren't allowed to share those, if I read it right.
-
-> The latest has a diff patch of ~500 lines, with far less complexity
-> and code changes necessary.
-
-Sure, have a look at my very first patch: 3 files changed, 210
-insertions, 21 deletions.  And that didn't remove bdev support.
-
-> BTW2 as evidenced by your FIXME comments against my code in your patch,
-> you really have to get over the notion that if you don't understand it,
-> the code must be wrong.
-
-Sometimes those are FIXMEs to make finding them easier, and are
-questions really.  If you feel like answering them:
-
-/* FIXME: == s->s_blocksize(_bits)? */
-Why do you use devblksize and devblksize_log2 in squashfs_sb_info?
-Aren't they the same as sb->s_blocksize and sb->s_blocksize_bits, as
-their names suggest?
-
-/* FIXME: squashfs_put_super has meta_index instead */
-The failed_mount: part of squashfs_fill_super() is very similar to
-squashfs_put_super(), but frees meta_index instead of id_table.  Why?
-
-These are probably easy questions for people knowing the VFS layer well,
-but I am not one of those.  They just triggered my built-in pattern
-matcher.
+diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
+index 40a3f15..6849e70 100644
+--- a/fs/squashfs/Kconfig
++++ b/fs/squashfs/Kconfig
+@@ -1,5 +1,6 @@
+ config SQUASHFS
+ 	tristate "SquashFS 4.0 - Squashed file system support"
++	depends on BLOCK || MTD
+ 	select ZLIB_INFLATE
+ 	help
+ 	  Saying Y here includes support for SquashFS 4.0 (a Compressed
+diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
+index 80f1cbe..8d5c0b8 100644
+--- a/fs/squashfs/Makefile
++++ b/fs/squashfs/Makefile
+@@ -7,3 +7,4 @@ squashfs-y += cache.o dir.o export.o file.o fragment.o id.o inode.o
+ squashfs-y += namei.o super.o symlink.o zlib_wrapper.o decompressor.o backend.o
+ squashfs-$(CONFIG_SQUASHFS_LZMA) += lzma_wrapper.o
+ squashfs-$(CONFIG_BLOCK) += block.o
++squashfs-$(CONFIG_MTD) += mtd.o
+diff --git a/fs/squashfs/backend.c b/fs/squashfs/backend.c
+index b83a5e2..a6136ca 100644
+--- a/fs/squashfs/backend.c
++++ b/fs/squashfs/backend.c
+@@ -1,6 +1,7 @@
+ #include <linux/fs.h>
+ #include <linux/slab.h>
+ #include <linux/buffer_head.h>
++#include <linux/mtd/super.h>
+ 
+ #include "squashfs_fs_i.h"
+ #include "squashfs.h"
+@@ -13,6 +14,10 @@ int squashfs_find_backend(struct file_system_type *fs_type, int flags,
+ 	if (!get_sb_bdev(fs_type, flags, dev_name, data, fill_bdev_super, mnt))
+ 		return 0;
+ #endif
++#ifdef CONFIG_MTD
++	if (!get_sb_mtd(fs_type, flags, dev_name, data, fill_mtd_super, mnt))
++		return 0;
++#endif
+ 	WARNING("no suitable backend found\n");
+ 	return -EINVAL;
+ }
+@@ -25,6 +30,12 @@ void squashfs_kill_super(struct super_block *sb)
+ 		return;
+ 	}
+ #endif
++#ifdef CONFIG_MTD
++	if (sb->s_mtd) {
++		kill_mtd_super(sb);
++		return;
++	}
++#endif
+ 	ERROR("squashfs_kill_super: no device behind the super block\n");
+ }
+ 
+@@ -43,6 +54,10 @@ int squashfs_read_data(struct super_block *sb, void **buffer, u64 index,
+ 	if (sb->s_bdev)
+ 		return bdev_read_data(sb, buffer, index, length, next_index, srclength, pages);
+ #endif
++#ifdef CONFIG_MTD
++	if (sb->s_mtd)
++		return mtd_read_data(sb, buffer, index, length, next_index, srclength, pages);
++#endif
+ 	ERROR("squashfs_read_data: no device behind the super block\n");
+ 	return -EIO;
+ }
+diff --git a/fs/squashfs/mtd.c b/fs/squashfs/mtd.c
+new file mode 100644
+index 0000000..b067616
+--- /dev/null
++++ b/fs/squashfs/mtd.c
+@@ -0,0 +1,179 @@
++/*
++ * mtd.c
++ */
++
++/*
++ * This file implements the low-level routines to read and decompress
++ * datablocks and metadata blocks from an MTD.
++ */
++
++#include <linux/fs.h>
++#include <linux/vfs.h>
++#include <linux/slab.h>
++#include <linux/string.h>
++#include <linux/buffer_head.h>
++#include <linux/mtd/mtd.h>
++
++#include "squashfs_fs.h"
++#include "squashfs_fs_sb.h"
++#include "squashfs_fs_i.h"
++#include "squashfs.h"
++#include "decompressor.h"
++
++static int checked_mtd_read(struct mtd_info *mi, u64 index, int length,
++			    void *buf)
++{
++	int ret, retlen;
++
++	TRACE("Entering checked_mtd_read: index=0x%llx, length=%d\n",
++	      index, length);
++	ret = mi->read(mi, index, length, &retlen, buf);
++	if (ret) {
++		if (ret == -EUCLEAN || ret == -EBADMSG)
++			WARNING("checked_mtd_read(index=0x%llx, length=%d): "
++				"recoverable error %d\n", index, length, ret);
++		else {
++			ERROR("checked_mtd_read(index=0x%llx, length=%d): %d\n",
++			      index, length, ret);
++			return ret;
++		}
++	}
++	if (retlen != length) {
++		ERROR("checked_mtd_read(index=0x%llx, length=%d) short read: %d\n",
++		      index, length, retlen);
++		return -EIO;
++	}
++	return 0;
++}
++
++static int update_buffer(struct buffer_head *bh)
++{
++	struct mtd_info *mi = (struct mtd_info *)bh->b_bdev;
++	int ret = checked_mtd_read(mi, bh->b_blocknr, bh->b_size, bh->b_data);
++	if (ret)
++		return 0;
++	return 1;
++}
++
++static void put_buffer(struct buffer_head *bh)
++{
++}
++
++/*
++ * Big buffer_heads require more memory, but if a single one is enough,
++ * that can be special-cased in unlzma to avoid the extra memcpy.
++ * A better unlzma interface would be preferable, though.
++ */
++int mtd_read_data(struct super_block *sb, void **buffer, u64 index,
++		  int length, u64 *next_index, int srclength, int pages)
++{
++	struct squashfs_sb_info *msblk = sb->s_fs_info;
++	struct mtd_info *mi = sb->s_mtd;
++	u64 i = index;
++	int bytes_left, compressed;
++
++	if (length) { /* Data block */
++		compressed = SQUASHFS_COMPRESSED_BLOCK(length);
++		length = SQUASHFS_COMPRESSED_SIZE_BLOCK(length);
++
++		TRACE("Block @ 0x%llx, %scompressed size %d, src size %d\n",
++			index, compressed ? "" : "un", length, srclength);
++	} else { /* Metadata block */
++		u16 metalen;
++		if ((index + 2) > msblk->bytes_used)
++			goto read_failure;
++		if (checked_mtd_read(mi, index, 2, &metalen))
++			goto read_failure;
++		i += 2;
++		length = le16_to_cpu(metalen);
++		compressed = SQUASHFS_COMPRESSED(length);
++		length = SQUASHFS_COMPRESSED_SIZE(length);
++
++		TRACE("Block @ 0x%llx, %scompressed size %d\n", index,
++				compressed ? "" : "un", length);
++	}
++	if (next_index)
++		*next_index = i + length;
++
++	if (length < 0 || length > srclength || i + length > msblk->bytes_used)
++		goto read_failure;
++
++	if (compressed) {
++		struct buffer_head **bh, *bhs;
++		int bh_num = (max_t(int, msblk->block_size, SQUASHFS_METADATA_SIZE) >>
++				msblk->devblksize_log2) + 1;
++		u_char *data;
++		int b;
++
++		bh = kmalloc(bh_num * sizeof(*bh), GFP_KERNEL);
++		if (bh == NULL)
++			return -ENOMEM;
++		bhs = kmalloc(bh_num * sizeof(*bhs), GFP_KERNEL);
++		if (bhs == NULL) {
++			kfree(bh);
++			return -ENOMEM;
++		}
++		data = kmalloc(msblk->devblksize, GFP_KERNEL);
++		if (data == NULL) {
++			kfree(bhs);
++			kfree(bh);
++			return -ENOMEM;
++		}
++
++		bytes_left = length;
++		for (b = 0; bytes_left > 0; b++) {
++			bh[b] = &bhs[b];
++			bhs[b].b_blocknr = i;
++			bhs[b].b_size = min(msblk->devblksize, bytes_left);
++			/* We know that the decompressors will use each buffer_head
++			 * only once, so update_buffer may change the data under them. */
++			bhs[b].b_data = data;
++			bhs[b].b_bdev = (void *)mi;
++			i += msblk->devblksize;
++			bytes_left -= msblk->devblksize;
++		}
++
++		length = squashfs_decompress(msblk, buffer, bh, b, 0,
++			length, srclength, pages, update_buffer, put_buffer);
++		if (length < 0) {
++			kfree(data);
++			kfree(bhs);
++			kfree(bh);
++			goto read_failure;
++		}
++	} else { /* Not compressed */
++		int page = 0;
++		bytes_left = length;
++		while (bytes_left > 0) {
++			int blk = min_t(int, bytes_left, PAGE_CACHE_SIZE);
++			if (checked_mtd_read(mi, i, blk, buffer[page++]))
++				goto read_failure;
++			bytes_left -= blk;
++			i += blk;
++		}
++	}
++	return length;
++
++read_failure:
++	ERROR("mtd_read_data failed to read block 0x%llx\n",
++	      (unsigned long long) index);
++	return -EIO;
++}
++
++int fill_mtd_super(struct super_block *sb, void *data, int silent)
++{
++	struct squashfs_sb_info *msblk;
++	char b[BDEVNAME_SIZE];
++
++	TRACE("Entering fill_mtd_super\n");
++
++	msblk = kzalloc(sizeof(*msblk), GFP_KERNEL);
++	if (!msblk)
++		return -ENOMEM;
++
++	sb->s_fs_info = msblk;
++	msblk->devblksize = PAGE_CACHE_SIZE;
++	msblk->devblksize_log2 = PAGE_CACHE_SHIFT;
++	snprintf(b, sizeof b, "mtd%d", sb->s_mtd->index);
++	return squashfs_fill_super(sb, data, silent, b, sb->s_mtd->size);
++}
+diff --git a/fs/squashfs/squashfs.h b/fs/squashfs/squashfs.h
+index 7c5cd72..05a85e2 100644
+--- a/fs/squashfs/squashfs.h
++++ b/fs/squashfs/squashfs.h
+@@ -105,6 +105,10 @@ extern const struct squashfs_decompressor squashfs_lzma_comp_ops;
+ extern int fill_bdev_super(struct super_block *, void *, int);
+ extern int bdev_read_data(struct super_block *, void **, u64, int, u64 *, int, int);
+ 
++/* mtd.c */
++extern int fill_mtd_super(struct super_block *, void *, int);
++extern int mtd_read_data(struct super_block *, void **, u64, int, u64 *, int, int);
++
+ #ifndef CONFIG_BLOCK
+ struct buffer_head {
+ 	sector_t b_blocknr;
 -- 
-Regards,
-Feri.
+1.6.5
