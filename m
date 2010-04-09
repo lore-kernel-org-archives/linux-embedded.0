@@ -1,33 +1,86 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 0/3] RFC: direct MTD support for SquashFS
-Date: Wed, 31 Mar 2010 08:35:49 +0200
-Message-ID: <k2u2ea1731b1003302335s84cf9757t8127050d242710f6@mail.gmail.com>
-References: <87mxxxltk6.fsf@tac.ki.iif.hu>
-	 <1269955969-26123-1-git-send-email-wferi@niif.hu>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: A better way to sequence driver initialization?
+Date: Fri, 09 Apr 2010 14:23:08 -0500
+Message-ID: <4BBF7E9C.80604@billgatliff.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:received:message-id:subject:from:to:cc:content-type;
-        bh=/Zk6P+HeZ99cKt8qBS0ASmX2VipQX36P6T2p035M5ZE=;
-        b=l7kuWbG/t/Bd66y+9K+owvA2XJEpa00vgX5snbyJkj/z1K3cO+B02dwH8yw8Nem1fK
-         VbOWHGfgAhyKkM9ibL2SEa1YbKR5QvVWs9K2sIgHbVz3sgMfE+SwXdE1c0caCO7u5Jzf
-         IeSr4K+BxqG1MiOSiuxnqkM3CUMXga/odtmxU=
-In-Reply-To: <1269955969-26123-1-git-send-email-wferi@niif.hu>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Ferenc Wagner <wferi@niif.hu>
-Cc: Phillip Lougher <phillip@lougher.demon.co.uk>, Phillip Lougher <phillip.lougher@gmail.com>, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+To: Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-2010/3/30 Ferenc Wagner <wferi@niif.hu>:
->
-> Extra question: does squashfs_put_super require BKL protection?
->
+Guys:
 
-We should get rid off of BKL, so if you need a lock, you should use a
-local mutex.
 
-Marco
+My recent post, "Requesting a GPIO that hasn't been registered yet", and
+Anton's reply thereto (thanks, Anton!) on linuxppc-dev got me thinking
+about the problem of dependencies between devices in different  classes,
+and/or between drivers/devices in general.  I'd like to float an idea to
+see if it's worth pursuing.
+
+Changing the link order to get drivers to initialize in the right order
+will always be a problem for someone--- the order will be right for some
+people, but exactly wrong for others.  And the problem is made worse for
+Device Tree-based systems, where just about everything including IRQ
+descriptors are created on a demand and/or as-available basis.  What if
+we let the kernel sort those dependencies out for us, at runtime?  I
+think it's possible, and I can't be the only one who would like to see
+this happen.
+
+There are two parts to my idea for a solution.  First part is to modify
+do_initcalls() so that it launches each initcall function in its own
+kernel thread.  Wait, don't panic yet!
+
+Second, we create/modify functions like gpio_request() so that if they
+fail, they can optionally stop in a wait queue until the call could
+succeed.  Then gpiochip_add() would signal that queue each time a new
+gpiochip was added. Functions like request_irq() and clk_get()--- and
+probably many others--- would do the same thing, but with their own wait
+queues.
+
+Something like this:
+
+    static wait_queue_head_t requestor_wq;
+
+    int gpiochip_add(struct gpio_chip *chip)
+    {
+        ...
+        wake_up_interruptible(&requestor_wq);
+        return status;
+    }
+
+    int gpio_request_wait(unsigned gpio, const char *label)
+    {
+        return wait_event_interruptible(&requestor_wq,
+!gpio_request(gpio, label));
+    }
+
+
+Or we might want to make the above code be the actual gpio_request(),
+and bury the wait_event_interruptible() inside of that.  Doing so would
+prevent having to touch a lot of code, but would definitely change the
+behavior of gpio_request().  Not sure which approach is best.
+
+Finally, I think that do_initcalls() would turn into something like this:
+
+    static void __init do_initcalls(void)
+    {
+            initcall_t *fn;
+
+            for (fn = __early_initcall_end; fn < __initcall_end; fn++)
+                    kthread_create(do_one_initcall, *fn, "do_initcalls");
+
+            flush_scheduled_work();
+    }
+
+
+If someone doesn't tell me this is a stupid idea, I might post it to
+lkml.  Now's your chance!  :)
+
+
+b.g.
+
+-- 
+Bill Gatliff
+bgat@billgatliff.com
