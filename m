@@ -1,82 +1,106 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: A better way to sequence driver initialization?
-Date: Fri, 09 Apr 2010 14:23:08 -0500
-Message-ID: <4BBF7E9C.80604@billgatliff.com>
+Subject: Re: A better way to sequence driver initialization?
+Date: Fri, 09 Apr 2010 22:54:21 -0500
+Message-ID: <4BBFF66D.7020206@billgatliff.com>
+References: <4BBF7E9C.80604@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4BBF7E9C.80604@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Guys:
+Bill Gatliff wrote:
+> If someone doesn't tell me this is a stupid idea, I might post it to
+> lkml.  Now's your chance!  :)
+>   
+
+So I went ahead and tried it anyway:
 
 
-My recent post, "Requesting a GPIO that hasn't been registered yet", and
-Anton's reply thereto (thanks, Anton!) on linuxppc-dev got me thinking
-about the problem of dependencies between devices in different  classes,
-and/or between drivers/devices in general.  I'd like to float an idea to
-see if it's worth pursuing.
+$ git diff init/main.c
+diff --git a/init/main.c b/init/main.c
+index dac44a9..1461d09 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -753,7 +753,11 @@ static void __init do_initcalls(void)
+        initcall_t *fn;
 
-Changing the link order to get drivers to initialize in the right order
-will always be a problem for someone--- the order will be right for some
-people, but exactly wrong for others.  And the problem is made worse for
-Device Tree-based systems, where just about everything including IRQ
-descriptors are created on a demand and/or as-available basis.  What if
-we let the kernel sort those dependencies out for us, at runtime?  I
-think it's possible, and I can't be the only one who would like to see
-this happen.
+        for (fn = __early_initcall_end; fn < __initcall_end; fn++)
++#if 1
++               kthread_run(do_one_initcall, *fn, "do_initcalls");
++#else
+                do_one_initcall(*fn);
++#endif
 
-There are two parts to my idea for a solution.  First part is to modify
-do_initcalls() so that it launches each initcall function in its own
-kernel thread.  Wait, don't panic yet!
+        /* Make sure there is no pending stuff from the initcall sequence */
+        flush_scheduled_work();
 
-Second, we create/modify functions like gpio_request() so that if they
-fail, they can optionally stop in a wait queue until the call could
-succeed.  Then gpiochip_add() would signal that queue each time a new
-gpiochip was added. Functions like request_irq() and clk_get()--- and
-probably many others--- would do the same thing, but with their own wait
-queues.
+Interestingly, things didn't blow up as quickly as I had expected they
+would.  :)
 
-Something like this:
+Booting with initcall_debug=1 both with and without the kthread_run()
+mod has proven insightful.  The first OOPS I get with the mod looks like
+this:
 
-    static wait_queue_head_t requestor_wq;
+...
+calling  ch_init+0x0/0x18 @ 325
+Unable to handle kernel NULL pointer dereference at virtual address
+00000000
+pgd = c0004000
+[00000000] *pgd=00000000 
+Internal error: Oops: 5 [#4] PREEMPT 
+last sysfs file:
+Modules linked in: 
+CPU: 0 Tainted: GD  (2.6.33-rc5-csb737-00010-gaba040a-dirty #59)
+PC is at kset_find_obj+0x18/0x98
+LR is at kset_find_obj+0x18/0x98
+pc : [<c018156c>] lr : [<c018156c>] psr: 20000013
+sp : c3937f68  ip : c3937f68  fp : 00000000
+r10: 00000000  r9 : 00000000  r8 : 00000000
+r7 : c0396a6f  r6 : 00000000  r5 : 00000005  r4 : c03f03b0
+r3 : 00000003  r2 : c3936000  r1 : 00000000  r0 : 00000001
+Flags: nzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
+Control: 0005317f  Table: 20004000  DAC: 00000017
+Process do_initcalls (pid: 325, stack limit = 0xc3936270) 
+Stack: (0xc3937f68 to 0xc3938000) 
+7f60: c03fc050 c03f03b0 00000005 c03f03b0 00000000 c01c471c
+7f80: c03f03b0 00000005 c001e62c 00000000 00000000 c024007c 00000000
+1b58d32c
+7fa0: 00000005 c002c39c c381bfac c001e62c 1b58d32c 00000005 00000000
+c3937fd4
+7fc0: c381bfac c001e62c c002c340 c005cb3c 00000000 00000000 c3937fd8
+c3937fd8
+7fe0: 00000000 00000000 00000000 00000000 00000000 c002df78 00000000
+00000000
+[<c018156c>] (kset_find_obj+0x18/0x98) from [<c01c471c>]
+(driver_register+0x88/0x150)
+[<c01c471c>] (driver_register+0x88/0x150) from [<c024007c>]
+(__hid_register_driver+0x38/0x70) 
+[<c024007c>] (__hid_register_driver+0x38/0x70) from [<c002c39c>]
+(do_one_initcall+0x5c/0x1c4) 
+[<c002c39c>] (do_one_initcall+0x5c/0x1c4) from [<c005cb3c>]
+(kthread+0x78/0x80)
+[<c005cb3c>] (kthread+0x78/0x80) from [<c002df78>]
+(kernel_thread_exit+0x0/0x8)
+Code: e24dd004 e3a00001 e1a07001 ebfaf76c (e5963000)
+---[ end trace f9bb68fd55862436 ]--- 
+note: do_initcalls[325] exited with preempt_count 1
+...
 
-    int gpiochip_add(struct gpio_chip *chip)
-    {
-        ...
-        wake_up_interruptible(&requestor_wq);
-        return status;
-    }
+There is a ch_init() function in drivers/hid/hid-cherry.c.  I think that
+function is calling hid_register_driver() before hid_init() has set up
+hid_bus_type.  That causes kset_find_obj() to die because the kset
+structure it gets passed in ch_init() refers to a bus that doesn't exist
+yet.  It's a plain 'ole initialization race.
 
-    int gpio_request_wait(unsigned gpio, const char *label)
-    {
-        return wait_event_interruptible(&requestor_wq,
-!gpio_request(gpio, label));
-    }
-
-
-Or we might want to make the above code be the actual gpio_request(),
-and bury the wait_event_interruptible() inside of that.  Doing so would
-prevent having to touch a lot of code, but would definitely change the
-behavior of gpio_request().  Not sure which approach is best.
-
-Finally, I think that do_initcalls() would turn into something like this:
-
-    static void __init do_initcalls(void)
-    {
-            initcall_t *fn;
-
-            for (fn = __early_initcall_end; fn < __initcall_end; fn++)
-                    kthread_create(do_one_initcall, *fn, "do_initcalls");
-
-            flush_scheduled_work();
-    }
-
-
-If someone doesn't tell me this is a stupid idea, I might post it to
-lkml.  Now's your chance!  :)
+Maybe there are fewer places that would need wait queues than I
+originally thought!  At least for drivers that use the device API,
+kset_find_obj() might be the only place that needs to wait until a
+device or bus appears.  If I get a second next week, I might hack one in
+there and see how much farther I get...
 
 
 b.g.
