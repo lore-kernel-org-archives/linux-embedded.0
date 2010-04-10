@@ -1,85 +1,137 @@
-From: Bill Gatliff <bgat@billgatliff.com>
+From: Grant Likely <grant.likely@secretlab.ca>
 Subject: Re: A better way to sequence driver initialization?
-Date: Fri, 09 Apr 2010 23:19:52 -0500
-Message-ID: <4BBFFC68.8000801@billgatliff.com>
-References: <4BBF7E9C.80604@billgatliff.com> <4BBFF66D.7020206@billgatliff.com> <4BBFF789.3030201@billgatliff.com>
+Date: Fri, 9 Apr 2010 23:29:42 -0600
+Message-ID: <i2zfa686aa41004092229l97b83ebdqba6aece45419dc0@mail.gmail.com>
+References: <4BBF7E9C.80604@billgatliff.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4BBFF789.3030201@billgatliff.com>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <4BBF7E9C.80604@billgatliff.com>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-Bill Gatliff wrote:
+On Fri, Apr 9, 2010 at 1:23 PM, Bill Gatliff <bgat@billgatliff.com> wrote:
+> Guys:
 >
-> ... and kset_register() might be the only place that calls
-> wake_up_interruptible().  Wow.
->   
+>
+> My recent post, "Requesting a GPIO that hasn't been registered yet", and
+> Anton's reply thereto (thanks, Anton!) on linuxppc-dev got me thinking
+> about the problem of dependencies between devices in different =A0classes,
+> and/or between drivers/devices in general. =A0I'd like to float an idea to
+> see if it's worth pursuing.
+>
+> Changing the link order to get drivers to initialize in the right order
+> will always be a problem for someone--- the order will be right for some
+> people, but exactly wrong for others. =A0And the problem is made worse for
+> Device Tree-based systems, where just about everything including IRQ
+> descriptors are created on a demand and/or as-available basis. =A0What if
+> we let the kernel sort those dependencies out for us, at runtime? =A0I
+> think it's possible, and I can't be the only one who would like to see
+> this happen.
+>
+> There are two parts to my idea for a solution. =A0First part is to modify
+> do_initcalls() so that it launches each initcall function in its own
+> kernel thread. =A0Wait, don't panic yet!
 
-Wow, indeed.  With just the attached patch, I get exactly one OOPS
-now--- in ssc_free(), which I think is getting called because
-atmel_ssc_modinit() is racing with something.
+Is initcall the right granularity?  Shouldn't it be that each .probe()
+hook gets its own thread?  Otherwise one device missing its resources
+could block another device using the same driver (whose resources are
+available) from probing.  Regardless, parallel probe has be attempted
+and failed before.  There are lots of fiddly bits to get right.
 
-I wasn't able to get all the way to mounting my NFS rootfs, I think
-because I'm getting to ip_auto_config() before my ethernet controller
-has registered!  :)
+In fact, there *used* to be code in the kernel that does exactly that.
+ It was put in 2.6.20, but removed in 2.6.21-rc1.  Here's the relevant
+commits, and a very interesting thread discussing the issues:
 
+http://git.kernel.org/?p=3Dlinux/kernel/git/torvalds/linux-2.6.git;a=3Dcomm=
+itdiff;h=3D21c7f30b1d3f8a3de3128478daca3ce203fc8733
+http://git.kernel.org/?p=3Dlinux/kernel/git/torvalds/linux-2.6.git;a=3Dcomm=
+itdiff;h=3D5adc55da4a7758021bcc374904b0f8b076508a11
+http://lkml.indiana.edu/hypermail/linux/kernel/0705.1/0205.html
 
-$ git diff lib/kobject.c
-diff --git a/lib/kobject.c b/lib/kobject.c
-index b512b74..e75556c 100644
---- a/lib/kobject.c
-+++ b/lib/kobject.c
-@@ -18,6 +18,10 @@
- #include <linux/stat.h>
- #include <linux/slab.h>
+It is pointed out in that thread that a big part of the problem is
+that a large number of drivers in the tree just aren't safe for
+multithreaded probing which is kind of a showstopper.  Now, maybe
+doing it at the initcall level makes it less scary and more sane, but
+I suspect that it will still expose a lot of broken code that assumes
+things are already set up because it has always been that way.
 
-+#include <linux/sched.h>
-+#include <linux/wait.h>
-+DECLARE_WAIT_QUEUE_HEAD(kset_wait);
-+
- /*
-  * populate_dir - populate directory with attributes.
-  * @kobj: object we're working on.
-@@ -721,6 +725,7 @@ int kset_register(struct kset *k)
-        if (err)
-                return err;
-        kobject_uevent(&k->kobj, KOBJ_ADD);
-+       wake_up_interruptible(&kset_wait);
-        return 0;
- }
+> Second, we create/modify functions like gpio_request() so that if they
+> fail, they can optionally stop in a wait queue until the call could
+> succeed. =A0Then gpiochip_add() would signal that queue each time a new
+> gpiochip was added. Functions like request_irq() and clk_get()--- and
+> probably many others--- would do the same thing, but with their own wait
+> queues.
 
-@@ -744,7 +749,7 @@ void kset_unregister(struct kset *k)
-  * looking for a matching kobject. If matching object is found
-  * take a reference and return the object.
-  */
--struct kobject *kset_find_obj(struct kset *kset, const char *name)
-+struct kobject *__kset_find_obj(struct kset *kset, const char *name)
- {
-        struct kobject *k;
-        struct kobject *ret = NULL;
-@@ -760,6 +765,14 @@ struct kobject *kset_find_obj(struct kset *kset,
-const char *name)
-        return ret;
- }
+You could take a look at the bus notifier code too.  I made an attempt
+at solving a similar problem between Ethernet MAC drivers and binding
+against the correct phy.  I ended up solving the problem in a
+different way, but the experimenting I did convince me that it is a
+viable concept.
 
-+struct kobject *kset_find_obj(struct kset *kset, const char *name)
-+{
-+       struct kobject *ret = NULL;
-+       wait_event_interruptible(kset_wait, (ret = __kset_find_obj(kset,
-name)));
-+       return ret;
-+}
-+
- static void kset_release(struct kobject *kobj)
- {
-        struct kset *kset = container_of(kobj, struct kset, kobj);
+Basically, if the driver depends on another resource/device then it
+can register a callback to be notified when a new device becomes
+available.  Once the needed device shows up (or immediately if the
+device is already there), the driver gets called back and it can
+complete registration.
 
+Not quite the same model that you are talking about here, but it would
+solve the problem on a per-driver basis.
 
-b.g.
+> Something like this:
+>
+> =A0 =A0static wait_queue_head_t requestor_wq;
+>
+> =A0 =A0int gpiochip_add(struct gpio_chip *chip)
+> =A0 =A0{
+> =A0 =A0 =A0 =A0...
+> =A0 =A0 =A0 =A0wake_up_interruptible(&requestor_wq);
+> =A0 =A0 =A0 =A0return status;
+> =A0 =A0}
+>
+> =A0 =A0int gpio_request_wait(unsigned gpio, const char *label)
+> =A0 =A0{
+> =A0 =A0 =A0 =A0return wait_event_interruptible(&requestor_wq,
+> !gpio_request(gpio, label));
+> =A0 =A0}
+>
+>
+> Or we might want to make the above code be the actual gpio_request(),
+> and bury the wait_event_interruptible() inside of that. =A0Doing so would
+> prevent having to touch a lot of code, but would definitely change the
+> behavior of gpio_request(). =A0Not sure which approach is best.
+>
+> Finally, I think that do_initcalls() would turn into something like this:
+>
+> =A0 =A0static void __init do_initcalls(void)
+> =A0 =A0{
+> =A0 =A0 =A0 =A0 =A0 =A0initcall_t *fn;
+>
+> =A0 =A0 =A0 =A0 =A0 =A0for (fn =3D __early_initcall_end; fn < __initcall_=
+end; fn++)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0kthread_create(do_one_initcall, *f=
+n, "do_initcalls");
+>
+> =A0 =A0 =A0 =A0 =A0 =A0flush_scheduled_work();
+> =A0 =A0}
+>
+>
+> If someone doesn't tell me this is a stupid idea, I might post it to
+> lkml. =A0Now's your chance! =A0:)
 
--- 
-Bill Gatliff
-bgat@billgatliff.com
+Have you dug into the Arjan's asynchronous function call infrastructure?
+
+http://lwn.net/Articles/314808/
+
+g.
