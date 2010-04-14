@@ -1,66 +1,42 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH] Pseudo-console for capture and redirection of console 
-	output
-Date: Mon, 12 Apr 2010 09:06:17 +0200
-Message-ID: <s2g2ea1731b1004120006t81106be1g851d1c1cc272d83a@mail.gmail.com>
-References: <20100412063545.GA28646@dvomlehn-lnx2.corp.sa.net>
+From: David VomLehn <dvomlehn@cisco.com>
+Subject: Re: [PATCH] Pseudo-console for capture and redirection of console
+ 	output
+Date: Wed, 14 Apr 2010 16:30:25 -0400
+Message-ID: <4BC625E1.8030206@cisco.com>
+References: <20100412063545.GA28646@dvomlehn-lnx2.corp.sa.net> <p2g8bd0f97a1004112340u547f244bpe0e4f1c9880f0c35@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:in-reply-to:references
-         :date:received:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=AEw77GCSllu6VBGNVqgg2xQTnHr7oN1zhWF/cIL3n4g=;
-        b=G0H03MQrPq9gPOSK2tBH7UFzGd0geyN+f9NmzjvPXOIgIpbcFwHXajyb9g+oTNhDqn
-         dI+XoxC7gfBTTo3TdQlp3ZVi6Ue3ZrG76KGgcaiM1+VD6jdAmvIei9QRKRPdYmb+JbeK
-         gNrof2d7WbTDRRBLcwWJYTjF8I4zziw4lOmTE=
-In-Reply-To: <20100412063545.GA28646@dvomlehn-lnx2.corp.sa.net>
+In-Reply-To: <p2g8bd0f97a1004112340u547f244bpe0e4f1c9880f0c35@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: David VomLehn <dvomlehn@cisco.com>
-Cc: to@dvomlehn-lnx2.corp.sa.net, "linux-embedded@vger.kernel.org"@cisco.com, linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, mpm@selenic.com, paul.gortmaker@windriver.com
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Mike Frysinger <vapier.adi@gmail.com>
+Cc: dvomlehn@dvomlehn-lnx2.corp.sa.net, linux-embedded@vger.kernel.org, akpm@linux-foundation.org, dwm2@infradead.org, mpm@selenic.com, paul.gortmaker@windriver.com
 
-2010/4/12 David VomLehn <dvomlehn@cisco.com>:
-> Provide functions for capturing console output for storage. The prima=
-ry user
-> is likely to be embedded systems that don't have the storage for core=
- dumps
-> but do have a need to log kernel panic information for later evaluati=
-on. It
-> offers two main areas of functionality:
+Mike Frysinger wrote:
+> On Mon, Apr 12, 2010 at 02:35, David VomLehn wrote:
+>   
+>> Provide functions for capturing console output for storage. The primary user
+>> is likely to be embedded systems that don't have the storage for core dumps
+>> but do have a need to log kernel panic information for later evaluation. It
+>> offers two main areas of functionality:
+>>
+>> o       It can maintain a circular log of console output so that kernel log
+>>        messages written before panic() was called can be retrieved to be
+>>        added to the failure log.
+>> o       A function can be registered to store output from printk() in a
+>>        persistent location, such as a reserved location in RAM.  Then,
+>>        printk() can be used either directly, to print state information, or
+>>        indirectly, through standard functions like dump_stack() and
+>>        show_regs().
+>>     
 >
-> o =A0 =A0 =A0 It can maintain a circular log of console output so tha=
-t kernel log
-> =A0 =A0 =A0 =A0messages written before panic() was called can be retr=
-ieved to be
-> =A0 =A0 =A0 =A0added to the failure log.
-> o =A0 =A0 =A0 A function can be registered to store output from print=
-k() in a
-> =A0 =A0 =A0 =A0persistent location, such as a reserved location in RA=
-M. =A0Then,
-> =A0 =A0 =A0 =A0printk() can be used either directly, to print state i=
-nformation, or
-> =A0 =A0 =A0 =A0indirectly, through standard functions like dump_stack=
-() and
-> =A0 =A0 =A0 =A0show_regs().
->
-> During normal operation, we use the circular logging. When we crash, =
-almost
-> the first thing we do is to switch to storing output. This goes in a =
-memory
-> buffer that is preserved over reboots. We then write a detailed crash
-> report using printk() and functions that use printk(). We retrieve th=
-e last
-> n lines of the log before the crash and print it, so that gets captur=
-ed
-> in the log, too.
->
-
-It's very similar to my driver ramoops, have you already seen it?
-Currently it's in the mm tree, I think it will be included in mainline
-early.
-
-Marco
+> how is this any different from the already existing mtdoops driver ?
+> -mike
+>   
+It's a smaller connection piece. It could be used in mtdoops or any 
+other printk-capture
+cheme. That being said, I'd rather consider this as an RFC. I've had a 
+number of interesting
+and useful conversations that suggest other ways to procede.
