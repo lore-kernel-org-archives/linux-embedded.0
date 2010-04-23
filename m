@@ -1,73 +1,43 @@
-From: Phillip Lougher <phillip-cnXvMjJKhjYG2Il/BtU0GPXRex20P6io@public.gmane.org>
-Subject: Re: Status of SquashFS LZMA support in mainline
-Date: Thu, 22 Apr 2010 02:37:25 +0100
-Message-ID: <4BCFA855.8070407@lougher.demon.co.uk>
-References: <4BCF9863.2000903@am.sony.com>
+From: Felipe Balbi <felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [Libmtp-discuss] [RFC/PATCH 0/2] u_char.c and mtp.c patches
+Date: Fri, 23 Apr 2010 16:04:46 +0300
+Message-ID: <20100423130446.GA11418@nokia.com>
+References: <1268123742-22968-1-git-send-email-felipe.balbi@nokia.com>
+ <x2m63386a3d1004180824u30bea481t3a11ed889c26b293@mail.gmail.com>
+ <z2w63386a3d1004190910o3698ad39w1167d81c12537e98@mail.gmail.com>
+ <20100419162611.GA15131@nokia.com>
+ <p2p63386a3d1004191223jb650984ft37372276e4870e87@mail.gmail.com>
+ <20100419200727.GC27643@nokia.com>
+ <20100419224451.GE1800@kroah.com>
+ <p2ze3bf744d1004230602nd09a7570jb3cee76f87ba8c00@mail.gmail.com>
+Reply-To: felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <p2ze3bf744d1004230602nd09a7570jb3cee76f87ba8c00-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <4BCF9863.2000903-mEdOJwZ7QcZBDgjK7y7TUQ@public.gmane.org>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
-	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=squashfs-devel>
-List-Post: <mailto:squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
-	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Tim Bird <tim.bird-mEdOJwZ7QcZBDgjK7y7TUQ@public.gmane.org>
-Cc: squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-embedded <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Mackall <mpm-VDJrAJ4Gl5ZBDgjK7y7TUQ@public.gmane.org>
+To: ext pouly amaury <amaury.pouly-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "libmtp-discuss-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <libmtp-discuss-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "Balbi Felipe (Nokia-D/Helsinki)" <felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, linux-embedded <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Mandy Arnaud.2 (EXT-Teleca/Helsinki)" <ext-arnaud.2.mandy-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Linux USB Mailing List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Quadros Roger (Nokia-D/Helsinki)" <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, David Brownell <david-b-yBeKhBN/0LDR7s880joybQ@public.gmane.org>, "Krogerus Heikki (EXT-Teleca/Helsinki)" <ext-heikki.krogerus-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tim Bird <tim.bird-mEdOJwZ7QcZBDgjK7y7TUQ@public.gmane.org>, "Kaliuta Yauheni (Nokia-D/Helsinki)" <Yauheni.Kaliuta-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
 
-Tim Bird wrote:
-> Does anyone (Phillip?) know the status of SquashFS support
-> for LZMA compression in mainline?  I seem to recall that
-> Phillip got the patches for this into linux-next sometime
-> in January, but I'm not sure if the latest kernel
-> (2.6.34-rcxx) includes this or not.
-> 
+Hi,
 
-Short answer, no it doesn't include this, Linus rejected my
-changes to the LZMA code that made it available for
-use by non init code (the LZMA code is currently only used by
-initramfs/initrd and the kernel decompression code).
+On Fri, Apr 23, 2010 at 03:02:31PM +0200, ext pouly amaury wrote:
+>Those two patents may apply:
+>System and method to specify extended configuration descriptor 
+>information in USB devices
+>System and method to specify device specific user interface information 
+>in the firmware of a USB device
 
-See the thread with the response from Linus here
-http://linux.derkeiler.com/Mailing-Lists/Kernel/2010-03/msg01462.html
+exactly, those are the ones. Thanks a lot for finding that out.
 
-So even though AFAIK there was no issues with the Squashfs LZMA
-wrapper, I had to drop it because it's useless without my changes
-to the LZMA code.
+-- 
+balbi
 
-I salvaged as much as possible, and submitted a second pull request
-with only the new Squashfs decompression framework (so it can use different
-decompressors cleanly).  This was accepted.
-
-
-> I also see in Linus' git tree the following commits in
-> March:
-> 
-> 2010-03-05	Linus Torvalds	Merge git://git.kernel.org/pub/scm/linux/kernel/git...
-> ...git://git./linux/kernel/git/pkl/squashfs-linus
-> ...org/pub/scm/linux/kernel/git/pkl/squashfs-linus:
-> Squashfs: get rid of obsolete definition...
-> Squashfs: get rid of obsolete variable...
-> Squashfs: add decompressor entries for...
-> Squashfs: add a decompressor framework
-> Squashfs: factor out remaining zlib dependencies...
-> Squashfs: move zlib decompression wrapper...
-
-The partial pull is why the commit history is slightly confusing, part of the
-work is there, but all LZMA work is mysteriously missing.
-
-What now?  It's clear the Squashfs LZMA work isn't going to be accepted until
-I clean up the STATIC and __init mess that Linus objected to.  This is one
-of my next tasks when I get enough free time to work through the issues.  It
-may be quite a lot of work because to fix this requires touching quite a
-few different architecture files.  It's not something that's going to be fixed
-in a couple of evenings :-(
-
-Phillip
-
-------------------------------------------------------------------------------
+DefectiveByDesign.org
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
