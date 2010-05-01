@@ -1,28 +1,18 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH] console logging detour via printk
-Date: Sat, 1 May 2010 11:00:22 +0200
-Message-ID: <z2r10f740e81005010200we353e3a4v90d9fe64620edb24@mail.gmail.com>
+Date: Sat, 1 May 2010 12:04:18 +0100
+Message-ID: <20100501120418.6fca2aad@lxorguk.ukuu.org.uk>
 References: <1272664980.10241.77.camel@itpsd6lap>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:sender:received
-         :in-reply-to:references:date:x-google-sender-auth:message-id:subject
-         :from:to:cc:content-type;
-        bh=vmTfNz5l203PtCKhgfCmcNNgK7qg/Mg9V/4pWfc5+RY=;
-        b=JWHnAM4mjw//n7Gf/47kyQwPLAhMiVvPV/EwBFLPtrhh4hqYob9JGex4pg/kJ/uiyW
-         axnGacwFwQ8YSsotboLxjgPhSPYjnIVXhbCjZL97uuKua2fj4ImdgtIRPVsLOjXVjYHQ
-         zjYnp7N6EubC9guWYZy7lETbDmFKAp1bP1sAc=
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1272664980.10241.77.camel@itpsd6lap>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Samo Pogacnik <samo_pogacnik@t-2.net>
 Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-On Sat, May 1, 2010 at 00:03, Samo Pogacnik <samo_pogacnik@t-2.net> wrote:
 > while i was searching for effective logging of complete console output
 > produced by the kernel and user phase of the boot process, it turned out
 > that only kernel messages imho get systematically cached and stored into
@@ -32,24 +22,40 @@ On Sat, May 1, 2010 at 00:03, Samo Pogacnik <samo_pogacnik@t-2.net> wrote:
 > bootlogd daemo, which handles the job of redirecting console output into
 > a log file, but i find it problematic to use especialy, when using
 > initial ram disk image.
->
-> So in short i came up with an idea to transform console writes into
-> printks at appropriate code place of some console drivers (the patch
-> includes code for VT console and SERIAL_CORE console drivers). Printks
-> eventually reach console device avoiding the patched part of the console
-> drivers.
 
-What about catching /dev/console instead of VT console,  SERIAL_CORE
-console, ...?
-Then it works with whatever console= parameter you specify.
+So you want to patch the kernel because you can't work out how to do this
+in userspace ? The distributions seem to have no problem doing this in
+user space that I can see. It doesn't seem to be a hard user space
+problem, and there are a ton of things you want to do with this sort of
+stuff (like network logging) that you can't do in kernel space.
 
-Gr{oetje,eeting}s,
+> --- a_linux-2.6.33.3/drivers/char/vt.c
+> +++ b_linux-2.6.33.3/drivers/char/vt.c
+> @@ -2696,6 +2696,16 @@ static int con_write(struct tty_struct *tty, const unsigned char *buf, int count
+>  {
+>  	int	retval;
+>  
+> +#ifdef CONFIG_VT_CONSOLE_DETOUR
+> +	if (console_detour) {
+> +		int idx = vt_console_driver.index - 1;
+> + 
+> +		if ((idx >= 0) && (idx == tty->index)) {
+> +			console_printk_detour(buf, count);
+> +			return count;
+> +		}
+> +	}
+> +#endif
 
-						Geert
+This requires you go around hacking up each device which is not a good
+idea and becomes rapidly unmaintainable.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+I suspect what you actually need for such logging might be to write a
+very simple tty driver whose write method is implemented as printk. That
+works in the general case and doesn't require hacking up the code
+everywhere else.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-							    -- Linus Torvalds
+However given your init stuff can trivially use openpty to set up a logged
+console I am not sure I see the point in doing this in kernel in the
+first place.
+
+Alan
