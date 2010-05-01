@@ -1,21 +1,20 @@
 From: Samo Pogacnik <samo_pogacnik@t-2.net>
 Subject: Re: [PATCH] console logging detour via printk
-Date: Sat, 01 May 2010 18:36:54 +0200
-Message-ID: <1272731814.2147.26.camel@itpsd6lap>
+Date: Sat, 01 May 2010 20:48:09 +0200
+Message-ID: <1272739689.2147.156.camel@itpsd6lap>
 References: <1272664980.10241.77.camel@itpsd6lap>
-	 <z2r10f740e81005010200we353e3a4v90d9fe64620edb24@mail.gmail.com>
+	 <20100501120418.6fca2aad@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <z2r10f740e81005010200we353e3a4v90d9fe64620edb24@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20100501120418.6fca2aad@lxorguk.ukuu.org.uk>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Geert Uytterhoeven <geert@linux-m68k.org>
+To: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Dne 01.05.2010 (sob) ob 11:00 +0200 je Geert Uytterhoeven zapisal(a):
-> On Sat, May 1, 2010 at 00:03, Samo Pogacnik <samo_pogacnik@t-2.net> wrote:
+Dne 01.05.2010 (sob) ob 12:04 +0100 je Alan Cox zapisal(a):
 > > while i was searching for effective logging of complete console output
 > > produced by the kernel and user phase of the boot process, it turned out
 > > that only kernel messages imho get systematically cached and stored into
@@ -25,31 +24,66 @@ Dne 01.05.2010 (sob) ob 11:00 +0200 je Geert Uytterhoeven zapisal(a):
 > > bootlogd daemo, which handles the job of redirecting console output into
 > > a log file, but i find it problematic to use especialy, when using
 > > initial ram disk image.
-> >
-> > So in short i came up with an idea to transform console writes into
-> > printks at appropriate code place of some console drivers (the patch
-> > includes code for VT console and SERIAL_CORE console drivers). Printks
-> > eventually reach console device avoiding the patched part of the console
-> > drivers.
 > 
-> What about catching /dev/console instead of VT console,  SERIAL_CORE
-> console, ...?
-> Then it works with whatever console= parameter you specify.
+> So you want to patch the kernel because you can't work out how to do this
+> in userspace ? The distributions seem to have no problem doing this in
+> user space that I can see. It doesn't seem to be a hard user space
+> problem, and there are a ton of things you want to do with this sort of
+> stuff (like network logging) that you can't do in kernel space.
 
-Could not agree more, but that was as close as i was able to detect the
-common code and provide something that actually works. Maybe this is
-already enough to cover all boot consoles? 
+The distros have no problem logging complete console output into log
+files or over the network, because they simply do not do it at least for
+the initrd part of the boot process (i'd be glad, if i'm wrong). 
+Anyway the proposed mechanism nicely bridges the gap between the kernel
+boot start and the system logging daemon start-up. It also solves the
+chicken and egg problem of how to log console if user space console
+logging facility fails.
 
 > 
-> Gr{oetje,eeting}s,
+> > --- a_linux-2.6.33.3/drivers/char/vt.c
+> > +++ b_linux-2.6.33.3/drivers/char/vt.c
+> > @@ -2696,6 +2696,16 @@ static int con_write(struct tty_struct *tty, const unsigned char *buf, int count
+> >  {
+> >  	int	retval;
+> >  
+> > +#ifdef CONFIG_VT_CONSOLE_DETOUR
+> > +	if (console_detour) {
+> > +		int idx = vt_console_driver.index - 1;
+> > + 
+> > +		if ((idx >= 0) && (idx == tty->index)) {
+> > +			console_printk_detour(buf, count);
+> > +			return count;
+> > +		}
+> > +	}
+> > +#endif
 > 
-> 						Geert
+> This requires you go around hacking up each device which is not a good
+> idea and becomes rapidly unmaintainable.
+
+Agree, it should have been done within a well defined code volume.
+
 > 
+> I suspect what you actually need for such logging might be to write a
+> very simple tty driver whose write method is implemented as printk. That
+> works in the general case and doesn't require hacking up the code
+> everywhere else.
+
+Looks to me that some kernel code is welcome:)?
+
+> 
+> However given your init stuff can trivially use openpty to set up a logged
+> console I am not sure I see the point in doing this in kernel in the
+> first place.
+> 
+
+As said above, how to bridge kernel boot start and logging daemon
+start-up without kernel help, especially when initrd is in the way? imho
+it would be too complicated.
+
+> Alan
 > --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-> 
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
-> 							    -- Linus Torvalds
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-regards, Samo
+thanks for the reply, with best regards, Samo
