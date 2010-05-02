@@ -1,59 +1,44 @@
-From: Paul Smith <paul@mad-scientist.net>
-Subject: Can I manage/modify console baud rates from userspace?
-Date: Sat, 01 May 2010 20:02:04 -0400
-Message-ID: <1272758524.27961.1114.camel@homebase>
-Reply-To: paul@mad-scientist.net
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: Re: Can I manage/modify console baud rates from userspace?
+Date: Sun, 02 May 2010 11:58:31 +0200
+Message-ID: <4BDD4CC7.3050507@gmail.com>
+References: <1272758524.27961.1114.camel@homebase>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=gIB1q3JQJ789EmcoFbHPTYvYI/AV8EGSXUttEdOKxQE=;
+        b=DeK3r6FoL2lOhMlq9ek6UrivmL7gu+1nj115ZimtzYYqNkyLSxZ9meZAQlhdKBnB5F
+         Bs+b3N3csXIZ9wK/uYrW2GOjlxHes19IwV7VsglbaeVwWlm8+b3IJKqNcjzYqY4yNzP+
+         E3Z+DmMJ71eD/0xVikAMQQPp9Gu6QjsZBey00=
+In-Reply-To: <1272758524.27961.1114.camel@homebase>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: paul@mad-scientist.net
+Cc: linux-embedded@vger.kernel.org
 
-Hi all.  I need some advice on an issue that just cropped up.  We have a
-Linux embedded image (current kernel is 2.6.31-based) that we are
-booting up on blade systems using PXE to obtain the kernel image, the
-kernel boot line parameters, and an initrd from a server.
+02/05/2010 02:02, Paul Smith wrote:
+> I've looked at setserial and it supports a baud_base parameter but that
+> doesn't appear to be what I want (I tried it anyway: changing it didn't
+> work, my console output was still screwed up).
+> 
+> Trying to do something like creating customized PXE configs on the
+> server based on the MAC addresses of the blades that are "new" (or old)
+> would be an absolute nightmare as people swap blades between chassis,
+> add new ones, etc. all the time.
+> 
+> 
+> Please help me find a better way... :-(
+> 
 
-On these systems we REALLY need to be able to watch the console, even
-after deployment into the field (e.g., not just during
-development/internally).
+It's strange that it's not possible to change the baud rate, but I'm not
+an expert of tty layer. A naive implementation could be patch the kernel
+to choose a well-known baud rate for your hw reading a revision register
+or something like that.
 
-We currently run this image on various hardware platforms, one of which
-uses serial-over-LAN, where the console is connected to a dedicated vlan
-from the blade to the chassis management module, which you can ssh into
-and from there connect to the console on any blade in the chassis.  The
-vlan configuration on these blades doesn't support any baud rate over
-19200, so in order to get this working we use the PXE configuration file
-to add "console=ttyS1,19200" to the kernel boot line.  Works great!
-
-Here's the problem.  The vendor has released a new version of the blade
-hardware for this platform, and while the old hardware didn't support
-any baud rate above 19200 for serial-over-LAN, the new hardware doesn't
-support any baud rate at 19200 or below, so there's no single baud rate
-that will work for both types of blades.
-
-These blades are interchangeable in the chassis and since the current
-ones are end-of-life we have to start to support the new blade, and we
-have to support combinations of new and old blades in the same chassis
-(due to replacements).
-
-So I _have_ to find a way to get the console working in this
-configuration.  Even if I lose the early boot messages but then managed
-to configure the console properly from userspace after the kernel
-booted, that would be less than ideal but at least it would be progress.
-Is there some way to do this?  Is there some way in the kernel to handle
-this kind of situation?
-
-I've looked at setserial and it supports a baud_base parameter but that
-doesn't appear to be what I want (I tried it anyway: changing it didn't
-work, my console output was still screwed up).
-
-Trying to do something like creating customized PXE configs on the
-server based on the MAC addresses of the blades that are "new" (or old)
-would be an absolute nightmare as people swap blades between chassis,
-add new ones, etc. all the time.
-
-
-Please help me find a better way... :-(
+Marco
