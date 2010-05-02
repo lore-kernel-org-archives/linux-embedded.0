@@ -1,55 +1,59 @@
-From: Samo Pogacnik <samo_pogacnik@t-2.net>
-Subject: Re: [PATCH] console logging detour via printk
-Date: Sun, 02 May 2010 00:45:48 +0200
-Message-ID: <1272753948.2147.262.camel@itpsd6lap>
-References: <1272664980.10241.77.camel@itpsd6lap>
-	 <20100501120418.6fca2aad@lxorguk.ukuu.org.uk>
-	 <1272739689.2147.156.camel@itpsd6lap>
-	 <20100501204131.4c7aeae4@lxorguk.ukuu.org.uk>
+From: Paul Smith <paul@mad-scientist.net>
+Subject: Can I manage/modify console baud rates from userspace?
+Date: Sat, 01 May 2010 20:02:04 -0400
+Message-ID: <1272758524.27961.1114.camel@homebase>
+Reply-To: paul@mad-scientist.net
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100501204131.4c7aeae4@lxorguk.ukuu.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-Dne 01.05.2010 (sob) ob 20:41 +0100 je Alan Cox zapisal(a):
-> > The distros have no problem logging complete console output into log
-> > files or over the network, because they simply do not do it at least for
-> > the initrd part of the boot process (i'd be glad, if i'm wrong). 
-> 
-> I'd have to double check - but its trivial to move the log if so.
-> 
-> > > I suspect what you actually need for such logging might be to write a
-> > > very simple tty driver whose write method is implemented as printk. That
-> > > works in the general case and doesn't require hacking up the code
-> > > everywhere else.
-> > 
-> > Looks to me that some kernel code is welcome:)?
-> 
-> I really don't see the point but if you must do it then doing it as its
-> own driver would at least avoid making a mess in the rest of the kernel,
-> at which point it becomes less of a problem
-> 
-> > > However given your init stuff can trivially use openpty to set up a logged
-> > > console I am not sure I see the point in doing this in kernel in the
-> > > first place.
-> > > 
-> > 
-> > As said above, how to bridge kernel boot start and logging daemon
-> > start-up without kernel help, especially when initrd is in the way? imho
-> > it would be too complicated.
-> 
-> Put the logging start up in the initrd, its just a ramdisk its not
-> special in any way at all.
-I understand and can agree with everything you said, however providing
-an additional mechanism might not hurt. Funny enough by generalizing the
-patch for any console type, the essential code change is made at the
-same place where initial console redirection mechanism has been
-implemented. And again, console redirection can not log anything that
-has been output to console prior to redirection activation.  
+Hi all.  I need some advice on an issue that just cropped up.  We have a
+Linux embedded image (current kernel is 2.6.31-based) that we are
+booting up on blade systems using PXE to obtain the kernel image, the
+kernel boot line parameters, and an initrd from a server.
 
-regards, Samo
+On these systems we REALLY need to be able to watch the console, even
+after deployment into the field (e.g., not just during
+development/internally).
+
+We currently run this image on various hardware platforms, one of which
+uses serial-over-LAN, where the console is connected to a dedicated vlan
+from the blade to the chassis management module, which you can ssh into
+and from there connect to the console on any blade in the chassis.  The
+vlan configuration on these blades doesn't support any baud rate over
+19200, so in order to get this working we use the PXE configuration file
+to add "console=ttyS1,19200" to the kernel boot line.  Works great!
+
+Here's the problem.  The vendor has released a new version of the blade
+hardware for this platform, and while the old hardware didn't support
+any baud rate above 19200 for serial-over-LAN, the new hardware doesn't
+support any baud rate at 19200 or below, so there's no single baud rate
+that will work for both types of blades.
+
+These blades are interchangeable in the chassis and since the current
+ones are end-of-life we have to start to support the new blade, and we
+have to support combinations of new and old blades in the same chassis
+(due to replacements).
+
+So I _have_ to find a way to get the console working in this
+configuration.  Even if I lose the early boot messages but then managed
+to configure the console properly from userspace after the kernel
+booted, that would be less than ideal but at least it would be progress.
+Is there some way to do this?  Is there some way in the kernel to handle
+this kind of situation?
+
+I've looked at setserial and it supports a baud_base parameter but that
+doesn't appear to be what I want (I tried it anyway: changing it didn't
+work, my console output was still screwed up).
+
+Trying to do something like creating customized PXE configs on the
+server based on the MAC addresses of the blades that are "new" (or old)
+would be an absolute nightmare as people swap blades between chassis,
+add new ones, etc. all the time.
+
+
+Please help me find a better way... :-(
