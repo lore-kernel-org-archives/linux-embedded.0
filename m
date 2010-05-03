@@ -1,83 +1,71 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH] console logging detour via printk
-Date: Mon, 03 May 2010 19:05:23 +0200
-Message-ID: <4BDF0253.6030302@gmail.com>
-References: <1272664980.10241.77.camel@itpsd6lap>	 <20100501120418.6fca2aad@lxorguk.ukuu.org.uk>	 <1272739689.2147.156.camel@itpsd6lap>  <4BDD4CD7.2060205@gmail.com> <1272806987.2155.34.camel@itpsd6lap>
+From: Paul Smith <paul@mad-scientist.net>
+Subject: Re: Can I manage/modify console baud rates from userspace?
+Date: Mon, 3 May 2010 13:28:27 -0400
+Message-ID: <1272907707.31303.23.camel@psmith-ubeta.netezza.com>
+References: <1272758524.27961.1114.camel@homebase>
+	 <4BDD4CC7.3050507@gmail.com> <1272816895.27961.1131.camel@homebase>
+	 <20100502202534.GA29535@merkur.ravnborg.org>
+Reply-To: paul@mad-scientist.net
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=go0WhYfAhIi3iaPGSs51zWLIxiEuztnonG5svCpEfZs=;
-        b=Vesmjv7Xk+gDqnqS26G804uKm3EGOM9xQl491BxPFR7tGNnpy1fFEx4RXNYcfEexQ4
-         p/fQUOLwrwK5zzn7Ifne9npX8XwJ2eIGM8eSDEijYBs1c8NgOJP7PAfbGjPy3nQyNQhv
-         nbQ2sDtXHQfH53hxUB7PI9VjPD2zcT+YdmiKI=
-In-Reply-To: <1272806987.2155.34.camel@itpsd6lap>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Samo Pogacnik <samo_pogacnik@t-2.net>
-Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20100502202534.GA29535@merkur.ravnborg.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, linux-embedded@vger.kernel.org
 
-Il 02/05/2010 15:29, Samo Pogacnik ha scritto:
-> Dne 02.05.2010 (ned) ob 11:58 +0200 je Marco Stornelli zapisal(a):
->> 01/05/2010 20:48, Samo Pogacnik wrote:
->>
->> Mmm...It's an interesting problem. I see in my distro (openSuse) a
->> script called boot.klog that it seems to perform that (even initrd
->> part). In the file boot.msg I can see the initial prints of the kernel
->> and user space scripts.
->>
-> Thanks for the info. 
-> Is this boot.klog script from the initrd image or from the real rootfs?
-> As you can see, i am still suspicious about the initrd part user console
-> messages:)
-> 
-> Samo
-> 
-> 
+On Sun, 2010-05-02 at 22:25 +0200, Sam Ravnborg wrote:
+> I would suggest asking Alan Cox - he if anyone would know.
+> I lost the original mail and context above is missing some details.
+> Anyway added to this mail.
 
-In the initrd there's the script blogd.sh:
+Thanks Sam.  Alan, hope you don't mind a direct email.  I'll cut down
+the original request to just (I hope) the important details.
 
-if test -z "$fboot" -a -z "$quiet" -a -z "$REDIRECT" ; then
-    REDIRECT=$(showconsole 2>/dev/null)
-    if test -n "$REDIRECT" ; then
-	if test "$devpts" != "yes" ; then
-	    mount -t devpts devpts /dev/pts
-	    devpts=yes
-	fi
-	> /dev/shm/initrd.msg
-	ln -sf /dev/shm/initrd.msg /var/log/boot.msg
-	mkdir -p /var/run
-	/sbin/blogd $REDIRECT
-    fi
-fi
+I have an environment in which a number of (Intel-based) blades in one
+or more blade chassis boot from a host using PXE to download a Linux
+kernel (2.6.31-based ATM) and a ramdisk root partition.  These blades
+provide access to the console via serial-over-LAN, where the chassis
+provides a special vlan connection to the blades' ttyS1 port.  You can
+then connect to the chassis management module via SSH, and from there
+connect to the console of any of the blades.
 
-And in the rootfs the boot.klog script:
+We require this capability in our deployed systems, not just during
+development, so I need to make sure this is working at all times and
+that it's easy to configure and maintain in the field.
 
-# Read all kernel messages generated until now and put them in one file.
-    test -s /var/log/boot.msg && mv -f /var/log/boot.msg /var/log/boot.omsg
-    echo Creating /var/log/boot.msg
-    if test -x /sbin/klogd ; then
-        # klogd syncs out the file
-	/sbin/klogd -s -o -n -f /var/log/boot.msg
-	test -s /var/log/boot.msg
-	rc_status -v1 -r
-    elif test -x /bin/dmesg ; then
-	/bin/dmesg > /var/log/boot.msg
-	/bin/sync
-	test -s /var/log/boot.msg
-	rc_status -v1 -r
-    fi
-    if test -e /dev/shm/initrd.msg ; then
-	cat /dev/shm/initrd.msg >> /var/log/boot.msg
-	rm -f /dev/shm/initrd.msg
-    fi
-[ --- cut here --- ]
+Today, all the blades we ship use a maximum baud rate of 19200 so in my
+PXE config, I have "console=ttyS1,19200" added to the kernel boot line.
+Works great.
 
-Regards,
+The vendor is providing a newer version of these blades and the current
+version is end-of-lifed.  The new blades are drop-in replaceable,
+individually, with the current blades, which is nice.  Unfortunately
+these new blades do not support any overlapping baud rate with the old
+blades, so there's no single value I can provide in the PXE
+configuration on my host that will work with all blades in a
+heterogeneous blade deployment.
 
-Marco
+
+So I'm stuck here and don't have a good idea how to move forward.  I
+tried using setserial to modify the baud rate (it supports a parameter
+baud_base which didn't seem like it would do what I wanted--and it
+didn't) but no joy.
+
+Trying to customize the PXE config would be virtually impossible: we'd
+have to map all the MAC addresses and figure out which ones were for
+newer blades, and maintain that mapping as blades were swapped in and
+out and even moved between chassis or between slots in the same chassis.
+A nightmare!
+
+Is there some other way to modify the baud rate of the console device
+from userspace once I figure out the right one?  It would definitely be
+less than ideal since we'd lose all the boot output, except what we can
+get from dmesg _if_ the system boots, but it would be something.
+
+Any other thoughts or ideas?
+
+
+Thanks for reading!
