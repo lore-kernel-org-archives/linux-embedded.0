@@ -1,92 +1,172 @@
-From: Ming Lei <tom.leiming@gmail.com>
-Subject: Re: [PATCH] ARM: fix inbalance of hardirqs trace before return to 
-	user or exception
-Date: Sun, 9 May 2010 21:07:08 +0800
-Message-ID: <i2kd82e647a1005090607w24424d8p4b524007a9c7fe0@mail.gmail.com>
-References: <1273377379-18078-1-git-send-email-tom.leiming@gmail.com>
-	 <20100509091856.GA29763@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: tom.leiming@gmail.com
+Subject: [PATCH] ARM: fix 'unannotated irqs-on' lockdep warning
+Date: Mon, 10 May 2010 22:27:15 +0800
+Message-ID: <1273501635-28403-1-git-send-email-tom.leiming@gmail.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=wEs7V29dX4QvuR6Y3TFc0G1PFTrXJ1ZHY85o5AtQwFc=;
-        b=Zlh71+hzW5aDh1iIsaM2FUA3bXpP1jRlwlWyC26f+xUqOmtKVgKSjvDzvJtvAm+KaW
-         OAFzrIZxNMPwOV2lTZxBfVliJ99sxn9yjHTzfmLb+Zq/YQyYChq5ZaHSWKw3SFQEio1h
-         rsTWsXlLjF4d694Ih/1JudMpdr/OliiPLgf5U=
-In-Reply-To: <20100509091856.GA29763@n2100.arm.linux.org.uk>
+        h=domainkey-signature:received:received:from:to:cc:subject:date
+         :message-id:x-mailer;
+        bh=YfeF/FqB6ciJXpsxSuyCD2uQhoAOllay9W6tu8Sld/I=;
+        b=xQ4roT5qN6uHycrD16kq1zN9UgYMN85llQfWW2KaembBCNMiG1QfHDHFKsYt2eoVbl
+         El6HmQ/k0w4bUlk6jd7hsZpXJiliWSufEopo1TKjeFVHeRCSpA3I8WyUrD2F/eq60OWZ
+         osFwAMV+m+Xnn/dK/wMY0hKaV/T+RxF2RQBXk=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, a.p.zijlstra@chello.nl, linux-kernel@vger.kernel.org
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux@arm.linux.org.uk
+Cc: linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, a.p.zijlstra@chello.nl, linux-kernel@vger.kernel.org, Ming Lei <tom.leiming@gmail.com>
 
-2010/5/9 Russell King - ARM Linux <linux@arm.linux.org.uk>:
-> On Sun, May 09, 2010 at 11:56:19AM +0800, tom.leiming@gmail.com wrote=
-:
->> From: Ming Lei <tom.leiming@gmail.com>
->>
->> This patch introduces macro of trace_ret_hardirqs_on, which will
->> call asm_trace_hardirqs_on if I flag in the stored CPSR is zero.
->>
->> The patch adds trace_ret_hardirqs_on before returning to user
->> or exception mode once disable_irq was called explicitly, which does
->> fix the inbalance of hardirqs trace and make lockdep happy. The patc=
-h
->> does fix this kind of lockdep warning below:
->
-> I'm not convinced that this is required in all the places you're addi=
-ng
-> it. =A0Eg, in the return-to-user case, userspace _always_ has IRQs
-> enabled, and when we enter kernel space from the exception handler, w=
-e
-> always enable IRQs. =A0Returning from any syscall with IRQs disabled =
-is a
-> bug, and so that _should_ produce a warning.
->
-> In fact, returning to user mode with IRQs disabled in _any_ case is a
-> bug.
+From: Ming Lei <tom.leiming@gmail.com>
 
-The patch only adds hardirqs on event to make lockdep see it.
-Maybe in this paths, we should not trace the hardirqs off event, then w=
-e
-will not need to add the hardirqs on event before return to user. If
-you agree, I'll
-write another patch to do it.
+This patch fixes the 'unannotated irqs-on' lockdep warning below:
 
->
-> Please provide your reasoning for adding this to every path.
+	CPU: Testing write buffer coherency: ok
+	------------[ cut here ]------------
+	WARNING: at kernel/lockdep.c:3145 check_flags+0xcc/0x1dc()
+	Modules linked in:
+	[<c0035120>] (unwind_backtrace+0x0/0xf8) from [<c0355374>] (dump_stack+0x20/0x24)
+	[<c0355374>] (dump_stack+0x20/0x24) from [<c0060c04>] (warn_slowpath_common+0x58/0x70)
+	[<c0060c04>] (warn_slowpath_common+0x58/0x70) from [<c0060c3c>] (warn_slowpath_null+0x20/0x24)
+	[<c0060c3c>] (warn_slowpath_null+0x20/0x24) from [<c008f224>] (check_flags+0xcc/0x1dc)
+	[<c008f224>] (check_flags+0xcc/0x1dc) from [<c00945dc>] (lock_acquire+0x50/0x140)
+	[<c00945dc>] (lock_acquire+0x50/0x140) from [<c0358434>] (_raw_spin_lock+0x50/0x88)
+	[<c0358434>] (_raw_spin_lock+0x50/0x88) from [<c00fd114>] (set_task_comm+0x2c/0x60)
+	[<c00fd114>] (set_task_comm+0x2c/0x60) from [<c007e184>] (kthreadd+0x30/0x108)
+	[<c007e184>] (kthreadd+0x30/0x108) from [<c0030104>] (kernel_thread_exit+0x0/0x8)
+	---[ end trace 1b75b31a2719ed1c ]---
+	possible reason: unannotated irqs-on.
+	irq event stamp: 3
+	hardirqs last  enabled at (2): [<c0059bb0>] finish_task_switch+0x48/0xb0
+	hardirqs last disabled at (3): [<c002f0b0>] ret_slow_syscall+0xc/0x1c
+	softirqs last  enabled at (0): [<c005f3e0>] copy_process+0x394/0xe5c
+	softirqs last disabled at (0): [<(null)>] (null)
 
-The patch adds this in places which disable_irq is called before return=
-ing to
-user or kernel mode from sys-call or exception. This can keep hardirqs =
-trace
-balance to remove lockdep warning of "unannotated irqs-on" since disabl=
-e_irq
-may call trace_hardirqs_off to trace hardirqs off event and lockdep
-will see it.
+This patch introduces macro of trace_ret_hardirqs_on, which will
+call trace_hardirqs_on if I flag in the stored CPSR is zero.
 
-If lockdep warning is produced, lockdep does not work afterwards. It is=
- the
-purpose of the patch.
+In the path of returning to user-space, the patch replaces disable_irq
+with disable_irq_notrace in ret_to_user to avoid the 'unannotated irqs-on'
+lockdep warning since hardirqs is always enabled before returning to user.
 
->
-> Finally, using asm_trace_hardirqs_on is extremely expensive, and in
-> many cases the register saving is completely wasteful. =A0That's why
-> places were doing this:
->
-> #ifdef CONFIG_TRACE_IRQFLAGS
-> =A0 =A0 =A0 =A0tst =A0 =A0 r4, #PSR_I_BIT
-> =A0 =A0 =A0 =A0bleq =A0 =A0trace_hardirqs_on
-> #endif
->
-> which is much more efficient.
+In the path of returning to kernel-space, the patch still replaces
+disable_irq with disable_irq_notrace in __xxx_svc handler and adds
+trace_hardirqs_on before calling svc_exit to trace the possible hardirqs on
+event for avoiding the possible 'unannotated irqs-on' lockdep warning.
 
-Yes, I'll use the efficient way in v2 of the patch.
+Signed-off-by: Ming Lei <tom.leiming@gmail.com>
+---
+ arch/arm/kernel/entry-armv.S   |   31 +++++++++++++++++--------------
+ arch/arm/kernel/entry-common.S |    2 +-
+ arch/arm/kernel/entry-header.S |    7 +++++++
+ 3 files changed, 25 insertions(+), 15 deletions(-)
 
-
---=20
-Lei Ming
+diff --git a/arch/arm/kernel/entry-armv.S b/arch/arm/kernel/entry-armv.S
+index e6a0fb0..7202adf 100644
+--- a/arch/arm/kernel/entry-armv.S
++++ b/arch/arm/kernel/entry-armv.S
+@@ -204,13 +204,15 @@ __dabt_svc:
+ 	@
+ 	@ IRQs off again before pulling preserved data off the stack
+ 	@
+-	disable_irq
++	disable_irq_notrace
+ 
+ 	@
+ 	@ restore SPSR and restart the instruction
++	@ trace possible hardirqs on event before returning
+ 	@
+-	ldr	r2, [sp, #S_PSR]
+-	svc_exit r2				@ return from exception
++	ldr	r4, [sp, #S_PSR]
++	trace_ret_hardirqs_on r4
++	svc_exit r4				@ return from exception
+  UNWIND(.fnend		)
+ ENDPROC(__dabt_svc)
+ 
+@@ -235,10 +237,7 @@ __irq_svc:
+ 	blne	svc_preempt
+ #endif
+ 	ldr	r4, [sp, #S_PSR]		@ irqs are already disabled
+-#ifdef CONFIG_TRACE_IRQFLAGS
+-	tst	r4, #PSR_I_BIT
+-	bleq	trace_hardirqs_on
+-#endif
++	trace_ret_hardirqs_on r4
+ 	svc_exit r4				@ return from exception
+  UNWIND(.fnend		)
+ ENDPROC(__irq_svc)
+@@ -291,13 +290,15 @@ __und_svc:
+ 	@
+ 	@ IRQs off again before pulling preserved data off the stack
+ 	@
+-1:	disable_irq
++1:	disable_irq_notrace
+ 
+ 	@
+ 	@ restore SPSR and restart the instruction
++	@ trace possible hardirqs on event before returning
+ 	@
+-	ldr	r2, [sp, #S_PSR]		@ Get SVC cpsr
+-	svc_exit r2				@ return from exception
++	ldr	r4, [sp, #S_PSR]		@ Get SVC cpsr
++	trace_ret_hardirqs_on r4
++	svc_exit r4				@ return from exception
+  UNWIND(.fnend		)
+ ENDPROC(__und_svc)
+ 
+@@ -327,13 +328,15 @@ __pabt_svc:
+ 	@
+ 	@ IRQs off again before pulling preserved data off the stack
+ 	@
+-	disable_irq
++	disable_irq_notrace
+ 
+ 	@
+ 	@ restore SPSR and restart the instruction
+-	@
+-	ldr	r2, [sp, #S_PSR]
+-	svc_exit r2				@ return from exception
++	@ trace possible hardirqs on event before returning
++	@	
++	ldr	r4, [sp, #S_PSR]
++	trace_ret_hardirqs_on r4
++	svc_exit r4				@ return from exception
+  UNWIND(.fnend		)
+ ENDPROC(__pabt_svc)
+ 
+diff --git a/arch/arm/kernel/entry-common.S b/arch/arm/kernel/entry-common.S
+index 2c1db77..ed471a7 100644
+--- a/arch/arm/kernel/entry-common.S
++++ b/arch/arm/kernel/entry-common.S
+@@ -58,7 +58,7 @@ work_resched:
+  */
+ ENTRY(ret_to_user)
+ ret_slow_syscall:
+-	disable_irq				@ disable interrupts
++	disable_irq_notrace				@ disable interrupts
+ 	ldr	r1, [tsk, #TI_FLAGS]
+ 	tst	r1, #_TIF_WORK_MASK
+ 	bne	work_pending
+diff --git a/arch/arm/kernel/entry-header.S b/arch/arm/kernel/entry-header.S
+index d93f976..ac51ce3 100644
+--- a/arch/arm/kernel/entry-header.S
++++ b/arch/arm/kernel/entry-header.S
+@@ -30,6 +30,13 @@
+ #error "Please fix"
+ #endif
+ 
++	.macro trace_ret_hardirqs_on, rspsr
++#ifdef CONFIG_TRACE_IRQFLAGS
++	tst 	\rspsr, #PSR_I_BIT
++	bleq	trace_hardirqs_on
++#endif
++	.endm
++
+ 	.macro	zero_fp
+ #ifdef CONFIG_FRAME_POINTER
+ 	mov	fp, #0
+-- 
+1.6.2.5
