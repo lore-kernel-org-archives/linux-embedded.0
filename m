@@ -1,7 +1,7 @@
 From: Samo Pogacnik <samo_pogacnik@t-2.net>
-Subject: [PATCH] tagged console logging detour via printk
-Date: Mon, 10 May 2010 19:02:00 +0200
-Message-ID: <1273510920.6998.76.camel@itpsd6lap>
+Subject: [PATCH] detour TTY driver
+Date: Sat, 15 May 2010 12:17:38 +0200
+Message-ID: <1273918658.2341.17.camel@itpsd6lap>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -13,191 +13,106 @@ Cc: linux kernel <linux-kernel@vger.kernel.org>
 
 Hi,
 
-This version of console detour patch provides tagging of console
-messages, when sent to printk. This may result in logs like this:
-...
-May  6 22:41:27 lap1 kernel: [    1.092979] Freeing unused kernel memory: 548k freed
-May  6 22:41:27 lap1 kernel: [    1.094503] Write protecting the kernel text: 3564k
-May  6 22:41:27 lap1 kernel: [    1.094739] Write protecting the kernel read-only data: 1736k
-May  6 22:41:27 lap1 kernel: [C][    1.099902] Mounting proc filesystem
-May  6 22:41:27 lap1 kernel: [C][    1.100165] Mounting sysfs filesystem
-May  6 22:41:27 lap1 kernel: [C][    1.100440] Creating /dev
-May  6 22:41:27 lap1 kernel: [C][    1.101835] Creating initial device nodes
-...
-...
-May  6 22:41:27 lap1 kernel: [C][   25.313917] Bringing up interface eth0:  \
-May  6 22:41:27 lap1 kernel: [   25.433672] eth0: link up, 100Mbps, full-duplex, lpa 0x45E1
-May  6 22:41:27 lap1 kernel: [C][   30.863244] ESC[60G\
-May  6 22:41:27 lap1 kernel: [C][   30.863319] [\
-May  6 22:41:27 lap1 kernel: [C][   30.863443] ESC[0;32m\
-May  6 22:41:27 lap1 kernel: [C][   30.863499]   OK  \
-May  6 22:41:27 lap1 kernel: [C][   30.863617] ESC[0;39m\
-May  6 22:41:27 lap1 kernel: [C][   30.863663] ]\
-May  6 22:41:27 lap1 kernel: [C][   30.863710] ^
-...
-May  6 22:41:27 lap1 kernel: [C][   31.327576] Starting system logger: \
-...
+Here is the initial suggestion for a simple detour TTY driver, which
+provides the ability to write user messages through printk. This allows
+user output to be inlined with kernel output. Together with printk
+time-stamping enabled, a detailed boot sequence analyses is possible.
+Additionally, console logs could have been stored through the same
+mechanism as kernel messages and does not require the system logger to
+be started very/too soon.
 
-It would have been possible for the system logger to use the console tag
-and replace the "kernel" with e.g. "console" word for console messages.
-The other thing the system logger could do is to fix its time stamps for
-messages generated before logger start-up based on printk time stamp
-(see the last message in the example log)...
-
-regards, 
-Samo
-
-p.s.
-I'll provide also an independent detour tty driver as Alan suggested.
+regards, Samo
 
 ---
 Signed-off-by: Samo Pogacnik <samo_pogacnik@t-2.net>
-diff --git a_linux-2.6.33.3/Documentation/kernel-parameters.txt b_linux-2.6.33.3/Documentation/kernel-parameters.txt
-index e2c7487..ab0072c 100644
---- a_linux-2.6.33.3/Documentation/kernel-parameters.txt
-+++ b_linux-2.6.33.3/Documentation/kernel-parameters.txt
-@@ -628,6 +628,8 @@ and is between 256 and 4096 characters. It is defined in the file
- 			Defaults to the default architecture's huge page size
- 			if not specified.
- 
-+	detour		[KNL] Enable console logging detour via printk.
-+
- 	dhash_entries=	[KNL]
- 			Set number of hash buckets for dentry cache.
- 
+diff --git a_linux-2.6.33.3/Documentation/devices.txt b_linux-2.6.33.3/Documentation/devices.txt
+index 53d64d3..f889097 100644
+--- a_linux-2.6.33.3/Documentation/devices.txt
++++ b_linux-2.6.33.3/Documentation/devices.txt
+@@ -239,6 +239,7 @@ Your cooperation is appreciated.
+ 		  0 = /dev/tty		Current TTY device
+ 		  1 = /dev/console	System console
+ 		  2 = /dev/ptmx		PTY master multiplex
++		  3 = /dev/detour	Detour via printk TTY device
+ 		 64 = /dev/cua0		Callout device for ttyS0
+ 		    ...
+ 		255 = /dev/cua191	Callout device for ttyS191
 diff --git a_linux-2.6.33.3/drivers/char/Kconfig b_linux-2.6.33.3/drivers/char/Kconfig
-index e023682..43c552e 100644
+index e023682..4d21e2d 100644
 --- a_linux-2.6.33.3/drivers/char/Kconfig
 +++ b_linux-2.6.33.3/drivers/char/Kconfig
-@@ -88,6 +88,22 @@ config VT_HW_CONSOLE_BINDING
- 	 information. For framebuffer console users, please refer to
- 	 <file:Documentation/fb/fbcon.txt>.
+@@ -485,6 +485,20 @@ config LEGACY_PTY_COUNT
+ 	  When not in use, each legacy PTY occupies 12 bytes on 32-bit
+ 	  architectures and 24 bytes on 64-bit architectures.
  
-+config CONSOLE_DETOUR
-+	bool "Support for console detour via printk"
++config DETOUR_TTY
++	bool "TTY driver to detour user output via printk"
 +	default n
 +	---help---
-+	  If you say Y here, the support for writing console messages via
-+	  printk is included into the console code.
++	  If you say Y here, the support for writing user messages (i.e.
++	  console messages) via printk is available.
 +
-+	  The feature is useful to catch all console log messages.
-+	  In order to use this feature, you should specify kernel command line
-+	  option "detour" or write a positive number into
-+	  /proc/sys/kernel/console_detour. You can disable the feature on-line
-+	  by writing zero into the proc file. By writing a negative value into
-+	  the proc file, the feature is disabled permanently (until next boot).
++	  The feature is useful to inline user messages with kernel
++	  messages.
++	  In order to use this feature, you should output user messages
++	  to /dev/detour.
 +
 +	  If unsure, say N.
 +
- config DEVKMEM
- 	bool "/dev/kmem virtual device support"
- 	default y
-diff --git a_linux-2.6.33.3/drivers/char/tty_io.c b_linux-2.6.33.3/drivers/char/tty_io.c
-index 76253cf..f77de34 100644
---- a_linux-2.6.33.3/drivers/char/tty_io.c
-+++ b_linux-2.6.33.3/drivers/char/tty_io.c
-@@ -1087,6 +1087,13 @@ ssize_t redirected_tty_write(struct file *file, const char __user *buf,
- 	}
- 	spin_unlock(&redirect_lock);
+ config BRIQ_PANEL
+ 	tristate 'Total Impact briQ front panel driver'
+ 	depends on PPC_CHRP
+diff --git a_linux-2.6.33.3/drivers/char/Makefile b_linux-2.6.33.3/drivers/char/Makefile
+index f957edf..b84db55 100644
+--- a_linux-2.6.33.3/drivers/char/Makefile
++++ b_linux-2.6.33.3/drivers/char/Makefile
+@@ -11,6 +11,7 @@ obj-y	 += mem.o random.o tty_io.o n_tty.o tty_ioctl.o tty_ldisc.o tty_buffer.o t
  
-+#ifdef CONFIG_CONSOLE_DETOUR
-+	if (console_detour) {
-+		console_printk_detour(buf, count);
-+		if (!p)
-+			return count;
-+	}
-+#endif
- 	if (p) {
- 		ssize_t res;
- 		res = vfs_write(p, buf, count, &p->f_pos);
-diff --git a_linux-2.6.33.3/include/linux/console.h b_linux-2.6.33.3/include/linux/console.h
-index dcca533..354a7a8 100644
---- a_linux-2.6.33.3/include/linux/console.h
-+++ b_linux-2.6.33.3/include/linux/console.h
-@@ -108,6 +108,13 @@ struct console {
- 	struct	 console *next;
- };
- 
-+extern int console_detour;
-+extern void console_printk_detour(const unsigned char *buf, int count);
-+
-+struct ctl_table;
-+int detour_sysctl_handler(struct ctl_table *table, int write,
-+		void __user *buffer, size_t *length, loff_t *ppos);
-+
- extern int console_set_on_cmdline;
- 
- extern int add_preferred_console(char *name, int idx, char *options);
-diff --git a_linux-2.6.33.3/init/main.c b_linux-2.6.33.3/init/main.c
-index 512ba15..add9e95 100644
---- a_linux-2.6.33.3/init/main.c
-+++ b_linux-2.6.33.3/init/main.c
-@@ -25,6 +25,7 @@
- #include <linux/bootmem.h>
- #include <linux/acpi.h>
- #include <linux/tty.h>
-+#include <linux/console.h>
- #include <linux/gfp.h>
- #include <linux/percpu.h>
- #include <linux/kmod.h>
-@@ -249,6 +250,14 @@ static int __init loglevel(char *str)
- 
- early_param("loglevel", loglevel);
- 
-+static int __init detour(char *str)
-+{
-+	console_detour = 1;
-+	return 0;
-+}
-+
-+early_param("detour", detour);
-+
- /*
-  * Unknown boot options get handed to init, unless they look like
-  * unused parameters (modprobe will find them in /proc/cmdline).
-diff --git a_linux-2.6.33.3/kernel/printk.c b_linux-2.6.33.3/kernel/printk.c
-index 1751c45..9897ecb 100644
---- a_linux-2.6.33.3/kernel/printk.c
-+++ b_linux-2.6.33.3/kernel/printk.c
-@@ -655,6 +655,8 @@ static int recursion_bug;
- static int new_text_line = 1;
- static char printk_buf[1024];
- 
-+static const char *detour_tag = "[C]";
-+
- int printk_delay_msec __read_mostly;
- 
- static inline void printk_delay(void)
-@@ -753,6 +755,15 @@ asmlinkage int vprintk(const char *fmt, va_list args)
- 			printed_len += 3;
- 			new_text_line = 0;
- 
-+			if ((p[0] == detour_tag[0]) &&
-+			    (p[1] == detour_tag[1]) &&
-+			    (p[2] == detour_tag[2])) {
-+				int i;
-+
-+				for (i = 0; i < 3; i++, p++)
-+					emit_log_char(*p);
-+			}
-+
- 			if (printk_time) {
- 				/* Follow the token with the time */
- 				char tbuf[50], *tp;
-@@ -1368,6 +1379,80 @@ static int __init disable_boot_consoles(void)
- }
- late_initcall(disable_boot_consoles);
- 
+ obj-$(CONFIG_LEGACY_PTYS)	+= pty.o
+ obj-$(CONFIG_UNIX98_PTYS)	+= pty.o
++obj-$(CONFIG_DETOUR_TTY)	+= dty.o
+ obj-y				+= misc.o
+ obj-$(CONFIG_VT)		+= vt_ioctl.o vc_screen.o selection.o keyboard.o
+ obj-$(CONFIG_BFIN_JTAG_COMM)	+= bfin_jtag_comm.o
+diff --git a_linux-2.6.33.3/drivers/char/dty.c b_linux-2.6.33.3/drivers/char/dty.c
+new file mode 100644
+index 0000000..3ffe248
+--- /dev/null
++++ b_linux-2.6.33.3/drivers/char/dty.c
+@@ -0,0 +1,137 @@
 +/*
-+ * This option can be enabled with kernel command line option "detour" or
-+ * through a proc file (/proc/sys/kernel/console_detour). It enables console
-+ * logging through printk, if supported by enabled console.
++ *  linux/drivers/char/detour.c
++ *
++ *  Copyright (C) 2010  Samo Pogacnik
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the smems of the GNU General Public License as published by
++ * the Free Software Foundation; version 2 of the License.
 + */
-+int console_detour;
-+EXPORT_SYMBOL(console_detour);
 +
++/*
++ * This pseudo device allows user to make printk messages. It is possible
++ * to store "console" messages inline with kernel messages for better analyses
++ * of the boot process, for example.
++ */
++
++#include <linux/device.h>
++#include <linux/tty.h>
++
++static struct tty_driver *dty_driver;
++
++static const char *detour_tag = "[D] ";
 +#define DETOUR_STR_SIZE 508
-+void console_printk_detour(const unsigned char *buf, int count)
++
++/*
++ *	Our simple preformatting:
++ *	- every cr is replaced by '^'nl combination
++ *	- every non cr or nl ended write is padded with '\'nl combination
++ *	- adds a detour source tag in front of each line
++ *
++ * 	This is useful for logging purposes (kind of a logging ldisc?).
++ */
++static void detour_printk(const unsigned char *buf, int count)
 +{
 +	static char tmp[DETOUR_STR_SIZE + 4];
 +	static int curr;
@@ -234,7 +149,7 @@ index 1751c45..9897ecb 100644
 +		}
 +	}
 +	if (curr > 0) {
-+		/* not nl or cr terminated message */
++		/* non nl or cr terminated message */
 +		tmp[curr + 0] = '\\';
 +		tmp[curr + 1] = '\n';
 +		tmp[curr + 2] = '\0';
@@ -242,54 +157,64 @@ index 1751c45..9897ecb 100644
 +		curr = 0;
 +	}
 +}
-+EXPORT_SYMBOL(console_printk_detour);
 +
-+int detour_sysctl_handler(struct ctl_table *table, int write,
-+	void __user *buffer, size_t *length, loff_t *ppos)
++/*
++ *	Dummy tty ops open for succesfull terminal device open.
++ */
++static int dty_open(struct tty_struct *tty, struct file *filp)
 +{
-+	static int disable_forever;
-+
-+	proc_dointvec(table, write, buffer, length, ppos);
-+	if (write) {
-+		if ((console_detour < 0) || (disable_forever != 0)) {
-+			disable_forever = 1;
-+			console_detour = 0;
-+			return 0;
-+		}
-+		if (console_detour > 1)
-+			console_detour = 1;
-+	}
 +	return 0;
 +}
 +
- #if defined CONFIG_PRINTK
++/*
++ *	File ops (not tty ops) write avoids ldisc inserting additional CRs.
++ *	We simply throw this to our preformatter, which calls printk.
++ */
++static ssize_t detour_write(struct file *file, const char __user *buf,
++	size_t count, loff_t *ppos)
++{
++	detour_printk(buf, count);
++	return count;
++}
++
++static const struct tty_operations dty_ops = {
++	.open = dty_open,
++};
++
++static struct file_operations detour_fops;
++
++static int __init dty_init(void)
++{
++	dty_driver = alloc_tty_driver(1);
++	if (!dty_driver)
++		panic("Couldn't allocate pty driver");
++
++	dty_driver->owner = THIS_MODULE;
++	dty_driver->driver_name = "dty";
++	dty_driver->name = "detour";
++	dty_driver->major = TTYAUX_MAJOR;
++	dty_driver->minor_start = 3;
++	dty_driver->num = 1;
++	dty_driver->type = TTY_DRIVER_TYPE_CONSOLE;
++	dty_driver->init_termios = tty_std_termios;
++	dty_driver->flags = TTY_DRIVER_RESET_TERMIOS | TTY_DRIVER_REAL_RAW |
++		TTY_DRIVER_DYNAMIC_DEV;
++	tty_set_operations(dty_driver, &dty_ops);
++
++	if (tty_register_driver(dty_driver))
++		panic("Couldn't register dty driver");
++
++	/* register our fops write function */
++	tty_default_fops(&detour_fops);
++	detour_fops.write = detour_write;
++
++	cdev_init(&dty_driver->cdev, &detour_fops);
++
++	/* create our unnumbered device */
++	device_create(tty_class, NULL, MKDEV(TTYAUX_MAJOR, 3), NULL,
++		dty_driver->name);
++
++	return 0;
++}
++module_init(dty_init);
  
- /*
-diff --git a_linux-2.6.33.3/kernel/sysctl.c b_linux-2.6.33.3/kernel/sysctl.c
-index 8a68b24..ab644cb 100644
---- a_linux-2.6.33.3/kernel/sysctl.c
-+++ b_linux-2.6.33.3/kernel/sysctl.c
-@@ -50,6 +50,7 @@
- #include <linux/ftrace.h>
- #include <linux/slow-work.h>
- #include <linux/perf_event.h>
-+#include <linux/console.h>
- 
- #include <asm/uaccess.h>
- #include <asm/processor.h>
-@@ -936,6 +937,13 @@ static struct ctl_table kern_table[] = {
- 		.proc_handler	= proc_dointvec,
- 	},
- #endif
-+	{
-+		.procname	= "console_detour",
-+		.data		= &console_detour,
-+		.maxlen		= sizeof(int),
-+		.mode		= 0644,
-+		.proc_handler	= &detour_sysctl_handler,
-+	},
- /*
-  * NOTE: do not add new entries to this table unless you have read
-  * Documentation/sysctl/ctl_unnumbered.txt
-
-
