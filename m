@@ -1,220 +1,255 @@
-From: Samo Pogacnik <samo_pogacnik@t-2.net>
-Subject: [PATCH] detour TTY driver
-Date: Sat, 15 May 2010 12:17:38 +0200
-Message-ID: <1273918658.2341.17.camel@itpsd6lap>
+From: "Chan Jeong" <chan.jeong-Hm3cg6mZ9cc@public.gmane.org>
+Subject: [PATCH 1/2] Squashfs: add LZO decompression support
+Date: Tue, 18 May 2010 12:55:51 +0900
+Message-ID: <42180.602081544$1274156263@news.gmane.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
-Cc: linux kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+Content-Language: ko
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
+	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=squashfs-devel>
+List-Post: <mailto:squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
+	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+Cc: 'Phillip Lougher' <phillip-cnXvMjJKhjYG2Il/BtU0GPXRex20P6io@public.gmane.org>, 'Gunho Lee' <gunho.lee-Hm3cg6mZ9cc@public.gmane.org>, 'Tim Bird' <tim.bird-mEdOJwZ7QcZBDgjK7y7TUQ@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, 'Hyo Jun Im' <hyojun.im-Hm3cg6mZ9cc@public.gmane.org>
 
 Hi,
 
-Here is the initial suggestion for a simple detour TTY driver, which
-provides the ability to write user messages through printk. This allows
-user output to be inlined with kernel output. Together with printk
-time-stamping enabled, a detailed boot sequence analyses is possible.
-Additionally, console logs could have been stored through the same
-mechanism as kernel messages and does not require the system logger to
-be started very/too soon.
+This patch series adds LZO decompression support to Squashfs,
+using in-kernel LZO decompression library and Squashfs 
+decompressor entries.
 
-regards, Samo
+The patch series also includes LZO support for Squashfs tools.
 
+Signed-off-by: Chan Jeong <chan.jeong-Hm3cg6mZ9cc@public.gmane.org>
 ---
-Signed-off-by: Samo Pogacnik <samo_pogacnik@t-2.net>
-diff --git a_linux-2.6.33.3/Documentation/devices.txt b_linux-2.6.33.3/Documentation/devices.txt
-index 53d64d3..f889097 100644
---- a_linux-2.6.33.3/Documentation/devices.txt
-+++ b_linux-2.6.33.3/Documentation/devices.txt
-@@ -239,6 +239,7 @@ Your cooperation is appreciated.
- 		  0 = /dev/tty		Current TTY device
- 		  1 = /dev/console	System console
- 		  2 = /dev/ptmx		PTY master multiplex
-+		  3 = /dev/detour	Detour via printk TTY device
- 		 64 = /dev/cua0		Callout device for ttyS0
- 		    ...
- 		255 = /dev/cua191	Callout device for ttyS191
-diff --git a_linux-2.6.33.3/drivers/char/Kconfig b_linux-2.6.33.3/drivers/char/Kconfig
-index e023682..4d21e2d 100644
---- a_linux-2.6.33.3/drivers/char/Kconfig
-+++ b_linux-2.6.33.3/drivers/char/Kconfig
-@@ -485,6 +485,20 @@ config LEGACY_PTY_COUNT
- 	  When not in use, each legacy PTY occupies 12 bytes on 32-bit
- 	  architectures and 24 bytes on 64-bit architectures.
+ fs/squashfs/Kconfig        |    5 ++
+ fs/squashfs/Makefile       |    1 +
+ fs/squashfs/decompressor.c |    6 ++
+ fs/squashfs/lzo_wrapper.c  |  144 ++++++++++++++++++++++++++++++++++++++++++++
+ fs/squashfs/squashfs.h     |    3 +
+ 5 files changed, 159 insertions(+), 0 deletions(-)
+
+diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
+index 25a00d1..79e3ca4 100644
+--- a/fs/squashfs/Kconfig
++++ b/fs/squashfs/Kconfig
+@@ -26,6 +26,11 @@ config SQUASHFS
  
-+config DETOUR_TTY
-+	bool "TTY driver to detour user output via printk"
-+	default n
-+	---help---
-+	  If you say Y here, the support for writing user messages (i.e.
-+	  console messages) via printk is available.
-+
-+	  The feature is useful to inline user messages with kernel
-+	  messages.
-+	  In order to use this feature, you should output user messages
-+	  to /dev/detour.
-+
-+	  If unsure, say N.
-+
- config BRIQ_PANEL
- 	tristate 'Total Impact briQ front panel driver'
- 	depends on PPC_CHRP
-diff --git a_linux-2.6.33.3/drivers/char/Makefile b_linux-2.6.33.3/drivers/char/Makefile
-index f957edf..b84db55 100644
---- a_linux-2.6.33.3/drivers/char/Makefile
-+++ b_linux-2.6.33.3/drivers/char/Makefile
-@@ -11,6 +11,7 @@ obj-y	 += mem.o random.o tty_io.o n_tty.o tty_ioctl.o tty_ldisc.o tty_buffer.o t
+ 	  If unsure, say N.
  
- obj-$(CONFIG_LEGACY_PTYS)	+= pty.o
- obj-$(CONFIG_UNIX98_PTYS)	+= pty.o
-+obj-$(CONFIG_DETOUR_TTY)	+= dty.o
- obj-y				+= misc.o
- obj-$(CONFIG_VT)		+= vt_ioctl.o vc_screen.o selection.o keyboard.o
- obj-$(CONFIG_BFIN_JTAG_COMM)	+= bfin_jtag_comm.o
-diff --git a_linux-2.6.33.3/drivers/char/dty.c b_linux-2.6.33.3/drivers/char/dty.c
++config SQUASHFS_LZO
++	bool "Include support for LZO compressed file systems"
++	depends on SQUASHFS
++	select LZO_DECOMPRESS
++
+ config SQUASHFS_EMBEDDED
+ 
+ 	bool "Additional option for memory-constrained systems" 
+diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
+index df8a19e..4dd3e14 100644
+--- a/fs/squashfs/Makefile
++++ b/fs/squashfs/Makefile
+@@ -5,3 +5,4 @@
+ obj-$(CONFIG_SQUASHFS) += squashfs.o
+ squashfs-y += block.o cache.o dir.o export.o file.o fragment.o id.o inode.o
+ squashfs-y += namei.o super.o symlink.o zlib_wrapper.o decompressor.o
++squashfs-$(CONFIG_SQUASHFS_LZO) += lzo_wrapper.o
+diff --git a/fs/squashfs/decompressor.c b/fs/squashfs/decompressor.c
+index 157478d..24af9ce 100644
+--- a/fs/squashfs/decompressor.c
++++ b/fs/squashfs/decompressor.c
+@@ -40,9 +40,11 @@ static const struct squashfs_decompressor squashfs_lzma_unsupported_comp_ops = {
+ 	NULL, NULL, NULL, LZMA_COMPRESSION, "lzma", 0
+ };
+ 
++#ifndef CONFIG_SQUASHFS_LZO
+ static const struct squashfs_decompressor squashfs_lzo_unsupported_comp_ops = {
+ 	NULL, NULL, NULL, LZO_COMPRESSION, "lzo", 0
+ };
++#endif
+ 
+ static const struct squashfs_decompressor squashfs_unknown_comp_ops = {
+ 	NULL, NULL, NULL, 0, "unknown", 0
+@@ -51,7 +53,11 @@ static const struct squashfs_decompressor squashfs_unknown_comp_ops = {
+ static const struct squashfs_decompressor *decompressor[] = {
+ 	&squashfs_zlib_comp_ops,
+ 	&squashfs_lzma_unsupported_comp_ops,
++#ifdef CONFIG_SQUASHFS_LZO
++	&squashfs_lzo_comp_ops,
++#else
+ 	&squashfs_lzo_unsupported_comp_ops,
++#endif
+ 	&squashfs_unknown_comp_ops
+ };
+ 
+diff --git a/fs/squashfs/lzo_wrapper.c b/fs/squashfs/lzo_wrapper.c
 new file mode 100644
-index 0000000..3ffe248
+index 0000000..6577cfa
 --- /dev/null
-+++ b_linux-2.6.33.3/drivers/char/dty.c
-@@ -0,0 +1,137 @@
++++ b/fs/squashfs/lzo_wrapper.c
+@@ -0,0 +1,144 @@
 +/*
-+ *  linux/drivers/char/detour.c
++ * Squashfs - a compressed read only filesystem for Linux
 + *
-+ *  Copyright (C) 2010  Samo Pogacnik
++ * Copyright (c) 2010 LG Electronics
++ * Chan Jeong <chan.jeong-Hm3cg6mZ9cc@public.gmane.org>
 + *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the smems of the GNU General Public License as published by
-+ * the Free Software Foundation; version 2 of the License.
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2,
++ * or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
++ *
++ * lzo_wrapper.c
 + */
 +
-+/*
-+ * This pseudo device allows user to make printk messages. It is possible
-+ * to store "console" messages inline with kernel messages for better analyses
-+ * of the boot process, for example.
-+ */
++#include <linux/mutex.h>
++#include <linux/buffer_head.h>
++#include <linux/slab.h>
++#include <linux/vmalloc.h>
++#include <linux/lzo.h>
 +
-+#include <linux/device.h>
-+#include <linux/tty.h>
++#include "squashfs_fs.h"
++#include "squashfs_fs_sb.h"
++#include "squashfs_fs_i.h"
++#include "squashfs.h"
++#include "decompressor.h"
 +
-+static struct tty_driver *dty_driver;
 +
-+static const char *detour_tag = "[D] ";
-+#define DETOUR_STR_SIZE 508
-+
-+/*
-+ *	Our simple preformatting:
-+ *	- every cr is replaced by '^'nl combination
-+ *	- every non cr or nl ended write is padded with '\'nl combination
-+ *	- adds a detour source tag in front of each line
-+ *
-+ * 	This is useful for logging purposes (kind of a logging ldisc?).
-+ */
-+static void detour_printk(const unsigned char *buf, int count)
++static void *lzo_init(struct squashfs_sb_info *msblk)
 +{
-+	static char tmp[DETOUR_STR_SIZE + 4];
-+	static int curr;
-+	int i;
++	void **streams;
 +
-+	for (i = 0; i < count; i++) {
-+		tmp[curr] = buf[i];
-+		if (curr < DETOUR_STR_SIZE) {
-+			switch (buf[i]) {
-+			case '\r':
-+				tmp[curr] = '^';
-+				tmp[curr + 1] = '\n';
-+				tmp[curr + 2] = '\0';
-+				printk(KERN_INFO "%s%s", detour_tag, tmp);
-+				curr = 0;
-+				if (buf[i + 1] == '\n')
-+					i++;
-+				break;
-+			case '\n':
-+				tmp[curr + 1] = '\0';
-+				printk(KERN_INFO "%s%s", detour_tag, tmp);
-+				curr = 0;
-+				break;
-+			default:
-+				curr++;
-+			}
-+		} else {
-+			/* end of tmp buffer reached: cut the message in two */
-+			tmp[curr + 1] = '\\';
-+			tmp[curr + 2] = '\n';
-+			tmp[curr + 3] = '\0';
-+			printk(KERN_INFO "%s%s", detour_tag, tmp);
-+			curr = 0;
++	streams = (void **)kmalloc(sizeof(void *) * 2, GFP_KERNEL);
++	if (streams == NULL)
++		goto failed;
++
++	/* input workspace */
++	streams[0] = vmalloc(msblk->block_size);
++	if (streams[0] == NULL)
++		goto failed;
++
++	/* output workspace */
++	streams[1] = vmalloc(msblk->block_size);
++	if (streams[1] == NULL)
++		goto failed;
++
++	return streams;
++
++failed:
++	ERROR("Failed to allocate lzo workspace\n");
++	if (streams) {
++		if (streams[0])
++			vfree(streams[0]);
++		kfree(streams);
++	}
++	return NULL;
++}
++
++
++static void lzo_free(void *stream)
++{
++	void **streams = (void **)stream;
++	vfree(streams[1]);
++	vfree(streams[0]);
++	kfree(streams);
++}
++
++
++static int lzo_uncompress(struct squashfs_sb_info *msblk, void **buffer,
++	struct buffer_head **bh, int b, int offset, int length, int srclength,
++	int pages)
++{
++	int lzo_err;
++	int avail, bytes, k = 0, page;
++	void **streams = (void **)msblk->stream;
++	void *in;
++
++	mutex_lock(&msblk->read_data_mutex);
++
++	bytes = length;
++	in = streams[0];
++	while (k < b) {
++		avail = min(bytes, msblk->devblksize - offset);
++		bytes -= avail;
++		wait_on_buffer(bh[k]);
++		if (!buffer_uptodate(bh[k]))
++			goto release_mutex;
++
++		if (k == 0 && avail == 0) {
++			offset = 0;
++			put_bh(bh[k++]);
++			continue;
 +		}
++
++		memcpy(in, bh[k]->b_data + offset, avail);
++		in += avail;
++		offset = 0;
++		put_bh(bh[k++]);
 +	}
-+	if (curr > 0) {
-+		/* non nl or cr terminated message */
-+		tmp[curr + 0] = '\\';
-+		tmp[curr + 1] = '\n';
-+		tmp[curr + 2] = '\0';
-+		printk(KERN_INFO "%s%s", detour_tag, tmp);
-+		curr = 0;
++
++	bytes = in - streams[0];
++	length = msblk->block_size;
++	lzo_err = lzo1x_decompress_safe(streams[0], bytes, streams[1], &length);
++	if (lzo_err != LZO_E_OK)
++		goto release_mutex;
++
++	bytes = length;
++	in = streams[1];
++	page = 0;
++	while (page < pages && bytes > 0) {
++		avail = min((int)PAGE_CACHE_SIZE, bytes);
++		memcpy(buffer[page++], in, avail);
++		in += avail;
++		bytes -= avail;
 +	}
++
++	mutex_unlock(&msblk->read_data_mutex);
++	return length;
++
++release_mutex:
++	mutex_unlock(&msblk->read_data_mutex);
++
++	for (; k < b; k++)
++		put_bh(bh[k]);
++
++	return -EIO;
 +}
 +
-+/*
-+ *	Dummy tty ops open for succesfull terminal device open.
-+ */
-+static int dty_open(struct tty_struct *tty, struct file *filp)
-+{
-+	return 0;
-+}
-+
-+/*
-+ *	File ops (not tty ops) write avoids ldisc inserting additional CRs.
-+ *	We simply throw this to our preformatter, which calls printk.
-+ */
-+static ssize_t detour_write(struct file *file, const char __user *buf,
-+	size_t count, loff_t *ppos)
-+{
-+	detour_printk(buf, count);
-+	return count;
-+}
-+
-+static const struct tty_operations dty_ops = {
-+	.open = dty_open,
++const struct squashfs_decompressor squashfs_lzo_comp_ops = {
++	.init = lzo_init,
++	.free = lzo_free,
++	.decompress = lzo_uncompress,
++	.id = LZO_COMPRESSION,
++	.name = "lzo",
++	.supported = 1
 +};
-+
-+static struct file_operations detour_fops;
-+
-+static int __init dty_init(void)
-+{
-+	dty_driver = alloc_tty_driver(1);
-+	if (!dty_driver)
-+		panic("Couldn't allocate pty driver");
-+
-+	dty_driver->owner = THIS_MODULE;
-+	dty_driver->driver_name = "dty";
-+	dty_driver->name = "detour";
-+	dty_driver->major = TTYAUX_MAJOR;
-+	dty_driver->minor_start = 3;
-+	dty_driver->num = 1;
-+	dty_driver->type = TTY_DRIVER_TYPE_CONSOLE;
-+	dty_driver->init_termios = tty_std_termios;
-+	dty_driver->flags = TTY_DRIVER_RESET_TERMIOS | TTY_DRIVER_REAL_RAW |
-+		TTY_DRIVER_DYNAMIC_DEV;
-+	tty_set_operations(dty_driver, &dty_ops);
-+
-+	if (tty_register_driver(dty_driver))
-+		panic("Couldn't register dty driver");
-+
-+	/* register our fops write function */
-+	tty_default_fops(&detour_fops);
-+	detour_fops.write = detour_write;
-+
-+	cdev_init(&dty_driver->cdev, &detour_fops);
-+
-+	/* create our unnumbered device */
-+	device_create(tty_class, NULL, MKDEV(TTYAUX_MAJOR, 3), NULL,
-+		dty_driver->name);
-+
-+	return 0;
-+}
-+module_init(dty_init);
+diff --git a/fs/squashfs/squashfs.h b/fs/squashfs/squashfs.h
+index fe2587a..1f0ee85 100644
+--- a/fs/squashfs/squashfs.h
++++ b/fs/squashfs/squashfs.h
+@@ -94,3 +94,6 @@ extern const struct address_space_operations squashfs_symlink_aops;
  
+ /* zlib_wrapper.c */
+ extern const struct squashfs_decompressor squashfs_zlib_comp_ops;
++
++/* lzo_wrappers.c */
++extern const struct squashfs_decompressor squashfs_lzo_comp_ops;
+
+
+------------------------------------------------------------------------------
