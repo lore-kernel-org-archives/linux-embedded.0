@@ -1,57 +1,49 @@
-From: Ming Lei <tom.leiming@gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: [RESEND PATCH] ARM: fix 'unannotated irqs-on' lockdep warning
-Date: Sun, 23 May 2010 21:44:20 +0800
-Message-ID: <AANLkTikRp0EHxshKYq39p18ymoRNAtyHrNm3yq6A49-r@mail.gmail.com>
-References: <1274615328-27953-1-git-send-email-tom.leiming@gmail.com>
-	 <20100523123801.GC950@n2100.arm.linux.org.uk>
+Date: Sun, 23 May 2010 15:13:01 +0100
+Message-ID: <20100523141300.GD950@n2100.arm.linux.org.uk>
+References: <1274615328-27953-1-git-send-email-tom.leiming@gmail.com> <20100523123801.GC950@n2100.arm.linux.org.uk> <AANLkTikRp0EHxshKYq39p18ymoRNAtyHrNm3yq6A49-r@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=XbN8v7eRG2U+YsGFqF+MF9QP0iNokdFPDJQkX1rr/2Y=;
-        b=Bx/GbutH9qyk2nPbwVQhfrCqb7fGHS2kmfoCmfFh375vsJZbytdrJQ9sGFdFzsEJ82
-         hxdpQcop0K/+ogPirmOnzTYJoZsM+Ty5bYnngX3KuU+AYb/NatWWX5gqrFrMveNIXApv
-         6KAr5HkS8WkDPAUinKD5RRsxZfvNhgzrrNr2w=
-In-Reply-To: <20100523123801.GC950@n2100.arm.linux.org.uk>
+	d=arm.linux.org.uk; s=caramon; h=Date:From:To:Cc:Subject:
+	Message-ID:References:MIME-Version:Content-Type:
+	Content-Transfer-Encoding:In-Reply-To:Sender; bh=zPUOvJA8J7oGeTK
+	cdDaCfq5q3k7kE8HU7oeIWKBF5cs=; b=gAIj9sRxlhgRiorIBS2/H7gGGTRAolT
+	+UbdhWy2Y+q1o1r7Lz8k147kuS47MH7qW7ByymWVVD3uZwA2TUVtzYahQY9xCKke
+	pI8sX4FvKv8UZvWjC93waKl1AzlbvFheqRtAeP6h8r2l2N6SlEZyienYqgwca1H2
+	+dVKYI2DlTcs=
+Content-Disposition: inline
+In-Reply-To: <AANLkTikRp0EHxshKYq39p18ymoRNAtyHrNm3yq6A49-r@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+To: Ming Lei <tom.leiming@gmail.com>
 Cc: linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, a.p.zijlstra@chello.nl, linux-kernel@vger.kernel.org
 
-2010/5/23 Russell King - ARM Linux <linux@arm.linux.org.uk>:
->> =A0ENTRY(ret_to_user)
->> =A0ret_slow_syscall:
->> - =A0 =A0 disable_irq =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 @ disable interrupts
->> + =A0 =A0 disable_irq_notrace =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 @ disable interrupts
->
-> I think this one does need to be traced - the pending work functions =
-are
-> all C code which could call back into lockdep.
+On Sun, May 23, 2010 at 09:44:20PM +0800, Ming Lei wrote:
+> 2010/5/23 Russell King - ARM Linux <linux@arm.linux.org.uk>:
+> >> =A0ENTRY(ret_to_user)
+> >> =A0ret_slow_syscall:
+> >> - =A0 =A0 disable_irq =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 @ disable interrupts
+> >> + =A0 =A0 disable_irq_notrace =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 @ disable interrupts
+> >
+> > I think this one does need to be traced - the pending work function=
+s are
+> > all C code which could call back into lockdep.
+>=20
+> If there are pending works, schedule will be called to give cpu to it=
+,
+> I wonder why the work function to be scheduled will be run with irq
+> disabled. Seems we should enable irq again before calling schedule,
+> not sure.
 
-If there are pending works, schedule will be called to give cpu to it, =
-I wonder
-why the work function to be scheduled will be run with irq disabled.
-Seems we should enable irq again before calling schedule, not sure.
+No.  I'm talking about things like do_notify_resume().
 
-> Also, I'm nervious about applying this patch without seeing more peop=
-le
-> test it.
-
-I test the patch on my beagle board and is OK, and if you don't apply o=
-ne
-patch into your tree, there are few people who may test it since they h=
-ave to
-parse the raw email patch(which is more inconvenient than 'git pull') f=
-or test
-if they want to do.
-
-Thanks,
---=20
-Lei Ming
+I think the above should be left as-is, so that as far as lockdep is
+concerned, IRQs are off while userspace runs.  What happens between
+returning to userspace and re-entering the kernel has no bearing what
+so ever on lockdep.
