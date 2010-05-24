@@ -1,120 +1,45 @@
-From: "Chan Jeong" <chan.jeong-Hm3cg6mZ9cc@public.gmane.org>
-Subject: Re: [PATCH 1/2] Squashfs: add LZO decompression
-	support
-Date: Mon, 24 May 2010 15:53:03 +0900
-Message-ID: <21896.8588313603$1274684021@news.gmane.org>
-References: <001a01caf63e$0280ef50$0782cdf0$@jeong@lge.com>
-	<4BF9E921.6090609@lougher.demon.co.uk>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [RESEND PATCH] ARM: fix 'unannotated irqs-on' lockdep warning
+Date: Mon, 24 May 2010 08:19:21 +0100
+Message-ID: <20100524071921.GA17528@n2100.arm.linux.org.uk>
+References: <1274615328-27953-1-git-send-email-tom.leiming@gmail.com> <20100523123801.GC950@n2100.arm.linux.org.uk> <AANLkTikRp0EHxshKYq39p18ymoRNAtyHrNm3yq6A49-r@mail.gmail.com> <20100523141300.GD950@n2100.arm.linux.org.uk> <AANLkTinV9Na9zxYMIfTr893Ynnc0YOk2B6uPKEa9s4R1@mail.gmail.com> <20100523194746.GE950@n2100.arm.linux.org.uk> <20100524112355.18424622@tom-lei>
 Mime-Version: 1.0
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=arm.linux.org.uk; s=caramon; h=Date:From:To:Cc:Subject:
+	Message-ID:References:MIME-Version:Content-Type:In-Reply-To:
+	Sender; bh=ax3nHc/WSW7iC+MWkzYEf58Hr/euCOdJh76B5dRjdsw=; b=PG9fj
+	dDNpfuoW8PePQiAN0ULhoKrlO0RjK8eo5gvX5manyxqGCR+B/WZZe67HAJU4Erg5
+	8ngZsTuwNFmXk/KRbi9Pgak5nCEuB5bQKiyx6O/IN6JgtKUVZdRD1lgUmqfLG9Ci
+	iDq3s61tmVsTon4/esU/mwPcT60uZvJEDee5MA=
+Content-Disposition: inline
+In-Reply-To: <20100524112355.18424622@tom-lei>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <4BF9E921.6090609-cnXvMjJKhjYG2Il/BtU0GPXRex20P6io@public.gmane.org>
-Content-Language: ko
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
-	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=squashfs-devel>
-List-Post: <mailto:squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/squashfs-devel>, 
-	<mailto:squashfs-devel-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: squashfs-devel-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: 'Phillip Lougher' <phillip-cnXvMjJKhjYG2Il/BtU0GPXRex20P6io@public.gmane.org>
-Cc: 'Hyo Jun Im' <hyojun.im-Hm3cg6mZ9cc@public.gmane.org>, squashfs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, 'Tim Bird' <tim.bird-mEdOJwZ7QcZBDgjK7y7TUQ@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, 'Gunho Lee' <gunho.lee-Hm3cg6mZ9cc@public.gmane.org>
+To: Ming Lei <tom.leiming@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, a.p.zijlstra@chello.nl, linux-kernel@vger.kernel.org
 
-> Chan Jeong wrote:
-> > Hi,
-> >
-> > This patch series adds LZO decompression support to Squashfs,
-> > using in-kernel LZO decompression library and Squashfs
-> > decompressor entries.
-> >
-> > The patch series also includes LZO support for Squashfs tools.
-> >
-> > Signed-off-by: Chan Jeong <chan.jeong-Hm3cg6mZ9cc@public.gmane.org>
+On Mon, May 24, 2010 at 11:23:55AM +0800, Ming Lei wrote:
+> On Sun, 23 May 2010 20:47:46 +0100
+> Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
+> > Moreover, I put to you that it's utterly pointless - and a waste of
+> > CPU time - telling lockdep about the IRQ masking when an exception
 > 
-> Hi Chan
+> Yes, the patch still tries to remove the pointless trace of IRQ masking,
+> such as: replace disable_irq with disable_irq_notrace.
 > 
-> Thanks for the patches.  How much testing have these patches had?
->  From an eyeball of the code (and a check of the LZO decompressor
-> code in the kernel) they look OK.
+> > occurs, and it's also pointless telling lockdep about the IRQ
+> > unmasking when we resume userspace.
 > 
-> I'm currently considering whether to push these for mainline in
-> the current 2.6.35 merge window.  I'd like to push them in this
-> merge window, however, pushing them now is definitely cutting things
-> fine because they were only posted for review after the merge window
-> opened (and the established etiquette is the merge window is to push
-> things that were posted for review and ideally in linux-next well
-> before the merge window opened).
-> 
-> So, some idea of how much testing these patches have had would
-> increase my confidence about pushing them in this merge window.
-> 
-> Thanks
-> 
-> Phillip
+> Even it is pointless, but if lockdep doesn't see the IRQ unmasking, the 
+> warning "unannotated irqs-on" will be triggered and lockdep doe not work
+> any longer, so we have to remove the warning to make lockdep workable on
+> ARM, could you agree on it?  It is the main purpose of the patch.
 
-Hi Phillip,
+I'm sorry, I think we have a communication issue; you're not understanding
+the points that I'm making.  I feel I'm wasting my time trying to explain
+it.
 
-Thank you for your feedback. I have done much testing with those
-patches on X86 PCs and a MIPS-based TV product.
-
-Actually the TV product has been working fine with Squashfs-zlib
-filesystem images, and after replacement with lzo images, it is
-running good for long-run test and all TV functions such as video,
-audio, UI and networking are working fine as well.
-
-And Here is just clean-up for the first patch. The kcalloc() is
-safer for lzo workspace pointer array, because it returns zeroed
-memory.
-
-Thanks,
-Chan Jeong
-
---
-diff --git a/fs/squashfs/lzo_wrapper.c b/fs/squashfs/lzo_wrapper.c
-index 6577cfa..02a767a 100644
---- a/fs/squashfs/lzo_wrapper.c
-+++ b/fs/squashfs/lzo_wrapper.c
-@@ -38,7 +38,7 @@ static void *lzo_init(struct squashfs_sb_info *msblk)
- {
- 	void **streams;
- 
--	streams = (void **)kmalloc(sizeof(void *) * 2, GFP_KERNEL);
-+	streams = (void **)kcalloc(2, sizeof(void *), GFP_KERNEL);
- 	if (streams == NULL)
- 		goto failed;
- 
-@@ -56,11 +56,9 @@ static void *lzo_init(struct squashfs_sb_info *msblk)
- 
- failed:
- 	ERROR("Failed to allocate lzo workspace\n");
--	if (streams) {
--		if (streams[0])
--			vfree(streams[0]);
--		kfree(streams);
--	}
-+	if (streams)
-+		vfree(streams[0]);
-+	kfree(streams);
- 	return NULL;
- }
- 
-@@ -68,8 +66,11 @@ failed:
- static void lzo_free(void *stream)
- {
- 	void **streams = (void **)stream;
--	vfree(streams[1]);
--	vfree(streams[0]);
-+
-+	if (streams) {
-+		vfree(streams[1]);
-+		vfree(streams[0]);
-+	}
- 	kfree(streams);
- }
- 
-
-
-------------------------------------------------------------------------------
+I'm not merging your patch as-is because I believe it to be wrong.
