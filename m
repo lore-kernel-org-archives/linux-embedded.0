@@ -1,48 +1,105 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: [Squashfs-devel] [PATCH 1/2] Squashfs: add LZO decompression
- support
-Date: Mon, 24 May 2010 03:49:05 +0100
-Message-ID: <4BF9E921.6090609@lougher.demon.co.uk>
-References: <001a01caf63e$0280ef50$0782cdf0$@jeong@lge.com>
+From: Ming Lei <tom.leiming@gmail.com>
+Subject: Re: [RESEND PATCH] ARM: fix 'unannotated irqs-on' lockdep warning
+Date: Mon, 24 May 2010 11:23:55 +0800
+Message-ID: <20100524112355.18424622@tom-lei>
+References: <1274615328-27953-1-git-send-email-tom.leiming@gmail.com>
+	<20100523123801.GC950@n2100.arm.linux.org.uk>
+	<AANLkTikRp0EHxshKYq39p18ymoRNAtyHrNm3yq6A49-r@mail.gmail.com>
+	<20100523141300.GD950@n2100.arm.linux.org.uk>
+	<AANLkTinV9Na9zxYMIfTr893Ynnc0YOk2B6uPKEa9s4R1@mail.gmail.com>
+	<20100523194746.GE950@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <001a01caf63e$0280ef50$0782cdf0$@jeong@lge.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:date:from:to:cc:subject
+         :message-id:in-reply-to:references:organization:x-mailer
+         :mime-version:content-type:content-transfer-encoding;
+        bh=phug/qxpazbzywpwb8h6fIj2IzMRDHviXA3PnP9Woiw=;
+        b=AioU6vI2Z/r61dcBBHXJAsAwgLNoNfM8pyfShujV5zHuJ8LUUs3MaJGkgzFebzT7mM
+         ZwvBVCXkILtSDsfEOlFFl4Hi27naftiIj7ElnOMQ8IhxEsjRsUqZq6gXtO/XAuIaG8I6
+         yjby/LxakMMqaG9DEDF+uIl6+etyPSTWcSvn4=
+In-Reply-To: <20100523194746.GE950@n2100.arm.linux.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Chan Jeong <chan.jeong@lge.com>
-Cc: squashfs-devel@lists.sourceforge.net, 'Gunho Lee' <gunho.lee@lge.com>, 'Tim Bird' <tim.bird@am.sony.com>, linux-embedded@vger.kernel.org, 'Hyo Jun Im' <hyojun.im@lge.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, a.p.zijlstra@chello.nl, linux-kernel@vger.kernel.org
 
-Chan Jeong wrote:
-> Hi,
+On Sun, 23 May 2010 20:47:46 +0100
+Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
+
+> Let me explain again.  We have this series of actions:
 > 
-> This patch series adds LZO decompression support to Squashfs,
-> using in-kernel LZO decompression library and Squashfs 
-> decompressor entries.
+> - in userspace
+> - exception happens
+> - cpu disables interrupts itself
+> - save state
+> - enable interrupts, and tell lockdep that IRQs are unmasked
+> - we process the exception, and ultimately call ret_fast_syscall or
+>   ret_slow_syscall
 > 
-> The patch series also includes LZO support for Squashfs tools.
+> Now, what was happening in existing kernels is:
 > 
-> Signed-off-by: Chan Jeong <chan.jeong@lge.com>
+> POINT A.
+> - disable interrupts, and tell lockdep that IRQs are masked
+> - check for any work pending
+>   - if work pending, call function - with IRQs still masked
+>   - go back to point A.
+> - restore state
+> - resume userspace, which implicitly re-enables IRQs
+> 
+> This results in a balanced and afaics correct setup.  Lockdep doesn't
+> care about the state of userspace - it only cares about state (and its
+> code only ever runs) when we're in kernel mode.
+> 
+> With your change above, what's happening is the above is replaced by:
+> 
+> POINT A.
+> - disable interrupts, but don't tell lockdep that IRQs are masked
+> - check for any work pending
+>   - if work pending, call function - with IRQs still masked
+> 	*but* lockdep believes IRQs are enabled.  Therefore, I believe
+> 	false warnings are probable from things like the scheduler,
+> 	signal handling paths, etc.
+>   - go back to point A.
+> - restore state
+> - resume userspace, which implicitly re-enables IRQs
+> 
+> So can you now see why I believe the above change I've quoted is
+> wrong?
 
-Hi Chan
+Yes, you are right, so we can fix it by the two ways below:
 
-Thanks for the patches.  How much testing have these patches had?
- From an eyeball of the code (and a check of the LZO decompressor
-code in the kernel) they look OK.
+	-keep disable_irq in ret_slow_syscall, also add a extra 
+	trace_ret_hardirqs_on before resume userspace.
+or 
+	-replace disable_irq with disable_irq_notrace in ret_slow_syscall
+	and ret_fast_syscall, also add a extra trace_ret_hardirqs_off if
+	there are works pending
 
-I'm currently considering whether to push these for mainline in
-the current 2.6.35 merge window.  I'd like to push them in this
-merge window, however, pushing them now is definitely cutting things
-fine because they were only posted for review after the merge window
-opened (and the established etiquette is the merge window is to push
-things that were posted for review and ideally in linux-next well
-before the merge window opened).
+seems the 2nd way is more efficient.
 
-So, some idea of how much testing these patches have had would
-increase my confidence about pushing them in this merge window.
+> 
+> Moreover, I put to you that it's utterly pointless - and a waste of
+> CPU time - telling lockdep about the IRQ masking when an exception
 
-Thanks
+Yes, the patch still tries to remove the pointless trace of IRQ masking,
+such as: replace disable_irq with disable_irq_notrace.
 
-Phillip
+> occurs, and it's also pointless telling lockdep about the IRQ
+> unmasking when we resume userspace.
 
+Even it is pointless, but if lockdep doesn't see the IRQ unmasking, the 
+warning "unannotated irqs-on" will be triggered and lockdep doe not work
+any longer, so we have to remove the warning to make lockdep workable on
+ARM, could you agree on it?  It is the main purpose of the patch.
+
+The warning was reported before and still exists in 2.6.34 and -next tree:
+
+        http://marc.info/?l=linux-arm-kernel&m=126047420005553&w=2
+
+
+Thanks,
+Ming Lei
