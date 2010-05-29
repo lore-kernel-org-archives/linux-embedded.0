@@ -1,22 +1,24 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
+From: Samo Pogacnik <samo_pogacnik@t-2.net>
 Subject: Re: [PATCH] detour TTY driver
-Date: Sat, 29 May 2010 23:59:08 +0100
-Message-ID: <20100529225908.GQ31073@ZenIV.linux.org.uk>
+Date: Sun, 30 May 2010 01:33:03 +0200
+Message-ID: <1275175983.2122.42.camel@itpsd6lap>
 References: <1273918658.2341.17.camel@itpsd6lap>
- <1275171436.2122.29.camel@itpsd6lap>
- <20100529235402.296406d9@lxorguk.ukuu.org.uk>
+	 <1275171436.2122.29.camel@itpsd6lap>
+	 <20100529235402.296406d9@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <20100529235402.296406d9@lxorguk.ukuu.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Samo Pogacnik <samo_pogacnik@t-2.net>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Randy Dunlap <rdunlap@xenotime.net>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Randy Dunlap <rdunlap@xenotime.net>, Al Viro <viro@ZenIV.linux.org.uk>
 
-On Sat, May 29, 2010 at 11:54:02PM +0100, Alan Cox wrote:
+> > +static void initial_console_redirect(void)
+> > +{
+> > +	long ret;
+> > +
 > > +	/* re-register our fops write function */
 > > +	detour_fops.write = detour_write;
 > > +
@@ -35,7 +37,19 @@ On Sat, May 29, 2010 at 11:54:02PM +0100, Alan Cox wrote:
 > > +	printk(KERN_INFO "detour_fops.open() returned %ld\n", ret);
 > > +	ret = detour_fops.unlocked_ioctl(&detour_file, TIOCCONS, 0);
 > > +	printk(KERN_INFO "detour_fops.ioctl() returned %ld\n", ret);
+> > +}
+> 
+> Bletch.. I'm really opposed to this kind of hackery. Fix your userspace a
+> tiny bit.
+> 
+> So
+> - Write only tty that uses printk: Looks good to me, implementation
+>   quibbles only
+> - Magic kernel hacks to shuffle things around in the initial console
+>   logic - hideous. I still really think you need to fix your userspace
+> 
 
-That alone is enough for a NAK.  Do Not Do That.  Fake struct file/dentry/inode
-and their uses are not acceptable.  Neither is modifying file_operations,
-while we are at it.
+Thank you for all comments. I'll try to follow them (might take some
+time) and i'll remove the internal console redirection magic for sure. 
+
+regards, Samo
