@@ -1,55 +1,43 @@
-From: Samo Pogacnik <samo_pogacnik@t-2.net>
-Subject: Re: [PATCH] detour TTY driver
-Date: Sun, 30 May 2010 01:33:03 +0200
-Message-ID: <1275175983.2122.42.camel@itpsd6lap>
-References: <1273918658.2341.17.camel@itpsd6lap>
-	 <1275171436.2122.29.camel@itpsd6lap>
-	 <20100529235402.296406d9@lxorguk.ukuu.org.uk>
+From: Marco Stornelli <marco.stornelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: omap udc driver problem with beagle board
+Date: Sun, 30 May 2010 11:53:49 +0200
+Message-ID: <4C0235AD.70008@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100529235402.296406d9@lxorguk.ukuu.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:subject:content-type
+         :content-transfer-encoding;
+        bh=MsXzo5KqvgoJT35vlCcO5IwLdxn2tOA/ju1uT2wgSUY=;
+        b=S8ikdlxxkrAmULj847Ez9oXesuE6c0SGg4/vaIXpQqNPae/PeTbK4X5rDiF46YK8hJ
+         wEhg4qcP7bY2WBhMlxhu4vv202bP/jzV3YDlnet1nXaLWWf9jMTlt4rytK0+aUZ68kKC
+         7D+f4WrPqzqGPiM1H/GISnxWYPtSJe12Ixqp0=
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Randy Dunlap <rdunlap@xenotime.net>, Al Viro <viro@ZenIV.linux.org.uk>
+To: felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org, dbrownell-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Embedded <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org
 
-> > +static void initial_console_redirect(void)
-> > +{
-> > +	long ret;
-> > +
-> > +	/* re-register our fops write function */
-> > +	detour_fops.write = detour_write;
-> > +
-> > +	detour_file.f_dentry = &detour_dentry;
-> > +	detour_file.f_dentry->d_inode = &detour_inode;
-> > +	detour_file.f_op = &detour_fops;
-> > +	detour_file.f_mode |= FMODE_WRITE;
-> > +	security_file_alloc(&detour_file);
-> > +	INIT_LIST_HEAD(&detour_file.f_u.fu_list);
-> > +
-> > +	detour_inode.i_rdev = MKDEV(TTYAUX_MAJOR, 3);
-> > +	security_inode_alloc(&detour_inode);
-> > +	INIT_LIST_HEAD(&detour_inode.inotify_watches);
-> > +
-> > +	ret = detour_fops.open(&detour_inode, &detour_file);
-> > +	printk(KERN_INFO "detour_fops.open() returned %ld\n", ret);
-> > +	ret = detour_fops.unlocked_ioctl(&detour_file, TIOCCONS, 0);
-> > +	printk(KERN_INFO "detour_fops.ioctl() returned %ld\n", ret);
-> > +}
-> 
-> Bletch.. I'm really opposed to this kind of hackery. Fix your userspace a
-> tiny bit.
-> 
-> So
-> - Write only tty that uses printk: Looks good to me, implementation
->   quibbles only
-> - Magic kernel hacks to shuffle things around in the initial console
->   logic - hideous. I still really think you need to fix your userspace
-> 
+Hi,
 
-Thank you for all comments. I'll try to follow them (might take some
-time) and i'll remove the internal console redirection magic for sure. 
+I'm using the kernel 2.6.34 with the beagle board rev. c4. I have got
+some problems with the ethernet gadget to use nfs over usb. The problem
+is with the usb. When the g_ether driver register itself, the omap udc
+driver returns ENODEV because the kernel didn't call the probe for
+this driver. Looking at the code, it seems the problem is in board
+specific management of the usb. There isn't the registration of the
+platform device to match the omap udc platform driver. It should be done
+in the omap_usb_init() but in case of beagle board this function is
+never called, so omap udc driver cannot work. Is it a regression? Is
+there any workaround?
 
-regards, Samo
+Thanks.
+
+Regards,
+
+Marco
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
