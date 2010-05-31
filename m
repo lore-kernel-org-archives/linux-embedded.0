@@ -1,39 +1,33 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
+From: Felipe Balbi <felipe.balbi-Er96nB+QtnoAvxtiuMwx3w@public.gmane.org>
 Subject: Re: omap udc driver problem with beagle board
-Date: Mon, 31 May 2010 09:06:35 +0200
-Message-ID: <AANLkTine39Za56t8UQRJVeoH94dOuoFAysGPq_cXYhEe@mail.gmail.com>
+Date: Mon, 31 May 2010 10:29:45 +0300
+Message-ID: <20100531072945.GA4190@nokia.com>
 References: <4C0235AD.70008@gmail.com>
-	<20100530160047.GA7704@gandalf>
+ <20100530160047.GA7704@gandalf>
+ <AANLkTine39Za56t8UQRJVeoH94dOuoFAysGPq_cXYhEe@mail.gmail.com>
+Reply-To: felipe.balbi-Er96nB+QtnoAvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type;
-        bh=MlwMWu2XMvo6LLTddhPapcFpNDdpI5jj7dFI/L0YYcQ=;
-        b=uADdffx2yIrJn1n8y3oBjSPjXQwSw4tQFo/khX2trBsfwhv8eeeIKP8Z9pC030gbWV
-         o01ZraM84HQU4GoBALDe/s9KcY733dIlLTXRq/gXYObQChOXleGY42+wxkLZwmxyQmAF
-         h95LixFa5jyK6gYfT+2oWJOhDS5VHEmy+6zBM=
-In-Reply-To: <20100530160047.GA7704@gandalf>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <AANLkTine39Za56t8UQRJVeoH94dOuoFAysGPq_cXYhEe-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 Content-Transfer-Encoding: 7bit
-To: me@felipebalbi.com
-Cc: felipe.balbi@nokia.com, dbrownell@users.sourceforge.net, linux-usb@vger.kernel.org, linux-omap@vger.kernel.org, Linux Embedded <linux-embedded@vger.kernel.org>, tony@atomide.com
+To: ext Marco Stornelli <marco.stornelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "me-uiRdBs8odbtmTBlB0Cgj/Q@public.gmane.org" <me-uiRdBs8odbtmTBlB0Cgj/Q@public.gmane.org>, "Balbi Felipe (Nokia-D/Helsinki)" <felipe.balbi-Er96nB+QtnoAvxtiuMwx3w@public.gmane.org>, "dbrownell-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dbrownell-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Embedded <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org" <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 
-2010/5/30 Felipe Balbi <me@felipebalbi.com>:
-> On Sun, May 30, 2010 at 11:53:49AM +0200, Marco Stornelli wrote:
-> beagle board uses musb. You shouldn't be relying on the udc controller.
-> Your Kconfig is just wrong.
->
-> --
-> balbi
->
+On Mon, May 31, 2010 at 09:06:35AM +0200, ext Marco Stornelli wrote:
+>Oops, my fault. I see the error in the configuration. Thank you very
+>much for your response. I'll try again.
 
-Oops, my fault. I see the error in the configuration. Thank you very
-much for your response. I'll try again.
+no problem.
 
-Regards,
+-- 
+balbi
 
-Marco
+DefectiveByDesign.org
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
