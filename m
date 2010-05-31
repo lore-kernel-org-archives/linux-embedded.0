@@ -1,7 +1,7 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
 Subject: Re: omap udc driver problem with beagle board
-Date: Mon, 31 May 2010 08:30:21 +0200
-Message-ID: <AANLkTinrmtStR8o8rRkqmbva77s9GByPpynpQjcEzqvh@mail.gmail.com>
+Date: Mon, 31 May 2010 09:06:35 +0200
+Message-ID: <AANLkTine39Za56t8UQRJVeoH94dOuoFAysGPq_cXYhEe@mail.gmail.com>
 References: <4C0235AD.70008@gmail.com>
 	<20100530160047.GA7704@gandalf>
 Mime-Version: 1.0
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:mime-version:received:received:in-reply-to
          :references:date:message-id:subject:from:to:cc:content-type;
-        bh=KdqLjXU3JS6jUx68jWm+s00G4FlsfSML6Yak+WCe96g=;
-        b=mRkSoy+6lz4pg9/xr+n/6UGmj5qtuhZGYP1cGVPMLztDg4nUQChwj0TPYQKbN8DPO2
-         vfSc+y6zd5GYB3UQbw0NZjvmqFr0oEE8X0IBYegvRZmhARs7qaE+IICTgmsNxAHV2bbB
-         xDDKb1PfPYJafDBQgrcMweC7jSXW5I09bpj8g=
+        bh=MlwMWu2XMvo6LLTddhPapcFpNDdpI5jj7dFI/L0YYcQ=;
+        b=uADdffx2yIrJn1n8y3oBjSPjXQwSw4tQFo/khX2trBsfwhv8eeeIKP8Z9pC030gbWV
+         o01ZraM84HQU4GoBALDe/s9KcY733dIlLTXRq/gXYObQChOXleGY42+wxkLZwmxyQmAF
+         h95LixFa5jyK6gYfT+2oWJOhDS5VHEmy+6zBM=
 In-Reply-To: <20100530160047.GA7704@gandalf>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -24,7 +24,6 @@ Cc: felipe.balbi@nokia.com, dbrownell@users.sourceforge.net, linux-usb@vger.kern
 
 2010/5/30 Felipe Balbi <me@felipebalbi.com>:
 > On Sun, May 30, 2010 at 11:53:49AM +0200, Marco Stornelli wrote:
->
 > beagle board uses musb. You shouldn't be relying on the udc controller.
 > Your Kconfig is just wrong.
 >
@@ -32,7 +31,9 @@ Cc: felipe.balbi@nokia.com, dbrownell@users.sourceforge.net, linux-usb@vger.kern
 > balbi
 >
 
-Mmm....does it mean that it's not possible to use g_ether driver? I
-read in several docs/wiki that it's possible.
+Oops, my fault. I see the error in the configuration. Thank you very
+much for your response. I'll try again.
+
+Regards,
 
 Marco
