@@ -1,36 +1,38 @@
-From: Felipe Balbi <me@felipebalbi.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
 Subject: Re: omap udc driver problem with beagle board
-Date: Sun, 30 May 2010 19:00:48 +0300
-Message-ID: <20100530160047.GA7704@gandalf>
+Date: Mon, 31 May 2010 08:30:21 +0200
+Message-ID: <AANLkTinrmtStR8o8rRkqmbva77s9GByPpynpQjcEzqvh@mail.gmail.com>
 References: <4C0235AD.70008@gmail.com>
-Reply-To: me@felipebalbi.com
+	<20100530160047.GA7704@gandalf>
 Mime-Version: 1.0
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4C0235AD.70008@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:received:in-reply-to
+         :references:date:message-id:subject:from:to:cc:content-type;
+        bh=KdqLjXU3JS6jUx68jWm+s00G4FlsfSML6Yak+WCe96g=;
+        b=mRkSoy+6lz4pg9/xr+n/6UGmj5qtuhZGYP1cGVPMLztDg4nUQChwj0TPYQKbN8DPO2
+         vfSc+y6zd5GYB3UQbw0NZjvmqFr0oEE8X0IBYegvRZmhARs7qaE+IICTgmsNxAHV2bbB
+         xDDKb1PfPYJafDBQgrcMweC7jSXW5I09bpj8g=
+In-Reply-To: <20100530160047.GA7704@gandalf>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Marco Stornelli <marco.stornelli@gmail.com>
+To: me@felipebalbi.com
 Cc: felipe.balbi@nokia.com, dbrownell@users.sourceforge.net, linux-usb@vger.kernel.org, linux-omap@vger.kernel.org, Linux Embedded <linux-embedded@vger.kernel.org>, tony@atomide.com
 
-On Sun, May 30, 2010 at 11:53:49AM +0200, Marco Stornelli wrote:
-> Hi,
-> 
-> I'm using the kernel 2.6.34 with the beagle board rev. c4. I have got
-> some problems with the ethernet gadget to use nfs over usb. The problem
-> is with the usb. When the g_ether driver register itself, the omap udc
-> driver returns ENODEV because the kernel didn't call the probe for
-> this driver. Looking at the code, it seems the problem is in board
-> specific management of the usb. There isn't the registration of the
-> platform device to match the omap udc platform driver. It should be done
-> in the omap_usb_init() but in case of beagle board this function is
-> never called, so omap udc driver cannot work. Is it a regression? Is
-> there any workaround?
+2010/5/30 Felipe Balbi <me@felipebalbi.com>:
+> On Sun, May 30, 2010 at 11:53:49AM +0200, Marco Stornelli wrote:
+>
+> beagle board uses musb. You shouldn't be relying on the udc controller.
+> Your Kconfig is just wrong.
+>
+> --
+> balbi
+>
 
-beagle board uses musb. You shouldn't be relying on the udc controller.
-Your Kconfig is just wrong.
+Mmm....does it mean that it's not possible to use g_ether driver? I
+read in several docs/wiki that it's possible.
 
--- 
-balbi
+Marco
