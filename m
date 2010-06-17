@@ -1,33 +1,38 @@
-From: Tim Bird <tim.bird@am.sony.com>
+From: Wolfgang Denk <wd@denx.de>
 Subject: Re: Information on XIP
-Date: Wed, 16 Jun 2010 15:33:17 -0700
-Message-ID: <4C19512D.9010202@am.sony.com>
+Date: Thu, 17 Jun 2010 17:56:01 +0200
+Message-ID: <20100617155601.8856CD81C69@gemini.denx.de>
 References: <4C194DF0.60307@am.sony.com> <AANLkTinhDRRh0FhREV_YDPiPxPhGxfpo6ckRRag4vwQk@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTinhDRRh0FhREV_YDPiPxPhGxfpo6ckRRag4vwQk@mail.gmail.com>
+In-reply-to: <AANLkTinhDRRh0FhREV_YDPiPxPhGxfpo6ckRRag4vwQk@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On 06/16/2010 03:23 PM, Mike Frysinger wrote:
-> On Wed, Jun 16, 2010 at 18:19, Tim Bird wrote:
->> I'd like to start collecting information about XIP on the
->> eLinux wiki.  If you've done XIP for the kernel or for
->> user-space (application XIP), or know a good source of
->> information about this, please let me know.
+Dear Mike Frysinger,
+
+In message <AANLkTinhDRRh0FhREV_YDPiPxPhGxfpo6ckRRag4vwQk@mail.gmail.com> you wrote:
+>
+> > I'm interested in putting together a basic tutorial about
+> > XIP, and doing some benchmarking on an ARM platform.
 > 
-> Blackfin linux + userspace XIP:
-> http://docs.blackfin.uclinux.org/doku.php?id=linux-kernel:xip
+> i believe the denk guys have done some benchmarking on ppc, so you
+> might want to poke them if they arent on this list
 
-Thanks!
- -- Tim
+We are here, of course, but I feel we have nothing to contribute. All
+our work in this area dates back several years and is probably not
+applicable to current software versions any more.
 
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Network Entertainment
-=============================
+Best regards,
+
+Wolfgang Denk
+
+-- 
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+"Beware of programmers carrying screwdrivers."      - Chip Salzenberg
