@@ -1,38 +1,47 @@
-From: Wolfgang Denk <wd@denx.de>
-Subject: Re: Information on XIP
-Date: Thu, 17 Jun 2010 17:56:01 +0200
-Message-ID: <20100617155601.8856CD81C69@gemini.denx.de>
-References: <4C194DF0.60307@am.sony.com> <AANLkTinhDRRh0FhREV_YDPiPxPhGxfpo6ckRRag4vwQk@mail.gmail.com>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Subject: Re: [PATCH] detour TTY driver - now ttyprintk
+Date: Mon, 21 Jun 2010 15:38:58 +0100
+Message-ID: <20100621153858.444695c0@lxorguk.ukuu.org.uk>
+References: <1273918658.2341.17.camel@itpsd6lap>
+	<1275171436.2122.29.camel@itpsd6lap>
+	<20100529235402.296406d9@lxorguk.ukuu.org.uk>
+	<1275175983.2122.42.camel@itpsd6lap>
+	<1276123020.16010.97.camel@itpsd6lap>
+	<20100611134455.3fa7d563@lxorguk.ukuu.org.uk>
+	<1276291932.2154.45.camel@itpsd6lap>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: <AANLkTinhDRRh0FhREV_YDPiPxPhGxfpo6ckRRag4vwQk@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1276291932.2154.45.camel@itpsd6lap>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>
+To: Samo Pogacnik <samo_pogacnik@t-2.net>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>
 
-Dear Mike Frysinger,
+> I'm thinking to leave the ratelimit support in for the time being. I had
+> in mind cases, when someone does
+>  "cat /proc/kmsg > dev/ttyprintk" or
+> suppose the console is redirected to ttyprintk (which i would like to be
+> able to do from user program)
 
-In message <AANLkTinhDRRh0FhREV_YDPiPxPhGxfpo6ckRRag4vwQk@mail.gmail.com> you wrote:
->
-> > I'm interested in putting together a basic tutorial about
-> > XIP, and doing some benchmarking on an ARM platform.
-> 
-> i believe the denk guys have done some benchmarking on ppc, so you
-> might want to poke them if they arent on this list
+Console as in the printk sense would then loop.
 
-We are here, of course, but I feel we have nothing to contribute. All
-our work in this area dates back several years and is probably not
-applicable to current software versions any more.
+If you are going to do the flow control you should probably do something
+like
 
-Best regards,
 
-Wolfgang Denk
+write_room()
+{
+	if (!flow_controlled)
+		space = 8192;
+	return space;
+}
 
--- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-"Beware of programmers carrying screwdrivers."      - Chip Salzenberg
+write()
+{
+	space -= len;
+}
+
+then your flow control will behave properly and slow down users rather
+than losing data (except stuff sent without blocking)
