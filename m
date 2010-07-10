@@ -1,81 +1,78 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: Embedded topics at Linux Plumbers 2010
-Date: Thu, 8 Jul 2010 10:52:58 -0600
-Message-ID: <AANLkTik5qVq_2kfUpQ2QWBBUEmbr9MDb2yNbelB2pO42@mail.gmail.com>
-References: <AANLkTinaTkyJqHQ3iBknWmJtaLjTRcwJ3G360xQK4FpE@mail.gmail.com>
+From: Stefan Schoenleitner <dev.c0debabe@gmail.com>
+Subject: SAM9-L9260: TXD1 is not working on AT91SAM9260
+Date: Sat, 10 Jul 2010 09:09:34 +0200
+Message-ID: <4C381CAE.10503@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTinaTkyJqHQ3iBknWmJtaLjTRcwJ3G360xQK4FpE@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: linux-embedded@vger.kernel.org
 
-Update:  We've now released the official call for proposals:
+Hi,
 
-http://www.linuxplumbersconf.org/2010
+I have an Olimex SAM9-L9260 board with an AT91SAM9260 controller on it.
+The board is running a sound-2.6 git kernel (2.6.35).
 
-Cheers,
-g.
+My problem is that for USART1 (which uses the RXD1 and TXD1 pins), the
+transmit pin (i.e. TXD1) is not working.
+I looked at it with my scope and discovered that it is high all the time
+(which is most likely due to the configured pull-up resistor).
 
-On Tue, Jul 6, 2010 at 1:56 PM, Grant Likely <grant.likely@secretlab.ca=
-> wrote:
->
-> Hi all,
->
-> I'm on the Linux Plumbers [1] planning committee this year, and I'm
-> also heading up the embedded Linux mini-conference. =A0While the
-> "official" call for miniconference proposals hasn't actually been
-> issued (real soon now, I promise!), the submission form [2] is now
-> open, and embedded topic proposals are being accepted. =A0Some initia=
-l
-> ideas have already been discussed on the plumbers wiki[3], but now we
-> need firm proposals to use in planning the miniconference. =A0If ther=
-e
-> is anything embedded related that you'd like to discuss at plumbers,
-> then I encourage you to submit a proposal.
->
-> [1] http://www.linuxplumbersconf.org/2010
-> [2] http://www.linuxplumbersconf.org/2010/ocw/events/LPC2010MC/propos=
-als
-> [3] http://wiki.linuxplumbersconf.org/2010:embedded_topics
->
-> The miniconferences are working sessions to get developers from
-> different projects into the same room. =A0Focus is on discussing and
-> solving problems instead of formal presentations. =A0A good proposal
-> includes a problem that needs to be solved, some potential solutions
-> to discuss, and ideally identify individuals who's participation is
-> important.
->
-> Deadline for proposal submission is July 19th, so get those proposals
-> in soon! =A0If you have a good topic, but are unsure whether or not
-> you'll be able to attend, please submit the proposal anyway. =A0The
-> miniconference format is flexable so we're able to handle a certain
-> amount of uncertainty.
->
-> For those who do want to make a formal presentation, we've do also
-> have one track dedicated to the purpose. =A0Presentation proposals ca=
-n
-> be submitted here [4]. =A0We also have some slots set aside for BoFs
-> [5].
->
-> [4] http://www.linuxplumbersconf.org/2010/ocw/events/LPC2010/proposal=
-s
-> [5] http://www.linuxplumbersconf.org/2010/ocw/events/LPC2010BOFS/prop=
-osals
->
-> If you have any questions, feel free to email me.
->
-> Cheers,
-> g.
->
-> --
-> Grant Likely, B.Sc., P.Eng.
-> Secret Lab Technologies Ltd.
+Here is what I did to get the UART up and running (just like what I
+already did for the DBG UART and UART0):
+
+
+In my board file (arch/arm/mach-at91/board-sam9-l9260.c) I added the
+following line to ek_map_io(), to register USART1 as ttyS2:
+
+-----------------------------------------------------------------------
+at91_register_uart(AT91SAM9260_ID_US1, 2, 0);
+-----------------------------------------------------------------------
+
+
+A look at at91sam9260_devices.c reveals that this will lead to a call of
+-----------------------------------------------------------------------
+configure_usart1_pins(pins);
+-----------------------------------------------------------------------
+
+which in turn does the following:
+-----------------------------------------------------------------------
+at91_set_A_periph(AT91_PIN_PB6, 1);     /* TXD1 */
+at91_set_A_periph(AT91_PIN_PB7, 0);     /* RXD1 */
+-----------------------------------------------------------------------
+
+
+Hence the pins PB6 and PB7 are configured to be UART pins.
+I also made sure that there is no other code, that sets the
+functionality of those pins to something else (e.g. pin PB6 could also
+be used as TCLK1).
 
 
 
---
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+Then, when I boot the kernel, I get the following lines, which show that
+the UARTs are recognized:
+
+-----------------------------------------------------------------------
+atmel_usart.0: ttyS0 at MMIO 0xfefff200 (irq = 1) is a ATMEL_SERIAL
+atmel_usart.1: ttyS1 at MMIO 0xfffb0000 (irq = 6) is a ATMEL_SERIAL
+atmel_usart.2: ttyS2 at MMIO 0xfffb4000 (irq = 7) is a ATMEL_SERIAL
+-----------------------------------------------------------------------
+
+
+While this looks good so far, the odd behavior is that I can correctly
+receive data on /dev/ttyS2 (i.e. data is received on the RXD1/PB7 pin),
+but I can not send (i.e. *no* data is being transmitted on the TXD1/PB6
+pin).
+
+
+* Is this a bug in the kernel or am I doing something wrong here ?
+
+* Did you experience similar behavior on the at91sam9260 ?
+
+As I already said, I have done this with other UART devices as well
+(i.e. USART0) and it worked flawlessly.
+
+cheers,
+stefan
