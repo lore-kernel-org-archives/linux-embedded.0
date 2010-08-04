@@ -1,7 +1,7 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Planning on updating the PWM patches soon...
-Date: Mon, 2 Aug 2010 18:06:02 -0500
-Message-ID: <AANLkTineBMCKvtCfE4w5oPPcyXwWKA107kiEf_g90Cxb@mail.gmail.com>
+Subject: Where to post an embedded-centric filesystem driver?
+Date: Wed, 4 Aug 2010 07:16:05 -0500
+Message-ID: <AANLkTi=oBoVKW4QrtjCYfsM7bd+W-9RPgExGe=iQwvQt@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
@@ -13,20 +13,14 @@ To: linux-embedded@vger.kernel.org
 Guys:
 
 
-I have some time this week to finally update my PWM API patches.  Some
-of you have emailed me privately, saying that you have adapted your
-own hardware to use the API.  If you would like your code to be
-proffered as part of the initial patch set, please email me and let me
-know!
+I just finished a filesystem driver that provides Linux the ability to
+do a read-only mount of Micromonitor's TFS filesystem.  Micromonitor
+is a great little bootloader that I use on all my boards.  A
+read-write filesystem driver for Linux is in the works.
 
-I should have a git tree set up with my latest stuff in a few hours.
-Once we have that how we want it, I'll send patches to this mailing
-list.  Thanks to everyone who has helped me with this code, the
-response has been very gratifying.  Sorry it has taken me so long to
-get back to this.
-
-
-Kindest regards,
+Nobody outside of the embedded world will ever hear of
+Micromonitor/TFS.  So I'm not quite sure where to post my patches.
+Suggestions?
 
 
 b.g.
