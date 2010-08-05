@@ -1,33 +1,39 @@
-From: David Woodhouse <dwmw2@infradead.org>
-Subject: Re: Where to post an embedded-centric filesystem driver?
-Date: Wed, 04 Aug 2010 13:18:45 +0100
-Message-ID: <1280924325.19499.29.camel@localhost>
-References: <AANLkTi=oBoVKW4QrtjCYfsM7bd+W-9RPgExGe=iQwvQt@mail.gmail.com>
+From: Linus WALLEIJ <linus.walleij@stericsson.com>
+Subject: RE: [PATCH] RFC: AMBA bus discardable probe() function
+Date: Thu, 5 Aug 2010 08:22:13 +0200
+Message-ID: <CEE6BB42CAD6E947908279175AF8470A0262E58F84@EXDCVYMBSTM006.EQ1STM.local>
+References: <1280925543-6862-1-git-send-email-linus.walleij@stericsson.com>
+ <20100804222410.GB12502@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=oBoVKW4QrtjCYfsM7bd+W-9RPgExGe=iQwvQt@mail.gmail.com>
+In-Reply-To: <20100804222410.GB12502@n2100.arm.linux.org.uk>
+Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Greg Kroah-Hartman <gregkh@suse.de>, David Brownell <dbrownell@users.sourceforge.net>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Viresh KUMAR <viresh.kumar@st.com>
 
-On Wed, 2010-08-04 at 07:16 -0500, Bill Gatliff wrote:
-> 
-> 
-> I just finished a filesystem driver that provides Linux the ability to
-> do a read-only mount of Micromonitor's TFS filesystem.  Micromonitor
-> is a great little bootloader that I use on all my boards.  A
-> read-write filesystem driver for Linux is in the works.
-> 
-> Nobody outside of the embedded world will ever hear of
-> Micromonitor/TFS.  So I'm not quite sure where to post my patches.
-> Suggestions? 
+[Russell]
 
-linux-fsdevel@vger.kernel.org
+> which gives a total of 5188 bytes for all the above probe functions.
+> However, in order to free this, we're adding 184 bytes of code and
+> literal pool to achieve this:
+> (...) 
+> The overall kernel size is 3877020 bytes, which means we're potentially
+> allowing for 0.13% of the kernel to be freed at run time - which may
+> equate to one or at most two additional pages.
 
--- 
-David Woodhouse                            Open Source Technology Centre
-David.Woodhouse@intel.com                              Intel Corporation
+We have the PL022 as well, and the PL08x is being added but it will
+likely stay in that ballpark figure.
+
+But overall that does not seem to be worth it, so let's drop it
+for the time being. CC:ing the linux-embedded folks that
+often worry about footprint size to see if someone oppose. Also
+CC Viresh who works on a platform for e.g. set-top boxes using
+these PrimeCells which I think may be memory-constrained.
+
+Yours,
+Linus Walleij
 
