@@ -1,44 +1,329 @@
-From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Subject: Re: [PATCH] RFC: AMBA bus discardable probe() function
-Date: Wed, 4 Aug 2010 23:43:26 -0700
-Message-ID: <201008042343.27043.dmitry.torokhov@gmail.com>
-References: <1280925543-6862-1-git-send-email-linus.walleij@stericsson.com> <20100804194319.GA30722@suse.de> <CEE6BB42CAD6E947908279175AF8470A0262E58F8B@EXDCVYMBSTM006.EQ1STM.local>
+From: Samo Pogacnik <samo_pogacnik@t-2.net>
+Subject: Re: [PATCH] detour TTY driver - now ttyprintk
+Date: Tue, 24 Aug 2010 22:03:13 +0200
+Message-ID: <1282680194.8020.46.camel@itpsd6lap>
+References: <1273918658.2341.17.camel@itpsd6lap>
+	 <1275171436.2122.29.camel@itpsd6lap>
+	 <20100529235402.296406d9@lxorguk.ukuu.org.uk>
+	 <1275175983.2122.42.camel@itpsd6lap> <1276123020.16010.97.camel@itpsd6lap>
+	 <20100611134455.3fa7d563@lxorguk.ukuu.org.uk>
+	 <1276291932.2154.45.camel@itpsd6lap>
+	 <20100621153858.444695c0@lxorguk.ukuu.org.uk>
+	 <1277244410.2195.47.camel@itpsd6lap>
+	 <20100622232108.26752ff8@lxorguk.ukuu.org.uk>
+	 <1277462596.2143.101.camel@itpsd6lap>
+	 <20100625120329.1303aa61@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:from:to:subject:date
-         :user-agent:cc:references:in-reply-to:mime-version:content-type
-         :content-transfer-encoding:message-id;
-        bh=ZT5AyTLHTv/vw80DkpsfAiNTp10N9AGea0Y7PSkzOUA=;
-        b=RRwXHLMCAsUrGRab+/V6zQd1edV04bxi5nf2fccTzEI4L/xk2gq3jl1Tpo3JIiofRa
-         gafjMDG5XHaCnoYOnEjNtqVGKzkpqXYbUy8p4uudAcHMnOWvH+OzPAdA+GOoQNvDVnrL
-         wSVcOhwQxZNmqymfB5ZmteZAFMpo/lUNiYQh4=
-In-Reply-To: <CEE6BB42CAD6E947908279175AF8470A0262E58F8B@EXDCVYMBSTM006.EQ1STM.local>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=t-2.net; h=
+	content-transfer-encoding:x-mailer:mime-version:message-id:date
+	:date:content-type:content-type:references:in-reply-to:from:from
+	:subject:subject:received:received:received:received; s=
+	smtp-out-1; t=1282680207; x=1284494607; bh=5b5ntW+066knrzmy9eibi
+	w2Xq0UJzdJ5yL2idiNyMtE=; b=piXV72rHcj8pz7aDxpgl4r+szOTm29nYSvta3
+	m2VICkQ3dTsjifLFuRJy0dz1FptOE3VyFhB1Ofwp5lcflj1rMlc2IqVnr+RFe+6b
+	9U2BRuSHvi9rqQBEB6DFckdPCJO+6ewVYkE3Tf8s4WBAhvHnyshEsuWgJ/iKD9Y3
+	SUgC34=
+In-Reply-To: <20100625120329.1303aa61@lxorguk.ukuu.org.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: Linus WALLEIJ <linus.walleij@stericsson.com>
-Cc: Greg KH <gregkh@suse.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <linux@arm.linux.org.uk>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Viresh KUMAR <viresh.kumar@st.com>
+Content-Type: text/plain; charset="us-ascii"
+To: linux kernel <linux-kernel@vger.kernel.org>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Greg Kroah-Hartman <gregkh@suse.de>
 
-On Wednesday, August 04, 2010 11:26:00 pm Linus WALLEIJ wrote:
-> [Greg]
-> 
-> > [Me]
-> > 
-> > > +	spin_lock(&amba_bustype.p->klist_drivers.k_lock);
-> > 
-> > Ick, nope, you can't do this, sorry.  That's a "private" structure for
-> > a reason.
-> 
-> Yeah I get it, but in the platform bus case what's that traversal of
-> the klists actually for? I didn't get it, and was guessing that it
-> was considering the case where devices spawn new devices.
+On 25.06.2010 (Fri) at 12:03 +0100 Alan Cox wrote: 
+> With my devices.txt owner hat on I'll allocate the minor as you suggest
+> (and double check this causes no problems), with my tty hat on can you
+> send it to GregKH for merging into the tree.
 
-It is to check if the driver actually bound to any devices and fail driver
-registration if it did not - then, in case of modular build, entire driver
-module might get unloaded from memory as well.
+Hi,
 
--- 
-Dmitry
+I hope that this TTY driver is ok for merging. It is very basic -
+removed all flow control and rate limiting. Patch has been generated
+against 2.6.34 kernel version.
+
+regards, Samo
+---
+Signed-off-by: Samo Pogacnik <samo_pogacnik@t-2.net>
+diff --git a_linux/Documentation/devices.txt b_linux/Documentation/devices.txt
+index 53d64d3..71aef33 100644
+--- a_linux/Documentation/devices.txt
++++ b_linux/Documentation/devices.txt
+@@ -239,6 +239,7 @@ Your cooperation is appreciated.
+ 		  0 = /dev/tty		Current TTY device
+ 		  1 = /dev/console	System console
+ 		  2 = /dev/ptmx		PTY master multiplex
++		  3 = /dev/ttyprintk	User messages via printk TTY device
+ 		 64 = /dev/cua0		Callout device for ttyS0
+ 		    ...
+ 		255 = /dev/cua191	Callout device for ttyS191
+diff --git a_linux/drivers/char/Kconfig b_linux/drivers/char/Kconfig
+index 3141dd3..5c38a06 100644
+--- a_linux/drivers/char/Kconfig
++++ b_linux/drivers/char/Kconfig
+@@ -485,6 +485,20 @@ config LEGACY_PTY_COUNT
+ 	  When not in use, each legacy PTY occupies 12 bytes on 32-bit
+ 	  architectures and 24 bytes on 64-bit architectures.
+ 
++config TTY_PRINTK
++	bool "TTY driver to output user messages via printk"
++	default n
++	---help---
++	  If you say Y here, the support for writing user messages (i.e.
++	  console messages) via printk is available.
++
++	  The feature is useful to inline user messages with kernel
++	  messages.
++	  In order to use this feature, you should output user messages
++	  to /dev/ttyprintk or redirect console to this TTY.
++
++	  If unsure, say N.
++
+ config BRIQ_PANEL
+ 	tristate 'Total Impact briQ front panel driver'
+ 	depends on PPC_CHRP
+diff --git a_linux/drivers/char/Makefile b_linux/drivers/char/Makefile
+index f957edf..ed60f45 100644
+--- a_linux/drivers/char/Makefile
++++ b_linux/drivers/char/Makefile
+@@ -11,6 +11,7 @@ obj-y	 += mem.o random.o tty_io.o n_tty.o tty_ioctl.o tty_ldisc.o tty_buffer.o t
+ 
+ obj-$(CONFIG_LEGACY_PTYS)	+= pty.o
+ obj-$(CONFIG_UNIX98_PTYS)	+= pty.o
++obj-$(CONFIG_TTY_PRINTK)	+= ttyprintk.o
+ obj-y				+= misc.o
+ obj-$(CONFIG_VT)		+= vt_ioctl.o vc_screen.o selection.o keyboard.o
+ obj-$(CONFIG_BFIN_JTAG_COMM)	+= bfin_jtag_comm.o
+diff --git a_linux/drivers/char/ttyprintk.c b_linux/drivers/char/ttyprintk.c
+new file mode 100644
+index 0000000..c40c161
+--- /dev/null
++++ b_linux/drivers/char/ttyprintk.c
+@@ -0,0 +1,225 @@
++/*
++ *  linux/drivers/char/ttyprintk.c
++ *
++ *  Copyright (C) 2010  Samo Pogacnik
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the smems of the GNU General Public License as published by
++ * the Free Software Foundation; version 2 of the License.
++ */
++
++/*
++ * This pseudo device allows user to make printk messages. It is possible
++ * to store "console" messages inline with kernel messages for better analyses
++ * of the boot process, for example.
++ */
++
++#include <linux/device.h>
++#include <linux/serial.h>
++#include <linux/tty.h>
++
++struct ttyprintk_port {
++	struct tty_port port;
++	struct mutex port_write_mutex;
++};
++
++static struct ttyprintk_port tpk_port;
++
++/*
++ * Our simple preformatting supports transparent output of (time-stamped)
++ * printk messages (also suitable for logging service):
++ * - any cr is replaced by nl
++ * - adds a ttyprintk source tag in front of each line
++ * - too long message is fragmeted, with '\'nl between fragments
++ * - TPK_STR_SIZE isn't really the write_room limiting factor, bcause
++ *   it is emptied on the fly during preformatting.
++ */
++#define TPK_STR_SIZE 508 /* should be bigger then max expected line length */
++#define TPK_MAX_ROOM 4096 /* we could assume 4K for instance */
++static const char *tpk_tag = "[U] "; /* U for User */
++static int tpk_curr;
++
++static int tpk_printk(const unsigned char *buf, int count)
++{
++	static char tmp[TPK_STR_SIZE + 4];
++	int i = tpk_curr;
++
++	if (buf == NULL) {
++		/* flush tmp[] */
++		if (tpk_curr > 0) {
++			/* non nl or cr terminated message - add nl */
++			tmp[tpk_curr + 0] = '\n';
++			tmp[tpk_curr + 1] = '\0';
++			printk(KERN_INFO "%s%s", tpk_tag, tmp);
++			tpk_curr = 0;
++		}
++		return i;
++	}
++
++	for (i = 0; i < count; i++) {
++		tmp[tpk_curr] = buf[i];
++		if (tpk_curr < TPK_STR_SIZE) {
++			switch (buf[i]) {
++			case '\r':
++				/* replace cr with nl */
++				tmp[tpk_curr + 0] = '\n';
++				tmp[tpk_curr + 1] = '\0';
++				printk(KERN_INFO "%s%s", tpk_tag, tmp);
++				tpk_curr = 0;
++				if (buf[i + 1] == '\n')
++					i++;
++				break;
++			case '\n':
++				tmp[tpk_curr + 1] = '\0';
++				printk(KERN_INFO "%s%s", tpk_tag, tmp);
++				tpk_curr = 0;
++				break;
++			default:
++				tpk_curr++;
++			}
++		} else {
++			/* end of tmp buffer reached: cut the message in two */
++			tmp[tpk_curr + 1] = '\\';
++			tmp[tpk_curr + 2] = '\n';
++			tmp[tpk_curr + 3] = '\0';
++			printk(KERN_INFO "%s%s", tpk_tag, tmp);
++			tpk_curr = 0;
++		}
++	}
++
++	return count;
++}
++
++/*
++ * TTY operations open function.
++ */
++static int tpk_open(struct tty_struct *tty, struct file *filp)
++{
++	tty->driver_data = &tpk_port;
++
++	return tty_port_open(&tpk_port.port, tty, filp);
++}
++
++/*
++ * TTY operations close function.
++ */
++static void tpk_close(struct tty_struct *tty, struct file *filp)
++{
++	struct ttyprintk_port *tpkp = tty->driver_data;
++
++	mutex_lock(&tpkp->port_write_mutex);
++	/* flush tpk_printk buffer */
++	tpk_printk(NULL, 0);
++	mutex_unlock(&tpkp->port_write_mutex);
++
++	tty_port_close(&tpkp->port, tty, filp);
++}
++
++/*
++ * TTY operations write function.
++ */
++static int tpk_write(struct tty_struct *tty,
++		const unsigned char *buf, int count)
++{
++	struct ttyprintk_port *tpkp = tty->driver_data;
++	int ret;
++
++
++	/* exclusive use of tpk_printk within this tty */
++	mutex_lock(&tpkp->port_write_mutex);
++	ret = tpk_printk(buf, count);
++	mutex_unlock(&tpkp->port_write_mutex);
++
++	return ret;
++}
++
++/*
++ * TTY operations write_room function.
++ */
++static int tpk_write_room(struct tty_struct *tty)
++{
++	return TPK_MAX_ROOM;
++}
++
++/*
++ * TTY operations ioctl function.
++ */
++static int tpk_ioctl(struct tty_struct *tty, struct file *file,
++			unsigned int cmd, unsigned long arg)
++{
++	struct ttyprintk_port *tpkp = tty->driver_data;
++
++	if (!tpkp)
++		return -EINVAL;
++
++	switch (cmd) {
++	/* Stop TIOCCONS */
++	case TIOCCONS:
++		return -EOPNOTSUPP;
++	default:
++		return -ENOIOCTLCMD;
++	}
++	return 0;
++}
++
++static const struct tty_operations ttyprintk_ops = {
++	.open = tpk_open,
++	.close = tpk_close,
++	.write = tpk_write,
++	.write_room = tpk_write_room,
++	.ioctl = tpk_ioctl,
++};
++
++struct tty_port_operations null_ops = { };
++
++static struct tty_driver *ttyprintk_driver;
++
++static int __init ttyprintk_init(void)
++{
++	int ret = -ENOMEM;
++	void *rp;
++
++	ttyprintk_driver = alloc_tty_driver(1);
++	if (!ttyprintk_driver)
++		return ret;
++
++	ttyprintk_driver->owner = THIS_MODULE;
++	ttyprintk_driver->driver_name = "ttyprintk";
++	ttyprintk_driver->name = "ttyprintk";
++	ttyprintk_driver->major = TTYAUX_MAJOR;
++	ttyprintk_driver->minor_start = 3;
++	ttyprintk_driver->num = 1;
++	ttyprintk_driver->type = TTY_DRIVER_TYPE_CONSOLE;
++	ttyprintk_driver->init_termios = tty_std_termios;
++	ttyprintk_driver->init_termios.c_oflag = OPOST | OCRNL | ONOCR | ONLRET;
++	ttyprintk_driver->flags = TTY_DRIVER_RESET_TERMIOS |
++		TTY_DRIVER_REAL_RAW | TTY_DRIVER_DYNAMIC_DEV;
++	tty_set_operations(ttyprintk_driver, &ttyprintk_ops);
++
++	ret = tty_register_driver(ttyprintk_driver);
++	if (ret < 0) {
++		printk(KERN_ERR "Couldn't register ttyprintk driver\n");
++		goto error;
++	}
++
++	/* create our unnumbered device */
++	rp = device_create(tty_class, NULL, MKDEV(TTYAUX_MAJOR, 3), NULL,
++				ttyprintk_driver->name);
++	if (IS_ERR(rp)) {
++		printk(KERN_ERR "Couldn't create ttyprintk device\n");
++		ret = PTR_ERR(rp);
++		goto error;
++	}
++
++	tty_port_init(&tpk_port.port);
++	tpk_port.port.ops = &null_ops;
++	mutex_init(&tpk_port.port_write_mutex);
++
++	return 0;
++
++error:
++	put_tty_driver(ttyprintk_driver);
++	ttyprintk_driver = NULL;
++	return ret;
++}
++module_init(ttyprintk_init);
+
