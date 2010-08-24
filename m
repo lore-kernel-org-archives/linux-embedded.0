@@ -1,43 +1,40 @@
-From: Greg KH <gregkh@suse.de>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH] detour TTY driver - now ttyprintk
-Date: Tue, 24 Aug 2010 16:12:41 -0700
-Message-ID: <20100824231241.GA6971@suse.de>
+Date: Wed, 25 Aug 2010 00:51:52 +0100
+Message-ID: <20100825005152.40ba2f12@lxorguk.ukuu.org.uk>
 References: <20100622232108.26752ff8@lxorguk.ukuu.org.uk>
- <1277462596.2143.101.camel@itpsd6lap>
- <20100625120329.1303aa61@lxorguk.ukuu.org.uk>
- <1282683470.8020.66.camel@itpsd6lap>
- <20100824211016.GA7176@suse.de>
- <1282687797.8020.108.camel@itpsd6lap>
- <20100824222035.GA10625@suse.de>
- <1282690232.8020.116.camel@itpsd6lap>
- <20100824225703.GA5913@suse.de>
- <20100825002221.68fc09a4@lxorguk.ukuu.org.uk>
+	<1277462596.2143.101.camel@itpsd6lap>
+	<20100625120329.1303aa61@lxorguk.ukuu.org.uk>
+	<1282683470.8020.66.camel@itpsd6lap>
+	<20100824211016.GA7176@suse.de>
+	<1282687797.8020.108.camel@itpsd6lap>
+	<20100824222035.GA10625@suse.de>
+	<1282690232.8020.116.camel@itpsd6lap>
+	<20100824225703.GA5913@suse.de>
+	<20100825002221.68fc09a4@lxorguk.ukuu.org.uk>
+	<20100824231241.GA6971@suse.de>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20100825002221.68fc09a4@lxorguk.ukuu.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20100824231241.GA6971@suse.de>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>, Kay Sievers <kay.sievers@vrfy.org>
-Cc: Samo Pogacnik <samo_pogacnik@t-2.net>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>
+To: Greg KH <gregkh@suse.de>
+Cc: Kay Sievers <kay.sievers@vrfy.org>, Samo Pogacnik <samo_pogacnik@t-2.net>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Wed, Aug 25, 2010 at 12:22:21AM +0100, Alan Cox wrote:
-> > No, it does cover that.  You should be able to do that with a simple
-> > console redirection to /dev/kmsg  What happened when you tried to do
-> > that?
+> > - formatting
 > 
-> stty: standard input: Inappropriate ioctl for device
+> Ick, we really want to format things from userspace here?
 
-Kay, how does systemd handle the kmsg console redirection?
+Depends what you are trying to do.
 
-> It's value is twofold
-> 
-> - formatting
+Put an embedded hat on
 
-Ick, we really want to format things from userspace here?
+Do you want to be able to flip between a real debug interface and a
+logging device on the same software set without risking changing behaviour
 
-thanks,
+Do you want to load a 70K daemon and an initrd or burn about 1.5K on a
+kernel interface ?
 
-greg k-h
+Alan
