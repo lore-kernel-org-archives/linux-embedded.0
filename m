@@ -1,70 +1,49 @@
-From: Greg KH <gregkh@suse.de>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH] detour TTY driver - now ttyprintk
-Date: Wed, 25 Aug 2010 08:57:16 -0700
-Message-ID: <20100825155716.GB16284@suse.de>
+Date: Wed, 25 Aug 2010 18:11:08 +0100
+Message-ID: <20100825181108.1dcd0d80@lxorguk.ukuu.org.uk>
 References: <20100824211016.GA7176@suse.de>
- <1282687797.8020.108.camel@itpsd6lap>
- <20100824222035.GA10625@suse.de>
- <1282690232.8020.116.camel@itpsd6lap>
- <20100824225703.GA5913@suse.de>
- <20100825002221.68fc09a4@lxorguk.ukuu.org.uk>
- <20100824231241.GA6971@suse.de>
- <20100825005152.40ba2f12@lxorguk.ukuu.org.uk>
- <20100825004134.GA28884@suse.de>
- <20100825110813.5f7d7ac8@lxorguk.ukuu.org.uk>
+	<1282687797.8020.108.camel@itpsd6lap>
+	<20100824222035.GA10625@suse.de>
+	<1282690232.8020.116.camel@itpsd6lap>
+	<20100824225703.GA5913@suse.de>
+	<20100825002221.68fc09a4@lxorguk.ukuu.org.uk>
+	<20100824231241.GA6971@suse.de>
+	<20100825005152.40ba2f12@lxorguk.ukuu.org.uk>
+	<20100825004134.GA28884@suse.de>
+	<20100825110813.5f7d7ac8@lxorguk.ukuu.org.uk>
+	<20100825155716.GB16284@suse.de>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20100825110813.5f7d7ac8@lxorguk.ukuu.org.uk>
+In-Reply-To: <20100825155716.GB16284@suse.de>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+To: Greg KH <gregkh@suse.de>
 Cc: Kay Sievers <kay.sievers@vrfy.org>, Samo Pogacnik <samo_pogacnik@t-2.net>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Wed, Aug 25, 2010 at 11:08:13AM +0100, Alan Cox wrote:
-> > > Do you want to be able to flip between a real debug interface and a
-> > > logging device on the same software set without risking changing behaviour
-> > 
-> > I don't understand this point.
+> Would that work for this driver in use as a console?
+
+Yes
+
+>   exec < /dev/console > /dev/kmsg 2>&1
 > 
-> A tty has a very specific set of behaviours simply by being a tty. Some
-> applications rely upon them so being able to flip between the two
-> interfaces is useful.
+> That's one extra process, not that much, right?
 
-Would that work for this driver in use as a console?
+About 150K or so way too much and its not robust.
 
-> > Seriously, look at how Fedora 14 handles this, why can't you do the same
-> > for embedded systems all from userspace, no additional code needed
-> > anywhere.
+> > You also want errors to get out (or stored) even if there are crashes -
+> > which the Fedora one is not very good at. To be fair in the Fedora world
+> > its not a big deal to say 'Oh dear, boot with ....'. Embedded isn't the
+> > same, and you want to capture the odd rare error reliably.
 > 
-> Its a whole set of extra processes and daemons and stuff, and
-> minimally uses something like 70K even if its very compact (8K stack, 40K+
-> page tables, 16K of buffers, code, data) - oh and I forgot the fifo
-> buffering and pty cost - so its near 100K. 1.5K v 100K - for something
-> 1.5K of kernel code that anyone else can turn off and would be off by
-> default ?
+> again, the above exec line should work for what the embedded people
+> want, right?
 
-  exec < /dev/console > /dev/kmsg 2>&1
+We didn't *need* devtmpfs either - that was a little bit of user space.
+It's a similar thing - you can do the job better in 1.5K of kernel code
+than 150K or more of user space - which is not trivial on a box with no
+swap.
 
-That's one extra process, not that much, right?
-
-> On a lot of embedded systems you don't have all the stuff Fedora carts
-> around. No modules, initrds, magic front end processes, graphical startup
-> daemons etc, all of which work to produce that feature IFF you have pty
-> support in your kernel, and for the current code also glibc.
-
-It sounded like they had an initrd that they cared about here.
-
-> You also want errors to get out (or stored) even if there are crashes -
-> which the Fedora one is not very good at. To be fair in the Fedora world
-> its not a big deal to say 'Oh dear, boot with ....'. Embedded isn't the
-> same, and you want to capture the odd rare error reliably.
-
-again, the above exec line should work for what the embedded people
-want, right?
-
-thanks,
-
-greg k-h
+Alan
