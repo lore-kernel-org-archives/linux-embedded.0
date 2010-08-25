@@ -1,57 +1,64 @@
-From: Kay Sievers <kay.sievers@vrfy.org>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH] detour TTY driver - now ttyprintk
-Date: Wed, 25 Aug 2010 09:48:23 +0200
-Message-ID: <AANLkTimTXKTHqmomfuTQMosPMyhrGLFk7YrEJikpPm6e@mail.gmail.com>
-References: <20100622232108.26752ff8@lxorguk.ukuu.org.uk> <1277462596.2143.101.camel@itpsd6lap>
- <20100625120329.1303aa61@lxorguk.ukuu.org.uk> <1282683470.8020.66.camel@itpsd6lap>
- <20100824211016.GA7176@suse.de> <1282687797.8020.108.camel@itpsd6lap>
- <20100824222035.GA10625@suse.de> <1282690232.8020.116.camel@itpsd6lap>
- <20100824225703.GA5913@suse.de> <20100825002221.68fc09a4@lxorguk.ukuu.org.uk>
- <20100824231241.GA6971@suse.de> <AANLkTi=SkVv4tYUuAr9n03iYFdTJQr7wQnFaodrkHpom@mail.gmail.com>
+Date: Wed, 25 Aug 2010 11:08:13 +0100
+Message-ID: <20100825110813.5f7d7ac8@lxorguk.ukuu.org.uk>
+References: <20100625120329.1303aa61@lxorguk.ukuu.org.uk>
+	<1282683470.8020.66.camel@itpsd6lap>
+	<20100824211016.GA7176@suse.de>
+	<1282687797.8020.108.camel@itpsd6lap>
+	<20100824222035.GA10625@suse.de>
+	<1282690232.8020.116.camel@itpsd6lap>
+	<20100824225703.GA5913@suse.de>
+	<20100825002221.68fc09a4@lxorguk.ukuu.org.uk>
+	<20100824231241.GA6971@suse.de>
+	<20100825005152.40ba2f12@lxorguk.ukuu.org.uk>
+	<20100825004134.GA28884@suse.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=SkVv4tYUuAr9n03iYFdTJQr7wQnFaodrkHpom@mail.gmail.com>
+In-Reply-To: <20100825004134.GA28884@suse.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 To: Greg KH <gregkh@suse.de>
-Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, Samo Pogacnik <samo_pogacnik@t-2.net>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>
+Cc: Kay Sievers <kay.sievers@vrfy.org>, Samo Pogacnik <samo_pogacnik@t-2.net>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>
 
-On Wed, Aug 25, 2010 at 09:40, Kay Sievers <kay.sievers@vrfy.org> wrote=
-:
-> On Wed, Aug 25, 2010 at 01:12, Greg KH <gregkh@suse.de> wrote:
->> On Wed, Aug 25, 2010 at 12:22:21AM +0100, Alan Cox wrote:
->>> > No, it does cover that. =C2=A0You should be able to do that with =
-a simple
->>> > console redirection to /dev/kmsg =C2=A0What happened when you tri=
-ed to do
->>> > that?
->>>
->>> stty: standard input: Inappropriate ioctl for device
->>
->> Kay, how does systemd handle the kmsg console redirection?
->
-> Systemd does not steal the console, this is done by plymouth, in the
-> same way blogd can do that. It uses a pty and rewrites the messages.
->
-> Systemd does pass syslog to the kernel buffer during early boot. Init
-> provides /dev/log. With systemd, the started services usually don't
-> get the console connected, but use syslog anyway or the stdout/err
-> gets redirected to syslog.
->
-> With systemd the console is not too useful because we start everythin=
-g
-> in parallel. If all the services would put out stuff there like sysv
-> did, it would look like a real mess.
+> > Do you want to be able to flip between a real debug interface and a
+> > logging device on the same software set without risking changing behaviour
+> 
+> I don't understand this point.
 
-Or isn't that what you asked for? We just write the stuff that arrives
-at syslog to /dev/kmsg to put things in the kernel log buffer.
+A tty has a very specific set of behaviours simply by being a tty. Some
+applications rely upon them so being able to flip between the two
+interfaces is useful.
 
-Also initrds are usually using
-  exec < /dev/console > /dev/kmsg 2>&1
-to get stuff directly to the kernel buffer.
+> > Do you want to load a 70K daemon and an initrd or burn about 1.5K on a
+> > kernel interface ?
+> 
+> I'd rather burn 0K on the one we have today :)
 
-What does /dev/ttyprintk offer on top of that?
+So say "N" when configuring
 
-Kay
+> Seriously, look at how Fedora 14 handles this, why can't you do the same
+> for embedded systems all from userspace, no additional code needed
+> anywhere.
+
+Its a whole set of extra processes and daemons and stuff, and
+minimally uses something like 70K even if its very compact (8K stack, 40K+
+page tables, 16K of buffers, code, data) - oh and I forgot the fifo
+buffering and pty cost - so its near 100K. 1.5K v 100K - for something
+1.5K of kernel code that anyone else can turn off and would be off by
+default ?
+
+On a lot of embedded systems you don't have all the stuff Fedora carts
+around. No modules, initrds, magic front end processes, graphical startup
+daemons etc, all of which work to produce that feature IFF you have pty
+support in your kernel, and for the current code also glibc.
+
+You also want errors to get out (or stored) even if there are crashes -
+which the Fedora one is not very good at. To be fair in the Fedora world
+its not a big deal to say 'Oh dear, boot with ....'. Embedded isn't the
+same, and you want to capture the odd rare error reliably.
+
+Alan
+
