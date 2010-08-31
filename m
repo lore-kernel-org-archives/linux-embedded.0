@@ -1,42 +1,46 @@
-From: Greg KH <gregkh@suse.de>
-Subject: Re: [PATCH] detour TTY driver - now ttyprintk
-Date: Thu, 26 Aug 2010 16:02:31 -0700
-Message-ID: <20100826230231.GA12060@suse.de>
-References: <20100824231241.GA6971@suse.de> <20100825005152.40ba2f12@lxorguk.ukuu.org.uk> <20100825004134.GA28884@suse.de> <20100825110813.5f7d7ac8@lxorguk.ukuu.org.uk> <20100825155716.GB16284@suse.de> <20100825181108.1dcd0d80@lxorguk.ukuu.org.uk> <20100825171045.GA19401@suse.de> <20100825191437.1df57c9d@lxorguk.ukuu.org.uk> <20100825181647.GA22018@suse.de> <1282843484.2440.23.camel@itpsd6lap>
+From: Andrew Murray <amurray@mpcdata.com>
+Subject: [RFC] Kernel 'boot cache' to reduce boot time
+Date: Tue, 31 Aug 2010 20:13:09 +0100
+Message-ID: <AANLkTimJkPD=shB9oi3ASocaLEpG=C7oDJMbq8BEy2Fe@mail.gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1282843484.2440.23.camel@itpsd6lap>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Samo Pogacnik <samo_pogacnik@t-2.net>
-Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, Kay Sievers <kay.sievers@vrfy.org>, linux kernel <linux-kernel@vger.kernel.org>, linux-embedded <linux-embedded@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-On Thu, Aug 26, 2010 at 07:24:44PM +0200, Samo Pogacnik wrote:
-> On 25.08.2010 (sre) at 11:16 -0700 Greg KH wrote:
-> > On Wed, Aug 25, 2010 at 07:14:37PM +0100, Alan Cox wrote:
-> > > > > > That's one extra process, not that much, right?
-> > > > > 
-> > > > > About 150K or so way too much and its not robust.
-> > > > 
-> > > > Fair enough.  So, with this driver, would it make sense for the distros
-> > > > to switch over to using it instead of the above line in their initrd?
-> > > 
-> > > Distros no - I doubt any normal PC distro would turn the facility on.
-> > > Embedded - yes especially deeply embedded.
-> > 
-> > So should this be dependent on CONFIG_EMBEDDED then?
-> > 
-> 
-> Should i resend the patch with CONFIG_EMBEDDED dependency enabled? I do
-> not have any real objections to that, except that the driver operates
-> the same way regardless of the (non-)embedded configuration.
+Hello,
 
-No, I can change it when I apply the patch next week (sorry, swamped at
-the moment.)
+I have a suggestion for a kernel framework which aims to reduce boot
+time in embedded devices and would be interested in hearing your
+feedback.
 
-thanks,
+A large portion of kernel boot time is spent in driver probe functions
+often waiting for hardware for example calculating LPJ values or
+trying to determine what type of camera is connected (PAL/NTSC) etc.
+However for most embedded devices the hardware remains constant and
+these probes always determine the same information. Therefore boot
+time can be decreased by removing some of this probe code and
+replacing it with known values.
 
-greg k-h
+To some extent some of these optimisations have already been done
+through a variety of methods - for example the LPJ calculation can be
+bypassed with the lpj= parameter and some drivers have their own
+methods. My solution aims to generalise these solutions...
+
+The solution is to provide a very simple framework which will allow
+drivers to identify and record such values (LPJ, camera type, decoder
+chip version) during boot. Once booted the user can obtain a
+collection of these values and pass them back to the kernel on
+subsequent boots. During subsequent boots - drivers upon realising
+these values have already been provided can bypass some of their probe
+code and thus reducing boot time. Taking advantage of this framework
+would be very trivial for drivers.
+
+I wanted to see your views on the overall solution prior to
+considering how it could be implemented.
+
+Thanks,
+
+Andrew Murray
