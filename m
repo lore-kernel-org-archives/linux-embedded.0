@@ -1,151 +1,340 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [RFC] Kernel 'boot cache' to reduce boot time
-Date: Tue, 31 Aug 2010 20:40:44 -0600
-Message-ID: <AANLkTinWwWg9SXLL1rAF-VKCp+BH8wZuYsgibg-52__U@mail.gmail.com>
-References: <AANLkTimJkPD=shB9oi3ASocaLEpG=C7oDJMbq8BEy2Fe@mail.gmail.com> <4C7D5D60.1070203@am.sony.com>
+From: <gregkh@suse.de>
+Subject: patch "add ttyprintk driver" added to gregkh-2.6 tree
+Date: Wed, 01 Sep 2010 15:50:53 -0700
+Message-ID: <12833814531068@site>
+References: <1282761847.5857.9.camel@itpsd6lap>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4C7D5D60.1070203@am.sony.com>
+In-Reply-To: <1282761847.5857.9.camel@itpsd6lap>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Andrew Murray <amurray@mpcdata.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, "Van De Ven, Arjan" <arjan.van.de.ven@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+To: samo_pogacnik@t-2.net, alan@lxorguk.ukuu.org.uk, gregkh@suse.de, kay.sievers@vrfy.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tue, Aug 31, 2010 at 1:52 PM, Tim Bird <tim.bird@am.sony.com> wrote:
-> On 08/31/2010 12:13 PM, Andrew Murray wrote:
->> I have a suggestion for a kernel framework which aims to reduce boot
->> time in embedded devices and would be interested in hearing your
->> feedback.
->>
->> A large portion of kernel boot time is spent in driver probe functio=
-ns
->> often waiting for hardware for example calculating LPJ values or
->> trying to determine what type of camera is connected (PAL/NTSC) etc.
->> However for most embedded devices the hardware remains constant and
->> these probes always determine the same information. Therefore boot
->> time can be decreased by removing some of this probe code and
->> replacing it with known values.
->>
->> To some extent some of these optimisations have already been done
->> through a variety of methods - for example the LPJ calculation can b=
-e
->> bypassed with the lpj=3D parameter and some drivers have their own
->> methods. My solution aims to generalise these solutions...
->>
->> The solution is to provide a very simple framework which will allow
->> drivers to identify and record such values (LPJ, camera type, decode=
-r
->> chip version) during boot. Once booted the user can obtain a
->> collection of these values and pass them back to the kernel on
->> subsequent boots. During subsequent boots - drivers upon realising
->> these values have already been provided can bypass some of their pro=
-be
->> code and thus reducing boot time. Taking advantage of this framework
->> would be very trivial for drivers.
 
-I think we've pretty much already got this functionality, even if it
-isn't fully taken advantage of by all device drivers.  Any device can
-be registered with either a device-specific platform_data pointer or a
-device_node pointer (when CONFIG_OF is enabled).  Any driver can be
-adapted to use additional data from either of those sources as an
-alternative to HW probing.  platform_data is simply a statically
-defined C structure provided by the board support code.  A device_node
-pointer points to the device's node in a flattened device tree data
-structure that is passed to the kernel at boot time.
+This is a note to let you know that I've just added the patch titled
 
-(It's also worth noting that a large number of device drivers in
-embedded devices already don't do any form of probing, and only rely
-on the static data provided at device registration time).
+    add ttyprintk driver
 
-USB and PCI busses are the obvious cases where the kernel currently HW
-probes by default, but those cases could also be modified to make use
-of device tree or platform_data configuration sources.  From your
-description, it sounds like camera connections are in the same boat.
+to my gregkh-2.6 tree which can be found in directory form at:
+    http://www.kernel.org/pub/linux/kernel/people/gregkh/gregkh-2.6/patches/
+ and in git form at:
+    git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/patches.git
 
->> I wanted to see your views on the overall solution prior to
->> considering how it could be implemented.
->
-> For my part, I think this sounds like a great idea. =A0I have
-> considered such a mechanism in the past, but never gotten around
-> to actually designing a solution.
->
-> Here are some random thoughts on this idea:
->
-> My experience is that we've made good progress on boot time
-> probing, for fixed hardware. =A0The big problems in the kernel
-> boot time appear to be with busses that require discovery of
-> devices, with long timeouts specified in the bus standard and
-> arbitrary bus connection architecture (I'm thinking of USB,
-> but other busses have similar problems). =A0For many embedded
-> devices, scanning these types of pluggable busses aren't
-> required for what I call "first product use", but they can be
-> scanned and populated later.
+The filename of this patch is:
+    add-ttyprintk-driver.patch
 
-There actually already are bindings and some support code for
-describing fixed PCI devices in a flattened device tree.  USB is a bit
-harder though, but fortunately USB probing can often be deferred until
-later in the boot (as you rightly pointed out) after userspace has
-started.
+The patch will show up in the next release of the linux-next tree
+(usually sometime within the next 24 hours during the week.)
 
->
-> Note that the asynchronous function call stuff by Arjan
-> van de Ven addresses some of this boot time probing
-> delay problem.
->
-> Having said that, I don't think that probing of static
-> hardware is a solved problem, by any means.
->
-> For the boot cache data, you are going to need to figure
-> out how to make the data persistent. =A0Doing something
-> in a regular fashion (rather than ad-hoc via command line
-> options) should help with this.
+If this patch meets the merge guidelines for a bugfix, it should be
+merged into Linus's tree before the next major kernel release.
+If not, it will be merged into Linus's tree during the next merge window.
 
-I'm not convinced that doing a "live" capture is the best approach.
-I'd rather see that kind of data obtained by the developer and
-explicitly specified either in a device tree or the platform support
-code.
+Either way, you will probably be copied on the patch when it gets sent
+to Linus for merging so that others can see what is happening in kernel
+development.
 
-If live capture is required, then doing an IPL-style boot, suspend &
-dump (like you described below) is probably a more robust approach.
-Otherwise you have to figure out how to pick and choose items of data
-out of a running kernel and inject them in again at the next boot
-(blech!).
+If you have any questions about this process, please let me know.
 
-> To some degree this might end up looking very similar
-> to the "resume" path in the driver, where a particular
-> device state is entered into from cold start.
->
-> Sony has been doing something related to this called
-> "Snapshot boot" for some time now, which is kind of an
-> optimized unhibernate operation, with some hardware bringup
-> done by firmware, and some bringup done using the normal driver
-> resume operation. =A0This work was presented at OLS
-> several years ago, but we haven't pushed it much since
-> then. =A0(But we're using it in product)
-> See http://elinux.org/upload/3/37/Snapshot-boot-final.pdf
 
-I remember hearing very positive things about that presentation (and
-being sorry that I missed it) that year at OLS.  I'm pretty intrigued
-by the approach and would like to see more research done in that area.
+From samo_pogacnik@t-2.net  Wed Sep  1 15:35:26 2010
+Subject: add ttyprintk driver
+From: Samo Pogacnik <samo_pogacnik@t-2.net>
+To: linux kernel <linux-kernel@vger.kernel.org>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>,
+	Greg KH <gregkh@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>,
+	Kay Sievers <kay.sievers@vrfy.org>
+Date: Wed, 25 Aug 2010 20:44:07 +0200
+Message-Id: <1282761847.5857.9.camel@itpsd6lap>
 
-> Sorry for rambling. =A0Anyway - I'm all for the boot cache idea.
-> But acceptability would, of course, be dependent on the
-> details of the implementation.
->
-> The best thing to get started, IMHO, would be to identify
-> a few drivers which have long probe times, and see
-> how they could reduce these with the proposed boot cache.
-> If you find that each new device adds some new wrinkle
-> in the cache requirements, that would be a bad sign. =A0But
-> if different drivers, especially drivers in different functional
-> areas, are found to be able to use a consistent API, then
-> this could be a nice feature.
->
-> BTW - I could see this tying into the flattened device
-> tree work by Grant Likely.
 
-http://www.devicetree.org/Device_Tree_Usage
+Ttyprintk is a pseudo TTY driver, which allows users to make printk
+messages, via output to ttyprintk device. It is possible to store
+"console" messages inline with kernel messages for better analyses of
+the boot process, for example.
 
-g.
+Signed-off-by: Samo Pogacnik <samo_pogacnik@t-2.net>
+Acked-by: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+---
+ Documentation/devices.txt |    1 
+ drivers/char/Kconfig      |   15 +++
+ drivers/char/Makefile     |    1 
+ drivers/char/ttyprintk.c  |  225 ++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 242 insertions(+)
+
+--- a/Documentation/devices.txt
++++ b/Documentation/devices.txt
+@@ -239,6 +239,7 @@ Your cooperation is appreciated.
+ 		  0 = /dev/tty		Current TTY device
+ 		  1 = /dev/console	System console
+ 		  2 = /dev/ptmx		PTY master multiplex
++		  3 = /dev/ttyprintk	User messages via printk TTY device
+ 		 64 = /dev/cua0		Callout device for ttyS0
+ 		    ...
+ 		255 = /dev/cua191	Callout device for ttyS191
+--- a/drivers/char/Kconfig
++++ b/drivers/char/Kconfig
+@@ -493,6 +493,21 @@ config LEGACY_PTY_COUNT
+ 	  When not in use, each legacy PTY occupies 12 bytes on 32-bit
+ 	  architectures and 24 bytes on 64-bit architectures.
+ 
++config TTY_PRINTK
++	bool "TTY driver to output user messages via printk"
++	depends on EMBEDDED
++	default n
++	---help---
++	  If you say Y here, the support for writing user messages (i.e.
++	  console messages) via printk is available.
++
++	  The feature is useful to inline user messages with kernel
++	  messages.
++	  In order to use this feature, you should output user messages
++	  to /dev/ttyprintk or redirect console to this TTY.
++
++	  If unsure, say N.
++
+ config BRIQ_PANEL
+ 	tristate 'Total Impact briQ front panel driver'
+ 	depends on PPC_CHRP
+--- a/drivers/char/Makefile
++++ b/drivers/char/Makefile
+@@ -12,6 +12,7 @@ obj-y	 += mem.o random.o tty_io.o n_tty.
+ obj-y				+= tty_mutex.o
+ obj-$(CONFIG_LEGACY_PTYS)	+= pty.o
+ obj-$(CONFIG_UNIX98_PTYS)	+= pty.o
++obj-$(CONFIG_TTY_PRINTK)	+= ttyprintk.o
+ obj-y				+= misc.o
+ obj-$(CONFIG_VT)		+= vt_ioctl.o vc_screen.o selection.o keyboard.o
+ obj-$(CONFIG_BFIN_JTAG_COMM)	+= bfin_jtag_comm.o
+--- /dev/null
++++ b/drivers/char/ttyprintk.c
+@@ -0,0 +1,225 @@
++/*
++ *  linux/drivers/char/ttyprintk.c
++ *
++ *  Copyright (C) 2010  Samo Pogacnik
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the smems of the GNU General Public License as published by
++ * the Free Software Foundation; version 2 of the License.
++ */
++
++/*
++ * This pseudo device allows user to make printk messages. It is possible
++ * to store "console" messages inline with kernel messages for better analyses
++ * of the boot process, for example.
++ */
++
++#include <linux/device.h>
++#include <linux/serial.h>
++#include <linux/tty.h>
++
++struct ttyprintk_port {
++	struct tty_port port;
++	struct mutex port_write_mutex;
++};
++
++static struct ttyprintk_port tpk_port;
++
++/*
++ * Our simple preformatting supports transparent output of (time-stamped)
++ * printk messages (also suitable for logging service):
++ * - any cr is replaced by nl
++ * - adds a ttyprintk source tag in front of each line
++ * - too long message is fragmeted, with '\'nl between fragments
++ * - TPK_STR_SIZE isn't really the write_room limiting factor, bcause
++ *   it is emptied on the fly during preformatting.
++ */
++#define TPK_STR_SIZE 508 /* should be bigger then max expected line length */
++#define TPK_MAX_ROOM 4096 /* we could assume 4K for instance */
++static const char *tpk_tag = "[U] "; /* U for User */
++static int tpk_curr;
++
++static int tpk_printk(const unsigned char *buf, int count)
++{
++	static char tmp[TPK_STR_SIZE + 4];
++	int i = tpk_curr;
++
++	if (buf == NULL) {
++		/* flush tmp[] */
++		if (tpk_curr > 0) {
++			/* non nl or cr terminated message - add nl */
++			tmp[tpk_curr + 0] = '\n';
++			tmp[tpk_curr + 1] = '\0';
++			printk(KERN_INFO "%s%s", tpk_tag, tmp);
++			tpk_curr = 0;
++		}
++		return i;
++	}
++
++	for (i = 0; i < count; i++) {
++		tmp[tpk_curr] = buf[i];
++		if (tpk_curr < TPK_STR_SIZE) {
++			switch (buf[i]) {
++			case '\r':
++				/* replace cr with nl */
++				tmp[tpk_curr + 0] = '\n';
++				tmp[tpk_curr + 1] = '\0';
++				printk(KERN_INFO "%s%s", tpk_tag, tmp);
++				tpk_curr = 0;
++				if (buf[i + 1] == '\n')
++					i++;
++				break;
++			case '\n':
++				tmp[tpk_curr + 1] = '\0';
++				printk(KERN_INFO "%s%s", tpk_tag, tmp);
++				tpk_curr = 0;
++				break;
++			default:
++				tpk_curr++;
++			}
++		} else {
++			/* end of tmp buffer reached: cut the message in two */
++			tmp[tpk_curr + 1] = '\\';
++			tmp[tpk_curr + 2] = '\n';
++			tmp[tpk_curr + 3] = '\0';
++			printk(KERN_INFO "%s%s", tpk_tag, tmp);
++			tpk_curr = 0;
++		}
++	}
++
++	return count;
++}
++
++/*
++ * TTY operations open function.
++ */
++static int tpk_open(struct tty_struct *tty, struct file *filp)
++{
++	tty->driver_data = &tpk_port;
++
++	return tty_port_open(&tpk_port.port, tty, filp);
++}
++
++/*
++ * TTY operations close function.
++ */
++static void tpk_close(struct tty_struct *tty, struct file *filp)
++{
++	struct ttyprintk_port *tpkp = tty->driver_data;
++
++	mutex_lock(&tpkp->port_write_mutex);
++	/* flush tpk_printk buffer */
++	tpk_printk(NULL, 0);
++	mutex_unlock(&tpkp->port_write_mutex);
++
++	tty_port_close(&tpkp->port, tty, filp);
++}
++
++/*
++ * TTY operations write function.
++ */
++static int tpk_write(struct tty_struct *tty,
++		const unsigned char *buf, int count)
++{
++	struct ttyprintk_port *tpkp = tty->driver_data;
++	int ret;
++
++
++	/* exclusive use of tpk_printk within this tty */
++	mutex_lock(&tpkp->port_write_mutex);
++	ret = tpk_printk(buf, count);
++	mutex_unlock(&tpkp->port_write_mutex);
++
++	return ret;
++}
++
++/*
++ * TTY operations write_room function.
++ */
++static int tpk_write_room(struct tty_struct *tty)
++{
++	return TPK_MAX_ROOM;
++}
++
++/*
++ * TTY operations ioctl function.
++ */
++static int tpk_ioctl(struct tty_struct *tty, struct file *file,
++			unsigned int cmd, unsigned long arg)
++{
++	struct ttyprintk_port *tpkp = tty->driver_data;
++
++	if (!tpkp)
++		return -EINVAL;
++
++	switch (cmd) {
++	/* Stop TIOCCONS */
++	case TIOCCONS:
++		return -EOPNOTSUPP;
++	default:
++		return -ENOIOCTLCMD;
++	}
++	return 0;
++}
++
++static const struct tty_operations ttyprintk_ops = {
++	.open = tpk_open,
++	.close = tpk_close,
++	.write = tpk_write,
++	.write_room = tpk_write_room,
++	.ioctl = tpk_ioctl,
++};
++
++struct tty_port_operations null_ops = { };
++
++static struct tty_driver *ttyprintk_driver;
++
++static int __init ttyprintk_init(void)
++{
++	int ret = -ENOMEM;
++	void *rp;
++
++	ttyprintk_driver = alloc_tty_driver(1);
++	if (!ttyprintk_driver)
++		return ret;
++
++	ttyprintk_driver->owner = THIS_MODULE;
++	ttyprintk_driver->driver_name = "ttyprintk";
++	ttyprintk_driver->name = "ttyprintk";
++	ttyprintk_driver->major = TTYAUX_MAJOR;
++	ttyprintk_driver->minor_start = 3;
++	ttyprintk_driver->num = 1;
++	ttyprintk_driver->type = TTY_DRIVER_TYPE_CONSOLE;
++	ttyprintk_driver->init_termios = tty_std_termios;
++	ttyprintk_driver->init_termios.c_oflag = OPOST | OCRNL | ONOCR | ONLRET;
++	ttyprintk_driver->flags = TTY_DRIVER_RESET_TERMIOS |
++		TTY_DRIVER_REAL_RAW | TTY_DRIVER_DYNAMIC_DEV;
++	tty_set_operations(ttyprintk_driver, &ttyprintk_ops);
++
++	ret = tty_register_driver(ttyprintk_driver);
++	if (ret < 0) {
++		printk(KERN_ERR "Couldn't register ttyprintk driver\n");
++		goto error;
++	}
++
++	/* create our unnumbered device */
++	rp = device_create(tty_class, NULL, MKDEV(TTYAUX_MAJOR, 3), NULL,
++				ttyprintk_driver->name);
++	if (IS_ERR(rp)) {
++		printk(KERN_ERR "Couldn't create ttyprintk device\n");
++		ret = PTR_ERR(rp);
++		goto error;
++	}
++
++	tty_port_init(&tpk_port.port);
++	tpk_port.port.ops = &null_ops;
++	mutex_init(&tpk_port.port_write_mutex);
++
++	return 0;
++
++error:
++	put_tty_driver(ttyprintk_driver);
++	ttyprintk_driver = NULL;
++	return ret;
++}
++module_init(ttyprintk_init);
