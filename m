@@ -1,32 +1,49 @@
-From: "Kridner, Jason" <jdk@ti.com>
-Subject: Generic PWM kernel driver (with support for OMAP3)
-Date: Mon, 13 Sep 2010 08:06:33 -0500
-Message-ID: <8F7AF80515AF0D4D93307E594F3CB40E5F1B55AD@dlee03.ent.ti.com>
+From: Robin Theunis <robint91@gmail.com>
+Subject: Re: ARM target not boot after remap memory
+Date: Mon, 13 Sep 2010 15:11:07 +0200
+Message-ID: <AANLkTi=XoouQ7RtcfSHiGG5vVUcuYAZtuhfzYqOaa8aW@mail.gmail.com>
+References: <AANLkTi=tWwaFHB0DY=j0UaqbYdYJpGJpmWdGC4aMufSw@mail.gmail.com>
+	<4C8E1417.4060204@compulab.co.il>
+	<20100913124049.GG30787@n2100.arm.linux.org.uk>
+	<AANLkTi=dT1uMrRctB4=Hvh35zVc-DtReWmHj-18cd9XT@mail.gmail.com>
+	<20100913125140.GH30787@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:received:in-reply-to
+         :references:date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=qQQJekAQERTT/6G/9/ImsR+D0o7l4cYFJzxqagLyZoE=;
+        b=f4c7QgC7kPH9QkqR/kVzB6iishEjjzJXehRSq3t/VcFKDUvlDfRsi3hJuP/v9Pr/vu
+         xkX4/S+Nfa8Ghhy+6kMqKWGQh1lsYZMBnkUv0f5rN+nk64MrfCQxb3kODNLBSP4mznlb
+         H9JlUJtvOD5yloOTkJUsUaXQJzaVr97kOcIDc=
+In-Reply-To: <20100913125140.GH30787@n2100.arm.linux.org.uk>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Bill Gatliff <bgat@billgatliff.com>, Varun Jewalikar <varunjewalikar@hotmail.com>, soren <soren.ssc@gmail.com>, "scott@jumpnowtek.com" <scott@jumpnowtek.com>
-Cc: "beagleboard@googlegroups.com" <beagleboard@googlegroups.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Bill,
+I have tested it.
 
-I was looking at your PWM patch set[1] and it seems this has been pending for a long time (since February).  Do you know if this is any closer to being accepted, ie. have you done any additional work or has it been accepted to some maintainer's tree?
+When I compiled the kernel with debug_LL on the and triggered such an
+error by changing r1 to
+something different. And then I got an error of unsupport machine.
 
-There was a Google Summer of Code project for BeagleBoard.org[2] to put PWM code into the kernel[3], but the student (Varun, copied) has not yet submitted his patches to the linux-embedded mailing list yet and he wasn't aware of your patch set when he began his work.  His patch set[4] also misses some of the features from your patch set.  The student's work seems to be based on Scott's work[5] and branched from his tree on github[6].
 
-Have you released an updated patch series to address the feedback comments or shall we introduce a new set?
-
-Regards,
-Jason Kridner
-http://beagleboard.org/twitter 
-
-[1] https://patchwork.kernel.org/patch/76229/
-[2] http://beagleboard.org/gsoc
-[3] http://elinux.org/BeagleBoard/GSoC/2010_Projects/Pulse_Width_Modulation 
-[4] http://github.com/neo01124/omap3-pwm
-[5] http://www.jumpnowtek.com/index.php?option=com_content&view=article&id=56&Itemid=63 
-[6] http://github.com/scottellis/omap3-pwm 
+2010/9/13 Russell King - ARM Linux <linux@arm.linux.org.uk>
+> On Mon, Sep 13, 2010 at 02:48:18PM +0200, Robin Theunis wrote:
+>> Hi Russell,
+>>
+>> Yes I have tested it. I made a breakpoint at 0x2008000 and viewed th=
+at
+>> the r1 register and there in I found the correct ID.
+>
+> Ensure that CONFIG_DEBUG_LL is enabled, and that it outputs to the co=
+rrect
+> UART. =A0The kernel will produce some messages via the DEBUG_LL stuff=
+ prior
+> to entering the __error loop.
+>
