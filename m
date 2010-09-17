@@ -1,64 +1,89 @@
-From: Robin Theunis <robint91@gmail.com>
-Subject: Re: ARM target not boot after remap memory
-Date: Tue, 14 Sep 2010 07:32:37 +0200
-Message-ID: <AANLkTimWLpazRTDdGsXRrTYCjJQURM8ydv2TcX_PycWM@mail.gmail.com>
-References: <AANLkTi=tWwaFHB0DY=j0UaqbYdYJpGJpmWdGC4aMufSw@mail.gmail.com>
-	<20100913214132.0438615242D@gemini.denx.de>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Linux Plumbers Embedded microconference
+Date: Fri, 17 Sep 2010 17:32:42 -0600
+Message-ID: <AANLkTinqm-EsovG8c1mfX2zuAgHt5OoRCcD+owBbndNc@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=0ZRT9Phum8R8JSq3OnENcYwcRzWMq74kZfEZqU50TfI=;
-        b=fvNPcGTFpE/7/nKT1iPZTv/OOsmUOyvxlNpwBNvaduNnkym+tF3W/MaSDYArOa9jyh
-         Se6oh6NYqq7NA78fMInBnm1LP8HsbsKvrKymlGiAf9veUzatff1Y0CBIcQlj2Hz7Yo3P
-         8c/lXfVO+wrCTxXQ5Cv3qvuHIYzB1ctjelH6s=
-In-Reply-To: <20100913214132.0438615242D@gemini.denx.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Wolfgang Denk <wd@denx.de>
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Kevin Hilman <khilman@deeprootsystems.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Jeremy Kerr <jeremy.kerr@canonical.com>, Tim Bird <tim.bird@am.sony.com>, Scott Wood <sc>
 
-Dear Wolfgang,
+I'm now getting around to drafting the agenda for the embedded
+microconference.  From looking at the proposals and some of the recent
+mailing list discussions, there are some topics that bubble up to the
+surface for me:
 
-I messed up the buildroot and u-boot version!
-u-boot =3D 2010.06
-and
-buildroot =3D 2010.08
+1) Device model usage - Support for runtime PM has been a hot topic,
+but the way the device model is populated and used on embedded
+platforms also has impact on correct initialization ordering, and how
+to instantiate 'system' devices composed of multiple discrete devices
+across the system.  ie. connecting a codec and a DAI in ASoC.
 
-Sorry all, my fault.
+2) Device Tree, HWMOD, static pdata, SFI, and other methods for
+teaching the kernel about the machine.
 
-Best regards,
+3) Common infrastructure beyond the kernel.  Android has fastboot and
+other tools.  Many folks use u-boot for development, but something
+custom (smaller) for deployment.  Are there any other tools/techniques
+from Android/MeeGo/Linaro/WebOS/etc. that would be useful to a wider
+audience.  Tim Bird has offered to lead this discussion.
 
-Robin Theunis
+4) Asymmetric multiprocessing (AMP) intercommunication.  Cores are
+cheap, hardware is built with lots of them but how do they
+communicate?  This is an issues for DSPs and for embedded
+virtualization.  Syslink has been proposed.  Freescale PowerPC has
+multicore chips that can be carved up for AMP.  Patches have been
+circulated to repurpose virtio for interprocessor communication.
 
-2010/9/13 Wolfgang Denk <wd@denx.de>:
-> Dear Robin Theunis,
->
-> In message <AANLkTi=3DtWwaFHB0DY=3Dj0UaqbYdYJpGJpmWdGC4aMufSw@mail.gm=
-ail.com> you wrote:
->>
->> The U-boot version is 2010.08. I have build the whole system on a
->
-> There is no such version of U-Boot.
->
-> Best regards,
->
-> Wolfgang Denk
->
-> --
-> DENX Software Engineering GmbH, =A0 =A0 MD: Wolfgang Denk & Detlev Zu=
-ndel
-> HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-> Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-> What is tolerance? -- it is the consequence of humanity. We =A0are =A0=
-all
-> formed =A0of frailty and error; let us pardon reciprocally each other=
-'s
-> folly -- that is the first law of nature. =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0- Voltaire
->
+...
+
+1 & 2 are somewhat interrelated as they are both aspects of embedded
+requirements on the device model.  I'm not sure, but I may end up
+merging these two topics to a degree.  My impression is that the same
+problems are being wrestled with in different problem domains.  I'd
+like to schedule 3 or 4 people to give a brief (10-15min) overview of
+how they need devices registered, and how it fits in with the driver
+model, followed by discussion.  Hopefully it will identify areas where
+common solution can/should be implemented.  Or in other words; take
+our own blinders off for a bit and see how other people are solving
+the same problems.  :-)
+
+Here is my draft list:
+
+Kevin: How HWMOD is used to describe interconnections between internal
+SoC devices.
+Mark or Liam: ASoC - How what needs to be done to collect disparate
+devices (codecs, audio controllers, etc) into a single SoC device.
+Jeremy: Populating the device model with device tree external data (why and how)
+(I'm also open to other suggestions)
+
+Mark and Liam, I know you haven't made a proposal to do this, but if
+you'd be willing I think it would be valuable.
+
+...
+
+The AMP IPC topic is interesting to me, but I'd like to get some
+feedback before I commit to it.  I would schedule it the same way that
+the device model discussion is organized; 3-4 overviews 10-15 minutes
+each followed by discussion.  Right now I've got a proposal from the
+TI folks to talk about Syslink.  Freescalers, what say you?  Could I
+convince one of you to talk about AMP IPC on your powerpc multicore
+SoCs?  Multicore on Xilinx FPGAs would also be interesting, but I'm
+not up to date on if anybody is actively working on that.  Are there
+any other AMP IPC mechanisms that should be discussed?
+
+...
+
+Tim, Jeremy and Kevin; I've accepted your micro-conference topics.  As
+the conference gets closer I'll write up a draft of the actual agenda
+and your proposals can be massaged appropriately to reflect exactly
+what issues will be discussed.
+
+Thoughts?
+g.
+
+-- 
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
