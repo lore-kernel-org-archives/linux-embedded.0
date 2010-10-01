@@ -1,293 +1,494 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: [PWM 07/10] PWM API driver for MPC52xx GPT peripheral
-Date: Fri,  1 Oct 2010 10:17:48 -0500
-Message-ID: <1285946271-17728-7-git-send-email-bgat@billgatliff.com>
+Subject: [PWM 10/10] Expunge previous driver for PXA PWM
+Date: Fri,  1 Oct 2010 10:17:51 -0500
+Message-ID: <1285946271-17728-10-git-send-email-bgat@billgatliff.com>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="utf-8"
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org, linux-embedded@vger.kernel.org
 Cc: Bill Gatliff <bgat@billgatliff.com>
 
 Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
 ---
- arch/powerpc/platforms/52xx/mpc52xx_gpt.c |  196 +++++++++++++++++++++=
-+++++++-
- 1 files changed, 194 insertions(+), 2 deletions(-)
+ arch/arm/mach-pxa/Kconfig  |   26 ++--
+ arch/arm/plat-pxa/Makefile |    1 -
+ arch/arm/plat-pxa/pwm.c    |  304 --------------------------------------------
+ drivers/pwm/Kconfig        |    8 +
+ drivers/pwm/Makefile       |    1 +
+ 5 files changed, 22 insertions(+), 318 deletions(-)
+ delete mode 100644 arch/arm/plat-pxa/pwm.c
 
-diff --git a/arch/powerpc/platforms/52xx/mpc52xx_gpt.c b/arch/powerpc/p=
-latforms/52xx/mpc52xx_gpt.c
-index fea833e..76f8c40 100644
---- a/arch/powerpc/platforms/52xx/mpc52xx_gpt.c
-+++ b/arch/powerpc/platforms/52xx/mpc52xx_gpt.c
-@@ -1,6 +1,7 @@
- /*
-  * MPC5200 General Purpose Timer device driver
-  *
-+ * Copyright (c) 2010 Bill Gatliff <bgat@billgatliff.com>
-  * Copyright (c) 2009 Secret Lab Technologies Ltd.
-  * Copyright (c) 2008 Sascha Hauer <s.hauer@pengutronix.de>, Pengutron=
-ix
-  *
-@@ -50,6 +51,12 @@
-  * IO, or it can be an Open Collector (OC) output.  At the moment it i=
-s the
-  * responsibility of either the bootloader or the platform setup code =
-to set
-  * the output mode.  This driver does not change the output mode setti=
-ng.
-+ *
-+ * To use the PWM function, the following property must be added to
-+ * the device tree node for the gpt device:
-+ *     pwm-controller;
-+ * TODO: we could set polarity, initial period and duty cycle, on/off,
-+ * and whatnot inside the dts file...
-  */
-=20
- #include <linux/device.h>
-@@ -66,11 +73,12 @@
- #include <linux/watchdog.h>
- #include <linux/miscdevice.h>
- #include <linux/uaccess.h>
-+#include <linux/pwm/pwm.h>
- #include <asm/div64.h>
- #include <asm/mpc52xx.h>
-=20
- MODULE_DESCRIPTION("Freescale MPC52xx gpt driver");
--MODULE_AUTHOR("Sascha Hauer, Grant Likely, Albrecht Dre=C3=9F");
-+MODULE_AUTHOR("Sascha Hauer, Grant Likely, Albrecht Dre=C3=9F, Bill Ga=
-tliff");
- MODULE_LICENSE("GPL");
-=20
- /**
-@@ -96,6 +104,9 @@ struct mpc52xx_gpt_priv {
- #if defined(CONFIG_GPIOLIB)
- 	struct gpio_chip gc;
- #endif
-+#if defined(CONFIG_GENERIC_PWM)
-+	struct pwm_device pwm;
-+#endif
- };
-=20
- LIST_HEAD(mpc52xx_gpt_list);
-@@ -126,6 +137,10 @@ DEFINE_MUTEX(mpc52xx_gpt_list_mutex);
-=20
- #define MPC52xx_GPT_STATUS_IRQMASK	(0x000f)
-=20
-+#define MPC52xx_GPT_PWM_WIDTH_MASK	(0xffff0000)
-+#define MPC52xx_GPT_PWM_PWMOP		(0x100)
-+#define MPC52xx_GPT_PWM_LOAD		(0x1)
-+
- #define MPC52xx_GPT_CAN_WDT		(1 << 0)
- #define MPC52xx_GPT_IS_WDT		(1 << 1)
-=20
-@@ -275,6 +290,183 @@ mpc52xx_gpt_irq_setup(struct mpc52xx_gpt_priv *gp=
-t, struct device_node *node)
-=20
-=20
- /* -------------------------------------------------------------------=
---
-+ * PWM API hooks
-+ */
-+#if defined(CONFIG_GENERIC_PWM)
-+static inline struct mpc52xx_gpt_priv *pwm_to_mpc52xx_gpt(const struct=
- pwm_channel *p)
-+{
-+	return container_of(p->pwm, struct mpc52xx_gpt_priv, pwm);
-+}
-+
-+static int mpc52xx_gpt_pwm_request(struct pwm_channel *p)
-+{
-+	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
-+
-+	/* TODO: add hooks to prevent conflicts in use */
-+	p->tick_hz =3D gpt->ipb_freq;
-+	return 0;
-+}
-+
-+static void mpc52xx_gpt_pwm_release(struct pwm_channel *p)
-+{
-+	/* TODO: add hooks to prevent conflicts in use */
-+}
-+
-+static int __mpc52xx_gpt_pwm_config_period_ticks(struct pwm_channel *p=
-,
-+					       struct pwm_channel_config *c)
-+{
-+	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
-+	u64 prescale, count;
-+
-+	prescale =3D (c->period_ticks >> 16) + 1;
-+	count =3D c->period_ticks;
-+	do_div(count, prescale);
-+	out_be32(&gpt->regs->count, prescale << 16 | count);
-+
-+	p->period_ticks =3D count * prescale;
-+	dev_dbg(p->pwm->dev, "prescale %4x count %4x period_ticks %8x\n",
-+		(unsigned int)prescale, (unsigned int)count,
-+		(unsigned int)p->period_ticks);
-+
-+	return 0;
-+}
-+
-+static int __mpc52xx_gpt_pwm_config_duty_ticks(struct pwm_channel *p,
-+					       struct pwm_channel_config *c)
-+{
-+	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
-+	unsigned long flags;
-+	u64 width =3D c->duty_ticks;
-+	u32 prescale, count;
-+
-+	spin_lock_irqsave(&gpt->lock, flags);
-+
-+	count =3D in_be32(&gpt->regs->count);
-+	prescale =3D count >> 16;
-+	count &=3D 0xffffUL;
-+
-+	/* TODO: this probably isn't the best place to do a divide... */
-+	do_div(width, prescale);
-+
-+	clrsetbits_be32(&gpt->regs->pwm, MPC52xx_GPT_PWM_WIDTH_MASK,
-+			MPC52xx_GPT_PWM_WIDTH_MASK & (width << 16));
-+	spin_unlock_irqrestore(&gpt->lock, flags);
-+
-+	p->duty_ticks =3D width * prescale;
-+	dev_dbg(p->pwm->dev, "prescale %4x count %4x width %4x duty_ticks %8x=
-\n",
-+		(unsigned int)prescale, (unsigned int)count,
-+		(unsigned int)width, (unsigned int)p->duty_ticks);
-+
-+	return 0;
-+}
-+
-+static int __mpc52xx_gpt_pwm_config_polarity(struct pwm_channel *p,
-+					     struct pwm_channel_config *c)
-+{
-+	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&gpt->lock, flags);
-+	if (c->polarity)
-+		setbits32(&gpt->regs->pwm, MPC52xx_GPT_PWM_PWMOP);
-+	else
-+		clrbits32(&gpt->regs->pwm, MPC52xx_GPT_PWM_PWMOP);
-+	p->active_high =3D c->polarity ? 1 : 0;
-+	spin_unlock_irqrestore(&gpt->lock, flags);
-+	return 0;
-+}
-+
-+static int __mpc52xx_gpt_pwm_start(struct pwm_channel *p)
-+{
-+	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&gpt->lock, flags);
-+	clrsetbits_be32(&gpt->regs->mode, MPC52xx_GPT_MODE_MS_MASK,
-+		     MPC52xx_GPT_MODE_MS_PWM);
-+	spin_unlock_irqrestore(&gpt->lock, flags);
-+	return 0;
-+}
-+
-+static int __mpc52xx_gpt_pwm_stop(struct pwm_channel *p)
-+{
-+	struct mpc52xx_gpt_priv *gpt =3D pwm_to_mpc52xx_gpt(p);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&gpt->lock, flags);
-+	clrbits32(&gpt->regs->mode, MPC52xx_GPT_MODE_MS_MASK);
-+	spin_unlock_irqrestore(&gpt->lock, flags);
-+	return 0;
-+}
-+
-+static int mpc52xx_gpt_pwm_config_nosleep(struct pwm_channel *p,
-+					  struct pwm_channel_config *c)
-+{
-+	int ret =3D -EINVAL;
-+
-+	if (c->config_mask & PWM_CONFIG_PERIOD_TICKS)
-+		if ((ret =3D __mpc52xx_gpt_pwm_config_period_ticks(p, c)))
-+			goto done;
-+
-+	if (c->config_mask & PWM_CONFIG_DUTY_TICKS)
-+		if ((ret =3D __mpc52xx_gpt_pwm_config_duty_ticks(p, c)))
-+			goto done;
-+
-+	if (c->config_mask & PWM_CONFIG_POLARITY)
-+		if ((ret =3D __mpc52xx_gpt_pwm_config_polarity(p, c)))
-+			goto done;
-+
-+	if (c->config_mask & PWM_CONFIG_START)
-+		if ((ret =3D __mpc52xx_gpt_pwm_start(p)))
-+			goto done;
-+
-+	if (c->config_mask & PWM_CONFIG_STOP)
-+		if ((ret =3D __mpc52xx_gpt_pwm_stop(p)))
-+			goto done;
-+
-+done:
-+	return ret;
-+}
-+
-+static int mpc52xx_gpt_pwm_config(struct pwm_channel *p,
-+				  struct pwm_channel_config *c)
-+{
-+	dev_dbg(p->pwm->dev, "config_mask %x\n", c->config_mask);
-+
-+	if (!mpc52xx_gpt_pwm_config_nosleep(p, c))
-+		return 0;
-+
-+	might_sleep();
-+
-+	/* TODO: add other API entry points */
-+
-+	return -EINVAL;
-+}
-+
-+static void
-+mpc52xx_gpt_pwm_setup(struct mpc52xx_gpt_priv *gpt, struct device_node=
- *node)
-+{
-+	if (!of_find_property(node, "pwm-controller", NULL))
-+		return;
-+
-+	gpt->pwm.dev =3D gpt->dev;
-+	gpt->pwm.bus_id =3D dev_name(gpt->dev);
-+	gpt->pwm.nchan =3D 1;
-+	gpt->pwm.owner =3D THIS_MODULE;
-+
-+	gpt->pwm.request =3D mpc52xx_gpt_pwm_request;
-+	gpt->pwm.release =3D mpc52xx_gpt_pwm_release;
-+	gpt->pwm.config_nosleep =3D mpc52xx_gpt_pwm_config_nosleep;
-+	gpt->pwm.config =3D mpc52xx_gpt_pwm_config;
-+
-+	pwm_register(&gpt->pwm);
-+}
-+#else
-+static void
-+mpc52xx_gpt_pwm_setup(struct mpc52xx_gpt_priv *p, struct device_node *=
-np) {}
-+#endif
-+
-+/* -------------------------------------------------------------------=
---
-  * GPIOLIB hooks
-  */
- #if defined(CONFIG_GPIOLIB)
-@@ -739,9 +931,9 @@ static int __devinit mpc52xx_gpt_probe(struct platf=
-orm_device *ofdev,
- 	}
-=20
- 	dev_set_drvdata(&ofdev->dev, gpt);
+diff --git a/arch/arm/mach-pxa/Kconfig b/arch/arm/mach-pxa/Kconfig
+index 7aefb90..74a55fd 100644
+--- a/arch/arm/mach-pxa/Kconfig
++++ b/arch/arm/mach-pxa/Kconfig
+@@ -13,13 +13,13 @@ config ARCH_LUBBOCK
+ config MACH_MAINSTONE
+ 	bool "Intel HCDDBBVA0 Development Platform (aka Mainstone)"
+ 	select PXA27x
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 
+ config MACH_ZYLONITE
+ 	bool
+ 	select PXA3xx
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 
+ config MACH_ZYLONITE300
+@@ -60,7 +60,7 @@ config ARCH_VIPER
+ 	select PXA25x
+ 	select ISA
+ 	select I2C_GPIO
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 	select PXA_HAVE_ISA_IRQS
+ 	select ARCOM_PCMCIA
+@@ -110,7 +110,7 @@ config MACH_CM_X300
+ 	select PXA3xx
+ 	select CPU_PXA300
+ 	select CPU_PXA310
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 
+ config MACH_CAPC7117
+ 	bool "Embedian CAPC-7117 evaluation kit based on the MXM-8x10 CoM"
+@@ -205,7 +205,7 @@ config TRIZEPS_PCMCIA
+ config MACH_LOGICPD_PXA270
+ 	bool "LogicPD PXA270 Card Engine Development Platform"
+ 	select PXA27x
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 
+ config MACH_PCM027
+@@ -216,7 +216,7 @@ config MACH_PCM027
+ 
+ config MACH_PCM990_BASEBOARD
+ 	bool "PHYTEC PCM-990 development board"
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	depends on MACH_PCM027
+ 
+ choice
+@@ -273,7 +273,7 @@ config MACH_H4700
+ 	bool "HP iPAQ hx4700"
+ 	select PXA27x
+ 	select IWMMXT
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 
+ config MACH_H5000
+@@ -288,14 +288,14 @@ config MACH_MAGICIAN
+ 	bool "Enable HTC Magician Support"
+ 	select PXA27x
+ 	select IWMMXT
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 
+ config MACH_MIOA701
+ 	bool "Mitac Mio A701 Support"
+ 	select PXA27x
+ 	select IWMMXT
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select GPIO_SYSFS
+ 	help
+ 	  Say Y here if you intend to run this kernel on a
+@@ -306,7 +306,7 @@ config PXA_EZX
+ 	bool "Motorola EZX Platform"
+ 	select PXA27x
+ 	select IWMMXT
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 
+ config MACH_EZX_A780
+@@ -345,7 +345,7 @@ config MACH_MP900C
+ 
+ config ARCH_PXA_PALM
+ 	bool "PXA based Palm PDAs"
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 
+ config MACH_PALM27X
+ 	bool
+@@ -442,7 +442,7 @@ config MACH_RAUMFELD_RC
+ 	bool "Raumfeld Controller"
+ 	select PXA3xx
+ 	select CPU_PXA300
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 
+ config MACH_RAUMFELD_CONNECTOR
+ 	bool "Raumfeld Connector"
+@@ -605,7 +605,7 @@ config MACH_E800
+ config MACH_ZIPIT2
+ 	bool "Zipit Z2 Handheld"
+ 	select PXA27x
+-	select HAVE_PWM
++	select GENERIC_PWM
+ 	select PXA_HAVE_BOARD_IRQS
+ 
+ endmenu
+diff --git a/arch/arm/plat-pxa/Makefile b/arch/arm/plat-pxa/Makefile
+index 4aacdd1..35ced88 100644
+--- a/arch/arm/plat-pxa/Makefile
++++ b/arch/arm/plat-pxa/Makefile
+@@ -8,5 +8,4 @@ obj-$(CONFIG_GENERIC_GPIO)	+= gpio.o
+ obj-$(CONFIG_PXA3xx)		+= mfp.o
+ obj-$(CONFIG_ARCH_MMP)		+= mfp.o
+ 
+-obj-$(CONFIG_HAVE_PWM)		+= pwm.o
+ obj-$(CONFIG_PXA_SSP)		+= ssp.o
+diff --git a/arch/arm/plat-pxa/pwm.c b/arch/arm/plat-pxa/pwm.c
+deleted file mode 100644
+index ef32686..0000000
+--- a/arch/arm/plat-pxa/pwm.c
++++ /dev/null
+@@ -1,304 +0,0 @@
+-/*
+- * linux/arch/arm/mach-pxa/pwm.c
+- *
+- * simple driver for PWM (Pulse Width Modulator) controller
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+- *
+- * 2008-02-13	initial version
+- * 		eric miao <eric.miao@marvell.com>
+- */
 -
- 	mpc52xx_gpt_gpio_setup(gpt, ofdev->dev.of_node);
- 	mpc52xx_gpt_irq_setup(gpt, ofdev->dev.of_node);
-+	mpc52xx_gpt_pwm_setup(gpt, ofdev->dev.of_node);
-=20
- 	mutex_lock(&mpc52xx_gpt_list_mutex);
- 	list_add(&gpt->list, &mpc52xx_gpt_list);
---=20
+-#include <linux/module.h>
+-#include <linux/kernel.h>
+-#include <linux/platform_device.h>
+-#include <linux/slab.h>
+-#include <linux/err.h>
+-#include <linux/clk.h>
+-#include <linux/io.h>
+-#include <linux/pwm.h>
+-
+-#include <asm/div64.h>
+-
+-#define HAS_SECONDARY_PWM	0x10
+-#define PWM_ID_BASE(d)		((d) & 0xf)
+-
+-static const struct platform_device_id pwm_id_table[] = {
+-	/*   PWM    has_secondary_pwm? */
+-	{ "pxa25x-pwm", 0 },
+-	{ "pxa27x-pwm", 0 | HAS_SECONDARY_PWM },
+-	{ "pxa168-pwm", 1 },
+-	{ "pxa910-pwm", 1 },
+-	{ },
+-};
+-MODULE_DEVICE_TABLE(platform, pwm_id_table);
+-
+-/* PWM registers and bits definitions */
+-#define PWMCR		(0x00)
+-#define PWMDCR		(0x04)
+-#define PWMPCR		(0x08)
+-
+-#define PWMCR_SD	(1 << 6)
+-#define PWMDCR_FD	(1 << 10)
+-
+-struct pwm_device {
+-	struct list_head	node;
+-	struct pwm_device	*secondary;
+-	struct platform_device	*pdev;
+-
+-	const char	*label;
+-	struct clk	*clk;
+-	int		clk_enabled;
+-	void __iomem	*mmio_base;
+-
+-	unsigned int	use_count;
+-	unsigned int	pwm_id;
+-};
+-
+-/*
+- * period_ns = 10^9 * (PRESCALE + 1) * (PV + 1) / PWM_CLK_RATE
+- * duty_ns   = 10^9 * (PRESCALE + 1) * DC / PWM_CLK_RATE
+- */
+-int pwm_config(struct pwm_device *pwm, int duty_ns, int period_ns)
+-{
+-	unsigned long long c;
+-	unsigned long period_cycles, prescale, pv, dc;
+-
+-	if (pwm == NULL || period_ns == 0 || duty_ns > period_ns)
+-		return -EINVAL;
+-
+-	c = clk_get_rate(pwm->clk);
+-	c = c * period_ns;
+-	do_div(c, 1000000000);
+-	period_cycles = c;
+-
+-	if (period_cycles < 1)
+-		period_cycles = 1;
+-	prescale = (period_cycles - 1) / 1024;
+-	pv = period_cycles / (prescale + 1) - 1;
+-
+-	if (prescale > 63)
+-		return -EINVAL;
+-
+-	if (duty_ns == period_ns)
+-		dc = PWMDCR_FD;
+-	else
+-		dc = (pv + 1) * duty_ns / period_ns;
+-
+-	/* NOTE: the clock to PWM has to be enabled first
+-	 * before writing to the registers
+-	 */
+-	clk_enable(pwm->clk);
+-	__raw_writel(prescale, pwm->mmio_base + PWMCR);
+-	__raw_writel(dc, pwm->mmio_base + PWMDCR);
+-	__raw_writel(pv, pwm->mmio_base + PWMPCR);
+-	clk_disable(pwm->clk);
+-
+-	return 0;
+-}
+-EXPORT_SYMBOL(pwm_config);
+-
+-int pwm_enable(struct pwm_device *pwm)
+-{
+-	int rc = 0;
+-
+-	if (!pwm->clk_enabled) {
+-		rc = clk_enable(pwm->clk);
+-		if (!rc)
+-			pwm->clk_enabled = 1;
+-	}
+-	return rc;
+-}
+-EXPORT_SYMBOL(pwm_enable);
+-
+-void pwm_disable(struct pwm_device *pwm)
+-{
+-	if (pwm->clk_enabled) {
+-		clk_disable(pwm->clk);
+-		pwm->clk_enabled = 0;
+-	}
+-}
+-EXPORT_SYMBOL(pwm_disable);
+-
+-static DEFINE_MUTEX(pwm_lock);
+-static LIST_HEAD(pwm_list);
+-
+-struct pwm_device *pwm_request(int pwm_id, const char *label)
+-{
+-	struct pwm_device *pwm;
+-	int found = 0;
+-
+-	mutex_lock(&pwm_lock);
+-
+-	list_for_each_entry(pwm, &pwm_list, node) {
+-		if (pwm->pwm_id == pwm_id) {
+-			found = 1;
+-			break;
+-		}
+-	}
+-
+-	if (found) {
+-		if (pwm->use_count == 0) {
+-			pwm->use_count++;
+-			pwm->label = label;
+-		} else
+-			pwm = ERR_PTR(-EBUSY);
+-	} else
+-		pwm = ERR_PTR(-ENOENT);
+-
+-	mutex_unlock(&pwm_lock);
+-	return pwm;
+-}
+-EXPORT_SYMBOL(pwm_request);
+-
+-void pwm_free(struct pwm_device *pwm)
+-{
+-	mutex_lock(&pwm_lock);
+-
+-	if (pwm->use_count) {
+-		pwm->use_count--;
+-		pwm->label = NULL;
+-	} else
+-		pr_warning("PWM device already freed\n");
+-
+-	mutex_unlock(&pwm_lock);
+-}
+-EXPORT_SYMBOL(pwm_free);
+-
+-static inline void __add_pwm(struct pwm_device *pwm)
+-{
+-	mutex_lock(&pwm_lock);
+-	list_add_tail(&pwm->node, &pwm_list);
+-	mutex_unlock(&pwm_lock);
+-}
+-
+-static int __devinit pwm_probe(struct platform_device *pdev)
+-{
+-	const struct platform_device_id *id = platform_get_device_id(pdev);
+-	struct pwm_device *pwm, *secondary = NULL;
+-	struct resource *r;
+-	int ret = 0;
+-
+-	pwm = kzalloc(sizeof(struct pwm_device), GFP_KERNEL);
+-	if (pwm == NULL) {
+-		dev_err(&pdev->dev, "failed to allocate memory\n");
+-		return -ENOMEM;
+-	}
+-
+-	pwm->clk = clk_get(&pdev->dev, NULL);
+-	if (IS_ERR(pwm->clk)) {
+-		ret = PTR_ERR(pwm->clk);
+-		goto err_free;
+-	}
+-	pwm->clk_enabled = 0;
+-
+-	pwm->use_count = 0;
+-	pwm->pwm_id = PWM_ID_BASE(id->driver_data) + pdev->id;
+-	pwm->pdev = pdev;
+-
+-	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (r == NULL) {
+-		dev_err(&pdev->dev, "no memory resource defined\n");
+-		ret = -ENODEV;
+-		goto err_free_clk;
+-	}
+-
+-	r = request_mem_region(r->start, resource_size(r), pdev->name);
+-	if (r == NULL) {
+-		dev_err(&pdev->dev, "failed to request memory resource\n");
+-		ret = -EBUSY;
+-		goto err_free_clk;
+-	}
+-
+-	pwm->mmio_base = ioremap(r->start, resource_size(r));
+-	if (pwm->mmio_base == NULL) {
+-		dev_err(&pdev->dev, "failed to ioremap() registers\n");
+-		ret = -ENODEV;
+-		goto err_free_mem;
+-	}
+-
+-	if (id->driver_data & HAS_SECONDARY_PWM) {
+-		secondary = kzalloc(sizeof(struct pwm_device), GFP_KERNEL);
+-		if (secondary == NULL) {
+-			ret = -ENOMEM;
+-			goto err_free_mem;
+-		}
+-
+-		*secondary = *pwm;
+-		pwm->secondary = secondary;
+-
+-		/* registers for the second PWM has offset of 0x10 */
+-		secondary->mmio_base = pwm->mmio_base + 0x10;
+-		secondary->pwm_id = pdev->id + 2;
+-	}
+-
+-	__add_pwm(pwm);
+-	if (secondary)
+-		__add_pwm(secondary);
+-
+-	platform_set_drvdata(pdev, pwm);
+-	return 0;
+-
+-err_free_mem:
+-	release_mem_region(r->start, resource_size(r));
+-err_free_clk:
+-	clk_put(pwm->clk);
+-err_free:
+-	kfree(pwm);
+-	return ret;
+-}
+-
+-static int __devexit pwm_remove(struct platform_device *pdev)
+-{
+-	struct pwm_device *pwm;
+-	struct resource *r;
+-
+-	pwm = platform_get_drvdata(pdev);
+-	if (pwm == NULL)
+-		return -ENODEV;
+-
+-	mutex_lock(&pwm_lock);
+-
+-	if (pwm->secondary) {
+-		list_del(&pwm->secondary->node);
+-		kfree(pwm->secondary);
+-	}
+-
+-	list_del(&pwm->node);
+-	mutex_unlock(&pwm_lock);
+-
+-	iounmap(pwm->mmio_base);
+-
+-	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	release_mem_region(r->start, resource_size(r));
+-
+-	clk_put(pwm->clk);
+-	kfree(pwm);
+-	return 0;
+-}
+-
+-static struct platform_driver pwm_driver = {
+-	.driver		= {
+-		.name	= "pxa25x-pwm",
+-		.owner	= THIS_MODULE,
+-	},
+-	.probe		= pwm_probe,
+-	.remove		= __devexit_p(pwm_remove),
+-	.id_table	= pwm_id_table,
+-};
+-
+-static int __init pwm_init(void)
+-{
+-	return platform_driver_register(&pwm_driver);
+-}
+-arch_initcall(pwm_init);
+-
+-static void __exit pwm_exit(void)
+-{
+-	platform_driver_unregister(&pwm_driver);
+-}
+-module_exit(pwm_exit);
+-
+-MODULE_LICENSE("GPL v2");
+diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
+index 0584c25..def003b 100644
+--- a/drivers/pwm/Kconfig
++++ b/drivers/pwm/Kconfig
+@@ -19,6 +19,14 @@ config ATMEL_PWM
+ 	  peripheral channels found on certain Atmel processors.
+ 	  If unsure, say N.
+ 
++config PXA_PWM
++        tristate "PXA2xx PWM support"
++	depends on PXA2xx || PXA3xx
++	help
++	  This option enables device driver support for the PWM
++	  peripheral device found on certain PXA2xx/PXA3xx
++	  microcontrollers.  If unsure, say N.
++
+ config GPIO_PWM
+        tristate "PWM emulation using GPIO"
+        help
+diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
+index 5f29752..03ae2cd 100644
+--- a/drivers/pwm/Makefile
++++ b/drivers/pwm/Makefile
+@@ -3,4 +3,5 @@
+ #
+ obj-$(CONFIG_GENERIC_PWM)	+= pwm.o
+ obj-$(CONFIG_ATMEL_PWM)		+= atmel-pwm.o
++obj-$(CONFIG_PXA_PWM)		+= pxa-pwm.o
+ obj-$(CONFIG_GPIO_PWM)		+= gpio.o
+-- 
 1.7.1
