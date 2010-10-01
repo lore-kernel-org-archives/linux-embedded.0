@@ -1,7 +1,7 @@
 From: Bill Gatliff <bgat@billgatliff.com>
 Subject: [PWM 08/10] Initial support for PXA PWM peripheral; compile-tested only
 Date: Fri,  1 Oct 2010 10:17:49 -0500
-Message-ID: <1285946271-17728-8-git-send-email-bgat@billgatliff.com>
+Message-ID: <1285946271-17728-8-git-send-email-bgat__4144.11089518598$1285947958$gmane$org@billgatliff.com>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
