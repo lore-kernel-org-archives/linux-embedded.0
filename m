@@ -1,7 +1,7 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: [PWM 10/10] Expunge previous driver for PXA PWM
-Date: Fri,  1 Oct 2010 10:17:51 -0500
-Message-ID: <1285946271-17728-10-git-send-email-bgat@billgatliff.com>
+Subject: [PWM 04/10] Implements PWM-based LED control
+Date: Fri,  1 Oct 2010 10:17:45 -0500
+Message-ID: <1285946271-17728-4-git-send-email-bgat@billgatliff.com>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
@@ -15,480 +15,361 @@ Cc: Bill Gatliff <bgat@billgatliff.com>
 
 Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
 ---
- arch/arm/mach-pxa/Kconfig  |   26 ++--
- arch/arm/plat-pxa/Makefile |    1 -
- arch/arm/plat-pxa/pwm.c    |  304 --------------------------------------------
- drivers/pwm/Kconfig        |    8 +
- drivers/pwm/Makefile       |    1 +
- 5 files changed, 22 insertions(+), 318 deletions(-)
- delete mode 100644 arch/arm/plat-pxa/pwm.c
+ drivers/leds/Kconfig        |   19 +++-
+ drivers/leds/leds-pwm.c     |  224 +++++++++++++++++++++++-------------------
+ include/linux/pwm/pwm-led.h |   33 +++++++
+ 3 files changed, 169 insertions(+), 107 deletions(-)
+ create mode 100644 include/linux/pwm/pwm-led.h
 
-diff --git a/arch/arm/mach-pxa/Kconfig b/arch/arm/mach-pxa/Kconfig
-index 7aefb90..74a55fd 100644
---- a/arch/arm/mach-pxa/Kconfig
-+++ b/arch/arm/mach-pxa/Kconfig
-@@ -13,13 +13,13 @@ config ARCH_LUBBOCK
- config MACH_MAINSTONE
- 	bool "Intel HCDDBBVA0 Development Platform (aka Mainstone)"
- 	select PXA27x
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
+diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
+index e411262..3af2cde 100644
+--- a/drivers/leds/Kconfig
++++ b/drivers/leds/Kconfig
+@@ -26,12 +26,19 @@ config LEDS_88PM860X
+ 	  This option enables support for on-chip LED drivers found on Marvell
+ 	  Semiconductor 88PM8606 PMIC.
  
- config MACH_ZYLONITE
- 	bool
- 	select PXA3xx
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
+-config LEDS_ATMEL_PWM
+-	tristate "LED Support using Atmel PWM outputs"
+-	depends on ATMEL_PWM
+-	help
+-	  This option enables support for LEDs driven using outputs
+-	  of the dedicated PWM controller found on newer Atmel SOCs.
++config LEDS_PWM
++       tristate "Support for LEDs connected to Generic PWM channels"
++       depends on LEDS_CLASS && GENERIC_PWM
++       help
++         Enables support for LEDs connected to PWM devices that
++	 conform to the Generic PWM API.  This API allows drivers
++	 to adjust the brightness of the LED by varying the duty
++	 cycle of the signal at the PWM channel output, using PWM API
++	 commands, rather than merely turning them on and off.
++
++	 If your platform has devices with drivers that implement
++	 the Generic PWM API, and those devices have outputs that
++	 are connected to LEDs, then you probably want to say 'Y' here.
  
- config MACH_ZYLONITE300
-@@ -60,7 +60,7 @@ config ARCH_VIPER
- 	select PXA25x
- 	select ISA
- 	select I2C_GPIO
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
- 	select PXA_HAVE_ISA_IRQS
- 	select ARCOM_PCMCIA
-@@ -110,7 +110,7 @@ config MACH_CM_X300
- 	select PXA3xx
- 	select CPU_PXA300
- 	select CPU_PXA310
--	select HAVE_PWM
-+	select GENERIC_PWM
- 
- config MACH_CAPC7117
- 	bool "Embedian CAPC-7117 evaluation kit based on the MXM-8x10 CoM"
-@@ -205,7 +205,7 @@ config TRIZEPS_PCMCIA
- config MACH_LOGICPD_PXA270
- 	bool "LogicPD PXA270 Card Engine Development Platform"
- 	select PXA27x
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
- 
- config MACH_PCM027
-@@ -216,7 +216,7 @@ config MACH_PCM027
- 
- config MACH_PCM990_BASEBOARD
- 	bool "PHYTEC PCM-990 development board"
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	depends on MACH_PCM027
- 
- choice
-@@ -273,7 +273,7 @@ config MACH_H4700
- 	bool "HP iPAQ hx4700"
- 	select PXA27x
- 	select IWMMXT
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
- 
- config MACH_H5000
-@@ -288,14 +288,14 @@ config MACH_MAGICIAN
- 	bool "Enable HTC Magician Support"
- 	select PXA27x
- 	select IWMMXT
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
- 
- config MACH_MIOA701
- 	bool "Mitac Mio A701 Support"
- 	select PXA27x
- 	select IWMMXT
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select GPIO_SYSFS
- 	help
- 	  Say Y here if you intend to run this kernel on a
-@@ -306,7 +306,7 @@ config PXA_EZX
- 	bool "Motorola EZX Platform"
- 	select PXA27x
- 	select IWMMXT
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
- 
- config MACH_EZX_A780
-@@ -345,7 +345,7 @@ config MACH_MP900C
- 
- config ARCH_PXA_PALM
- 	bool "PXA based Palm PDAs"
--	select HAVE_PWM
-+	select GENERIC_PWM
- 
- config MACH_PALM27X
- 	bool
-@@ -442,7 +442,7 @@ config MACH_RAUMFELD_RC
- 	bool "Raumfeld Controller"
- 	select PXA3xx
- 	select CPU_PXA300
--	select HAVE_PWM
-+	select GENERIC_PWM
- 
- config MACH_RAUMFELD_CONNECTOR
- 	bool "Raumfeld Connector"
-@@ -605,7 +605,7 @@ config MACH_E800
- config MACH_ZIPIT2
- 	bool "Zipit Z2 Handheld"
- 	select PXA27x
--	select HAVE_PWM
-+	select GENERIC_PWM
- 	select PXA_HAVE_BOARD_IRQS
- 
- endmenu
-diff --git a/arch/arm/plat-pxa/Makefile b/arch/arm/plat-pxa/Makefile
-index 4aacdd1..35ced88 100644
---- a/arch/arm/plat-pxa/Makefile
-+++ b/arch/arm/plat-pxa/Makefile
-@@ -8,5 +8,4 @@ obj-$(CONFIG_GENERIC_GPIO)	+= gpio.o
- obj-$(CONFIG_PXA3xx)		+= mfp.o
- obj-$(CONFIG_ARCH_MMP)		+= mfp.o
- 
--obj-$(CONFIG_HAVE_PWM)		+= pwm.o
- obj-$(CONFIG_PXA_SSP)		+= ssp.o
-diff --git a/arch/arm/plat-pxa/pwm.c b/arch/arm/plat-pxa/pwm.c
-deleted file mode 100644
-index ef32686..0000000
---- a/arch/arm/plat-pxa/pwm.c
-+++ /dev/null
-@@ -1,304 +0,0 @@
--/*
-- * linux/arch/arm/mach-pxa/pwm.c
-- *
-- * simple driver for PWM (Pulse Width Modulator) controller
+ config LEDS_LOCOMO
+ 	tristate "LED Support for Locomo device"
+diff --git a/drivers/leds/leds-pwm.c b/drivers/leds/leds-pwm.c
+index da3fa8d..ab064ac 100644
+--- a/drivers/leds/leds-pwm.c
++++ b/drivers/leds/leds-pwm.c
+@@ -1,153 +1,175 @@
+ /*
+- * linux/drivers/leds-pwm.c
++ * drivers/leds/leds-pwm.c
+  *
+- * simple PWM based LED control
++ * Copyright (C) 2010 Bill Gatliff <bgat@billgatliff.com>
++ * Copyright (C) 2009 Loutao Fu, Pengutronix <l.fu@pengutronix.de>
+  *
+- * Copyright 2009 Luotao Fu @ Pengutronix (l.fu@pengutronix.de)
++ * Based on leds-gpio.c by Raphael Assenat <raph@8d.com>
+  *
+- * based on leds-gpio.c by Raphael Assenat <raph@8d.com>
 - *
 - * This program is free software; you can redistribute it and/or modify
 - * it under the terms of the GNU General Public License version 2 as
-- * published by the Free Software Foundation.
-- *
-- * 2008-02-13	initial version
-- * 		eric miao <eric.miao@marvell.com>
-- */
++ * This program is Free Software.  You may redistribute and/or modify
++ * it under the terms of the GNU General Public License version 2, as
+  * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
++ * USA
+  */
 -
 -#include <linux/module.h>
--#include <linux/kernel.h>
--#include <linux/platform_device.h>
--#include <linux/slab.h>
+ #include <linux/kernel.h>
+-#include <linux/init.h>
+ #include <linux/platform_device.h>
+-#include <linux/fb.h>
+-#include <linux/leds.h>
 -#include <linux/err.h>
--#include <linux/clk.h>
--#include <linux/io.h>
 -#include <linux/pwm.h>
+-#include <linux/leds_pwm.h>
+ #include <linux/slab.h>
 -
--#include <asm/div64.h>
--
--#define HAS_SECONDARY_PWM	0x10
--#define PWM_ID_BASE(d)		((d) & 0xf)
--
--static const struct platform_device_id pwm_id_table[] = {
--	/*   PWM    has_secondary_pwm? */
--	{ "pxa25x-pwm", 0 },
--	{ "pxa27x-pwm", 0 | HAS_SECONDARY_PWM },
--	{ "pxa168-pwm", 1 },
--	{ "pxa910-pwm", 1 },
--	{ },
--};
--MODULE_DEVICE_TABLE(platform, pwm_id_table);
--
--/* PWM registers and bits definitions */
--#define PWMCR		(0x00)
--#define PWMDCR		(0x04)
--#define PWMPCR		(0x08)
--
--#define PWMCR_SD	(1 << 6)
--#define PWMDCR_FD	(1 << 10)
--
--struct pwm_device {
--	struct list_head	node;
--	struct pwm_device	*secondary;
--	struct platform_device	*pdev;
--
--	const char	*label;
--	struct clk	*clk;
--	int		clk_enabled;
--	void __iomem	*mmio_base;
--
--	unsigned int	use_count;
--	unsigned int	pwm_id;
--};
--
--/*
-- * period_ns = 10^9 * (PRESCALE + 1) * (PV + 1) / PWM_CLK_RATE
-- * duty_ns   = 10^9 * (PRESCALE + 1) * DC / PWM_CLK_RATE
-- */
--int pwm_config(struct pwm_device *pwm, int duty_ns, int period_ns)
--{
--	unsigned long long c;
--	unsigned long period_cycles, prescale, pv, dc;
--
--	if (pwm == NULL || period_ns == 0 || duty_ns > period_ns)
--		return -EINVAL;
--
--	c = clk_get_rate(pwm->clk);
--	c = c * period_ns;
--	do_div(c, 1000000000);
--	period_cycles = c;
--
--	if (period_cycles < 1)
--		period_cycles = 1;
--	prescale = (period_cycles - 1) / 1024;
--	pv = period_cycles / (prescale + 1) - 1;
--
--	if (prescale > 63)
--		return -EINVAL;
--
--	if (duty_ns == period_ns)
--		dc = PWMDCR_FD;
--	else
--		dc = (pv + 1) * duty_ns / period_ns;
--
--	/* NOTE: the clock to PWM has to be enabled first
--	 * before writing to the registers
--	 */
--	clk_enable(pwm->clk);
--	__raw_writel(prescale, pwm->mmio_base + PWMCR);
--	__raw_writel(dc, pwm->mmio_base + PWMDCR);
--	__raw_writel(pv, pwm->mmio_base + PWMPCR);
--	clk_disable(pwm->clk);
--
--	return 0;
--}
--EXPORT_SYMBOL(pwm_config);
--
--int pwm_enable(struct pwm_device *pwm)
--{
--	int rc = 0;
--
--	if (!pwm->clk_enabled) {
--		rc = clk_enable(pwm->clk);
--		if (!rc)
--			pwm->clk_enabled = 1;
--	}
--	return rc;
--}
--EXPORT_SYMBOL(pwm_enable);
--
--void pwm_disable(struct pwm_device *pwm)
--{
--	if (pwm->clk_enabled) {
--		clk_disable(pwm->clk);
--		pwm->clk_enabled = 0;
--	}
--}
--EXPORT_SYMBOL(pwm_disable);
--
--static DEFINE_MUTEX(pwm_lock);
--static LIST_HEAD(pwm_list);
--
--struct pwm_device *pwm_request(int pwm_id, const char *label)
--{
--	struct pwm_device *pwm;
--	int found = 0;
--
--	mutex_lock(&pwm_lock);
--
--	list_for_each_entry(pwm, &pwm_list, node) {
--		if (pwm->pwm_id == pwm_id) {
--			found = 1;
--			break;
--		}
--	}
--
--	if (found) {
--		if (pwm->use_count == 0) {
--			pwm->use_count++;
--			pwm->label = label;
--		} else
--			pwm = ERR_PTR(-EBUSY);
--	} else
--		pwm = ERR_PTR(-ENOENT);
--
--	mutex_unlock(&pwm_lock);
--	return pwm;
--}
--EXPORT_SYMBOL(pwm_request);
--
--void pwm_free(struct pwm_device *pwm)
--{
--	mutex_lock(&pwm_lock);
--
--	if (pwm->use_count) {
--		pwm->use_count--;
--		pwm->label = NULL;
--	} else
--		pr_warning("PWM device already freed\n");
--
--	mutex_unlock(&pwm_lock);
--}
--EXPORT_SYMBOL(pwm_free);
--
--static inline void __add_pwm(struct pwm_device *pwm)
--{
--	mutex_lock(&pwm_lock);
--	list_add_tail(&pwm->node, &pwm_list);
--	mutex_unlock(&pwm_lock);
--}
--
--static int __devinit pwm_probe(struct platform_device *pdev)
--{
--	const struct platform_device_id *id = platform_get_device_id(pdev);
--	struct pwm_device *pwm, *secondary = NULL;
--	struct resource *r;
--	int ret = 0;
--
--	pwm = kzalloc(sizeof(struct pwm_device), GFP_KERNEL);
--	if (pwm == NULL) {
--		dev_err(&pdev->dev, "failed to allocate memory\n");
--		return -ENOMEM;
--	}
--
--	pwm->clk = clk_get(&pdev->dev, NULL);
--	if (IS_ERR(pwm->clk)) {
--		ret = PTR_ERR(pwm->clk);
--		goto err_free;
--	}
--	pwm->clk_enabled = 0;
--
--	pwm->use_count = 0;
--	pwm->pwm_id = PWM_ID_BASE(id->driver_data) + pdev->id;
--	pwm->pdev = pdev;
--
--	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (r == NULL) {
--		dev_err(&pdev->dev, "no memory resource defined\n");
--		ret = -ENODEV;
--		goto err_free_clk;
--	}
--
--	r = request_mem_region(r->start, resource_size(r), pdev->name);
--	if (r == NULL) {
--		dev_err(&pdev->dev, "failed to request memory resource\n");
--		ret = -EBUSY;
--		goto err_free_clk;
--	}
--
--	pwm->mmio_base = ioremap(r->start, resource_size(r));
--	if (pwm->mmio_base == NULL) {
--		dev_err(&pdev->dev, "failed to ioremap() registers\n");
--		ret = -ENODEV;
--		goto err_free_mem;
--	}
--
--	if (id->driver_data & HAS_SECONDARY_PWM) {
--		secondary = kzalloc(sizeof(struct pwm_device), GFP_KERNEL);
--		if (secondary == NULL) {
--			ret = -ENOMEM;
--			goto err_free_mem;
--		}
--
--		*secondary = *pwm;
--		pwm->secondary = secondary;
--
--		/* registers for the second PWM has offset of 0x10 */
--		secondary->mmio_base = pwm->mmio_base + 0x10;
--		secondary->pwm_id = pdev->id + 2;
--	}
--
--	__add_pwm(pwm);
--	if (secondary)
--		__add_pwm(secondary);
--
--	platform_set_drvdata(pdev, pwm);
--	return 0;
--
--err_free_mem:
--	release_mem_region(r->start, resource_size(r));
--err_free_clk:
--	clk_put(pwm->clk);
--err_free:
--	kfree(pwm);
--	return ret;
--}
--
--static int __devexit pwm_remove(struct platform_device *pdev)
--{
--	struct pwm_device *pwm;
--	struct resource *r;
--
--	pwm = platform_get_drvdata(pdev);
--	if (pwm == NULL)
--		return -ENODEV;
--
--	mutex_lock(&pwm_lock);
--
--	if (pwm->secondary) {
--		list_del(&pwm->secondary->node);
--		kfree(pwm->secondary);
--	}
--
--	list_del(&pwm->node);
--	mutex_unlock(&pwm_lock);
--
--	iounmap(pwm->mmio_base);
--
--	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	release_mem_region(r->start, resource_size(r));
--
--	clk_put(pwm->clk);
--	kfree(pwm);
--	return 0;
--}
--
--static struct platform_driver pwm_driver = {
--	.driver		= {
--		.name	= "pxa25x-pwm",
--		.owner	= THIS_MODULE,
--	},
--	.probe		= pwm_probe,
--	.remove		= __devexit_p(pwm_remove),
--	.id_table	= pwm_id_table,
--};
--
--static int __init pwm_init(void)
--{
--	return platform_driver_register(&pwm_driver);
--}
--arch_initcall(pwm_init);
--
--static void __exit pwm_exit(void)
--{
--	platform_driver_unregister(&pwm_driver);
--}
--module_exit(pwm_exit);
--
--MODULE_LICENSE("GPL v2");
-diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index 0584c25..def003b 100644
---- a/drivers/pwm/Kconfig
-+++ b/drivers/pwm/Kconfig
-@@ -19,6 +19,14 @@ config ATMEL_PWM
- 	  peripheral channels found on certain Atmel processors.
- 	  If unsure, say N.
- 
-+config PXA_PWM
-+        tristate "PXA2xx PWM support"
-+	depends on PXA2xx || PXA3xx
-+	help
-+	  This option enables device driver support for the PWM
-+	  peripheral device found on certain PXA2xx/PXA3xx
-+	  microcontrollers.  If unsure, say N.
+-struct led_pwm_data {
+-	struct led_classdev	cdev;
+-	struct pwm_device	*pwm;
+-	unsigned int 		active_low;
+-	unsigned int		period;
++#include <linux/leds.h>
++#include <linux/io.h>
++#include <linux/pwm/pwm.h>
++#include <linux/pwm/pwm-led.h>
 +
- config GPIO_PWM
-        tristate "PWM emulation using GPIO"
-        help
-diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index 5f29752..03ae2cd 100644
---- a/drivers/pwm/Makefile
-+++ b/drivers/pwm/Makefile
-@@ -3,4 +3,5 @@
- #
- obj-$(CONFIG_GENERIC_PWM)	+= pwm.o
- obj-$(CONFIG_ATMEL_PWM)		+= atmel-pwm.o
-+obj-$(CONFIG_PXA_PWM)		+= pxa-pwm.o
- obj-$(CONFIG_GPIO_PWM)		+= gpio.o
++struct led_pwm {
++	struct led_classdev	led;
++	struct pwm_channel	*pwm;
++	int percent;
+ };
+ 
+-static void led_pwm_set(struct led_classdev *led_cdev,
+-	enum led_brightness brightness)
++static inline struct led_pwm *to_led_pwm(const struct led_classdev *c)
++{
++	return container_of(c, struct led_pwm, led);
++}
++
++static void
++led_pwm_brightness_set(struct led_classdev *c,
++		       enum led_brightness b)
++{
++	struct led_pwm *led = to_led_pwm(c);
++	int percent;
++
++	percent = (b * 100) / (LED_FULL - LED_OFF);
++	led->percent = percent;
++	pwm_set_duty_percent(led->pwm, percent);
++}
++
++static enum led_brightness
++led_pwm_brightness_get(struct led_classdev *c)
+ {
+-	struct led_pwm_data *led_dat =
+-		container_of(led_cdev, struct led_pwm_data, cdev);
+-	unsigned int max = led_dat->cdev.max_brightness;
+-	unsigned int period =  led_dat->period;
+-
+-	if (brightness == 0) {
+-		pwm_config(led_dat->pwm, 0, period);
+-		pwm_disable(led_dat->pwm);
+-	} else {
+-		pwm_config(led_dat->pwm, brightness * period / max, period);
+-		pwm_enable(led_dat->pwm);
++	struct led_pwm *led = to_led_pwm(c);
++	return led->percent;
++}
++
++static int
++led_pwm_blink_set(struct led_classdev *c,
++		  unsigned long *on_ms,
++		  unsigned long *off_ms)
++{
++	struct led_pwm *led = to_led_pwm(c);
++	struct pwm_channel_config cfg;
++
++	if (*on_ms == 0 && *off_ms == 0) {
++		*on_ms = 1000UL;
++		*off_ms = 1000UL;
+ 	}
++
++	cfg.config_mask = PWM_CONFIG_DUTY_NS
++		| PWM_CONFIG_PERIOD_NS;
++
++	cfg.duty_ns = *on_ms * 1000000UL;
++	cfg.period_ns = (*on_ms + *off_ms) * 1000000UL;
++
++	return pwm_config(led->pwm, &cfg);
+ }
+ 
+-static int led_pwm_probe(struct platform_device *pdev)
++static int __devinit
++led_pwm_probe(struct platform_device *pdev)
+ {
+-	struct led_pwm_platform_data *pdata = pdev->dev.platform_data;
+-	struct led_pwm *cur_led;
+-	struct led_pwm_data *leds_data, *led_dat;
+-	int i, ret = 0;
++	struct pwm_led_platform_data *pdata = pdev->dev.platform_data;
++	struct led_pwm *led;
++	int ret;
+ 
+-	if (!pdata)
+-		return -EBUSY;
++	if (!pdata || !pdata->led_info)
++		return -EINVAL;
+ 
+-	leds_data = kzalloc(sizeof(struct led_pwm_data) * pdata->num_leds,
+-				GFP_KERNEL);
+-	if (!leds_data)
++	led = kzalloc(sizeof(*led), GFP_KERNEL);
++	if (!led)
+ 		return -ENOMEM;
+ 
+-	for (i = 0; i < pdata->num_leds; i++) {
+-		cur_led = &pdata->leds[i];
+-		led_dat = &leds_data[i];
+-
+-		led_dat->pwm = pwm_request(cur_led->pwm_id,
+-				cur_led->name);
+-		if (IS_ERR(led_dat->pwm)) {
+-			dev_err(&pdev->dev, "unable to request PWM %d\n",
+-					cur_led->pwm_id);
+-			goto err;
+-		}
+-
+-		led_dat->cdev.name = cur_led->name;
+-		led_dat->cdev.default_trigger = cur_led->default_trigger;
+-		led_dat->active_low = cur_led->active_low;
+-		led_dat->period = cur_led->pwm_period_ns;
+-		led_dat->cdev.brightness_set = led_pwm_set;
+-		led_dat->cdev.brightness = LED_OFF;
+-		led_dat->cdev.max_brightness = cur_led->max_brightness;
+-		led_dat->cdev.flags |= LED_CORE_SUSPENDRESUME;
+-
+-		ret = led_classdev_register(&pdev->dev, &led_dat->cdev);
+-		if (ret < 0) {
+-			pwm_free(led_dat->pwm);
+-			goto err;
+-		}
++	led->pwm = pwm_request(pdata->bus_id, pdata->chan,
++			       pdata->led_info->name);
++	if (!led->pwm) {
++		ret = -EINVAL;
++		goto err_pwm_request;
+ 	}
+ 
+-	platform_set_drvdata(pdev, leds_data);
++	platform_set_drvdata(pdev, led);
+ 
+-	return 0;
++	led->led.name = pdata->led_info->name;
++	led->led.default_trigger = pdata->led_info->default_trigger;
++	led->led.brightness_set = led_pwm_brightness_set;
++	led->led.brightness_get = led_pwm_brightness_get;
++	led->led.blink_set = led_pwm_blink_set;
++	led->led.brightness = LED_OFF;
+ 
+-err:
+-	if (i > 0) {
+-		for (i = i - 1; i >= 0; i--) {
+-			led_classdev_unregister(&leds_data[i].cdev);
+-			pwm_free(leds_data[i].pwm);
+-		}
+-	}
++	ret = pwm_config(led->pwm, pdata->config);
++	if (ret)
++		goto err_pwm_config;
++	pwm_start(led->pwm);
++
++	ret = led_classdev_register(&pdev->dev, &led->led);
++	if (ret < 0)
++		goto err_classdev_register;
+ 
+-	kfree(leds_data);
++	return 0;
++
++err_classdev_register:
++	pwm_stop(led->pwm);
++err_pwm_config:
++	pwm_release(led->pwm);
++err_pwm_request:
++	kfree(led);
+ 
+ 	return ret;
+ }
+ 
+-static int __devexit led_pwm_remove(struct platform_device *pdev)
++static int __devexit
++led_pwm_remove(struct platform_device *pdev)
+ {
+-	int i;
+-	struct led_pwm_platform_data *pdata = pdev->dev.platform_data;
+-	struct led_pwm_data *leds_data;
++	struct led_pwm *led = platform_get_drvdata(pdev);
+ 
+-	leds_data = platform_get_drvdata(pdev);
++	led_classdev_unregister(&led->led);
+ 
+-	for (i = 0; i < pdata->num_leds; i++) {
+-		led_classdev_unregister(&leds_data[i].cdev);
+-		pwm_free(leds_data[i].pwm);
++	if (led->pwm) {
++		pwm_stop(led->pwm);
++		pwm_release(led->pwm);
+ 	}
+ 
+-	kfree(leds_data);
++	kfree(led);
+ 
+ 	return 0;
+ }
+ 
+ static struct platform_driver led_pwm_driver = {
+-	.probe		= led_pwm_probe,
+-	.remove		= __devexit_p(led_pwm_remove),
+-	.driver		= {
+-		.name	= "leds_pwm",
+-		.owner	= THIS_MODULE,
++	.driver = {
++		.name =		"leds-pwm",
++		.owner =	THIS_MODULE,
+ 	},
++	.probe = led_pwm_probe,
++	.remove = led_pwm_remove,
+ };
+ 
+-static int __init led_pwm_init(void)
++static int __init led_pwm_modinit(void)
+ {
+ 	return platform_driver_register(&led_pwm_driver);
+ }
++module_init(led_pwm_modinit);
+ 
+-static void __exit led_pwm_exit(void)
++static void __exit led_pwm_modexit(void)
+ {
+ 	platform_driver_unregister(&led_pwm_driver);
+ }
++module_exit(led_pwm_modexit);
+ 
+-module_init(led_pwm_init);
+-module_exit(led_pwm_exit);
+-
+-MODULE_AUTHOR("Luotao Fu <l.fu@pengutronix.de>");
+-MODULE_DESCRIPTION("PWM LED driver for PXA");
++MODULE_AUTHOR("Bill Gatliff <bgat@billgatliff.com>");
++MODULE_DESCRIPTION("Driver for LEDs with PWM-controlled brightness");
+ MODULE_LICENSE("GPL");
+ MODULE_ALIAS("platform:leds-pwm");
+diff --git a/include/linux/pwm/pwm-led.h b/include/linux/pwm/pwm-led.h
+new file mode 100644
+index 0000000..8ffeecc
+--- /dev/null
++++ b/include/linux/pwm/pwm-led.h
+@@ -0,0 +1,33 @@
++/*
++ * include/linux/pwm-led.h
++ *
++ * Copyright (C) 2008 Bill Gatliff <bgat@billgatliff.com>
++ *
++ * This program is free software; you may redistribute and/or modify
++ * it under the terms of the GNU General Public License version 2, as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
++ * USA
++ */
++#ifndef __LINUX_PWM_LED_H
++#define __LINUX_PWM_LED_H
++
++struct led_info;
++struct pwm_channel_config;
++
++struct pwm_led_platform_data {
++	const char *bus_id;
++	int chan;
++	struct pwm_channel_config *config;
++	struct led_info *led_info;
++};
++
++#endif /* __LINUX_PWM_LED_H */
 -- 
 1.7.1
