@@ -1,56 +1,57 @@
-From: sugumar <sugumar.embedded@gmail.com>
-Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common user and kernel interface
-Date: Tue, 5 Oct 2010 10:35:20 +0000 (UTC)
-Message-ID: <loom.20101005T121312-661@post.gmane.org>
-References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: [PATCH] pramfs: Persistent and protected RAM filesystem
+Date: Tue, 5 Oct 2010 13:39:14 +0200
+Message-ID: <AANLkTik34ZKasZMMpx4wD71k+RPccGLvAi1Cwe5UwZpj@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:received:date:message-id
+         :subject:from:to:cc:content-type;
+        bh=UjkEXiGMEgbr5TThiVG1REMlvJZxSgaost6iYEVEcJ4=;
+        b=n9VjjStn3OxHvM18epDlY3PJfpRENzKq6iePauaCQrS5T4QuJY/Xu1TIRH1lyaxwNP
+         TGRs1nFx2bp2cIyevpVE/M1aasKEui3fY1U6hxrtl1tVOR0x8RfLWU7P0hCJviqbUIcw
+         wNO8oIwWjBNUvmkE4ay+N8qfYT/XBz8Os9mYg=
+Sender: owner-linux-mm@kvack.org
+List-Id: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: linux-embedded@vger.kernel.org, linux-fsdevel@vger.kernel.org, Tim Bird <tim.bird@am.sony.com>, linux-mm@kvack.org
 
-Bill Gatliff <bgat <at> billgatliff.com> writes:
+Hi all,
 
-> 
-> Signed-off-by: Bill Gatliff <bgat <at> billgatliff.com>
-> ---
->  Documentation/pwm.txt   |  260 +++++++++++++++++++
->  drivers/pwm/pwm.c       |  635 +++++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/pwm.h     |   31 ---
->  include/linux/pwm/pwm.h |  128 ++++++++++
->  4 files changed, 1023 insertions(+), 31 deletions(-)
->  create mode 100644 Documentation/pwm.txt
->  create mode 100644 drivers/pwm/pwm.c
->  delete mode 100644 include/linux/pwm.h
->  create mode 100644 include/linux/pwm/pwm.h
-> 
-> diff --git a/Documentation/pwm.txt b/Documentation/pwm.txt
-> new file mode 100644
-> index 0000000..34b1e5a
-> --- /dev/null
-> +++ b/Documentation/pwm.txt
-> @@ -0,0 +1,260 @@
-> +                       
+after a lot of improvement, test, bug fix and new features, it's the
+moment for third round with the kernel community to submit PRAMFS for
+mainline. First of all, I have to say thanks to Tim Bird and CELF to
+actively support the project.
 
-Hi bill,
-   I have been working on writing generic PWM driver that provides common
-interface to all the PWM devices. I hadn't come across this thread until kevin
-pointed out. It looks like a very good implementation and i would like to make
-my eHRPWM driver to fit into this framework. eHRPWM (enhanced high resolution
-pwm) module has other features such as Dead Band, PWM chopper and Trip Zone and
-i am not sure how to incorporate these in the generic framework. I really need
-you help here.
+Since the last review (June 2009) a lot of things are changed:
 
-    I am sure the generic framework should support all the features provided by
-the PWM devices. For eg, eHRPWM has Trip-Zone feature where an asynchronous
-input (incase of short circuit .) can be configured to generate an interrupt.
-I am interested in finding a way to handle this. Kindly give your comments.
+- removed any reference of BKL
+- fixed the endianess for the fs layout
+- added support for extended attributes, ACLs and security labels
+- moved out any pte manipulations from fs and inserted them in mm
+- implemented the new truncate convention
+- fixed problems with 64bit archs
 
+...and much more. Complete "story" in the ChangeLog inserted in the
+documentation file.
+
+Since the patch is long, you can download and review the patch from
+the project site: http:\\pramfs.sourceforge.net. The patch version is
+1.2.1 for kernel 2.6.36.
+In addition, in the web site tech page, you can find a lot of
+information about implementation, technical details, benchemarking and
+so on.
 
 Regards,
-N.Sugumar
 
+Marco
 
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
 
