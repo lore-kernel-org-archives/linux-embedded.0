@@ -1,35 +1,33 @@
 From: Bill Gatliff <bgat@billgatliff.com>
 Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common user
  and kernel interface
-Date: Wed, 6 Oct 2010 13:45:43 -0500
-Message-ID: <AANLkTikLyPK__snmXUKT9zfqyL7YAZ8e3Apa6s4-2L7w@mail.gmail.com>
+Date: Wed, 6 Oct 2010 13:48:01 -0500
+Message-ID: <AANLkTim2tbWNviJottUg3jAD2ybd5oUPJu3vdPvNa_fX@mail.gmail.com>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
-	<87eic97eum.fsf@deeprootsystems.com>
+	<AANLkTi=6GN=cwA5vuv4fNDt0=xPT3+g2vntzZdN_gDrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <87eic97eum.fsf@deeprootsystems.com>
+In-Reply-To: <AANLkTi=6GN=cwA5vuv4fNDt0=xPT3+g2vntzZdN_gDrw@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Kevin Hilman <khilman@deeprootsystems.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Hector Oron <hector.oron@gmail.com>
 Cc: linux-embedded@vger.kernel.org
 
-On Fri, Oct 1, 2010 at 5:00 PM, Kevin Hilman
-<khilman@deeprootsystems.com> wrote:
-> Bill Gatliff <bgat@billgatliff.com> writes:
->
->> Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
->
-> Hi Bill,
->
-> Any plans to post this to a broader audience? =A0maybe linux-arm-kern=
-el?
+Hector:
 
-I was thinking that the appropriate audience was all right here.  :)
+On Sat, Oct 2, 2010 at 7:25 AM, Hector Oron <hector.oron@gmail.com> wrote:
+> Hello Bill,
+>
+> Thanks for trying (again) to get this in mainline.
+> Are you planning to request a slot in the GIT at kernel.org to hold
+> and maintain this nice framework?
+
+I did make such a request once, and it went nowhere.  :(
 
 
 b.g.
---=20
+-- 
 Bill Gatliff
 bgat@billgatliff.com
