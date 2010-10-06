@@ -1,50 +1,39 @@
-From: "Grosen, Mark" <mgrosen@ti.com>
-Subject: RE: [PWM 01/10] API to consolidate PWM devices behind a common user
- and kernel interface
-Date: Wed, 6 Oct 2010 14:02:34 -0500
-Message-ID: <5F744A5A3C131242B81CE5874BD2CFFB93E1BC93@dlee01.ent.ti.com>
+From: Kevin Hilman <khilman@deeprootsystems.com>
+Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common user and kernel interface
+Date: Wed, 06 Oct 2010 12:08:11 -0700
+Message-ID: <87eic3m95w.fsf@deeprootsystems.com>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
-	<loom.20101005T121312-661@post.gmane.org>
- <AANLkTi=LiUooyUaYw_pKAHp+23ADKXdsAwTo_6zSaX0s@mail.gmail.com>
+	<87eic97eum.fsf@deeprootsystems.com>
+	<AANLkTikLyPK__snmXUKT9zfqyL7YAZ8e3Apa6s4-2L7w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=LiUooyUaYw_pKAHp+23ADKXdsAwTo_6zSaX0s@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <AANLkTikLyPK__snmXUKT9zfqyL7YAZ8e3Apa6s4-2L7w@mail.gmail.com>
+	(Bill Gatliff's message of "Wed, 6 Oct 2010 13:45:43 -0500")
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Bill Gatliff <bgat@billgatliff.com>, sugumar <sugumar.embedded@gmail.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-
------Original Message-----
-=46rom: linux-embedded-owner@vger.kernel.org [mailto:linux-embedded-own=
-er@vger.kernel.org] On Behalf Of Bill Gatliff
-Sent: Wednesday, October 06, 2010 11:50 AM
-To: sugumar
+To: Bill Gatliff <bgat@billgatliff.com>
 Cc: linux-embedded@vger.kernel.org
-Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common=
- user and kernel interface
 
-> On Tue, Oct 5, 2010 at 5:35 AM, sugumar <sugumar.embedded@gmail.com> =
-wrote:
->> =A0 I have been working on writing generic PWM driver that provides=20
->> common interface to all the PWM devices. I hadn't come across this=20
->> thread until kevin pointed out. It looks like a very good=20
->> implementation and i would like to make my eHRPWM driver to fit into=
-=20
->> this framework. eHRPWM (enhanced high resolution
->> pwm) module has other features such as Dead Band, PWM chopper and Tr=
-ip=20
->> Zone and i am not sure how to incorporate these in the generic=20
->> framework. I really need you help here.
+Bill Gatliff <bgat@billgatliff.com> writes:
 
-> Ok.  Can you point me to a datasheet for the part?
+> On Fri, Oct 1, 2010 at 5:00 PM, Kevin Hilman
+> <khilman@deeprootsystems.com> wrote:
+>> Bill Gatliff <bgat@billgatliff.com> writes:
+>>
+>>> Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
+>>
+>> Hi Bill,
+>>
+>> Any plans to post this to a broader audience? =A0maybe linux-arm-ker=
+nel?
+>
+> I was thinking that the appropriate audience was all right here.  :)
 
-PDF datasheet here: http://www.ti.com/litv/pdf/sprufl3b
+Maybe so, in terms of maintainers and folks watching the bigger picture
+of the kernel.  However, the folks that seem to be developing similar
+things in parallel are apparently not here as they seem to be doing
+similar work in parallel.
 
-Mark--
-To unsubscribe from this list: send the line "unsubscribe linux-embedde=
-d" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kevin
