@@ -1,7 +1,7 @@
 From: sugumar <sugumar@ti.com>
-Subject: [PATCH 3/4] Modify the back light driver to support the new PWM framework
-Date: Fri,  8 Oct 2010 18:47:43 +0530
-Message-ID: <1286543863-32115-1-git-send-email-sugumar@ti.com>
+Subject: [PATCH 4/4] davinci: da850/omap-l138 evm: Platform support for backlight driver
+Date: Fri,  8 Oct 2010 18:48:01 +0530
+Message-ID: <1286543881-32141-1-git-send-email-sugumar@ti.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -11,120 +11,77 @@ Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org
 Cc: davinci-linux-open-source@linux.davincidsp.com, sugumar <sugumar@ti.com>
 
-This patch makes necessary changes to the existing backlight
-driver to work with the new PWM framework
+on DA850/OMAP-L138 EVM, eCAP module is used to control the LCD
+backlight. This patch registers the backlight device as platform device,
+confgiures the pins for PWM output and also sets the backlight specific
+data such as period, maximum intensity and default brightness.
 
 Signed-off-by: sugumar <sugumar@ti.com>
 ---
- drivers/pwm/Kconfig              |    1 +
- drivers/video/backlight/pwm_bl.c |   28 +++++++++++++++-------------
- include/linux/pwm_backlight.h    |    3 ++-
- 3 files changed, 18 insertions(+), 14 deletions(-)
+ arch/arm/mach-davinci/board-da850-evm.c |   37 +++++++++++++++++++++++++++++++
+ 1 files changed, 37 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index 6f32dd6..0c90d98 100644
---- a/drivers/pwm/Kconfig
-+++ b/drivers/pwm/Kconfig
-@@ -5,6 +5,7 @@
- menuconfig GENERIC_PWM
- 	tristate "PWM Support"
- 	depends on SYSFS
-+	select HAVE_PWM
- 	help
- 	  This enables PWM support through the generic PWM API.
- 	  If unsure, say N.
-diff --git a/drivers/video/backlight/pwm_bl.c b/drivers/video/backlight/pwm_bl.c
-index 5504435..591a2fd 100644
---- a/drivers/video/backlight/pwm_bl.c
-+++ b/drivers/video/backlight/pwm_bl.c
-@@ -17,12 +17,12 @@
- #include <linux/fb.h>
- #include <linux/backlight.h>
- #include <linux/err.h>
--#include <linux/pwm.h>
-+#include <linux/pwm/pwm.h>
- #include <linux/pwm_backlight.h>
- #include <linux/slab.h>
+diff --git a/arch/arm/mach-davinci/board-da850-evm.c b/arch/arm/mach-davinci/board-da850-evm.c
+index b280efb..fe88e37 100644
+--- a/arch/arm/mach-davinci/board-da850-evm.c
++++ b/arch/arm/mach-davinci/board-da850-evm.c
+@@ -37,6 +37,7 @@
+ #include <mach/nand.h>
+ #include <mach/mux.h>
  
- struct pwm_bl_data {
--	struct pwm_device	*pwm;
-+	struct pwm_channel	*pwm;
- 	struct device		*dev;
- 	unsigned int		period;
- 	int			(*notify)(struct device *,
-@@ -45,11 +45,13 @@ static int pwm_backlight_update_status(struct backlight_device *bl)
- 		brightness = pb->notify(pb->dev, brightness);
++#include <linux/pwm_backlight.h>
+ #define DA850_EVM_PHY_MASK		0x1
+ #define DA850_EVM_MDIO_FREQUENCY	2200000 /* PHY bus frequency */
  
- 	if (brightness == 0) {
--		pwm_config(pb->pwm, 0, pb->period);
--		pwm_disable(pb->pwm);
-+		pwm_set_period_ns(pb->pwm, pb->period);
-+		pwm_set_duty_ns(pb->pwm, 0);
-+		pwm_stop(pb->pwm);
- 	} else {
--		pwm_config(pb->pwm, brightness * pb->period / max, pb->period);
--		pwm_enable(pb->pwm);
-+		pwm_set_period_ns(pb->pwm, pb->period);
-+		pwm_set_duty_ns(pb->pwm, brightness * pb->period / max);
-+		pwm_start(pb->pwm);
- 	}
+@@ -48,6 +49,28 @@
+ 
+ #define DA850_MII_MDIO_CLKEN_PIN	GPIO_TO_PIN(2, 6)
+ 
++
++#define DAVINCI_BACKLIGHT_MAX_BRIGHTNESS	250
++#define DAVINVI_BACKLIGHT_DEFAULT_BRIGHTNESS	250
++#define DAVINCI_PWM_PERIOD_NANO_SECONDS		(1000000 * 10)
++
++static struct platform_pwm_backlight_data da850evm_backlight_data = {
++	.pwm_id		= "ecap.2",
++	.ch		= 0,
++	.max_brightness	= DAVINCI_BACKLIGHT_MAX_BRIGHTNESS,
++	.dft_brightness	= DAVINVI_BACKLIGHT_DEFAULT_BRIGHTNESS,
++	.pwm_period_ns	= DAVINCI_PWM_PERIOD_NANO_SECONDS,
++};
++
++static struct platform_device da850evm_backlight = {
++	.name	= "pwm-backlight",
++	.id	= -1,
++	.dev	= {
++	.platform_data	= &da850evm_backlight_data,
++	},
++};
++
++
+ static struct mtd_partition da850_evm_norflash_partition[] = {
+ 	{
+ 		.name           = "bootloaders + env",
+@@ -633,6 +656,20 @@ static int __init da850_evm_config_emac(void)
+ 		pr_warning("da850_evm_init: emac registration failed: %d\n",
+ 				ret);
+ 
++	ret = davinci_cfg_reg(DA850_ECAP2_APWM2);
++	if (ret)
++		pr_warning("da850_evm_init:ecap mux failed: %d\n", ret);
++
++	ret = da850_register_ecap();
++	if (ret)
++		pr_warning("da850_evm_init: eCAP registration failed: %d\n",
++			ret);
++
++	ret = platform_device_register(&da850evm_backlight);
++	if (ret)
++		pr_warning("da850_evm_init: backlight device registration "
++			"failed: %d\n", ret);
++
  	return 0;
  }
-@@ -94,7 +96,7 @@ static int pwm_backlight_probe(struct platform_device *pdev)
- 	pb->notify = data->notify;
- 	pb->dev = &pdev->dev;
- 
--	pb->pwm = pwm_request(data->pwm_id, "backlight");
-+	pb->pwm = pwm_request(data->pwm_id, data->ch, "backlight");
- 	if (IS_ERR(pb->pwm)) {
- 		dev_err(&pdev->dev, "unable to request PWM for backlight\n");
- 		ret = PTR_ERR(pb->pwm);
-@@ -119,7 +121,7 @@ static int pwm_backlight_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_bl:
--	pwm_free(pb->pwm);
-+	pwm_release(pb->pwm);
- err_pwm:
- 	kfree(pb);
- err_alloc:
-@@ -135,9 +137,9 @@ static int pwm_backlight_remove(struct platform_device *pdev)
- 	struct pwm_bl_data *pb = dev_get_drvdata(&bl->dev);
- 
- 	backlight_device_unregister(bl);
--	pwm_config(pb->pwm, 0, pb->period);
--	pwm_disable(pb->pwm);
--	pwm_free(pb->pwm);
-+	pwm_set_duty_ns(pb->pwm, 0);
-+	pwm_stop(pb->pwm);
-+	pwm_release(pb->pwm);
- 	kfree(pb);
- 	if (data->exit)
- 		data->exit(&pdev->dev);
-@@ -153,8 +155,8 @@ static int pwm_backlight_suspend(struct platform_device *pdev,
- 
- 	if (pb->notify)
- 		pb->notify(pb->dev, 0);
--	pwm_config(pb->pwm, 0, pb->period);
--	pwm_disable(pb->pwm);
-+	pwm_set_duty_ns(pb->pwm, 0);
-+	pwm_stop(pb->pwm);
- 	return 0;
- }
- 
-diff --git a/include/linux/pwm_backlight.h b/include/linux/pwm_backlight.h
-index 01b3d75..eb325bb 100644
---- a/include/linux/pwm_backlight.h
-+++ b/include/linux/pwm_backlight.h
-@@ -5,7 +5,8 @@
- #define __LINUX_PWM_BACKLIGHT_H
- 
- struct platform_pwm_backlight_data {
--	int pwm_id;
-+	const char *pwm_id;
-+	int ch;
- 	unsigned int max_brightness;
- 	unsigned int dft_brightness;
- 	unsigned int pwm_period_ns;
+ device_initcall(da850_evm_config_emac);
 -- 
 1.5.6
