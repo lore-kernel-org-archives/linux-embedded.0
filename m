@@ -1,20 +1,20 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH 15/16] pramfs: test module
-Date: Sun, 10 Oct 2010 18:37:49 +0200
-Message-ID: <4CB1EBDD.8050509@gmail.com>
+Subject: [PATCH 04/16] pramfs: file operations
+Date: Sun, 10 Oct 2010 18:29:53 +0200
+Message-ID: <4CB1EA01.5020909@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=rQg6dttPlqMSQdh0jaIUwCLrPAgZf1hsLvxBJNzRomg=;
-        b=A88vT/D1XIeFdpW/DXq6G50AzK5+96uCw+9N5wgQooNSmndDxrNY393v5YWnXV3fj0
-         zpacLWHfTQkf2/pOUIKivbScJQXy7fhZuNtWH2GxP8YFKRVXvSuGxxBraj/aUBKcLAqD
-         lajvFY1areKvXI0sWZ+JNOL96ViUW32VK3zps=
-Sender: linux-kernel-owner@vger.kernel.org
+        bh=GA5jUfH9XljMNe5LNurnm1rt3oD4nU4xS9HnV2jFj98=;
+        b=wt371SqmzH3BcaiWnYaavi5j5vxvVPQTzqb21+qp+X/aRfzcKq2GDadmlGRpwCatm6
+         fJ/aFJGuw0bf/Ul9UwHX+AAW4jiYuGQk8oeT6wQTxlV2VY7UjexHGUht7Acik2e/+eHM
+         6X/ZtRmUemb5VaXBRFXxz20ZEpTZSv4NVMgSI=
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Linux Kernel <linux-kernel@vger.kernel.org>
@@ -22,20 +22,20 @@ Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdev
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-Test module.
+File operations.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
-diff -Nurp linux-2.6.36-orig/fs/pramfs/pramfs_test.c linux-2.6.36/fs/pramfs/pramfs_test.c
---- linux-2.6.36-orig/fs/pramfs/pramfs_test.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/pramfs_test.c	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,49 @@
+diff -Nurp linux-2.6.36-orig/fs/pramfs/file.c linux-2.6.36/fs/pramfs/file.c
+--- linux-2.6.36-orig/fs/pramfs/file.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/file.c	2010-09-24 18:34:03.000000000 +0200
+@@ -0,0 +1,166 @@
 +/*
-+ * FILE NAME fs/pramfs/namei.c
++ * FILE NAME fs/pramfs/file.c
 + *
 + * BRIEF DESCRIPTION
 + *
-+ * Pramfs test module.
++ * File operations for files.
 + *
 + * Copyright 2009-2010 Marco Stornelli <marco.stornelli@gmail.com>
 + * Copyright 2003 Sony Corporation
@@ -45,38 +45,155 @@ diff -Nurp linux-2.6.36-orig/fs/pramfs/pramfs_test.c linux-2.6.36/fs/pramfs/pram
 + * License version 2. This program is licensed "as is" without any
 + * warranty of any kind, whether express or implied.
 + */
-+#include <linux/module.h>
-+#include <linux/version.h>
-+#include <linux/init.h>
 +#include <linux/fs.h>
++#include <linux/sched.h>
++#include <linux/slab.h>
++#include <linux/uio.h>
++#include <linux/mm.h>
++#include <linux/uaccess.h>
 +#include "pram.h"
++#include "acl.h"
++#include "xip.h"
++#include "xattr.h"
 +
-+int __init test_pramfs_write(void)
++static int pram_open_file(struct inode *inode, struct file *filp)
 +{
-+	struct pram_super_block *psb;
-+
-+	psb = get_pram_super();
-+	if (!psb) {
-+		printk(KERN_ERR
-+		"%s: PRAMFS super block not found (not mounted?)\n",
-+		__func__);
-+		return 1;
-+	}
-+
-+	/*
-+	 * Attempt an unprotected clear of checksum information in the
-+	 * superblock, this should cause a kernel page protection fault.
-+	 */
-+	printk("%s: writing to kernel VA %p\n", __func__, psb);
-+	psb->s_sum = 0;
-+
-+	return 0;
++#ifndef CONFIG_PRAMFS_XIP
++	/* Without XIP we force to use Direct IO */
++	filp->f_flags |= O_DIRECT;
++#endif
++	return generic_file_open(inode, filp);
 +}
 +
-+void test_pramfs_write_cleanup(void) {}
++ssize_t __pram_direct_IO(int rw, struct kiocb *iocb,
++		   const struct iovec *iov,
++		   loff_t offset, unsigned long nr_segs)
++{
++	struct file *file = iocb->ki_filp;
++	struct inode *inode = file->f_mapping->host;
++	struct super_block *sb = inode->i_sb;
++	int progress = 0, hole = 0;
++	ssize_t retval = 0;
++	void *tmp = NULL;
++	unsigned long blocknr, blockoff;
++	int num_blocks, blocksize_mask, blocksize, blocksize_bits;
++	char __user *buf = iov->iov_base;
++	size_t length = iov_length(iov, nr_segs);
 +
-+/* Module information */
-+MODULE_LICENSE("GPL");
-+module_init(test_pramfs_write);
-+module_exit(test_pramfs_write_cleanup);
++	if (length < 0)
++		return -EINVAL;
++	if ((rw == READ) && (offset + length > inode->i_size))
++		length = inode->i_size - offset;
++	if (!length)
++		goto out;
++
++	blocksize_bits = inode->i_sb->s_blocksize_bits;
++	blocksize = 1 << blocksize_bits;
++	blocksize_mask = blocksize - 1;
++
++	/* find starting block number to access */
++	blocknr = offset >> blocksize_bits;
++	/* find starting offset within starting block */
++	blockoff = offset & blocksize_mask;
++	/* find number of blocks to access */
++	num_blocks = (blockoff + length + blocksize_mask) >> blocksize_bits;
++
++	if (rw == WRITE) {
++		/* prepare a temporary buffer to hold a user data block
++		   for writing. */
++		tmp = kmalloc(blocksize, GFP_KERNEL);
++		if (!tmp)
++			return -ENOMEM;
++		/* now allocate the data blocks we'll need */
++		retval = pram_alloc_blocks(inode, blocknr, num_blocks);
++		if (retval)
++			goto fail1;
++	}
++
++	while (length) {
++		int count;
++		u8 *bp = NULL;
++		u64 block = pram_find_data_block(inode, blocknr++);
++		if (unlikely(!block && rw == READ)) {
++			/* We are falling in a hole */
++			hole = 1;
++		} else {
++			bp = (u8 *)pram_get_block(sb, block);
++			if (!bp)
++				goto fail2;
++		}
++
++		count = blockoff + length > blocksize ?
++			blocksize - blockoff : length;
++
++		if (rw == READ) {
++			if (unlikely(hole)) {
++				retval = clear_user(buf, count);
++				if (retval) {
++					retval = -EFAULT;
++					goto fail1;
++				}
++			} else {
++				retval = copy_to_user(buf, &bp[blockoff], count);
++				if (retval) {
++					retval = -EFAULT;
++					goto fail1;
++				}
++			}
++		} else {
++			retval = copy_from_user(tmp, buf, count);
++			if (retval) {
++				retval = -EFAULT;
++				goto fail1;
++			}
++
++			pram_memunlock_block(inode->i_sb, bp);
++			memcpy(&bp[blockoff], tmp, count);
++			pram_memlock_block(inode->i_sb, bp);
++		}
++
++		progress += count;
++		buf += count;
++		length -= count;
++		blockoff = 0;
++		hole = 0;
++	}
++
++fail2:
++	retval = progress;
++fail1:
++	kfree(tmp);
++out:
++	return retval;
++}
++
++static int __pram_mmap(struct file *file, struct vm_area_struct *vma)
++{
++	/* Only private mappings */
++	if (vma->vm_flags & VM_SHARED)
++		return -EINVAL;
++	return generic_file_mmap(file, vma);
++}
++
++struct file_operations pram_file_operations = {
++	.llseek		= generic_file_llseek,
++	.read		= pram_read,
++	.write		= pram_write,
++	.aio_read	= pram_aio_read,
++	.aio_write	= pram_aio_write,
++	.mmap		= pram_mmap,
++	.open		= pram_open_file,
++	.fsync		= noop_fsync,
++};
++
++struct inode_operations pram_file_inode_operations = {
++#ifdef CONFIG_PRAMFS_XATTR
++	.setxattr	= generic_setxattr,
++	.getxattr	= generic_getxattr,
++	.listxattr	= pram_listxattr,
++	.removexattr	= generic_removexattr,
++#endif
++	.setattr	= pram_notify_change,
++	.check_acl	= pram_check_acl,
++};
  
