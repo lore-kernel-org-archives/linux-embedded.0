@@ -1,7 +1,7 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH 16/16] pramfs Makefile and Kconfig
-Date: Sun, 10 Oct 2010 18:39:11 +0200
-Message-ID: <4CB1EC2F.7070807@gmail.com>
+Subject: [PATCH 13/16] pramfs: xattr block descriptors tree
+Date: Sun, 10 Oct 2010 18:35:50 +0200
+Message-ID: <4CB1EB66.4000702@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=4/7L9GvmylxfmCxB588MhUAISGikNA0F3OXkVfjUqGQ=;
-        b=C+ZPZkgRvCa/gFX/JaN6d2vXOsnmYl10RhO8mC+GEAnfEAgyFk/x+gxHnF4HfQuH3T
-         pG9cIc5tX2zYZ2gk7XUUUvOXyzWs1keS1ul9dPG2mLJ1eh5hl1J/lMgYYoaMEk1QaIHI
-         UXDAolU4BecmOQXBIk7enlccZNIThwM2VXBO4=
+        bh=yoofUu7cbG0jG8Zy//1A/H6WNbsrpTINgnThZo0lqQI=;
+        b=fnTVxjgp8TwxBVUibrYXf8s3XkRgNpo5EYHBS1jd5qMmrblzaKrTNrs0iTSe/21P1h
+         lC1EPk1/7m0O/E4pkoWuMHbnnj7+EAcfZaVIATFxs07DGuqk4/kz/9Gxpr2CF9z0hJUd
+         X+DURlFEPbVBEGuiGgAi8MrjruOe7yo9OzRbc=
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -22,142 +22,246 @@ Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdev
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-Makefile and Kconfig.
+Extended attributes block descriptors tree.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
-diff -Nurp linux-2.6.36-orig/fs/Makefile linux-2.6.36/fs/Makefile
---- linux-2.6.36-orig/fs/Makefile	2010-09-13 01:07:37.000000000 +0200
-+++ linux-2.6.36/fs/Makefile	2010-09-14 18:49:52.000000000 +0200
-@@ -126,3 +126,4 @@ obj-$(CONFIG_BTRFS_FS)		+= btrfs/
- obj-$(CONFIG_GFS2_FS)           += gfs2/
- obj-$(CONFIG_EXOFS_FS)          += exofs/
- obj-$(CONFIG_CEPH_FS)		+= ceph/
-+obj-$(CONFIG_PRAMFS)		+= pramfs/
-diff -Nurp linux-2.6.36-orig/fs/Kconfig linux-2.6.36/fs/Kconfig
---- linux-2.6.36-orig/fs/Kconfig	2010-09-13 01:07:37.000000000 +0200
-+++ linux-2.6.36/fs/Kconfig	2010-09-14 18:49:52.000000000 +0200
-@@ -13,7 +13,7 @@ source "fs/ext4/Kconfig"
- config FS_XIP
- # execute in place
- 	bool
--	depends on EXT2_FS_XIP
-+	depends on EXT2_FS_XIP || PRAMFS_XIP
- 	default y
-  source "fs/jbd/Kconfig"
-@@ -25,13 +25,14 @@ config FS_MBCACHE
- 	default y if EXT2_FS=y && EXT2_FS_XATTR
- 	default y if EXT3_FS=y && EXT3_FS_XATTR
- 	default y if EXT4_FS=y && EXT4_FS_XATTR
--	default m if EXT2_FS_XATTR || EXT3_FS_XATTR || EXT4_FS_XATTR
-+	default y if PRAMFS=y && PRAMFS_XATTR
-+	default m if EXT2_FS_XATTR || EXT3_FS_XATTR || EXT4_FS_XATTR || PRAMFS_XATTR
-  source "fs/reiserfs/Kconfig"
- source "fs/jfs/Kconfig"
-  config FS_POSIX_ACL
--# Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs/nfs4)
-+# Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs/nfs4/pramfs)
- #
- # NOTE: you can implement Posix ACLs without these helpers (XFS does).
- # 	Never use this symbol for ifdefs.
-@@ -189,6 +190,7 @@ source "fs/romfs/Kconfig"
- source "fs/sysv/Kconfig"
- source "fs/ufs/Kconfig"
- source "fs/exofs/Kconfig"
-+source "fs/pramfs/Kconfig"
-  endif # MISC_FILESYSTEMS
- diff -Nurp linux-2.6.36-orig/fs/pramfs/Kconfig linux-2.6.36/fs/pramfs/Kconfig
---- linux-2.6.36-orig/fs/pramfs/Kconfig	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/Kconfig	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,72 @@
-+config PRAMFS
-+	tristate "Persistent and Protected RAM file system support"
-+	depends on HAS_IOMEM && EXPERIMENTAL
-+	select CRC16
-+	help
-+	   If your system has a block of fast (comparable in access speed to
-+	   system memory) and non-volatile RAM and you wish to mount a
-+	   light-weight, full-featured, and space-efficient filesystem over it,
-+	   say Y here, and read <file:Documentation/filesystems/pramfs.txt>.
+diff -Nurp linux-2.6.36-orig/fs/pramfs/desctree.c linux-2.6.36/fs/pramfs/desctree.c
+--- linux-2.6.36-orig/fs/pramfs/desctree.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/desctree.c	2010-09-14 18:49:52.000000000 +0200
+@@ -0,0 +1,184 @@
++/*
++ * FILE NAME fs/pramfs/desctree.c
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Extended attributes block descriptors tree.
++ *
++ * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
 +
-+	   To compile this as a module,  choose M here: the module will be
-+	   called pramfs.ko.
++#include <linux/spinlock.h>
++#include "desctree.h"
++#include "pram.h"
 +
-+config PRAMFS_XIP
-+	bool "Enable Execute-in-place in PRAMFS"
-+	depends on PRAMFS && !PRAMFS_WRITE_PROTECT
-+	help
-+	   Say Y here to enable xip feature of PRAMFS.
++/* xblock_desc_init_always()
++ *
++ * These are initializations that need to be done on every
++ * descriptor allocation as the fields are not initialised
++ * by slab allocation.
++ */
++void xblock_desc_init_always(struct pram_xblock_desc *desc)
++{
++	atomic_set(&desc->refcount, 0);
++	desc->blocknr = 0;
++	desc->flags = 0;
++}
 +
-+config PRAMFS_WRITE_PROTECT
-+	bool "Enable PRAMFS write protection"
-+	depends on PRAMFS && MMU
-+	default y
-+	help
-+	   Say Y here to enable the write protect feature of PRAMFS.
++/* xblock_desc_init_once()
++ *
++ * These are initializations that only need to be done
++ * once, because the fields are idempotent across use
++ * of the descriptor, so let the slab aware of that.
++ */
++void xblock_desc_init_once(struct pram_xblock_desc *desc)
++{
++	mutex_init(&desc->lock);
++}
 +
-+config PRAMFS_XATTR
-+	bool "PRAMFS extended attributes"
-+	depends on PRAMFS
-+	help
-+	  Extended attributes are name:value pairs associated with inodes by
-+	  the kernel or by users (see the attr(5) manual page, or visit
-+	  <http://acl.bestbits.at/> for details).
++/* __insert_xblock_desc()
++ *
++ * Insert a new descriptor in the tree.
++ *
++ */
++static void __insert_xblock_desc(struct pram_sb_info *sbi,
++				 unsigned long blocknr, struct rb_node *node)
++{
++	struct rb_node **p = &(sbi->desc_tree.rb_node);
++	struct rb_node *parent = NULL;
++	struct pram_xblock_desc *desc;
 +
-+	  If unsure, say N.
++	while (*p) {
++		parent = *p;
++		desc = rb_entry(parent, struct pram_xblock_desc, node);
 +
-+config PRAMFS_POSIX_ACL
-+	bool "PRAMFS POSIX Access Control Lists"
-+	depends on PRAMFS_XATTR
-+	select FS_POSIX_ACL
-+	help
-+	  Posix Access Control Lists (ACLs) support permissions for users and
-+	  groups beyond the owner/group/world scheme.
++		if (blocknr < desc->blocknr)
++			p = &(*p)->rb_left;
++		else if (blocknr > desc->blocknr)
++			p = &(*p)->rb_right;
++		else
++			/* Oops...an other descriptor for the same block ? */
++			BUG();
++	}
 +
-+	  To learn more about Access Control Lists, visit the Posix ACLs for
-+	  Linux website <http://acl.bestbits.at/>.
++	rb_link_node(node, parent, p);
++	rb_insert_color(node, &sbi->desc_tree);
++}
 +
-+	  If you don't know what Access Control Lists are, say N
++void insert_xblock_desc(struct pram_sb_info *sbi, struct pram_xblock_desc *desc)
++{
++	spin_lock(&sbi->desc_tree_lock);
++	__insert_xblock_desc(sbi, desc->blocknr, &desc->node);
++	spin_unlock(&sbi->desc_tree_lock);
++};
 +
-+config PRAMFS_SECURITY
-+	bool "PRAMFS Security Labels"
-+	depends on PRAMFS_XATTR
-+	help
-+	  Security labels support alternative access control models
-+	  implemented by security modules like SELinux.  This option
-+	  enables an extended attribute handler for file security
-+	  labels in the pram filesystem.
++/* __lookup_xblock_desc()
++ *
++ * Search an extended attribute descriptor in the tree via the
++ * block number. It returns the descriptor if it's found or
++ * NULL. If not found it creates a new descriptor if create is not 0.
++ */
++static struct pram_xblock_desc *__lookup_xblock_desc(struct pram_sb_info *sbi,
++					    unsigned long blocknr,
++					    struct kmem_cache *cache,
++					    int create)
++{
++	struct rb_node *n = sbi->desc_tree.rb_node;
++	struct pram_xblock_desc *desc = NULL;
 +
-+	  If you are not using a security module that requires using
-+	  extended attributes for file security labels, say N.
++	while (n) {
++		desc = rb_entry(n, struct pram_xblock_desc, node);
 +
-+config PRAMFS_TEST
-+	boolean
-+	depends on PRAMFS
++		if (blocknr < desc->blocknr)
++			n = n->rb_left;
++		else if (blocknr > desc->blocknr)
++			n = n->rb_right;
++		else {
++			atomic_inc(&desc->refcount);
++			goto out;
++		}
++	}
 +
-+config TEST_MODULE
-+	tristate "PRAMFS Test"
-+	depends on PRAMFS && m
-+	select PRAMFS_TEST
-+	help
-+	  Say Y here to build a simple module to test the protection of
-+	  PRAMFS. The module will be called pramfs_test.ko.
-diff -Nurp linux-2.6.36-orig/fs/pramfs/Makefile linux-2.6.36/fs/pramfs/Makefile
---- linux-2.6.36-orig/fs/pramfs/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/Makefile	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,14 @@
-+#
-+# Makefile for the linux pram-filesystem routines.
-+#
++	/* not found */
++	if (create) {
++		desc = kmem_cache_alloc(cache, GFP_NOFS);
++		if (!desc)
++			return ERR_PTR(-ENOMEM);
++		xblock_desc_init_always(desc);
++		atomic_set(&desc->refcount, 1);
++		desc->blocknr = blocknr;
++		__insert_xblock_desc(sbi, desc->blocknr, &desc->node);
++	}
++out:
++	return desc;
++}
 +
-+obj-$(CONFIG_PRAMFS) += pramfs.o
-+obj-$(CONFIG_TEST_MODULE) += pramfs_test.o
++struct pram_xblock_desc *lookup_xblock_desc(struct pram_sb_info *sbi,
++					    unsigned long blocknr,
++					    struct kmem_cache *cache,
++					    int create)
++{
++	struct pram_xblock_desc *desc = NULL;
 +
-+pramfs-y := balloc.o dir.o file.o inode.o namei.o super.o symlink.o
++	spin_lock(&sbi->desc_tree_lock);
++	desc = __lookup_xblock_desc(sbi, blocknr, cache, create);
++	spin_unlock(&sbi->desc_tree_lock);
++	return desc;
++}
 +
-+pramfs-$(CONFIG_PRAMFS_WRITE_PROTECT) += wprotect.o
-+pramfs-$(CONFIG_PRAMFS_XIP) += xip.o
-+pramfs-$(CONFIG_PRAMFS_XATTR) += xattr.o xattr_user.o xattr_trusted.o desctree.o
-+pramfs-$(CONFIG_PRAMFS_POSIX_ACL) += acl.o
-+pramfs-$(CONFIG_PRAMFS_SECURITY) += xattr_security.o
++/* put_xblock_desc()
++ *
++ * Decrement the reference count and if it reaches zero and the
++ * desciptor has been marked to be free, then we free it.
++ * It returns 0 if the descriptor has been deleted and 1 otherwise.
++ */
++int put_xblock_desc(struct pram_sb_info *sbi, struct pram_xblock_desc *desc)
++{
++	int ret = 1;
++	if (!desc)
++		return ret;
++
++	if (atomic_dec_and_lock(&desc->refcount, &sbi->desc_tree_lock)) {
++		if (test_bit(FREEING, &desc->flags)) {
++			rb_erase(&desc->node, &sbi->desc_tree);
++			pram_dbg("erasing desc for block %lu\n", desc->blocknr);
++			ret = 0;
++		}
++		spin_unlock(&sbi->desc_tree_lock);
++	}
++	return ret;
++};
++
++/* mark_free_desc()
++ *
++ * Mark free a descriptor. The descriptor will be deleted later in the
++ * put_xblock_desc().
++ */
++void mark_free_desc(struct pram_xblock_desc *desc)
++{
++	set_bit(FREEING, &desc->flags);
++}
++
++/* erase_tree()
++ *
++ * Free all objects in the tree.
++ */
++void erase_tree(struct pram_sb_info *sbi, struct kmem_cache *cachep)
++{
++	struct rb_node *n;
++	struct pram_xblock_desc *desc;
++
++	spin_lock(&sbi->desc_tree_lock);
++	n = rb_first(&sbi->desc_tree);
++	while (n) {
++		desc = rb_entry(n, struct pram_xblock_desc, node);
++		rb_erase(n, &sbi->desc_tree);
++		kmem_cache_free(cachep, desc);
++		n = rb_next(n);
++	}
++	spin_unlock(&sbi->desc_tree_lock);
++}
+diff -Nurp linux-2.6.36-orig/fs/pramfs/desctree.h linux-2.6.36/fs/pramfs/desctree.h
+--- linux-2.6.36-orig/fs/pramfs/desctree.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/desctree.h	2010-09-18 08:41:02.000000000 +0200
+@@ -0,0 +1,46 @@
++/*
++ * FILE NAME fs/pramfs/desctree.h
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Extended attributes block descriptors tree.
++ *
++ * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#include <asm/atomic.h>
++#include <linux/slab.h>
++#include "pram.h"
++
++struct pram_xblock_desc {
++#define FREEING (1UL << 1)
++	unsigned long flags;	/* descriptor flags */
++	atomic_t refcount;	/* users count of this descriptor */
++	unsigned long blocknr;	/* absolute block number */
++	struct mutex lock;	/* block lock */
++	struct rb_node node;	/* node in the rb tree */
++};
++
++extern struct pram_xblock_desc *lookup_xblock_desc(struct pram_sb_info *sbi,
++						   unsigned long blocknr,
++						   struct kmem_cache *, int);
++extern void insert_xblock_desc(struct pram_sb_info *sbi,
++			       struct pram_xblock_desc *desc);
++extern void mark_free_desc(struct pram_xblock_desc *desc);
++extern int put_xblock_desc(struct pram_sb_info *sbi,
++			   struct pram_xblock_desc *desc);
++extern void xblock_desc_init_always(struct pram_xblock_desc *desc);
++extern void xblock_desc_init_once(struct pram_xblock_desc *desc);
++extern void erase_tree(struct pram_sb_info *sbi,
++		       struct kmem_cache *);
++
++static inline void xblock_desc_init(struct pram_xblock_desc *desc)
++{
++	xblock_desc_init_always(desc);
++	xblock_desc_init_once(desc);
++};
++
  
