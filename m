@@ -1,87 +1,48 @@
-From: sugumar <sugumar@ti.com>
-Subject: [PATCH 4/4] davinci: da850/omap-l138 evm: Platform support for backlight driver
-Date: Fri,  8 Oct 2010 18:48:01 +0530
-Message-ID: <1286543881-32141-1-git-send-email-sugumar@ti.com>
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: [PATCH 00/16] pramfs: persistent and protected RAM Filesystem
+Date: Sun, 10 Oct 2010 18:26:59 +0200
+Message-ID: <4CB1E953.9070407@gmail.com>
+Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
-Cc: davinci-linux-open-source@linux.davincidsp.com, sugumar <sugumar@ti.com>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:content-type
+         :content-transfer-encoding;
+        bh=rXzp6pshdiTK2aVCnheQKycs8r1HpTdYnf2Nj1uQYGo=;
+        b=vTP9Qi69bl/ocUpAAmfzBWrCP/Lb4uo5TRqQrdMFmZgkXtt3mz4xFKvCMwlKTJScVk
+         20l002h+xW9svgxDhvpUze62UnOYstFVXtqI+w4Ktdtq2Zb1usvkLYkUST+RQz4wbF8D
+         UECadMUiQBmFxtUzM6Dvf7PAyWxo4irtO2qtU=
+Sender: linux-fsdevel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>
 
-on DA850/OMAP-L138 EVM, eCAP module is used to control the LCD
-backlight. This patch registers the backlight device as platform device,
-confgiures the pins for PWM output and also sets the backlight specific
-data such as period, maximum intensity and default brightness.
+Hi all,
 
-Signed-off-by: sugumar <sugumar@ti.com>
----
- arch/arm/mach-davinci/board-da850-evm.c |   37 +++++++++++++++++++++++++++++++
- 1 files changed, 37 insertions(+), 0 deletions(-)
+after a lot of improvement, test, bug fix and new features, it's the
+moment for third round with the kernel community to submit PRAMFS for
+mainline.
 
-diff --git a/arch/arm/mach-davinci/board-da850-evm.c b/arch/arm/mach-davinci/board-da850-evm.c
-index b280efb..fe88e37 100644
---- a/arch/arm/mach-davinci/board-da850-evm.c
-+++ b/arch/arm/mach-davinci/board-da850-evm.c
-@@ -37,6 +37,7 @@
- #include <mach/nand.h>
- #include <mach/mux.h>
- 
-+#include <linux/pwm_backlight.h>
- #define DA850_EVM_PHY_MASK		0x1
- #define DA850_EVM_MDIO_FREQUENCY	2200000 /* PHY bus frequency */
- 
-@@ -48,6 +49,28 @@
- 
- #define DA850_MII_MDIO_CLKEN_PIN	GPIO_TO_PIN(2, 6)
- 
-+
-+#define DAVINCI_BACKLIGHT_MAX_BRIGHTNESS	250
-+#define DAVINVI_BACKLIGHT_DEFAULT_BRIGHTNESS	250
-+#define DAVINCI_PWM_PERIOD_NANO_SECONDS		(1000000 * 10)
-+
-+static struct platform_pwm_backlight_data da850evm_backlight_data = {
-+	.pwm_id		= "ecap.2",
-+	.ch		= 0,
-+	.max_brightness	= DAVINCI_BACKLIGHT_MAX_BRIGHTNESS,
-+	.dft_brightness	= DAVINVI_BACKLIGHT_DEFAULT_BRIGHTNESS,
-+	.pwm_period_ns	= DAVINCI_PWM_PERIOD_NANO_SECONDS,
-+};
-+
-+static struct platform_device da850evm_backlight = {
-+	.name	= "pwm-backlight",
-+	.id	= -1,
-+	.dev	= {
-+	.platform_data	= &da850evm_backlight_data,
-+	},
-+};
-+
-+
- static struct mtd_partition da850_evm_norflash_partition[] = {
- 	{
- 		.name           = "bootloaders + env",
-@@ -633,6 +656,20 @@ static int __init da850_evm_config_emac(void)
- 		pr_warning("da850_evm_init: emac registration failed: %d\n",
- 				ret);
- 
-+	ret = davinci_cfg_reg(DA850_ECAP2_APWM2);
-+	if (ret)
-+		pr_warning("da850_evm_init:ecap mux failed: %d\n", ret);
-+
-+	ret = da850_register_ecap();
-+	if (ret)
-+		pr_warning("da850_evm_init: eCAP registration failed: %d\n",
-+			ret);
-+
-+	ret = platform_device_register(&da850evm_backlight);
-+	if (ret)
-+		pr_warning("da850_evm_init: backlight device registration "
-+			"failed: %d\n", ret);
-+
- 	return 0;
- }
- device_initcall(da850_evm_config_emac);
--- 
-1.5.6
+Since the last review (June 2009) a lot of things are changed:
+
+- removed any reference of BKL
+- fixed the endianess for the fs layout
+- added support for extended attributes, ACLs and security labels
+- moved out any pte manipulations from fs and inserted them in mm
+- implemented the new truncate convention
+- fixed problems with 64bit archs
+
+...and much more. Complete "story" in the ChangeLog inserted in the
+documentation file.
+
+In addition, in the web site tech page (http:\\pramfs.sourceforge.net),
+you can find a lot of information about implementation, technical
+details, benchmarking and so on.
+
+All the work to mainline this feature is sponsored by the CE Linux Forum.
+
+Regards,
+Marco
