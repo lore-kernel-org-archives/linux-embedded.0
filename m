@@ -1,151 +1,118 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH 10/16] pramfs: xip operations
-Date: Sun, 10 Oct 2010 18:32:46 +0200
-Message-ID: <4CB1EAAE.8010002@gmail.com>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: Re: [PATCH 16/16] pramfs Makefile and Kconfig
+Date: Sun, 10 Oct 2010 10:02:11 -0700
+Message-ID: <20101010100211.3c747512.rdunlap@xenotime.net>
+References: <4CB1EC2F.7070807@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:content-type
-         :content-transfer-encoding;
-        bh=0dZkMc5AaQmiGETk6Q5HEWDW9097PhHkpvDadUjFQ/M=;
-        b=FcsC3Sl+qoY+ORFFXXR2D33JG/ksOTSWPa9xG/gY0aFnFsGIuKQ7DgBGjsacMOLxF6
-         XKKz6Q0bza3u7/pOi+Kj+QGo9D+TaUMbKpWdXoCkd63QGJxBRQJG6lBbup2Ad8GSyPjb
-         R73k6h2xnUgijjNlBPZhu008WTcZZUWikLkfk=
+In-Reply-To: <4CB1EC2F.7070807@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Linux Kernel <linux-kernel@vger.kernel.org>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
-From: Marco Stornelli <marco.stornelli@gmail.com>
+On Sun, 10 Oct 2010 18:39:11 +0200 Marco Stornelli wrote:
 
-XIP operations.
+> From: Marco Stornelli <marco.stornelli@gmail.com>
+> 
+> Makefile and Kconfig.
+> 
+> Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+> ---
+>  diff -Nurp linux-2.6.36-orig/fs/pramfs/Kconfig linux-2.6.36/fs/pramfs/Kconfig
+> --- linux-2.6.36-orig/fs/pramfs/Kconfig	1970-01-01 01:00:00.000000000 +0100
+> +++ linux-2.6.36/fs/pramfs/Kconfig	2010-09-14 18:49:52.000000000 +0200
+> @@ -0,0 +1,72 @@
+> +config PRAMFS
+> +	tristate "Persistent and Protected RAM file system support"
+> +	depends on HAS_IOMEM && EXPERIMENTAL
+> +	select CRC16
+> +	help
+> +	   If your system has a block of fast (comparable in access speed to
+> +	   system memory) and non-volatile RAM and you wish to mount a
+> +	   light-weight, full-featured, and space-efficient filesystem over it,
+> +	   say Y here, and read <file:Documentation/filesystems/pramfs.txt>.
+> +
+> +	   To compile this as a module,  choose M here: the module will be
+> +	   called pramfs.ko.
 
-Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+	  called pramfs.
+
+(we don't add the .ko suffix; well, we try not to do that)
+
+> +
+> +config PRAMFS_XIP
+> +	bool "Enable Execute-in-place in PRAMFS"
+> +	depends on PRAMFS && !PRAMFS_WRITE_PROTECT
+> +	help
+> +	   Say Y here to enable xip feature of PRAMFS.
+
+	                        XIP
+
+> +
+> +config PRAMFS_WRITE_PROTECT
+> +	bool "Enable PRAMFS write protection"
+> +	depends on PRAMFS && MMU
+> +	default y
+> +	help
+> +	   Say Y here to enable the write protect feature of PRAMFS.
+> +
+> +config PRAMFS_XATTR
+> +	bool "PRAMFS extended attributes"
+> +	depends on PRAMFS
+> +	help
+> +	  Extended attributes are name:value pairs associated with inodes by
+> +	  the kernel or by users (see the attr(5) manual page, or visit
+> +	  <http://acl.bestbits.at/> for details).
+> +
+> +	  If unsure, say N.
+> +
+> +config PRAMFS_POSIX_ACL
+> +	bool "PRAMFS POSIX Access Control Lists"
+> +	depends on PRAMFS_XATTR
+> +	select FS_POSIX_ACL
+> +	help
+> +	  Posix Access Control Lists (ACLs) support permissions for users and
+> +	  groups beyond the owner/group/world scheme.
+> +
+> +	  To learn more about Access Control Lists, visit the Posix ACLs for
+> +	  Linux website <http://acl.bestbits.at/>.
+> +
+> +	  If you don't know what Access Control Lists are, say N
+
+end sentence with period ('.').
+
+> +
+> +config PRAMFS_SECURITY
+> +	bool "PRAMFS Security Labels"
+> +	depends on PRAMFS_XATTR
+> +	help
+> +	  Security labels support alternative access control models
+> +	  implemented by security modules like SELinux.  This option
+> +	  enables an extended attribute handler for file security
+> +	  labels in the pram filesystem.
+> +
+> +	  If you are not using a security module that requires using
+> +	  extended attributes for file security labels, say N.
+> +
+> +config PRAMFS_TEST
+> +	boolean
+> +	depends on PRAMFS
+> +
+> +config TEST_MODULE
+> +	tristate "PRAMFS Test"
+> +	depends on PRAMFS && m
+> +	select PRAMFS_TEST
+> +	help
+> +	  Say Y here to build a simple module to test the protection of
+> +	  PRAMFS. The module will be called pramfs_test.ko.
+
+	                             called pramfs_test.
+
+
+
 ---
-diff -Nurp linux-2.6.36-orig/fs/pramfs/xip.c linux-2.6.36/fs/pramfs/xip.c
---- linux-2.6.36-orig/fs/pramfs/xip.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/xip.c	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,90 @@
-+/*
-+ * FILE NAME fs/pramfs/xip.c
-+ *
-+ * BRIEF DESCRIPTION
-+ *
-+ * XIP operations.
-+ *
-+ * Copyright 2009-2010 Marco Stornelli <marco.stornelli@gmail.com>
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
-+ */
-+
-+#include <linux/mm.h>
-+#include <linux/fs.h>
-+#include <linux/genhd.h>
-+#include <linux/buffer_head.h>
-+#include "pram.h"
-+#include "xip.h"
-+
-+static int pram_find_and_alloc_blocks(struct inode *inode, sector_t iblock,
-+				     sector_t *data_block, int create)
-+{
-+	int err = -EIO;
-+	u64 block;
-+
-+	mutex_lock(&PRAM_I(inode)->truncate_lock);
-+
-+	block = pram_find_data_block(inode, iblock);
-+
-+	if (!block) {
-+		if (!create) {
-+			err = -ENODATA;
-+			goto err;
-+		}
-+
-+		err = pram_alloc_blocks(inode, iblock, 1);
-+		if (err)
-+			goto err;
-+
-+		block = pram_find_data_block(inode, iblock);
-+		if (!block) {
-+			err = -ENODATA;
-+			goto err;
-+		}
-+	}
-+
-+	*data_block = block;
-+	err = 0;
-+
-+ err:
-+	mutex_unlock(&PRAM_I(inode)->truncate_lock);
-+	return err;
-+}
-+
-+
-+static int __pram_get_block(struct inode *inode, pgoff_t pgoff, int create,
-+		   sector_t *result)
-+{
-+	int rc = 0;
-+	sector_t iblock;
-+
-+	/* find starting block number to access */
-+	iblock = (sector_t)pgoff << (PAGE_CACHE_SHIFT - inode->i_blkbits);
-+
-+	rc = pram_find_and_alloc_blocks(inode, iblock, result, create);
-+
-+	if (rc == -ENODATA)
-+		BUG_ON(create);
-+
-+	return rc;
-+}
-+
-+int pram_get_xip_mem(struct address_space *mapping, pgoff_t pgoff, int create,
-+				void **kmem, unsigned long *pfn)
-+{
-+	int rc;
-+	sector_t block;
-+
-+	/* first, retrieve the block */
-+	rc = __pram_get_block(mapping->host, pgoff, create, &block);
-+	if (rc)
-+		goto exit;
-+
-+	*kmem = pram_get_block(mapping->host->i_sb, block);
-+	*pfn = page_to_pfn(virt_to_page((unsigned long)*kmem));
-+
-+exit:
-+	return rc;
-+}
-diff -Nurp linux-2.6.36-orig/fs/pramfs/xip.h linux-2.6.36/fs/pramfs/xip.h
---- linux-2.6.36-orig/fs/pramfs/xip.h	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/xip.h	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,24 @@
-+/*
-+ * FILE NAME fs/pramfs/xip.h
-+ *
-+ * BRIEF DESCRIPTION
-+ *
-+ * XIP operations.
-+ *
-+ * Copyright 2009-2010 Marco Stornelli <marco.stornelli@gmail.com>
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
-+ */
-+
-+#ifdef CONFIG_PRAMFS_XIP
-+
-+int pram_get_xip_mem(struct address_space *, pgoff_t, int, void **,
-+							      unsigned long *);
-+
-+#else
-+
-+#define pram_get_xip_mem NULL
-+
-+#endif
-+
- 
+~Randy
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
