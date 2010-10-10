@@ -1,131 +1,163 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH 14(16] pramfs: memory protection
-Date: Sun, 10 Oct 2010 18:36:50 +0200
-Message-ID: <4CB1EBA2.8090409@gmail.com>
+Subject: [PATCH 16/16] pramfs Makefile and Kconfig
+Date: Sun, 10 Oct 2010 18:39:11 +0200
+Message-ID: <4CB1EC2F.7070807@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=2kRM2BA/yMONyqD2y9PibuxEHxKe+VpaK18vETE+SH0=;
-        b=J3xOwzfvQij0K3++67RCs1hMT8SybD6MOiKnHCNmkIJWV/QoSNmyyfx1w+XYa0xwb6
-         sUhbofBkPkLZ2/+JGmZpAiodMG2ZDUf+i2enITNzgJJ1M2/1GekIwkIYFFY2i4fTCZf0
-         sJACtW/27Jg2IKDoKiSeYrMo5TThYHLzQvhvw=
-Sender: linux-embedded-owner@vger.kernel.org
+        bh=4/7L9GvmylxfmCxB588MhUAISGikNA0F3OXkVfjUqGQ=;
+        b=C+ZPZkgRvCa/gFX/JaN6d2vXOsnmYl10RhO8mC+GEAnfEAgyFk/x+gxHnF4HfQuH3T
+         pG9cIc5tX2zYZ2gk7XUUUvOXyzWs1keS1ul9dPG2mLJ1eh5hl1J/lMgYYoaMEk1QaIHI
+         UXDAolU4BecmOQXBIk7enlccZNIThwM2VXBO4=
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Linux Kernel <linux-kernel@vger.kernel.org>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, linux-mm@kvack.org
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-Memory write protection.
+Makefile and Kconfig.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
-diff -Nurp linux-2.6.36-orig/fs/pramfs/wprotect.c linux-2.6.36/fs/pramfs/wprotect.c
---- linux-2.6.36-orig/fs/pramfs/wprotect.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/wprotect.c	2010-09-26 18:04:07.000000000 +0200
-@@ -0,0 +1,31 @@
-+/*
-+ * FILE NAME fs/pramfs/wprotect.c
-+ *
-+ * BRIEF DESCRIPTION
-+ *
-+ * Write protection for the filesystem pages.
-+ *
-+ * Copyright 2009-2010 Marco Stornelli <marco.stornelli@gmail.com>
-+ * Copyright 2003 Sony Corporation
-+ * Copyright 2003 Matsushita Electric Industrial Co., Ltd.
-+ * 2003-2004 (c) MontaVista Software, Inc. , Steve Longerbeam
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
-+ */
+diff -Nurp linux-2.6.36-orig/fs/Makefile linux-2.6.36/fs/Makefile
+--- linux-2.6.36-orig/fs/Makefile	2010-09-13 01:07:37.000000000 +0200
++++ linux-2.6.36/fs/Makefile	2010-09-14 18:49:52.000000000 +0200
+@@ -126,3 +126,4 @@ obj-$(CONFIG_BTRFS_FS)		+= btrfs/
+ obj-$(CONFIG_GFS2_FS)           += gfs2/
+ obj-$(CONFIG_EXOFS_FS)          += exofs/
+ obj-$(CONFIG_CEPH_FS)		+= ceph/
++obj-$(CONFIG_PRAMFS)		+= pramfs/
+diff -Nurp linux-2.6.36-orig/fs/Kconfig linux-2.6.36/fs/Kconfig
+--- linux-2.6.36-orig/fs/Kconfig	2010-09-13 01:07:37.000000000 +0200
++++ linux-2.6.36/fs/Kconfig	2010-09-14 18:49:52.000000000 +0200
+@@ -13,7 +13,7 @@ source "fs/ext4/Kconfig"
+ config FS_XIP
+ # execute in place
+ 	bool
+-	depends on EXT2_FS_XIP
++	depends on EXT2_FS_XIP || PRAMFS_XIP
+ 	default y
+  source "fs/jbd/Kconfig"
+@@ -25,13 +25,14 @@ config FS_MBCACHE
+ 	default y if EXT2_FS=y && EXT2_FS_XATTR
+ 	default y if EXT3_FS=y && EXT3_FS_XATTR
+ 	default y if EXT4_FS=y && EXT4_FS_XATTR
+-	default m if EXT2_FS_XATTR || EXT3_FS_XATTR || EXT4_FS_XATTR
++	default y if PRAMFS=y && PRAMFS_XATTR
++	default m if EXT2_FS_XATTR || EXT3_FS_XATTR || EXT4_FS_XATTR || PRAMFS_XATTR
+  source "fs/reiserfs/Kconfig"
+ source "fs/jfs/Kconfig"
+  config FS_POSIX_ACL
+-# Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs/nfs4)
++# Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs/nfs4/pramfs)
+ #
+ # NOTE: you can implement Posix ACLs without these helpers (XFS does).
+ # 	Never use this symbol for ifdefs.
+@@ -189,6 +190,7 @@ source "fs/romfs/Kconfig"
+ source "fs/sysv/Kconfig"
+ source "fs/ufs/Kconfig"
+ source "fs/exofs/Kconfig"
++source "fs/pramfs/Kconfig"
+  endif # MISC_FILESYSTEMS
+ diff -Nurp linux-2.6.36-orig/fs/pramfs/Kconfig linux-2.6.36/fs/pramfs/Kconfig
+--- linux-2.6.36-orig/fs/pramfs/Kconfig	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/Kconfig	2010-09-14 18:49:52.000000000 +0200
+@@ -0,0 +1,72 @@
++config PRAMFS
++	tristate "Persistent and Protected RAM file system support"
++	depends on HAS_IOMEM && EXPERIMENTAL
++	select CRC16
++	help
++	   If your system has a block of fast (comparable in access speed to
++	   system memory) and non-volatile RAM and you wish to mount a
++	   light-weight, full-featured, and space-efficient filesystem over it,
++	   say Y here, and read <file:Documentation/filesystems/pramfs.txt>.
 +
-+#include <linux/module.h>
-+#include <linux/fs.h>
-+#include <linux/mm.h>
-+#include <linux/io.h>
-+#include "pram.h"
++	   To compile this as a module,  choose M here: the module will be
++	   called pramfs.ko.
 +
-+void pram_writeable(void *vaddr, unsigned long size, int rw)
-+{
-+	int ret = 0;
++config PRAMFS_XIP
++	bool "Enable Execute-in-place in PRAMFS"
++	depends on PRAMFS && !PRAMFS_WRITE_PROTECT
++	help
++	   Say Y here to enable xip feature of PRAMFS.
 +
-+	ret = rw ? write_on_kernel_pte_range((unsigned long)vaddr, size) :
-+		    write_off_kernel_pte_range((unsigned long)vaddr, size);
++config PRAMFS_WRITE_PROTECT
++	bool "Enable PRAMFS write protection"
++	depends on PRAMFS && MMU
++	default y
++	help
++	   Say Y here to enable the write protect feature of PRAMFS.
 +
-+	BUG_ON(ret);
-+}
-diff -Nurp linux-2.6.36-orig/include/linux/mm.h linux-2.6.36/include/linux/mm.h
---- linux-2.6.36-orig/include/linux/mm.h	2010-09-13 01:07:37.000000000 +0200
-+++ linux-2.6.36/include/linux/mm.h	2010-09-14 18:49:52.000000000 +0200
-@@ -811,6 +811,11 @@ int follow_phys(struct vm_area_struct *v
- 		unsigned int flags, unsigned long *prot, resource_size_t *phys);
- int generic_access_phys(struct vm_area_struct *vma, unsigned long addr,
- 			void *buf, int len, int write);
-+int writeable_kernel_pte_range(unsigned long address, unsigned long size,
-+				unsigned int rw);
++config PRAMFS_XATTR
++	bool "PRAMFS extended attributes"
++	depends on PRAMFS
++	help
++	  Extended attributes are name:value pairs associated with inodes by
++	  the kernel or by users (see the attr(5) manual page, or visit
++	  <http://acl.bestbits.at/> for details).
 +
-+#define write_on_kernel_pte_range(addr, size) writeable_kernel_pte_range(addr, size, 1)
-+#define write_off_kernel_pte_range(addr, size) writeable_kernel_pte_range(addr, size, 0)
-  static inline void unmap_shared_mapping_range(struct address_space *mapping,
- 		loff_t const holebegin, loff_t const holelen)
-diff -Nurp linux-2.6.36-orig/mm/memory.c linux-2.6.36/mm/memory.c
---- linux-2.6.36-orig/mm/memory.c	2010-09-13 01:07:37.000000000 +0200
-+++ linux-2.6.36/mm/memory.c	2010-09-14 18:49:52.000000000 +0200
-@@ -3587,3 +3587,49 @@ void might_fault(void)
- }
- EXPORT_SYMBOL(might_fault);
- #endif
++	  If unsure, say N.
 +
-+int writeable_kernel_pte_range(unsigned long address, unsigned long size,
-+							      unsigned int rw)
-+{
++config PRAMFS_POSIX_ACL
++	bool "PRAMFS POSIX Access Control Lists"
++	depends on PRAMFS_XATTR
++	select FS_POSIX_ACL
++	help
++	  Posix Access Control Lists (ACLs) support permissions for users and
++	  groups beyond the owner/group/world scheme.
 +
-+	unsigned long addr = address & PAGE_MASK;
-+	unsigned long end = address + size;
-+	unsigned long start = addr;
-+	int ret = -EINVAL;
-+	pgd_t *pgd;
-+	pud_t *pud;
-+	pmd_t *pmd;
-+	pte_t *ptep, pte;
++	  To learn more about Access Control Lists, visit the Posix ACLs for
++	  Linux website <http://acl.bestbits.at/>.
 +
-+	spin_lock_irq(&init_mm.page_table_lock);
++	  If you don't know what Access Control Lists are, say N
 +
-+	do {
-+		pgd = pgd_offset(&init_mm, address);
-+		if (pgd_none(*pgd) || unlikely(pgd_bad(*pgd)))
-+			goto out;
++config PRAMFS_SECURITY
++	bool "PRAMFS Security Labels"
++	depends on PRAMFS_XATTR
++	help
++	  Security labels support alternative access control models
++	  implemented by security modules like SELinux.  This option
++	  enables an extended attribute handler for file security
++	  labels in the pram filesystem.
 +
-+		pud = pud_offset(pgd, address);
-+		if (pud_none(*pud) || unlikely(pud_bad(*pud)))
-+			goto out;
++	  If you are not using a security module that requires using
++	  extended attributes for file security labels, say N.
 +
-+		pmd = pmd_offset(pud, address);
-+		if (pmd_none(*pmd) || unlikely(pmd_bad(*pmd)))
-+			goto out;
++config PRAMFS_TEST
++	boolean
++	depends on PRAMFS
 +
-+		ptep = pte_offset_kernel(pmd, addr);
-+		pte = *ptep;
-+		if (pte_present(pte)) {
-+			  pte = rw ? pte_mkwrite(pte) : pte_wrprotect(pte);
-+			  *ptep = pte;
-+		}
-+		addr += PAGE_SIZE;
-+	} while (addr && (addr < end));
++config TEST_MODULE
++	tristate "PRAMFS Test"
++	depends on PRAMFS && m
++	select PRAMFS_TEST
++	help
++	  Say Y here to build a simple module to test the protection of
++	  PRAMFS. The module will be called pramfs_test.ko.
+diff -Nurp linux-2.6.36-orig/fs/pramfs/Makefile linux-2.6.36/fs/pramfs/Makefile
+--- linux-2.6.36-orig/fs/pramfs/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/Makefile	2010-09-14 18:49:52.000000000 +0200
+@@ -0,0 +1,14 @@
++#
++# Makefile for the linux pram-filesystem routines.
++#
 +
-+	ret = 0;
++obj-$(CONFIG_PRAMFS) += pramfs.o
++obj-$(CONFIG_TEST_MODULE) += pramfs_test.o
 +
-+out:
-+	flush_tlb_kernel_range(start, end);
-+	spin_unlock_irq(&init_mm.page_table_lock);
-+	return ret;
-+}
-+EXPORT_SYMBOL(writeable_kernel_pte_range);
++pramfs-y := balloc.o dir.o file.o inode.o namei.o super.o symlink.o
++
++pramfs-$(CONFIG_PRAMFS_WRITE_PROTECT) += wprotect.o
++pramfs-$(CONFIG_PRAMFS_XIP) += xip.o
++pramfs-$(CONFIG_PRAMFS_XATTR) += xattr.o xattr_user.o xattr_trusted.o desctree.o
++pramfs-$(CONFIG_PRAMFS_POSIX_ACL) += acl.o
++pramfs-$(CONFIG_PRAMFS_SECURITY) += xattr_security.o
  
