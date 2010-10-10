@@ -1,193 +1,1501 @@
-From: Michael Opdenacker <michael.opdenacker@free-electrons.com>
-Subject: logfs segfaults at umount time
-Date: Sun, 10 Oct 2010 18:11:31 +0200
-Message-ID: <4CB1E5B3.1090300@free-electrons.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: [PATCH 12/16] pramfs: extended attributes
+Date: Sun, 10 Oct 2010 18:34:29 +0200
+Message-ID: <4CB1EB15.9040109@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:content-type
+         :content-transfer-encoding;
+        bh=8t7OQqiNR06PmqsHRWpMxkhwebOUueTkIQTsyGjJe2g=;
+        b=NPoQ6iudxNHOjhphYepJ8jMSPt4TTt7fV1lXkMS9wgPBNcrO4CtM/Jl+90N+FuaNt1
+         m2EdfsTjZ/3DvAzAUBhGbsvHntzIREOV8dUcqLwbaRn44/iUzBYEnsIJXAKUcObRpXh5
+         Gp8M96+J324l5w8XOB4V+xXRBFHD9Uc8Ylc4g=
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: joern@logfs.org
-Cc: logfs@logfs.org, linux-embedded mailing list <linux-embedded@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
-Hi J=F6rn,
+From: Marco Stornelli <marco.stornelli@gmail.com>
 
-I'm running some flash filesystem benchmarks for CELF, and I'm facing
-kernel segfaults when I try to umount my logfs filesystem.
+Extended attributes operations.
 
-This happens with both 2.6.35 and 2.6.36-rc7. See the below trace.
-
-Has anyone else faced the same kind of issue? Don't hesitate to get bac=
-k
-to me if you need more details or if there are commands you would like
-me to run.
-
-Thank you in advance for your help,
-
-Cheers,
-
-Michael.
-
-
-root@calao:~# cat /proc/cmdline
-console=3DttyS0,115200n8 root=3D/dev/nfs ip=3D192.168.2.100
-nfsroot=3D192.168.2.1:/home/mike/work/celf/RFS mtdparts=3Datmel_nand:12=
-8m(Main)
-root@calao:~# flash_eraseall /dev/mtd0
-Erasing 128 Kibyte @ 8000000 -- 100 % complete.
-root@calao:~# mkfs.logfs /dev/mtdblock0
-Will create filesystem with the following details:
-              hex:   decimal:
-fssize=3D    8000000  134217728
-segsize=3D     40000     262144
-blocksize=3D    1000       4096
-writesize=3D       1          1
-
-Do you wish to continue (yes/no)
-yes
-
-=46inished generating LogFS
-root@calao:~# mount -t logfs /dev/mtdblock0 /mnt/flash/
-root@calao:~# cp -rf /fs/8m/* /mnt/flash/
-eth0: TX underrun, resetting buffers
-eth0: TX underrun, resetting buffers
-root@calao:~# umount /mnt/flash/
-kernel BUG at fs/logfs/segment.c:858!
-Unable to handle kernel NULL pointer dereference at virtual address 000=
-00000
-pgd =3D c14a4000
-[00000000] *pgd=3D23a3c031, *pte=3D00000000, *ppte=3D00000000
-Internal error: Oops: 817 [#1]
-last sysfs file: /sys/devices/virtual/vc/vcs6/uevent
-Modules linked in: logfs zlib_deflate zlib_inflate
-CPU: 0    Not tainted  (2.6.36-rc7 #1)
-PC is at __bug+0x18/0x24
-LR is at __bug+0x14/0x24
-pc : [<c0025764>]    lr : [<c0025760>]    psr: 20000013
-sp : c2d91e18  ip : 00000000  fp : c2d91e84
-r10: c03c3b80  r9 : 00000009  r8 : 00000000
-r7 : c2d91e60  r6 : c3601d58  r5 : c3601d58  r4 : c03c3b80
-r3 : 00000000  r2 : c033e368  r1 : 60000013  r0 : 0000002c
-=46lags: nzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment user
-Control: 0005317f  Table: 214a4000  DAC: 00000015
-Process umount (pid: 1292, stack limit =3D 0xc2d90270)
-Stack: (0xc2d91e18 to 0xc2d92000)
-1e00:                                                       bf022620
-bf022630
-1e20: bf022620 c0078360 ffffffff c0078a04 ffffffff c3601d58 c2d91e60
-00000000
-1e40: 0000000e 00000081 ffffffff c3601d58 c2d91e60 c0078b2c 00000000
-00000000
-1e60: 0000000e 00000000 c03e01a0 c03e01c0 c03e01e0 c03df100 c03df120
-c03df140
-1e80: c03df160 c03df180 c03df1a0 c03c3b80 c03986c0 c0398e40 c03c3ba0
-c03c3bc0
-1ea0: ffffffff ffffffff ffffffff 00000000 c2c1f800 c2d90000 c380dc60
-c380dc78
-1ec0: 00000000 c0078d70 ffffffff ffffffff c3601760 c3601cb8 c2c1f800
-bf022104
-1ee0: c3691830 c3601760 c035e708 c3601cb8 c035e708 c2c1f800 c035e848
-c2d90000
-1f00: c380dc60 c380dc78 00000000 c00a90f4 c3601cb8 c00a99b8 c2c1f800
-c2d90000
-1f20: bf0272e4 c035e848 c2d90000 c0098d04 c2c1f800 c3a7b000 c380dc60
-bf0248e4
-1f40: c2c1f800 bf028228 c380dc60 c0097f70 00000000 c2d91f68 c380dc60
-c00ad3ac
-1f60: 4003a000 c380dc78 c2d91f68 c2d91f68 c2d91f70 c2d91f70 c380dc60
-c35fbab8
-1f80: c2d90000 0001c530 0001aa1c 0001c518 00000034 c0021fe8 c2d90000
-00000000
-1fa0: 0001bab4 c0021e40 0001c530 0001aa1c 0001c530 00000000 00000048
-00000000
-1fc0: 0001c530 0001aa1c 0001c518 00000034 00000000 00000000 00000000
-0001bab4
-1fe0: 0001c560 be983c08 402c1c5c 402c1c7c 60000010 0001c530 e7d82003
-e7c12007
-[<c0025764>] (__bug+0x18/0x24) from [<bf022630>]
-(map_invalidatepage+0x10/0x18 [logfs])
-[<bf022630>] (map_invalidatepage+0x10/0x18 [logfs]) from [<c0078360>]
-(do_invalidatepage+0x20/0x28)
-[<c0078360>] (do_invalidatepage+0x20/0x28) from [<c0078a04>]
-(truncate_inode_page+0xd4/0xe4)
-[<c0078a04>] (truncate_inode_page+0xd4/0xe4) from [<c0078b2c>]
-(truncate_inode_pages_range+0x118/0x344)
-[<c0078b2c>] (truncate_inode_pages_range+0x118/0x344) from [<c0078d70>]
-(truncate_inode_pages+0x18/0x20)
-[<c0078d70>] (truncate_inode_pages+0x18/0x20) from [<bf022104>]
-(logfs_evict_inode+0x40/0x188 [logfs])
-[<bf022104>] (logfs_evict_inode+0x40/0x188 [logfs]) from [<c00a90f4>]
-(evict+0x20/0xb0)
-[<c00a90f4>] (evict+0x20/0xb0) from [<c00a99b8>] (iput+0x178/0x254)
-[<c00a99b8>] (iput+0x178/0x254) from [<c0098d04>]
-(generic_shutdown_super+0x78/0xe4)
-[<c0098d04>] (generic_shutdown_super+0x78/0xe4) from [<bf0248e4>]
-(logfs_kill_sb+0x40/0xf8 [logfs])
-[<bf0248e4>] (logfs_kill_sb+0x40/0xf8 [logfs]) from [<c0097f70>]
-(deactivate_locked_super+0x44/0x58)
-[<c0097f70>] (deactivate_locked_super+0x44/0x58) from [<c00ad3ac>]
-(sys_umount+0x6c/0x33c)
-[<c00ad3ac>] (sys_umount+0x6c/0x33c) from [<c0021e40>]
-(ret_fast_syscall+0x0/0x2c)
-Code: e1a01000 e59f000c eb096367 e3a03000 (e5833000)
----[ end trace f09ed3af1a44d711 ]---
-------------[ cut here ]------------
-WARNING: at kernel/exit.c:899 do_exit+0x5d4/0x624()
-Modules linked in: logfs zlib_deflate zlib_inflate
-[<c0027ae8>] (unwind_backtrace+0x0/0xf4) from [<c003a310>]
-(warn_slowpath_common+0x4c/0x64)
-[<c003a310>] (warn_slowpath_common+0x4c/0x64) from [<c003a344>]
-(warn_slowpath_null+0x1c/0x24)
-[<c003a344>] (warn_slowpath_null+0x1c/0x24) from [<c003e0a4>]
-(do_exit+0x5d4/0x624)
-[<c003e0a4>] (do_exit+0x5d4/0x624) from [<c0025c90>] (die+0x188/0x1c0)
-[<c0025c90>] (die+0x188/0x1c0) from [<c0029044>]
-(__do_kernel_fault+0x64/0x84)
-[<c0029044>] (__do_kernel_fault+0x64/0x84) from [<c0029198>]
-(do_page_fault+0x134/0x1d8)
-[<c0029198>] (do_page_fault+0x134/0x1d8) from [<c00212e4>]
-(do_DataAbort+0x34/0x98)
-[<c00212e4>] (do_DataAbort+0x34/0x98) from [<c0021a6c>]
-(__dabt_svc+0x4c/0x60)
-Exception stack(0xc2d91dd0 to 0xc2d91e18)
-1dc0:                                     0000002c 60000013 c033e368
-00000000
-1de0: c03c3b80 c3601d58 c3601d58 c2d91e60 00000000 00000009 c03c3b80
-c2d91e84
-1e00: 00000000 c2d91e18 c0025760 c0025764 20000013 ffffffff
-[<c0021a6c>] (__dabt_svc+0x4c/0x60) from [<c0025764>] (__bug+0x18/0x24)
-[<c0025764>] (__bug+0x18/0x24) from [<bf022630>]
-(map_invalidatepage+0x10/0x18 [logfs])
-[<bf022630>] (map_invalidatepage+0x10/0x18 [logfs]) from [<c0078360>]
-(do_invalidatepage+0x20/0x28)
-[<c0078360>] (do_invalidatepage+0x20/0x28) from [<c0078a04>]
-(truncate_inode_page+0xd4/0xe4)
-[<c0078a04>] (truncate_inode_page+0xd4/0xe4) from [<c0078b2c>]
-(truncate_inode_pages_range+0x118/0x344)
-[<c0078b2c>] (truncate_inode_pages_range+0x118/0x344) from [<c0078d70>]
-(truncate_inode_pages+0x18/0x20)
-[<c0078d70>] (truncate_inode_pages+0x18/0x20) from [<bf022104>]
-(logfs_evict_inode+0x40/0x188 [logfs])
-[<bf022104>] (logfs_evict_inode+0x40/0x188 [logfs]) from [<c00a90f4>]
-(evict+0x20/0xb0)
-[<c00a90f4>] (evict+0x20/0xb0) from [<c00a99b8>] (iput+0x178/0x254)
-[<c00a99b8>] (iput+0x178/0x254) from [<c0098d04>]
-(generic_shutdown_super+0x78/0xe4)
-[<c0098d04>] (generic_shutdown_super+0x78/0xe4) from [<bf0248e4>]
-(logfs_kill_sb+0x40/0xf8 [logfs])
-[<bf0248e4>] (logfs_kill_sb+0x40/0xf8 [logfs]) from [<c0097f70>]
-(deactivate_locked_super+0x44/0x58)
-[<c0097f70>] (deactivate_locked_super+0x44/0x58) from [<c00ad3ac>]
-(sys_umount+0x6c/0x33c)
-[<c00ad3ac>] (sys_umount+0x6c/0x33c) from [<c0021e40>]
-(ret_fast_syscall+0x0/0x2c)
----[ end trace f09ed3af1a44d712 ]---
-Segmentation fault
-
---=20
-Michael Opdenacker, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
-+ 33 621 604 642
+Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+---
+diff -Nurp linux-2.6.36-orig/fs/pramfs/xattr.c linux-2.6.36/fs/pramfs/xattr.c
+--- linux-2.6.36-orig/fs/pramfs/xattr.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/xattr.c	2010-09-14 19:45:40.000000000 +0200
+@@ -0,0 +1,1108 @@
++/*
++ * FILE NAME fs/pramfs/xattr.c
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Extended attributes operations.
++ *
++ * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * based on fs/ext2/xattr.c with the following copyright:
++ *
++ * Fix by Harrison Xing <harrison@mountainviewdata.com>.
++ * Extended attributes for symlinks and special files added per
++ *  suggestion of Luka Renko <luka.renko@hermes.si>.
++ * xattr consolidation Copyright (c) 2004 James Morris <jmorris@redhat.com>,
++ *  Red Hat Inc.
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++/*
++ * Extended attributes are stored in blocks allocated outside of
++ * any inode. The i_xattr field is then made to point to this allocated
++ * block. If all extended attributes of an inode are identical, these
++ * inodes may share the same extended attribute block. Such situations
++ * are automatically detected by keeping a cache of recent attribute block
++ * numbers and hashes over the block's contents in memory.
++ *
++ *
++ * Extended attribute block layout:
++ *
++ *   +------------------+
++ *   | header           |
++ *   | entry 1          | |
++ *   | entry 2          | | growing downwards
++ *   | entry 3          | v
++ *   | four null bytes  |
++ *   | . . .            |
++ *   | value 1          | ^
++ *   | value 3          | | growing upwards
++ *   | value 2          | |
++ *   +------------------+
++ *
++ * The block header is followed by multiple entry descriptors. These entry
++ * descriptors are variable in size, and alligned to PRAM_XATTR_PAD
++ * byte boundaries. The entry descriptors are sorted by attribute name,
++ * so that two extended attribute blocks can be compared efficiently.
++ *
++ * Attribute values are aligned to the end of the block, stored in
++ * no specific order. They are also padded to PRAM_XATTR_PAD byte
++ * boundaries. No additional gaps are left between them.
++ *
++ * Locking strategy
++ * ----------------
++ * pi->i_xattr is protected by PRAM_I(inode)->xattr_sem.
++ * EA blocks are only changed if they are exclusive to an inode, so
++ * holding xattr_sem also means that nothing but the EA block's reference
++ * count will change. Multiple writers to an EA block are synchronized
++ * by the mutex in each block descriptor. Block descriptors are kept in a
++ * red black tree and the key is the absolute block number.
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/mbcache.h>
++#include <linux/rwsem.h>
++#include <linux/security.h>
++#include "pram.h"
++#include "xattr.h"
++#include "acl.h"
++#include "desctree.h"
++
++#define HDR(bp) ((struct pram_xattr_header *)(bp))
++#define ENTRY(ptr) ((struct pram_xattr_entry *)(ptr))
++#define FIRST_ENTRY(bh) ENTRY(HDR(bh)+1)
++#define IS_LAST_ENTRY(entry) (*(__u32 *)(entry) == 0)
++#define GET_DESC(sbi, blocknr) lookup_xblock_desc(sbi, blocknr, pram_xblock_desc_cache, 1)
++#define LOOKUP_DESC(sbi, blocknr) lookup_xblock_desc(sbi, blocknr, NULL, 0)
++
++#ifdef PRAM_XATTR_DEBUG
++# define ea_idebug(inode, f...) do { \
++		printk(KERN_DEBUG "inode %ld: ", inode->i_ino); \
++		printk(f); \
++		printk("\n"); \
++	} while (0)
++# define ea_bdebug(blocknr, f...) do { \
++		printk(KERN_DEBUG "block %lu: ", blocknr); \
++		printk(f); \
++		printk("\n"); \
++	} while (0)
++#else
++# define ea_idebug(f...)
++# define ea_bdebug(f...)
++#endif
++
++static int pram_xattr_set2(struct inode *, char *, struct pram_xblock_desc *, struct pram_xattr_header *);
++
++static int pram_xattr_cache_insert(struct super_block *sb, unsigned long blocknr, u32 xhash);
++static struct pram_xblock_desc *pram_xattr_cache_find(struct inode *,
++						 struct pram_xattr_header *);
++static void pram_xattr_rehash(struct pram_xattr_header *,
++			      struct pram_xattr_entry *);
++
++static struct mb_cache *pram_xattr_cache;
++static struct kmem_cache *pram_xblock_desc_cache;
++
++static const struct xattr_handler *pram_xattr_handler_map[] = {
++	[PRAM_XATTR_INDEX_USER]		     = &pram_xattr_user_handler,
++#ifdef CONFIG_PRAMFS_POSIX_ACL
++	[PRAM_XATTR_INDEX_POSIX_ACL_ACCESS]  = &pram_xattr_acl_access_handler,
++	[PRAM_XATTR_INDEX_POSIX_ACL_DEFAULT] = &pram_xattr_acl_default_handler,
++#endif
++	[PRAM_XATTR_INDEX_TRUSTED]	     = &pram_xattr_trusted_handler,
++#ifdef CONFIG_PRAMFS_SECURITY
++	[PRAM_XATTR_INDEX_SECURITY]	     = &pram_xattr_security_handler,
++#endif
++};
++
++const struct xattr_handler *pram_xattr_handlers[] = {
++	&pram_xattr_user_handler,
++	&pram_xattr_trusted_handler,
++#ifdef CONFIG_PRAMFS_POSIX_ACL
++	&pram_xattr_acl_access_handler,
++	&pram_xattr_acl_default_handler,
++#endif
++#ifdef CONFIG_PRAMFS_SECURITY
++	&pram_xattr_security_handler,
++#endif
++	NULL
++};
++
++static void desc_put(struct super_block *sb, struct pram_xblock_desc *desc)
++{
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++	if (!put_xblock_desc(sbi, desc)) {
++		/* Ok we can free the block and its descriptor */
++		pram_dbg("freeing block %lu and its descriptor", desc->blocknr);
++		pram_free_block(sb, desc->blocknr);
++		kmem_cache_free(pram_xblock_desc_cache, desc);
++	}
++}
++
++static inline const struct xattr_handler *pram_xattr_handler(int name_index)
++{
++	const struct xattr_handler *handler = NULL;
++
++	if (name_index > 0 && name_index < ARRAY_SIZE(pram_xattr_handler_map))
++		handler = pram_xattr_handler_map[name_index];
++	return handler;
++}
++
++/*
++ * pram_xattr_get()
++ *
++ * Copy an extended attribute into the buffer
++ * provided, or compute the buffer size required.
++ * Buffer is NULL to compute the size of the buffer required.
++ *
++ * Returns a negative error number on failure, or the number of bytes
++ * used / required on success.
++ */
++int pram_xattr_get(struct inode *inode, int name_index, const char *name,
++	       void *buffer, size_t buffer_size)
++{
++	char *bp = NULL;
++	struct pram_xattr_entry *entry;
++	struct pram_xblock_desc *desc;
++	struct pram_inode *pi;
++	size_t name_len, size;
++	char *end;
++	int error = 0;
++	unsigned long blocknr;
++	struct super_block *sb = inode->i_sb;
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++
++	ea_idebug(inode, "name=%d<%s>, buffer=%p, buffer_size=%ld",
++		  name_index, name, buffer, (long)buffer_size);
++
++	pi = pram_get_inode(sb, inode->i_ino);
++	if (!pi)
++		return -EINVAL;
++	if (name == NULL)
++		return -EINVAL;
++	down_read(&PRAM_I(inode)->xattr_sem);
++	error = -ENODATA;
++	if (!pi->i_xattr)
++		goto cleanup;
++	ea_idebug(inode, "reading block %llu", be64_to_cpu(pi->i_xattr));
++	bp = pram_get_block(sb, be64_to_cpu(pi->i_xattr));
++	error = -EIO;
++	if (!bp)
++		goto cleanup;
++	end = bp + sb->s_blocksize;
++	blocknr = pram_get_blocknr(sb, be64_to_cpu(pi->i_xattr));
++	ea_bdebug(blocknr, "refcount=%d", be32_to_cpu(HDR(bp)->h_refcount));
++	if (HDR(bp)->h_magic != cpu_to_be32(PRAM_XATTR_MAGIC)) {
++bad_block:	pram_err("inode %ld: bad block %llu", inode->i_ino,
++		be64_to_cpu(pi->i_xattr));
++		error = -EIO;
++		goto cleanup;
++	}
++	/* find named attribute */
++	name_len = strlen(name);
++
++	error = -ERANGE;
++	if (name_len > 255)
++		goto cleanup;
++	entry = FIRST_ENTRY(bp);
++	while (!IS_LAST_ENTRY(entry)) {
++		struct pram_xattr_entry *next =
++			PRAM_XATTR_NEXT(entry);
++		if ((char *)next >= end)
++			goto bad_block;
++		if (name_index == entry->e_name_index &&
++		    name_len == entry->e_name_len &&
++		    memcmp(name, entry->e_name, name_len) == 0)
++			goto found;
++		entry = next;
++	}
++	/* Check the remaining name entries */
++	while (!IS_LAST_ENTRY(entry)) {
++		struct pram_xattr_entry *next =
++			PRAM_XATTR_NEXT(entry);
++		if ((char *)next >= end)
++			goto bad_block;
++		entry = next;
++	}
++
++	desc = GET_DESC(sbi, blocknr);
++	if (IS_ERR(desc)) {
++		error = -ENOMEM;
++		goto cleanup;
++	}
++	desc_put(sb, desc);
++	if (pram_xattr_cache_insert(sb, blocknr,
++					be32_to_cpu(HDR(bp)->h_hash)))
++		ea_idebug(inode, "cache insert failed");
++	error = -ENODATA;
++	goto cleanup;
++found:
++	/* check the buffer size */
++	if (entry->e_value_block != 0)
++		goto bad_block;
++	size = be32_to_cpu(entry->e_value_size);
++	if (size > inode->i_sb->s_blocksize ||
++	    be16_to_cpu(entry->e_value_offs) + size > inode->i_sb->s_blocksize)
++		goto bad_block;
++
++	desc = GET_DESC(sbi, blocknr);
++	if (IS_ERR(desc)) {
++		error = -ENOMEM;
++		goto cleanup;
++	}
++	desc_put(sb, desc);
++	if (pram_xattr_cache_insert(sb, blocknr,
++					be32_to_cpu(HDR(bp)->h_hash)))
++		ea_idebug(inode, "cache insert failed");
++	if (buffer) {
++		error = -ERANGE;
++		if (size > buffer_size)
++			goto cleanup;
++		/* return value of attribute */
++		memcpy(buffer, bp + be16_to_cpu(entry->e_value_offs),
++			size);
++	}
++	error = size;
++
++cleanup:
++	up_read(&PRAM_I(inode)->xattr_sem);
++
++	return error;
++}
++
++/*
++ * pram_xattr_list()
++ *
++ * Copy a list of attribute names into the buffer
++ * provided, or compute the buffer size required.
++ * Buffer is NULL to compute the size of the buffer required.
++ *
++ * Returns a negative error number on failure, or the number of bytes
++ * used / required on success.
++ */
++static int pram_xattr_list(struct dentry *dentry, char *buffer, size_t buffer_size)
++{
++	struct inode *inode = dentry->d_inode;
++	char *bp = NULL;
++	struct pram_xattr_entry *entry;
++	struct pram_xblock_desc *desc;
++	struct pram_inode *pi;
++	char *end;
++	size_t rest = buffer_size;
++	int error = 0;
++	unsigned long blocknr;
++	struct super_block *sb = inode->i_sb;
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++
++	ea_idebug(inode, "buffer=%p, buffer_size=%ld",
++		  buffer, (long)buffer_size);
++
++	pi = pram_get_inode(sb, inode->i_ino);
++	if (!pi)
++		return error;
++	down_read(&PRAM_I(inode)->xattr_sem);
++	error = 0;
++	if (!pi->i_xattr)
++		goto cleanup;
++	ea_idebug(inode, "reading block %llu", be64_to_cpu(pi->i_xattr));
++	bp = pram_get_block(sb, be64_to_cpu(pi->i_xattr));
++	blocknr = pram_get_blocknr(sb, be64_to_cpu(pi->i_xattr));
++	error = -EIO;
++	if (!bp)
++		goto cleanup;
++	ea_bdebug(blocknr, "refcount=%d", be32_to_cpu(HDR(bp)->h_refcount));
++	end = bp + sb->s_blocksize;
++	if (HDR(bp)->h_magic != cpu_to_be32(PRAM_XATTR_MAGIC)) {
++bad_block:	pram_err("inode %ld: bad block %llu", inode->i_ino,
++			be64_to_cpu(pi->i_xattr));
++		error = -EIO;
++		goto cleanup;
++	}
++
++	/* check the on-disk data structure */
++	entry = FIRST_ENTRY(bp);
++	while (!IS_LAST_ENTRY(entry)) {
++		struct pram_xattr_entry *next = PRAM_XATTR_NEXT(entry);
++
++		if ((char *)next >= end)
++			goto bad_block;
++		entry = next;
++	}
++
++	desc = GET_DESC(sbi, blocknr);
++	if (IS_ERR(desc)) {
++		error = -ENOMEM;
++		goto cleanup;
++	}
++	desc_put(sb, desc);
++	if (pram_xattr_cache_insert(sb, blocknr,
++					be32_to_cpu(HDR(bp)->h_hash)))
++			ea_idebug(inode, "cache insert failed");
++
++	/* list the attribute names */
++	for (entry = FIRST_ENTRY(bp); !IS_LAST_ENTRY(entry);
++	     entry = PRAM_XATTR_NEXT(entry)) {
++		const struct xattr_handler *handler =
++			pram_xattr_handler(entry->e_name_index);
++
++		if (handler) {
++			size_t size = handler->list(dentry, buffer, rest,
++						    entry->e_name,
++						    entry->e_name_len,
++						    handler->flags);
++			if (buffer) {
++				if (size > rest) {
++					error = -ERANGE;
++					goto cleanup;
++				}
++				buffer += size;
++			}
++			rest -= size;
++		}
++	}
++	error = buffer_size - rest;  /* total size */
++
++cleanup:
++	up_read(&PRAM_I(inode)->xattr_sem);
++
++	return error;
++}
++
++/*
++ * Inode operation listxattr()
++ *
++ * dentry->d_inode->i_mutex: don't care
++ */
++ssize_t pram_listxattr(struct dentry *dentry, char *buffer, size_t size)
++{
++	return pram_xattr_list(dentry, buffer, size);
++}
++
++/*
++ * pram_xattr_set()
++ *
++ * Create, replace or remove an extended attribute for this inode. Buffer
++ * is NULL to remove an existing extended attribute, and non-NULL to
++ * either replace an existing extended attribute, or create a new extended
++ * attribute. The flags XATTR_REPLACE and XATTR_CREATE
++ * specify that an extended attribute must exist and must not exist
++ * previous to the call, respectively.
++ *
++ * Returns 0, or a negative error number on failure.
++ */
++int pram_xattr_set(struct inode *inode, int name_index, const char *name,
++	       const void *value, size_t value_len, int flags)
++{
++	struct super_block *sb = inode->i_sb;
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++	struct pram_xattr_header *header = NULL;
++	struct pram_xattr_entry *here, *last;
++	struct pram_inode *pi;
++	struct pram_xblock_desc *desc = NULL;
++	size_t name_len, free, min_offs = sb->s_blocksize;
++	int not_found = 1, error;
++	char *end;
++	char *bp = NULL;
++	unsigned long blocknr = 0;
++
++	/*
++	 * header -- Points either into bp, or to a temporarily
++	 *           allocated buffer.
++	 * here -- The named entry found, or the place for inserting, within
++	 *         the block pointed to by header.
++	 * last -- Points right after the last named entry within the block
++	 *         pointed to by header.
++	 * min_offs -- The offset of the first value (values are aligned
++	 *             towards the end of the block).
++	 * end -- Points right after the block pointed to by header.
++	 */
++
++	ea_idebug(inode, "name=%d.%s, value=%p, value_len=%ld",
++		  name_index, name, value, (long)value_len);
++
++	if (value == NULL)
++		value_len = 0;
++	if (name == NULL)
++		return -EINVAL;
++	name_len = strlen(name);
++	if (name_len > 255 || value_len > sb->s_blocksize)
++		return -ERANGE;
++	pi = pram_get_inode(sb, inode->i_ino);
++	if (!pi)
++		return -EINVAL;
++	down_write(&PRAM_I(inode)->xattr_sem);
++	if (pi->i_xattr) {
++		/* The inode already has an extended attribute block. */
++		bp = pram_get_block(sb, be64_to_cpu(pi->i_xattr));
++		error = -EIO;
++		if (!bp)
++			goto cleanup;
++		blocknr = pram_get_blocknr(sb, be64_to_cpu(pi->i_xattr));
++		ea_bdebug(blocknr, "refcount=%d", be32_to_cpu(HDR(bp)->h_refcount));
++		header = HDR(bp);
++		end = bp + sb->s_blocksize;
++		if (header->h_magic != cpu_to_be32(PRAM_XATTR_MAGIC)) {
++bad_block:		pram_err("inode %ld: bad block %llu", inode->i_ino,
++				   be64_to_cpu(pi->i_xattr));
++			error = -EIO;
++			goto cleanup;
++		}
++		/* Find the named attribute. */
++		here = FIRST_ENTRY(bp);
++		while (!IS_LAST_ENTRY(here)) {
++			struct pram_xattr_entry *next = PRAM_XATTR_NEXT(here);
++			if ((char *)next >= end)
++				goto bad_block;
++			if (!here->e_value_block && here->e_value_size) {
++				size_t offs = be16_to_cpu(here->e_value_offs);
++				if (offs < min_offs)
++					min_offs = offs;
++			}
++			not_found = name_index - here->e_name_index;
++			if (!not_found)
++				not_found = name_len - here->e_name_len;
++			if (!not_found)
++				not_found = memcmp(name, here->e_name, name_len);
++			if (not_found <= 0)
++				break;
++			here = next;
++		}
++		last = here;
++		/* We still need to compute min_offs and last. */
++		while (!IS_LAST_ENTRY(last)) {
++			struct pram_xattr_entry *next = PRAM_XATTR_NEXT(last);
++			if ((char *)next >= end)
++				goto bad_block;
++			if (!last->e_value_block && last->e_value_size) {
++				size_t offs = be16_to_cpu(last->e_value_offs);
++				if (offs < min_offs)
++					min_offs = offs;
++			}
++			last = next;
++		}
++
++		/* Check whether we have enough space left. */
++		free = min_offs - ((char *)last - (char *)header) - sizeof(__u32);
++	} else {
++		/* We will use a new extended attribute block. */
++		free = sb->s_blocksize -
++			sizeof(struct pram_xattr_header) - sizeof(__u32);
++		here = last = NULL;  /* avoid gcc uninitialized warning. */
++	}
++
++	if (not_found) {
++		/* Request to remove a nonexistent attribute? */
++		error = -ENODATA;
++		if (flags & XATTR_REPLACE)
++			goto cleanup;
++		error = 0;
++		if (value == NULL)
++			goto cleanup;
++	} else {
++		/* Request to create an existing attribute? */
++		error = -EEXIST;
++		if (flags & XATTR_CREATE)
++			goto cleanup;
++		if (!here->e_value_block && here->e_value_size) {
++			size_t size = be32_to_cpu(here->e_value_size);
++
++			if (be16_to_cpu(here->e_value_offs) + size >
++			    sb->s_blocksize || size > sb->s_blocksize)
++				goto bad_block;
++			free += PRAM_XATTR_SIZE(size);
++		}
++		free += PRAM_XATTR_LEN(name_len);
++	}
++	error = -ENOSPC;
++	if (free < PRAM_XATTR_LEN(name_len) + PRAM_XATTR_SIZE(value_len))
++		goto cleanup;
++
++	/* Here we know that we can set the new attribute. */
++
++	if (header) {
++		struct mb_cache_entry *ce;
++
++		desc = GET_DESC(sbi, blocknr);
++		if (IS_ERR(desc)) {
++			error = -ENOMEM;
++			goto cleanup;
++		}
++
++		/* assert(header == HDR(bp)); */
++		ce = mb_cache_entry_get(pram_xattr_cache, (struct block_device *)sbi,
++							blocknr);
++		mutex_lock(&desc->lock);
++		pram_memunlock_block(sb, bp);
++		if (header->h_refcount == cpu_to_be32(1)) {
++			ea_bdebug(blocknr, "modifying in-place");
++			if (ce)
++				mb_cache_entry_free(ce);
++			/* keep it locked while modifying it. */
++		} else {
++			int offset;
++
++			if (ce)
++				mb_cache_entry_release(ce);
++			pram_memlock_block(sb, bp);
++			mutex_unlock(&desc->lock);
++			ea_bdebug(desc->blocknr, "cloning");
++			header = kmalloc(inode->i_sb->s_blocksize, GFP_KERNEL);
++			error = -ENOMEM;
++			if (header == NULL)
++				goto cleanup;
++			memcpy(header, HDR(bp), inode->i_sb->s_blocksize);
++			header->h_refcount = cpu_to_be32(1);
++
++			offset = (char *)here - bp;
++			here = ENTRY((char *)header + offset);
++			offset = (char *)last - bp;
++			last = ENTRY((char *)header + offset);
++		}
++	} else {
++		/* Allocate a buffer where we construct the new block. */
++		header = kzalloc(sb->s_blocksize, GFP_KERNEL);
++		error = -ENOMEM;
++		if (header == NULL)
++			goto cleanup;
++		end = (char *)header + sb->s_blocksize;
++		header->h_magic = cpu_to_be32(PRAM_XATTR_MAGIC);
++		header->h_refcount = cpu_to_be32(1);
++		last = here = ENTRY(header+1);
++	}
++
++	/* Iff we are modifying the block in-place, the block is locked here. */
++
++	if (not_found) {
++		/* Insert the new name. */
++		size_t size = PRAM_XATTR_LEN(name_len);
++		size_t rest = (char *)last - (char *)here;
++		memmove((char *)here + size, here, rest);
++		memset(here, 0, size);
++		here->e_name_index = name_index;
++		here->e_name_len = name_len;
++		memcpy(here->e_name, name, name_len);
++	} else {
++		if (!here->e_value_block && here->e_value_size) {
++			char *first_val = (char *)header + min_offs;
++			size_t offs = be16_to_cpu(here->e_value_offs);
++			char *val = (char *)header + offs;
++			size_t size = PRAM_XATTR_SIZE(
++				be32_to_cpu(here->e_value_size));
++
++			if (size == PRAM_XATTR_SIZE(value_len)) {
++				/* The old and the new value have the same
++				   size. Just replace. */
++				here->e_value_size = cpu_to_be32(value_len);
++				memset(val + size - PRAM_XATTR_PAD, 0,
++				       PRAM_XATTR_PAD); /* Clear pad bytes. */
++				memcpy(val, value, value_len);
++				goto skip_replace;
++			}
++
++			/* Remove the old value. */
++			memmove(first_val + size, first_val, val - first_val);
++			memset(first_val, 0, size);
++			here->e_value_offs = 0;
++			min_offs += size;
++
++			/* Adjust all value offsets. */
++			last = ENTRY(header+1);
++			while (!IS_LAST_ENTRY(last)) {
++				size_t o = be16_to_cpu(last->e_value_offs);
++				if (!last->e_value_block && o < offs)
++					last->e_value_offs =
++						cpu_to_be16(o + size);
++				last = PRAM_XATTR_NEXT(last);
++			}
++		}
++		if (value == NULL) {
++			/* Remove the old name. */
++			size_t size = PRAM_XATTR_LEN(name_len);
++			last = ENTRY((char *)last - size);
++			memmove(here, (char *)here + size,
++				(char *)last - (char *)here);
++			memset(last, 0, size);
++		}
++	}
++
++	if (value != NULL) {
++		/* Insert the new value. */
++		here->e_value_size = cpu_to_be32(value_len);
++		if (value_len) {
++			size_t size = PRAM_XATTR_SIZE(value_len);
++			char *val = (char *)header + min_offs - size;
++			here->e_value_offs =
++				cpu_to_be16((char *)val - (char *)header);
++			memset(val + size - PRAM_XATTR_PAD, 0,
++			       PRAM_XATTR_PAD); /* Clear the pad bytes. */
++			memcpy(val, value, value_len);
++		}
++	}
++
++skip_replace:
++	if (IS_LAST_ENTRY(ENTRY(header+1))) {
++		/* This block is now empty. */
++		if (bp && header == HDR(bp)) {
++			/* we were modifying in-place. */
++			pram_memlock_block(sb, bp);
++			mutex_unlock(&desc->lock);
++		}
++		error = pram_xattr_set2(inode, bp, desc, NULL);
++	} else {
++		pram_xattr_rehash(header, here);
++		if (bp && header == HDR(bp)) {
++			/* we were modifying in-place. */
++			pram_memlock_block(sb, bp);
++			mutex_unlock(&desc->lock);
++		}
++		error = pram_xattr_set2(inode, bp, desc, header);
++	}
++
++cleanup:
++	desc_put(sb, desc);
++	if (!(bp && header == HDR(bp)))
++		kfree(header);
++	up_write(&PRAM_I(inode)->xattr_sem);
++
++	return error;
++}
++
++/*
++ * Second half of pram_xattr_set(): Update the file system.
++ */
++static int pram_xattr_set2(struct inode *inode, char *old_bp,
++			   struct pram_xblock_desc *old_desc,
++			   struct pram_xattr_header *header)
++{
++	struct super_block *sb = inode->i_sb;
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++	struct pram_xblock_desc *new_desc = NULL;
++	unsigned long blocknr;
++	struct pram_inode *pi;
++	int error;
++	char *new_bp = NULL;
++
++	if (header) {
++		new_desc = pram_xattr_cache_find(inode, header);
++		if (new_desc) {
++			new_bp = pram_get_block(sb, pram_get_block_off(sb, new_desc->blocknr));
++			/* We found an identical block in the cache. */
++			if (new_bp == old_bp) {
++				ea_bdebug(new_desc->blocknr, "keeping this block");
++			} else {
++				/* The old block is released after updating
++				   the inode.  */
++				ea_bdebug(new_desc->blocknr, "reusing block");
++				pram_memunlock_block(sb, new_bp);
++				be32_add_cpu(&HDR(new_bp)->h_refcount, 1);
++				pram_memlock_block(sb, new_bp);
++				ea_bdebug(new_desc->blocknr, "refcount now=%d",
++					be32_to_cpu(HDR(new_bp)->h_refcount));
++			}
++			blocknr = new_desc->blocknr;
++			mutex_unlock(&new_desc->lock);
++			desc_put(sb, new_desc);
++		} else if (old_bp && header == HDR(old_bp)) {
++			/* Keep this block. No need to lock the block as we
++			   don't need to change the reference count. */
++			new_bp = old_bp;
++			pram_xattr_cache_insert(sb, old_desc->blocknr, HDR(new_bp)->h_hash);
++			blocknr = old_desc->blocknr;
++		} else {
++			/* We need to allocate a new block */
++			struct pram_xblock_desc *new_desc;
++
++			error = pram_new_block(sb, &blocknr, 1);
++			if (error)
++				goto out;
++			ea_idebug(inode, "creating block %lu", blocknr);
++			new_desc = kmem_cache_alloc(pram_xblock_desc_cache, GFP_KERNEL);
++			if (!new_desc) {
++				pram_free_block(sb, blocknr);
++				error = -EIO;
++				goto out;
++			}
++			xblock_desc_init_always(new_desc);
++			new_desc->blocknr = blocknr;
++			new_bp = pram_get_block(sb, pram_get_block_off(sb, blocknr));
++			if (!new_bp) {
++				pram_free_block(sb, blocknr);
++				kmem_cache_free(pram_xblock_desc_cache, new_desc);
++				error = -EIO;
++				goto out;
++			}
++			pram_memunlock_block(sb, new_bp);
++			memcpy(new_bp, header, sb->s_blocksize);
++			pram_memlock_block(sb, new_bp);
++			insert_xblock_desc(sbi, new_desc);
++			pram_xattr_cache_insert(sb, new_desc->blocknr, HDR(new_bp)->h_hash);
++		}
++	}
++
++	/* Update the inode. */
++	pi = pram_get_inode(sb, inode->i_ino);
++	pram_memunlock_inode(pi);
++	pi->i_xattr = new_bp ? be64_to_cpu(pram_get_block_off(sb, blocknr)) : 0;
++	inode->i_ctime = CURRENT_TIME_SEC;
++	pi->i_ctime = cpu_to_be32(inode->i_ctime.tv_sec);
++	pram_memlock_inode(pi);
++
++	error = 0;
++	if (old_bp && old_bp != new_bp) {
++		struct mb_cache_entry *ce;
++
++		/* Here old_desc MUST be valid or we have a bug */
++		BUG_ON(!old_desc);
++
++		/*
++		 * If there was an old block and we are no longer using it,
++		 * release the old block.
++		 */
++		ce = mb_cache_entry_get(pram_xattr_cache, (struct block_device *)sbi,
++					old_desc->blocknr);
++		mutex_lock(&old_desc->lock);
++		if (HDR(old_bp)->h_refcount == cpu_to_be32(1)) {
++			/* Free the old block. */
++			if (ce)
++				mb_cache_entry_free(ce);
++			ea_bdebug(old_desc->blocknr, "freeing");
++			mutex_unlock(&old_desc->lock);
++			/* Caller will call desc_put later */
++			mark_free_desc(old_desc);
++		} else {
++			/* Decrement the refcount only. */
++			pram_memunlock_block(sb, old_bp);
++			be32_add_cpu(&HDR(old_bp)->h_refcount, -1);
++			pram_memlock_block(sb, old_bp);
++			if (ce)
++				mb_cache_entry_release(ce);
++			ea_bdebug(old_desc->blocknr, "refcount now=%d",
++			be32_to_cpu(HDR(old_bp)->h_refcount));
++			mutex_unlock(&old_desc->lock);
++		}
++	}
++
++out:
++	return error;
++}
++
++/*
++ * pram_xattr_delete_inode()
++ *
++ * Free extended attribute resources associated with this inode. This
++ * is called immediately before an inode is freed.
++ */
++void pram_xattr_delete_inode(struct inode *inode)
++{
++	char *bp = NULL;
++	struct mb_cache_entry *ce;
++	struct pram_inode *pi;
++	struct pram_xblock_desc *desc;
++	struct super_block *sb = inode->i_sb;
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++	unsigned long blocknr;
++
++	pi = pram_get_inode(sb, inode->i_ino);
++	if (!pi)
++		goto cleanup;
++	down_write(&PRAM_I(inode)->xattr_sem);
++	if (!pi->i_xattr)
++		goto cleanup;
++	bp = pram_get_block(sb, be64_to_cpu(pi->i_xattr));
++	if (!bp) {
++		pram_err("inode %ld: block %llu read error", inode->i_ino,
++			be64_to_cpu(pi->i_xattr));
++		goto cleanup;
++	}
++	blocknr = pram_get_blocknr(sb, be64_to_cpu(pi->i_xattr));
++	if (HDR(bp)->h_magic != cpu_to_be32(PRAM_XATTR_MAGIC)) {
++		pram_err("inode %ld: bad block %llu", inode->i_ino,
++			be64_to_cpu(pi->i_xattr));
++		goto cleanup;
++	}
++	ce = mb_cache_entry_get(pram_xattr_cache, (struct block_device *)sbi, blocknr);
++	desc = LOOKUP_DESC(sbi, blocknr);
++	if (!desc) {
++		pram_err("descriptor not found for blocknr %lu", blocknr);
++		goto cleanup;
++	}
++	mutex_lock(&desc->lock);
++	if (HDR(bp)->h_refcount == cpu_to_be32(1)) {
++		if (ce)
++			mb_cache_entry_free(ce);
++		mark_free_desc(desc);
++	} else {
++		be32_add_cpu(&HDR(bp)->h_refcount, -1);
++		if (ce)
++			mb_cache_entry_release(ce);
++		ea_bdebug(blocknr, "refcount now=%d",
++			be32_to_cpu(HDR(bp)->h_refcount));
++		mutex_unlock(&desc->lock);
++	}
++	desc_put(sb, desc);
++
++cleanup:
++	up_write(&PRAM_I(inode)->xattr_sem);
++}
++
++/*
++ * pram_xattr_put_super()
++ *
++ * This is called when a file system is unmounted.
++ */
++void pram_xattr_put_super(struct super_block *sb)
++{
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++	/*
++	* NOTE: we haven't got any block device to use with mb. Mb code
++	* doesn't use the pointer but it uses only the address as unique
++	* key so it's safe to use a "general purpose" address. We use
++	* super block info data as unique key. Maybe it'd be better to
++	* change mb code in order to use a generic void pointer to a
++	* generic id.
++	*/
++	mb_cache_shrink((struct block_device *)sbi);
++	erase_tree(sbi, pram_xblock_desc_cache);
++	kmem_cache_shrink(pram_xblock_desc_cache);
++}
++
++
++/*
++ * pram_xattr_cache_insert()
++ *
++ * Create a new entry in the extended attribute cache, and insert
++ * it unless such an entry is already in the cache.
++ *
++ * Returns 0, or a negative error number on failure.
++ */
++static int pram_xattr_cache_insert(struct super_block *sb, unsigned long blocknr, u32 xhash)
++{
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++	__u32 hash = be32_to_cpu(xhash);
++	struct mb_cache_entry *ce;
++	int error;
++
++	ce = mb_cache_entry_alloc(pram_xattr_cache, GFP_NOFS);
++	if (!ce)
++		return -ENOMEM;
++	error = mb_cache_entry_insert(ce, (struct block_device *)sbi, blocknr, hash);
++	if (error) {
++		mb_cache_entry_free(ce);
++		if (error == -EBUSY) {
++			ea_bdebug(blocknr, "already in cache");
++			error = 0;
++		}
++	} else {
++		ea_bdebug(blocknr, "inserting [%x]", (int)hash);
++		mb_cache_entry_release(ce);
++	}
++	return error;
++}
++
++/*
++ * pram_xattr_cmp()
++ *
++ * Compare two extended attribute blocks for equality.
++ *
++ * Returns 0 if the blocks are equal, 1 if they differ, and
++ * a negative error number on errors.
++ */
++static int pram_xattr_cmp(struct pram_xattr_header *header1,
++			  struct pram_xattr_header *header2)
++{
++	struct pram_xattr_entry *entry1, *entry2;
++
++	entry1 = ENTRY(header1+1);
++	entry2 = ENTRY(header2+1);
++	while (!IS_LAST_ENTRY(entry1)) {
++		if (IS_LAST_ENTRY(entry2))
++			return 1;
++		if (entry1->e_hash != entry2->e_hash ||
++		    entry1->e_name_index != entry2->e_name_index ||
++		    entry1->e_name_len != entry2->e_name_len ||
++		    entry1->e_value_size != entry2->e_value_size ||
++		    memcmp(entry1->e_name, entry2->e_name, entry1->e_name_len))
++			return 1;
++		if (entry1->e_value_block != 0 || entry2->e_value_block != 0)
++			return -EIO;
++		if (memcmp((char *)header1 + be16_to_cpu(entry1->e_value_offs),
++			   (char *)header2 + be16_to_cpu(entry2->e_value_offs),
++			   be32_to_cpu(entry1->e_value_size)))
++			return 1;
++
++		entry1 = PRAM_XATTR_NEXT(entry1);
++		entry2 = PRAM_XATTR_NEXT(entry2);
++	}
++	if (!IS_LAST_ENTRY(entry2))
++		return 1;
++	return 0;
++}
++
++/*
++ * pram_xattr_cache_find()
++ *
++ * Find an identical extended attribute block.
++ *
++ * Returns a locked extended block descriptor for the block found, or
++ * NULL if such a block was not found or an error occurred.
++ * The block, however, is not memory unlocked.
++ */
++static struct pram_xblock_desc *pram_xattr_cache_find(struct inode *inode, struct pram_xattr_header *header)
++{
++	__u32 hash = be32_to_cpu(header->h_hash);
++	struct mb_cache_entry *ce;
++	struct pram_xblock_desc *desc;
++	struct super_block *sb = inode->i_sb;
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++
++	if (!header->h_hash)
++		return NULL;  /* never share */
++	ea_idebug(inode, "looking for cached blocks [%x]", (int)hash);
++again:
++	ce = mb_cache_entry_find_first(pram_xattr_cache, (struct block_device *)sbi, hash);
++	while (ce) {
++		char *bp;
++
++		if (IS_ERR(ce)) {
++			if (PTR_ERR(ce) == -EAGAIN)
++				goto again;
++			break;
++		}
++
++		bp = pram_get_block(sb, pram_get_block_off(sb, (unsigned long)ce->e_block));
++		if (!bp) {
++			pram_err("inode %ld: block %ld read error",
++				inode->i_ino, (unsigned long) ce->e_block);
++		} else {
++			desc = LOOKUP_DESC(sbi, ce->e_block);
++			if (!desc) {
++				mb_cache_entry_release(ce);
++				return NULL;
++			}
++			mutex_lock(&desc->lock);
++			if (be32_to_cpu(HDR(bp)->h_refcount) >
++				   PRAM_XATTR_REFCOUNT_MAX) {
++				ea_idebug(inode, "block %ld refcount %d>%d",
++					  (unsigned long) ce->e_block,
++					  be32_to_cpu(HDR(bp)->h_refcount),
++					  PRAM_XATTR_REFCOUNT_MAX);
++			} else if (!pram_xattr_cmp(header, HDR(bp))) {
++				mb_cache_entry_release(ce);
++				return desc;
++			}
++			mutex_unlock(&desc->lock);
++		}
++		ce = mb_cache_entry_find_next(ce, (struct block_device *)sbi, hash);
++	}
++	return NULL;
++}
++
++#define NAME_HASH_SHIFT 5
++#define VALUE_HASH_SHIFT 16
++
++/*
++ * pram_xattr_hash_entry()
++ *
++ * Compute the hash of an extended attribute.
++ */
++static inline void pram_xattr_hash_entry(struct pram_xattr_header *header,
++					 struct pram_xattr_entry *entry)
++{
++	__u32 hash = 0;
++	char *name = entry->e_name;
++	int n;
++
++	for (n = 0; n < entry->e_name_len; n++) {
++		hash = (hash << NAME_HASH_SHIFT) ^
++		       (hash >> (8*sizeof(hash) - NAME_HASH_SHIFT)) ^
++		       *name++;
++	}
++
++	if (entry->e_value_block == 0 && entry->e_value_size != 0) {
++		__be32 *value = (__be32 *)((char *)header +
++			be16_to_cpu(entry->e_value_offs));
++		for (n = (be32_to_cpu(entry->e_value_size) +
++		     PRAM_XATTR_ROUND) >> PRAM_XATTR_PAD_BITS; n; n--) {
++			hash = (hash << VALUE_HASH_SHIFT) ^
++			       (hash >> (8*sizeof(hash) - VALUE_HASH_SHIFT)) ^
++			       be32_to_cpu(*value++);
++		}
++	}
++	entry->e_hash = cpu_to_be32(hash);
++}
++
++#undef NAME_HASH_SHIFT
++#undef VALUE_HASH_SHIFT
++
++#define BLOCK_HASH_SHIFT 16
++
++/*
++ * pram_xattr_rehash()
++ *
++ * Re-compute the extended attribute hash value after an entry has changed.
++ */
++static void pram_xattr_rehash(struct pram_xattr_header *header,
++			      struct pram_xattr_entry *entry)
++{
++	struct pram_xattr_entry *here;
++	__u32 hash = 0;
++
++	pram_xattr_hash_entry(header, entry);
++	here = ENTRY(header+1);
++	while (!IS_LAST_ENTRY(here)) {
++		if (!here->e_hash) {
++			/* Block is not shared if an entry's hash value == 0 */
++			hash = 0;
++			break;
++		}
++		hash = (hash << BLOCK_HASH_SHIFT) ^
++		       (hash >> (8*sizeof(hash) - BLOCK_HASH_SHIFT)) ^
++		       be32_to_cpu(here->e_hash);
++		here = PRAM_XATTR_NEXT(here);
++	}
++	header->h_hash = cpu_to_be32(hash);
++}
++
++#undef BLOCK_HASH_SHIFT
++
++static void init_xblock_desc_once(void *foo)
++{
++	struct pram_xblock_desc *desc = (struct pram_xblock_desc *) foo;
++
++	xblock_desc_init_once(desc);
++}
++
++int __init init_pram_xattr(void)
++{
++	int ret = 0;
++	pram_xattr_cache = mb_cache_create("pram_xattr", 6);
++	if (!pram_xattr_cache) {
++		ret = -ENOMEM;
++		goto fail1;
++	}
++
++	pram_xblock_desc_cache = kmem_cache_create("pram_xblock_desc",
++					     sizeof(struct pram_xblock_desc),
++					     0, (SLAB_RECLAIM_ACCOUNT|
++						SLAB_MEM_SPREAD),
++					     init_xblock_desc_once);
++	if (!pram_xblock_desc_cache) {
++		ret = -ENOMEM;
++		goto fail2;
++	}
++
++	return 0;
++fail2:
++	mb_cache_destroy(pram_xattr_cache);
++fail1:
++	return ret;
++}
++
++void exit_pram_xattr(void)
++{
++	mb_cache_destroy(pram_xattr_cache);
++	kmem_cache_destroy(pram_xblock_desc_cache);
++}
+diff -Nurp linux-2.6.36-orig/fs/pramfs/xattr.h linux-2.6.36/fs/pramfs/xattr.h
+--- linux-2.6.36-orig/fs/pramfs/xattr.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/xattr.h	2010-09-18 08:40:35.000000000 +0200
+@@ -0,0 +1,134 @@
++/*
++ * FILE NAME fs/pramfs/xattr.h
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Extended attributes for the pram filesystem.
++ *
++ * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * based on fs/ext2/xattr.h with the following copyright:
++ *
++ *(C) 2001 Andreas Gruenbacher, <a.gruenbacher@computer.org>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#include <linux/init.h>
++#include <linux/xattr.h>
++
++/* Magic value in attribute blocks */
++#define PRAM_XATTR_MAGIC		0x6d617270
++
++/* Maximum number of references to one attribute block */
++#define PRAM_XATTR_REFCOUNT_MAX		1024
++
++/* Name indexes */
++#define PRAM_XATTR_INDEX_USER			1
++#define PRAM_XATTR_INDEX_POSIX_ACL_ACCESS	2
++#define PRAM_XATTR_INDEX_POSIX_ACL_DEFAULT	3
++#define PRAM_XATTR_INDEX_TRUSTED		4
++#define	PRAM_XATTR_INDEX_LUSTRE			5
++#define PRAM_XATTR_INDEX_SECURITY	        6
++
++struct pram_xattr_header {
++	__be32	h_magic;	/* magic number for identification */
++	__be32	h_refcount;	/* reference count */
++	__be32	h_hash;		/* hash value of all attributes */
++	__u32	h_reserved[4];	/* zero right now */
++};
++
++struct pram_xattr_entry {
++	__u8	e_name_len;	/* length of name */
++	__u8	e_name_index;	/* attribute name index */
++	__be16	e_value_offs;	/* offset in disk block of value */
++	__be32	e_value_block;	/* disk block attribute is stored on (n/i) */
++	__be32	e_value_size;	/* size of attribute value */
++	__be32	e_hash;		/* hash value of name and value */
++	char	e_name[0];	/* attribute name */
++};
++
++#define PRAM_XATTR_PAD_BITS		2
++#define PRAM_XATTR_PAD		(1<<PRAM_XATTR_PAD_BITS)
++#define PRAM_XATTR_ROUND		(PRAM_XATTR_PAD-1)
++#define PRAM_XATTR_LEN(name_len) \
++	(((name_len) + PRAM_XATTR_ROUND + \
++	sizeof(struct pram_xattr_entry)) & ~PRAM_XATTR_ROUND)
++#define PRAM_XATTR_NEXT(entry) \
++	((struct pram_xattr_entry *)( \
++	  (char *)(entry) + PRAM_XATTR_LEN((entry)->e_name_len)))
++#define PRAM_XATTR_SIZE(size) \
++	(((size) + PRAM_XATTR_ROUND) & ~PRAM_XATTR_ROUND)
++
++#ifdef CONFIG_PRAMFS_XATTR
++
++extern const struct xattr_handler pram_xattr_user_handler;
++extern const struct xattr_handler pram_xattr_trusted_handler;
++extern const struct xattr_handler pram_xattr_acl_access_handler;
++extern const struct xattr_handler pram_xattr_acl_default_handler;
++extern const struct xattr_handler pram_xattr_security_handler;
++
++extern ssize_t pram_listxattr(struct dentry *, char *, size_t);
++
++extern int pram_xattr_get(struct inode *, int, const char *, void *, size_t);
++extern int pram_xattr_set(struct inode *, int, const char *, const void *, size_t, int);
++
++extern void pram_xattr_delete_inode(struct inode *);
++extern void pram_xattr_put_super(struct super_block *);
++
++extern int init_pram_xattr(void) __init;
++extern void exit_pram_xattr(void);
++
++extern const struct xattr_handler *pram_xattr_handlers[];
++
++# else  /* CONFIG_PRAMFS_XATTR */
++
++static inline int
++pram_xattr_get(struct inode *inode, int name_index,
++	       const char *name, void *buffer, size_t size)
++{
++	return -EOPNOTSUPP;
++}
++
++static inline int
++pram_xattr_set(struct inode *inode, int name_index, const char *name,
++	       const void *value, size_t size, int flags)
++{
++	return -EOPNOTSUPP;
++}
++
++static inline void
++pram_xattr_delete_inode(struct inode *inode)
++{
++}
++
++static inline void
++pram_xattr_put_super(struct super_block *sb)
++{
++}
++
++static inline int
++init_pram_xattr(void)
++{
++	return 0;
++}
++
++static inline void
++exit_pram_xattr(void)
++{
++}
++
++#define pram_xattr_handlers NULL
++
++# endif  /* CONFIG_PRAMFS_XATTR */
++
++#ifdef CONFIG_PRAMFS_SECURITY
++extern int pram_init_security(struct inode *inode, struct inode *dir);
++#else
++static inline int pram_init_security(struct inode *inode, struct inode *dir)
++{
++	return 0;
++}
++#endif
+diff -Nurp linux-2.6.36-orig/fs/pramfs/xattr_security.c linux-2.6.36/fs/pramfs/xattr_security.c
+--- linux-2.6.36-orig/fs/pramfs/xattr_security.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/xattr_security.c	2010-09-14 18:49:52.000000000 +0200
+@@ -0,0 +1,80 @@
++/*
++ * FILE NAME fs/pramfs/xattr_security.c
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Handler for storing security labels as extended attributes.
++ *
++ * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#include <linux/module.h>
++#include <linux/slab.h>
++#include <linux/string.h>
++#include <linux/fs.h>
++#include <linux/pram_fs.h>
++#include <linux/security.h>
++#include "xattr.h"
++
++static size_t pram_xattr_security_list(struct dentry *dentry, char *list,
++				       size_t list_size, const char *name,
++				       size_t name_len, int type)
++{
++	const int prefix_len = XATTR_SECURITY_PREFIX_LEN;
++	const size_t total_len = prefix_len + name_len + 1;
++
++	if (list && total_len <= list_size) {
++		memcpy(list, XATTR_SECURITY_PREFIX, prefix_len);
++		memcpy(list+prefix_len, name, name_len);
++		list[prefix_len + name_len] = '\0';
++	}
++	return total_len;
++}
++
++static int pram_xattr_security_get(struct dentry *dentry, const char *name,
++		       void *buffer, size_t size, int type)
++{
++	if (strcmp(name, "") == 0)
++		return -EINVAL;
++	return pram_xattr_get(dentry->d_inode, PRAM_XATTR_INDEX_SECURITY, name,
++			      buffer, size);
++}
++
++static int pram_xattr_security_set(struct dentry *dentry, const char *name,
++		const void *value, size_t size, int flags, int type)
++{
++	if (strcmp(name, "") == 0)
++		return -EINVAL;
++	return pram_xattr_set(dentry->d_inode, PRAM_XATTR_INDEX_SECURITY, name,
++			      value, size, flags);
++}
++
++int pram_init_security(struct inode *inode, struct inode *dir)
++{
++	int err;
++	size_t len;
++	void *value;
++	char *name;
++
++	err = security_inode_init_security(inode, dir, &name, &value, &len);
++	if (err) {
++		if (err == -EOPNOTSUPP)
++			return 0;
++		return err;
++	}
++	err = pram_xattr_set(inode, PRAM_XATTR_INDEX_SECURITY,
++			     name, value, len, 0);
++	kfree(name);
++	kfree(value);
++	return err;
++}
++
++const struct xattr_handler pram_xattr_security_handler = {
++	.prefix	= XATTR_SECURITY_PREFIX,
++	.list	= pram_xattr_security_list,
++	.get	= pram_xattr_security_get,
++	.set	= pram_xattr_security_set,
++};
+diff -Nurp linux-2.6.36-orig/fs/pramfs/xattr_trusted.c linux-2.6.36/fs/pramfs/xattr_trusted.c
+--- linux-2.6.36-orig/fs/pramfs/xattr_trusted.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/xattr_trusted.c	2010-09-14 18:49:52.000000000 +0200
+@@ -0,0 +1,67 @@
++/*
++ * FILE NAME fs/pramfs/xattr_trusted.c
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Handler for trusted extended attributes.
++ *
++ * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * based on fs/ext2/xattr_trusted.c with the following copyright:
++ *
++ * Copyright (C) 2003 by Andreas Gruenbacher, <a.gruenbacher@computer.org>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#include <linux/module.h>
++#include <linux/string.h>
++#include <linux/capability.h>
++#include <linux/fs.h>
++#include <linux/pram_fs.h>
++#include "xattr.h"
++
++static size_t pram_xattr_trusted_list(struct dentry *dentry, char *list,
++				size_t list_size, const char *name,
++				size_t name_len, int type)
++{
++	const int prefix_len = XATTR_TRUSTED_PREFIX_LEN;
++	const size_t total_len = prefix_len + name_len + 1;
++
++	if (!capable(CAP_SYS_ADMIN))
++		return 0;
++
++	if (list && total_len <= list_size) {
++		memcpy(list, XATTR_TRUSTED_PREFIX, prefix_len);
++		memcpy(list+prefix_len, name, name_len);
++		list[prefix_len + name_len] = '\0';
++	}
++	return total_len;
++}
++
++static int pram_xattr_trusted_get(struct dentry *dentry, const char *name,
++				void *buffer, size_t size, int type)
++{
++	if (strcmp(name, "") == 0)
++		return -EINVAL;
++	return pram_xattr_get(dentry->d_inode, PRAM_XATTR_INDEX_TRUSTED, name,
++			      buffer, size);
++}
++
++static int pram_xattr_trusted_set(struct dentry *dentry, const char *name,
++		const void *value, size_t size, int flags, int type)
++{
++	if (strcmp(name, "") == 0)
++		return -EINVAL;
++	return pram_xattr_set(dentry->d_inode, PRAM_XATTR_INDEX_TRUSTED, name,
++			      value, size, flags);
++}
++
++const struct xattr_handler pram_xattr_trusted_handler = {
++	.prefix	= XATTR_TRUSTED_PREFIX,
++	.list	= pram_xattr_trusted_list,
++	.get	= pram_xattr_trusted_get,
++	.set	= pram_xattr_trusted_set,
++};
+diff -Nurp linux-2.6.36-orig/fs/pramfs/xattr_user.c linux-2.6.36/fs/pramfs/xattr_user.c
+--- linux-2.6.36-orig/fs/pramfs/xattr_user.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/xattr_user.c	2010-09-14 18:49:52.000000000 +0200
+@@ -0,0 +1,63 @@
++/*
++ * FILE NAME fs/pramfs/xattr_user.c
++ *
++ * BRIEF DESCRIPTION
++ *
++ * Handler for extended user attributes.
++ *
++ * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ *
++ * based on fs/ext2/xattr_user.c with the following copyright:
++ *
++ * Copyright (C) 2001 by Andreas Gruenbacher, <a.gruenbacher@computer.org>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/string.h>
++#include "pram.h"
++#include "xattr.h"
++
++static size_t pram_xattr_user_list(struct dentry *dentry, char *list, size_t list_size,
++		const char *name, size_t name_len, int type)
++{
++	const size_t prefix_len = XATTR_USER_PREFIX_LEN;
++	const size_t total_len = prefix_len + name_len + 1;
++
++	if (list && total_len <= list_size) {
++		memcpy(list, XATTR_USER_PREFIX, prefix_len);
++		memcpy(list+prefix_len, name, name_len);
++		list[prefix_len + name_len] = '\0';
++	}
++	return total_len;
++}
++
++static int pram_xattr_user_get(struct dentry *dentry, const char *name,
++		void *buffer, size_t size, int type)
++{
++	if (strcmp(name, "") == 0)
++		return -EINVAL;
++	return pram_xattr_get(dentry->d_inode, PRAM_XATTR_INDEX_USER,
++			      name, buffer, size);
++}
++
++static int pram_xattr_user_set(struct dentry *dentry, const char *name,
++		const void *value, size_t size, int flags, int type)
++{
++	if (strcmp(name, "") == 0)
++		return -EINVAL;
++
++	return pram_xattr_set(dentry->d_inode, PRAM_XATTR_INDEX_USER,
++			      name, value, size, flags);
++}
++
++const struct xattr_handler pram_xattr_user_handler = {
++	.prefix	= XATTR_USER_PREFIX,
++	.list	= pram_xattr_user_list,
++	.get	= pram_xattr_user_get,
++	.set	= pram_xattr_user_set,
++};
+ 
