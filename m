@@ -1,118 +1,47 @@
-From: Randy Dunlap <rdunlap@xenotime.net>
-Subject: Re: [PATCH 16/16] pramfs Makefile and Kconfig
-Date: Sun, 10 Oct 2010 10:02:11 -0700
-Message-ID: <20101010100211.3c747512.rdunlap@xenotime.net>
-References: <4CB1EC2F.7070807@gmail.com>
+From: Wolfgang Denk <wd@denx.de>
+Subject: Re: logfs segfaults at umount time
+Date: Sun, 10 Oct 2010 19:16:33 +0200
+Message-ID: <20101010171633.5E90C14F310@gemini.denx.de>
+References: <4CB1E5B3.1090300@free-electrons.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4CB1EC2F.7070807@gmail.com>
+In-reply-to: <4CB1E5B3.1090300@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+To: Michael Opdenacker <michael.opdenacker@free-electrons.com>
+Cc: joern@logfs.org, logfs@logfs.org, linux-embedded mailing list <linux-embedded@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
-On Sun, 10 Oct 2010 18:39:11 +0200 Marco Stornelli wrote:
+Dear Michael,
 
-> From: Marco Stornelli <marco.stornelli@gmail.com>
+In message <4CB1E5B3.1090300@free-electrons.com> you wrote:
 > 
-> Makefile and Kconfig.
-> 
-> Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
-> ---
->  diff -Nurp linux-2.6.36-orig/fs/pramfs/Kconfig linux-2.6.36/fs/pramfs/Kconfig
-> --- linux-2.6.36-orig/fs/pramfs/Kconfig	1970-01-01 01:00:00.000000000 +0100
-> +++ linux-2.6.36/fs/pramfs/Kconfig	2010-09-14 18:49:52.000000000 +0200
-> @@ -0,0 +1,72 @@
-> +config PRAMFS
-> +	tristate "Persistent and Protected RAM file system support"
-> +	depends on HAS_IOMEM && EXPERIMENTAL
-> +	select CRC16
-> +	help
-> +	   If your system has a block of fast (comparable in access speed to
-> +	   system memory) and non-volatile RAM and you wish to mount a
-> +	   light-weight, full-featured, and space-efficient filesystem over it,
-> +	   say Y here, and read <file:Documentation/filesystems/pramfs.txt>.
-> +
-> +	   To compile this as a module,  choose M here: the module will be
-> +	   called pramfs.ko.
+> I'm running some flash filesystem benchmarks for CELF, and I'm facing
+> kernel segfaults when I try to umount my logfs filesystem.
+...
+> root@calao:~# mount -t logfs /dev/mtdblock0 /mnt/flash/
+> root@calao:~# cp -rf /fs/8m/* /mnt/flash/
+> eth0: TX underrun, resetting buffers
+> eth0: TX underrun, resetting buffers
 
-	  called pramfs.
+Seems you have some problems here already?
 
-(we don't add the .ko suffix; well, we try not to do that)
+> root@calao:~# umount /mnt/flash/
+> kernel BUG at fs/logfs/segment.c:858!
+> Unable to handle kernel NULL pointer dereference at virtual address 00000000
+> pgd = c14a4000
+> [00000000] *pgd=23a3c031, *pte=00000000, *ppte=00000000
+> Internal error: Oops: 817 [#1]
+...
 
-> +
-> +config PRAMFS_XIP
-> +	bool "Enable Execute-in-place in PRAMFS"
-> +	depends on PRAMFS && !PRAMFS_WRITE_PROTECT
-> +	help
-> +	   Say Y here to enable xip feature of PRAMFS.
+Best regards,
 
-	                        XIP
+Wolfgang Denk
 
-> +
-> +config PRAMFS_WRITE_PROTECT
-> +	bool "Enable PRAMFS write protection"
-> +	depends on PRAMFS && MMU
-> +	default y
-> +	help
-> +	   Say Y here to enable the write protect feature of PRAMFS.
-> +
-> +config PRAMFS_XATTR
-> +	bool "PRAMFS extended attributes"
-> +	depends on PRAMFS
-> +	help
-> +	  Extended attributes are name:value pairs associated with inodes by
-> +	  the kernel or by users (see the attr(5) manual page, or visit
-> +	  <http://acl.bestbits.at/> for details).
-> +
-> +	  If unsure, say N.
-> +
-> +config PRAMFS_POSIX_ACL
-> +	bool "PRAMFS POSIX Access Control Lists"
-> +	depends on PRAMFS_XATTR
-> +	select FS_POSIX_ACL
-> +	help
-> +	  Posix Access Control Lists (ACLs) support permissions for users and
-> +	  groups beyond the owner/group/world scheme.
-> +
-> +	  To learn more about Access Control Lists, visit the Posix ACLs for
-> +	  Linux website <http://acl.bestbits.at/>.
-> +
-> +	  If you don't know what Access Control Lists are, say N
-
-end sentence with period ('.').
-
-> +
-> +config PRAMFS_SECURITY
-> +	bool "PRAMFS Security Labels"
-> +	depends on PRAMFS_XATTR
-> +	help
-> +	  Security labels support alternative access control models
-> +	  implemented by security modules like SELinux.  This option
-> +	  enables an extended attribute handler for file security
-> +	  labels in the pram filesystem.
-> +
-> +	  If you are not using a security module that requires using
-> +	  extended attributes for file security labels, say N.
-> +
-> +config PRAMFS_TEST
-> +	boolean
-> +	depends on PRAMFS
-> +
-> +config TEST_MODULE
-> +	tristate "PRAMFS Test"
-> +	depends on PRAMFS && m
-> +	select PRAMFS_TEST
-> +	help
-> +	  Say Y here to build a simple module to test the protection of
-> +	  PRAMFS. The module will be called pramfs_test.ko.
-
-	                             called pramfs_test.
-
-
-
----
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+-- 
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+We have phasers, I vote we blast 'em!
+	-- Bailey, "The Corbomite Maneuver", stardate 1514.2
