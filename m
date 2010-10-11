@@ -1,50 +1,89 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 11/16] pramfs: ACL management
-Date: Mon, 11 Oct 2010 18:50:43 +0200
-Message-ID: <4CB34063.70803@gmail.com>
-References: <4CB1EAD8.2030206@gmail.com> <4CB30266.1010706@gmail.com>
+Subject: Re: [PATCH 14(16] pramfs: memory protection
+Date: Mon, 11 Oct 2010 19:32:10 +0200
+Message-ID: <4CB34A1A.3030003@gmail.com>
+References: <4CB1EBA2.8090409@gmail.com> <87aamm3si1.fsf@basil.nowhere.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:references:in-reply-to
          :content-type:content-transfer-encoding;
-        bh=lXy9yz5dPsOp7TaPxt6l8jkz2gT9dZ+/FAfIyHoY8K0=;
-        b=jdDQzrruaMvGcV074/RvqzjUKRe0jtDcgnrCJOO730vHJS2eTpn+EEkcnhzRMXGs4+
-         ug5seEWdJBz0oflq4zm1geg5IVCGJDRJQl2o0sxVXDQYm2jkYY77e6tdj7iRNrkNez35
-         CNVBI04y66PMbdUI5FEksvWzkCKfgieGbWrkY=
-In-Reply-To: <4CB30266.1010706@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
+        bh=lDqYUkRdihaVkLL6HrWusRYMEjEX9OXFinc9zJ6eYTA=;
+        b=Scr/gWorvELuRi85vAAO4A0ko7vg8x6HhaPpcWxCMIJEeLH6BdCZ4I/S61Ohg+J/x2
+         PMzPollb22Hn9JmWtKsoIXM5G2h4yELrLA5Ht64wruApyBY27/DtUF8kvD4y4eDxl0JT
+         eb08OX4KayJZkAJFSQg7OYq4xgQ3K7L2z1Yzg=
+In-Reply-To: <87aamm3si1.fsf@basil.nowhere.org>
+Sender: owner-linux-mm@kvack.org
+List-Id: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Kieran Bingham <kieranbingham@gmail.com>
-Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+To: Andi Kleen <andi@firstfloor.org>
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, linux-mm@kvack.org
 
-Il 11/10/2010 14:26, Kieran Bingham ha scritto:
->  On 10/10/2010 17:33, Marco Stornelli wrote:
->> From: Marco Stornelli<marco.stornelli@gmail.com>
->>
->> ACL operations.
->>
->> Signed-off-by: Marco Stornelli<marco.stornelli@gmail.com>
->> ---
->> diff -Nurp linux-2.6.36-orig/fs/pramfs/acl.c linux-2.6.36/fs/pramfs/acl.c
->> --- linux-2.6.36-orig/fs/pramfs/acl.c    1970-01-01 01:00:00.000000000
->> +0100
->> +++ linux-2.6.36/fs/pramfs/acl.c    2010-09-14 18:49:52.000000000 +0200
->> @@ -0,0 +1,418 @@
->> +/*
->> + * FILE NAME fs/pramfs/acl.h
-> Found another one :)
-> FILE NAME != acl.h ...
-> -- 
-> KB
+Il 10/10/2010 18:46, Andi Kleen ha scritto:
+> This won't work at all on x86 because you don't handle large 
+> pages.
+> 
+> And it doesn't work on x86-64 because the first 2GB are double
+> mapped (direct and kernel text mapping)
+> 
+> Thirdly I expect it won't either on architectures that map
+> the direct mapping with special registers (like IA64 or MIPS)
+
+Andi, what do you think to use the already implemented follow_pte
+instead? 
+
+int writeable_kernel_pte_range(unsigned long address, unsigned long size,
+							      unsigned int rw)
+{
+
+	unsigned long addr = address & PAGE_MASK;
+	unsigned long end = address + size;
+	unsigned long start = addr;
+	int ret = -EINVAL;
+	pte_t *ptep, pte;
+	spinlock_t *lock = &init_mm.page_table_lock;
+
+	do {
+		ret = follow_pte(&init_mm, addr, &ptep, &lock);
+		if (ret)
+			goto out;
+		pte = *ptep;
+		if (pte_present(pte)) {
+			  pte = rw ? pte_mkwrite(pte) : pte_wrprotect(pte);
+			  *ptep = pte;
+		}
+		pte_unmap_unlock(ptep, lock);
+		addr += PAGE_SIZE;
+	} while (addr && (addr < end));
+
+	ret = 0;
+
+out:
+	flush_tlb_kernel_range(start, end);
+	return ret;
+}
+
+
+> 
+> I'm not sure this is very useful anyways. It doesn't protect
+> against stray DMA and it doesn't protect against writes through
+> broken user PTEs.
+> 
+> -Andi
 > 
 
-Oops, damn copy&paste ;) I'll fix it asap.
-
-Thanks.
+It's a way to have more protection against kernel bug, for a 
+in-memory fs can be important. However this option can be 
+enabled/disabled at fs level.
 
 Marco
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+
