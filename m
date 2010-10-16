@@ -1,44 +1,370 @@
 From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common user
- and kernel interface
-Date: Sat, 16 Oct 2010 00:05:47 -0600
-Message-ID: <AANLkTimWFBUVuZJTw9R=x8u1AnPEMOWXK1yPEUXLf6Lg@mail.gmail.com>
+Subject: Re: [PWM 02/10] Emulates PWM hardware using a high-resolution
+ timer and a GPIO pin
+Date: Sat, 16 Oct 2010 00:54:16 -0600
+Message-ID: <20101016065416.GB653@angua.secretlab.ca>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
- <AANLkTi=6GN=cwA5vuv4fNDt0=xPT3+g2vntzZdN_gDrw@mail.gmail.com> <AANLkTim2tbWNviJottUg3jAD2ybd5oUPJu3vdPvNa_fX@mail.gmail.com>
+ <1285946271-17728-2-git-send-email-bgat@billgatliff.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTim2tbWNviJottUg3jAD2ybd5oUPJu3vdPvNa_fX@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <1285946271-17728-2-git-send-email-bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 To: Bill Gatliff <bgat@billgatliff.com>
-Cc: Hector Oron <hector.oron@gmail.com>, linux-embedded@vger.kernel.org
+Cc: linux-embedded@vger.kernel.org
 
-On Wed, Oct 6, 2010 at 12:48 PM, Bill Gatliff <bgat@billgatliff.com> wr=
-ote:
-> Hector:
->
-> On Sat, Oct 2, 2010 at 7:25 AM, Hector Oron <hector.oron@gmail.com> w=
-rote:
->> Hello Bill,
->>
->> Thanks for trying (again) to get this in mainline.
->> Are you planning to request a slot in the GIT at kernel.org to hold
->> and maintain this nice framework?
->
-> I did make such a request once, and it went nowhere. =A0:(
+On Fri, Oct 01, 2010 at 10:17:43AM -0500, Bill Gatliff wrote:
+> Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
+> ---
 
-Git trees don't have to be hosted on git.kernel.org.  None of my trees
-are on kernel.org, and Linus pulls from me all the time.  You can host
-your own git server, or use a git hosting provider.
+Code looks pretty clean.  Minor comments below, plus a rehash of an
+old argument.
 
-But, if you're serious about getting it mainlined, then you need to
-post the whole series to linux-kernel.  Also, without a specific
-maintainer to pick it up for you, it helps to cc: Andrew Morton.  I
-recommend doing so sooner rather than later.  It probably won't make
-2.6.37 since the merge window is opening in about a week, but it would
-be a good candidate for .38.  I'll go through all the patches right
-now and make my comments.
+>  drivers/pwm/gpio.c |  298 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 files changed, 298 insertions(+), 0 deletions(-)
+>  create mode 100644 drivers/pwm/gpio.c
+> 
+> diff --git a/drivers/pwm/gpio.c b/drivers/pwm/gpio.c
+> new file mode 100644
+> index 0000000..f4aab06
+> --- /dev/null
+> +++ b/drivers/pwm/gpio.c
+> @@ -0,0 +1,298 @@
+> +/*
+> + * drivers/pwm/gpio.c
+> + *
+> + * Models a single-channel PWM device using a timer and a GPIO pin.
+> + *
+> + * Copyright (C) 2010 Bill Gatliff <bgat@billgatliff.com>
+> + *
+> + * This program is free software; you may redistribute and/or modify
+> + * it under the terms of the GNU General Public License Version 2, as
+> + * published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it will be useful, but
+> + * WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+> + * General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program; if not, write to the Free Software
+> + * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+> + * USA
+> + */
+> +
+> +#include <linux/module.h>
+> +#include <linux/init.h>
+> +#include <linux/slab.h>
+> +#include <linux/hrtimer.h>
+> +#include <linux/err.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/workqueue.h>
+> +#include <linux/gpio.h>
+> +#include <linux/pwm/pwm.h>
+> +
+> +struct gpio_pwm {
+> +	struct pwm_device pwm;
+> +	struct hrtimer timer;
+> +	struct work_struct work;
+> +	pwm_callback_t callback;
+> +	int gpio;
+> +	unsigned long polarity : 1;
+> +	unsigned long active : 1;
+> +};
+> +
+> +static inline struct gpio_pwm *to_gpio_pwm(const struct pwm_channel *p)
+> +{
+> +	return container_of(p->pwm, struct gpio_pwm, pwm);
+> +}
+> +
+> +static void
+> +gpio_pwm_work (struct work_struct *work)
 
-g.
+By breaking the line here; 'grep gpio_pwm_work' is a lot less useful
+because it doesn't tell you the return type (a very common thing to do
+when figuring out how an API works).  Only split lines if you really
+need to (ie, longer than 80 chars), and if you do need a line break,
+then break in the parameters list.
+
+> +{
+> +	struct gpio_pwm *gp = container_of(work, struct gpio_pwm, work);
+> +
+> +	if (gp->active)
+> +		gpio_direction_output(gp->gpio, gp->polarity ? 1 : 0);
+> +	else
+> +		gpio_direction_output(gp->gpio, gp->polarity ? 0 : 1);
+> +}
+
+Bitwise operations are probably faster than two conditionals.
+How about:
+
+gpio_direction_output(gp->gpio, !(gp->polarity ^ gp->active));
+
+
+> +
+> +static enum hrtimer_restart
+> +gpio_pwm_timeout(struct hrtimer *t)
+> +{
+> +	struct gpio_pwm *gp = container_of(t, struct gpio_pwm, timer);
+> +	ktime_t tnew;
+> +
+> +	if (unlikely(gp->pwm.channels[0].duty_ticks == 0))
+> +		gp->active = 0;
+
+This function references gp->pwm.channels[0] a lot.  You might want to
+load the pointer into a local variable in the interest of readability.
+
+> +	else if (unlikely(gp->pwm.channels[0].duty_ticks
+> +			  == gp->pwm.channels[0].period_ticks))
+> +		gp->active = 1;
+> +	else
+> +		gp->active ^= 1;
+> +
+> +	if (gpio_cansleep(gp->gpio))
+> +		schedule_work(&gp->work);
+> +	else
+> +		gpio_pwm_work(&gp->work);
+> +
+> +	if (!gp->active && gp->pwm.channels[0].callback)
+> +		gp->pwm.channels[0].callback(&gp->pwm.channels[0]);
+> +
+> +	if (unlikely(!gp->active &&
+> +		     (gp->pwm.channels[0].flags & BIT(FLAG_STOP)))) {
+> +		clear_bit(FLAG_STOP, &gp->pwm.channels[0].flags);
+> +		complete_all(&gp->pwm.channels[0].complete);
+> +		return HRTIMER_NORESTART;
+> +	}
+> +
+> +	if (gp->active)
+> +		tnew = ktime_set(0, gp->pwm.channels[0].duty_ticks);
+> +	else
+> +		tnew = ktime_set(0, gp->pwm.channels[0].period_ticks
+> +				 - gp->pwm.channels[0].duty_ticks);
+> +	hrtimer_start(&gp->timer, tnew, HRTIMER_MODE_REL);
+> +
+> +	return HRTIMER_NORESTART;
+> +}
+> +
+> +static void gpio_pwm_start(struct pwm_channel *p)
+> +{
+> +	struct gpio_pwm *gp = to_gpio_pwm(p);
+> +
+> +	gp->active = 0;
+> +	gpio_pwm_timeout(&gp->timer);
+> +}
+> +
+> +static int
+> +gpio_pwm_config_nosleep(struct pwm_channel *p,
+> +			struct pwm_channel_config *c)
+> +{
+> +	struct gpio_pwm *gp = to_gpio_pwm(p);
+> +	int ret = 0;
+> +	unsigned long flags;
+> +
+> +	spin_lock_irqsave(&p->lock, flags);
+> +
+> +	switch (c->config_mask) {
+> +
+> +	case PWM_CONFIG_DUTY_TICKS:
+> +		p->duty_ticks = c->duty_ticks;
+> +		break;
+> +
+> +	case PWM_CONFIG_START:
+> +		if (!hrtimer_active(&gp->timer)) {
+> +			gpio_pwm_start(p);
+> +		}
+> +		break;
+> +	default:
+> +		ret = -EINVAL;
+> +		break;
+> +	}
+> +
+> +	spin_unlock_irqrestore(&p->lock, flags);
+> +	return ret;
+> +}
+> +
+> +static int
+> +gpio_pwm_stop_sync(struct pwm_channel *p)
+> +{
+> +	struct gpio_pwm *gp = to_gpio_pwm(p);
+> +	int ret;
+> +	int was_on = hrtimer_active(&gp->timer);
+> +
+> +	if (was_on) {
+> +		do {
+> +			init_completion(&p->complete);
+> +			set_bit(FLAG_STOP, &p->flags);
+> +			ret = wait_for_completion_interruptible(&p->complete);
+> +			if (ret)
+> +				return ret;
+> +		} while (p->flags & BIT(FLAG_STOP));
+> +	}
+> +
+> +	return was_on;
+> +}
+> +
+> +static int
+> +gpio_pwm_config(struct pwm_channel *p,
+> +		struct pwm_channel_config *c)
+> +{
+> +	struct gpio_pwm *gp = to_gpio_pwm(p);
+> +	int was_on = 0;
+> +
+> +	if (p->pwm->config_nosleep) {
+> +		if (!p->pwm->config_nosleep(p, c))
+> +			return 0;
+> +	}
+> +
+> +	might_sleep();
+> +
+> +	was_on = gpio_pwm_stop_sync(p);
+> +	if (was_on < 0)
+> +		return was_on;
+> +
+> +	if (c->config_mask & PWM_CONFIG_PERIOD_TICKS)
+> +		p->period_ticks = c->period_ticks;
+> +
+> +	if (c->config_mask & PWM_CONFIG_DUTY_TICKS)
+> +		p->duty_ticks = c->duty_ticks;
+> +
+> +	if (c->config_mask & PWM_CONFIG_POLARITY) {
+> +		gp->polarity = c->polarity ? 1 : 0;
+> +		p->active_high = gp->polarity;
+> +	}
+> +
+> +	if ((c->config_mask & PWM_CONFIG_START)
+> +	    || (was_on && !(c->config_mask & PWM_CONFIG_STOP)))
+> +		gpio_pwm_start(p);
+> +
+> +	return 0;
+> +}
+> +
+> +static int
+> +gpio_pwm_set_callback(struct pwm_channel *p,
+> +		      pwm_callback_t callback)
+> +{
+> +	struct gpio_pwm *gp = to_gpio_pwm(p);
+> +	gp->callback = callback;
+> +	return 0;
+> +}
+> +
+> +static int
+> +gpio_pwm_request(struct pwm_channel *p)
+> +{
+> +	p->tick_hz = 1000000000UL;
+> +	return 0;
+> +}
+> +
+> +static int __devinit
+> +gpio_pwm_probe(struct platform_device *pdev)
+> +{
+> +	struct gpio_pwm *gp;
+> +	struct gpio_pwm_platform_data *gpd = pdev->dev.platform_data;
+> +	int ret = 0;
+> +
+> +	/* TODO: create configfs entries, so users can assign GPIOs to
+> +	 * PWMs at runtime instead of creating a platform_device
+> +	 * specification and rebuilding their kernel */
+
+(digging up an old argument, I know)
+
+I still think that the PWM api would do well to piggyback on the
+namespace and support code of gpiolib.  Some pins would support gpio
+functions, some would support pwm, some would support both, but it
+makes sense to share the overall pin management code. (I'm not
+talking about pin muxing; that is a separate problem)
+
+In that scenario, the code in this file becomes library available to
+be used by regular gpios to implement pwm behaviour.
+
+> +
+> +	if (!gpd || gpio_request(gpd->gpio, dev_name(&pdev->dev)))
+> +		return -EINVAL;
+> +
+> +	gp = kzalloc(sizeof(*gp), GFP_KERNEL);
+> +	if (!gp) {
+> +		ret = -ENOMEM;
+> +		goto err_alloc;
+> +	}
+> +
+> +	platform_set_drvdata(pdev, gp);
+> +
+> +	gp->pwm.dev = &pdev->dev;
+> +	gp->pwm.bus_id = dev_name(&pdev->dev);
+> +	gp->pwm.nchan = 1;
+> +	gp->gpio = gpd->gpio;
+> +
+> +	INIT_WORK(&gp->work, gpio_pwm_work);
+> +
+> +	hrtimer_init(&gp->timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+> +	gp->timer.function = gpio_pwm_timeout;
+> +
+> +	gp->pwm.owner = THIS_MODULE;
+> +	gp->pwm.config_nosleep = gpio_pwm_config_nosleep;
+> +	gp->pwm.config = gpio_pwm_config;
+> +	gp->pwm.request = gpio_pwm_request;
+> +	gp->pwm.set_callback = gpio_pwm_set_callback;
+> +
+> +	ret = pwm_register(&gp->pwm);
+> +	if (ret)
+> +		goto err_pwm_register;
+> +
+> +	return 0;
+> +
+> +err_pwm_register:
+> +	platform_set_drvdata(pdev, 0);
+> +	kfree(gp);
+> +err_alloc:
+> +	return ret;
+> +}
+> +
+> +static int __devexit
+> +gpio_pwm_remove(struct platform_device *pdev)
+> +{
+> +	struct gpio_pwm *gp = platform_get_drvdata(pdev);
+> +	int ret;
+> +
+> +	ret = pwm_unregister(&gp->pwm);
+> +	hrtimer_cancel(&gp->timer);
+> +	cancel_work_sync(&gp->work);
+> +	platform_set_drvdata(pdev, 0);
+> +	kfree(gp);
+> +
+> +	return 0;
+> +}
+> +
+> +static struct platform_driver gpio_pwm_driver = {
+> +	.driver = {
+> +		.name = "gpio_pwm",
+> +		.owner = THIS_MODULE,
+> +	},
+> +	.probe = gpio_pwm_probe,
+> +	.remove = __devexit_p(gpio_pwm_remove),
+> +};
+> +
+> +static int __init gpio_pwm_init(void)
+> +{
+> +	return platform_driver_register(&gpio_pwm_driver);
+> +}
+> +module_init(gpio_pwm_init);
+> +
+> +static void __exit gpio_pwm_exit(void)
+> +{
+> +	platform_driver_unregister(&gpio_pwm_driver);
+> +}
+> +module_exit(gpio_pwm_exit);
+> +
+> +MODULE_AUTHOR("Bill Gatliff <bgat@billgatliff.com>");
+> +MODULE_DESCRIPTION("PWM output using GPIO and a high-resolution timer");
+> +MODULE_LICENSE("GPL");
+> +MODULE_ALIAS("platform:gpio_pwm");
+> -- 
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
