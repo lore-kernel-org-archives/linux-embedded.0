@@ -1,13 +1,13 @@
 From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PWM 05/10] LED "dim" trigger based on PWM control of the LED
-Date: Sat, 16 Oct 2010 02:00:26 -0600
-Message-ID: <20101016080026.GF653@angua.secretlab.ca>
+Subject: Re: [PWM 06/10] Incorporate PWM API code into KBuild
+Date: Sat, 16 Oct 2010 02:02:07 -0600
+Message-ID: <20101016080207.GG653@angua.secretlab.ca>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
- <1285946271-17728-5-git-send-email-bgat@billgatliff.com>
+ <1285946271-17728-6-git-send-email-bgat@billgatliff.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1285946271-17728-5-git-send-email-bgat@billgatliff.com>
+In-Reply-To: <1285946271-17728-6-git-send-email-bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -15,122 +15,170 @@ Content-Transfer-Encoding: 7bit
 To: Bill Gatliff <bgat@billgatliff.com>
 Cc: linux-embedded@vger.kernel.org
 
-On Fri, Oct 01, 2010 at 10:17:46AM -0500, Bill Gatliff wrote:
+On Fri, Oct 01, 2010 at 10:17:47AM -0500, Bill Gatliff wrote:
 > Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
 
-Ditto on description
-
-Otherwise pretty straight forward.  Looks okay to me.
-
-g.
+Ditto on description.
 
 > ---
->  drivers/leds/ledtrig-dim.c |   96 ++++++++++++++++++++++++++++++++++++++++++++
->  1 files changed, 96 insertions(+), 0 deletions(-)
->  create mode 100644 drivers/leds/ledtrig-dim.c
+>  drivers/Kconfig       |    2 ++
+>  drivers/Makefile      |    2 ++
+>  drivers/leds/Kconfig  |   22 ++++++++++++++++------
+>  drivers/leds/Makefile |    2 ++
+>  drivers/pwm/Kconfig   |   28 ++++++++++++++++++++++++++++
+>  drivers/pwm/Makefile  |    6 ++++++
+>  6 files changed, 56 insertions(+), 6 deletions(-)
+>  create mode 100644 drivers/pwm/Kconfig
+>  create mode 100644 drivers/pwm/Makefile
+
+Hmmm... is this patch series bisectable?
+
 > 
-> diff --git a/drivers/leds/ledtrig-dim.c b/drivers/leds/ledtrig-dim.c
+> diff --git a/drivers/Kconfig b/drivers/Kconfig
+> index a2b902f..60390cb 100644
+> --- a/drivers/Kconfig
+> +++ b/drivers/Kconfig
+> @@ -54,6 +54,8 @@ source "drivers/pps/Kconfig"
+>  
+>  source "drivers/gpio/Kconfig"
+>  
+> +source "drivers/pwm/Kconfig"
+> +
+>  source "drivers/w1/Kconfig"
+>  
+>  source "drivers/power/Kconfig"
+> diff --git a/drivers/Makefile b/drivers/Makefile
+> index a2aea53..fa7ca1c 100644
+> --- a/drivers/Makefile
+> +++ b/drivers/Makefile
+> @@ -6,6 +6,8 @@
+>  #
+>  
+>  obj-y				+= gpio/
+> +obj-$(CONFIG_GENERIC_PWM)	+= pwm/
+> +
+>  obj-$(CONFIG_PCI)		+= pci/
+>  obj-$(CONFIG_PARISC)		+= parisc/
+>  obj-$(CONFIG_RAPIDIO)		+= rapidio/
+> diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
+> index 3af2cde..b434fa3 100644
+> --- a/drivers/leds/Kconfig
+> +++ b/drivers/leds/Kconfig
+> @@ -249,12 +249,6 @@ config LEDS_DAC124S085
+>  	  This option enables support for DAC124S085 SPI DAC from NatSemi,
+>  	  which can be used to control up to four LEDs.
+>  
+> -config LEDS_PWM
+> -	tristate "PWM driven LED Support"
+> -	depends on HAVE_PWM
+> -	help
+> -	  This option enables support for pwm driven LEDs
+> -
+>  config LEDS_REGULATOR
+>  	tristate "REGULATOR driven LED support"
+>  	depends on REGULATOR
+> @@ -354,6 +348,14 @@ config LEDS_TRIGGER_HEARTBEAT
+>  	  load average.
+>  	  If unsure, say Y.
+>  
+> +config LEDS_TRIGGER_DIM
+> +	tristate "LED Dimmer Trigger"
+> +	depends on LEDS_TRIGGERS
+> +	help
+> +	  Regulates the brightness of an LED based on the 1-minute CPU
+> +	  load average. Ideal for PWM-driven LEDs.
+> +	  If unsure, say Y.
+> +
+>  config LEDS_TRIGGER_BACKLIGHT
+>  	tristate "LED backlight Trigger"
+>  	help
+> @@ -374,6 +376,14 @@ config LEDS_TRIGGER_GPIO
+>  
+>  	  If unsure, say N.
+>  
+> +config LEDS_TRIGGER_DIM
+> +       tristate "LED Dimmer Trigger"
+> +       depends on LEDS_TRIGGERS
+> +       help
+> +         Regulates the brightness of an LED based on the 1-minute CPU
+> +         load average.  Ideal for PWM-driven LEDs.
+> +         If unsure, say Y.
+> +
+
+Inconsistent whitespace
+
+>  config LEDS_TRIGGER_DEFAULT_ON
+>  	tristate "LED Default ON Trigger"
+>  	help
+> diff --git a/drivers/leds/Makefile b/drivers/leds/Makefile
+> index 7d6b958..a4ccea4 100644
+> --- a/drivers/leds/Makefile
+> +++ b/drivers/leds/Makefile
+> @@ -22,6 +22,7 @@ obj-$(CONFIG_LEDS_COBALT_RAQ)		+= leds-cobalt-raq.o
+>  obj-$(CONFIG_LEDS_SUNFIRE)		+= leds-sunfire.o
+>  obj-$(CONFIG_LEDS_PCA9532)		+= leds-pca9532.o
+>  obj-$(CONFIG_LEDS_GPIO)			+= leds-gpio.o
+> +obj-$(CONFIG_LEDS_PWM)			+= leds-pwm.o
+>  obj-$(CONFIG_LEDS_LP3944)		+= leds-lp3944.o
+>  obj-$(CONFIG_LEDS_CLEVO_MAIL)		+= leds-clevo-mail.o
+>  obj-$(CONFIG_LEDS_HP6XX)		+= leds-hp6xx.o
+> @@ -46,6 +47,7 @@ obj-$(CONFIG_LEDS_DAC124S085)		+= leds-dac124s085.o
+>  obj-$(CONFIG_LEDS_TRIGGER_TIMER)	+= ledtrig-timer.o
+>  obj-$(CONFIG_LEDS_TRIGGER_IDE_DISK)	+= ledtrig-ide-disk.o
+>  obj-$(CONFIG_LEDS_TRIGGER_HEARTBEAT)	+= ledtrig-heartbeat.o
+> +obj-$(CONFIG_LEDS_TRIGGER_DIM)		+= ledtrig-dim.o
+>  obj-$(CONFIG_LEDS_TRIGGER_BACKLIGHT)	+= ledtrig-backlight.o
+>  obj-$(CONFIG_LEDS_TRIGGER_GPIO)		+= ledtrig-gpio.o
+>  obj-$(CONFIG_LEDS_TRIGGER_DEFAULT_ON)	+= ledtrig-default-on.o
+> diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
 > new file mode 100644
-> index 0000000..8f93f44
+> index 0000000..0584c25
 > --- /dev/null
-> +++ b/drivers/leds/ledtrig-dim.c
-> @@ -0,0 +1,96 @@
-> +/*
-> + * LED Dim Trigger
-> + *
-> + * Copyright (C) 2010 Bill Gatliff <bgat@billgatliff.com>
-> + *
-> + * "Dims" an LED based on system load.  Derived from Atsushi Nemoto's
-> + * ledtrig-heartbeat.c.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + *
-> + */
-> +#include <linux/module.h>
-> +#include <linux/kernel.h>
-> +#include <linux/slab.h>
-> +#include <linux/init.h>
-> +#include <linux/timer.h>
-> +#include <linux/sched.h>
-> +#include <linux/leds.h>
+> +++ b/drivers/pwm/Kconfig
+> @@ -0,0 +1,28 @@
+> +#
+> +# PWM infrastructure and devices
+> +#
 > +
-> +#include "leds.h"
+> +menuconfig GENERIC_PWM
+> +	tristate "PWM Support"
+> +	depends on SYSFS
+> +	help
+> +	  This enables PWM support through the generic PWM API.
+> +	  If unsure, say N.
 > +
-> +struct dim_trig_data {
-> +	struct timer_list timer;
-> +};
+> +if GENERIC_PWM
 > +
+> +config ATMEL_PWM
+> +	tristate "Atmel AT32/AT91 PWM support"
+> +	depends on AVR32 || ARCH_AT91
+> +	help
+> +	  This option enables device driver support for the PWMC
+> +	  peripheral channels found on certain Atmel processors.
+> +	  If unsure, say N.
 > +
-> +static void
-> +led_dim_function(unsigned long data)
-> +{
-> +	struct led_classdev *led_cdev = (struct led_classdev *)data;
-> +	struct dim_trig_data *dim_data = led_cdev->trigger_data;
-> +	unsigned int brightness;
+> +config GPIO_PWM
+> +       tristate "PWM emulation using GPIO"
+> +       help
+> +         This option enables a single-channel PWM device using
+
+Ditto
+
+> +	 a kernel interval timer and a GPIO pin.  If unsure, say N.
 > +
-> +	brightness = ((LED_FULL - LED_OFF) * avenrun[0]) / EXP_1;
-> +	if (brightness > LED_FULL)
-> +		brightness = LED_FULL;
-> +
-> +	led_set_brightness(led_cdev, brightness);
-> +	mod_timer(&dim_data->timer, jiffies + msecs_to_jiffies(500));
-> +}
-> +
-> +
-> +static void
-> +dim_trig_activate(struct led_classdev *led_cdev)
-> +{
-> +	struct dim_trig_data *dim_data;
-> +
-> +	dim_data = kzalloc(sizeof(*dim_data), GFP_KERNEL);
-> +	if (!dim_data)
-> +		return;
-> +
-> +	led_cdev->trigger_data = dim_data;
-> +	setup_timer(&dim_data->timer,
-> +		    led_dim_function, (unsigned long)led_cdev);
-> +	led_dim_function(dim_data->timer.data);
-> +}
-> +
-> +
-> +static void
-> +dim_trig_deactivate(struct led_classdev *led_cdev)
-> +{
-> +	struct dim_trig_data *dim_data = led_cdev->trigger_data;
-> +
-> +	if (dim_data) {
-> +		del_timer_sync(&dim_data->timer);
-> +		kfree(dim_data);
-> +	}
-> +}
-> +
-> +
-> +static struct led_trigger dim_led_trigger = {
-> +	.name     = "dim",
-> +	.activate = dim_trig_activate,
-> +	.deactivate = dim_trig_deactivate,
-> +};
-> +
-> +
-> +static int __init dim_trig_init(void)
-> +{
-> +	return led_trigger_register(&dim_led_trigger);
-> +}
-> +module_init(dim_trig_init);
-> +
-> +
-> +static void __exit dim_trig_exit(void)
-> +{
-> +	led_trigger_unregister(&dim_led_trigger);
-> +}
-> +module_exit(dim_trig_exit);
-> +
-> +
-> +MODULE_AUTHOR("Bill Gatliff <bgat@billgatliff.com>");
-> +MODULE_DESCRIPTION("Dim LED trigger");
-> +MODULE_LICENSE("GPL");
+> +endif
+> diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
+> new file mode 100644
+> index 0000000..e8cacc5
+> --- /dev/null
+> +++ b/drivers/pwm/Makefile
+> @@ -0,0 +1,6 @@
+> +#
+> +# Makefile for pwm devices
+> +#
+> +obj-y := pwm.o
+> +obj-$(CONFIG_ATMEL_PWM)		+= atmel-pwm.o
+> +obj-$(CONFIG_GPIO_PWM)		+= gpio.o
 > -- 
 > 1.7.1
 > 
