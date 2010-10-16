@@ -1,36 +1,44 @@
 From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: Linux Plumbers Embedded microconference
-Date: Fri, 15 Oct 2010 21:50:58 -0600
-Message-ID: <20101016035058.GD21170@angua.secretlab.ca>
-References: <AANLkTinqm-EsovG8c1mfX2zuAgHt5OoRCcD+owBbndNc@mail.gmail.com>
- <1287159628.14514.177.camel@localhost>
+Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common user
+ and kernel interface
+Date: Sat, 16 Oct 2010 00:05:47 -0600
+Message-ID: <AANLkTimWFBUVuZJTw9R=x8u1AnPEMOWXK1yPEUXLf6Lg@mail.gmail.com>
+References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
+ <AANLkTi=6GN=cwA5vuv4fNDt0=xPT3+g2vntzZdN_gDrw@mail.gmail.com> <AANLkTim2tbWNviJottUg3jAD2ybd5oUPJu3vdPvNa_fX@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1287159628.14514.177.camel@localhost>
+In-Reply-To: <AANLkTim2tbWNviJottUg3jAD2ybd5oUPJu3vdPvNa_fX@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Kevin Hilman <khilman@deeprootsystems.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Jeremy Kerr <jeremy.kerr@canonical.com>, Tim Bird <tim.bird@am.sony.com>, Scott Wood <scottwood@freescale.com>, linux-embedded <linux-embedded@vger.kernel.org>, Liam Girdwood <lrg@slimlogic.co.uk>, =?iso-8859-1?Q?Lo=EFc?= Minier <lool@dooz.org>, John Linn <John.Linn@xilinx.com>, Becky Bruce <Becky.Bruce@freescale.com>, Kumar Gala <kumar.gala@freescale.com>, Paul Walmsley <paul@pwsan.com>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: Hector Oron <hector.oron@gmail.com>, linux-embedded@vger.kernel.org
 
-On Fri, Oct 15, 2010 at 09:20:28AM -0700, Kevin Hilman wrote:
-> Hi Grant,
-> 
-> Do you have a draft agenda yet for the microconf?  Specifically, I'd
-> like to get a better feel for how much time we'll dedicate to each
-> topic, and therefore be better prepared for the discussions.
+On Wed, Oct 6, 2010 at 12:48 PM, Bill Gatliff <bgat@billgatliff.com> wr=
+ote:
+> Hector:
+>
+> On Sat, Oct 2, 2010 at 7:25 AM, Hector Oron <hector.oron@gmail.com> w=
+rote:
+>> Hello Bill,
+>>
+>> Thanks for trying (again) to get this in mainline.
+>> Are you planning to request a slot in the GIT at kernel.org to hold
+>> and maintain this nice framework?
+>
+> I did make such a request once, and it went nowhere. =A0:(
 
-Working on it.  RealSoonNow.
+Git trees don't have to be hosted on git.kernel.org.  None of my trees
+are on kernel.org, and Linus pulls from me all the time.  You can host
+your own git server, or use a git hosting provider.
 
-> Also, some TI folks are asking me if I know whether the AMP topic is
-> going to be discussed.  TI is actively working on this and would like to
-> participate in any discussions.  Their 1st generation code for this is
-> in staging (tidspbridge) while the 2nd generation is under active
-> deveopment with some of the lead developers planning to be at LPC.
-
-Yes, AMP is absolutely on the agenda.  It seems to be a big topic for
-a lot of folks.
+But, if you're serious about getting it mainlined, then you need to
+post the whole series to linux-kernel.  Also, without a specific
+maintainer to pick it up for you, it helps to cc: Andrew Morton.  I
+recommend doing so sooner rather than later.  It probably won't make
+2.6.37 since the merge window is opening in about a week, but it would
+be a good candidate for .38.  I'll go through all the patches right
+now and make my comments.
 
 g.
