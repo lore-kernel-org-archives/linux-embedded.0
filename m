@@ -1,162 +1,105 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common
- user and kernel interface
-Date: Wed, 20 Oct 2010 12:34:35 -0600
-Message-ID: <20101020183435.GA12480@angua.secretlab.ca>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common user
+ and kernel interface
+Date: Wed, 20 Oct 2010 14:32:16 -0500
+Message-ID: <AANLkTik-stsHoEcpJkuszFxyrVPjvEy3iMNkovX_kzXe@mail.gmail.com>
 References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
- <20101016074240.GC653@angua.secretlab.ca>
- <AANLkTikLnoAiZpZpA-aUPa3kSW7ZO=542wLgzFUqiL_4@mail.gmail.com>
+	<20101016074240.GC653@angua.secretlab.ca>
+	<AANLkTikLnoAiZpZpA-aUPa3kSW7ZO=542wLgzFUqiL_4@mail.gmail.com>
+	<20101020183435.GA12480@angua.secretlab.ca>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <AANLkTikLnoAiZpZpA-aUPa3kSW7ZO=542wLgzFUqiL_4@mail.gmail.com>
+In-Reply-To: <20101020183435.GA12480@angua.secretlab.ca>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Bill Gatliff <bgat@billgatliff.com>
+To: Grant Likely <grant.likely@secretlab.ca>
 Cc: linux-embedded@vger.kernel.org
 
-On Wed, Oct 20, 2010 at 01:13:34PM -0500, Bill Gatliff wrote:
-> Grant:
->=20
-> > I'm not hugely keen on the naming approach, and I'd rather see the
-> > pwm core be responsible for the namespace.
->=20
-> The problem with that, as I see it, is that then the channel
-> identifiers become dependent on the order of device initialization.
+Grant:
 
-Correct, just like on all other subsystems.
+> Identify by name tends to be a horrible interface in my opinion. The
+> lesson has been learned in the network and block layers that names
+> change over time and trying to lock them down to something that a use=
+r
+> finds 'sane' ends up in a mess of workarounds and bad assumptions in
+> the code.
 
-> By allowing driver authors to assign names, however, users are capabl=
-e
-> of pinning their channel requests to specific devices and channels
-> with confidence that those names will remain valid regardless of the
-> sequence they compile their kernel in.
+The reason it doesn't work for network and block devices is because
+the names of those devices aren't relevant; it's only the IP address
+assigned and mount point that are of interest.  Furthermore, you
+rarely talk directly to an ethernet controller: you just route packets
+through it.  And the kernel decides which packets are going to go
+where based solely on IP and related information, and never the name
+of the device.  So pretending that the name matters is a recipe for
+trouble.
 
-Identify by name tends to be a horrible interface in my opinion. The
-lesson has been learned in the network and block layers that names
-change over time and trying to lock them down to something that a user
-finds 'sane' ends up in a mess of workarounds and bad assumptions in
-the code.
+PWM devices are different, I think, in that the name of the device
+uniquely identifies a physical peripheral in the part, and the channel
+number is often mapped to a specific pin on the chip package by the
+platform integrator.  If you have a hope of driving your PWM signal to
+the right place each time the system builds and boots, you have to be
+able to specify things to that level of detail.
 
-=46or in-kernel users, either platform_data or notifier hooks can be us=
-ed
-by one device to have explicit knowledge about the device. No need to
-muck about with name encoding.
+And then there's the laziness factor.  :)  I don't like having to
+figure out over and over again that "pwm-1:2" is really mapped to the
+PWMC peripheral's channel two; and I definitely don't like worrying
+that channel enumerations will change just because I plugged in a new
+i2c GPIO chip or LED driver.  I want to be able to tell the system
+that I want to talk to a specific pin, regardless of when it shows up
+relative to all the other pins in the system.
 
-In userspace, the correct solution is to expose real information about
-the device (how the instance is connected to the system plus any other
-identifying data) in the sysfs tree and let udev (or a trivial
-replacement) decode to a stable user-friendly name.
-
-Essentially, identifying by name attempts to expose real information
-about which device it is, but the process of encoding a name is lossy
-and so it fails to be robust in the long term.
-
->=20
-> > Nitpick: putting the filename into the file itself I find tends to =
-be
-> > useless
->=20
-> Agreed.  Those tend to sneak in during my early development, and then
-> I get so used to seeing them that I forget to take them out.
-
-:-)
-
->=20
-> >> +static int __pwm_create_sysfs(struct pwm_device *pwm);
-> >
-> > If you order the functions in this file correct, the forward
-> > declaration should not be necessary.
->=20
-> In theory, I agree completely with you.  In this specific instance,
-> however, I haven't been able to structure things in a way that
-> eliminates at least one forward declaration.
-
-=46air enough, sometimes that is necessary.  I didn't look that closely=
-=2E
-
-> One possibility would be to move all the sysfs-related stuff out to a
-> separate file altogether.  Depending on what the class attribute
-> rework ends up doing to the code, I just might do that.  Of course,
-> that wouldn't eliminate the forward declaration--- it would just move
-> it.  :)
-
-Yeah, by changing to using class attributes, a lot of this could end
-up going away.
-
->=20
-> >> + =A0 =A0 for (wchan =3D 0; wchan < pwm->nchan; wchan++) {
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 dev =3D class_find_device(&pwm_class, NU=
-LL,
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 &pwm->channels[wchan],
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 __match_device);
-> >
-> > If the pwm_channel structure carried a pointer to its device
-> > structure, then this lookup wouldn't be needed.
->=20
-> This comment, combined with your other one on the class attributes
-> (below) convince me that the device model isn't quite right yet.  I
-> will rework this until seems correct.
-
-:-)
-
->=20
-> > The above 8 functions are so tiny that they should probably be stat=
-ic
-> > inlines in the header file.
->=20
-> Agreed.
->=20
-> > Rather than open coding the registration of sysfs files, I believe =
-the
-> > right thing to do is to use class attributes so that the files get
-> > automatically registered for you and are immediately advertised to
-> > userspace (very important for correct interaction with udev).
->=20
-> I think I'm either still a little weak on my device model
-> understanding, or things have been changing there lately and I haven'=
+> In userspace, the correct solution is to expose real information abou=
 t
-> had the time to notice.  Regardless, this code always seemed a little
-> awkward--- you seem to agree, so I'll do some research and come back
-> with something better.
->=20
-> > Also, sysfs_create_group() should not be called directly when worki=
-ng
-> > with devices.
->=20
-> Probably necessary because I'm not doing something right elsewhere.  =
-:)
->=20
-> >> + =A0 =A0 /* TODO: how to deal with devices that register very ear=
-ly? */
-> >
-> > Same thing we always do for bootstrapping. =A0If it *must* be early=
-,
-> > then we do a simple direct access to get things running in platform
-> > code, and then take over in the driver when it finally gets probed.
-> > The driver model helps with many things, but really early stuff isn=
-'t
-> > one of them.
->=20
-> I _think_ you and I are saying the same thing: that the device model
-> only works well with late-registering devices.  I'm not sure I
-> understand your suggestion for how to deal with must-be-early devices=
-=2E
+> the device (how the instance is connected to the system plus any othe=
+r
+> identifying data) in the sysfs tree and let udev (or a trivial
+> replacement) decode to a stable user-friendly name.
 
-My experience has been there are very few things that cannot be
-deferred to module_initcall() time if the device model is handled
-well.  Typically the things that fall outside of that model are core
-infrastructure things like irq controllers which need to be ready to
-go before many of the subsystems are initialized.
+That's precisely what I'm doing.
 
-Basically I'm saying that for things that *really do* need to be setup
-before the initcalls, you either don't use the device model at all, or
-you figure out how to hand off control from early bootstrap code once
-the driver model is set up.  Kind of like the early console code.
-Scary stuff.
+I don't anticipate that device authors will use names like
+"panel_backlight".  Rather, they should use names like "pwmc:2:3",
+which means "PWMC peripheral 2 channel number 3".  Then they can look
+at a schematic to verify that PWMC2 indeed goes to the panel
+backlight.
 
-g.
+> Essentially, identifying by name attempts to expose real information
+> about which device it is, but the process of encoding a name is lossy
+> and so it fails to be robust in the long term.
+
+In the case of semi-transparent devices like ethernet controllers and
+block devices, I agree.  But the information for a PWM signal doesn't
+merely pass through a PWM controller: it tells the controller what to
+do.  Subtle but important difference compared to an ethernet
+controller that makes it compelling to use actual names in my case.
+
+> Yeah, by changing to using class attributes, a lot of this could end
+> up going away.
+
+Looking at that now, in fact.
+
+> My experience has been there are very few things that cannot be
+> deferred to module_initcall() time if the device model is handled
+> well. =A0Typically the things that fall outside of that model are cor=
+e
+> infrastructure things like irq controllers which need to be ready to
+> go before many of the subsystems are initialized.
+
+The one situation that comes to mind is i2c GPIO expanders on powerpc.
+ Since everything in that world is bound only after the DTS file gets
+parsed, finding and registering things can be tricky.  Or maybe it was
+the onboard GPIO controllers in the MPC5200.  IIRC, I found a case
+where something could call pwm_register() before the PWM framework
+itself had even been established.  That caused sysfs to complain, to
+say the least.
+
+Of course, the problem could actually be that I'm not using sysfs
+quite right yet.  Hmm...
+
+
+b.g.
+--=20
+Bill Gatliff
+bgat@billgatliff.com
