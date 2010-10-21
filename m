@@ -1,36 +1,34 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Generic PWM git tree rebased; please resend me your patches
-Date: Thu, 21 Oct 2010 08:14:48 -0500
-Message-ID: <AANLkTin=BvOXfQcrUvjmRzJ416TbJ1KsMVtZSrh0TFy=@mail.gmail.com>
+Subject: Re: [PWM 01/10] API to consolidate PWM devices behind a common user
+ and kernel interface
+Date: Thu, 21 Oct 2010 08:18:06 -0500
+Message-ID: <AANLkTinc=4ywuJxjayV5GiDAWUL=ZwpPUN4FEYRG-pFb@mail.gmail.com>
+References: <1285946271-17728-1-git-send-email-bgat@billgatliff.com>
+	<20101016074240.GC653@angua.secretlab.ca>
+	<AANLkTikLnoAiZpZpA-aUPa3kSW7ZO=542wLgzFUqiL_4@mail.gmail.com>
+	<20101020183435.GA12480@angua.secretlab.ca>
+	<AANLkTik-stsHoEcpJkuszFxyrVPjvEy3iMNkovX_kzXe@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <AANLkTik-stsHoEcpJkuszFxyrVPjvEy3iMNkovX_kzXe@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org, Arun Murthy <arun.murthy@stericsson.com>, sugumar <sugumar.embedded@gmail.com>
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: linux-embedded@vger.kernel.org
 
-Guys:
+Grant:
 
 
-I have a public git tree of my generic PWM framework code here:
+On Wed, Oct 20, 2010 at 2:32 PM, Bill Gatliff <bgat@billgatliff.com> wrote:
+>> Yeah, by changing to using class attributes, a lot of this could end
+>> up going away.
+>
+> Looking at that now, in fact.
 
-     git://git.billgatliff.com/pwm.git
-
-I have rebased my series against linux-2.6.36, and also cleaned up a
-bunch of stuff based on reviewer feedback.  I think I have also make
-things such that the existing PWM kernel code can coexist with my
-framework, giving us less breakage and more time to migrate things to
-the new API.
-
-Many of you have been sending me code against the patch series I
-posted here a few weeks ago, and I really do appreciate that.  Please
-rebase your patches against the above repository and resend (or send
-me a pull request).  I'm trying to get all of your patches merged, but
-many of them aren't going in without conflicts.  Sorry for the extra
-work.
-
-Thanks very much!
+Going to class device attributes did the trick.  Thanks for pointing
+me in the right direction!
 
 
 b.g.
