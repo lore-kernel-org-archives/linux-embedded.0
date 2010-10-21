@@ -1,39 +1,39 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 01/16] pramfs: documentation
-Date: Thu, 21 Oct 2010 12:51:47 +0200
-Message-ID: <AANLkTinszVf3Y=prsdzx_v508MOUNBEGMX73zA+ZgOd2@mail.gmail.com>
-References: <4CB1E976.7080607@gmail.com>
-	<20101020125459.c183c286.randy.dunlap@oracle.com>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: Generic PWM git tree rebased; please resend me your patches
+Date: Thu, 21 Oct 2010 08:14:48 -0500
+Message-ID: <AANLkTin=BvOXfQcrUvjmRzJ416TbJ1KsMVtZSrh0TFy=@mail.gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type;
-        bh=UYL+MTkjEaBAS3G4UnzzDOdNsaV3VlqPVPjH3xoG4rc=;
-        b=ZUZHU8EPfinIzEnGqbMQKOhuMVq5aUQ4wPt8ApSssHJZ2P57iCIKPfvrRj8IGampor
-         EdgvPCEmUh5kZ2M9kGDW6gfLXjV2nc0OU+ZkzuDcw5NLjQ/Gfx9Re8GDdwP4k+wQx6Zm
-         KQaJXo5DLctKl5IL8D0XMXePkcZtQFoPwNOn0=
-In-Reply-To: <20101020125459.c183c286.randy.dunlap@oracle.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Randy Dunlap <randy.dunlap@oracle.com>
-Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+To: linux-embedded@vger.kernel.org, Arun Murthy <arun.murthy@stericsson.com>, sugumar <sugumar.embedded@gmail.com>
 
-2010/10/20 Randy Dunlap <randy.dunlap@oracle.com>:
-> On Sun, 10 Oct 2010 18:27:34 +0200 Marco Stornelli wrote:
->
->> From: Marco Stornelli <marco.stornelli@gmail.com>
->>
->> Documentation for PRAMFS.
->>
->> Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
->> ---
+Guys:
 
-Ack for all the remarks, thank for the review.
 
-Regards,
+I have a public git tree of my generic PWM framework code here:
 
-Marco
+     git://git.billgatliff.com/pwm.git
+
+I have rebased my series against linux-2.6.36, and also cleaned up a
+bunch of stuff based on reviewer feedback.  I think I have also make
+things such that the existing PWM kernel code can coexist with my
+framework, giving us less breakage and more time to migrate things to
+the new API.
+
+Many of you have been sending me code against the patch series I
+posted here a few weeks ago, and I really do appreciate that.  Please
+rebase your patches against the above repository and resend (or send
+me a pull request).  I'm trying to get all of your patches merged, but
+many of them aren't going in without conflicts.  Sorry for the extra
+work.
+
+Thanks very much!
+
+
+b.g.
+-- 
+Bill Gatliff
+bgat@billgatliff.com
