@@ -1,48 +1,61 @@
-From: Chris Simmonds <chris.simmonds@2net.co.uk>
-Subject: Re: Embedded Linux Boot Time Poll
-Date: Fri, 22 Oct 2010 16:33:48 +0100
-Message-ID: <4CC1AEDC.2040405@2net.co.uk>
-References: <AANLkTi=YBzPDG6nOmQfegGOT+8nXm_6EKJE_L2uswxeu@mail.gmail.com>
-Reply-To: chris@2net.co.uk
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: Linux Plumbers Embedded microconference
+Date: Fri, 22 Oct 2010 19:03:22 -0600
+Message-ID: <AANLkTikOjEZ1Cri-h4Ty1wjemsZ_r6QgTdXRFQ2QjRYW@mail.gmail.com>
+References: <AANLkTinqm-EsovG8c1mfX2zuAgHt5OoRCcD+owBbndNc@mail.gmail.com>
+ <1287159628.14514.177.camel@localhost> <20101016035058.GD21170@angua.secretlab.ca>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=YBzPDG6nOmQfegGOT+8nXm_6EKJE_L2uswxeu@mail.gmail.com>
+In-Reply-To: <20101016035058.GD21170@angua.secretlab.ca>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Andrew Murray <amurray@mpcdata.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+To: Kevin Hilman <khilman@deeprootsystems.com>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Jeremy Kerr <jeremy.kerr@canonical.com>, Tim Bird <tim.bird@am.sony.com>, Scott Wood <scottwood@freescale.com>, linux-embedded <linux-embedded@vger.kernel.org>, Liam Girdwood <lrg@slimlogic.co.uk>, =?ISO-8859-1?Q?Lo=EFc_Minier?= <lool@dooz.org>, John Linn <John.Linn@xilinx.com>, Becky Bruce <Becky.Bruce@freescale.com>, Kumar Gala <kumar.gala@freescale.com>, Paul Walmsley <paul@pwsan.com>, Ohad Ben-Cohen <ohad@wizery.com>, Magnus Damm <magnus.damm@gmail.com>
 
-On 22/10/10 00:20, Andrew Murray wrote:
-> Hello,
->
-> I'm performing some research [for a CELF presentation] into reducing
-> boot time on embedded systems and would like to see if the embedded
-> community agree with the following statement as to why Linux
-> [arguably] takes so long in the first place for an unoptimised system:
->
-> "Linux is general purpose, convenient and flexible. As it's general
-> purpose it's likely to contain un-required functionality which results
-> in more initialisation and a larger image size. As it's convenient and
-> flexible it will spent time discovering devices and verifying their
-> existence."
->
-> Do you largely agree or disagree?
-> Also do you believe that boot time isn't the highest priority when it
-> comes to improving the kernel?
->
-> Thanks,
->
-> Andrew Murray
+Hi all,
 
- From my experience, your statements are broadly correct. As has been 
-pointed out, there are techniques to optimise the boot time in a system, 
-but they are not very well known to the majority of engineers working on 
-embedded Linux devices. The situation is not helped by the poor choices 
-made by many board and chip level vendors who bundle a Linux tool chain 
-and rootfs with their hardware. So, I believe that it is mostly a 
-problem of education, starting with the chip- and board- vendors.
+Here is a very early draft of the agenda for the embedded track at the
+Linux Plumbers Conference on Nov 3-5th.  Don't make any decisions
+based on this, and I'll be talking to some of you individually about
+the details, but this gives you an idea of what I'm thinking.
 
-Bye for now
-Chris Simmonds
+http://wiki.linuxplumbersconf.org/2010:embedded_topics
+
+Cheers,
+g.
+
+On Fri, Oct 15, 2010 at 9:50 PM, Grant Likely <grant.likely@secretlab.c=
+a> wrote:
+> On Fri, Oct 15, 2010 at 09:20:28AM -0700, Kevin Hilman wrote:
+>> Hi Grant,
+>>
+>> Do you have a draft agenda yet for the microconf? =A0Specifically, I=
+'d
+>> like to get a better feel for how much time we'll dedicate to each
+>> topic, and therefore be better prepared for the discussions.
+>
+> Working on it. =A0RealSoonNow.
+>
+>> Also, some TI folks are asking me if I know whether the AMP topic is
+>> going to be discussed. =A0TI is actively working on this and would l=
+ike to
+>> participate in any discussions. =A0Their 1st generation code for thi=
+s is
+>> in staging (tidspbridge) while the 2nd generation is under active
+>> deveopment with some of the lead developers planning to be at LPC.
+>
+> Yes, AMP is absolutely on the agenda. =A0It seems to be a big topic f=
+or
+> a lot of folks.
+>
+> g.
+>
+>
+
+
+
+--=20
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
