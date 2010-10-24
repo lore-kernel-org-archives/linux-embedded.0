@@ -1,61 +1,61 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: Linux Plumbers Embedded microconference
-Date: Fri, 22 Oct 2010 19:03:22 -0600
-Message-ID: <AANLkTikOjEZ1Cri-h4Ty1wjemsZ_r6QgTdXRFQ2QjRYW@mail.gmail.com>
-References: <AANLkTinqm-EsovG8c1mfX2zuAgHt5OoRCcD+owBbndNc@mail.gmail.com>
- <1287159628.14514.177.camel@localhost> <20101016035058.GD21170@angua.secretlab.ca>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
+Subject: Re: Embedded Linux Boot Time Poll
+Date: Sun, 24 Oct 2010 12:17:50 +0200
+Message-ID: <20101024101750.GF32583@pengutronix.de>
+References: <AANLkTi=YBzPDG6nOmQfegGOT+8nXm_6EKJE_L2uswxeu@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20101016035058.GD21170@angua.secretlab.ca>
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=YBzPDG6nOmQfegGOT+8nXm_6EKJE_L2uswxeu@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Kevin Hilman <khilman@deeprootsystems.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Jeremy Kerr <jeremy.kerr@canonical.com>, Tim Bird <tim.bird@am.sony.com>, Scott Wood <scottwood@freescale.com>, linux-embedded <linux-embedded@vger.kernel.org>, Liam Girdwood <lrg@slimlogic.co.uk>, =?ISO-8859-1?Q?Lo=EFc_Minier?= <lool@dooz.org>, John Linn <John.Linn@xilinx.com>, Becky Bruce <Becky.Bruce@freescale.com>, Kumar Gala <kumar.gala@freescale.com>, Paul Walmsley <paul@pwsan.com>, Ohad Ben-Cohen <ohad@wizery.com>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Andrew Murray <amurray@mpcdata.com>
+Cc: linux-embedded@vger.kernel.org
 
-Hi all,
+Hello Andrew,
 
-Here is a very early draft of the agenda for the embedded track at the
-Linux Plumbers Conference on Nov 3-5th.  Don't make any decisions
-based on this, and I'll be talking to some of you individually about
-the details, but this gives you an idea of what I'm thinking.
-
-http://wiki.linuxplumbersconf.org/2010:embedded_topics
-
-Cheers,
-g.
-
-On Fri, Oct 15, 2010 at 9:50 PM, Grant Likely <grant.likely@secretlab.c=
-a> wrote:
-> On Fri, Oct 15, 2010 at 09:20:28AM -0700, Kevin Hilman wrote:
->> Hi Grant,
->>
->> Do you have a draft agenda yet for the microconf? =A0Specifically, I=
-'d
->> like to get a better feel for how much time we'll dedicate to each
->> topic, and therefore be better prepared for the discussions.
+On Fri, Oct 22, 2010 at 12:20:50AM +0100, Andrew Murray wrote:
+> I'm performing some research [for a CELF presentation] into reducing
+> boot time on embedded systems and would like to see if the embedded
+> community agree with the following statement as to why Linux
+> [arguably] takes so long in the first place for an unoptimised system:
 >
-> Working on it. =A0RealSoonNow.
+> "Linux is general purpose, convenient and flexible. As it's general
+> purpose it's likely to contain un-required functionality which results
+> in more initialisation and a larger image size. As it's convenient and
+> flexible it will spent time discovering devices and verifying their
+> existence."
 >
->> Also, some TI folks are asking me if I know whether the AMP topic is
->> going to be discussed. =A0TI is actively working on this and would l=
-ike to
->> participate in any discussions. =A0Their 1st generation code for thi=
-s is
->> in staging (tidspbridge) while the 2nd generation is under active
->> deveopment with some of the lead developers planning to be at LPC.
->
-> Yes, AMP is absolutely on the agenda. =A0It seems to be a big topic f=
-or
-> a lot of folks.
->
-> g.
->
->
+> Do you largely agree or disagree?  Also do you believe that boot time
+> isn't the highest priority when it comes to improving the kernel?
 
+I second what the others have already written. With a resonably tuned
+system it is possible to gain boot times of < 0.5 s into the Linux
+userspace on a 532 MHz MX35 (ARM1136).
 
+What highly matters if the use case, which in turn influences what can
+be done to decrease the boot time.
 
---=20
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+- If a distribution is tuned to "run everywhere", it has to do a lot of
+  probing, which needs time (i.e. a general purpose distribution on an
+  ARM or PowerPC). In turn, you can easily install almost everything on
+  such a system
+
+- If a system can be optimized for a special scenario (i.e. a machine
+  operator terminal), you can configure away almost all unrequired
+  functionality. In turn, it may be difficult to install random software
+  parts on such a system.
+
+It's more a matter of paradigms.
+
+I assume we'll have nice boot time discussons at ELC-E, I also have a
+talk there concering this topic :-)
+
+rsc
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
