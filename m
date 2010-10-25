@@ -1,92 +1,49 @@
 From: Pawel Suchanecki <subdcc@gmail.com>
 Subject: Re: How to spin down the SATA hard drive on ARM target (Open-RD)?
-Date: Mon, 25 Oct 2010 18:24:03 +0200
-Message-ID: <AANLkTinzVGgsCRuqdShJbCLO-CGFGd_Pt-jeYMZV1+sh@mail.gmail.com>
+Date: Mon, 25 Oct 2010 18:35:47 +0200
+Message-ID: <AANLkTi=Mh7X128uypFbcjNBNvQX6+XhzToGWAt-U5N4S@mail.gmail.com>
 References: <AANLkTim6xmfWSF92GzenqfYOgzjj73TF6wS7QM06T=Ps@mail.gmail.com>
+	<AANLkTinzVGgsCRuqdShJbCLO-CGFGd_Pt-jeYMZV1+sh@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:mime-version:received:received:in-reply-to
          :references:date:message-id:subject:from:to:content-type;
-        bh=XDPBwHZce+Yx/qKCjn3roPf21O34zn1XULigOAiwACs=;
-        b=mnFeYYKUfOaiLmFfudTdS16VTbo6T0RNnTNaetqvN9ZScOz0ufnUid0kbH4ZZ3+dbb
-         mWR4zQQ054DW33q/g9tr/L+0fYTmtEqrl8px2G2OaWOOIjaA32DltqQ7uUKhRzFeIlPq
-         sBlLSOmv7Vj5Etnn/8I0ghxkzMOpjiS84ALPg=
-In-Reply-To: <AANLkTim6xmfWSF92GzenqfYOgzjj73TF6wS7QM06T=Ps@mail.gmail.com>
+        bh=15SUjabzPo7tCRt/3PGplffrbO+piz6zhjaR78fr2g4=;
+        b=cOUeWUlsjhd6PvywQxDST2lTe0Ejhu6IfgbfRUyUQox7CfC3smykWIfbvEfVEQ4jn2
+         zW0TufL1I7xA9Cby4e/G/oEzBff+l0MU7otzAxtWRwhssU8h0V+44xmEH2WrO7ZoPuKy
+         TEIW9GQGETiW2L7AwL/C0PLOKt0avnZlwRT0w=
+In-Reply-To: <AANLkTinzVGgsCRuqdShJbCLO-CGFGd_Pt-jeYMZV1+sh@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org
 
-Hello again,
-
-I post an update below the original.
-
-2010/10/25 Pawel Suchanecki <subdcc@gmail.com>:
-> Dear list,
->
-> I am trying to achieve the HDD _simple_ power saving function on
-> Open-RD Client device, running Linux 2.6.22 / 2.6.36.
->
-> The simplification is that I just need to spin the disk down and then
-> sit quietly waiting for IC2 port expander's IRQ (button press) to
-> reboot the system.
->
-> Is the `sg_stat --stop' command from sg3_utils package capable of
-> performing the disk spin down for SATA device (WD) on this armish
-> platform?
-> If not, please direct me to proper solution.
->
-> Is it feasible running full power saving mode (i.e. using spindown
-> daemon [1]) to be able to wake the hard disk and resume normal system
-> operation?
-
-I forgot to mention that the standard approach (i.e. hdparm -y / -Y )
-does not work for me:
-
-root@XXXX:~# df -h | grep -E "Filesystem|sda"
-Filesystem           Size           Used           Avail
-Use%           Mounted on
-/dev/sda1             344G            26G          305G
-8%           /mnt/disk
+> How can this happen that hdparm replies with IO error when the device
+> is there (and serving a working filesystem) ?
 
 
-root@XXXX:~# hdparm -y /dev/sda1
+Guys,
 
-/dev/sda1:
- issuing standby command
- HDIO_DRIVE_CMD(standby) failed: Input/Output error
+I had a feeling to test hdparm -t/-T but it confuses me even more:
 
+hdparm -t /dev/sda  <and>  hdparm -T /dev/sda
 
-root@XXXX:~# hdparm -Y /dev/sda1
+seem to work, providing reasonable stats.
 
-/dev/sda1:
- issuing sleep command
- HDIO_DRIVE_CMD(sleep) failed: Input/Output error
+Here is the output from the latter one:
 
-
-root@XXXX:~# hdparm -I /dev/sda1
+root@XXXX:~# hdparm -T /dev/sda
 
 /dev/sda:
- HDIO_DRIVE_CMD(indentify) failed: Input/Output error
+ Timing cached reads:     436 MB in  2.01 seconds = 217.11 MB/sec
+
+Any clues?
 
 
-Using sdparm I get the device model instead of the command executed as
-in this request:
-
-root@XXXX:~# sdparm -C stop /dev/sg0
-     /dev/sg0: WDC           WD3000BLFS-01YBU 04.0
-
-
-Also as you already may noticed, the hard drive itself is WDC VelociRaptor.
-
-Is it possible that the VelociRaptor  -- due to being targeted at the
-enterprise market -- does not support power saving functions?
-
-How can this happen that hdparm replies with IO error when the device
-is there (and serving a working filesystem) ?
-
-Thanks,
-Pawel.
+-- 
+Robotics engineer * GNU generation member
+Linux reg. user # 145057 * Open BSD secured
+Perl programmer * C coder * Firmware engineer
