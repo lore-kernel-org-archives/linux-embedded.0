@@ -1,112 +1,47 @@
-From: Andrew Murray <amurray@mpcdata.com>
-Subject: Re: Embedded Linux Boot Time Poll
-Date: Sun, 24 Oct 2010 17:01:16 +0100
-Message-ID: <AANLkTin6d28BP_THD+yJgc3fvPBnrhNCJHUbkXRKJhuA@mail.gmail.com>
-References: <AANLkTi=YBzPDG6nOmQfegGOT+8nXm_6EKJE_L2uswxeu@mail.gmail.com>
+From: Pawel Suchanecki <subdcc@gmail.com>
+Subject: How to spin down the SATA hard drive on ARM target (Open-RD)?
+Date: Mon, 25 Oct 2010 12:47:31 +0200
+Message-ID: <AANLkTim6xmfWSF92GzenqfYOgzjj73TF6wS7QM06T=Ps@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=YBzPDG6nOmQfegGOT+8nXm_6EKJE_L2uswxeu@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:received:date:message-id
+         :subject:from:to:content-type;
+        bh=UelDOmsxEjRFcL+LBmaX8j7vl6O7Q8F3Ohsep4gq//k=;
+        b=qjG3JYl6J2JkLeqWd3USUvNWg6Gb0nqfFYcHE+PlDj4FFLVC4kuwY57Q4WbGm4C9Tr
+         ZUtAYF+LVZnNCr9/LgNMg4ClQoW2j/PevajxIMl16mTg4lc2OdigIwftOlFjrWeMkxX2
+         k0hAv4Wz7BVTfZV0L3HSyCJDBZi0jNHxMN4cE=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 To: linux-embedded@vger.kernel.org
 
-Hi,
+Dear list,
 
-Thanks all for your very valuable input. This seems to be an
-interesting topic that generates a lot of interest!
+I am trying to achieve the HDD _simple_ power saving function on
+Open-RD Client device, running Linux 2.6.22 / 2.6.36.
 
-I've updated my statement - does this reflect your views?
+The simplification is that I just need to spin the disk down and then
+sit quietly waiting for IC2 port expander's IRQ (button press) to
+reboot the system.
 
-"Given an unoptimised system based on embedded Linux with a clearly
-defined purpose - The amount of boot time it takes to reach that
-required state of functionality can be reduced by specialising the
-software stack to those needs. Specialisation may involve
-removing/deferring unrequired functionality/support and optimising
-required functionality."
+Is the `sg_stat --stop' command from sg3_utils package capable of
+performing the disk spin down for SATA device (WD) on this armish
+platform?
+If not, please direct me to proper solution.
 
-I've emphasised the focus of the statement to refer to a Linux based
-system and so by doing this optimisation then refers to the system as
-a whole including bootloaders, choice of filesystems, user space
-initialisation, etc.
+Is it feasible running full power saving mode (i.e. using spindown
+daemon [1]) to be able to wake the hard disk and resume normal system
+operation?
 
-I've also defined boot time as the amount of time required to reach a
-useful state of functionality - in other words meeting only the needs
-of the application which provides the products purpose.
+Thank you in advance,
+Pawel.
 
-By remove functionality/support - I mean removing support for device
-drivers not required and also removing unused functionality (which may
-be things like removing kallsyms, ipautoconfig, printk support, etc).
-And by 'optimise required functionality' - I think this can have a
-broad meaning and include system design decisions such as how
-userspace is initialised - e.g. the app could be the init process,
-optimising flash timings, using a more optimal filesystem, removing
-probes (if you know the hardware will always been there), etc.
+[1] http://code.google.com/p/spindown/
 
-And I've tried to use relative terms rather than absolute terms - so
-the comparison is against an unoptimised system (e.g. perhaps a
-customer has a pre-provided BSP and they have little knowledge of how
-to optimise it and remove things via KConfig etc).
-
-Thanks,
-
-Andrew Murray
-
-On 22 October 2010 00:20, Andrew Murray <amurray@mpcdata.com> wrote:
-> Hello,
->
-> I'm performing some research [for a CELF presentation] into reducing
-> boot time on embedded systems and would like to see if the=A0embedded
-> community agree with the following statement as to why Linux
-> [arguably] takes so long in the first place for an unoptimised system=
-:
->
-> "Linux is general purpose,=A0convenient=A0and flexible. As it's gener=
-al
-> purpose it's=A0likely=A0to contain un-required=A0functionality which =
-results
-> in more initialisation and a larger image size. As it's=A0convenient=A0=
-and
-> flexible it will spent time discovering devices and=A0verifying=A0the=
-ir
-> existence."
->
-> Do you largely agree or disagree?
-> Also do you believe that boot time isn't the highest priority when it
-> comes to improving the kernel?
->
-> Thanks,
->
-> Andrew Murray
->
-
-
-
---=20
-Andrew Murray, Embedded Linux Group
-MPC Data Limited
-e-mail: amurray@mpc-data.co.uk=A0 web: www.mpc-data.co.uk
-tel: +44 (0) 1225 710600=A0 =A0 =A0 =A0 =A0 =A0 =A0=A0 fax: +44 (0) 122=
-5 710601
-ddi: +44 (0) 1225 710665
-
-MPC Data Limited is a company registered in England and Wales with
-company number 05507446
-Registered Address: County Gate, County Way, Trowbridge, Wiltshire, BA1=
-4 7FJ
-VAT no: 850625238
-
-The information in this email and in the attached documents is
-confidential and may be
-legally privileged. Any unauthorized review, copying, disclosure or
-distribution is
-prohibited and may be unlawful. It is intended solely for the
-addressee. Access to this
-email by anyone else is unauthorized. If you are not the intended
-recipient, please
-contact the sender by reply email and destroy all copies of the
-original message. When
-addressed to our clients any opinions or advice contained in this
-email is subject to
-the terms and conditions expressed in the governing contract.
+--
+Robotics engineer * GNU generation member
+Linux reg. user # 145057 * Open BSD secured
+Perl programmer * C coder * Firmware engineer
