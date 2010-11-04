@@ -1,60 +1,88 @@
-From: H Hartley Sweeten <hartleys@visionengravers.com>
-Subject: RE: commit 432dc821 breaks machines
-Date: Wed, 27 Oct 2010 11:18:50 -0500
-Message-ID: <0D753D10438DA54287A00B027084269764819C5D74@AUSP01VMBX24.collaborationhost.net>
-References: <Pine.LNX.4.64.1010270842580.7190@axis700.grange>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: Embedded Linux Flag Version
+Date: Thu, 4 Nov 2010 15:07:28 -0700
+Message-ID: <4CD32EA0.4070805@am.sony.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <Pine.LNX.4.64.1010270842580.7190@axis700.grange>
-Content-Language: en-US
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: linux-mtd-bounces@lists.infradead.org
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded@vger.kernel.org
 
-On Tuesday, October 26, 2010 11:52 PM, Guennadi Liakhovetski wrote:
->
-> Hi
->
-> commit 432dc821c90114f9b0e00f6752a700e937516ade
-> Author: H Hartley Sweeten <hartleys@visionengravers.com>
-> Date:   Thu Aug 19 18:18:21 2010 -0700
->
->     mtd: cleanup Kconfig dependencies
->
-> breaks machines by undefining macros like CONFIG_MTD_MAP_BANK_WIDTH_*. 
-> Previously the Kconfig entries like
->
-> config MTD_MAP_BANK_WIDTH_1
-> 	bool "Support  8-bit buswidth" if MTD_CFI_GEOMETRY
-> 	default y
->
-> meant, that if MTD_CFI_GEOMETRY is not selected, this config entry is not 
-> _displayed_, and default selections are used. Now, with that "if" removed 
-> and all these Kconfig entries put under a common
+Embedded Flag Version
 
-Yah, I overlooked that part.
 
->
-> if MTD_CFI_GEOMETRY
->
-> none of these options get selected by default. Please, revert or otherwise 
-> fix this part.
+Recently, two embedded Linux summit meetings were held, one in Tokyo,
+Japan and one in Cambridge, UK. The purpose of these meetings was to
+discuss among industry and community leaders things that might help
+improve the value or decrease the cost of embedded Linux. One initiative
+which came out of these meetings, was the notion of declaring a "flag
+version" of Linux, for embedded use. This would be a specific version of
+the Linux kernel, chosen as a rallying point for embedded Linux
+software, add-ons and products.
 
-I believe David Woodhouse has already reverted the commit.
 
-Sorry for the trouble,
-Hartley
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+In hearing from several different consumer electronics product companies
+and semi-conductor producers at the summits, it became apparent that a
+significant problem in the embedded space is variation in the kernel
+version. This could be called version fragmentation. Companies,
+especially those at the end of the software supply chain, often get
+stuck using a particular kernel version for a product due to the cost to
+integrate software coming from different entities.
+
+
+Of course the optimal solution to this problem would be if all required
+software were pre-integrated into the latest stable release, at all
+times. However, software can not be mainlined instantaneously. Not
+everyone is using the latest version of the Linux kernel (2.6.36, as of
+this writing). In point of fact, no one in the CE industry does (or
+really can), use the absolute latest kernel for a product that is
+shipping today. It takes time to assemble the software and perform the
+testing required to ship a product. However, it is desirable for many
+reasons to stay as close to the current version of Linux as possible.
+
+
+Selecting a "flag version" is intended to help with this problem. First,
+it should be explained what having a flag version means. It means that
+suppliers and vendors throughout the embedded industry will be
+encouraged to use a particular version of the kernel for software
+development, integration and testing. Also, industry and community
+developers agree to work together to maintain a long-term stable branch
+of the flag version of the kernel (until the next flag version is
+declared), in an effort to share costs and improve stability and quality.
+
+
+It may seem counter-intuitive that selecting a version of the kernel for
+long-term stable maintenance would help companies keep up with the
+mainline version. But there are a number of reasons why it can. First
+and foremost, a lot of effort is spent integrating software components
+to make a product. This includes software components from IP block
+vendors, semi-conductor vendors, parts suppliers, Linux vendors, and
+in-house software teams. By decreasing the effort required to integrate
+this software, it becomes possible to spend more time working on other
+features, and working with upstream, and increases the frequency that a
+company can afford to switch kernel versions. Also, by leveraging the
+testing of multiple organizations and developers, including those
+outside one's own company, a group can more quickly ensure that a kernel
+is suitable for production use. This also decreases the effort required
+to use the kernel, and increases the possibility of quicker version changes.
+
+
+It was noted at the summit that several CE companies and embedded
+projects will be using (or are already using) 2.6.35 for upcoming
+products or releases. This includes Sony, Google, Meego, and Linaro. On
+behalf of the CE Linux Forum and a number of consumer electronics
+companies, projects and community developers, we therefore declare
+2.6.35 as a flag version of the kernel for embedded use. Several
+companies will be investing in development, integration and testing of
+this version. Entities wanting to do business with those companies would
+therefore be well-advised to make sure their hardware, drivers and
+enhancements work well with this version of the kernel.
+
+
+Tim Bird
+Architecture Group Chair
+CE Linux Forum
+November 4, 2010
+
