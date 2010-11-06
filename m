@@ -1,78 +1,42 @@
-From: James Hogan <james@albanarts.com>
-Subject: Re: [PATCH 10/16 v2] pramfs: XIP operations
-Date: Sat, 6 Nov 2010 13:33:30 +0000
-Message-ID: <20101106133330.GC13522@gandalf.local>
-References: <4CD518EF.3030306@gmail.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: Re: [PATCH 01/16 v2] pramfs: documentation
+Date: Sat, 06 Nov 2010 15:59:15 +0100
+Message-ID: <4CD56D43.2010803@gmail.com>
+References: <4CD51832.7070309@gmail.com> <20101106103935.GA13172@gandalf.local>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4CD518EF.3030306@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:references:in-reply-to
+         :content-type:content-transfer-encoding;
+        bh=KkadXfeuzEb1f4ao4QcNyQEqmUfaZ2KkiISE9S2pcG0=;
+        b=LZuVvxjxtw5c5oNQFEGonCHc64p0Ru5hMdLUtq/AVBydoTeBit+MipE3MShkCFtjdz
+         lcRRQAKD0hnwSEjCmOpq+kiHkVyBjnIj2yd+kjCqZ15/wee1kXqyM/SgeWYdr1qJufAL
+         HlPmWAuhYVNDAaOYbLGfv+XY04700sSN3Sk5M=
+In-Reply-To: <20101106103935.GA13172@gandalf.local>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Marco Stornelli <marco.stornelli@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+To: James Hogan <james@albanarts.com>
 Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>
 
-Hi,
+Il 06/11/2010 11:39, James Hogan ha scritto:
+> Hi,
+> 
+> On Sat, Nov 06, 2010 at 09:56:18AM +0100, Marco Stornelli wrote:
+>> From: Marco Stornelli <marco.stornelli@gmail.com>
+>> +PRAMFS is write protected. The page table entries that map the backing-store
+>> +RAM are normally marked read-only. Write operations into the filesystem
+>> +temporarily mark the affected pages as writeable, the write operation is
+>> +carried out with locks held, and then the page table entries is +marked read-only again.
+>> +This feature provides protection against filesystem corruption caused by errant
+> 
+> Looks like an accidental lost newline in the patch here, should that be
+> "are marked" or is there some text missing?
+> 
 
-On Sat, Nov 06, 2010 at 09:59:27AM +0100, Marco Stornelli wrote:
-> diff -Nurp linux-2.6.36-orig/fs/pramfs/xip.c linux-2.6.36/fs/pramfs/x=
-ip.c
-> --- linux-2.6.36-orig/fs/pramfs/xip.c	1970-01-01 01:00:00.000000000 +=
-0100
-> +++ linux-2.6.36/fs/pramfs/xip.c	2010-09-14 18:49:52.000000000 +0200
-<snip>
-> +static int pram_find_and_alloc_blocks(struct inode *inode, sector_t =
-iblock,
-> +				     sector_t *data_block, int create)
-> +{
-> +	int err =3D -EIO;
-> +	u64 block;
-> +
-> +	mutex_lock(&PRAM_I(inode)->truncate_lock);
+My fault, a problem during email formatting. I'll resend this patch.
 
-fs/pramfs/xip.c: In function =E2=80=98pram_find_and_alloc_blocks=E2=80=99=
-:
-fs/pramfs/xip.c:27: error: =E2=80=98struct pram_inode_vfs=E2=80=99 has =
-no member named
-=E2=80=98truncate_lock=E2=80=99
-fs/pramfs/xip.c:52: error: =E2=80=98struct pram_inode_vfs=E2=80=99 has =
-no member named
-=E2=80=98truncate_lock=E2=80=99
-
-i guess that should be truncate_mutex.
-
-> +
-> +	block =3D pram_find_data_block(inode, iblock);
-> +
-> +	if (!block) {
-> +		if (!create) {
-> +			err =3D -ENODATA;
-> +			goto err;
-> +		}
-> +
-> +		err =3D pram_alloc_blocks(inode, iblock, 1);
-> +		if (err)
-> +			goto err;
-> +
-> +		block =3D pram_find_data_block(inode, iblock);
-> +		if (!block) {
-> +			err =3D -ENODATA;
-> +			goto err;
-> +		}
-> +	}
-> +
-> +	*data_block =3D block;
-> +	err =3D 0;
-> +
-> + err:
-> +	mutex_unlock(&PRAM_I(inode)->truncate_lock);
-
-same here
-
-> +	return err;
-> +}
-
-Cheers
-James
+Marco
