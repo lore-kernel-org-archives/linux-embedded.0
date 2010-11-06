@@ -1,63 +1,43 @@
 From: James Hogan <james@albanarts.com>
-Subject: Re: [PATCH 12/16] pramfs: extended attributes
-Date: Sat, 6 Nov 2010 11:57:28 +0000
-Message-ID: <20101106115728.GA13522@gandalf.local>
-References: <4CB1EB15.9040109@gmail.com>
+Subject: Re: [PATCH 02/16 v2] pramfs: super block operations
+Date: Sat, 6 Nov 2010 13:12:58 +0000
+Message-ID: <20101106131257.GB13522@gandalf.local>
+References: <4CD51847.20306@gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4CB1EB15.9040109@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <4CD51847.20306@gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
 To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>
 
-Hi Marco,
+Hi,
 
-On Sun, Oct 10, 2010 at 06:34:29PM +0200, Marco Stornelli wrote:
+On Sat, Nov 06, 2010 at 09:56:39AM +0100, Marco Stornelli wrote:
 > From: Marco Stornelli <marco.stornelli@gmail.com>
-> diff -Nurp linux-2.6.36-orig/fs/pramfs/xattr.h linux-2.6.36/fs/pramfs/xattr.h
-> --- linux-2.6.36-orig/fs/pramfs/xattr.h	1970-01-01 01:00:00.000000000 +0100
-> +++ linux-2.6.36/fs/pramfs/xattr.h	2010-09-18 08:40:35.000000000 +0200
-> @@ -0,0 +1,134 @@
-> +/*
-> + * FILE NAME fs/pramfs/xattr.h
-> + *
-> + * BRIEF DESCRIPTION
-> + *
-> + * Extended attributes for the pram filesystem.
-> + *
-> + * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
-> + *
-> + * based on fs/ext2/xattr.h with the following copyright:
-> + *
-> + *(C) 2001 Andreas Gruenbacher, <a.gruenbacher@computer.org>
-> + *
-> + * This file is licensed under the terms of the GNU General Public
-> + * License version 2. This program is licensed "as is" without any
-> + * warranty of any kind, whether express or implied.
-> + */
-> +
-> +#include <linux/init.h>
-> +#include <linux/xattr.h>
-> +
-> +/* Magic value in attribute blocks */
-> +#define PRAM_XATTR_MAGIC		0x6d617270
-> +
-> +/* Maximum number of references to one attribute block */
-> +#define PRAM_XATTR_REFCOUNT_MAX		1024
-> +
-> +/* Name indexes */
-> +#define PRAM_XATTR_INDEX_USER			1
-> +#define PRAM_XATTR_INDEX_POSIX_ACL_ACCESS	2
-> +#define PRAM_XATTR_INDEX_POSIX_ACL_DEFAULT	3
-> +#define PRAM_XATTR_INDEX_TRUSTED		4
-> +#define	PRAM_XATTR_INDEX_LUSTRE			5
-> +#define PRAM_XATTR_INDEX_SECURITY	        6
+>=20
+> Super block operations.
+>=20
+> Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+> ---
+> diff -Nurp linux-2.6.36-orig/fs/pramfs/super.c linux-2.6.36/fs/pramfs=
+/super.c
+> --- linux-2.6.36-orig/fs/pramfs/super.c	1970-01-01 01:00:00.000000000=
+ +0100
+> +++ linux-2.6.36/fs/pramfs/super.c	2010-09-25 14:09:47.000000000 +020=
+0
+<snip>
+> +	pram_dbg("max name length %d\n", PRAM_NAME_LEN);
 
-Maybe nobody minds, but there's some inconsistent whitespace here.
+I get a warning on this line that could be avoided:
+
+fs/pramfs/super.c: In function =E2=80=98pram_init=E2=80=99:
+fs/pramfs/super.c:308: warning: format =E2=80=98%d=E2=80=99 expects typ=
+e =E2=80=98int=E2=80=99, but
+argument 2 has type =E2=80=98long unsigned int=E2=80=99
 
 Cheers
 James
