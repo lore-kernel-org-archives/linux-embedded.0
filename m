@@ -1,7 +1,7 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH 11/16 v2] pramfs: ACL management
-Date: Sat, 06 Nov 2010 09:59:48 +0100
-Message-ID: <4CD51904.4000602@gmail.com>
+Subject: [PATCH 13/16 v2] pramfs: xattr block descriptors tree
+Date: Sat, 06 Nov 2010 10:00:36 +0100
+Message-ID: <4CD51934.7010205@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
@@ -10,10 +10,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:received:received:message-id:date:from
          :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=JQvcBn4xgaDbyWtTvdjSobCpqXX9o6coujdc4+BHySM=;
-        b=PHMcgYFVvVBY190KzkURJYcEhziFHh19DaY2lZgzWc9lkrnzDNGG3o1lOyDgtAW71D
-         QgKD6YcNgN0z0b82Otxz2GKrjOrxl5HWK5iQoJRJdkAqhyQ6HxvVt9jZSUdXCmPzJLKl
-         lPwFKRpM5QZYM57Ml5f+/OLWPiaizmEieWnXQ=
+        bh=yoofUu7cbG0jG8Zy//1A/H6WNbsrpTINgnThZo0lqQI=;
+        b=W2Ib9/payU5mxpZg9TBU6hagqjoTqEmZnmX2QoSPoGSLkn9Mamg8zFmCs1XuzKDHMg
+         J0/vR/tOCayFdWTkWQuCbVO1LtnkQiMdABl02sMIkjyjzzvcWZzm3BUMv8wSqgrPZGIE
+         bfWaZ+X836XT1kQJ5IYnHsaA6BfHmWL6dLRO0=
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -22,522 +22,246 @@ Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdev
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-ACL operations.
+Extended attributes block descriptors tree.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
-diff -Nurp linux-2.6.36-orig/fs/pramfs/acl.c linux-2.6.36/fs/pramfs/acl.c
---- linux-2.6.36-orig/fs/pramfs/acl.c	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/acl.c	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,418 @@
+diff -Nurp linux-2.6.36-orig/fs/pramfs/desctree.c linux-2.6.36/fs/pramfs/desctree.c
+--- linux-2.6.36-orig/fs/pramfs/desctree.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/desctree.c	2010-09-14 18:49:52.000000000 +0200
+@@ -0,0 +1,184 @@
 +/*
-+ * FILE NAME fs/pramfs/acl.c
++ * FILE NAME fs/pramfs/desctree.c
 + *
-+ * BRIEF MODULE DESCRIPTION
++ * BRIEF DESCRIPTION
 + *
-+ * POSIX ACL operations
++ * Extended attributes block descriptors tree.
 + *
 + * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
-+ *
-+ * based on fs/ext2/acl.c with the following copyright:
-+ *
-+ * Copyright (C) 2001-2003 Andreas Gruenbacher, <agruen@suse.de>
 + *
 + * This file is licensed under the terms of the GNU General Public
 + * License version 2. This program is licensed "as is" without any
 + * warranty of any kind, whether express or implied.
 + */
 +
-+#include <linux/capability.h>
-+#include <linux/init.h>
-+#include <linux/sched.h>
-+#include <linux/slab.h>
-+#include <linux/fs.h>
++#include <linux/spinlock.h>
++#include "desctree.h"
 +#include "pram.h"
-+#include "xattr.h"
-+#include "acl.h"
 +
-+/*
-+ * Load ACL information from filesystem.
++/* xblock_desc_init_always()
++ *
++ * These are initializations that need to be done on every
++ * descriptor allocation as the fields are not initialised
++ * by slab allocation.
 + */
-+static struct posix_acl *pram_acl_load(const void *value, size_t size)
++void xblock_desc_init_always(struct pram_xblock_desc *desc)
 +{
-+	const char *end = (char *)value + size;
-+	int n, count;
-+	struct posix_acl *acl;
-+
-+	if (!value)
-+		return NULL;
-+	if (size < sizeof(struct pram_acl_header))
-+		 return ERR_PTR(-EINVAL);
-+	if (((struct pram_acl_header *)value)->a_version !=
-+	    cpu_to_be32(PRAM_ACL_VERSION))
-+		return ERR_PTR(-EINVAL);
-+	value = (char *)value + sizeof(struct pram_acl_header);
-+	count = pram_acl_count(size);
-+	if (count < 0)
-+		return ERR_PTR(-EINVAL);
-+	if (count == 0)
-+		return NULL;
-+	acl = posix_acl_alloc(count, GFP_KERNEL);
-+	if (!acl)
-+		return ERR_PTR(-ENOMEM);
-+	for (n = 0; n < count; n++) {
-+		struct pram_acl_entry *entry = (struct pram_acl_entry *)value;
-+		if ((char *)value + sizeof(struct pram_acl_entry_short) > end)
-+			goto fail;
-+		acl->a_entries[n].e_tag  = be16_to_cpu(entry->e_tag);
-+		acl->a_entries[n].e_perm = be16_to_cpu(entry->e_perm);
-+		switch (acl->a_entries[n].e_tag) {
-+		case ACL_USER_OBJ:
-+		case ACL_GROUP_OBJ:
-+		case ACL_MASK:
-+		case ACL_OTHER:
-+			value = (char *)value +
-+				sizeof(struct pram_acl_entry_short);
-+			acl->a_entries[n].e_id = ACL_UNDEFINED_ID;
-+			break;
-+		case ACL_USER:
-+		case ACL_GROUP:
-+			value = (char *)value + sizeof(struct pram_acl_entry);
-+			if ((char *)value > end)
-+				goto fail;
-+			acl->a_entries[n].e_id =
-+				be32_to_cpu(entry->e_id);
-+			break;
-+		default:
-+			goto fail;
-+		}
-+	}
-+	if (value != end)
-+		goto fail;
-+	return acl;
-+
-+fail:
-+	posix_acl_release(acl);
-+	return ERR_PTR(-EINVAL);
++	atomic_set(&desc->refcount, 0);
++	desc->blocknr = 0;
++	desc->flags = 0;
 +}
 +
-+/*
-+ * Save ACL information into the filesystem.
++/* xblock_desc_init_once()
++ *
++ * These are initializations that only need to be done
++ * once, because the fields are idempotent across use
++ * of the descriptor, so let the slab aware of that.
 + */
-+static void *pram_acl_save(const struct posix_acl *acl, size_t *size)
++void xblock_desc_init_once(struct pram_xblock_desc *desc)
 +{
-+	struct pram_acl_header *ext_acl;
-+	char *e;
-+	size_t n;
-+
-+	*size = pram_acl_size(acl->a_count);
-+	ext_acl = kmalloc(sizeof(struct pram_acl_header) + acl->a_count *
-+			sizeof(struct pram_acl_entry), GFP_KERNEL);
-+	if (!ext_acl)
-+		return ERR_PTR(-ENOMEM);
-+	ext_acl->a_version = cpu_to_be32(PRAM_ACL_VERSION);
-+	e = (char *)ext_acl + sizeof(struct pram_acl_header);
-+	for (n = 0; n < acl->a_count; n++) {
-+		struct pram_acl_entry *entry = (struct pram_acl_entry *)e;
-+		entry->e_tag  = cpu_to_be16(acl->a_entries[n].e_tag);
-+		entry->e_perm = cpu_to_be16(acl->a_entries[n].e_perm);
-+		switch (acl->a_entries[n].e_tag) {
-+		case ACL_USER:
-+		case ACL_GROUP:
-+			entry->e_id =
-+				cpu_to_be32(acl->a_entries[n].e_id);
-+			e += sizeof(struct pram_acl_entry);
-+			break;
-+		case ACL_USER_OBJ:
-+		case ACL_GROUP_OBJ:
-+		case ACL_MASK:
-+		case ACL_OTHER:
-+			e += sizeof(struct pram_acl_entry_short);
-+			break;
-+		default:
-+			goto fail;
-+		}
-+	}
-+	return (char *)ext_acl;
-+
-+fail:
-+	kfree(ext_acl);
-+	return ERR_PTR(-EINVAL);
++	mutex_init(&desc->lock);
 +}
 +
-+/*
-+ * inode->i_mutex: don't care
++/* __insert_xblock_desc()
++ *
++ * Insert a new descriptor in the tree.
++ *
 + */
-+static struct posix_acl *pram_get_acl(struct inode *inode, int type)
++static void __insert_xblock_desc(struct pram_sb_info *sbi,
++				 unsigned long blocknr, struct rb_node *node)
 +{
-+	int name_index;
-+	char *value = NULL;
-+	struct posix_acl *acl;
-+	int retval;
++	struct rb_node **p = &(sbi->desc_tree.rb_node);
++	struct rb_node *parent = NULL;
++	struct pram_xblock_desc *desc;
 +
-+	acl = get_cached_acl(inode, type);
-+	if (acl != ACL_NOT_CACHED)
-+		return acl;
++	while (*p) {
++		parent = *p;
++		desc = rb_entry(parent, struct pram_xblock_desc, node);
 +
-+	switch (type) {
-+	case ACL_TYPE_ACCESS:
-+		name_index = PRAM_XATTR_INDEX_POSIX_ACL_ACCESS;
-+		break;
-+	case ACL_TYPE_DEFAULT:
-+		name_index = PRAM_XATTR_INDEX_POSIX_ACL_DEFAULT;
-+		break;
-+	default:
-+		BUG();
++		if (blocknr < desc->blocknr)
++			p = &(*p)->rb_left;
++		else if (blocknr > desc->blocknr)
++			p = &(*p)->rb_right;
++		else
++			/* Oops...an other descriptor for the same block ? */
++			BUG();
 +	}
-+	retval = pram_xattr_get(inode, name_index, "", NULL, 0);
-+	if (retval > 0) {
-+		value = kmalloc(retval, GFP_KERNEL);
-+		if (!value)
++
++	rb_link_node(node, parent, p);
++	rb_insert_color(node, &sbi->desc_tree);
++}
++
++void insert_xblock_desc(struct pram_sb_info *sbi, struct pram_xblock_desc *desc)
++{
++	spin_lock(&sbi->desc_tree_lock);
++	__insert_xblock_desc(sbi, desc->blocknr, &desc->node);
++	spin_unlock(&sbi->desc_tree_lock);
++};
++
++/* __lookup_xblock_desc()
++ *
++ * Search an extended attribute descriptor in the tree via the
++ * block number. It returns the descriptor if it's found or
++ * NULL. If not found it creates a new descriptor if create is not 0.
++ */
++static struct pram_xblock_desc *__lookup_xblock_desc(struct pram_sb_info *sbi,
++					    unsigned long blocknr,
++					    struct kmem_cache *cache,
++					    int create)
++{
++	struct rb_node *n = sbi->desc_tree.rb_node;
++	struct pram_xblock_desc *desc = NULL;
++
++	while (n) {
++		desc = rb_entry(n, struct pram_xblock_desc, node);
++
++		if (blocknr < desc->blocknr)
++			n = n->rb_left;
++		else if (blocknr > desc->blocknr)
++			n = n->rb_right;
++		else {
++			atomic_inc(&desc->refcount);
++			goto out;
++		}
++	}
++
++	/* not found */
++	if (create) {
++		desc = kmem_cache_alloc(cache, GFP_NOFS);
++		if (!desc)
 +			return ERR_PTR(-ENOMEM);
-+		retval = pram_xattr_get(inode, name_index, "", value, retval);
++		xblock_desc_init_always(desc);
++		atomic_set(&desc->refcount, 1);
++		desc->blocknr = blocknr;
++		__insert_xblock_desc(sbi, desc->blocknr, &desc->node);
 +	}
-+	if (retval > 0)
-+		acl = pram_acl_load(value, retval);
-+	else if (retval == -ENODATA || retval == -ENOSYS)
-+		acl = NULL;
-+	else
-+		acl = ERR_PTR(retval);
-+	kfree(value);
-+
-+	if (!IS_ERR(acl))
-+		set_cached_acl(inode, type, acl);
-+
-+	return acl;
++out:
++	return desc;
 +}
 +
-+/*
-+ * inode->i_mutex: down
-+ */
-+static int pram_set_acl(struct inode *inode, int type, struct posix_acl *acl)
++struct pram_xblock_desc *lookup_xblock_desc(struct pram_sb_info *sbi,
++					    unsigned long blocknr,
++					    struct kmem_cache *cache,
++					    int create)
 +{
-+	int name_index;
-+	void *value = NULL;
-+	size_t size = 0;
-+	int error;
++	struct pram_xblock_desc *desc = NULL;
 +
-+	if (S_ISLNK(inode->i_mode))
-+		return -EOPNOTSUPP;
-+
-+	switch (type) {
-+	case ACL_TYPE_ACCESS:
-+		name_index = PRAM_XATTR_INDEX_POSIX_ACL_ACCESS;
-+		if (acl) {
-+			mode_t mode = inode->i_mode;
-+			error = posix_acl_equiv_mode(acl, &mode);
-+			if (error < 0)
-+				return error;
-+			else {
-+				inode->i_mode = mode;
-+				inode->i_ctime = CURRENT_TIME_SEC;
-+				mark_inode_dirty(inode);
-+				if (error == 0)
-+					acl = NULL;
-+			}
-+		}
-+		break;
-+	case ACL_TYPE_DEFAULT:
-+		name_index = PRAM_XATTR_INDEX_POSIX_ACL_DEFAULT;
-+		if (!S_ISDIR(inode->i_mode))
-+			return acl ? -EACCES : 0;
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
-+	if (acl) {
-+		value = pram_acl_save(acl, &size);
-+		if (IS_ERR(value))
-+			return (int)PTR_ERR(value);
-+	}
-+
-+	error = pram_xattr_set(inode, name_index, "", value, size, 0);
-+
-+	kfree(value);
-+	if (!error)
-+		set_cached_acl(inode, type, acl);
-+	return error;
++	spin_lock(&sbi->desc_tree_lock);
++	desc = __lookup_xblock_desc(sbi, blocknr, cache, create);
++	spin_unlock(&sbi->desc_tree_lock);
++	return desc;
 +}
 +
-+int pram_check_acl(struct inode *inode, int mask)
-+{
-+	struct posix_acl *acl = pram_get_acl(inode, ACL_TYPE_ACCESS);
-+
-+	if (IS_ERR(acl))
-+		return PTR_ERR(acl);
-+	if (acl) {
-+		int error = posix_acl_permission(inode, acl, mask);
-+		posix_acl_release(acl);
-+		return error;
-+	}
-+
-+	return -EAGAIN;
-+}
-+
-+/*
-+ * Initialize the ACLs of a new inode. Called from pram_new_inode.
++/* put_xblock_desc()
 + *
-+ * dir->i_mutex: down
-+ * inode->i_mutex: up (access to inode is still exclusive)
++ * Decrement the reference count and if it reaches zero and the
++ * desciptor has been marked to be free, then we free it.
++ * It returns 0 if the descriptor has been deleted and 1 otherwise.
 + */
-+int pram_init_acl(struct inode *inode, struct inode *dir)
++int put_xblock_desc(struct pram_sb_info *sbi, struct pram_xblock_desc *desc)
 +{
-+	struct posix_acl *acl = NULL;
-+	int error = 0;
++	int ret = 1;
++	if (!desc)
++		return ret;
 +
-+	if (!S_ISLNK(inode->i_mode)) {
-+		acl = pram_get_acl(dir, ACL_TYPE_DEFAULT);
-+		if (IS_ERR(acl))
-+			return PTR_ERR(acl);
-+		if (!acl)
-+			inode->i_mode &= ~current_umask();
++	if (atomic_dec_and_lock(&desc->refcount, &sbi->desc_tree_lock)) {
++		if (test_bit(FREEING, &desc->flags)) {
++			rb_erase(&desc->node, &sbi->desc_tree);
++			pram_dbg("erasing desc for block %lu\n", desc->blocknr);
++			ret = 0;
++		}
++		spin_unlock(&sbi->desc_tree_lock);
 +	}
-+
-+	if (acl) {
-+		struct posix_acl *clone;
-+		mode_t mode;
-+
-+		if (S_ISDIR(inode->i_mode)) {
-+			error = pram_set_acl(inode, ACL_TYPE_DEFAULT, acl);
-+			if (error)
-+				goto cleanup;
-+		}
-+		clone = posix_acl_clone(acl, GFP_KERNEL);
-+		error = -ENOMEM;
-+		if (!clone)
-+			goto cleanup;
-+		mode = inode->i_mode;
-+		error = posix_acl_create_masq(clone, &mode);
-+		if (error >= 0) {
-+			inode->i_mode = mode;
-+			if (error > 0) {
-+				/* This is an extended ACL */
-+				error = pram_set_acl(inode,
-+						     ACL_TYPE_ACCESS, clone);
-+			}
-+		}
-+		posix_acl_release(clone);
-+	}
-+cleanup:
-+       posix_acl_release(acl);
-+       return error;
-+}
-+
-+/*
-+ * Does chmod for an inode that may have an Access Control List. The
-+ * inode->i_mode field must be updated to the desired value by the caller
-+ * before calling this function.
-+ * Returns 0 on success, or a negative error number.
-+ *
-+ * We change the ACL rather than storing some ACL entries in the file
-+ * mode permission bits (which would be more efficient), because that
-+ * would break once additional permissions (like  ACL_APPEND, ACL_DELETE
-+ * for directories) are added. There are no more bits available in the
-+ * file mode.
-+ *
-+ * inode->i_mutex: down
-+ */
-+int pram_acl_chmod(struct inode *inode)
-+{
-+	struct posix_acl *acl, *clone;
-+	int error;
-+
-+	if (S_ISLNK(inode->i_mode))
-+		return -EOPNOTSUPP;
-+	acl = pram_get_acl(inode, ACL_TYPE_ACCESS);
-+	if (IS_ERR(acl) || !acl)
-+		return PTR_ERR(acl);
-+	clone = posix_acl_clone(acl, GFP_KERNEL);
-+	posix_acl_release(acl);
-+	if (!clone)
-+		return -ENOMEM;
-+	error = posix_acl_chmod_masq(clone, inode->i_mode);
-+	if (!error)
-+		error = pram_set_acl(inode, ACL_TYPE_ACCESS, clone);
-+	posix_acl_release(clone);
-+	return error;
-+}
-+
-+/*
-+ * Extended attribut handlers
-+ */
-+static size_t pram_xattr_list_acl_access(struct dentry *dentry, char *list,
-+					size_t list_size, const char *name,
-+					size_t name_len, int type)
-+{
-+	const size_t size = sizeof(POSIX_ACL_XATTR_ACCESS);
-+
-+	if (list && size <= list_size)
-+		memcpy(list, POSIX_ACL_XATTR_ACCESS, size);
-+	return size;
-+}
-+
-+static size_t pram_xattr_list_acl_default(struct dentry *dentry, char *list,
-+					  size_t list_size, const char *name,
-+					  size_t name_len, int type)
-+{
-+	const size_t size = sizeof(POSIX_ACL_XATTR_DEFAULT);
-+
-+	if (list && size <= list_size)
-+		memcpy(list, POSIX_ACL_XATTR_DEFAULT, size);
-+	return size;
-+}
-+
-+static int pram_xattr_get_acl(struct dentry *dentry, const char *name,
-+			      void *buffer, size_t size, int type)
-+{
-+	struct posix_acl *acl;
-+	int error;
-+
-+	if (strcmp(name, "") != 0)
-+		return -EINVAL;
-+
-+	acl = pram_get_acl(dentry->d_inode, type);
-+	if (IS_ERR(acl))
-+		return PTR_ERR(acl);
-+	if (acl == NULL)
-+		return -ENODATA;
-+	error = posix_acl_to_xattr(acl, buffer, size);
-+	posix_acl_release(acl);
-+
-+	return error;
-+}
-+
-+static int pram_xattr_set_acl(struct dentry *dentry, const char *name,
-+			      const void *value, size_t size, int flags, int type)
-+{
-+	struct posix_acl *acl;
-+	int error;
-+
-+	if (strcmp(name, "") != 0)
-+		return -EINVAL;
-+	if (!is_owner_or_cap(dentry->d_inode))
-+		return -EPERM;
-+
-+	if (value) {
-+		acl = posix_acl_from_xattr(value, size);
-+		if (IS_ERR(acl))
-+			return PTR_ERR(acl);
-+		else if (acl) {
-+			error = posix_acl_valid(acl);
-+			if (error)
-+				goto release_and_out;
-+		}
-+	} else
-+		acl = NULL;
-+
-+	error = pram_set_acl(dentry->d_inode, type, acl);
-+
-+release_and_out:
-+	posix_acl_release(acl);
-+	return error;
-+}
-+
-+const struct xattr_handler pram_xattr_acl_access_handler = {
-+	.prefix	= POSIX_ACL_XATTR_ACCESS,
-+	.flags	= ACL_TYPE_ACCESS,
-+	.list	= pram_xattr_list_acl_access,
-+	.get	= pram_xattr_get_acl,
-+	.set	= pram_xattr_set_acl,
++	return ret;
 +};
 +
-+const struct xattr_handler pram_xattr_acl_default_handler = {
-+	.prefix	= POSIX_ACL_XATTR_DEFAULT,
-+	.flags	= ACL_TYPE_DEFAULT,
-+	.list	= pram_xattr_list_acl_default,
-+	.get	= pram_xattr_get_acl,
-+	.set	= pram_xattr_set_acl,
-+};
-diff -Nurp linux-2.6.36-orig/fs/pramfs/acl.h linux-2.6.36/fs/pramfs/acl.h
---- linux-2.6.36-orig/fs/pramfs/acl.h	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/acl.h	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,88 @@
++/* mark_free_desc()
++ *
++ * Mark free a descriptor. The descriptor will be deleted later in the
++ * put_xblock_desc().
++ */
++void mark_free_desc(struct pram_xblock_desc *desc)
++{
++	set_bit(FREEING, &desc->flags);
++}
++
++/* erase_tree()
++ *
++ * Free all objects in the tree.
++ */
++void erase_tree(struct pram_sb_info *sbi, struct kmem_cache *cachep)
++{
++	struct rb_node *n;
++	struct pram_xblock_desc *desc;
++
++	spin_lock(&sbi->desc_tree_lock);
++	n = rb_first(&sbi->desc_tree);
++	while (n) {
++		desc = rb_entry(n, struct pram_xblock_desc, node);
++		rb_erase(n, &sbi->desc_tree);
++		kmem_cache_free(cachep, desc);
++		n = rb_next(n);
++	}
++	spin_unlock(&sbi->desc_tree_lock);
++}
+diff -Nurp linux-2.6.36-orig/fs/pramfs/desctree.h linux-2.6.36/fs/pramfs/desctree.h
+--- linux-2.6.36-orig/fs/pramfs/desctree.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.36/fs/pramfs/desctree.h	2010-09-18 08:41:02.000000000 +0200
+@@ -0,0 +1,46 @@
 +/*
-+ * FILE NAME fs/pramfs/acl.h
++ * FILE NAME fs/pramfs/desctree.h
 + *
-+ * BRIEF MODULE DESCRIPTION
++ * BRIEF DESCRIPTION
 + *
-+ * POSIX ACL operations
++ * Extended attributes block descriptors tree.
 + *
 + * Copyright 2010 Marco Stornelli <marco.stornelli@gmail.com>
++ *
 + * This file is licensed under the terms of the GNU General Public
 + * License version 2. This program is licensed "as is" without any
 + * warranty of any kind, whether express or implied.
-+ *
-+ * Based on fs/ext2/acl.h with the following copyright:
-+ *
-+ * Copyright (C) 2001-2003 Andreas Gruenbacher, <agruen@suse.de>
-+ *
 + */
 +
-+#include <linux/posix_acl_xattr.h>
++#include <asm/atomic.h>
++#include <linux/slab.h>
++#include "pram.h"
 +
-+#define PRAM_ACL_VERSION	0x0001
-+
-+struct pram_acl_entry {
-+	__be16		e_tag;
-+	__be16		e_perm;
-+	__be32		e_id;
++struct pram_xblock_desc {
++#define FREEING (1UL << 1)
++	unsigned long flags;	/* descriptor flags */
++	atomic_t refcount;	/* users count of this descriptor */
++	unsigned long blocknr;	/* absolute block number */
++	struct mutex lock;	/* block lock */
++	struct rb_node node;	/* node in the rb tree */
 +};
 +
-+struct pram_acl_entry_short {
-+	__be16		e_tag;
-+	__be16		e_perm;
++extern struct pram_xblock_desc *lookup_xblock_desc(struct pram_sb_info *sbi,
++						   unsigned long blocknr,
++						   struct kmem_cache *, int);
++extern void insert_xblock_desc(struct pram_sb_info *sbi,
++			       struct pram_xblock_desc *desc);
++extern void mark_free_desc(struct pram_xblock_desc *desc);
++extern int put_xblock_desc(struct pram_sb_info *sbi,
++			   struct pram_xblock_desc *desc);
++extern void xblock_desc_init_always(struct pram_xblock_desc *desc);
++extern void xblock_desc_init_once(struct pram_xblock_desc *desc);
++extern void erase_tree(struct pram_sb_info *sbi,
++		       struct kmem_cache *);
++
++static inline void xblock_desc_init(struct pram_xblock_desc *desc)
++{
++	xblock_desc_init_always(desc);
++	xblock_desc_init_once(desc);
 +};
 +
-+struct pram_acl_header {
-+	__be32		a_version;
-+};
-+
-+static inline size_t pram_acl_size(int count)
-+{
-+	if (count <= 4) {
-+		return sizeof(struct pram_acl_header) +
-+		       count * sizeof(struct pram_acl_entry_short);
-+	} else {
-+		return sizeof(struct pram_acl_header) +
-+		       4 * sizeof(struct pram_acl_entry_short) +
-+		       (count - 4) * sizeof(struct pram_acl_entry);
-+	}
-+}
-+
-+static inline int pram_acl_count(size_t size)
-+{
-+	ssize_t s;
-+	size -= sizeof(struct pram_acl_header);
-+	s = size - 4 * sizeof(struct pram_acl_entry_short);
-+	if (s < 0) {
-+		if (size % sizeof(struct pram_acl_entry_short))
-+			return -1;
-+		return size / sizeof(struct pram_acl_entry_short);
-+	} else {
-+		if (s % sizeof(struct pram_acl_entry))
-+			return -1;
-+		return s / sizeof(struct pram_acl_entry) + 4;
-+	}
-+}
-+
-+#ifdef CONFIG_PRAMFS_POSIX_ACL
-+
-+/* acl.c */
-+extern int pram_check_acl(struct inode *, int);
-+extern int pram_acl_chmod(struct inode *);
-+extern int pram_init_acl(struct inode *, struct inode *);
-+
-+#else
-+#include <linux/sched.h>
-+#define pram_check_acl	NULL
-+#define pram_get_acl	NULL
-+#define pram_set_acl	NULL
-+
-+static inline int pram_acl_chmod(struct inode *inode)
-+{
-+	return 0;
-+}
-+
-+static inline int pram_init_acl(struct inode *inode, struct inode *dir)
-+{
-+	return 0;
-+}
-+#endif
  
