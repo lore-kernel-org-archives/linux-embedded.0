@@ -1,42 +1,31 @@
-From: Josh Boyer <jwboyer@gmail.com>
-Subject: Re: Embedded Linux Flag Version
-Date: Fri, 5 Nov 2010 10:32:54 -0400
-Message-ID: <AANLkTimjCkzxQbMkQxjsSk83siQDnPLy6Y8xSiCt8V45@mail.gmail.com>
-References: <4CD32EA0.4070805@am.sony.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: [PATCH 00/16 v2] pramfs: persistent and protected RAM Filesystem
+Date: Sat, 06 Nov 2010 09:55:56 +0100
+Message-ID: <4CD5181C.7040706@gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type;
-        bh=vZaPTyN81OsBV+yuB56Saic3uzOF782/Foe5dQm2E8I=;
-        b=vnRXKEmVcDvW5IQovt8Ans79Vc060YtHvZeJL9A4+r5P5rerxtbZbllo1iGxIVbqCR
-         5869ByPvBceI2Vyvf/w9WQueTCVgsuzAIALIcFwvo6lJp2bAgeavNa9+Pmx5KFkhgchC
-         PoB56ApRAkUAtcPzLnhvCAn35MIUk6n5u60zw=
-In-Reply-To: <4CD32EA0.4070805@am.sony.com>
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:content-type
+         :content-transfer-encoding;
+        bh=EH/a94Y5Gfx3QpbSYvHsx1gaudXTXxL5WstbTW1PJ3s=;
+        b=pi+16XgjmrE3bKbMtvksXir1cVnyoZimLKSNBTNIEMLQp4DVr07FL/RkWqUmgayB8P
+         wLzpdPjK0LFveBhzmg8FMNfrc1w5TkIMuinaUWcUGRKUvnedQhdLKSa5zV1Aj/YhAczU
+         ooEHYJRPEK2sYn63TVngyjCL4RHRL7YwRPmao=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: linux-embedded@vger.kernel.org
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>, Linux Embedded <linux-embedded@vger.kernel.org>
 
-On Thu, Nov 4, 2010 at 6:07 PM, Tim Bird <tim.bird@am.sony.com> wrote:
-> It was noted at the summit that several CE companies and embedded
-> projects will be using (or are already using) 2.6.35 for upcoming
-> products or releases. This includes Sony, Google, Meego, and Linaro. On
-> behalf of the CE Linux Forum and a number of consumer electronics
-> companies, projects and community developers, we therefore declare
-> 2.6.35 as a flag version of the kernel for embedded use. Several
-> companies will be investing in development, integration and testing of
-> this version. Entities wanting to do business with those companies would
-> therefore be well-advised to make sure their hardware, drivers and
-> enhancements work well with this version of the kernel.
+Hi all,
 
-What is the expected lifetime for a flag version?  A new version every
-year, 2 years, etc?  While the reasoning behind this makes sense to
-me, I'm curious how this will impact migration to the next flag
-version, and how the lifetime of a flag version will play into future
-migration.
+I send the patch series again. I fix documentation problems reported by
+Randy Dunlap and Kieran Bingham. I reworked the memory protection
+functions according to the suggestions of Andi Kleen.
 
-josh
+I ask to Andrew to evaluate to insert this fs in mainline.
+
+Marco
