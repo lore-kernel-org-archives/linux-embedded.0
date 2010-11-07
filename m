@@ -1,58 +1,65 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
-Subject: Re: [PATCH 16/16 v2] pramfs: Makefile and Kconfig
-Date: Sat, 6 Nov 2010 08:48:36 -0700
-Message-ID: <20101106084836.b9ba01f6.randy.dunlap@oracle.com>
-References: <4CD51969.3060603@gmail.com>
+From: Ryan Mallon <ryan@bluewatersys.com>
+Subject: Re: [PATCH 08/16 v2] pramfs: headers
+Date: Mon, 08 Nov 2010 09:09:17 +1300
+Message-ID: <4CD7076D.80507@bluewatersys.com>
+References: <4CD518C5.6000509@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <4CD51969.3060603@gmail.com>
+In-Reply-To: <4CD518C5.6000509@gmail.com>
 Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Marco Stornelli <marco.stornelli@gmail.com>
 Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>
 
-On Sat, 06 Nov 2010 10:01:29 +0100 Marco Stornelli wrote:
-
+On 11/06/2010 09:58 PM, Marco Stornelli wrote:
 > From: Marco Stornelli <marco.stornelli@gmail.com>
 > 
-> Makefile and Kconfig.
+> Definitions for the PRAMFS filesystem.
 > 
 > Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 > ---
-> +config TEST_MODULE
-> +	tristate "PRAMFS Test"
-> +	depends on PRAMFS && m
-> +	select PRAMFS_TEST
-> +	help
-> +	  Say Y here to build a simple module to test the protection of
-> +	  PRAMFS. The module will be called pramfs_test.
+> diff -Nurp linux-2.6.36-orig/fs/pramfs/pram.h linux-2.6.36/fs/pramfs/pram.h
+> --- linux-2.6.36-orig/fs/pramfs/pram.h	1970-01-01 01:00:00.000000000 +0100
+> +++ linux-2.6.36/fs/pramfs/pram.h	2010-10-30 12:02:45.000000000 +0200
+> @@ -0,0 +1,317 @@
 
-Since kconfig symbols are global, this one needs something like
-PRAMFS_ as a prefix, please.
+> +/*
+> + * Structure of the super block in PRAMFS
+> + */
+> +struct pram_super_block {
+> +	__be16	s_sum;          /* checksum of this sb, including padding */
+> +	__be64	s_size;         /* total size of fs in bytes */
+> +	__be32	s_blocksize;    /* blocksize in bytes */
+> +	__be32	s_inodes_count;	/* total inodes count (used or free) */
+> +	__be32	s_free_inodes_count;/* free inodes count */
+> +	__be32	s_free_inode_hint;  /* start hint for locating free inodes */
+> +	__be32	s_blocks_count;	/* total data blocks count (used or free) */
+> +	__be32	s_free_blocks_count;/* free data blocks count */
+> +	__be32	s_free_blocknr_hint;/* free data blocks count */
+> +	__be64	s_bitmap_start; /* data block in-use bitmap location */
+> +	__be32	s_bitmap_blocks;/* size of bitmap in number of blocks */
+> +	__be32	s_mtime;	/* Mount time */
+> +	__be32	s_wtime;	/* Write time */
+> +	__be16	s_magic;	/* Magic signature */
+> +	char	s_volume_name[16]; /* volume name */
+> +};
 
+Is there a particular reason to use big endian types for the data
+structures? On a little endian machine you will end up converting values
+everywhere. I assume that you don't expect the machine to change
+endianess between reboots :-). If this is for generating/reading
+filesystems from userspace, wouldn't it be better to have the userspace
+tools specify the target endianess and do the conversions there?
 
-> diff -Nurp linux-2.6.36-orig/fs/pramfs/Makefile linux-2.6.36/fs/pramfs/Makefile
-> --- linux-2.6.36-orig/fs/pramfs/Makefile	1970-01-01 01:00:00.000000000 +0100
-> +++ linux-2.6.36/fs/pramfs/Makefile	2010-09-14 18:49:52.000000000 +0200
-> @@ -0,0 +1,14 @@
-> +#
-> +# Makefile for the linux pram-filesystem routines.
-> +#
-> +
-> +obj-$(CONFIG_PRAMFS) += pramfs.o
-> +obj-$(CONFIG_TEST_MODULE) += pramfs_test.o
-> +
-> +pramfs-y := balloc.o dir.o file.o inode.o namei.o super.o symlink.o
-> +
-> +pramfs-$(CONFIG_PRAMFS_WRITE_PROTECT) += wprotect.o
-> +pramfs-$(CONFIG_PRAMFS_XIP) += xip.o
-> +pramfs-$(CONFIG_PRAMFS_XATTR) += xattr.o xattr_user.o xattr_trusted.o desctree.o
-> +pramfs-$(CONFIG_PRAMFS_POSIX_ACL) += acl.o
-> +pramfs-$(CONFIG_PRAMFS_SECURITY) += xattr_security.o
+~Ryan
 
+-- 
+Bluewater Systems Ltd - ARM Technology Solution Centre
 
----
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+Ryan Mallon         		5 Amuri Park, 404 Barbadoes St
+ryan@bluewatersys.com         	PO Box 13 889, Christchurch 8013
+http://www.bluewatersys.com	New Zealand
+Phone: +64 3 3779127		Freecall: Australia 1800 148 751
+Fax:   +64 3 3779135			  USA 1800 261 2934
