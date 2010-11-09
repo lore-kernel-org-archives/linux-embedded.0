@@ -1,69 +1,108 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: Embedded Linux Flag Version
-Date: Tue, 9 Nov 2010 13:38:48 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.1011091335440.13911@xanadu.home>
-References: <4CD32EA0.4070805@am.sony.com> <AANLkTikusrr073mUz3BQ3wP=y7E8WcDDayVms=PPhH8A@mail.gmail.com> <4CD98220.40806@am.sony.com> <20101109172501.GA18326@opentech.at>
+From: Ryan Mallon <ryan@bluewatersys.com>
+Subject: Re: [PATCH 08/16 v2] pramfs: headers
+Date: Wed, 10 Nov 2010 09:35:43 +1300
+Message-ID: <4CD9B09F.5090707@bluewatersys.com>
+References: <4CD518C5.6000509@gmail.com>	<4CD7076D.80507@bluewatersys.com>	<AANLkTinJJG0K=BPS0CPzDWcgpRn_yPxZ819N408SwD6d@mail.gmail.com>	<4CD85489.8000503@bluewatersys.com> <AANLkTim8rAQnVYpZdykd2VuL1N9CvkGj88Kf5qpSuJsC@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20101109172501.GA18326@opentech.at>
+In-Reply-To: <AANLkTim8rAQnVYpZdykd2VuL1N9CvkGj88Kf5qpSuJsC@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Nicholas Mc Guire <der.herr@hofr.at>
-Cc: Tim Bird <tim.bird@am.sony.com>, Mike Frysinger <vapier.adi@gmail.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>
 
-On Tue, 9 Nov 2010, Nicholas Mc Guire wrote:
-
-> On Tue, 09 Nov 2010, Tim Bird wrote:
+On 11/09/2010 09:19 PM, Marco Stornelli wrote:
+> 2010/11/8 Ryan Mallon <ryan@bluewatersys.com>:
+>> On 11/08/2010 08:49 PM, Marco Stornelli wrote:
+>>> 2010/11/7 Ryan Mallon <ryan@bluewatersys.com>:
+>>>> On 11/06/2010 09:58 PM, Marco Stornelli wrote:
+>>>>> From: Marco Stornelli <marco.stornelli@gmail.com>
+>>>>>
+>>>>> Definitions for the PRAMFS filesystem.
+>>>>>
+>>>>> Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+>>>>> ---
+>>>>> diff -Nurp linux-2.6.36-orig/fs/pramfs/pram.h linux-2.6.36/fs/pramfs/pram.h
+>>>>> --- linux-2.6.36-orig/fs/pramfs/pram.h        1970-01-01 01:00:00.000000000 +0100
+>>>>> +++ linux-2.6.36/fs/pramfs/pram.h     2010-10-30 12:02:45.000000000 +0200
+>>>>> @@ -0,0 +1,317 @@
+>>>>
+>>>>> +/*
+>>>>> + * Structure of the super block in PRAMFS
+>>>>> + */
+>>>>> +struct pram_super_block {
+>>>>> +     __be16  s_sum;          /* checksum of this sb, including padding */
+>>>>> +     __be64  s_size;         /* total size of fs in bytes */
+>>>>> +     __be32  s_blocksize;    /* blocksize in bytes */
+>>>>> +     __be32  s_inodes_count; /* total inodes count (used or free) */
+>>>>> +     __be32  s_free_inodes_count;/* free inodes count */
+>>>>> +     __be32  s_free_inode_hint;  /* start hint for locating free inodes */
+>>>>> +     __be32  s_blocks_count; /* total data blocks count (used or free) */
+>>>>> +     __be32  s_free_blocks_count;/* free data blocks count */
+>>>>> +     __be32  s_free_blocknr_hint;/* free data blocks count */
+>>>>> +     __be64  s_bitmap_start; /* data block in-use bitmap location */
+>>>>> +     __be32  s_bitmap_blocks;/* size of bitmap in number of blocks */
+>>>>> +     __be32  s_mtime;        /* Mount time */
+>>>>> +     __be32  s_wtime;        /* Write time */
+>>>>> +     __be16  s_magic;        /* Magic signature */
+>>>>> +     char    s_volume_name[16]; /* volume name */
+>>>>> +};
+>>>>
+>>>> Is there a particular reason to use big endian types for the data
+>>>> structures? On a little endian machine you will end up converting values
+>>>> everywhere. I assume that you don't expect the machine to change
+>>>> endianess between reboots :-). If this is for generating/reading
+>>>> filesystems from userspace, wouldn't it be better to have the userspace
+>>>> tools specify the target endianess and do the conversions there?
+>>>>
+>>>> ~Ryan
+>>>
+>>> Yes, there is a reason. In the first review a comment was: the fs must
+>>> have a fix endianess layout. This fs is designed for the embedded
+>>> world mainly. Since most of cpus used in this case are big-endian, it
+>>> means that for typical use case, there is no cost for endianess
+>>> conversion.
+>>
+>> ARM, which is a large portion of the embedded space, is typically little
+>> endian.
 > 
-> > On 11/09/2010 03:19 AM, Mike Frysinger wrote:
-> > > On Thu, Nov 4, 2010 at 18:07, Tim Bird wrote:
-> > >> It was noted at the summit that several CE companies and embedded
-> > >> projects will be using (or are already using) 2.6.35 for upcoming
-> > >> products or releases. This includes Sony, Google, Meego, and Linaro. On
-> > >> behalf of the CE Linux Forum and a number of consumer electronics
-> > >> companies, projects and community developers, we therefore declare
-> > >> 2.6.35 as a flag version of the kernel for embedded use. Several
-> > >> companies will be investing in development, integration and testing of
-> > >> this version. Entities wanting to do business with those companies would
-> > >> therefore be well-advised to make sure their hardware, drivers and
-> > >> enhancements work well with this version of the kernel.
-> > > 
-> > > wouldnt it make more sense to piggy back the extensive work going into
-> > > the "stable" tree ?  many of the points you raise after all are the
-> > > entire founding point of it.  plus, all the main distros form around
-> > > that, are spending time working on that, is marked as supported for 2
-> > > or 3 years, and there is already infrastructure/framework/process in
-> > > place (stable@kernel.org).
-> > > 
-> > > so instead of picking arbitrary versions (like 2.6.35) and needlessly
-> > > replicating the huge work load, simply declare these stable trees as
-> > > the "flag" versions.  that means today it'd be 2.6.32.y.
-> > 
-> > The fact that this tree is already a year old, and not likely to be
-> > brought forward for at least another 2 years is the reason we didn't
-> > choose it this time.  Most of the high-profile, active embedded projects
-> > are already on 2.6.35.  For companies looking to adopt a new base kernel
-> > in the next 12 months, I don't want to have them start with a year-old
-> > kernel.  We did consider the utility of synchronizing with the enterprise
-> > stable tree, but the timing just didn't work too well this time around.
-> >
-> I guess one of the key issues is that it would need to be defined beforehand
-> what version will be used as the next "flag" version so vendors could make
-> sure that there drivers are available. Further if such a selection were to
-> be made then there would need to be consesus on maintaining the respective
-> version for a sufficiently long time to allow for the next "flag" version
-> to evolve. Finally for those working on products even if you would now define
-> the current version as the "flag" version it would not help much as they
-> would hardly be able to shift to a different kernel short term - so again the
-> key is defining what version would be atleast planed for the next "flag" 
-> version - something like now defining it to be 2.6.38 - and then testing 
-> appropriately in the runup to 2.6.38 to deliver, most notably for the 
-> embedded architectures.
+> Not always. Indeed, I didn't say *all* cpu used are big-endian.
 
-FWIW, the imminent Linaro release is using 2.6.35.  The next release 
-scheduled for May 2011 will most probably use 2.6.38.
+My point is that little endian embedded machines make up a large portion
+of the devices that this filesystem will be useful on. On those devices
+it will also have an (unnecessary) conversion overhead.
 
+>>
+>> Why does a filesystem need to have a specific endianess layout?
+>> Especially for a highly specialised filesystem like this.
+>>
+> 
+> I didn't agree with it, but in the first review there was more than
+> one developer that said this thing. The main reason was to read the
+> format (for example with JTAG) or to create an image with a fix
+> format. I remember that someone said that there was a similar problem
+> with jffs2 and the experience tell to us that a fix endianess is
+> important. At that point I decided to use big-endian. You can see all
+> the discussion in lkml. The review has been done at June 2009.
 
-Nicolas
+You can still do all of those things without having a fixed endianess.
+You just have to have one extra step of telling the external tools what
+the endianess is. IMHO, it is better to have the overhead of the endian
+conversion in the tools since it is less costly there than an the
+embedded system.
+
+I'm just trying to understand why the fixed endianess rule cannot be
+bent for such a specialised filesystem.
+
+~Ryan
+
+-- 
+Bluewater Systems Ltd - ARM Technology Solution Centre
+
+Ryan Mallon         		5 Amuri Park, 404 Barbadoes St
+ryan@bluewatersys.com         	PO Box 13 889, Christchurch 8013
+http://www.bluewatersys.com	New Zealand
+Phone: +64 3 3779127		Freecall: Australia 1800 148 751
+Fax:   +64 3 3779135			  USA 1800 261 2934
