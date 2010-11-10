@@ -1,48 +1,39 @@
-From: Kevin Dankwardt <k@kcomputing.com>
+From: Bill Gatliff <bgat@billgatliff.com>
 Subject: Re: Avoiding platform-specific callbacks in drivers?
-Date: Tue, 09 Nov 2010 16:02:45 -0800
-Message-ID: <4CD9E125.2010207@kcomputing.com>
+Date: Tue, 9 Nov 2010 22:11:05 -0600
+Message-ID: <AANLkTi=3PwhEn4cuCGyVHDtH-zt_n17Bibg32WZrRA7c@mail.gmail.com>
 References: <AANLkTinG4y_Uxes0CJYMH+uwr1TcWwjQy+4+_ftyrnML@mail.gmail.com>
+	<alpine.LFD.2.00.1011091905540.13911@xanadu.home>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTinG4y_Uxes0CJYMH+uwr1TcWwjQy+4+_ftyrnML@mail.gmail.com>
+In-Reply-To: <alpine.LFD.2.00.1011091905540.13911@xanadu.home>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: linux-embedded@vger.kernel.org
+
+Nicolas:
+
+On Tue, Nov 9, 2010 at 6:10 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
+>
+> The pseudo-device could register the
+> real device and set itself as the parent.
+
+That little tidbit there is the part I seem to have been missing
+before now--- actually doing the physical device registration during
+the probing of the pseudo-device.  With that, the approach actually
+makes sense.
+
+Before now, I was thinking that I would still register both devices
+externally, which made things clumsy to think about.
 
 
-> Guys:
->
->
-> Let's say that on a given platform, I need to twiddle with a GPIO pin
-> when a chip enters and exits suspend.  One way to do that is to hack
-> the driver itself; a slightly less-inelegant way is to add a function
-> pointer in the platform data, and have the driver call back in its
-> suspend() and resume() methods.  I'm not real keen on either strategy,
-> because they both involve touching driver code that should be
-> platform-agnostic.  They seem... hacky.  :)
->
-> I would love to come up with a way that prevents touching the driver
-> at all, since the activity is terribly platform-specific. Is there
-> such a way?
->
-> One possibility is to set up some sort of parent-child relationship
-> between the device and a pseudo-device that deals with the GPIO pin.
-> But I'm not sure that will actually work, and it seems a bit
-> overly-complicated.
->
-> Ideas, anyone?  I'll be happy to try them out if they seem feasible,
-> and post code and feedback.
->
->
-> b.g.
->    
+Thanks!
 
-Isn't the general approach to avoid platform-dependencies to abstract 
-the behavior? As is used throughout the kernel, an "operations" struct 
-that provides the abstractions and each driver fills in its 
-implementation as required. The "polymorphism" approach. Maybe the 
-operations are "begin_suspend()" and "end_suspend()" and in this case 
-the functions twiddle a GPIO pin?
+
+b.g.
+-- 
+Bill Gatliff
+bgat@billgatliff.com
