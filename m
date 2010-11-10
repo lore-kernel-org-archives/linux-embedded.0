@@ -1,52 +1,54 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: Re: Embedded Linux Flag Version
-Date: Wed, 10 Nov 2010 09:30:47 -0800
-Message-ID: <4CDAD6C7.6050909@am.sony.com>
-References: <4CD32EA0.4070805@am.sony.com> <AANLkTikusrr073mUz3BQ3wP=y7E8WcDDayVms=PPhH8A@mail.gmail.com> <4CD98220.40806@am.sony.com> <AANLkTi=aPgC8Jyp8RaV77naAoFuuiRnaSyLYPLM+q322@mail.gmail.com>
+From: Ryan Mallon <ryan@bluewatersys.com>
+Subject: Re: [PATCH 08/16 v2] pramfs: headers
+Date: Thu, 11 Nov 2010 08:09:01 +1300
+Message-ID: <4CDAEDCD.5050603@bluewatersys.com>
+References: <4CD518C5.6000509@gmail.com>	<4CD7076D.80507@bluewatersys.com>	<AANLkTinJJG0K=BPS0CPzDWcgpRn_yPxZ819N408SwD6d@mail.gmail.com>	<4CD85489.8000503@bluewatersys.com>	<AANLkTim8rAQnVYpZdykd2VuL1N9CvkGj88Kf5qpSuJsC@mail.gmail.com>	<4CD9B09F.5090707@bluewatersys.com>	<AANLkTiky0LLnipJN3tCwcW6F2LEK-REEd=Ovo0ewMubR@mail.gmail.com> <AANLkTik+Vx8W1qXEZ=AqedRSj_D4-k70Xa4h-bnW2MRH@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=aPgC8Jyp8RaV77naAoFuuiRnaSyLYPLM+q322@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <AANLkTik+Vx8W1qXEZ=AqedRSj_D4-k70Xa4h-bnW2MRH@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>
 
-On 11/10/2010 2:16 AM, Mike Frysinger wrote:
-> On Tue, Nov 9, 2010 at 12:17, Tim Bird wrote:
->> On 11/09/2010 03:19 AM, Mike Frysinger wrote:
->>> On Thu, Nov 4, 2010 at 18:07, Tim Bird wrote:
->>>> It was noted at the summit that several CE companies and embedded
->>>> projects will be using (or are already using) 2.6.35 for upcoming
->>>> products or releases. This includes Sony, Google, Meego, and Linaro. On
->>>> behalf of the CE Linux Forum and a number of consumer electronics
->>>> companies, projects and community developers, we therefore declare
->>>> 2.6.35 as a flag version of the kernel for embedded use. Several
->>>> companies will be investing in development, integration and testing of
->>>> this version. Entities wanting to do business with those companies would
->>>> therefore be well-advised to make sure their hardware, drivers and
->>>> enhancements work well with this version of the kernel.
->>> wouldnt it make more sense to piggy back the extensive work going into
->>> the "stable" tree ?  many of the points you raise after all are the
->>> entire founding point of it.  plus, all the main distros form around
->>> that, are spending time working on that, is marked as supported for 2
->>> or 3 years, and there is already infrastructure/framework/process in
->>> place (stable@kernel.org).
+On 11/10/2010 09:15 PM, Marco Stornelli wrote:
+> 2010/11/9 Geert Uytterhoeven <geert@linux-m68k.org>:
+>> On Tue, Nov 9, 2010 at 21:35, Ryan Mallon <ryan@bluewatersys.com> wrote:
+>>> You can still do all of those things without having a fixed endianess.
+>>> You just have to have one extra step of telling the external tools what
+>>> the endianess is. IMHO, it is better to have the overhead of the endian
+>>> conversion in the tools since it is less costly there than an the
+>>> embedded system.
 >>>
->>> so instead of picking arbitrary versions (like 2.6.35) and needlessly
->>> replicating the huge work load, simply declare these stable trees as
->>> the "flag" versions.  that means today it'd be 2.6.32.y.
->> The fact that this tree is already a year old, and not likely to be
->> brought forward for at least another 2 years is the reason we didn't
->> choose it this time.  Most of the high-profile, active embedded projects
->> are already on 2.6.35.  For companies looking to adopt a new base kernel
->> in the next 12 months, I don't want to have them start with a year-old
->> kernel.  We did consider the utility of synchronizing with the enterprise
->> stable tree, but the timing just didn't work too well this time around.
-> so you're suggesting this is a one-off choice.  in the future, the
-> "flag" versions will simply piggy the existing stable trees ?
-Yes, if the timing works then.
-I can't promise anything, but I think it would be a very strong goal.
-  -- Tim
+>>> I'm just trying to understand why the fixed endianess rule cannot be
+>>> bent for such a specialised filesystem.
+>>
+>> When it was decided that filesystems should be fixed-endian and support for
+>> big-endian ext2 was dropped, the overhead of doing the fixed conversions was
+>> deetermined negligible due to compiler optimization.
+>> That was ages ago, and current embedded systems run circles around the
+>> machines of those days.
+>>
+>> Note that this is about metadata only. Actual file contents are always just
+>> byte streams.
+>>
+> 
+> I can add that the penalties in this case are  negligible due to the
+> compensation of the very fast access of the media. In addition, from
+> performance point of view I'm pretty happy (you can see the some
+> benchmark on the project web site).
 
+Thanks for the explanation guys.
+
+~Ryan
+
+-- 
+Bluewater Systems Ltd - ARM Technology Solution Centre
+
+Ryan Mallon         		5 Amuri Park, 404 Barbadoes St
+ryan@bluewatersys.com         	PO Box 13 889, Christchurch 8013
+http://www.bluewatersys.com	New Zealand
+Phone: +64 3 3779127		Freecall: Australia 1800 148 751
+Fax:   +64 3 3779135			  USA 1800 261 2934
