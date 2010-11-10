@@ -1,56 +1,74 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 08/16 v2] pramfs: headers
-Date: Wed, 10 Nov 2010 09:15:36 +0100
-Message-ID: <AANLkTik+Vx8W1qXEZ=AqedRSj_D4-k70Xa4h-bnW2MRH@mail.gmail.com>
-References: <4CD518C5.6000509@gmail.com>
-	<4CD7076D.80507@bluewatersys.com>
-	<AANLkTinJJG0K=BPS0CPzDWcgpRn_yPxZ819N408SwD6d@mail.gmail.com>
-	<4CD85489.8000503@bluewatersys.com>
-	<AANLkTim8rAQnVYpZdykd2VuL1N9CvkGj88Kf5qpSuJsC@mail.gmail.com>
-	<4CD9B09F.5090707@bluewatersys.com>
-	<AANLkTiky0LLnipJN3tCwcW6F2LEK-REEd=Ovo0ewMubR@mail.gmail.com>
+From: Mike Frysinger <vapier.adi@gmail.com>
+Subject: Re: Embedded Linux Flag Version
+Date: Wed, 10 Nov 2010 05:16:23 -0500
+Message-ID: <AANLkTi=aPgC8Jyp8RaV77naAoFuuiRnaSyLYPLM+q322@mail.gmail.com>
+References: <4CD32EA0.4070805@am.sony.com> <AANLkTikusrr073mUz3BQ3wP=y7E8WcDDayVms=PPhH8A@mail.gmail.com>
+ <4CD98220.40806@am.sony.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type;
-        bh=Kf9K7Zi41hDFZ/FPmasnuBKhr7H0CfIMr2bgrVqmcVM=;
-        b=fFsbMv7urI6aquE211VnNV2KISu+bYD1uJ1gZhpGfNiFH18Schstlcw7z/emjAZ2U7
-         L1yJwmj76EHzHpn1FWp/09+U+WF9c8gA7IFTMa6y5xe3QKnUuZzuEuIL3wo3RqhUZuhC
-         XlLwEYPFHVyEZgrCy6MXXVseA/vgwJZcV97ZQ=
-In-Reply-To: <AANLkTiky0LLnipJN3tCwcW6F2LEK-REEd=Ovo0ewMubR@mail.gmail.com>
+        h=domainkey-signature:received:mime-version:received:in-reply-to
+         :references:from:date:message-id:subject:to:cc:content-type
+         :content-transfer-encoding;
+        bh=iWmcXipEnYmYyEO0ls4cL5RkK9IdbI73nRB2itU1mvE=;
+        b=pagXUZhsMOapO7aGucphry8TW0TBybymIHxnceoTdn51Fdeax5rZujvrVa5pBBjeMG
+         EJHy3Vr2p+yvIdXI+MY1yiMR59xuCraHiViQeOlPcob8OtdAwxKUxZHDhm4xISPFIDgD
+         0/544yQ2UmqQ20QPrNz05nCpMj+q5bUiqMs8k=
+In-Reply-To: <4CD98220.40806@am.sony.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Ryan Mallon <ryan@bluewatersys.com>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>
+Content-Type: text/plain; charset="utf-8"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-2010/11/9 Geert Uytterhoeven <geert@linux-m68k.org>:
-> On Tue, Nov 9, 2010 at 21:35, Ryan Mallon <ryan@bluewatersys.com> wrote:
->> You can still do all of those things without having a fixed endianess.
->> You just have to have one extra step of telling the external tools what
->> the endianess is. IMHO, it is better to have the overhead of the endian
->> conversion in the tools since it is less costly there than an the
->> embedded system.
+On Tue, Nov 9, 2010 at 12:17, Tim Bird wrote:
+> On 11/09/2010 03:19 AM, Mike Frysinger wrote:
+>> On Thu, Nov 4, 2010 at 18:07, Tim Bird wrote:
+>>> It was noted at the summit that several CE companies and embedded
+>>> projects will be using (or are already using) 2.6.35 for upcoming
+>>> products or releases. This includes Sony, Google, Meego, and Linaro=
+=2E On
+>>> behalf of the CE Linux Forum and a number of consumer electronics
+>>> companies, projects and community developers, we therefore declare
+>>> 2.6.35 as a flag version of the kernel for embedded use. Several
+>>> companies will be investing in development, integration and testing=
+ of
+>>> this version. Entities wanting to do business with those companies =
+would
+>>> therefore be well-advised to make sure their hardware, drivers and
+>>> enhancements work well with this version of the kernel.
 >>
->> I'm just trying to understand why the fixed endianess rule cannot be
->> bent for such a specialised filesystem.
+>> wouldnt it make more sense to piggy back the extensive work going in=
+to
+>> the "stable" tree ? =C2=A0many of the points you raise after all are=
+ the
+>> entire founding point of it. =C2=A0plus, all the main distros form a=
+round
+>> that, are spending time working on that, is marked as supported for =
+2
+>> or 3 years, and there is already infrastructure/framework/process in
+>> place (stable@kernel.org).
+>>
+>> so instead of picking arbitrary versions (like 2.6.35) and needlessl=
+y
+>> replicating the huge work load, simply declare these stable trees as
+>> the "flag" versions. =C2=A0that means today it'd be 2.6.32.y.
 >
-> When it was decided that filesystems should be fixed-endian and support for
-> big-endian ext2 was dropped, the overhead of doing the fixed conversions was
-> deetermined negligible due to compiler optimization.
-> That was ages ago, and current embedded systems run circles around the
-> machines of those days.
->
-> Note that this is about metadata only. Actual file contents are always just
-> byte streams.
->
+> The fact that this tree is already a year old, and not likely to be
+> brought forward for at least another 2 years is the reason we didn't
+> choose it this time. =C2=A0Most of the high-profile, active embedded =
+projects
+> are already on 2.6.35. =C2=A0For companies looking to adopt a new bas=
+e kernel
+> in the next 12 months, I don't want to have them start with a year-ol=
+d
+> kernel. =C2=A0We did consider the utility of synchronizing with the e=
+nterprise
+> stable tree, but the timing just didn't work too well this time aroun=
+d.
 
-I can add that the penalties in this case are  negligible due to the
-compensation of the very fast access of the media. In addition, from
-performance point of view I'm pretty happy (you can see the some
-benchmark on the project web site).
-
-Marco
+so you're suggesting this is a one-off choice.  in the future, the
+"flag" versions will simply piggy the existing stable trees ?
+-mike
