@@ -1,36 +1,47 @@
 From: Bill Gatliff <bgat@billgatliff.com>
 Subject: Re: Avoiding platform-specific callbacks in drivers?
-Date: Tue, 9 Nov 2010 22:11:05 -0600
-Message-ID: <AANLkTi=3PwhEn4cuCGyVHDtH-zt_n17Bibg32WZrRA7c@mail.gmail.com>
+Date: Tue, 9 Nov 2010 22:17:31 -0600
+Message-ID: <AANLkTikeayhP_=AeJAgKXwW1TJfD-MZrDh_dcq9r2WQS@mail.gmail.com>
 References: <AANLkTinG4y_Uxes0CJYMH+uwr1TcWwjQy+4+_ftyrnML@mail.gmail.com>
-	<alpine.LFD.2.00.1011091905540.13911@xanadu.home>
+	<4CD9E125.2010207@kcomputing.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <alpine.LFD.2.00.1011091905540.13911@xanadu.home>
+In-Reply-To: <4CD9E125.2010207@kcomputing.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Nicolas Pitre <nico@fluxnic.net>
+To: Kevin Dankwardt <k@kcomputing.com>
 Cc: linux-embedded@vger.kernel.org
 
-Nicolas:
-
-On Tue, Nov 9, 2010 at 6:10 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
->
-> The pseudo-device could register the
-> real device and set itself as the parent.
-
-That little tidbit there is the part I seem to have been missing
-before now--- actually doing the physical device registration during
-the probing of the pseudo-device.  With that, the approach actually
-makes sense.
-
-Before now, I was thinking that I would still register both devices
-externally, which made things clumsy to think about.
+Kevin:
 
 
-Thanks!
+On Tue, Nov 9, 2010 at 6:02 PM, Kevin Dankwardt <k@kcomputing.com> wrote:
+> Isn't the general approach to avoid platform-dependencies to abstract the
+> behavior? As is used throughout the kernel, an "operations" struct that
+> provides the abstractions and each driver fills in its implementation as
+> required. The "polymorphism" approach. Maybe the operations are
+> "begin_suspend()" and "end_suspend()" and in this case the functions twiddle
+> a GPIO pin?
+
+The begin_suspend()/end_suspend() approach just moves the problem, really.
+
+Unless you put those function pointers into the platform data, you
+can't change them without touching the driver code.  And if you do put
+those function pointers into the platform data, that seems an awful
+lot like open-coding.  Gets the job done, but seems a fairly blunt
+instrument.
+
+In my case, the device model itself already provides the answer.  The
+"GPIO twiddling" can be dealt with by implementing a pseudo-device
+that registers the actual device underneath it.  Then the pseudo
+device neatly gets the suspend/resume events at the right times
+relative to the device.  AND you get the benefits of sysfs and debugfs
+for free.
+
+I knew the answer was there; it just took an expert like Nicolas Pitre
+to point out the obvious to me.  I can be so dense sometimes!  :)
 
 
 b.g.
