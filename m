@@ -1,70 +1,49 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 02/16 v3] pramfs: super operations
-Date: Mon, 15 Nov 2010 08:45:56 +0100
-Message-ID: <AANLkTimn=Yp-tzb6f-=M73+1Rjqbtp+fxWLH4bz7HEuJ@mail.gmail.com>
-References: <4CDEA53E.2050602@gmail.com>
-	<AANLkTiky=Vnxnav4VtX_Yd1sUtFGqHTrd=aih8qRJ7u7@mail.gmail.com>
+From: Wookey <wookey@wookware.org>
+Subject: YAFFS mainlining process currently underway
+Date: Mon, 15 Nov 2010 11:35:11 +0000
+Message-ID: <20101115113511.GL28472@dream.aleph1.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=/vasv7HGimPo2uQJAKMcDt2NFj+awGQ496ir/lsxPMw=;
-        b=wke/VuQcYm9nNcxwwJpxxEtRZNvwkLxpGLl58RKjvztmwtNkD9SxwkGMBqI2JmgjY2
-         yBrN8zy8ZymitiPy95XXwKseOsjypef5MuRTZT1b9A6h4fGxZBU1HL0f8tKHAVUd6A11
-         dLXwb8QfowoeR0tZWhOKOYR6d6cab7fwGwTtU=
-In-Reply-To: <AANLkTiky=Vnxnav4VtX_Yd1sUtFGqHTrd=aih8qRJ7u7@mail.gmail.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="windows-1252"
-To: yidong zhang <zhangyd6@gmail.com>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, tim.bird@am.sony.com, akpm@linux-foundation.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
+Cc: Charles Manning <manningc2@actrix.gen.nz>
 
-2010/11/15 yidong zhang <zhangyd6@gmail.com>:
-> hi Marco
->
->> + =A0 =A0 =A0 retval =3D 0;
->> + out:
->> + =A0 =A0 =A0 if (retval && sbi->virt_addr) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 iounmap(sbi->virt_addr);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 release_mem_region(sbi->phys_addr, ini=
-tsize);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 kfree(sbi);
->> + =A0 =A0 =A0 }
->> +
->> + =A0 =A0 =A0 return retval;
->> +}
->> +
-> =A0I think kfree(sbi) should not be put here. In case of
-> pram_parse_options failure, sbi should also be freed too. =A0How abou=
-t
-> change it to the list below? And change some =93goto out=94 =A0 branc=
-hes to
-> =93goto out_free=94.
->
-> =A0//=A0 =A0 retval =3D 0;
-> =A0 =A0 return 0;
-> =A0out:
-> =A0=A0 =A0 =A0 if (retval && sbi->virt_addr) {
-> =A0=A0 =A0 =A0 =A0 =A0 =A0 =A0 iounmap(sbi->virt_addr);
-> =A0=A0 =A0 =A0 =A0 =A0 =A0 =A0 release_mem_region(sbi->phys_addr, ini=
-tsize);
-> =A0=A0 =A0 =A0 }
-> out_free:
-> =A0=A0 =A0 =A0 =A0 =A0 =A0 =A0 kfree(sbi);
-> =A0=A0 =A0 =A0 return retval;
-> }
->
+Thanks to a kick (and some money to enable the necessary concentration
+on the job) from CELF/Google a YAFFS git branch intended for mainline
+merging has been created.
 
-Yeah, you're right. It's not always true that virt addr is valid,
-kfree should be used out of this if. I'll fix it.
+Initial patches are currently under discussion on the fsdevel list. I
+thought it worth mentioning here as this is a subject largely of
+interrest to embedded people. 
 
-Marco
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+http://www.spinics.net/lists/linux-fsdevel/threads.html#39158
+http://www.spinics.net/lists/linux-fsdevel/msg39142.html
+
+Do please comment.
+
+The main constraint to bear in mind, is the need to keep the
+in-linux branch compatible with the yaffs.net 'works with all OSes,
+not just Linux (and old kernel versions too)' branch. So that means
+compilers other than GCC, function veneers to interface with the
+various OS-provided filesystem and hardware access functions, the
+built-in trace system. Some of this is stuff that would go away or use
+built-in linux functionality with a linux-only filesystem, but this
+isn't a linux-only filesystem, so some compromise is needed.
+
+The discussion seems to be going well so far. 
+
+The codebase has been changed to Linux coding style and had a lot of
+cruft removed:
+* Multi-OS code has been removed.
+* Types changed from __u32-->u32 etc.
+* typedefs removed.
+* Lindenting done.
+
+Wookey
+-- 
+Principal hats:  Linaro, Emdebian, Wookware, Balloonboard, ARM
+http://wookware.org/
