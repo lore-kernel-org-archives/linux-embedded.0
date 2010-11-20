@@ -1,49 +1,53 @@
-From: Wookey <wookey@wookware.org>
-Subject: YAFFS mainlining process currently underway
-Date: Mon, 15 Nov 2010 11:35:11 +0000
-Message-ID: <20101115113511.GL28472@dream.aleph1.co.uk>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: [PATCH 00/16 v4] pramfs: persistent and protected RAM filesystem
+Date: Sat, 20 Nov 2010 10:56:28 +0100
+Message-ID: <4CE79B4C.7030001@gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:cc:subject:content-type
+         :content-transfer-encoding;
+        bh=cuB4kWyzgbZywUD6KmEQbkE+ZhnR8OeleZE/qEUonLM=;
+        b=EO1xx0noysDj88GieiRbgdGtoFq7fUQM6n8lFlgADhEv7Ao60vAQJ5SkhcxEb4/0fH
+         08H/s8QtJtK4oPsG33bW86SCJyAOxhac3Z6SjFOKntAEmGR+79/qyPV0x+XiUw7P6B/e
+         RJkjiINUP7DxFvzqZt1b4bcchLGbwYdCgR1C8=
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
-Cc: Charles Manning <manningc2@actrix.gen.nz>
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@suse.de>
 
-Thanks to a kick (and some money to enable the necessary concentration
-on the job) from CELF/Google a YAFFS git branch intended for mainline
-merging has been created.
+Hi all,
 
-Initial patches are currently under discussion on the fsdevel list. I
-thought it worth mentioning here as this is a subject largely of
-interrest to embedded people. 
+fourth round for the patch series. I summarize here the changes to
+improve the review:
 
-http://www.spinics.net/lists/linux-fsdevel/threads.html#39158
-http://www.spinics.net/lists/linux-fsdevel/msg39142.html
+v4:
+- in bitmap init used already present bitmap_set function
+- fix a possible memory leak in an error path reported by yidong zhang
 
-Do please comment.
+v3:
+- fix a possible memory leak in an error path reported by yidong zhang
+- fix a warning when using XIP about not used __pram_mmap symbol
+- fix test module header description and replaced TEST_MODULE with
+PRAMFS_TEST_MODULE in the Kconfig and Makefile according to the comments
+done by Randy Dunlap
+- fix a compilation warning in super.c reported by James Hogan
+- fix a compilation error when XIP was enabled
+- removed not used symbol PRAM_XATTR_INDEX_LUSTRE
+- fix some comment style issue
 
-The main constraint to bear in mind, is the need to keep the
-in-linux branch compatible with the yaffs.net 'works with all OSes,
-not just Linux (and old kernel versions too)' branch. So that means
-compilers other than GCC, function veneers to interface with the
-various OS-provided filesystem and hardware access functions, the
-built-in trace system. Some of this is stuff that would go away or use
-built-in linux functionality with a linux-only filesystem, but this
-isn't a linux-only filesystem, so some compromise is needed.
+v2:
+- fix documentation errors reported by Randy Dunlap and Kieran Bingham
+- reworked memory write protection functions with the suggestions of
+Andi Kleen
 
-The discussion seems to be going well so far. 
+v1:
+- first draft
 
-The codebase has been changed to Linux coding style and had a lot of
-cruft removed:
-* Multi-OS code has been removed.
-* Types changed from __u32-->u32 etc.
-* typedefs removed.
-* Lindenting done.
+Andrew/Greg, can you insert the code in the mm/staging tree?
 
-Wookey
--- 
-Principal hats:  Linaro, Emdebian, Wookware, Balloonboard, ARM
-http://wookware.org/
+Marco
