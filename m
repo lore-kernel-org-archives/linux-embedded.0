@@ -1,163 +1,63 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH 16/16 v4] pramfs: makefile and Kconfig
-Date: Sat, 20 Nov 2010 11:03:37 +0100
-Message-ID: <4CE79CF9.5040100@gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [RFC] persistent store
+Date: Mon, 22 Nov 2010 19:24:12 +0100
+Message-ID: <AANLkTimqn+qS5RxETz1DznsMDS4gZBGxkLkdCgTQ7qG-@mail.gmail.com>
+References: <4ce85e437577ae827@agluck-desktop.sc.intel.com>
+	<1290391175.2903.132.camel@yhuang-dev>
+	<AANLkTi=fNH4-VjLh1zzk-UdEQevR16_K8igdLeodw6yL@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arch-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:content-type
-         :content-transfer-encoding;
-        bh=8IJD3DA9in0Xzx4CzkxcMzj+109fo5AeiZbKwBx7LQc=;
-        b=ucEnwYrYXQl6RbyNUjlQE2c8w4Wvswx5JACtlje9QMkbDUzA2+g1j2F+JeYIHt6W5S
-         fbQe35cXNQam0Y91VimmKE68jA5/jkYqBvyyxtXp4XfgGW+pqlm+26LjhPE5Mr/FESVc
-         8oM/8jgJ58BQ+WxlS785HDjDU0wc6vMqRcfIs=
-Sender: linux-kernel-owner@vger.kernel.org
+        h=domainkey-signature:mime-version:received:sender:received
+         :in-reply-to:references:date:x-google-sender-auth:message-id:subject
+         :from:to:cc:content-type:content-transfer-encoding;
+        bh=MawYdo3+r4Ij+/sDvy4xF7VP6aRXe8KNjrjw5XOrjSY=;
+        b=gM2qW71Gn7slo+fISGY4oTF3rv1WyRXzfPX6hrGTIvmZ+pwJSm6t87ey05WOBifLuN
+         zUMt7bFv5OzfFY+CpVSN4id9q/DTGC2v8YT69C7lLyUrWVxrgb7oHZ8jviH/+Clx6DEd
+         pbD1063QW+irprNbEHR/8XP+kf8rV8NN0P8t8=
+In-Reply-To: <AANLkTi=fNH4-VjLh1zzk-UdEQevR16_K8igdLeodw6yL@mail.gmail.com>
+Sender: linux-arch-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Linux Kernel <linux-kernel@vger.kernel.org>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@suse.de>
+Content-Type: text/plain; charset="utf-8"
+To: Tony Luck <tony.luck@intel.com>
+Cc: Huang Ying <ying.huang@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "tglx@linutronix.de" <tglx@linutronix.de>, "mingo@elte.hu" <mingo@elte.hu>, "greg@kroah.com" <greg@kroah.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Linux Embedded <linux-embedded@vger.kernel.org>
 
-From: Marco Stornelli <marco.stornelli@gmail.com>
+On Mon, Nov 22, 2010 at 17:55, Tony Luck <tony.luck@intel.com> wrote:
+> On Sun, Nov 21, 2010 at 5:59 PM, Huang Ying <ying.huang@intel.com> wr=
+ote:
+>> This patch provides a general "read" interface for kmsg_dumper and s=
+ome
+>> other persistent storage users. Another possible choice is to just
+>> extend the original interface to add persistent store support. For
+>> example, we can add a "read" function in kmsg_dumper, and output the
+>> content of persistent store via extend /dev/kmsg via prefix every li=
+ne
+>> comes from persistent store or adding some "ioctl" to do that. (But =
+it
+>> seems that nobody likes "ioctl").
+>
+> In Linux (and Unix before it) "everything is a file" ... but this
+> doesn't work very well if the file has internal structure (e.g.
+> is made of records that can be individually changed or
+> deleted). =C2=A0A filesystem seems a much better model.
 
-Makefile and Kconfig.
+Any tangents with "pramfs: persistent and protected RAM filesystem"
+on linux-embedded?
 
-Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
----
-diff -Nurp linux-2.6.36-orig/fs/Makefile linux-2.6.36/fs/Makefile
---- linux-2.6.36-orig/fs/Makefile	2010-09-13 01:07:37.000000000 +0200
-+++ linux-2.6.36/fs/Makefile	2010-09-14 18:49:52.000000000 +0200
-@@ -126,3 +126,4 @@ obj-$(CONFIG_BTRFS_FS)		+= btrfs/
- obj-$(CONFIG_GFS2_FS)           += gfs2/
- obj-$(CONFIG_EXOFS_FS)          += exofs/
- obj-$(CONFIG_CEPH_FS)		+= ceph/
-+obj-$(CONFIG_PRAMFS)		+= pramfs/
-diff -Nurp linux-2.6.36-orig/fs/Kconfig linux-2.6.36/fs/Kconfig
---- linux-2.6.36-orig/fs/Kconfig	2010-09-13 01:07:37.000000000 +0200
-+++ linux-2.6.36/fs/Kconfig	2010-09-14 18:49:52.000000000 +0200
-@@ -13,7 +13,7 @@ source "fs/ext4/Kconfig"
- config FS_XIP
- # execute in place
- 	bool
--	depends on EXT2_FS_XIP
-+	depends on EXT2_FS_XIP || PRAMFS_XIP
- 	default y
-  source "fs/jbd/Kconfig"
-@@ -25,13 +25,14 @@ config FS_MBCACHE
- 	default y if EXT2_FS=y && EXT2_FS_XATTR
- 	default y if EXT3_FS=y && EXT3_FS_XATTR
- 	default y if EXT4_FS=y && EXT4_FS_XATTR
--	default m if EXT2_FS_XATTR || EXT3_FS_XATTR || EXT4_FS_XATTR
-+	default y if PRAMFS=y && PRAMFS_XATTR
-+	default m if EXT2_FS_XATTR || EXT3_FS_XATTR || EXT4_FS_XATTR || PRAMFS_XATTR
-  source "fs/reiserfs/Kconfig"
- source "fs/jfs/Kconfig"
-  config FS_POSIX_ACL
--# Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs/nfs4)
-+# Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs/nfs4/pramfs)
- #
- # NOTE: you can implement Posix ACLs without these helpers (XFS does).
- # 	Never use this symbol for ifdefs.
-@@ -189,6 +190,7 @@ source "fs/romfs/Kconfig"
- source "fs/sysv/Kconfig"
- source "fs/ufs/Kconfig"
- source "fs/exofs/Kconfig"
-+source "fs/pramfs/Kconfig"
-  endif # MISC_FILESYSTEMS
- diff -Nurp linux-2.6.36-orig/fs/pramfs/Kconfig linux-2.6.36/fs/pramfs/Kconfig
---- linux-2.6.36-orig/fs/pramfs/Kconfig	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/Kconfig	2010-10-30 10:30:19.000000000 +0200
-@@ -0,0 +1,72 @@
-+config PRAMFS
-+	tristate "Persistent and Protected RAM file system support"
-+	depends on HAS_IOMEM && EXPERIMENTAL
-+	select CRC16
-+	help
-+	   If your system has a block of fast (comparable in access speed to
-+	   system memory) and non-volatile RAM and you wish to mount a
-+	   light-weight, full-featured, and space-efficient filesystem over it,
-+	   say Y here, and read <file:Documentation/filesystems/pramfs.txt>.
-+
-+	   To compile this as a module,  choose M here: the module will be
-+	   called pramfs.
-+
-+config PRAMFS_XIP
-+	bool "Enable Execute-in-place in PRAMFS"
-+	depends on PRAMFS && !PRAMFS_WRITE_PROTECT
-+	help
-+	   Say Y here to enable XIP feature of PRAMFS.
-+
-+config PRAMFS_WRITE_PROTECT
-+	bool "Enable PRAMFS write protection"
-+	depends on PRAMFS && MMU && HAVE_SET_MEMORY_RO
-+	default y
-+	help
-+	   Say Y here to enable the write protect feature of PRAMFS.
-+
-+config PRAMFS_XATTR
-+	bool "PRAMFS extended attributes"
-+	depends on PRAMFS
-+	help
-+	  Extended attributes are name:value pairs associated with inodes by
-+	  the kernel or by users (see the attr(5) manual page, or visit
-+	  <http://acl.bestbits.at/> for details).
-+
-+	  If unsure, say N.
-+
-+config PRAMFS_POSIX_ACL
-+	bool "PRAMFS POSIX Access Control Lists"
-+	depends on PRAMFS_XATTR
-+	select FS_POSIX_ACL
-+	help
-+	  Posix Access Control Lists (ACLs) support permissions for users and
-+	  groups beyond the owner/group/world scheme.
-+
-+	  To learn more about Access Control Lists, visit the Posix ACLs for
-+	  Linux website <http://acl.bestbits.at/>.
-+
-+	  If you don't know what Access Control Lists are, say N.
-+
-+config PRAMFS_SECURITY
-+	bool "PRAMFS Security Labels"
-+	depends on PRAMFS_XATTR
-+	help
-+	  Security labels support alternative access control models
-+	  implemented by security modules like SELinux.  This option
-+	  enables an extended attribute handler for file security
-+	  labels in the pram filesystem.
-+
-+	  If you are not using a security module that requires using
-+	  extended attributes for file security labels, say N.
-+
-+config PRAMFS_TEST
-+	boolean
-+	depends on PRAMFS
-+
-+config PRAMFS_TEST_MODULE
-+	tristate "PRAMFS Test"
-+	depends on PRAMFS && m
-+	select PRAMFS_TEST
-+	help
-+	  Say Y here to build a simple module to test the protection of
-+	  PRAMFS. The module will be called pramfs_test.
-diff -Nurp linux-2.6.36-orig/fs/pramfs/Makefile linux-2.6.36/fs/pramfs/Makefile
---- linux-2.6.36-orig/fs/pramfs/Makefile	1970-01-01 01:00:00.000000000 +0100
-+++ linux-2.6.36/fs/pramfs/Makefile	2010-09-14 18:49:52.000000000 +0200
-@@ -0,0 +1,14 @@
-+#
-+# Makefile for the linux pram-filesystem routines.
-+#
-+
-+obj-$(CONFIG_PRAMFS) += pramfs.o
-+obj-$(CONFIG_PRAMFS_TEST_MODULE) += pramfs_test.o
-+
-+pramfs-y := balloc.o dir.o file.o inode.o namei.o super.o symlink.o
-+
-+pramfs-$(CONFIG_PRAMFS_WRITE_PROTECT) += wprotect.o
-+pramfs-$(CONFIG_PRAMFS_XIP) += xip.o
-+pramfs-$(CONFIG_PRAMFS_XATTR) += xattr.o xattr_user.o xattr_trusted.o desctree.o
-+pramfs-$(CONFIG_PRAMFS_POSIX_ACL) += acl.o
-+pramfs-$(CONFIG_PRAMFS_SECURITY) += xattr_security.o
- 
+Gr{oetje,eeting}s,
+
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-=
+m68k.org
+
+In personal conversations with technical people, I call myself a hacker=
+=2E But
+when I'm talking to journalists I just say "programmer" or something li=
+ke that.
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0=C2=A0 =C2=A0=C2=A0 -- Linus Torvalds
