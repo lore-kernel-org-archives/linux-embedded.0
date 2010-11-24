@@ -1,57 +1,84 @@
-From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [PATCH 09/16 v4] pramfs: dir operations
-Date: Wed, 24 Nov 2010 17:17:55 +0900
-Message-ID: <20101124081755.GD2212@linux-sh.org>
-References: <4CE79C4D.6000104@gmail.com>
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: Re: [PATCH 08/16 v4] pramfs: headers
+Date: Wed, 24 Nov 2010 09:23:02 +0100
+Message-ID: <AANLkTikXxzcr+Ybru9vCt0+w6s-UYVNEudxvecF-0Xse@mail.gmail.com>
+References: <4CE79C2F.5090001@gmail.com>
+	<20101124080658.GC2212@linux-sh.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4CE79C4D.6000104@gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:received:in-reply-to
+         :references:date:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=fdDLx8c7uV5Hv0JyUXYhKG5KjPbU1FwETWtuVQ8IcQk=;
+        b=jNyVYn7krKxsv+jBfnmW4CpbbgHf+bPub7DZvwiK/qRSr0kG3LlAh5DQQ4UCAH6udX
+         YkmxMZC/1tsH6HtbZVlSITLAay2K4SIGJmrwP98R/yHz93FLfJaVMlX3ZqLwLgpor4xH
+         biMqBbVHy3DRsaPtUQ0bjHUzhGb4yy1riRwNs=
+In-Reply-To: <20101124080658.GC2212@linux-sh.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Tim Bird <tim.bird@am.sony.com>, Greg Kroah-Hartman <gregkh@suse.de>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@suse.de>, Tim Bird <tim.bird@am.sony.com>
 
-On Sat, Nov 20, 2010 at 11:00:45AM +0100, Marco Stornelli wrote:
-> +int pram_add_link(struct dentry *dentry, struct inode *inode)
-> +{
-> +	struct inode *dir = dentry->d_parent->d_inode;
-> +	struct pram_inode *pidir, *pi, *pitail = NULL;
-> +	u64 tail_ino, prev_ino;
-> +
-> +	const char *name = dentry->d_name.name;
-> +
-> +	int namelen = dentry->d_name.len > PRAM_NAME_LEN ?
-> +		PRAM_NAME_LEN : dentry->d_name.len;
-> +
+2010/11/24 Paul Mundt <lethal@linux-sh.org>:
+> On Sat, Nov 20, 2010 at 11:00:15AM +0100, Marco Stornelli wrote:
+>> +/*
+>> + * Debug code
+>> + */
+>> +#define pram_dbg(s, args...) pr_debug("PRAMFS: "s, ## args)
+>> +#define pram_err(s, args...) pr_err("PRAMFS: "s, ## args)
+>> +#define pram_warn(s, args...) =A0 =A0 =A0 =A0pr_warning("PRAMFS: "s=
+, ## args)
+>> +#define pram_info(s, args...) =A0 =A0 =A0 =A0pr_info("PRAMFS: "s, #=
+# args)
+>> +
+> Please kill off all of this and just use KBUILD_MODNAME centrally.
 
-	namelen = min_t(unsigned int, dentry->d_name.len, PRAM_NAME_LEN);
+I didn't know this way to do, I'll look at it.
 
-?
+>
+>> +#ifdef CONFIG_PRAMFS_WRITE_PROTECT
+>> +extern void pram_writeable(void *vaddr, unsigned long size, int rw)=
+;
+>> +
+>> +#define wrprotect(addr, size) pram_writeable(addr, size, 0)
+>> +
+>> +#else
+>> +
+>> +#define wrprotect(addr, size) do {} while (0)
+>> +
+>> +#endif /* CONFIG PRAMFS_WRITE_PROTECT */
+>> +
+> Perhaps this should be pram_wrprotect()? Does this really benefit fro=
+m
+> being a config option instead of a mount option? Will this handle
+> multiple mounts with some write protected and others not?
 
-> +#define S_SHIFT 12
-> +static unsigned int dtype_by_mode[S_IFMT >> S_SHIFT] = {
-> +	[S_IFREG >> S_SHIFT]    DT_REG,
-> +	[S_IFDIR >> S_SHIFT]    DT_DIR,
-> +	[S_IFCHR >> S_SHIFT]    DT_CHR,
-> +	[S_IFBLK >> S_SHIFT]    DT_BLK,
-> +	[S_IFIFO >> S_SHIFT]    DT_FIFO,
-> +	[S_IFSOCK >> S_SHIFT]   DT_SOCK,
-> +	[S_IFLNK >> S_SHIFT]    DT_LNK,
-> +};
-> +
-> +static int pram_readdir(struct file *filp, void *dirent, filldir_t filldir)
-> +{
-...
-> +		ret = filldir(dirent, name, namelen,
-> +			      filp->f_pos, ino,
-> +			      dtype_by_mode[(be16_to_cpu(pi->i_mode) & S_IFMT)>>S_SHIFT]);
-> +		filp->f_pos = pi->i_d.d_next ? be64_to_cpu(pi->i_d.d_next) : 3;
+See my previous response.
 
-You might try to provide some generic helpers for this, at least GFS2
-also does the same thing:
+>
+>> +#ifdef CONFIG_PRAMFS_WRITE_PROTECT
+>> +static inline void pram_memunlock_range(void *p, unsigned long len)
+>> +{
+>> +#ifndef CONFIG_X86
+>> + =A0 =A0 local_irq_disable();
+>> +#endif
+>> + =A0 =A0 preempt_disable();
+>> + =A0 =A0 pram_writeable(p, len, 1);
+>> +}
+>> +
+> This needs some explaining, or killing. While the latter is preferabl=
+e,
+> we can also work with the former.
+>
 
-include/linux/gfs2_ondisk.h:#define DT2IF(dt) (((dt) << 12) & S_IFMT)
-include/linux/gfs2_ondisk.h:#define IF2DT(sif) (((sif) & S_IFMT) >> 12)
+Maybe I didn't understand, you mean preemt_disable() without disabling
+the interrupt?
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
