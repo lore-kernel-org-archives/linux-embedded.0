@@ -1,143 +1,72 @@
-From: Lasse Collin <lasse.collin@tukaani.org>
-Subject: [PATCH RFC 3/3] x86: Support XZ-compressed kernel
-Date: Wed, 24 Nov 2010 22:59:06 +0200
-Message-ID: <201011242259.06661.lasse.collin@tukaani.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH RFC 1/3] Decompressors: Add XZ decompressor module
+Date: Wed, 24 Nov 2010 14:25:49 -0800
+Message-ID: <20101124142549.c1b9ad14.akpm@linux-foundation.org>
+References: <201011242251.52927.lasse.collin@tukaani.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <201011242251.52927.lasse.collin@tukaani.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: linux-kernel@vger.kernel.org
-Cc: linux-embedded@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, Alain Knaff <alain@knaff.lu>, Albin Tonnerre <albin.tonnerre@free-electrons.com>, Phillip Lougher <phillip@lougher.demon.co.uk>, Andrew Morton <akpm@linux-foundation.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Lasse Collin <lasse.collin@tukaani.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, Alain Knaff <alain@knaff.lu>, Albin Tonnerre <albin.tonnerre@free-electrons.com>, Phillip Lougher <phillip@lougher.demon.co.uk>
 
-From: Lasse Collin <lasse.collin@tukaani.org>
+On Wed, 24 Nov 2010 22:51:52 +0200
+Lasse Collin <lasse.collin@tukaani.org> wrote:
 
-This integrates the XZ decompression code to the x86
-pre-boot code.
+> From: Lasse Collin <lasse.collin@tukaani.org>
+> 
+> In userspace, the .lzma format has become mostly a legacy
+> file format that got superseded by the .xz format. Similarly,
+> LZMA Utils was superseded by XZ Utils.
+> 
+> These patches add support for XZ decompression into
+> the kernel. Most of the code is as is from XZ Embedded
+> <http://tukaani.org/xz/embedded.html>. It was written for
+> the Linux kernel but is usable in other projects too.
+> 
+> Advantages of XZ over the current LZMA code in the kernel:
+>   - Nice API that can be used by other kernel modules; it's
+>     not limited to kernel, initramfs, and initrd decompression.
+>   - Integrity check support (CRC32)
+>   - BCJ filters improve compression of executable code on
+>     certain architectures. These together with LZMA2 can
+>     produce a few percent smaller kernel or Squashfs images
+>     than plain LZMA without making the decompression slower.
+> 
+> This patch: Add the main decompression code (xz_dec), testing
+> module (xz_dec_test), wrapper script (xz_wrap.sh) for the xz
+> command line tool, and documentation. The xz_dec module is
+> enough to have a usable XZ decompressor e.g. for Squashfs.
 
-mkpiggy.c is updated to reserve about 32 KiB more buffer safety
-margin for kernel decompression. It is done unconditionally for
-all decompressors to keep the code simpler.
+I'm not seeing any documentation which tells me how to create, install
+and execute xs-compressed kernels. There are new makefile targets?
 
-The XZ decompressor needs around 30 KiB of heap, so the heap size
-is increased to 32 KiB on both x86-32 and x86-64.
+>
+> ...
+>
+> +#define bcj_x86_test_msbyte(b) ((b) == 0x00 || (b) == 0xFF)
 
-Documentation/x86/boot.txt is updated to list the XZ magic number.
+This should be written in C.  It looks nicer, and so
+bcj_x86_test_msbyte(*p++) won't explode.
 
-With the x86 BCJ filter in XZ, XZ-compressed x86 kernel tends to be
-a few percent smaller than the equivalent LZMA-compressed kernel.
+> +static noinline_for_stack size_t bcj_x86(
 
-Signed-off-by: Lasse Collin <lasse.collin@tukaani.org>
----
+hm, but it uses little stack space.
 
-Even though the buffer safety margin has been increased,
-the comments in misc.c about the safety margin calculation
-were not touched. This is because the misc.c comments describe
-the calculation of the margin for the .gz format.
+> +static noinline_for_stack size_t bcj_x86(
+> +		struct xz_dec_bcj *s, uint8_t *buf, size_t size)
 
- Documentation/x86/boot.txt         |    6 +++---
- arch/x86/Kconfig                   |    1 +
- arch/x86/boot/compressed/Makefile  |    5 ++++-
- arch/x86/boot/compressed/misc.c    |    4 ++++
- arch/x86/boot/compressed/mkpiggy.c |    2 +-
- arch/x86/include/asm/boot.h        |    6 +-----
- 6 files changed, 14 insertions(+), 10 deletions(-)
+The preferred style is
 
-diff -uprN linux-2.6.37-rc3.orig/Documentation/x86/boot.txt linux-2.6.37-rc3/Documentation/x86/boot.txt
---- linux-2.6.37-rc3.orig/Documentation/x86/boot.txt	2010-10-20 23:30:22.000000000 +0300
-+++ linux-2.6.37-rc3/Documentation/x86/boot.txt	2010-11-18 19:58:57.000000000 +0200
-@@ -621,9 +621,9 @@ Protocol:	2.08+
-   The payload may be compressed. The format of both the compressed and
-   uncompressed data should be determined using the standard magic
-   numbers.  The currently supported compression formats are gzip
--  (magic numbers 1F 8B or 1F 9E), bzip2 (magic number 42 5A) and LZMA
--  (magic number 5D 00).  The uncompressed payload is currently always ELF
--  (magic number 7F 45 4C 46).
-+  (magic numbers 1F 8B or 1F 9E), bzip2 (magic number 42 5A), LZMA
-+  (magic number 5D 00), and XZ (magic number FD 37).  The uncompressed
-+  payload is currently always ELF (magic number 7F 45 4C 46).
-   
- Field name:	payload_length
- Type:		read
-diff -uprN linux-2.6.37-rc3.orig/arch/x86/Kconfig linux-2.6.37-rc3/arch/x86/Kconfig
---- linux-2.6.37-rc3.orig/arch/x86/Kconfig	2010-11-22 10:51:37.000000000 +0200
-+++ linux-2.6.37-rc3/arch/x86/Kconfig	2010-11-24 08:18:18.000000000 +0200
-@@ -51,6 +51,7 @@ config X86
- 	select HAVE_KERNEL_GZIP
- 	select HAVE_KERNEL_BZIP2
- 	select HAVE_KERNEL_LZMA
-+	select HAVE_KERNEL_XZ
- 	select HAVE_KERNEL_LZO
- 	select HAVE_HW_BREAKPOINT
- 	select HAVE_MIXED_BREAKPOINTS_REGS
-diff -uprN linux-2.6.37-rc3.orig/arch/x86/boot/compressed/Makefile linux-2.6.37-rc3/arch/x86/boot/compressed/Makefile
---- linux-2.6.37-rc3.orig/arch/x86/boot/compressed/Makefile	2010-10-20 23:30:22.000000000 +0300
-+++ linux-2.6.37-rc3/arch/x86/boot/compressed/Makefile	2010-11-16 20:36:23.000000000 +0200
-@@ -4,7 +4,7 @@
- # create a compressed vmlinux image from the original vmlinux
- #
- 
--targets := vmlinux.lds vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma vmlinux.bin.lzo head_$(BITS).o misc.o string.o cmdline.o early_serial_console.o piggy.o
-+targets := vmlinux.lds vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma vmlinux.bin.xz vmlinux.bin.lzo head_$(BITS).o misc.o string.o cmdline.o early_serial_console.o piggy.o
- 
- KBUILD_CFLAGS := -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2
- KBUILD_CFLAGS += -fno-strict-aliasing -fPIC
-@@ -49,12 +49,15 @@ $(obj)/vmlinux.bin.bz2: $(vmlinux.bin.al
- 	$(call if_changed,bzip2)
- $(obj)/vmlinux.bin.lzma: $(vmlinux.bin.all-y) FORCE
- 	$(call if_changed,lzma)
-+$(obj)/vmlinux.bin.xz: $(vmlinux.bin.all-y) FORCE
-+	$(call if_changed,xzkern)
- $(obj)/vmlinux.bin.lzo: $(vmlinux.bin.all-y) FORCE
- 	$(call if_changed,lzo)
- 
- suffix-$(CONFIG_KERNEL_GZIP)	:= gz
- suffix-$(CONFIG_KERNEL_BZIP2)	:= bz2
- suffix-$(CONFIG_KERNEL_LZMA)	:= lzma
-+suffix-$(CONFIG_KERNEL_XZ)	:= xz
- suffix-$(CONFIG_KERNEL_LZO) 	:= lzo
- 
- quiet_cmd_mkpiggy = MKPIGGY $@
-diff -uprN linux-2.6.37-rc3.orig/arch/x86/boot/compressed/misc.c linux-2.6.37-rc3/arch/x86/boot/compressed/misc.c
---- linux-2.6.37-rc3.orig/arch/x86/boot/compressed/misc.c	2010-11-22 10:51:37.000000000 +0200
-+++ linux-2.6.37-rc3/arch/x86/boot/compressed/misc.c	2010-11-24 08:18:18.000000000 +0200
-@@ -139,6 +139,10 @@ static int lines, cols;
- #include "../../../../lib/decompress_unlzma.c"
- #endif
- 
-+#ifdef CONFIG_KERNEL_XZ
-+#include "../../../../lib/decompress_unxz.c"
-+#endif
-+
- #ifdef CONFIG_KERNEL_LZO
- #include "../../../../lib/decompress_unlzo.c"
- #endif
-diff -uprN linux-2.6.37-rc3.orig/arch/x86/boot/compressed/mkpiggy.c linux-2.6.37-rc3/arch/x86/boot/compressed/mkpiggy.c
---- linux-2.6.37-rc3.orig/arch/x86/boot/compressed/mkpiggy.c	2010-10-20 23:30:22.000000000 +0300
-+++ linux-2.6.37-rc3/arch/x86/boot/compressed/mkpiggy.c	2010-11-16 20:37:57.000000000 +0200
-@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
- 
- 	offs = (olen > ilen) ? olen - ilen : 0;
- 	offs += olen >> 12;	/* Add 8 bytes for each 32K block */
--	offs += 32*1024 + 18;	/* Add 32K + 18 bytes slack */
-+	offs += 64*1024 + 128;	/* Add 64K + 128 bytes slack */
- 	offs = (offs+4095) & ~4095; /* Round to a 4K boundary */
- 
- 	printf(".section \".rodata..compressed\",\"a\",@progbits\n");
-diff -uprN linux-2.6.37-rc3.orig/arch/x86/include/asm/boot.h linux-2.6.37-rc3/arch/x86/include/asm/boot.h
---- linux-2.6.37-rc3.orig/arch/x86/include/asm/boot.h	2010-10-20 23:30:22.000000000 +0300
-+++ linux-2.6.37-rc3/arch/x86/include/asm/boot.h	2010-11-16 20:39:57.000000000 +0200
-@@ -32,11 +32,7 @@
- #define BOOT_HEAP_SIZE             0x400000
- #else /* !CONFIG_KERNEL_BZIP2 */
- 
--#ifdef CONFIG_X86_64
--#define BOOT_HEAP_SIZE	0x7000
--#else
--#define BOOT_HEAP_SIZE	0x4000
--#endif
-+#define BOOT_HEAP_SIZE	0x8000
- 
- #endif /* !CONFIG_KERNEL_BZIP2 */
- 
+static noinline_for_stack size_t bcj_x86(struct xz_dec_bcj *s, uint8_t *buf,
+					size_t size)
+
+or
+
+static noinline_for_stack size_t
+bcj_x86(struct xz_dec_bcj *s, uint8_t *buf, size_t size)
+
+(lots of dittoes)
