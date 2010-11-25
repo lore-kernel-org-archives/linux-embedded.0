@@ -1,29 +1,35 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: Re: [PATCH RFC 2/3] Decompressors: Add boot-time XZ support
-Date: Thu, 25 Nov 2010 07:06:25 +0000
-Message-ID: <4CEE0AF1.7030208@lougher.demon.co.uk>
-References: <201011242254.41176.lasse.collin@tukaani.org> <4CEE02EE.1050102@lougher.demon.co.uk>
+From: Natanael Olaiz <nolaiz@gmail.com>
+Subject: [OT] Display for an embedded device
+Date: Thu, 25 Nov 2010 11:15:19 +0100
+Message-ID: <4CEE3737.2080907@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4CEE02EE.1050102@lougher.demon.co.uk>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:received:message-id:date:from
+         :user-agent:mime-version:to:subject:content-type
+         :content-transfer-encoding;
+        bh=mIDC/p8zbbTGGirTk4LqdM4a+r1VUtYp78jchwVgkmc=;
+        b=Ad/0Xn6w3OflinBWD1diQt7faWpNtt7PxesAoALs6hHpfWa+/1v6WkCUSOq+0J46jV
+         UC/7di9GtffS6Mvfiz3eARntS6o8LyEyCAruqOkqHotGDsWb45s5JPA9NePcDpnCemFq
+         xR6tcfo0iiwc6BMbm+1Yl7y76CFP8Fsw7EN6s=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Lasse Collin <lasse.collin@tukaani.org>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, Alain Knaff <alain@knaff.lu>, Albin Tonnerre <albin.tonnerre@free-electrons.com>, Andrew Morton <akpm@linux-foundation.org>
+To: linux-embedded@vger.kernel.org
 
-On 25/11/10 06:32, Phillip Lougher wrote:
->> +
->> + for (i = 0; i< size; ++i)
->
-> The kernel uses either "i < size" or "i<size" ...
->
+Hi,
 
-Disregard these, looks like my email client (Mozilla Thunderbird)
-is eating spaces... Very odd
+I don't know if this is the proper place to ask, so if anyone knows a 
+better place just tell me...
 
->> + if (fill == NULL&& flush == NULL) {
->
+Which kind of display devices are supported by the kernel? Which kind of 
+tiny display devices do you recommend to use in a rackable PC? (it would 
+be ideal to fit the display in the box of one rack unit)
 
-and this.
+
+Thanks in advance, and sorry if the message if so off topic.
+
+Best regards,
+Natanael.
