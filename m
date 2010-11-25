@@ -1,65 +1,91 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 08/16 v4] pramfs: headers
-Date: Thu, 25 Nov 2010 13:20:37 +0100
-Message-ID: <AANLkTimWtBkoXfr6d4ujsfeJiMEvtLV2EgMzowv4LvDv@mail.gmail.com>
-References: <4CE79C2F.5090001@gmail.com>
-	<20101124080658.GC2212@linux-sh.org>
-	<AANLkTikXxzcr+Ybru9vCt0+w6s-UYVNEudxvecF-0Xse@mail.gmail.com>
-	<20101124083519.GF2212@linux-sh.org>
+From: Lasse Collin <lasse.collin@tukaani.org>
+Subject: Re: [PATCH RFC 1/3] Decompressors: Add XZ decompressor module
+Date: Thu, 25 Nov 2010 16:34:03 +0200
+Message-ID: <201011251634.04065.lasse.collin@tukaani.org>
+References: <201011242251.52927.lasse.collin@tukaani.org> <20101124142549.c1b9ad14.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type;
-        bh=hcOW2rcNYq9nXC6NckAaN3LYuMD51Q9vmwLrsu9v7bM=;
-        b=YEAa1lqU4JO1FCxda/D4tAsnFQgmEX1XNFoUEoBKKITq4JIFwDjuJy8l8SyiNvYcbS
-         JoXTXPhi9njdndWzkZSljYqiQvqUhp7Jp8OUWaVHJh40H7VtUFf0JqIVhmlFWar8vwfe
-         u1o/k0HYFez9mxsK51NhPYu7E2IwbMcT0U3Gw=
-In-Reply-To: <20101124083519.GF2212@linux-sh.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@suse.de>, Tim Bird <tim.bird@am.sony.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20101124142549.c1b9ad14.akpm@linux-foundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: Text/Plain; charset="us-ascii"
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>, Alain Knaff <alain@knaff.lu>, Albin Tonnerre <albin.tonnerre@free-electrons.com>, Phillip Lougher <phillip@lougher.demon.co.uk>
 
-2010/11/24 Paul Mundt <lethal@linux-sh.org>:
-> On Wed, Nov 24, 2010 at 09:23:02AM +0100, Marco Stornelli wrote:
->> 2010/11/24 Paul Mundt <lethal@linux-sh.org>:
->> >
->> >> +#ifdef CONFIG_PRAMFS_WRITE_PROTECT
->> >> +static inline void pram_memunlock_range(void *p, unsigned long len)
->> >> +{
->> >> +#ifndef CONFIG_X86
->> >> + ? ? local_irq_disable();
->> >> +#endif
->> >> + ? ? preempt_disable();
->> >> + ? ? pram_writeable(p, len, 1);
->> >> +}
->> >> +
->> > This needs some explaining, or killing. While the latter is preferable,
->> > we can also work with the former.
->> >
->>
->> Maybe I didn't understand, you mean preemt_disable() without disabling
->> the interrupt?
->
-> I mean what exactly is this supposed to be doing? It looks pretty
-> questionable for SMP for starters, it doesn't explain why x86 is special,
-> etc. It looks like you wanted a spinlock with IRQs disabled but probably
-> opted not to use it because you were throwing this around interfaces that
-> could sleep, which looks like a really scary thing for latency. It's also
-> making architecture assumptions without any explanation of why. This
-> needs to be explained, and in some amount of detail, as it's not entirely
-> obvious.
->
+On 2010-11-25 Andrew Morton wrote:
+> On Wed, 24 Nov 2010 22:51:52 +0200
+> Lasse Collin <lasse.collin@tukaani.org> wrote:
+> > This patch: Add the main decompression code (xz_dec), testing
+> > module (xz_dec_test), wrapper script (xz_wrap.sh) for the xz
+> > command line tool, and documentation. The xz_dec module is
+> > enough to have a usable XZ decompressor e.g. for Squashfs.
+> 
+> I'm not seeing any documentation which tells me how to create,
+> install and execute xs-compressed kernels. There are new makefile
+> targets?
 
-Ok, it's not clear, I'll try to explain. My idea here is avoid "open
-windows" with the memory not locked (lock here means not protected).
-The problem here is that if you call set_memory_rw/set_memory_ro with
-interrupt disabled (for x86) you'll fall in a bug_on() condition. I
-can add that the use of these functions has been discussed in the v1
-patch series with Andi Kleen.
+The last paragraph under "XZ related components in the kernel" in 
+Documentation/xz.txt mentions xzkern and xzmisc commands available for 
+makefiles. They are defined in scripts/Makefile.lib and have some 
+comments as documentation there too.
 
-Marco
+The Kconfig options to enable XZ-compressed kernel are added in the 
+second patch. There is already an option to select the kernel 
+compression method so I only added XZ to that list. I assume that people 
+will find this option just like they have been able to find the other 
+compression methods.
+
+> > +#define bcj_x86_test_msbyte(b) ((b) == 0x00 || (b) == 0xFF)
+> 
+> This should be written in C.  It looks nicer, and so
+> bcj_x86_test_msbyte(*p++) won't explode.
+
+Thanks. It's fixed in XZ Embedded git repository now:
+
+    git clone http://git.tukaani.org/xz-embedded.git
+    (clone only, no WWW for now)
+
+I will post updated patches when needed.
+
+> > +static noinline_for_stack size_t bcj_x86(
+> 
+> hm, but it uses little stack space.
+
+I wrote that code 19 months ago and now it looks odd to me too. I 
+remember that my idea was to minimize stack usage in this call stack:
+
+    xz_dec_run() -> xz_dec_bcj_run() -> xz_dec_lzma2_run() -> ...
+
+I wanted to prevent the BCJ filters from being inlined into 
+xz_dec_bcj_run() because inlining would have increased the maximum 
+stack usage by 100-150 bytes.
+
+The BCJ filters are called via bcj_apply() which is called in two places 
+from xz_dec_bcj_run(). Since there are two calls to bcj_apply(), GCC 
+won't inline it. It will only inline the BCJ filters into bcj_apply() 
+and that's OK. So noinline_for_stack does nothing good here. Maybe my 
+early version had only one call to bcj_apply() or something like that.
+
+Anyway, I removed noinline_for_stacks. I tested it also when only 
+one BCJ filter is enabled and with a few different GCC versions.
+
+> > +static noinline_for_stack size_t bcj_x86(
+> > +             struct xz_dec_bcj *s, uint8_t *buf, size_t size)
+> 
+> The preferred style is
+> 
+> static noinline_for_stack size_t bcj_x86(struct xz_dec_bcj *s, uint8_t *buf,
+>                                         size_t size)
+> 
+> or
+> 
+> static noinline_for_stack size_t
+> bcj_x86(struct xz_dec_bcj *s, uint8_t *buf, size_t size)
+> 
+> (lots of dittoes)
+
+Fixed.
+
+-- 
+Lasse Collin  |  IRC: Larhzu @ IRCnet & Freenode
