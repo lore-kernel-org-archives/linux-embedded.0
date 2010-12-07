@@ -1,27 +1,28 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 0/7] printk: add pr_<level>_once, guard print_hex_dump
-Date: Mon, 06 Dec 2010 10:51:36 -0800
-Message-ID: <1291661496.17494.221.camel@Joe-Laptop>
-References: <cover.1291611190.git.joe@perches.com>
-	 <1291649869.3065.2095.camel@calx>  <1291659120.17494.179.camel@Joe-Laptop>
-	 <1291659380.3065.2214.camel@calx>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: CELF open project proposals for 2011 - Request for proposals
+Date: Tue, 7 Dec 2010 03:53:00 -0800
+Message-ID: <4CFE201C.8050407@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1291659380.3065.2214.camel@calx>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Matt Mackall <mpm@selenic.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: "celinux-dev@tree.celinuxforum.org" <celinux-dev@tree.celinuxforum.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-On Mon, 2010-12-06 at 12:16 -0600, Matt Mackall wrote:
-> On Mon, 2010-12-06 at 10:12 -0800, Joe Perches wrote:
-> > There could be ~500 bytes more saved if hex_dump_to_buffer
-> > was compiled out.
-> Can't say I'm excited by this approach. .5k is under my threshold for
-> this level of invasiveness.
+In addition to its other activities, each year, the CE Linux Forum
+performs contract work to enhance embedded Linux.  We would like
+to invite you to consider what areas of embedded Linux technology
+and embedded Linux development could be improved, and submit
+a proposal.
 
-Mine too, but I thought I'd mention it.
+Any ideas or projects that you  think it would be good
+for CELF to fund would be appreciated.
 
+Please see more details and full instructions at:
+http://elinux.org/CELF_Open_Project_Proposal_2011
 
+Regards,
+  -- Tim Bird
+Architecture Group Chair
+CE Linux Forum
