@@ -1,57 +1,33 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
+From: Lasse Collin <lasse.collin@tukaani.org>
 Subject: Re: [PATCH 2/2] Squashfs: Add XZ compression configuration option
-Date: Thu, 9 Dec 2010 08:02:04 +0100
-Message-ID: <AANLkTimUYrb8EMomgmsW+v7ttbkUH0P57SBD5M4_AGmU@mail.gmail.com>
+Date: Thu, 9 Dec 2010 11:09:31 +0200
+Message-ID: <201012091109.32084.lasse.collin@tukaani.org>
 References: <4D007315.1090704@lougher.demon.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:sender:received
-         :in-reply-to:references:date:x-google-sender-auth:message-id:subject
-         :from:to:cc:content-type:content-transfer-encoding;
-        bh=+qEq2EGThMWEG2FfjqmdZ2uqCde49zCwUZcg7nHpkSY=;
-        b=CghCBcWBb430Alu4QxSH+DG1NgXaYt0RNndUcASHN9eoVFwM/INUMrwWeSprnJ3L96
-         86rDpWj0HOAt48P5fnNQPeS0hVVZWChM8IhvecppKChPVIR+1pUnRLPC9TGSVqw4zTaC
-         +RcLxsfuQyV7dlVNhDri6A0K/eCok3T3MH/kk=
 In-Reply-To: <4D007315.1090704@lougher.demon.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
+Content-Type: Text/Plain; charset="us-ascii"
 To: Phillip Lougher <phillip@lougher.demon.co.uk>
-Cc: Linux Kernel Development <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, Lasse Collin <lasse.collin@tukaani.org>, Andy Whitcroft <apw@canonical.com>
+Cc: Linux Kernel Development <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Linux Embedded Maillist <linux-embedded@vger.kernel.org>
 
-On Thu, Dec 9, 2010 at 07:11, Phillip Lougher
-<phillip@lougher.demon.co.uk> wrote:
-> --- a/fs/squashfs/Kconfig
-> +++ b/fs/squashfs/Kconfig
-> @@ -53,6 +53,22 @@ config SQUASHFS_LZO
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0If unsure, say N.
->
+On 2010-12-09 Phillip Lougher wrote:
 > +config SQUASHFS_XZ
-> + =C2=A0 =C2=A0 =C2=A0 bool "Include support for XZ compressed file s=
-ystems"
-> + =C2=A0 =C2=A0 =C2=A0 depends on SQUASHFS
-> + =C2=A0 =C2=A0 =C2=A0 default n
+> +       bool "Include support for XZ compressed file systems"
+> +       depends on SQUASHFS
+> +       default n
+> +       select XZ_DEC
 
-"default n" is the default, no reason to specify it.
+Should "select XZ_DEC" be replaced with "depends on XZ_DEC"? XZ_DEC 
+requires CRC32, so if "select XZ_DEC" is used, there needs to be also 
+"select CRC32".
 
-Do we need a checkpatch test for this?
+XZ_DEC may optionally use other XZ_DEC_* symbols, which the user will 
+want to choose when building for an embedded system. With "depends on 
+XZ_DEC" the user will see that there's more than a single option that 
+affects the details of the XZ support in Squashfs.
 
-Gr{oetje,eeting}s,
-
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-=
-m68k.org
-
-In personal conversations with technical people, I call myself a hacker=
-=2E But
-when I'm talking to journalists I just say "programmer" or something li=
-ke that.
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0=C2=A0 =C2=A0=C2=A0 -- Linus Torvalds
+-- 
+Lasse Collin  |  IRC: Larhzu @ IRCnet & Freenode
