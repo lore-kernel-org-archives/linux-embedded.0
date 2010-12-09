@@ -1,100 +1,57 @@
-From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH 2/2] Squashfs: Add XZ compression configuration option
-Date: Thu, 09 Dec 2010 06:11:33 +0000
-Message-ID: <4D007315.1090704@lougher.demon.co.uk>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 2/2] Squashfs: Add XZ compression configuration option
+Date: Thu, 9 Dec 2010 08:02:04 +0100
+Message-ID: <AANLkTimUYrb8EMomgmsW+v7ttbkUH0P57SBD5M4_AGmU@mail.gmail.com>
+References: <4D007315.1090704@lougher.demon.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:received:sender:received
+         :in-reply-to:references:date:x-google-sender-auth:message-id:subject
+         :from:to:cc:content-type:content-transfer-encoding;
+        bh=+qEq2EGThMWEG2FfjqmdZ2uqCde49zCwUZcg7nHpkSY=;
+        b=CghCBcWBb430Alu4QxSH+DG1NgXaYt0RNndUcASHN9eoVFwM/INUMrwWeSprnJ3L96
+         86rDpWj0HOAt48P5fnNQPeS0hVVZWChM8IhvecppKChPVIR+1pUnRLPC9TGSVqw4zTaC
+         +RcLxsfuQyV7dlVNhDri6A0K/eCok3T3MH/kk=
+In-Reply-To: <4D007315.1090704@lougher.demon.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Linux Kernel Development <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Linux Embedded Maillist <linux-embedded@vger.kernel.org>
-Cc: Lasse Collin <lasse.collin@tukaani.org>
+Content-Type: text/plain; charset="utf-8"
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: Linux Kernel Development <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, Lasse Collin <lasse.collin@tukaani.org>, Andy Whitcroft <apw@canonical.com>
 
+On Thu, Dec 9, 2010 at 07:11, Phillip Lougher
+<phillip@lougher.demon.co.uk> wrote:
+> --- a/fs/squashfs/Kconfig
+> +++ b/fs/squashfs/Kconfig
+> @@ -53,6 +53,22 @@ config SQUASHFS_LZO
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0If unsure, say N.
+>
+> +config SQUASHFS_XZ
+> + =C2=A0 =C2=A0 =C2=A0 bool "Include support for XZ compressed file s=
+ystems"
+> + =C2=A0 =C2=A0 =C2=A0 depends on SQUASHFS
+> + =C2=A0 =C2=A0 =C2=A0 default n
 
-Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
----
-  fs/squashfs/Kconfig        |   16 ++++++++++++++++
-  fs/squashfs/Makefile       |    1 +
-  fs/squashfs/decompressor.c |   11 +++++++++++
-  fs/squashfs/squashfs.h     |    3 +++
-  4 files changed, 31 insertions(+), 0 deletions(-)
+"default n" is the default, no reason to specify it.
 
-diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
-index e5f63da..e96d99a 100644
---- a/fs/squashfs/Kconfig
-+++ b/fs/squashfs/Kconfig
-@@ -53,6 +53,22 @@ config SQUASHFS_LZO
+Do we need a checkpatch test for this?
 
-  	  If unsure, say N.
+Gr{oetje,eeting}s,
 
-+config SQUASHFS_XZ
-+	bool "Include support for XZ compressed file systems"
-+	depends on SQUASHFS
-+	default n
-+	select XZ_DEC
-+	help
-+	  Saying Y here includes support for reading Squashfs file systems
-+	  compressed with XZ compresssion.  XZ gives better compression than
-+	  the default zlib compression, at the expense of greater CPU and
-+	  memory overhead.
-+
-+	  XZ is not the standard compression used in Squashfs and so most
-+	  file systems will be readable without selecting this option.
-+
-+	  If unsure, say N.
-+
-  config SQUASHFS_EMBEDDED
-  	bool "Additional option for memory-constrained systems"
-  	depends on SQUASHFS
-diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
-index 7672bac..cecf2be 100644
---- a/fs/squashfs/Makefile
-+++ b/fs/squashfs/Makefile
-@@ -7,3 +7,4 @@ squashfs-y += block.o cache.o dir.o export.o file.o fragment.o id.o inode.o
-  squashfs-y += namei.o super.o symlink.o zlib_wrapper.o decompressor.o
-  squashfs-$(CONFIG_SQUASHFS_XATTR) += xattr.o xattr_id.o
-  squashfs-$(CONFIG_SQUASHFS_LZO) += lzo_wrapper.o
-+squashfs-$(CONFIG_SQUASHFS_XZ) += xz_wrapper.o
-diff --git a/fs/squashfs/decompressor.c b/fs/squashfs/decompressor.c
-index 24af9ce..ac333b8 100644
---- a/fs/squashfs/decompressor.c
-+++ b/fs/squashfs/decompressor.c
-@@ -46,6 +46,12 @@ static const struct squashfs_decompressor squashfs_lzo_unsupported_comp_ops = {
-  };
-  #endif
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 Geert
 
-+#ifndef CONFIG_SQUASHFS_XZ
-+static const struct squashfs_decompressor squashfs_xz_unsupported_comp_ops = {
-+	NULL, NULL, NULL, XZ_COMPRESSION, "xz", 0
-+};
-+#endif
-+
-  static const struct squashfs_decompressor squashfs_unknown_comp_ops = {
-  	NULL, NULL, NULL, 0, "unknown", 0
-  };
-@@ -58,6 +64,11 @@ static const struct squashfs_decompressor *decompressor[] = {
-  #else
-  	&squashfs_lzo_unsupported_comp_ops,
-  #endif
-+#ifdef CONFIG_SQUASHFS_XZ
-+	&squashfs_xz_comp_ops,
-+#else
-+	&squashfs_xz_unsupported_comp_ops,
-+#endif
-  	&squashfs_unknown_comp_ops
-  };
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-=
+m68k.org
 
-diff --git a/fs/squashfs/squashfs.h b/fs/squashfs/squashfs.h
-index 5d45569..1096e2e 100644
---- a/fs/squashfs/squashfs.h
-+++ b/fs/squashfs/squashfs.h
-@@ -107,3 +107,6 @@ extern const struct squashfs_decompressor squashfs_zlib_comp_ops;
-
-  /* lzo_wrapper.c */
-  extern const struct squashfs_decompressor squashfs_lzo_comp_ops;
-+
-+/* xz_wrapper.c */
-+extern const struct squashfs_decompressor squashfs_xz_comp_ops;
--- 
-1.6.3.3
+In personal conversations with technical people, I call myself a hacker=
+=2E But
+when I'm talking to journalists I just say "programmer" or something li=
+ke that.
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0=C2=A0 =C2=A0=C2=A0 -- Linus Torvalds
