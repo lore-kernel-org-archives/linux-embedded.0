@@ -1,7 +1,7 @@
 From: Phillip Lougher <phillip@lougher.demon.co.uk>
-Subject: [PATCH 1/2] Squashfs: add XZ compression support
-Date: Thu, 09 Dec 2010 06:08:45 +0000
-Message-ID: <4D00726D.3080503@lougher.demon.co.uk>
+Subject: [PATCH 2/2] Squashfs: Add XZ compression configuration option
+Date: Thu, 09 Dec 2010 06:11:33 +0000
+Message-ID: <4D007315.1090704@lougher.demon.co.uk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -12,185 +12,89 @@ To: Linux Kernel Development <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.
 Cc: Lasse Collin <lasse.collin@tukaani.org>
 
 
-Add XZ decompressor wrapper code.
-
 Signed-off-by: Phillip Lougher <phillip@lougher.demon.co.uk>
 ---
-  fs/squashfs/squashfs_fs.h |    1 +
-  fs/squashfs/xz_wrapper.c  |  153 +++++++++++++++++++++++++++++++++++++++++++++
-  2 files changed, 154 insertions(+), 0 deletions(-)
-  create mode 100644 fs/squashfs/xz_wrapper.c
+  fs/squashfs/Kconfig        |   16 ++++++++++++++++
+  fs/squashfs/Makefile       |    1 +
+  fs/squashfs/decompressor.c |   11 +++++++++++
+  fs/squashfs/squashfs.h     |    3 +++
+  4 files changed, 31 insertions(+), 0 deletions(-)
 
-diff --git a/fs/squashfs/squashfs_fs.h b/fs/squashfs/squashfs_fs.h
-index c5137fc..39533fe 100644
---- a/fs/squashfs/squashfs_fs.h
-+++ b/fs/squashfs/squashfs_fs.h
-@@ -238,6 +238,7 @@ struct meta_index {
-  #define ZLIB_COMPRESSION	1
-  #define LZMA_COMPRESSION	2
-  #define LZO_COMPRESSION		3
-+#define XZ_COMPRESSION		4
+diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
+index e5f63da..e96d99a 100644
+--- a/fs/squashfs/Kconfig
++++ b/fs/squashfs/Kconfig
+@@ -53,6 +53,22 @@ config SQUASHFS_LZO
 
-  struct squashfs_super_block {
-  	__le32			s_magic;
-diff --git a/fs/squashfs/xz_wrapper.c b/fs/squashfs/xz_wrapper.c
-new file mode 100644
-index 0000000..053fe35
---- /dev/null
-+++ b/fs/squashfs/xz_wrapper.c
-@@ -0,0 +1,153 @@
-+/*
-+ * Squashfs - a compressed read only filesystem for Linux
-+ *
-+ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
-+ * Phillip Lougher <phillip@lougher.demon.co.uk>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version 2,
-+ * or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-+ *
-+ * xz_wrapper.c
-+ */
+  	  If unsure, say N.
+
++config SQUASHFS_XZ
++	bool "Include support for XZ compressed file systems"
++	depends on SQUASHFS
++	default n
++	select XZ_DEC
++	help
++	  Saying Y here includes support for reading Squashfs file systems
++	  compressed with XZ compresssion.  XZ gives better compression than
++	  the default zlib compression, at the expense of greater CPU and
++	  memory overhead.
 +
++	  XZ is not the standard compression used in Squashfs and so most
++	  file systems will be readable without selecting this option.
 +
-+#include <linux/mutex.h>
-+#include <linux/buffer_head.h>
-+#include <linux/slab.h>
-+#include <linux/xz.h>
++	  If unsure, say N.
 +
-+#include "squashfs_fs.h"
-+#include "squashfs_fs_sb.h"
-+#include "squashfs_fs_i.h"
-+#include "squashfs.h"
-+#include "decompressor.h"
-+
-+struct squashfs_xz {
-+	struct xz_dec *state;
-+	struct xz_buf buf;
+  config SQUASHFS_EMBEDDED
+  	bool "Additional option for memory-constrained systems"
+  	depends on SQUASHFS
+diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
+index 7672bac..cecf2be 100644
+--- a/fs/squashfs/Makefile
++++ b/fs/squashfs/Makefile
+@@ -7,3 +7,4 @@ squashfs-y += block.o cache.o dir.o export.o file.o fragment.o id.o inode.o
+  squashfs-y += namei.o super.o symlink.o zlib_wrapper.o decompressor.o
+  squashfs-$(CONFIG_SQUASHFS_XATTR) += xattr.o xattr_id.o
+  squashfs-$(CONFIG_SQUASHFS_LZO) += lzo_wrapper.o
++squashfs-$(CONFIG_SQUASHFS_XZ) += xz_wrapper.o
+diff --git a/fs/squashfs/decompressor.c b/fs/squashfs/decompressor.c
+index 24af9ce..ac333b8 100644
+--- a/fs/squashfs/decompressor.c
++++ b/fs/squashfs/decompressor.c
+@@ -46,6 +46,12 @@ static const struct squashfs_decompressor squashfs_lzo_unsupported_comp_ops = {
+  };
+  #endif
+
++#ifndef CONFIG_SQUASHFS_XZ
++static const struct squashfs_decompressor squashfs_xz_unsupported_comp_ops = {
++	NULL, NULL, NULL, XZ_COMPRESSION, "xz", 0
 +};
++#endif
 +
-+static void *squashfs_xz_init(struct squashfs_sb_info *msblk)
-+{
-+        int block_size = max_t(int, msblk->block_size, SQUASHFS_METADATA_SIZE);
+  static const struct squashfs_decompressor squashfs_unknown_comp_ops = {
+  	NULL, NULL, NULL, 0, "unknown", 0
+  };
+@@ -58,6 +64,11 @@ static const struct squashfs_decompressor *decompressor[] = {
+  #else
+  	&squashfs_lzo_unsupported_comp_ops,
+  #endif
++#ifdef CONFIG_SQUASHFS_XZ
++	&squashfs_xz_comp_ops,
++#else
++	&squashfs_xz_unsupported_comp_ops,
++#endif
+  	&squashfs_unknown_comp_ops
+  };
+
+diff --git a/fs/squashfs/squashfs.h b/fs/squashfs/squashfs.h
+index 5d45569..1096e2e 100644
+--- a/fs/squashfs/squashfs.h
++++ b/fs/squashfs/squashfs.h
+@@ -107,3 +107,6 @@ extern const struct squashfs_decompressor squashfs_zlib_comp_ops;
+
+  /* lzo_wrapper.c */
+  extern const struct squashfs_decompressor squashfs_lzo_comp_ops;
 +
-+        struct squashfs_xz *stream = kmalloc(sizeof(*stream), GFP_KERNEL);
-+        if (stream == NULL)
-+                goto failed;
-+	stream->state = xz_dec_init(XZ_PREALLOC, block_size);
-+	if (stream->state == NULL)
-+		goto failed;
-+
-+	return stream;
-+
-+failed:
-+	ERROR("Failed to allocate xz workspace\n");
-+	kfree(stream);
-+	return NULL;
-+}
-+
-+
-+static void squashfs_xz_free(void *strm)
-+{
-+	struct squashfs_xz *stream = strm;
-+
-+	if (stream) {
-+		xz_dec_end(stream->state);
-+		kfree(stream);
-+	}
-+}
-+
-+
-+static int squashfs_xz_uncompress(struct squashfs_sb_info *msblk, void **buffer,
-+	struct buffer_head **bh, int b, int offset, int length, int srclength,
-+	int pages)
-+{
-+	enum xz_ret xz_err;
-+	int avail, total = 0, k = 0, page = 0;
-+	struct squashfs_xz *stream = msblk->stream;
-+
-+	mutex_lock(&msblk->read_data_mutex);
-+
-+	xz_dec_reset(stream->state);
-+	stream->buf.in_pos = 0;
-+	stream->buf.in_size = 0;
-+	stream->buf.out_pos = 0;
-+	stream->buf.out_size = PAGE_CACHE_SIZE;
-+	stream->buf.out = buffer[page++];
-+
-+	do {
-+		if (stream->buf.in_pos == stream->buf.in_size && k < b) {
-+			avail = min(length, msblk->devblksize - offset);
-+			length -= avail;
-+			wait_on_buffer(bh[k]);
-+			if (!buffer_uptodate(bh[k]))
-+				goto release_mutex;
-+
-+			if (avail == 0) {
-+				offset = 0;
-+				put_bh(bh[k++]);
-+				continue;
-+			}
-+
-+			stream->buf.in = bh[k]->b_data + offset;
-+			stream->buf.in_size = avail;
-+			stream->buf.in_pos = 0;
-+			offset = 0;
-+		}
-+
-+		if (stream->buf.out_pos == stream->buf.out_size
-+							&& page < pages) {
-+			stream->buf.out = buffer[page++];
-+			stream->buf.out_pos = 0;
-+			total += PAGE_CACHE_SIZE;
-+		}
-+
-+		xz_err = xz_dec_run(stream->state, &stream->buf);
-+
-+		if (stream->buf.in_pos == stream->buf.in_size && k < b)
-+			put_bh(bh[k++]);
-+	} while (xz_err == XZ_OK);
-+
-+	if (xz_err != XZ_STREAM_END) {
-+		ERROR("xz_dec_run error, data probably corrupt\n");
-+		goto release_mutex;
-+	}
-+
-+	if (k < b) {
-+		ERROR("xz_uncompress error, input remaining\n");
-+		goto release_mutex;
-+	}
-+
-+	total += stream->buf.out_pos;
-+	mutex_unlock(&msblk->read_data_mutex);
-+	return total;
-+
-+release_mutex:
-+	mutex_unlock(&msblk->read_data_mutex);
-+
-+	for (; k < b; k++)
-+		put_bh(bh[k]);
-+
-+	return -EIO;
-+}
-+
-+const struct squashfs_decompressor squashfs_xz_comp_ops = {
-+	.init = squashfs_xz_init,
-+	.free = squashfs_xz_free,
-+	.decompress = squashfs_xz_uncompress,
-+	.id = XZ_COMPRESSION,
-+	.name = "xz",
-+	.supported = 1
-+};
-+
++/* xz_wrapper.c */
++extern const struct squashfs_decompressor squashfs_xz_comp_ops;
 -- 
 1.6.3.3
