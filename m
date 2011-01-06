@@ -1,241 +1,151 @@
 From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH 09/17] pramfs: dir operations
-Date: Thu, 06 Jan 2011 13:03:04 +0100
-Message-ID: <4D25AF78.9020109@gmail.com>
+Subject: [PATCH 10/17] pramfs: xip operations
+Date: Thu, 06 Jan 2011 13:03:20 +0100
+Message-ID: <4D25AF88.4020204@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:subject:content-type
+         :user-agent:mime-version:to:cc:subject:content-type
          :content-transfer-encoding;
-        bh=S+zeYkoBXwkjVGNcSJ4tdaTUtKIlS2gZ4b//9vLD1cg=;
-        b=H/Yt08zpKgoNQnBuHpPeIr22FZk4BRuXEFfBTP4f1rIQ4Psamoh3o/bYmks7bMFjZX
-         r9s6kricXrqvgdWcuE3URebhKMLGRvnkarnfxTKSPLZ1EWpVd/XvfoFAwa6Q/ZyuW9u7
-         QOXxToDrhmnEuWBPnABccDvEpbCmglj/ZcELA=
+        bh=064PWwmQcAnTBPqOfeOQf4FCXr1lzM+dwJVJmqv02vY=;
+        b=oJ+PrsCtZwhIhja9Q7pFv0gUGYG7v4tdiy0QbfwNZ2yAMWTWHHbQpmj+ETwLEhMlC3
+         sJ29uVYsmDqf2+hZAVD+kZvnGWOT91XVV+QZW+h7NuOBjwaZ21rmr1G8R3uOBhGn2zLp
+         JE5P2sKDs5Bh9DD5ERqGjM/O0Vrnx46YIYfXc=
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
 From: Marco Stornelli <marco.stornelli@gmail.com>
 
-File operations for directories.
+XIP operations.
 
 Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
 ---
-diff --git a/fs/pramfs/dir.c b/fs/pramfs/dir.c
+diff --git a/fs/pramfs/xip.c b/fs/pramfs/xip.c
 new file mode 100644
-index 0000000..cf0bcba
+index 0000000..9ad8caf
 --- /dev/null
-+++ b/fs/pramfs/dir.c
-@@ -0,0 +1,208 @@
++++ b/fs/pramfs/xip.c
+@@ -0,0 +1,83 @@
 +/*
 + * BRIEF DESCRIPTION
 + *
-+ * File operations for directories.
++ * XIP operations.
 + *
 + * Copyright 2009-2010 Marco Stornelli <marco.stornelli@gmail.com>
-+ * Copyright 2003 Sony Corporation
-+ * Copyright 2003 Matsushita Electric Industrial Co., Ltd.
-+ * 2003-2004 (c) MontaVista Software, Inc. , Steve Longerbeam
 + * This file is licensed under the terms of the GNU General Public
 + * License version 2. This program is licensed "as is" without any
 + * warranty of any kind, whether express or implied.
 + */
 +
++#include <linux/mm.h>
 +#include <linux/fs.h>
-+#include <linux/pagemap.h>
++#include <linux/genhd.h>
++#include <linux/buffer_head.h>
 +#include "pram.h"
++#include "xip.h"
 +
++static int pram_find_and_alloc_blocks(struct inode *inode, sector_t iblock,
++				     sector_t *data_block, int create)
++{
++	int err = -EIO;
++	u64 block;
++
++	mutex_lock(&PRAM_I(inode)->truncate_mutex);
++
++	block = pram_find_data_block(inode, iblock);
++
++	if (!block) {
++		if (!create) {
++			err = -ENODATA;
++			goto err;
++		}
++
++		err = pram_alloc_blocks(inode, iblock, 1);
++		if (err)
++			goto err;
++
++		block = pram_find_data_block(inode, iblock);
++		if (!block) {
++			err = -ENODATA;
++			goto err;
++		}
++	}
++
++	*data_block = block;
++	err = 0;
++
++ err:
++	mutex_unlock(&PRAM_I(inode)->truncate_mutex);
++	return err;
++}
++
++static inline int __pram_get_block(struct inode *inode, pgoff_t pgoff, int create,
++		   sector_t *result)
++{
++	int rc = 0;
++
++	rc = pram_find_and_alloc_blocks(inode, (sector_t)pgoff, result, create);
++
++	if (rc == -ENODATA)
++		BUG_ON(create);
++
++	return rc;
++}
++
++int pram_get_xip_mem(struct address_space *mapping, pgoff_t pgoff, int create,
++				void **kmem, unsigned long *pfn)
++{
++	int rc;
++	sector_t block;
++
++	/* first, retrieve the block */
++	rc = __pram_get_block(mapping->host, pgoff, create, &block);
++	if (rc)
++		goto exit;
++
++	*kmem = pram_get_block(mapping->host->i_sb, block);
++	*pfn = page_to_pfn(virt_to_page((unsigned long)*kmem));
++
++exit:
++	return rc;
++}
+diff --git a/fs/pramfs/xip.h b/fs/pramfs/xip.h
+new file mode 100644
+index 0000000..797f1b0
+--- /dev/null
++++ b/fs/pramfs/xip.h
+@@ -0,0 +1,28 @@
 +/*
-+ *	Parent is locked.
++ * BRIEF DESCRIPTION
++ *
++ * XIP operations.
++ *
++ * Copyright 2009-2010 Marco Stornelli <marco.stornelli@gmail.com>
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
 + */
-+int pram_add_link(struct dentry *dentry, struct inode *inode)
++
++#ifdef CONFIG_PRAMFS_XIP
++int pram_get_xip_mem(struct address_space *, pgoff_t, int, void **,
++							      unsigned long *);
++static inline int pram_use_xip(struct super_block *sb)
 +{
-+	struct inode *dir = dentry->d_parent->d_inode;
-+	struct pram_inode *pidir, *pi, *pitail = NULL;
-+	u64 tail_ino, prev_ino;
-+
-+	const char *name = dentry->d_name.name;
-+
-+	int namelen = min_t(unsigned int, dentry->d_name.len, PRAM_NAME_LEN);
-+
-+	pidir = pram_get_inode(dir->i_sb, dir->i_ino);
-+	pi = pram_get_inode(dir->i_sb, inode->i_ino);
-+
-+	dir->i_mtime = dir->i_ctime = CURRENT_TIME;
-+
-+	tail_ino = be64_to_cpu(pidir->i_type.dir.tail);
-+	if (tail_ino != 0) {
-+		pitail = pram_get_inode(dir->i_sb, tail_ino);
-+		pram_memunlock_inode(dir->i_sb, pitail);
-+		pitail->i_d.d_next = cpu_to_be64(inode->i_ino);
-+		pram_memlock_inode(dir->i_sb, pitail);
-+
-+		prev_ino = tail_ino;
-+
-+		pram_memunlock_inode(dir->i_sb, pidir);
-+		pidir->i_type.dir.tail = cpu_to_be64(inode->i_ino);
-+		pidir->i_mtime = cpu_to_be32(dir->i_mtime.tv_sec);
-+		pidir->i_ctime = cpu_to_be32(dir->i_ctime.tv_sec);
-+		pram_memlock_inode(dir->i_sb, pidir);
-+	} else {
-+		/* the directory is empty */
-+		prev_ino = 0;
-+
-+		pram_memunlock_inode(dir->i_sb, pidir);
-+		pidir->i_type.dir.tail = cpu_to_be64(inode->i_ino);
-+		pidir->i_type.dir.head = cpu_to_be64(inode->i_ino);
-+		pidir->i_mtime = cpu_to_be32(dir->i_mtime.tv_sec);
-+		pidir->i_ctime = cpu_to_be32(dir->i_ctime.tv_sec);
-+		pram_memlock_inode(dir->i_sb, pidir);
-+	}
-+
-+
-+	pram_memunlock_inode(dir->i_sb, pi);
-+	pi->i_d.d_prev = cpu_to_be64(prev_ino);
-+	pi->i_d.d_parent = cpu_to_be64(dir->i_ino);
-+	memcpy(pi->i_d.d_name, name, namelen);
-+	pi->i_d.d_name[namelen] = '\0';
-+	pram_memlock_inode(dir->i_sb, pi);
-+	return 0;
++	struct pram_sb_info *sbi = (struct pram_sb_info *)sb->s_fs_info;
++	return sbi->s_mount_opt & PRAM_MOUNT_XIP;
 +}
++#define mapping_is_xip(map) unlikely(map->a_ops->get_xip_mem)
 +
-+int pram_remove_link(struct inode *inode)
-+{
-+	struct super_block *sb = inode->i_sb;
-+	struct pram_inode *prev = NULL;
-+	struct pram_inode *next = NULL;
-+	struct pram_inode *pidir, *pi;
++#else
 +
-+	pi = pram_get_inode(sb, inode->i_ino);
-+	pidir = pram_get_inode(sb, be64_to_cpu(pi->i_d.d_parent));
-+	if (!pidir)
-+		return -EACCES;
++#define mapping_is_xip(map)	0
++#define pram_use_xip(sb)	0
++#define pram_get_xip_mem	NULL
 +
-+	if (inode->i_ino == be64_to_cpu(pidir->i_type.dir.head)) {
-+		/* first inode in directory */
-+		next = pram_get_inode(sb, be64_to_cpu(pi->i_d.d_next));
-+
-+		if (next) {
-+			pram_memunlock_inode(sb, next);
-+			next->i_d.d_prev = 0;
-+			pram_memlock_inode(sb, next);
-+
-+			pram_memunlock_inode(sb, pidir);
-+			pidir->i_type.dir.head = pi->i_d.d_next;
-+		} else {
-+			pram_memunlock_inode(sb, pidir);
-+			pidir->i_type.dir.head = 0;
-+			pidir->i_type.dir.tail = 0;
-+		}
-+		pram_memlock_inode(sb, pidir);
-+	} else if (inode->i_ino == be64_to_cpu(pidir->i_type.dir.tail)) {
-+		/* last inode in directory */
-+		prev = pram_get_inode(sb, be64_to_cpu(pi->i_d.d_prev));
-+
-+		pram_memunlock_inode(sb, prev);
-+		prev->i_d.d_next = 0;
-+		pram_memlock_inode(sb, prev);
-+
-+		pram_memunlock_inode(sb, pidir);
-+		pidir->i_type.dir.tail = pi->i_d.d_prev;
-+		pram_memlock_inode(sb, pidir);
-+	} else {
-+		/* somewhere in the middle */
-+		prev = pram_get_inode(sb, be64_to_cpu(pi->i_d.d_prev));
-+		next = pram_get_inode(sb, be64_to_cpu(pi->i_d.d_next));
-+
-+		if (prev && next) {
-+			pram_memunlock_inode(sb, prev);
-+			prev->i_d.d_next = pi->i_d.d_next;
-+			pram_memlock_inode(sb, prev);
-+
-+			pram_memunlock_inode(sb, next);
-+			next->i_d.d_prev = pi->i_d.d_prev;
-+			pram_memlock_inode(sb, next);
-+		}
-+	}
-+
-+	pram_memunlock_inode(sb, pi);
-+	pi->i_d.d_next = 0;
-+	pi->i_d.d_prev = 0;
-+	pi->i_d.d_parent = 0;
-+	pram_memlock_inode(sb, pi);
-+
-+	return 0;
-+}
-+
-+#define DT2IF(dt) (((dt) << 12) & S_IFMT)
-+#define IF2DT(sif) (((sif) & S_IFMT) >> 12)
-+
-+static int pram_readdir(struct file *filp, void *dirent, filldir_t filldir)
-+{
-+	struct inode *inode = filp->f_dentry->d_inode;
-+	struct super_block *sb = inode->i_sb;
-+	struct pram_inode *pi;
-+	int namelen, ret = 0;
-+	char *name;
-+	ino_t ino;
-+
-+	pi = pram_get_inode(sb, inode->i_ino);
-+
-+	switch ((unsigned long)filp->f_pos) {
-+	case 0:
-+		ret = filldir(dirent, ".", 1, 0, inode->i_ino, DT_DIR);
-+		filp->f_pos++;
-+		return ret;
-+	case 1:
-+		ret = filldir(dirent, "..", 2, 1, be64_to_cpu(pi->i_d.d_parent), DT_DIR);
-+		ino = be64_to_cpu(pi->i_type.dir.head);
-+		filp->f_pos = ino ? ino : 2;
-+		return ret;
-+	case 2:
-+		ino = be64_to_cpu(pi->i_type.dir.head);
-+		if (ino) {
-+			filp->f_pos = ino;
-+			pi = pram_get_inode(sb, ino);
-+			break;
-+		} else {
-+			/* the directory is empty */
-+			filp->f_pos = 2;
-+			return 0;
-+		}
-+	case 3:
-+		return 0;
-+	default:
-+		ino = filp->f_pos;
-+		pi = pram_get_inode(sb, ino);
-+		break;
-+	}
-+
-+	while (pi && !be16_to_cpu(pi->i_links_count)) {
-+		ino = filp->f_pos = be64_to_cpu(pi->i_d.d_next);
-+		pi = pram_get_inode(sb, ino);
-+	}
-+
-+	if (pi) {
-+		name = pi->i_d.d_name;
-+		namelen = strlen(name);
-+
-+		ret = filldir(dirent, name, namelen,
-+			      filp->f_pos, ino,
-+			      IF2DT(be16_to_cpu(pi->i_mode)));
-+		filp->f_pos = pi->i_d.d_next ? be64_to_cpu(pi->i_d.d_next) : 3;
-+	} else
-+		filp->f_pos = 3;
-+
-+	return ret;
-+}
-+
-+struct file_operations pram_dir_operations = {
-+	.read		= generic_read_dir,
-+	.readdir	= pram_readdir,
-+	.fsync		= noop_fsync,
-+	.unlocked_ioctl	= pram_ioctl,
-+#ifdef CONFIG_COMPAT
-+	.compat_ioctl	= pram_compat_ioctl,
 +#endif
-+};
