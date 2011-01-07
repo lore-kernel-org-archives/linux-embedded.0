@@ -1,74 +1,44 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
+From: Tony Luck <tony.luck@intel.com>
 Subject: Re: [PATCH 01/17] pramfs: documentation
-Date: Fri, 07 Jan 2011 21:30:52 +0100
-Message-ID: <4D2777FC.6040509@gmail.com>
-References: <4D25AF02.60208@gmail.com> <AANLkTimGt5hi+TpFHWxktJEg3tcDQmmARdqFqzAt++OQ@mail.gmail.com>
+Date: Fri, 7 Jan 2011 13:59:27 -0800
+Message-ID: <AANLkTimtvYfHXG=rMLbFLzVaKbfB6nrj_ZE1AH4quRG2@mail.gmail.com>
+References: <4D25AF02.60208@gmail.com>
+	<AANLkTimGt5hi+TpFHWxktJEg3tcDQmmARdqFqzAt++OQ@mail.gmail.com>
+	<4D2777FC.6040509@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=sJqA18L3ELwFfn64fydrYSuUJ4wiuwHMbvPeO7cqluk=;
-        b=LDFaO5I63L2milLOkAkeR9e6pjAhdc1mEmOlUY4eF4XZb1wcrZWjGMgewa1SxZM2hR
-         AyWBPi3Ru22xgObSCcG/xzJvTpSNarq4AnOdGMFOAr8KBKPaJALQR/SwiIMJtHeVgocP
-         vM8NBscdiPWpQMeYIUgpSScq0URcfAVhS28KM=
-In-Reply-To: <AANLkTimGt5hi+TpFHWxktJEg3tcDQmmARdqFqzAt++OQ@mail.gmail.com>
+        h=domainkey-signature:mime-version:received:sender:received
+         :in-reply-to:references:date:x-google-sender-auth:message-id:subject
+         :from:to:cc:content-type;
+        bh=+gpCrddkNzseERSit0+cvo5L9pmbrulKL6AzEFcVzEM=;
+        b=ZPwsFMKjxFDCzhFhGo7F+JDHwt61FsC6WWKpjUjsTkYIOVau8Tf3Yq7Q/fseBNCceA
+         MwINMa5g8fc7NQvbMq/7aKY8EVZWsZp562mU9A2kfw5ViWzfs7rOgXm+jqgotBdkHUwB
+         fbbCqr9M0LdbqbrVQX9dzFPc8Qfhjc3yPPl+8=
+In-Reply-To: <4D2777FC.6040509@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tony Luck <tony.luck@intel.com>
+Content-Transfer-Encoding: 7bit
+To: Marco Stornelli <marco.stornelli@gmail.com>
 Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
-Il 07/01/2011 19:42, Tony Luck ha scritto:
-> On Thu, Jan 6, 2011 at 4:01 AM, Marco Stornelli
-> <marco.stornelli@gmail.com> wrote:
->> +accessed data that must survive system reboots and power cycles. An
->> +example usage might be system logs under /var/log, or a user address
->> +book in a cell phone or PDA.
-> 
-> Some usage model questions:
-> 
-> How do you handle errors?  I see that there are a few sanity checks in the
-> "mount" path ... but there would seem to be several opportunities for the
-> file system to get corrupted in other ways.  Since you don't have a block
-> device, a standard "fsck" program looks challenging (though I guess you
-> could mmap("/dev/mem") to peek & poke at the filesystem before trying
-> to mount it).
+On Fri, Jan 7, 2011 at 12:30 PM, Marco Stornelli
+<marco.stornelli@gmail.com> wrote:
+> constraint). About the errors: pramfs does not maintain file data in the
+> page caches for normal file I/O, so no writeback, the read/write
+> operation are done with direct io and they are always sync. The data are
+> write protected in hw when the arch provide this facility (x86 does).
+> Inode contains a checksum and when there are problems they are marked as
+> bad. Superblock contains checksum and there is a redundant superblock.
 
-Actually not (at least when strict devmem options is turned on) because
-the memory region is marked exclusive at the moment (only a design
-constraint). About the errors: pramfs does not maintain file data in the
-page caches for normal file I/O, so no writeback, the read/write
-operation are done with direct io and they are always sync. The data are
-write protected in hw when the arch provide this facility (x86 does).
-Inode contains a checksum and when there are problems they are marked as
-bad. Superblock contains checksum and there is a redundant superblock.
+But you can still get pramfs inconsistencies if the system crashes at an
+inopportune moment. E.g. when making files you write the new inode to
+pramfs, and then you insert the entry into the directory. A crash between
+these two operations leaves an allocated inode that doesn't appear in
+any directory.  Without a fsck option, it will be hard to see that you have
+this problem, and your only recovery option is to wipe *all* files by making
+a new filesystem.
 
-> Some sort of recovery path would seem useful for the "address
-> book" use model ... or do you just expect users to back their address book
-> up (to the cloud?) and have the phone just make a clean filesystem if any
-> errors are found?
-
-Yeah maybe the address book can be a case not perfectly suitable, but it
-was only an example. I thought about the fs as a "cache" in this use
-case. However the designer can use this area whatever he wants,
-recently I saw in a project this fs used as a system cache for decrypted
-files where the files were stored in flash encrypted, so I think it's
-flexible.
-
-> What about quotas?  You have a fixed amount of persistent space, and
-> presumably a number of apps that the user installs on their device that
-> may like to use pramfs to store data.  Do you need some kernel enforcement
-> to stop one rogue application from using up all the space? Or do you expect that
-> this would be handled in some library level interface that applications will
-> use to access pramfs?
-
-Sincerely in my embedded systems I've never used quotas even to save
-footprint (for the kernel support I mean). I don't think it's an hot
-feature in this case and other fs for embedded use as ubifs, jffs2 etc.
-don't support it.
-
-Marco
+-Tony
