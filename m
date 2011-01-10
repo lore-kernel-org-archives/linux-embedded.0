@@ -1,81 +1,58 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 01/17] pramfs: documentation
-Date: Mon, 10 Jan 2011 09:14:29 +0100
-Message-ID: <AANLkTi=DbZ8eU05Sq0jxpCTNKm7rW52FWVNbR16U3Zse@mail.gmail.com>
-References: <4D25AF02.60208@gmail.com>
-	<AANLkTimGt5hi+TpFHWxktJEg3tcDQmmARdqFqzAt++OQ@mail.gmail.com>
-	<4D2777FC.6040509@gmail.com>
-	<AANLkTimtvYfHXG=rMLbFLzVaKbfB6nrj_ZE1AH4quRG2@mail.gmail.com>
-	<4D281D65.1070102@gmail.com>
-	<20110110080839.GA16066@atrey.karlin.mff.cuni.cz>
+From: Rob Landley <rlandley@parallels.com>
+Subject: [PATCH] Move an assert under DEBUG_KERNEL. (attempt 2)
+Date: Mon, 10 Jan 2011 02:35:33 -0600
+Message-ID: <4D2AC4D5.5070503@parallels.com>
+References: <4D2579B2.7060704@parallels.com> <20110106154120.b69118c9.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:received:received:in-reply-to
-         :references:date:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=LHdPyMbpYKKn8PXITGTLLnMtLelHMMQKc8h/4HRNYRs=;
-        b=t4+/SCb6vj9TzTLQK7XgtGS6s4lPje+2PM4lop1ZZ2zC1AgoEArCfNGYwQT4jrcqok
-         iNAmoHCjpUrsVFRNiLxBHTB2W5AoYut2AvxDzkgglopxdcEtl2s7uYmIDZQszd/rh19x
-         +UE0NxowFCXewbD/n+z35pxOSof6payDbNq/M=
-In-Reply-To: <20110110080839.GA16066@atrey.karlin.mff.cuni.cz>
-Sender: linux-fsdevel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20110106154120.b69118c9.akpm@linux-foundation.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Tony Luck <tony.luck@intel.com>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: trivial@kernel.org, linux-net@vger.kernel.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-2011/1/10 Pavel Machek <pavel@ucw.cz>:
->> On 07/01/2011 22:59, Tony Luck wrote:
->> > On Fri, Jan 7, 2011 at 12:30 PM, Marco Stornelli
->> > <marco.stornelli@gmail.com> wrote:
->> >> constraint). About the errors: pramfs does not maintain file data=
- in the
->> >> page caches for normal file I/O, so no writeback, the read/write
->> >> operation are done with direct io and they are always sync. The d=
-ata are
->> >> write protected in hw when the arch provide this facility (x86 do=
-es).
->> >> Inode contains a checksum and when there are problems they are ma=
-rked as
->> >> bad. Superblock contains checksum and there is a redundant superb=
-lock.
->> >
->> > But you can still get pramfs inconsistencies if the system crashes=
- at an
->> > inopportune moment. E.g. when making files you write the new inode=
- to
->> > pramfs, and then you insert the entry into the directory. A crash =
-between
->> > these two operations leaves an allocated inode that doesn't appear=
- in
->> > any directory. =A0Without a fsck option, it will be hard to see th=
-at you have
->> > this problem, and your only recovery option is to wipe *all* files=
- by making
->> > a new filesystem.
->>
->> Is it a problem if you lost some logs? However do you expect that fs=
-ck
->> in this case will drop the inode?
->
-> Ask it the other way around.
->
-> What is persistent filesystem good for when it is only persistent
-> sometimes?
->
-> You'd be better running ext2 over special block device, it is quite s=
-imple.
->
+On 01/06/2011 05:41 PM, Andrew Morton wrote:
+> Probably a worthwhile thing to do, IMO.  If there's some net-specific
+> CONFIG_DEBUG_ setting then that wold be a better thing to use.
+> 
+> However the patch was a) wordwrapped, b) space-stuffed and c) not cc'ed
+> to the networking list.  So its prospects are dim.
 
-Ok I can work on it. However can an userspace tool prevent the insert
-of fs in linux next?
+Ok, either I've beaten thunderbird into submission, or I'll be submitting a patch to Documentation/email-clients.txt.  (Whether or not I need to find a different smtp server to send this through remains an open question.)
 
-Marco
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+(Confirming: I looked for a more specific DEBUG symbol, but couldn't find one.  I can add one, but this seems a bit small to have its own symbol, and DEBUG_KERNEL is already used in a few *.c files.)
+
+From: Rob Landley <rlandley@parallels.com>
+
+Move an assert under DEBUG_KERNEL.  (Minor cleanup to save a few bytes.)
+
+Signed-off-by: Rob Landley <rlandley@parallels.com>
+---
+
+ include/linux/rtnetlink.h |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/include/linux/rtnetlink.h b/include/linux/rtnetlink.h
+index bbad657..28c4025 100644
+--- a/include/linux/rtnetlink.h
++++ b/include/linux/rtnetlink.h
+@@ -782,6 +782,7 @@ extern struct netdev_queue *dev_ingress_queue_create(struct net_device *dev);
+ extern void rtnetlink_init(void);
+ extern void __rtnl_unlock(void);
+ 
++#ifdef CONFIG_DEBUG_KERNEL
+ #define ASSERT_RTNL() do { \
+ 	if (unlikely(!rtnl_is_locked())) { \
+ 		printk(KERN_ERR "RTNL: assertion failed at %s (%d)\n", \
+@@ -789,6 +790,9 @@ extern void __rtnl_unlock(void);
+ 		dump_stack(); \
+ 	} \
+ } while(0)
++#else
++#define ASSERT_RTNL()
++#endif
+ 
+ static inline u32 rtm_get_table(struct rtattr **rta, u8 table)
+ {
