@@ -1,56 +1,51 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 01/17] pramfs: documentation
-Date: Mon, 10 Jan 2011 19:17:33 +0100
-Message-ID: <4D2B4D3D.2030903@gmail.com>
-References: <4D25AF02.60208@gmail.com> <AANLkTimGt5hi+TpFHWxktJEg3tcDQmmARdqFqzAt++OQ@mail.gmail.com> <4D2777FC.6040509@gmail.com> <AANLkTimtvYfHXG=rMLbFLzVaKbfB6nrj_ZE1AH4quRG2@mail.gmail.com> <4D281D65.1070102@gmail.com> <20110110080839.GA16066@atrey.karlin.mff.cuni.cz> <987664A83D2D224EAE907B061CE93D5301940801B2@orsmsx505.amr.corp.intel.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH 00/17] pramfs: persistent and protected RAM filesystem
+Date: Tue, 11 Jan 2011 14:33:25 +0100
+Message-ID: <20110111133325.GC10705@atrey.karlin.mff.cuni.cz>
+References: <4D25AEEE.1050401@gmail.com> <1294322613.2016.333.camel@laptop> <4D25ED22.3070900@gmail.com> <4D25F4CF.1030009@gmail.com> <987664A83D2D224EAE907B061CE93D530193FC6AA2@orsmsx505.amr.corp.intel.com> <4D260A96.4020400@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=3wbENuzi19KKtnBoKnI7OMtN8lwRHDnKRbmLiuyQlPM=;
-        b=qbfkTdML+7lcISNsnqFd0Cr16aYp5SmEvcHFhzgOzKWzC/ygD1Yc4hXfVkiYG4CugG
-         8Qn/ilmq97rz1JxkcyZHvvn5xkuyP5bhniW6PGcmO29WnvrVtqeo5nBxjEP+UDUYWwVi
-         40vnBwdtqPswD7t+XFHfrFF7QD9CDtEm4rItQ=
-In-Reply-To: <987664A83D2D224EAE907B061CE93D5301940801B2@orsmsx505.amr.corp.intel.com>
+Content-Disposition: inline
+In-Reply-To: <4D260A96.4020400@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: "Luck, Tony" <tony.luck@intel.com>
-Cc: Pavel Machek <pavel@ucw.cz>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+Content-Transfer-Encoding: 7bit
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: "Luck, Tony" <tony.luck@intel.com>, Peter Zijlstra <peterz@infradead.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
-Il 10/01/2011 18:35, Luck, Tony ha scritto:
->> You'd be better running ext2 over special block device,
->> it is quite simple.
+> Il 06/01/2011 19:22, Luck, Tony ha scritto:
+> >> Errata corrige: maybe I used the wrong term, I meant "volatile" instead
+> >> of "temporary" information, i.e. I'd like to save this info to re-read
+> >> it later but I don't want to store it in flash, a simple log, run-time
+> >> information for debug like a flight-recorder or whatever you want.
+> > 
+> > I'm puzzled by the use of "a generic piece of memory" to store "persistent"
+> > things (Perhaps this is made clear in the 17 parts of the patch? I haven't
+> > read them yet).  On x86 f/w typically clears all of memory on reset ... so
+> > you only get persistence if you use kexec to get from the old kernel to
+> > the new one.
+> > 
+> > -Tony
+> > 
 > 
-> Marco,
-> 
-> You might want to spend some more time answering this question
-> (it is a particularly good one).  What are the reasons to use
-> pramfs, rather than a ext2 over a mem<->block driver.  You covered
-> some in your part 0 patch (like ext2 wastes time getting optimal
-> block placement for rotating media). But it might be a good idea
-> to go back over them here.  From my (lightweight) reading of your
-> code, it looks like the biggest benefit is avoiding duplicating
-> the data in the pramfs memory region and the VM page cache ...
-> which is a big deal for your target audience of hand held devices
-> where memory is a somewhat scarce resource. But you probably
-> have other goodness in there too.
-> 
-> -Tony
-> 
+> First of all, you can find a lot of information on the web site where
+> there is an overview and a page with implementation details, benchmark
+> and so on. With "a generic piece of memory" I mean a generic memory
+> device directly addressable. Usually this generic device is an NVRAM, so
+> we have a persistent store. If you haven't got this hw you can use other
+> devices or the classic RAM, in this case you have a fs persistent only
+> over reboot. The use of this fs is mainly for embedded systems, fw can
+> be configured to not clear *all* the memory. Pramfs is indeed supported
+> by U-Boot, you can see CONFIG_PRAM in the Das U-Boot manual. x86 in this
+> case can be a "strange" world for this fs, but however if the user wants
+> it can be used without problems because there aren't neither strict arch
+> or hw dependency.
 
-I can add that you can "place" the fs wherever you want, ext2 not
-without to build something "special" as Pavel said. Sincerely I don't
-know what other add. I think documentation, web site information and
-benchmark say all. You have got a fs that it's simple, it doesn't
-consume a lot of resources (you can do a fine tuning via N and bpi
-options for the metadata space for example), better in performance in
-this "environment", with the memory protection feature when
-available....other? I could write a piece of code that it turn on your
-coffee machine at morning, what do you think? :)
+Actually you probably want to state u-boot compatibility in the commit
+message. AFAICT, that is quite good argument _for_ inclusion.
 
-Marco
+
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
