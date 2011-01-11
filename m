@@ -1,51 +1,76 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH 00/17] pramfs: persistent and protected RAM filesystem
-Date: Tue, 11 Jan 2011 14:33:25 +0100
-Message-ID: <20110111133325.GC10705@atrey.karlin.mff.cuni.cz>
-References: <4D25AEEE.1050401@gmail.com> <1294322613.2016.333.camel@laptop> <4D25ED22.3070900@gmail.com> <4D25F4CF.1030009@gmail.com> <987664A83D2D224EAE907B061CE93D530193FC6AA2@orsmsx505.amr.corp.intel.com> <4D260A96.4020400@gmail.com>
+From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Subject: Re: [PATCH 01/17] pramfs: documentation
+Date: Tue, 11 Jan 2011 16:42:57 +0100
+Message-ID: <AANLkTi=fF_hskZ7kDEby0Uga0eaU_stM9qs890mUpxWd@mail.gmail.com>
+References: <4D25AF02.60208@gmail.com> <AANLkTimGt5hi+TpFHWxktJEg3tcDQmmARdqFqzAt++OQ@mail.gmail.com>
+ <4D2777FC.6040509@gmail.com> <AANLkTimtvYfHXG=rMLbFLzVaKbfB6nrj_ZE1AH4quRG2@mail.gmail.com>
+ <4D281D65.1070102@gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4D260A96.4020400@gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:received:mime-version:received:in-reply-to
+         :references:from:date:message-id:subject:to:cc:content-type
+         :content-transfer-encoding;
+        bh=am95BXZM67YV/9gkmKoR0F7OE8emOHBy9f31MS3iiJc=;
+        b=lx+QY5ZqJR6ptSNmMyaRM4Jpe5ylCo/lViB1p6iNueKQQu3/IwIgWx6gsDap8WxMTR
+         NW47QVvtA2SR4oc9ZODR8hQXCSwL2OyKUnPozV4giN1tqy1mzsr2G8mzuJHbYbbwg58x
+         htlg/lC7wp7A9ENF0CG7kLTe2pgv3ewVCJgPE=
+In-Reply-To: <4D281D65.1070102@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
 To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: "Luck, Tony" <tony.luck@intel.com>, Peter Zijlstra <peterz@infradead.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+Cc: Tony Luck <tony.luck@intel.com>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
 
-> Il 06/01/2011 19:22, Luck, Tony ha scritto:
-> >> Errata corrige: maybe I used the wrong term, I meant "volatile" instead
-> >> of "temporary" information, i.e. I'd like to save this info to re-read
-> >> it later but I don't want to store it in flash, a simple log, run-time
-> >> information for debug like a flight-recorder or whatever you want.
-> > 
-> > I'm puzzled by the use of "a generic piece of memory" to store "persistent"
-> > things (Perhaps this is made clear in the 17 parts of the patch? I haven't
-> > read them yet).  On x86 f/w typically clears all of memory on reset ... so
-> > you only get persistence if you use kexec to get from the old kernel to
-> > the new one.
-> > 
-> > -Tony
-> > 
-> 
-> First of all, you can find a lot of information on the web site where
-> there is an overview and a page with implementation details, benchmark
-> and so on. With "a generic piece of memory" I mean a generic memory
-> device directly addressable. Usually this generic device is an NVRAM, so
-> we have a persistent store. If you haven't got this hw you can use other
-> devices or the classic RAM, in this case you have a fs persistent only
-> over reboot. The use of this fs is mainly for embedded systems, fw can
-> be configured to not clear *all* the memory. Pramfs is indeed supported
-> by U-Boot, you can see CONFIG_PRAM in the Das U-Boot manual. x86 in this
-> case can be a "strange" world for this fs, but however if the user wants
-> it can be used without problems because there aren't neither strict arch
-> or hw dependency.
+2011/1/8 Marco Stornelli <marco.stornelli@gmail.com>:
+> On 07/01/2011 22:59, Tony Luck wrote:
+>> On Fri, Jan 7, 2011 at 12:30 PM, Marco Stornelli
+>> <marco.stornelli@gmail.com> wrote:
+>>> constraint). About the errors: pramfs does not maintain file data i=
+n the
+>>> page caches for normal file I/O, so no writeback, the read/write
+>>> operation are done with direct io and they are always sync. The dat=
+a are
+>>> write protected in hw when the arch provide this facility (x86 does=
+).
+>>> Inode contains a checksum and when there are problems they are mark=
+ed as
+>>> bad. Superblock contains checksum and there is a redundant superblo=
+ck.
+>>
+>> But you can still get pramfs inconsistencies if the system crashes a=
+t an
+>> inopportune moment. E.g. when making files you write the new inode t=
+o
+>> pramfs, and then you insert the entry into the directory. A crash be=
+tween
+>> these two operations leaves an allocated inode that doesn't appear i=
+n
+>> any directory. =A0Without a fsck option, it will be hard to see that=
+ you have
+>> this problem, and your only recovery option is to wipe *all* files b=
+y making
+>> a new filesystem.
+>
+> Is it a problem if you lost some logs? However do you expect that fsc=
+k
+> in this case will drop the inode?
 
-Actually you probably want to state u-boot compatibility in the commit
-message. AFAICT, that is quite good argument _for_ inclusion.
 
+IF there could be some inconsistencies in the file-system AND as long
+as there is no way to fixup these inconsistencies than purging their
+allocated space THEN I think the best approach would be clearing these
+inconsistencies at the mount time and printing a WARNING message for
+debug/stats purpose. Otherwise a user-space tool would be better
+because it could be used in interactive mode, also.
 
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Obviously the best would be to not have any inconsistencies at all.
+However, in a real world, the thread-off between a journaling fs and a
+simpler one in terms of code and memory usage could make acceptable
+adopting a simpler fs than a journaled one. Kernel documentation
+should inform clearly the user about pro/cons of adopting a simpler fs
+especially about data loss conditions.
+
+-RAF
