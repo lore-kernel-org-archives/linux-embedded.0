@@ -1,81 +1,60 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: Re: [PATCH 00/17] pramfs: persistent and protected RAM filesystem
-Date: Tue, 11 Jan 2011 20:01:38 +0100
-Message-ID: <4D2CA912.5070308@gmail.com>
-References: <4D25AEEE.1050401@gmail.com>
+From: Dirk Behme <dirk.behme@googlemail.com>
+Subject: Boot time: Kernel start parallelization issue?
+Date: Sat, 15 Jan 2011 09:40:38 +0100
+Message-ID: <4D315D86.40401@googlemail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:received:received:message-id:date:from
-         :user-agent:mime-version:to:cc:subject:references:in-reply-to
-         :content-type:content-transfer-encoding;
-        bh=Rx1H/99MwTkWtuYrJ2Gh5b6oRxpOp+AH+yWQxfLga80=;
-        b=IPL+zIO0ov6hh6AcSV9LiwE+TSkU9nuPaCuFdug6SjPwmzkW0+zKuYqeN1yNSySwUJ
-         pb8iQBWu9z0EWS05iw8LqY/Aw7gJV9nK7Kh7J7L2OFboB9iMrr2yaZg4AxWxnsxM79C+
-         xvWGE8s5GJRZilq7kf4cx1RHwED2n525Tgo+A=
-In-Reply-To: <4D25AEEE.1050401@gmail.com>
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
+         :cc:subject:content-type:content-transfer-encoding;
+        bh=icHROXbvByJlDcQq/iM4IgillHjoX+/7nyI+ngmQhKc=;
+        b=E+VJgDRpmlkOWD8s67mis9K4k0icvYCZ9Fg5R1dKzzpniTKO+tCBZwpTl2SH2ZJIwj
+         vM+LFgz/ATvPj7Km6uTvcqOSTpgTeSwZUF/oQCXdUNTldQbvbcXK708Jg1Oa82Xfagtw
+         0qiMiiV6bndMO8unp/N0DcXGpC1aGZtZtRIY8=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: sfr@canb.auug.org.au, Andrew Morton <akpm@linux-foundation.org>, dwmw2@infradead.org, mpm@selenic.com
-Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded@vger.kernel.org
+Cc: Arjan van de Ven <arjan@linux.intel.com>, Greg KH <gregkh@suse.de>, Martin Mueller <martin@pfump.org>
 
-Hi all,
 
-On 06/01/2011 13:00, Marco Stornelli wrote:
-> Hi all,
-> 
-> after several reviews is time to submit the code for mainline. Thanks to
-> CELF to believe and support actively the project and thanks to Tim Bird.
-> 
-> Here the stats:
-> 
->  Documentation/filesystems/pramfs.txt |  179 ++++++
->  Documentation/filesystems/xip.txt    |    2 +
->  arch/Kconfig                         |    3 +
->  arch/x86/Kconfig                     |    1 +
->  fs/Kconfig                           |    8 +-
->  fs/Makefile                          |    1 +
->  fs/pramfs/Kconfig                    |   72 +++
->  fs/pramfs/Makefile                   |   14 +
->  fs/pramfs/acl.c                      |  433 +++++++++++++
->  fs/pramfs/acl.h                      |   86 +++
->  fs/pramfs/balloc.c                   |  147 +++++
->  fs/pramfs/desctree.c                 |  181 ++++++
->  fs/pramfs/desctree.h                 |   44 ++
->  fs/pramfs/dir.c                      |  208 +++++++
->  fs/pramfs/file.c                     |  326 ++++++++++
->  fs/pramfs/inode.c                    |  848 ++++++++++++++++++++++++++
->  fs/pramfs/ioctl.c                    |  121 ++++
->  fs/pramfs/namei.c                    |  371 ++++++++++++
->  fs/pramfs/pram.h                     |  269 +++++++++
->  fs/pramfs/pramfs_test.c              |   47 ++
->  fs/pramfs/super.c                    |  940 +++++++++++++++++++++++++++++
->  fs/pramfs/symlink.c                  |   76 +++
->  fs/pramfs/wprotect.c                 |   41 ++
->  fs/pramfs/wprotect.h                 |  151 +++++
->  fs/pramfs/xattr.c                    | 1104 ++++++++++++++++++++++++++++++++++
->  fs/pramfs/xattr.h                    |  131 ++++
->  fs/pramfs/xattr_security.c           |   78 +++
->  fs/pramfs/xattr_trusted.c            |   65 ++
->  fs/pramfs/xattr_user.c               |   68 +++
->  fs/pramfs/xip.c                      |   83 +++
->  fs/pramfs/xip.h                      |   28 +
->  include/linux/magic.h                |    1 +
->  include/linux/pram_fs.h              |  130 ++++
->  include/linux/pram_fs_sb.h           |   45 ++
->  34 files changed, 6299 insertions(+), 3 deletions(-)
-> 
+There are some reports [1] [2] looking at the boot time of embedded 
+(ARM?) systems using initcall debug [3]. Both reports seem to show 
+that they have issues with the start up sequence of the kernel being 
+completely single-threaded. In [2] Greg mentions that on a x86 box 
+multi-threads are happening and that there he doesn't see this issue. 
+On the other hand, both reports mention Arjan's async initcall patches 
+[4] to help against the issue. I.e. introducing some parallelization 
+(on ARM) does help, too.
 
-Can I have a feedback to insert this fs in the linux-next? From this
-latest review I received some comments about how to fix some fs problems
-on-the-fly without to clean all and restart. My next step will be to
-write a simple fsck.pram to allow to fix these situations. However I
-think the kernel code it's mature to be inserted in a pre-mainline
-container. If I'll receive a positive feedback to my question, I'll
-repost the patches to the last version (I updated the fs to be RCU aware
-according to the work of Nick).
+With this, I wonder
 
-Marco
+- if anybody faces similar issues with single-threaded only kernel 
+start on embedded (ARM?) systems? Or if this is known? Or if there are 
+fixes for this?
+
+- if we somehow should try to 're-activate' Arjan's async initcall 
+patches?
+
+Any ideas?
+
+Many thanks and best regards
+
+Dirk
+
+P.S.: I couldn't find a mail address of Alex Gonzalez, the author of 
+[1], to put him into CC. If anybody knows him, please feel free to add 
+him to this thread. Thanks!
+
+[1] 
+http://www.lindusembedded.com/blog/2010/06/02/measuring-the-boot-time-of-an-embedded-linux-device/
+
+[2] http://thread.gmane.org/gmane.linux.usb.general/41181 (mainly the 
+last mail of this thread: 
+http://article.gmane.org/gmane.linux.usb.general/41619)
+
+[3] http://www.elinux.org/Initcall_Debug
+
+[4] http://lwn.net/Articles/299591/
