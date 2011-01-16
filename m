@@ -1,94 +1,73 @@
-From: Dirk Behme <dirk.behme@googlemail.com>
-Subject: Re: Boot time: Kernel start parallelization issue?
-Date: Sun, 16 Jan 2011 08:33:54 +0100
-Message-ID: <4D329F62.1010505@googlemail.com>
-References: <4D315D86.40401@googlemail.com> <4D31C034.8040105@linux.intel.com> <4D31C8C5.6010306@googlemail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 2/2] Squashfs: Add XZ compression configuration option
+Date: Sun, 16 Jan 2011 19:56:26 +0100
+Message-ID: <AANLkTinfFk-mkzgt_qw2+Y5GxkuPVC9S63reuG=GQ84=@mail.gmail.com>
+References: <4D007315.1090704@lougher.demon.co.uk>
+	<AANLkTimUYrb8EMomgmsW+v7ttbkUH0P57SBD5M4_AGmU@mail.gmail.com>
+	<4D01C770.1080301@lougher.demon.co.uk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
-         :cc:subject:references:in-reply-to:content-type
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:sender:in-reply-to:references:date
+         :x-google-sender-auth:message-id:subject:from:to:cc:content-type
          :content-transfer-encoding;
-        bh=wFBJPXOw/IyWs0VfkW4g7B6d0aQ2VB4lq8Dc0QHAvS4=;
-        b=UomlGbqUQpp4CpIdMnMWrVlpKLgLFolAplx0urHcEoC8UwS6/wY5xa4dzWT0iRHa2L
-         46ggEVHvLT6E45YSIMVr/I8unDi3mYOnAMkoAhF/JNc7smiw9dczt/OqTTGF8b0CWq2h
-         AdLUuV20AKjzfois1q/HyivXn90/WAn7RovBU=
-In-Reply-To: <4D31C8C5.6010306@googlemail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+        bh=e2csbrxQBAB1KAhS7nhJFjxLfo86fEyo9fmsNbtLdCs=;
+        b=Mokngkjj/SRmIKljC3aCMUFofRWBU7itAl2RUWCQ7U/9+wIe/2ckF3j4aJ57NX9ZDB
+         c5rX8k9E3ouqVX62VCBEZGDaMTQ3Zm/Fun8u22HgBmu3J/gNGhlEZjzimpyWuJ1hZ3Ee
+         Um3KYPNATRPTxWeuasnOXo6alPGoMbJo26Q7Y=
+In-Reply-To: <4D01C770.1080301@lougher.demon.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Arjan van de Ven <arjan@linux.intel.com>
-Cc: linux-embedded@vger.kernel.org, Greg KH <gregkh@suse.de>, Martin Mueller <martin@pfump.org>
+Content-Type: text/plain; charset="utf-8"
+To: Phillip Lougher <phillip@lougher.demon.co.uk>
+Cc: Linux Kernel Development <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, Linux Embedded Maillist <linux-embedded@vger.kernel.org>, Lasse Collin <lasse.collin@tukaani.org>, Andy Whitcroft <apw@canonical.com>
 
-On 15.01.2011 17:18, Dirk Behme wrote:
-> On 15.01.2011 16:41, Arjan van de Ven wrote:
->> On 1/15/2011 12:40 AM, Dirk Behme wrote:
+On Fri, Dec 10, 2010 at 07:23, Phillip Lougher
+<phillip@lougher.demon.co.uk> wrote:
+> Geert Uytterhoeven wrote:
+>> On Thu, Dec 9, 2010 at 07:11, Phillip Lougher
+>> <phillip@lougher.demon.co.uk> wrote:
 >>>
->>> There are some reports [1] [2] looking at the boot time of embedded
->>> (ARM?) systems using initcall debug [3]. Both reports seem to show
->>> that they have issues with the start up sequence of the kernel being
->>> completely single-threaded. In [2] Greg mentions that on a x86 box
->>> multi-threads are happening and that there he doesn't see this
->>> issue. On the other hand, both reports mention Arjan's async
->>> initcall patches [4] to help against the issue. I.e. introducing
->>> some parallelization (on ARM) does help, too.
+>>> --- a/fs/squashfs/Kconfig
+>>> +++ b/fs/squashfs/Kconfig
+>>> @@ -53,6 +53,22 @@ config SQUASHFS_LZO
 >>>
->>> With this, I wonder
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 If unsure, say N.
 >>>
->>> - if anybody faces similar issues with single-threaded only kernel
->>> start on embedded (ARM?) systems? Or if this is known? Or if there
->>> are fixes for this?
->>>
->>> - if we somehow should try to 're-activate' Arjan's async initcall
->>> patches?
+>>> +config SQUASHFS_XZ
+>>> + =C2=A0 =C2=A0 =C2=A0 bool "Include support for XZ compressed file=
+ systems"
+>>> + =C2=A0 =C2=A0 =C2=A0 depends on SQUASHFS
+>>> + =C2=A0 =C2=A0 =C2=A0 default n
 >>
->> those patches are obsoleted by the merged async_schedule() calls.
+>> "default n" is the default, no reason to specify it.
+>>
 >
-> Any link (patch name, git link) to be able to check for
-> async_schedule() calls?
-
-Do you talk about
-
-http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=22a9d645677feefd402befd02edd59b122289ef1
-http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=4ace92fc112c6069b4fcb95a31d3142d4a43ff2a
-http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=793180570ff2530d133343ceea85648de5f01b02
-http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=f29d3b23238e1955a8094e038c72546e99308e61
-
-http://lwn.net/Articles/314808/
-
-merged with 2.6.29?
-
-With a recent .37 kernel the usage of async_schedule() seems to be 
-implemented for
-
-./drivers/acpi/battery.c
-./drivers/s390/block/dasd.c
-./drivers/base/power/main.c
-./drivers/ata/libata-core.c
-./drivers/scsi/sd.c
-./drivers/md/raid5.c
-
-With this, on an embedded system using none of this, the completely 
-single-threaded start up reported in [2] seems to be reasonable, then?
-
-This would mean that to improve the issues reported in [2], 
-async_schedule() has to be implemented for the sub systems used, 
-there, too? I.e. the USB init?
-
->> what kernel are you seeing issues on?
+> Yes, thanks for pointing that out.
 >
-> [1] talks about 2.6.28, [2] talks about 2.6.34.
-
-Thanks
-
-Dirk
-
-> [1]
-> http://www.lindusembedded.com/blog/2010/06/02/measuring-the-boot-time-of-an-embedded-linux-device/
+> It seems there's a lot of "default n"s in the mainline kernel
 >
+> % find . -name "Kconfig"| xargs grep "default n" | wc
+> =C2=A0 =C2=A0485 =C2=A0 =C2=A01535 =C2=A0 18753
 >
-> [2] http://thread.gmane.org/gmane.linux.usb.general/41181 (mainly the
-> last mail of this thread:
-> http://article.gmane.org/gmane.linux.usb.general/41619)
+> including two in arch/m68k ;-)
+
+Thanks, fixed.
+
+Gr{oetje,eeting}s,
+
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-=
+m68k.org
+
+In personal conversations with technical people, I call myself a hacker=
+=2E But
+when I'm talking to journalists I just say "programmer" or something li=
+ke that.
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0=C2=A0 =C2=A0=C2=A0 -- Linus Torvalds
