@@ -1,80 +1,48 @@
-From: Grant Likely <grant.likely@secretlab.ca>
+From: Tony Ibbs <tibs@kynesim.co.uk>
 Subject: Re: [RFC][PATCH] KBUS messaging subsystem
-Date: Tue, 1 Feb 2011 20:40:08 -0700
-Message-ID: <20110202034008.GC29148@angua.secretlab.ca>
-References: <20110128180158.6f670a51@spoon>
+Date: Thu, 3 Feb 2011 16:59:28 +0000
+Message-ID: <20110203165928.796651d5@spoon>
+References: <20110128175040.72cf332a@spoon>
+	<20110128191837.GA6781@merkur.ravnborg.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20110128180158.6f670a51@spoon>
+In-Reply-To: <20110128191837.GA6781@merkur.ravnborg.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tony Ibbs <tibs@kynesim.co.uk>
-Cc: linux-embedded@vger.kernel.org, tibs@tonyibbs.co.uk, rrw@kynesim.co.uk
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Linux-embedded <linux-embedded@vger.kernel.org>, Richard Watts <rrw@kynesim.co.uk>, Tibs at home <tibs@tibsnjoan.co.uk>
 
-On Fri, Jan 28, 2011 at 06:01:58PM +0000, Tony Ibbs wrote:
-> We talked briefly at ELCE 2010 in Cambridge, after the "keeping
-> kernel maintainers happy" talk, and you offered that I could
-> CC you when I got round to submitting our kernel module.
+On Fri, 28 Jan 2011 20:20:42 +0100
+Sam Ravnborg <sam@ravnborg.org> wrote:
 
-Hi Tony,
+> [Edited cc: list as my smtp server refused to send the original reply]
 
-Yes, I remember talking to you.  I'll take a look through and see if I
-see any glaring problems.  However, my major critique still stands.
-There are already a large number of communication channels available
-to Linux, with DBUS gatting the most attention at the moment.  What
-niche is KBUS filling that DBUS and others misses?  Secondarily, does
-KBUS implement a new API instead of extending an existing mechanism to
-meet your needs?  I suspect you'll get a lot more traction if KBUS can
-make DBUS work better/faster/more efficiently.
+Apologies - I had copied down Grant Likely's email address wrong at ELCE.
 
-> I've just emailed the embedded linux mailing list with an initial
-> question about it, and attempted to CC you as
-> grant.likely@secretlab.com, which appears to have bounced. I'm
-> hoping that I just wrote the address down wrong, and the .ca
-> version is correct.
+> > Should I just submit the patch to this list?
+> 
+> You will get more feedback on lkml...
 
-Yes, the correct domain is secretlab.ca
+Indeed. I hoped to start small.
 
-> 
-> Apologies for any confusion,
-> Tibs
-> 
-> Begin forwarded message:
-> 
-> Date: Fri, 28 Jan 2011 17:50:40 +0000
-> From: Tony Ibbs <tibs@kynesim.co.uk>
-> To: Linux-embedded <linux-embedded@vger.kernel.org>
-> Cc: Grant Likely <grant.likely@secretlab.com>, Tibs at home <tibs@tonyibbs.co.uk>, Richard Watts <rrw@kynesim.co.uk>
-> Subject: [RFC][PATCH] KBUS messaging subsystem
-> 
-> 
-[...]
-> We've got a working repository with Linux 2.6.37 patched for KBUS,
-> available via:
-> 
->   git pull git://github.com/crazyscot/linux-2.6-kbus.git kbus-2.6.37
-> 
-> Our tentative patch is at
-> http://kbus.googlecode.com/files/0001-KBUS-messaging-subsystem.patch
-> 
-> The diffstat for the patch is:
-> 
->  Documentation/Kbus.txt     | 1189 ++++++++++
->  include/linux/kbus_defns.h |  666 ++++++
->  init/Kconfig               |    3 +
->  ipc/Kconfig                |   99 +
->  ipc/Makefile               |    1 +
->  ipc/kbus.c                 | 5120 ++++++++++++++++++++++++++++++++++++++++++++
->  ipc/kbus_internal.h        |  773 +++++++
->  7 files changed, 7851 insertions(+), 0 deletions(-)
-> 
-> Should I just submit the patch to this list?
+> - use __u32 (and friends) in exported headers - not uint32_t.
 
-Yes.  If you want review, then posting a URLs doesn't help.  :-)  Send
-it as an email so that I can just hit 'reply' and start typing.
-Post and then I'll comment.
+OK. I'd missed that. Presumably I should also be using u32 and friends
+inside the kernel module itself, instead of uint32_t...
 
-g.
+> - do not invent our own logging system. Use one of the standard
+> methods.
+
+I vaguely remember having a reason for that. Doubtless it was a bad
+one. I shall attend to it.
+
+> If you post for review try to divide it up a little.
+> Maybe kbus.c in one patch, Makefile + Kconfig in last patch.
+> It is a large file to review already.
+
+That's useful guidance. I shall amend the code as suggested above and
+resubmit as smaller, inline patches.
+
+Tibs
