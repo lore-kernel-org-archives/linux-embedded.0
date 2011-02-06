@@ -1,59 +1,158 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
-Subject: [PATCH] Kconfig: XIP doesn't depend on block
-Date: Sun, 06 Feb 2011 16:15:00 +0100
-Message-ID: <4D4EBAF4.9070403@gmail.com>
+From: Andrew Murray <amurray@mpcdata.com>
+Subject: Re: [PATCH] printk-formats.txt documentation update
+Date: Sun, 6 Feb 2011 16:14:50 +0000
+Message-ID: <AANLkTimsTJ4smnJUfkvYEkJixKQoZNfq6RHU4moLhT0o@mail.gmail.com>
+References: <AANLkTikj+FU8OF_-KFr2hmTSWqTHMK5JnrnTVyn-XtxQ@mail.gmail.com>
+	<AANLkTimcFvq-cSpain--STuVVg3dUJeTCDrykQ=24egg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
-         :cc:subject:content-type:content-transfer-encoding;
-        bh=Ar52BP6sCPw52EC68o3WwIlnBHbWKn+zuaBA46EI6BQ=;
-        b=DfLCsgv4dx0m/fv78dPEWy7Cf6NyKbI1EoPQMhDr7b+kF4QKCKk7kAG790PLPas6k4
-         xaI+JIOLLSAvdpc7WGpiFu1V4P/lAMk3eoWEndoeGDZMpIicG3SLL2TKrzWfFiaTYX8z
-         8O2TS4RVd0di174kfhO47Hgj2fKc58EiEdTCY=
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <AANLkTimcFvq-cSpain--STuVVg3dUJeTCDrykQ=24egg@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Linux Kernel <linux-kernel@vger.kernel.org>
-Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, rdunlap@xenotime.net
+Content-Transfer-Encoding: 7bit
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: linux-embedded@vger.kernel.org, linux kernel <linux-kernel@vger.kernel.org>, trivial@kernel.org, rdunlap@xenotime.net
 
-From: Marco Stornelli <marco.stornelli@gmail.com>
+On 6 February 2011 10:16, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> In the mean time, we also got %pV and %pK. Can you please add them as well? Thx!
 
-XIP doesn't depend on block symbol, then we can reorder the Kconfig.
-For ext2 doesn't change the Kconfig behavior but if other fs will use
-FS_XIP it won't need to include block support if not needed.
+Ok how about this revised patch?
 
-Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+From: Andrew Murray <amurray@mpc-data.co.uk>
+
+This patch updates the incomplete documentation concerning the printk
+extended format specifiers.
+
+Signed-off-by: Andrew Murray <amurray@mpc-data.co.uk>
 ---
+diff --git a/Documentation/printk-formats.txt b/Documentation/printk-formats.txt
+index 1b5a5dd..cad0dda 100644
+--- a/Documentation/printk-formats.txt
++++ b/Documentation/printk-formats.txt
+@@ -1,4 +1,4 @@
+-If variable is of Type,		use printk format specifier:
++f variable is of Type,		use printk format specifier:
+ ---------------------------------------------------------
+ 		int			%d or %x
+ 		unsigned int		%u or %x
+@@ -9,7 +9,111 @@ If variable is of Type,		use printk format specifier:
+ 		size_t			%zu or %zx
+ 		ssize_t			%zd or %zx
 
---- Kconfig.orig	2011-01-19 00:14:02.000000000 +0100
-+++ Kconfig	2011-02-06 16:04:51.000000000 +0100
-@@ -9,13 +9,6 @@ if BLOCK
- source "fs/ext2/Kconfig"
- source "fs/ext3/Kconfig"
- source "fs/ext4/Kconfig"
--
--config FS_XIP
--# execute in place
--	bool
--	depends on EXT2_FS_XIP
--	default y
--
- source "fs/jbd/Kconfig"
- source "fs/jbd2/Kconfig"
- 
-@@ -38,6 +31,12 @@ source "fs/nilfs2/Kconfig"
- 
- endif # BLOCK
- 
-+config FS_XIP
-+# execute in place
-+	bool
-+	depends on EXT2_FS_XIP
-+	default y
+-Raw pointer value SHOULD be printed with %p.
++Raw pointer value SHOULD be printed with %p. The kernel supports
++the following extended format specifiers for pointer types:
 +
- # Posix ACL utility routines
- #
- # Note: Posix ACLs can be implemented without these helpers.  Never use
++Symbols/Function Pointers:
++
++	%pF	versatile_init+0x0/0x110
++	%pf	versatile_init
++	%pS	versatile_init+0x0/0x110
++	%ps	versatile_init
++
++	For printing symbols and function pointers. The 'S' and 's' specifiers
++	result in the symbol name with ('S') or without ('s') offsets. Where
++	this is used on a kernel without KALLSYMS - the symbol address is
++	printed instead.
++
++	On ia64, ppc64 and parisc64 architectures function pointers are
++	actually function descriptors which must first be resolved. The 'F' and
++	'f' specifiers perform this resolution and then provide the same
++	functionality as the 'S' and 's' specifiers.
++
++Kernel Pointers:
++
++	%pK	0x0
++
++	For printing kernel pointers which should be hidden from unprivileged
++	users. The behaviour of %pK depends on the kptr_resrict sysctl - see
++	Documentation/sysctl/kernel.txt for more details.
++
++Struct Resources:
++
++	%pr	[mem 0x60000000-0x6fffffff flags 0x2200]
++	%pR	[mem 0x60000000-0x6fffffff pref]
++
++	For printing struct resources. The 'R' and 'r' specifiers result in a
++	printed resource with ('R') or without ('r') a decoded flags member.
++
++MAC/FDDI addresses:
++
++	%pM	00:01:02:03:04:05
++	%pMF	00-01-02-03-04-05
++	%pm	000102030405
++
++	For printing 6-byte MAC/FDDI addresses in hex notation. The 'M' and 'm'
++	specifiers result in a printed address with ('M') or without ('m') byte
++	seperators. The default byte seperator is the colon (':').
++
++	Where FDDI addresses are concerned the 'F' specifier can be used after
++	the 'M' specifier to use dash ('-') seperators instead of the default
++	seperator.
++
++IPv4 addresses:
++
++	%pI4	1.2.3.4
++	%pi4	001.002.003.004
++	%p[Ii][hnbl]
++	
++	For printing IPv4 dot-seperated decminal addresses. The 'I4' and 'i4'
++	specifiers result in a printed address with ('i4') or without ('I4')
++	leading zeros.
++
++	The additional 'h', 'n', 'b', and 'l' specifiers are used to specify
++	host, network, big or little endian order addresses respectively. Where
++	no specifier is provided the default network/big endian order is used.
++
++IPv6 addresses:
++
++	%pI6	0001:0002:0003:0004:0005:0006:0007:0008
++	%pi6	00010002000300040005000600070008
++	%pI6c	1:2:3:4:5:6:7:8
++
++	For printing IPv6 network-order 16 bit hex addresses. The 'I6' and 'i6'
++	specifiers result in a printed address with ('I6') or without ('i6')
++	colon-seperaters. Leading zeros are always used.
++
++	The additional 'c' specifier can be used with the 'I' specifier to
++	print a compressed IPv6 address as described by
++	http://tools.ietf.org/html/draft-ietf-6man-text-addr-representation-00.
++
++UUID/GUID addresses:
++
++	%pU	00010203-0506-0708-090a-0b0c0d0e0fff
++	%pU[bBlL]
++
++	For printing 16 byte UUID/GUIDs addresses. The additional 'l', 'L',
++	'b' and 'B' specifiers are used to specifiy a little endian order in
++	lower ('l') or upper case ('L') hex characters - and big endian order
++	in lower ('b') or upper case ('B') hex characters.
++
++	Where no additional specifiers are used the default little endian
++	order with lower case hex characters will be printed.
++
++struct va_format:
++
++	%pV	
++
++	For printing struct va_format structures. These contain a format string
++	and va_list as follows:
++
++	struct va_format {
++		const char *fmt;
++		va_lost *va;
++	};
++
++	Do not use this feature without some mechanism to verify the
++	correctness of the format string and va_list arguments.
+
+ u64 SHOULD be printed with %llu/%llx, (unsigned long long):
+
+@@ -32,4 +136,5 @@ Reminder: sizeof() result is of type size_t.
+ Thank you for your cooperation and attention.
+
+
+-By Randy Dunlap <rdunlap@xenotime.net>
++By Randy Dunlap <rdunlap@xenotime.net> and
++Andrew Murray <amurray@mpc-data.co.uk>
