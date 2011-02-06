@@ -1,89 +1,67 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [RFC][PATCH] KBUS messaging subsystem
-Date: Thu, 3 Feb 2011 10:32:45 -0700
-Message-ID: <AANLkTin+uw=y8kver3M-9OFOS-z=RvSHvFf_EBVOB71u@mail.gmail.com>
-References: <20110128180158.6f670a51@spoon> <20110202034008.GC29148@angua.secretlab.ca>
- <20110203170457.0a1640cf@spoon>
+From: Andrew Murray <amurray@mpcdata.com>
+Subject: [PATCH] printk-formats.txt documentation update
+Date: Sun, 6 Feb 2011 00:15:58 +0000
+Message-ID: <AANLkTikj+FU8OF_-KFr2hmTSWqTHMK5JnrnTVyn-XtxQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20110203170457.0a1640cf@spoon>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Tony Ibbs <tibs@kynesim.co.uk>
-Cc: linux-embedded@vger.kernel.org, tibs@tonyibbs.co.uk, rrw@kynesim.co.uk
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
+Cc: linux kernel <linux-kernel@vger.kernel.org>, trivial@kernel.org
 
-On Thu, Feb 3, 2011 at 10:04 AM, Tony Ibbs <tibs@kynesim.co.uk> wrote:
-> Apologies again for getting Grant's email address wrong on my initial
-> email.
->
-> On Tue, 1 Feb 2011 20:40:08 -0700
-> Grant Likely <grant.likely@secretlab.ca> wrote:
->
->> There are already a large number of communication channels available
->> to Linux, with DBUS gatting the most attention at the moment. =A0Wha=
-t
->> niche is KBUS filling that DBUS and others misses? =A0Secondarily, d=
-oes
->> KBUS implement a new API instead of extending an existing mechanism =
-to
->> meet your needs? =A0I suspect you'll get a lot more traction if KBUS=
- can
->> make DBUS work better/faster/more efficiently.
->
-> Hmm. I'm not sure what make up that large number, but I'll try to
-> address your specific concerns.
->
-> I've got four real reasons for why KBUS and not something else:
->
-> 1. Simple to use and understand. You should be able to get started
-> using KBUS without needing to feel you've had to learn anything much.
+From: Andrew Murray <amurray@mpc-data.co.uk>
 
-It can be argued that this is an interface issue; but that's a
-tangential point to my main point below....
+This patch updates the incomplete documentation concerning the printk
+extended format specifiers.
 
-[...]
-> As a side issue, DBUS also mixes together message and content. KBUS
-> deliberately does not address the description of message content. We =
-do
-> not believe there is a one-size-fits-all solution to this, not even f=
-or
-> request/reply used as RPC. Whilst not named in the big 4 above, I
-> regard this as a serious problem with DBUS for our domain.
->
-> Elsewhere, 0mq (zeromq) looks very attractive, not least because it
-> appears to be very well documented (although I think a lot of that is
-> fairly recent). I really want to find a project where I need to use i=
-t.
-> However, it is written in C++, so fails (4). Also, I think it is too
-> complete a solution - it is meant to be a general networking solution=
-,
-> and I think that makes it wrong for this application - it is over
-> powerful. Also, I assume it cannot provide (3).
->
-> I'm not sure what other mechanisms we should consider. The kernel
-> itself doesn't provide anything that addresses our problem space,
-> without a lot of support work.
->
-> As to API. The basic API is just the file API (open/read/write/
-> ioctl/close), and KBUS is perfectly usable at that level.
+Signed-off-by: Andrew Murray <amurray@mpc-data.co.uk>
+---
+diff --git a/Documentation/printk-formats.txt b/Documentation/printk-formats.txt
+index 1b5a5dd..df14336 100644
+--- a/Documentation/printk-formats.txt
++++ b/Documentation/printk-formats.txt
+@@ -9,7 +9,42 @@ If variable is of Type,		use printk format specifier:
+ 		size_t			%zu or %zx
+ 		ssize_t			%zd or %zx
 
-The big issue that comes into play when implementing a new protocol in
-Linux is that once it is implemented, we need to support it until the
-end of time.  That means it needs to be well thought out and there is
-a lot of resistance to implementing something new without first seeing
-that it is a measurable benefit that is worth supporting to the end of
-time.  In your case, you'll need to show (or attract) a wider range of
-users who can say, "yes, this is better than the alternatives".  I
-suggest looking at working with dbus for that exact reason.  If dbus
-can be made faster/better/more reliable by using a kbus backend, then
-you've got a big userbase saying that it is a valuable addition.  It
-also gives you a broad use-case that will stretch your assumptions and
-improve the implementation before it gets set in stone when merged.
+-Raw pointer value SHOULD be printed with %p.
++Raw pointer value SHOULD be printed with %p. The kernel supports
++the following extended format specifiers for pointer types:
++
++	General:
++
++	%pF	function pointer with offset, e.g. module_start
++	%pf	function pointer without offset, e.g. module_start+0x0/0x62 [hello]
++	%pS	text symbol with offset	
++	%ps	text symbol without offset
++	%pR	struct resource with decoded flags, e.g. [mem 0x0-0x1f 64 bit pref]
++	%pr	struct resource with raw flags, e.g. [mem 0x0-0x1f flags 0x201]
++
++	MAC/FDDI addresses:
++	
++	%pM	colon-seperated 6-byte MAC address in hex notation, e.g. 00:01:02:03:04:05
++	%pm	non-colon-seperated 6-byte MAC address is hex notation, e.g. 000102030405
++	%pMF	6-byte dash-separated FDDI hex notation
++
++	IPv4 addresses:
++
++	%pI4	IPv4 dot-seperated decimal without leading 0's, e.g. 1.2.3.4
++	%pi4	IPv4 dot-seperated decimal with leading 0's, 001.002.003.004
++	%p[Ii]4[hl] IPv4 dot-seperated decimal with/without leading 0's for
++		host (h), little (l) or network/big (default) endian order
++
++	IPv6 addresses:
++	%pI6	IPv6 colon-seperated network-order 16 bit hex with leading 0's,
++		e.g. 0001:0203:...:0708
++	%pi6	IPv6 non-colon-seperated network-order 16 bit hex with leading 0's,
++		e.g. 000102...0f
++	%pI6c	IPv6 address as described by
++		http://tools.ietf.org/html/draft-ietf-6man-text-addr-representation-00,
++		e.g. 1::708
++
++	%pU[bBlL] 16 byte UUID/GUID in big or little endian using lower or upper case
++
 
-If kbus turns out to only be applicable to your corner of the universe
-then it becomes a lot harder to justify it as a generic Linux
-communication implementation.
-
-g.
+ u64 SHOULD be printed with %llu/%llx, (unsigned long long):
