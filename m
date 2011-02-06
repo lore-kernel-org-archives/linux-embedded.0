@@ -1,30 +1,26 @@
-From: Tim Bird <tim.bird@am.sony.com>
+From: Joe Perches <joe@perches.com>
 Subject: Re: [PATCH] printk-formats.txt documentation update
-Date: Sat, 5 Feb 2011 16:27:19 -0800
-Message-ID: <4D4DEAE7.1070306@am.sony.com>
+Date: Sat, 05 Feb 2011 16:37:06 -0800
+Message-ID: <1296952626.4133.77.camel@Joe-Laptop>
 References: <AANLkTikj+FU8OF_-KFr2hmTSWqTHMK5JnrnTVyn-XtxQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 In-Reply-To: <AANLkTikj+FU8OF_-KFr2hmTSWqTHMK5JnrnTVyn-XtxQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Andrew Murray <amurray@mpcdata.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, "trivial@kernel.org" <trivial@kernel.org>
+Cc: linux-embedded@vger.kernel.org, linux kernel <linux-kernel@vger.kernel.org>, Jiri Kosina <trivial@kernel.org>
 
-On 02/05/2011 04:15 PM, Andrew Murray wrote:
+On Sun, 2011-02-06 at 00:15 +0000, Andrew Murray wrote:
 > From: Andrew Murray <amurray@mpc-data.co.uk>
-> 
 > This patch updates the incomplete documentation concerning the printk
 > extended format specifiers.
-> 
 > Signed-off-by: Andrew Murray <amurray@mpc-data.co.uk>
 > ---
 > diff --git a/Documentation/printk-formats.txt b/Documentation/printk-formats.txt
-> index 1b5a5dd..df14336 100644
-> --- a/Documentation/printk-formats.txt
-> +++ b/Documentation/printk-formats.txt
+[]
 > @@ -9,7 +9,42 @@ If variable is of Type,		use printk format specifier:
 >  		size_t			%zu or %zx
 >  		ssize_t			%zd or %zx
@@ -32,11 +28,18 @@ On 02/05/2011 04:15 PM, Andrew Murray wrote:
 > -Raw pointer value SHOULD be printed with %p.
 > +Raw pointer value SHOULD be printed with %p. The kernel supports
 > +the following extended format specifiers for pointer types:
+
+I think it'd be better if each extension were individually described
+with an example output.
+
 > +
 > +	General:
 > +
 > +	%pF	function pointer with offset, e.g. module_start
 > +	%pf	function pointer without offset, e.g. module_start+0x0/0x62 [hello]
+
+with/without inversion?
+
 > +	%pS	text symbol with offset	
 > +	%ps	text symbol without offset
 > +	%pR	struct resource with decoded flags, e.g. [mem 0x0-0x1f 64 bit pref]
@@ -45,6 +48,9 @@ On 02/05/2011 04:15 PM, Andrew Murray wrote:
 > +	MAC/FDDI addresses:
 > +	
 > +	%pM	colon-seperated 6-byte MAC address in hex notation, e.g. 00:01:02:03:04:05
+
+spelling: separated
+
 > +	%pm	non-colon-seperated 6-byte MAC address is hex notation, e.g. 000102030405
 > +	%pMF	6-byte dash-separated FDDI hex notation
 > +
@@ -65,22 +71,11 @@ On 02/05/2011 04:15 PM, Andrew Murray wrote:
 > +		e.g. 1::708
 > +
 > +	%pU[bBlL] 16 byte UUID/GUID in big or little endian using lower or upper case
-> +
-> 
->  u64 SHOULD be printed with %llu/%llx, (unsigned long long):
 
-I like this, as it has information that is not documented elsewhere.
+Maybe a simple 2 line table without the e.g.:
 
-Some feedback on the patch:
-
-Some of these lines are longer than 80 chars.  Can you please truncate
-things to fit in an 80-column terminal window?
-
-Thanks,
- -- Tim
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Linux Forum
-Senior Staff Engineer, Sony Network Entertainment
-=============================
+	%p<extension1>	sample output1
+			description1
+	%p<extension2>	sample output2
+			description2
+	
