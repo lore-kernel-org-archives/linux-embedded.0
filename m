@@ -1,63 +1,108 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: [PATCH] PM: Hide CONFIG_PM from users
-Date: Mon,  7 Feb 2011 12:22:15 +0000
-Message-ID: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] PM: Hide CONFIG_PM from users
+Date: Mon, 7 Feb 2011 13:40:28 +0100
+Message-ID: <AANLkTimxpRHW2TPwSnufpoeOHoEtkz1iaR3-VsC1qM4j@mail.gmail.com>
+References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:sender:in-reply-to:references:date
+         :x-google-sender-auth:message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=J9Js51tBRRGJsQq7CzPT95Xs5OZp3+NDppYRadXkWqE=;
+        b=WT+L7CrD582Dbc1mnZD9U9zvapBnokSwOX+X7Z4E2Xz/YwWoquMW//sI3UbdrqroYJ
+         /nT1X+g1kfcfx+4YVqk5jic4IbjQwN1HpBUZoAfL70s4fT88RPmbXFjzDKAs692PiAri
+         ALoV8bdFld4PBH/CFzXrMrJsDVPb/vWhCdrOc=
+In-Reply-To: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>
-Cc: linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
+Content-Type: text/plain; charset="utf-8"
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, linux-arch@vger.kernel.org
 
-It is very rare to find a current system which is both sufficiently
-resource constrained to want to compile out power management support
-and sufficiently power insensitive to be able to tolerate doing so.
-Since having the configuration option requires non-zero effort to
-maintain, with ifdefery in most drivers, but it is used with vanishing
-rarity it is simpler to just remove the option.
+On Mon, Feb 7, 2011 at 13:22, Mark Brown
+<broonie@opensource.wolfsonmicro.com> wrote:
+> It is very rare to find a current system which is both sufficiently
+> resource constrained to want to compile out power management support
+> and sufficiently power insensitive to be able to tolerate doing so.
 
-Begin doing so by hiding it from users - this should attract complaints
-from any active users. The option is left disabled for the IA64 Ski
-simulator which is a partial simulator for IA64 systems mostly missing
-device support. This is a very limited use case which is unlikely to
-ever want to enable most drivers.
+Hmmm...
 
-Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
----
- kernel/power/Kconfig |   21 ++-------------------
- 1 files changed, 2 insertions(+), 19 deletions(-)
+> --- a/kernel/power/Kconfig
+> +++ b/kernel/power/Kconfig
+> @@ -1,23 +1,6 @@
+> =C2=A0config PM
+> - =C2=A0 =C2=A0 =C2=A0 bool "Power Management support"
+> - =C2=A0 =C2=A0 =C2=A0 depends on !IA64_HP_SIM
+> - =C2=A0 =C2=A0 =C2=A0 ---help---
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 "Power Management" means that parts of =
+your computer are shut
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 off or put into a power conserving "sle=
+ep" mode if they are not
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 being used. =C2=A0There are two competi=
+ng standards for doing this: APM
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 and ACPI. =C2=A0If you want to use eith=
+er one, say Y here and then also
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 to the requisite support below.
 
-diff --git a/kernel/power/Kconfig b/kernel/power/Kconfig
-index 2657299..99e3c52 100644
---- a/kernel/power/Kconfig
-+++ b/kernel/power/Kconfig
-@@ -1,23 +1,6 @@
- config PM
--	bool "Power Management support"
--	depends on !IA64_HP_SIM
--	---help---
--	  "Power Management" means that parts of your computer are shut
--	  off or put into a power conserving "sleep" mode if they are not
--	  being used.  There are two competing standards for doing this: APM
--	  and ACPI.  If you want to use either one, say Y here and then also
--	  to the requisite support below.
--
--	  Power Management is most important for battery powered laptop
--	  computers; if you have a laptop, check out the Linux Laptop home
--	  page on the WWW at <http://www.linux-on-laptops.com/> or
--	  Tuxmobil - Linux on Mobile Computers at <http://www.tuxmobil.org/>
--	  and the Battery Powered Linux mini-HOWTO, available from
--	  <http://www.tldp.org/docs.html#howto>.
--
--	  Note that, even if you say N here, Linux on the x86 architecture
--	  will issue the hlt instruction if nothing is to be done, thereby
--	  sending the processor to sleep and saving power.
-+	bool
-+	default y if !IA64_HP_SIM
- 
- config PM_DEBUG
- 	bool "Power Management Debug Support"
--- 
-1.7.2.3
+Good to see the PC-centric comments are going away :-)
+
+> -
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 Power Management is most important for =
+battery powered laptop
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 computers; if you have a laptop, check =
+out the Linux Laptop home
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 page on the WWW at <http://www.linux-on=
+-laptops.com/> or
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 Tuxmobil - Linux on Mobile Computers at=
+ <http://www.tuxmobil.org/>
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 and the Battery Powered Linux mini-HOWT=
+O, available from
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 <http://www.tldp.org/docs.html#howto>.
+> -
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 Note that, even if you say N here, Linu=
+x on the x86 architecture
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 will issue the hlt instruction if nothi=
+ng is to be done, thereby
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 sending the processor to sleep and savi=
+ng power.
+> + =C2=A0 =C2=A0 =C2=A0 bool
+> + =C2=A0 =C2=A0 =C2=A0 default y if !IA64_HP_SIM
+
+The following architectures do not source "kernel/power/Kconfig":
+
+alpha
+cris
+h8300
+Kconfig
+m32r
+m68k
+m68knommu
+microblaze
+parisc
+score
+sparc
+tile
+um
+xtensa
+
+Which means that (for now) I don't have to care that CONFIG_PM becomes
+unclearable. Other people may care, though...
+
+Gr{oetje,eeting}s,
+
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-=
+m68k.org
+
+In personal conversations with technical people, I call myself a hacker=
+=2E But
+when I'm talking to journalists I just say "programmer" or something li=
+ke that.
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0=C2=A0 =C2=A0=C2=A0 -- Linus Torvalds
