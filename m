@@ -1,89 +1,69 @@
-From: Tony Ibbs <tibs@tonyibbs.co.uk>
-Subject: Re: [RFC][PATCH] KBUS messaging subsystem
-Date: Sun, 6 Feb 2011 21:07:38 +0000
-Message-ID: <02F6EA37-B85C-48EE-8444-F5FD9B9E2A31@tonyibbs.co.uk>
-References: <20110128180158.6f670a51@spoon> <20110202034008.GC29148@angua.secretlab.ca> <20110203170457.0a1640cf@spoon> <AANLkTin+uw=y8kver3M-9OFOS-z=RvSHvFf_EBVOB71u@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1082)
-Content-Transfer-Encoding: 7bit
+From: Marco Stornelli <marco.stornelli@gmail.com>
+Subject: Re: [PATCH] Kconfig: XIP doesn't depend on block
+Date: Mon, 7 Feb 2011 08:52:41 +0100
+Message-ID: <AANLkTi=T3TGYcxm2=C6QtYss09H9R+m0Zk9KDQepMqiL@mail.gmail.com>
+References: <4D4EBAF4.9070403@gmail.com>
+	<20110206084440.a6c2df3b.rdunlap@xenotime.net>
+Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTin+uw=y8kver3M-9OFOS-z=RvSHvFf_EBVOB71u@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:in-reply-to:references:date
+         :message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=CaMFObvC7uaDytQlMqZtg0CWRSSqhS1LQSAxp2IVa8o=;
+        b=D86EoYJsKW2okMNdZzZDkoBaG73DCSVuNhL6IcLFsSKaxuiYpZRLXUVkMczNnQauwE
+         jmZ946JiuySWatP5fOSFG5cIQX4gthpTOhGHNu7wbtGqnjP7J23BiISAL4hWaQo4H3UW
+         KZVC7dYt9UgYBmu62sD2lMTkH6ETpXnO1y6zY=
+In-Reply-To: <20110206084440.a6c2df3b.rdunlap@xenotime.net>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Tony Ibbs <tibs@kynesim.co.uk>, linux-embedded@vger.kernel.org, rrw@kynesim.co.uk
+Content-Type: text/plain; charset="iso-8859-1"
+To: Randy Dunlap <rdunlap@xenotime.net>
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
+2011/2/6 Randy Dunlap <rdunlap@xenotime.net>:
+> On Sun, 06 Feb 2011 16:15:00 +0100 Marco Stornelli wrote:
+>
+>> From: Marco Stornelli <marco.stornelli@gmail.com>
+>>
+>> XIP doesn't depend on block symbol, then we can reorder the Kconfig.
+>> For ext2 doesn't change the Kconfig behavior but if other fs will us=
+e
+>> FS_XIP it won't need to include block support if not needed.
+>
+> Hi Marco,
+>
+> Do you know of a filesystem where this matters?
+>
 
-On 3 Feb 2011, at 17:32, Grant Likely wrote:
+Yes, for example mine (pramfs) :)
 
-> The big issue that comes into play when implementing a new protocol in
-> Linux is that once it is implemented, we need to support it until the
-> end of time.
+>> Signed-off-by: Marco Stornelli <marco.stornelli@gmail.com>
+>> ---
+>>
+>> --- Kconfig.orig =A0 =A0 =A02011-01-19 00:14:02.000000000 +0100
+>> +++ Kconfig =A0 2011-02-06 16:04:51.000000000 +0100
+>
+> This filename should include path, like
+> --- fs/Kconfig.orig
+> +++ fs/Kconfig
+>
+>> @@ -9,13 +9,6 @@ if BLOCK
+>> =A0source "fs/ext2/Kconfig"
+>> =A0source "fs/ext3/Kconfig"
+>> =A0source "fs/ext4/Kconfig"
+>> -
+>
+> The 3 filesystems above are immediately under:
+>
+> if BLOCK
+>
+> so ext[234] depend on BLOCK. =A0Why would it matter about FS_XIP?
+>
 
-Indeed.
+I don't know but for example even POSIX ACL was under "if BLOCK",
+maybe there is only an historical refuse.
 
-> That means it needs to be well thought out and there is
-> a lot of resistance to implementing something new without first seeing
-> that it is a measurable benefit that is worth supporting to the end of
-> time.
-
-And I believe this is a good thing. If KBUS doesn't get in, hopefully it
-will be because it has been demonstrated why it should not.
-
-> In your case, you'll need to show (or attract) a wider range of
-> users who can say, "yes, this is better than the alternatives".
-
-This is one of the reasons I wanted to start by talking to the embedded
-linux mailing list, where we can get the attention of people working
-with small systems.
-
-> I suggest looking at working with dbus for that exact reason.  If dbus
-> can be made faster/better/more reliable by using a kbus backend, then
-> you've got a big userbase saying that it is a valuable addition.
-
-Well, that's presumably true, but does DBUS *need* to be those
-things (i.e., is it doing well enough already), and is that enough
-reason to put something into the kernel (previous attempts, e.g.,
-http://alban.apinc.org/blog/2010/09/15/d-bus-in-the-kernel-faster,
-seem to have foundered).
-
-> It also gives you a broad use-case that will stretch your assumptions
-
-That *is* a good motivation, and is one of the reasons for the CELF
-proposals. But I don't think it is sufficient to be KBUS's reason for
-existence.
-
-> and improve the implementation before it gets set in stone when
-> merged.
-
-and I'm not so convinced on this one, since it seems to present a bit of
-a chiken-and-egg problem. We believe KBUS is ready for merging because
-we've been using it to good effect. If we don't try to merge it, then we
-won't find out if we're right (!). If it should be in the kernel, then
-it's better to get it there sooner, so that it can be moulded/grown
-in-tree.
-
-> If kbus turns out to only be applicable to your corner of the universe
-> then it becomes a lot harder to justify it as a generic Linux
-> communication implementation.
-
-On the other hand, that depends on how big the corner is. We've seen
-many projects trying to hand construct new socket based systems for lack
-of a KBUS, and these generally reinvent the same problems each time. The
-idea of KBUS is to get away from that.
-
-If you're working on a large-ish system, needing to interact with the
-many high-level components that already interact using DBUS, then
-clearly you should be using DBUS for that purpose.
-
-However, if you're building a system from scratch, if you have Linux,
-busybox, and a set of programs that need to communicate with each other,
-and limited resources, then DBUS is not going to be chosen. But those
-systems still need a reliable, already written messaging mechanism,
-rather than another ad-hoc approach.
-
-Personally, I don't see KBUS competing with DBUS. DBUS already has its
-place, and I assume it is good at what it does. KBUS wants to come in
-at a lower level, and satisfy different customers.
-
-Tibs
+Marco
