@@ -1,50 +1,54 @@
-From: Frank Rowand <frank.rowand@am.sony.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
 Subject: Re: [PATCH] PM: Hide CONFIG_PM from users
-Date: Mon, 7 Feb 2011 18:52:00 -0800
-Message-ID: <4D50AFD0.9020704@am.sony.com>
-References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
-Reply-To: <frank.rowand@am.sony.com>
+Date: Tue, 8 Feb 2011 10:23:00 +0100
+Message-ID: <201102081023.00986.rjw@sisk.pl>
+References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com> <201102080005.40448.rjw@sisk.pl> <20110208005053.GB24804@core.coreip.homeip.net>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+In-Reply-To: <20110208005053.GB24804@core.coreip.homeip.net>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org
+Content-Type: Text/Plain; charset="us-ascii"
+To: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, Ingo Molnar <mingo@elte.hu>
 
-On 02/07/11 04:22, Mark Brown wrote:
-> It is very rare to find a current system which is both sufficiently
-> resource constrained to want to compile out power management support
-> and sufficiently power insensitive to be able to tolerate doing so.
-> Since having the configuration option requires non-zero effort to
-> maintain, with ifdefery in most drivers, but it is used with vanishing
-> rarity it is simpler to just remove the option.
+On Tuesday, February 08, 2011, Dmitry Torokhov wrote:
+> On Tue, Feb 08, 2011 at 12:05:40AM +0100, Rafael J. Wysocki wrote:
+> > On Monday, February 07, 2011, Dmitry Torokhov wrote:
+> > > On Mon, Feb 07, 2011 at 11:00:03PM +0100, Rafael J. Wysocki wrote:
+> > > > On Monday, February 07, 2011, Dmitry Torokhov wrote:
+> > > > > On Mon, Feb 07, 2011 at 10:15:59PM +0100, Rafael J. Wysocki wrote:
+> > > > > > On Monday, February 07, 2011, Mark Brown wrote:
+> > > > > > > 
+> > > > > > > Yeah, but some people seem very keen on removing the pointers to the PM
+> > > > > > > ops entirely when CONFIG_PM is disabled which means that you end up with
+> > > > > > > varying idioms for what you do with the PM ops as stuff gets ifdefed
+> > > > > > > out.  Then again I'm not sure anything would make those people any
+> > > > > > > happier.
+> > > > > > 
+> > > > > > I really think we should do things that makes sense rather that worry about
+> > > > > > who's going to like or dislike it (except for Linus maybe, but he tends to like
+> > > > > > things that make sense anyway).  At this point I think the change I suggested
+> > > > > > makes sense, because it (a) simplifies things and (b) follows the quite common
+> > > > > > practice which is to make PM callbacks depend on CONFIG_PM.
+> > > > > 
+> > > > > Many people make these callback dependent on PM not because it makes
+> > > > > much sense but because it is possible to do so. However, aside of
+> > > > > randconfig compile testing, nobody really tests drivers that implement
+> > > > > PM in the !CONFIG_PM setting.
+> > > > 
+> > > > That I can agree with, but I'm not sure whether it is an argument against
+> > > > the patch I've just posted or for it?
+> > > 
+> > > More of an observation for your (b) justification. I'd probably force
+> > > CONFIG_PM to always 'y'w while we weeding references to it from
+> > > drivers...
+> > 
+> > We simply can't force CONFIG_PM to 'y', because some platforms want it to be 'n'.
+> > 
+> 
+> Again, want or need? It would be nice to know answer to this question.
 
-Proof by assertion that it is used with vanishing rarity.
-
-> Begin doing so by hiding it from users - this should attract complaints
-> from any active users. The option is left disabled for the IA64 Ski
-> simulator which is a partial simulator for IA64 systems mostly missing
-> device support. This is a very limited use case which is unlikely to
-> ever want to enable most drivers.
-
-That is not a good method of getting feedback from users.
-
- 1) It immediately removes the ability to have CONFIG_PM undefined,
-    without first giving active users a chance to provide feedback.
-
- 2) The removal of that ability is not obvious ("make oldconfig" does
-    not say anything about CONFIG_PM).  It is easy to overlook a
-    config change that happens silently.
-
- 3) The active users may not move to a newer version of the kernel
-    that contains this change until after it has been decided that
-    there are no users of the config option since no one complained
-    in a timely manner.
-
-Would it be appropriate to use Documentation/feature-removal-schedule.txt
-if this truly will be removed?
-
--Frank
+I _think_ the answer is "want", which doesn't change a lot, because I'm not
+going to convince people to stop wanting things. :-)
