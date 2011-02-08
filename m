@@ -1,278 +1,48 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: [PATCH 3/5] PM: Reorder power management Kconfig options
-Date: Tue, 8 Feb 2011 22:21:49 +0100
-Message-ID: <201102082221.49605.rjw@sisk.pl>
-References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com> <20110208122159.GA8284@elte.hu> <201102082218.28015.rjw@sisk.pl>
+From: Tim Bird <tbird20d@gmail.com>
+Subject: Re: [PATCH] Remove CONFIG_PM altogether, enable power management all
+ the time
+Date: Tue, 8 Feb 2011 15:35:32 -0800
+Message-ID: <AANLkTimWnT8f=PyLgOOrZOaMx0pdv+yNtPw2T7=kO2G-@mail.gmail.com>
+References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+	<201102072046.48763.rjw@sisk.pl>
+	<20110207201803.GU10564@opensource.wolfsonmicro.com>
+	<201102072215.59921.rjw@sisk.pl>
+	<20110208122159.GA8284@elte.hu>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <201102082218.28015.rjw@sisk.pl>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:in-reply-to:references:date
+         :message-id:subject:from:to:cc:content-type;
+        bh=Tg79Q2NgGBUH/VY64lOBEKqKiN462t9xbNmUW5aQ6mE=;
+        b=mJL/IfZ1ik/94gdRsKtsUzizF5SILBUHLetpzKzvM7pK2FTQNypvE5G/Go7Vov1J0d
+         1cVO7QhYfXpCfo3uetU4LZxqIri1qBHSqLAPu2ZMbdT7zNGuPynsOUUtsrhn7zgOu/hy
+         luPQVAwlSWXdQQGM9oTjryC9PkARV2XZVqK6Y=
+In-Reply-To: <20110208122159.GA8284@elte.hu>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 To: Ingo Molnar <mingo@elte.hu>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Linus Torvalds <torvalds@linux-foundation.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>
 
-From: Rafael J. Wysocki <rjw@sisk.pl>
+On Tue, Feb 8, 2011 at 4:21 AM, Ingo Molnar <mingo@elte.hu> wrote:
+> Rafael, could you do a defconfig-ish x86 build with and without CONFIG_PM, and post
+> the 'size vmlinux' comparison - so that we can see the size difference? We make some
+> things CONFIG_EXPERT configurable just to enable folks who *really* want to cut down
+> on kernel size to configure it out.
 
-Reorder configuration options in kernel/power/Kconfig so that
-the options depended on are at the top of the list.
+I'm one of those people who *really* wants to cut down the kernel size.
+I've recently worked on a product where the kernel RAM budget is ~1M.
 
-This patch doesn't introduce any functional changes.
+>
+> Note that those usecases, even if they want a super-small kernel, might not care
+> about PM at all while they care about size: small boot kernels in ROMs, or simple
+> devices where CPU-idling implies deep low power mode, etc.
+>
+> So the vmlinux size comparisons would be needed really. If it's 5k nobody will care.
+I care about 5K.  (But honestly, I don't actively hunt stuff less than
+10K in size, because
+there's too many of them to chase, currently).
 
-Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
----
- kernel/power/Kconfig |  222 +++++++++++++++++++++++++--------------------------
- 1 file changed, 111 insertions(+), 111 deletions(-)
-
-Index: linux-2.6/kernel/power/Kconfig
-===================================================================
---- linux-2.6.orig/kernel/power/Kconfig
-+++ linux-2.6/kernel/power/Kconfig
-@@ -1,89 +1,3 @@
--config PM
--	bool
--	depends on PM_SLEEP || PM_RUNTIME
--	default y
--
--config PM_DEBUG
--	bool "Power Management Debug Support"
--	depends on PM
--	---help---
--	This option enables various debugging support in the Power Management
--	code. This is helpful when debugging and reporting PM bugs, like
--	suspend support.
--
--config PM_ADVANCED_DEBUG
--	bool "Extra PM attributes in sysfs for low-level debugging/testing"
--	depends on PM_DEBUG
--	default n
--	---help---
--	Add extra sysfs attributes allowing one to access some Power Management
--	fields of device objects from user space.  If you are not a kernel
--	developer interested in debugging/testing Power Management, say "no".
--
--config PM_VERBOSE
--	bool "Verbose Power Management debugging"
--	depends on PM_DEBUG
--	default n
--	---help---
--	This option enables verbose messages from the Power Management code.
--
--config CAN_PM_TRACE
--	def_bool y
--	depends on PM_DEBUG && PM_SLEEP && EXPERIMENTAL
--
--config PM_TRACE
--	bool
--	help
--	  This enables code to save the last PM event point across
--	  reboot. The architecture needs to support this, x86 for
--	  example does by saving things in the RTC, see below.
--
--	  The architecture specific code must provide the extern
--	  functions from <linux/resume-trace.h> as well as the
--	  <asm/resume-trace.h> header with a TRACE_RESUME() macro.
--
--	  The way the information is presented is architecture-
--	  dependent, x86 will print the information during a
--	  late_initcall.
--
--config PM_TRACE_RTC
--	bool "Suspend/resume event tracing"
--	depends on CAN_PM_TRACE
--	depends on X86
--	select PM_TRACE
--	default n
--	---help---
--	This enables some cheesy code to save the last PM event point in the
--	RTC across reboots, so that you can debug a machine that just hangs
--	during suspend (or more commonly, during resume).
--
--	To use this debugging feature you should attempt to suspend the
--	machine, reboot it and then run
--
--		dmesg -s 1000000 | grep 'hash matches'
--
--	CAUTION: this option will cause your machine's real-time clock to be
--	set to an invalid time after a resume.
--
--config PM_SLEEP_SMP
--	bool
--	depends on SMP
--	depends on ARCH_SUSPEND_POSSIBLE || ARCH_HIBERNATION_POSSIBLE
--	depends on PM_SLEEP
--	select HOTPLUG
--	select HOTPLUG_CPU
--	default y
--
--config PM_SLEEP
--	bool
--	depends on SUSPEND || HIBERNATION || XEN_SAVE_RESTORE
--	default y
--
--config PM_SLEEP_ADVANCED_DEBUG
--	bool
--	depends on PM_ADVANCED_DEBUG
--	default n
--
- config SUSPEND
- 	bool "Suspend to RAM and standby"
- 	depends on ARCH_SUSPEND_POSSIBLE
-@@ -93,17 +7,6 @@ config SUSPEND
- 	  powered and thus its contents are preserved, such as the
- 	  suspend-to-RAM state (e.g. the ACPI S3 state).
- 
--config PM_TEST_SUSPEND
--	bool "Test suspend/resume and wakealarm during bootup"
--	depends on SUSPEND && PM_DEBUG && RTC_CLASS=y
--	---help---
--	This option will let you suspend your machine during bootup, and
--	make it wake up a few seconds later using an RTC wakeup alarm.
--	Enable this with a kernel parameter like "test_suspend=mem".
--
--	You probably want to have your system's RTC driver statically
--	linked, ensuring that it's available when this test runs.
--
- config SUSPEND_FREEZER
- 	bool "Enable freezer for suspend to RAM/standby" \
- 		if ARCH_WANTS_FREEZER_CONTROL || BROKEN
-@@ -180,6 +83,117 @@ config PM_STD_PARTITION
- 	  suspended image to. It will simply pick the first available swap 
- 	  device.
- 
-+config PM_SLEEP
-+	bool
-+	depends on SUSPEND || HIBERNATION || XEN_SAVE_RESTORE
-+	default y
-+
-+config PM_SLEEP_SMP
-+	bool
-+	depends on SMP
-+	depends on ARCH_SUSPEND_POSSIBLE || ARCH_HIBERNATION_POSSIBLE
-+	depends on PM_SLEEP
-+	select HOTPLUG
-+	select HOTPLUG_CPU
-+	default y
-+
-+config PM_RUNTIME
-+	bool "Run-time PM core functionality"
-+	depends on !IA64_HP_SIM
-+	---help---
-+	  Enable functionality allowing I/O devices to be put into energy-saving
-+	  (low power) states at run time (or autosuspended) after a specified
-+	  period of inactivity and woken up in response to a hardware-generated
-+	  wake-up event or a driver's request.
-+
-+	  Hardware support is generally required for this functionality to work
-+	  and the bus type drivers of the buses the devices are on are
-+	  responsible for the actual handling of the autosuspend requests and
-+	  wake-up events.
-+
-+config PM
-+	bool
-+	depends on PM_SLEEP || PM_RUNTIME
-+	default y
-+
-+config PM_DEBUG
-+	bool "Power Management Debug Support"
-+	depends on PM
-+	---help---
-+	This option enables various debugging support in the Power Management
-+	code. This is helpful when debugging and reporting PM bugs, like
-+	suspend support.
-+
-+config PM_VERBOSE
-+	bool "Verbose Power Management debugging"
-+	depends on PM_DEBUG
-+	default n
-+	---help---
-+	This option enables verbose messages from the Power Management code.
-+
-+config PM_ADVANCED_DEBUG
-+	bool "Extra PM attributes in sysfs for low-level debugging/testing"
-+	depends on PM_DEBUG
-+	default n
-+	---help---
-+	Add extra sysfs attributes allowing one to access some Power Management
-+	fields of device objects from user space.  If you are not a kernel
-+	developer interested in debugging/testing Power Management, say "no".
-+
-+config PM_SLEEP_ADVANCED_DEBUG
-+	bool
-+	depends on PM_ADVANCED_DEBUG
-+	default n
-+
-+config PM_TEST_SUSPEND
-+	bool "Test suspend/resume and wakealarm during bootup"
-+	depends on SUSPEND && PM_DEBUG && RTC_CLASS=y
-+	---help---
-+	This option will let you suspend your machine during bootup, and
-+	make it wake up a few seconds later using an RTC wakeup alarm.
-+	Enable this with a kernel parameter like "test_suspend=mem".
-+
-+	You probably want to have your system's RTC driver statically
-+	linked, ensuring that it's available when this test runs.
-+
-+config CAN_PM_TRACE
-+	def_bool y
-+	depends on PM_DEBUG && PM_SLEEP && EXPERIMENTAL
-+
-+config PM_TRACE
-+	bool
-+	help
-+	  This enables code to save the last PM event point across
-+	  reboot. The architecture needs to support this, x86 for
-+	  example does by saving things in the RTC, see below.
-+
-+	  The architecture specific code must provide the extern
-+	  functions from <linux/resume-trace.h> as well as the
-+	  <asm/resume-trace.h> header with a TRACE_RESUME() macro.
-+
-+	  The way the information is presented is architecture-
-+	  dependent, x86 will print the information during a
-+	  late_initcall.
-+
-+config PM_TRACE_RTC
-+	bool "Suspend/resume event tracing"
-+	depends on CAN_PM_TRACE
-+	depends on X86
-+	select PM_TRACE
-+	default n
-+	---help---
-+	This enables some cheesy code to save the last PM event point in the
-+	RTC across reboots, so that you can debug a machine that just hangs
-+	during suspend (or more commonly, during resume).
-+
-+	To use this debugging feature you should attempt to suspend the
-+	machine, reboot it and then run
-+
-+		dmesg -s 1000000 | grep 'hash matches'
-+
-+	CAUTION: this option will cause your machine's real-time clock to be
-+	set to an invalid time after a resume.
-+
- config APM_EMULATION
- 	tristate "Advanced Power Management Emulation"
- 	depends on PM && SYS_SUPPORTS_APM_EMULATION
-@@ -206,20 +220,6 @@ config APM_EMULATION
- 	  anything, try disabling/enabling this option (or disabling/enabling
- 	  APM in your BIOS).
- 
--config PM_RUNTIME
--	bool "Run-time PM core functionality"
--	depends on !IA64_HP_SIM
--	---help---
--	  Enable functionality allowing I/O devices to be put into energy-saving
--	  (low power) states at run time (or autosuspended) after a specified
--	  period of inactivity and woken up in response to a hardware-generated
--	  wake-up event or a driver's request.
--
--	  Hardware support is generally required for this functionality to work
--	  and the bus type drivers of the buses the devices are on are
--	  responsible for the actual handling of the autosuspend requests and
--	  wake-up events.
--
- config PM_OPS
- 	bool
- 	depends on PM_SLEEP || PM_RUNTIME
+ -- Tim
