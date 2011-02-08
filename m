@@ -1,33 +1,50 @@
-From: Ray Lee <ray-lk@madrabbit.org>
+From: Frank Rowand <frank.rowand@am.sony.com>
 Subject: Re: [PATCH] PM: Hide CONFIG_PM from users
-Date: Mon, 7 Feb 2011 17:17:59 -0800
-Message-ID: <AANLkTimh=8pSmQ6i-5H5+agSso7dCOcOrUJ6Uq_fu7nh@mail.gmail.com>
-References: <20110207152132.GM10564@opensource.wolfsonmicro.com>
- <Pine.LNX.4.44L0.1102071035320.1924-100000@iolanthe.rowland.org> <20110207154953.GN10564@opensource.wolfsonmicro.com>
+Date: Mon, 7 Feb 2011 18:52:00 -0800
+Message-ID: <4D50AFD0.9020704@am.sony.com>
+References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+Reply-To: <frank.rowand@am.sony.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:sender:in-reply-to:references:from
-         :date:x-google-sender-auth:message-id:subject:to:cc:content-type;
-        bh=B4Y3INFhbZEA9Rl8KI1S6+wtj/xZU2/+dLG9ATap2l8=;
-        b=hNz8mEyzqnbHsxH5JhV1TDCap+k7lFrDkKqWJMfm2UyeZ/a8XYYIWPKxPviaExlAEU
-         1xQzz210b5MzH1pHLUBpIHY+V49LQLFMNgHOZ1+JcWdumPj/AxMuHW/lJYlW/+ywgepM
-         wSYl3fuEEEvUIxk1C4nHc6ILTZzcmoMIqOf8U=
-In-Reply-To: <20110207154953.GN10564@opensource.wolfsonmicro.com>
+In-Reply-To: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Alan Stern <stern@rowland.harvard.edu>, Stephen Rothwell <sfr@canb.auug.org.au>, Geert Uytterhoeven <geert@linux-m68k.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, ppc-dev <linuxppc-dev@lists.ozlabs.org>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org
 
-On Mon, Feb 7, 2011 at 7:49 AM, Mark Brown
-<broonie@opensource.wolfsonmicro.com> wrote:
-> I'm rather hoping that they'll notice the mailing list thread or that
-> someone else who knows what's going on with them does
+On 02/07/11 04:22, Mark Brown wrote:
+> It is very rare to find a current system which is both sufficiently
+> resource constrained to want to compile out power management support
+> and sufficiently power insensitive to be able to tolerate doing so.
+> Since having the configuration option requires non-zero effort to
+> maintain, with ifdefery in most drivers, but it is used with vanishing
+> rarity it is simpler to just remove the option.
 
-Surely you're joking. I mean, do _you_ scan every message that comes
-through lkml and its various sister lists?
+Proof by assertion that it is used with vanishing rarity.
 
-Do a git blame and add them to the CC:. It's the polite thing to do.
+> Begin doing so by hiding it from users - this should attract complaints
+> from any active users. The option is left disabled for the IA64 Ski
+> simulator which is a partial simulator for IA64 systems mostly missing
+> device support. This is a very limited use case which is unlikely to
+> ever want to enable most drivers.
+
+That is not a good method of getting feedback from users.
+
+ 1) It immediately removes the ability to have CONFIG_PM undefined,
+    without first giving active users a chance to provide feedback.
+
+ 2) The removal of that ability is not obvious ("make oldconfig" does
+    not say anything about CONFIG_PM).  It is easy to overlook a
+    config change that happens silently.
+
+ 3) The active users may not move to a newer version of the kernel
+    that contains this change until after it has been decided that
+    there are no users of the config option since no one complained
+    in a timely manner.
+
+Would it be appropriate to use Documentation/feature-removal-schedule.txt
+if this truly will be removed?
+
+-Frank
