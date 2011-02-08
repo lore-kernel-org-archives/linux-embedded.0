@@ -1,37 +1,45 @@
 From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: [PATCH] PM: Hide CONFIG_PM from users
-Date: Tue, 8 Feb 2011 11:18:27 +0000
-Message-ID: <20110208111827.GA29850@opensource.wolfsonmicro.com>
-References: <20110207152132.GM10564@opensource.wolfsonmicro.com>
- <Pine.LNX.4.44L0.1102071035320.1924-100000@iolanthe.rowland.org>
- <20110207154953.GN10564@opensource.wolfsonmicro.com>
- <AANLkTimh=8pSmQ6i-5H5+agSso7dCOcOrUJ6Uq_fu7nh@mail.gmail.com>
+Date: Tue, 8 Feb 2011 12:12:55 +0000
+Message-ID: <20110208121254.GE29850@opensource.wolfsonmicro.com>
+References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+ <201102072046.48763.rjw@sisk.pl>
+ <20110207201803.GU10564@opensource.wolfsonmicro.com>
+ <201102072215.59921.rjw@sisk.pl>
 Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <AANLkTimh=8pSmQ6i-5H5+agSso7dCOcOrUJ6Uq_fu7nh@mail.gmail.com>
+In-Reply-To: <201102072215.59921.rjw@sisk.pl>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Ray Lee <ray-lk@madrabbit.org>
-Cc: Alan Stern <stern@rowland.harvard.edu>, Stephen Rothwell <sfr@canb.auug.org.au>, Geert Uytterhoeven <geert@linux-m68k.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, ppc-dev <linuxppc-dev@lists.ozlabs.org>
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, Ingo Molnar <mingo@elte.hu>
 
-On Mon, Feb 07, 2011 at 05:17:59PM -0800, Ray Lee wrote:
-> On Mon, Feb 7, 2011 at 7:49 AM, Mark Brown
+On Mon, Feb 07, 2011 at 10:15:59PM +0100, Rafael J. Wysocki wrote:
 
-> > I'm rather hoping that they'll notice the mailing list thread or that
-> > someone else who knows what's going on with them does
+> I really think we should do things that makes sense rather that worry about
+> who's going to like or dislike it (except for Linus maybe, but he tends to like
+> things that make sense anyway).  At this point I think the change I suggested
+> makes sense, because it (a) simplifies things and (b) follows the quite common
+> practice which is to make PM callbacks depend on CONFIG_PM.
 
-> Surely you're joking. I mean, do _you_ scan every message that comes
-> through lkml and its various sister lists?
+So, part of the issue here is that it's not clear if having the ifdefs
+in the drivers is really something that makes sense.  It's not at all
+clear that anyone is actually making active use of them on real systems
+rather than just doing build coverage testing, it really feels like the
+ifdefs that people are currently using are just being cargo culted
+around.
 
-Actually I do at least scan most of the lists.
+The reason it's come up for me is that dev_pm_ops changes things a bit
+as you've got to decide how to handle the struct itself and there's no
+clear decision on what the best way forward for that is (is it OK to
+leave the struct if it's empty?) so you end up with the approach you
+need to take varying between maintainers which is annoying.
 
-> Do a git blame and add them to the CC:. It's the polite thing to do.
+> I'd appreciate it if people could review/test it and drop their comments.
 
-It's also going to result in the mail not going to the mailing lists as
-there's a limit on the number of people you can CC enforced by vger
-which probably isn't constructive.  It's moot now but as I said in the
-text you've helpfully cut I'd have suggested contacting them after the
-thread had come to a conclusion.
+Looks good to me:
+
+Reviewed/Tested-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
