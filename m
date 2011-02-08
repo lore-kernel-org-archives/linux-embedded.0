@@ -1,54 +1,37 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: [PATCH] PM: Hide CONFIG_PM from users
-Date: Tue, 8 Feb 2011 10:23:00 +0100
-Message-ID: <201102081023.00986.rjw@sisk.pl>
-References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com> <201102080005.40448.rjw@sisk.pl> <20110208005053.GB24804@core.coreip.homeip.net>
+Date: Tue, 8 Feb 2011 11:18:27 +0000
+Message-ID: <20110208111827.GA29850@opensource.wolfsonmicro.com>
+References: <20110207152132.GM10564@opensource.wolfsonmicro.com>
+ <Pine.LNX.4.44L0.1102071035320.1924-100000@iolanthe.rowland.org>
+ <20110207154953.GN10564@opensource.wolfsonmicro.com>
+ <AANLkTimh=8pSmQ6i-5H5+agSso7dCOcOrUJ6Uq_fu7nh@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20110208005053.GB24804@core.coreip.homeip.net>
+Content-Disposition: inline
+In-Reply-To: <AANLkTimh=8pSmQ6i-5H5+agSso7dCOcOrUJ6Uq_fu7nh@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-embedded@vger.kernel.org, Ingo Molnar <mingo@elte.hu>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Ray Lee <ray-lk@madrabbit.org>
+Cc: Alan Stern <stern@rowland.harvard.edu>, Stephen Rothwell <sfr@canb.auug.org.au>, Geert Uytterhoeven <geert@linux-m68k.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, ppc-dev <linuxppc-dev@lists.ozlabs.org>
 
-On Tuesday, February 08, 2011, Dmitry Torokhov wrote:
-> On Tue, Feb 08, 2011 at 12:05:40AM +0100, Rafael J. Wysocki wrote:
-> > On Monday, February 07, 2011, Dmitry Torokhov wrote:
-> > > On Mon, Feb 07, 2011 at 11:00:03PM +0100, Rafael J. Wysocki wrote:
-> > > > On Monday, February 07, 2011, Dmitry Torokhov wrote:
-> > > > > On Mon, Feb 07, 2011 at 10:15:59PM +0100, Rafael J. Wysocki wrote:
-> > > > > > On Monday, February 07, 2011, Mark Brown wrote:
-> > > > > > > 
-> > > > > > > Yeah, but some people seem very keen on removing the pointers to the PM
-> > > > > > > ops entirely when CONFIG_PM is disabled which means that you end up with
-> > > > > > > varying idioms for what you do with the PM ops as stuff gets ifdefed
-> > > > > > > out.  Then again I'm not sure anything would make those people any
-> > > > > > > happier.
-> > > > > > 
-> > > > > > I really think we should do things that makes sense rather that worry about
-> > > > > > who's going to like or dislike it (except for Linus maybe, but he tends to like
-> > > > > > things that make sense anyway).  At this point I think the change I suggested
-> > > > > > makes sense, because it (a) simplifies things and (b) follows the quite common
-> > > > > > practice which is to make PM callbacks depend on CONFIG_PM.
-> > > > > 
-> > > > > Many people make these callback dependent on PM not because it makes
-> > > > > much sense but because it is possible to do so. However, aside of
-> > > > > randconfig compile testing, nobody really tests drivers that implement
-> > > > > PM in the !CONFIG_PM setting.
-> > > > 
-> > > > That I can agree with, but I'm not sure whether it is an argument against
-> > > > the patch I've just posted or for it?
-> > > 
-> > > More of an observation for your (b) justification. I'd probably force
-> > > CONFIG_PM to always 'y'w while we weeding references to it from
-> > > drivers...
-> > 
-> > We simply can't force CONFIG_PM to 'y', because some platforms want it to be 'n'.
-> > 
-> 
-> Again, want or need? It would be nice to know answer to this question.
+On Mon, Feb 07, 2011 at 05:17:59PM -0800, Ray Lee wrote:
+> On Mon, Feb 7, 2011 at 7:49 AM, Mark Brown
 
-I _think_ the answer is "want", which doesn't change a lot, because I'm not
-going to convince people to stop wanting things. :-)
+> > I'm rather hoping that they'll notice the mailing list thread or that
+> > someone else who knows what's going on with them does
+
+> Surely you're joking. I mean, do _you_ scan every message that comes
+> through lkml and its various sister lists?
+
+Actually I do at least scan most of the lists.
+
+> Do a git blame and add them to the CC:. It's the polite thing to do.
+
+It's also going to result in the mail not going to the mailing lists as
+there's a limit on the number of people you can CC enforced by vger
+which probably isn't constructive.  It's moot now but as I said in the
+text you've helpfully cut I'd have suggested contacting them after the
+thread had come to a conclusion.
