@@ -1,69 +1,52 @@
-From: Ingo Molnar <mingo@elte.hu>
-Subject: Re: [PATCH] Remove CONFIG_PM altogether, enable power management all
- the time
-Date: Tue, 8 Feb 2011 13:21:59 +0100
-Message-ID: <20110208122159.GA8284@elte.hu>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH] PM: Hide CONFIG_PM from users
+Date: Tue, 8 Feb 2011 14:15:39 +0000
+Message-ID: <20110208141539.GI29850@opensource.wolfsonmicro.com>
 References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com>
- <201102072046.48763.rjw@sisk.pl>
- <20110207201803.GU10564@opensource.wolfsonmicro.com>
- <201102072215.59921.rjw@sisk.pl>
+ <4D50AFD0.9020704@am.sony.com>
 Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <201102072215.59921.rjw@sisk.pl>
+In-Reply-To: <4D50AFD0.9020704@am.sony.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: "Rafael J. Wysocki" <rjw@sisk.pl>, Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>
+To: Frank Rowand <frank.rowand@am.sony.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org
 
+On Mon, Feb 07, 2011 at 06:52:00PM -0800, Frank Rowand wrote:
+> On 02/07/11 04:22, Mark Brown wrote:
 
-* Rafael J. Wysocki <rjw@sisk.pl> wrote:
+> > Since having the configuration option requires non-zero effort to
+> > maintain, with ifdefery in most drivers, but it is used with vanishing
+> > rarity it is simpler to just remove the option.
 
-> I'd appreciate it if people could review/test it and drop their comments.
-> 
-> Thanks,
-> Rafael
-> 
-> ---
->  arch/x86/xen/Kconfig               |    2 +-
->  drivers/acpi/Kconfig               |    1 -
->  drivers/acpi/bus.c                 |    4 +---
->  drivers/acpi/internal.h            |    6 ++++++
->  drivers/acpi/sleep.c               |   13 +++++++++++--
->  drivers/base/power/Makefile        |    3 +--
->  drivers/net/e1000e/netdev.c        |    8 ++++----
->  drivers/net/pch_gbe/pch_gbe_main.c |    2 +-
->  drivers/pci/pci-driver.c           |    4 ++--
->  drivers/scsi/Makefile              |    2 +-
->  drivers/scsi/scsi_priv.h           |    2 +-
->  drivers/scsi/scsi_sysfs.c          |    2 +-
->  drivers/usb/core/hcd-pci.c         |    4 ++--
->  include/acpi/acpi_bus.h            |    2 +-
->  include/linux/pm.h                 |    2 +-
->  kernel/power/Kconfig               |   29 +++--------------------------
->  16 files changed, 37 insertions(+), 49 deletions(-)
+> Proof by assertion that it is used with vanishing rarity.
 
-Ok, there's some real bang for bucks in this patch, nice! It's a beginning.
+Sure, hopefully if it's incorrect people will come out of the woodwork
+to correct me :)
 
-Reviewed-by: Ingo Molnar <mingo@elte.hu>
+> That is not a good method of getting feedback from users.
 
-Also, i've Cc:-ed Linus, to check whether the idea to make power management a 
-permanent, core portion of Linux has any obvious downsides we missed.
+>  1) It immediately removes the ability to have CONFIG_PM undefined,
+>     without first giving active users a chance to provide feedback.
 
-Rafael, could you do a defconfig-ish x86 build with and without CONFIG_PM, and post 
-the 'size vmlinux' comparison - so that we can see the size difference? We make some 
-things CONFIG_EXPERT configurable just to enable folks who *really* want to cut down 
-on kernel size to configure it out.
+Note that it's not a terribly difficult change to reverse; if someone
+urgently does need to do so then I'd be surprised if they were able to
+build a kernel but not cope with that change.
 
-Note that those usecases, even if they want a super-small kernel, might not care 
-about PM at all while they care about size: small boot kernels in ROMs, or simple 
-devices where CPU-idling implies deep low power mode, etc.
+>  2) The removal of that ability is not obvious ("make oldconfig" does
+>     not say anything about CONFIG_PM).  It is easy to overlook a
+>     config change that happens silently.
 
-So the vmlinux size comparisons would be needed really. If it's 5k nobody will care. 
-If it's 50k-100k that's borderline. In the other side of the scale we have the 1500+
-#ifdef CONFIG_PM lines strewn around the kernel source, and the frequent !PM build
-breakages.
+It will expose the sub-options which actually do stuff, though - it's
+only the top level option for PM.
 
-	Ingo
+> Would it be appropriate to use Documentation/feature-removal-schedule.txt
+> if this truly will be removed?
+
+I guess, though I'm a bit pessimistic about anyone actually noticing.
+With Raphael's version it's not such a big deal as CONFIG_PM is selected
+by other options that previously depended on it instead of being enabled
+all the time.
