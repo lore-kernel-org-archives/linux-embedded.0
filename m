@@ -1,66 +1,35 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: [Updated][PATCH 5/5] PM: Clean up PM_TRACE dependencies and drop unnecessary Kconfig option
-Date: Fri, 11 Feb 2011 00:32:48 +0100
-Message-ID: <201102110032.48810.rjw@sisk.pl>
-References: <1297081335-13631-1-git-send-email-broonie@opensource.wolfsonmicro.com> <201102082218.28015.rjw@sisk.pl> <201102082223.37975.rjw@sisk.pl>
+From: Andrew Murray <amurray@mpcdata.com>
+Subject: Re: [PATCH] printk-formats.txt documentation update
+Date: Fri, 11 Feb 2011 08:15:20 +0000
+Message-ID: <AANLkTikbPwMS0VGsMH64CGhDUEmvOwUzYnXSV0q3eW9_@mail.gmail.com>
+References: <AANLkTikj+FU8OF_-KFr2hmTSWqTHMK5JnrnTVyn-XtxQ@mail.gmail.com>
+	<AANLkTimcFvq-cSpain--STuVVg3dUJeTCDrykQ=24egg@mail.gmail.com>
+	<AANLkTimsTJ4smnJUfkvYEkJixKQoZNfq6RHU4moLhT0o@mail.gmail.com>
+	<AANLkTi=bHe_h1F6Lh=rv6BXmVzkyPSW9u5EKXxpYGuL_@mail.gmail.com>
+	<20110207092930.GA3123@pengutronix.de>
+	<AANLkTi=zbmf6QQ2qgv6jf_SJ_GwF=8XPW4CCs-9AJ16B@mail.gmail.com>
+	<1297107205.17359.61.camel@Joe-Laptop>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <201102082223.37975.rjw@sisk.pl>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1297107205.17359.61.camel@Joe-Laptop>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: linux-pm@lists.linux-foundation.org
-Cc: Ingo Molnar <mingo@elte.hu>, Linus Torvalds <torvalds@linux-foundation.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Len Brown <len.brown@intel.com>, Alan Stern <stern@rowland.harvard.edu>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-embedded@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Joe Perches <joe@perches.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-embedded@vger.kernel.org, linux kernel <linux-kernel@vger.kernel.org>, trivial@kernel.org, rdunlap@xenotime.net
 
-On Tuesday, February 08, 2011, Rafael J. Wysocki wrote:
-> From: Rafael J. Wysocki <rjw@sisk.pl>
-> 
-> CONFIG_PM_SLEEP_ADVANCED_DEBUG should depend on CONFIG_PM_SLEEP
-> and CONFIG_CAN_PM_TRACE need not depend on EXPERIMENTAL.  Modify
-> kernel/power/Kconfig along those lines.
+On 7 February 2011 19:33, Joe Perches <joe@perches.com> wrote:
+>
+> On Mon, 2011-02-07 at 18:12 +0000, Andrew Murray wrote:
+> > On 7 February 2011 09:29, Wolfram Sang <w.sang@pengutronix.de> wrot=
+e:
+> > > On Sun, Feb 06, 2011 at 04:23:09PM +0000, Andrew Murray wrote:
+> > >> +
+>
 
-It turns out that CONFIG_PM_SLEEP_ADVANCED_DEBUG is not used any more, so we
-can simply get rid of it.
+Thanks for the feedback=C2=A0- I'll be on holiday shortly - so will hav=
+e to
+continue this when in return.
 
-Thanks,
-Rafael
-
----
-From: Rafael J. Wysocki <rjw@sisk.pl>
-Subject: PM: Clean up PM_TRACE dependencies and drop unnecessary Kconfig option
-
-CONFIG_PM_SLEEP_ADVANCED_DEBUG is not used any more, so drop it
-and CONFIG_CAN_PM_TRACE need not depend on EXPERIMENTAL, so remove
-that dependency.
-
-Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
----
- kernel/power/Kconfig |    7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
-
-Index: linux-2.6/kernel/power/Kconfig
-===================================================================
---- linux-2.6.orig/kernel/power/Kconfig
-+++ linux-2.6/kernel/power/Kconfig
-@@ -140,11 +140,6 @@ config PM_ADVANCED_DEBUG
- 	fields of device objects from user space.  If you are not a kernel
- 	developer interested in debugging/testing Power Management, say "no".
- 
--config PM_SLEEP_ADVANCED_DEBUG
--	bool
--	depends on PM_ADVANCED_DEBUG
--	default n
--
- config PM_TEST_SUSPEND
- 	bool "Test suspend/resume and wakealarm during bootup"
- 	depends on SUSPEND && PM_DEBUG && RTC_CLASS=y
-@@ -158,7 +153,7 @@ config PM_TEST_SUSPEND
- 
- config CAN_PM_TRACE
- 	def_bool y
--	depends on PM_DEBUG && PM_SLEEP && EXPERIMENTAL
-+	depends on PM_DEBUG && PM_SLEEP
- 
- config PM_TRACE
- 	bool
+Andrew Murray
