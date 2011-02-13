@@ -1,67 +1,68 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PWM v3: 1/3] PWM: Implement a generic PWM framework
-Date: Fri, 11 Feb 2011 23:48:39 -0600
-Message-ID: <AANLkTi=XRRELsqEaWAqxFhv+7tOvuLEV_XCDXmpsjQpm@mail.gmail.com>
-References: <1297353231-14475-1-git-send-email-bgat@billgatliff.com>
-	<1297353231-14475-2-git-send-email-bgat@billgatliff.com>
-	<20110210203937.GV9041@pengutronix.de>
-	<AANLkTika903eDoFOEcLtcAcizZpPqBH7k4drOdYyz3dA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PWM v4 0/3] Implement a generic PWM framework
+Date: Sat, 12 Feb 2011 20:15:20 -0600
+Message-ID: <1297563323-24074-1-git-send-email-bgat@billgatliff.com>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTika903eDoFOEcLtcAcizZpPqBH7k4drOdYyz3dA@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-embedded@vger.kernel.org
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: Bill Gatliff <bgat@billgatliff.com>
 
-Sascha:
+This patch series contains the fourth attempt at implementation of
+a generic PWM device interface framework.  Think gpiolib, but for
+devices and pseudo-devices that generate pulse-wave-modulated outputs.
+
+Functionally-speaking, this series has regressed somewhat from
+previous versions because I am currently focusing my attention on the
+API itself.  I include only implementations for GPIO+hrtimer devices
+and the Atmel PWMC peripheral as references in this series; I will
+post patches for LED drivers, PXA, Samsung, etc. devices once I know
+that the API itself is on its way to mainline.  (I believe that the
+two reference implementations sufficiently confirm the utility of the
+API itself).
+
+The code in this series is significantly clearer and more
+straightforward than previous versions.  Thanks to everyone who helped
+me with this refactoring!  I'm pretty convinced that the code you see
+here is at last suitable for pulling into mainline.
+
+Finally, the attached code CAN be used to control devices that drive
+stepper motors and the like, but doing so is discouraged as I am
+anticipating a request to develop an API specifically for such
+situations.
 
 
->> I think theres no value in having the FLAG_REGISTERED flag and this
->> function.
->
-> I think it sneaked in before I was using the mutex to prevent the lis=
-t
-> of devices from changing during a lookup. =A0Fixed.
-
-I take that back.  What having that flag lets one do is error recovery
-that looks like this:
-
-for (wchan =3D 0; wchan < NCHAN; wchan++) {
-    ret =3D pwm_register(&x->p[wchan], ... );
-    if (ret) goto error;
-}
-
-=2E..
-
-error:
-for (wchan =3D 0; wchan < NCHAN; wchan++) {
-    if (pwm_is_registered(&x->p[wchan]))
-        pwm_unregister(&x->p[wchan]);
-}
-
-
-Without pwm_is_registered() the driver must itself keep track of which
-devices were successfully registered and which ones weren't---
-something the internals of the API already knows.
-
-True, in the above example it's simply a matter of always registering
-in increasing channel order AND preserving the wchan value if an error
-occurs.  And then having an "errchan" index that counts from zero up
-to the last successfully-registered channel in the error loop.
-
-The pwm_is_registered() function does work of tracking successful
-device registrations, and therefore leads to simpler code in device
-drivers.  In particular, the error paths are simpler (and less
-redundant across drivers) than without pwm_is_registered().
-
-So I think pwm_is_registered() is a keeper.
-
+Regards,
 
 
 b.g.
---=20
-Bill Gatliff
-bgat@billgatliff.com
+
+
+Bill Gatliff (3):
+  PWM: Implement a generic PWM framework
+  PWM: GPIO+hrtimer device emulation
+  PWM: Atmel PWMC driver
+
+ Documentation/pwm.txt    |  277 ++++++++++++++++++++++
+ drivers/Kconfig          |    2 +
+ drivers/Makefile         |    2 +
+ drivers/pwm/Kconfig      |   27 +++
+ drivers/pwm/Makefile     |    7 +
+ drivers/pwm/atmel-pwmc.c |  501 +++++++++++++++++++++++++++++++++++++++
+ drivers/pwm/gpio-pwm.c   |  349 +++++++++++++++++++++++++++
+ drivers/pwm/pwm.c        |  584 ++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/pwm/pwm.h  |  147 ++++++++++++
+ 9 files changed, 1896 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/pwm.txt
+ create mode 100644 drivers/pwm/Kconfig
+ create mode 100644 drivers/pwm/Makefile
+ create mode 100644 drivers/pwm/atmel-pwmc.c
+ create mode 100644 drivers/pwm/gpio-pwm.c
+ create mode 100644 drivers/pwm/pwm.c
+ create mode 100644 include/linux/pwm/pwm.h
+
+-- 
+1.7.2.3
