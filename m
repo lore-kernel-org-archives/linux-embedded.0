@@ -1,72 +1,68 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
+From: Bill Gatliff <bgat@billgatliff.com>
 Subject: Re: [PWM v4 2/3] PWM: GPIO+hrtimer device emulation
-Date: Sat, 12 Feb 2011 23:41:58 -0500
-Message-ID: <AANLkTi=aQh8y5hhyuqdSnFWYKvacL=suo1ZTGVkwk-iZ@mail.gmail.com>
+Date: Sat, 12 Feb 2011 22:52:50 -0600
+Message-ID: <AANLkTi=w7Xb=B68Myqi1Sp6c8hZW7qPJvZZuRsQOLAH0@mail.gmail.com>
 References: <1297563323-24074-1-git-send-email-bgat@billgatliff.com>
- <1297563323-24074-3-git-send-email-bgat@billgatliff.com> <AANLkTimNuz245U64MBzGNpop7oVVnVpZ04UUA=7p5CLj@mail.gmail.com>
- <AANLkTinAcF+XK-YY3q-XQHH7vR=5h+Bxioooz-0gwTm6@mail.gmail.com>
+	<1297563323-24074-3-git-send-email-bgat@billgatliff.com>
+	<AANLkTimNuz245U64MBzGNpop7oVVnVpZ04UUA=7p5CLj@mail.gmail.com>
+	<AANLkTinAcF+XK-YY3q-XQHH7vR=5h+Bxioooz-0gwTm6@mail.gmail.com>
+	<AANLkTi=aQh8y5hhyuqdSnFWYKvacL=suo1ZTGVkwk-iZ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:in-reply-to:references:from:date
-         :message-id:subject:to:cc:content-type:content-transfer-encoding;
-        bh=yYEZ7JjqRpOnJNng5FuHdi29NGulfDpSS2unAu7BCrM=;
-        b=JOPTZPDHtMMY2cczG43vRThnnIfXlswlKdlbmHZdT8kEZJumECgwQQpbyCtN0kX7BL
-         2GOnRWQkBTWkQFtupOAZxUIY4xWExaiNVBDPASypl5dTerBdg8ErqoGvG77132ZTGtsq
-         b4iT1iBk2pVYpewdauQIdmPxiYGcMZPVwC644=
-In-Reply-To: <AANLkTinAcF+XK-YY3q-XQHH7vR=5h+Bxioooz-0gwTm6@mail.gmail.com>
+In-Reply-To: <AANLkTi=aQh8y5hhyuqdSnFWYKvacL=suo1ZTGVkwk-iZ@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Bill Gatliff <bgat@billgatliff.com>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Mike Frysinger <vapier.adi@gmail.com>
 Cc: linux-embedded@vger.kernel.org
 
-On Sat, Feb 12, 2011 at 23:28, Bill Gatliff wrote:
-> On Sat, Feb 12, 2011 at 8:53 PM, Mike Frysinger wrote:
->> document the module name in the help ?
->
-> Not sure what you are asking. =C2=A0Like this?
+Mike:
 
-yes, but it seems to be more common to use a style like so:
-config xxx
-    help
-      normal help text
-
-      To compile this driver as module, choose M here: the
-      module will be called gpio-pwm.
-
->>> +static struct pwm_device_ops gpio_pwm_device_ops =3D {
->>> + =C2=A0 =C2=A0 =C2=A0 .config =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D gpio=
-_pwm_config,
->>> + =C2=A0 =C2=A0 =C2=A0 .config_nosleep =3D gpio_pwm_config_nosleep,
->>> + =C2=A0 =C2=A0 =C2=A0 .request =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D gpio=
-_pwm_request,
->>> +};
+On Sat, Feb 12, 2011 at 10:41 PM, Mike Frysinger <vapier.adi@gmail.com>=
+ wrote:
+> On Sat, Feb 12, 2011 at 23:28, Bill Gatliff wrote:
+>> On Sat, Feb 12, 2011 at 8:53 PM, Mike Frysinger wrote:
+>>> document the module name in the help ?
 >>
->> is this struct not constified ? =C2=A0same for some of the other str=
-ucts in
->> this file ...
+>> Not sure what you are asking. =A0Like this?
 >
-> It isn't constified, but it should be. =C2=A0But if I do, I get lots =
-of
-> "discards qualifiers" warnings because const isn't used in the
-> functions I pass these structures to. =C2=A0So I kind of have to leav=
-e it
-> as-is, no?
+> yes, but it seems to be more common to use a style like so:
 
-it just means the pwm framework needs to be constified in the core code=
- first :)
+Ok.  Will do.
 
->> =C2=A0is that useful if they cant call any of the config funcs ?
+> it just means the pwm framework needs to be constified in the core co=
+de first :)
+
+Actually, the pwm framework is aggressively constified (though your
+suggestion has shown me one place I missed, and there are probably
+others).  The complaints I can't help are the ones that come from
+configfs!
+
 >
-> Users of gpio_pwm aren't supposed to call the config functions in
-> gpio-pwm.c, they are supposed to invoke them indirectly via the
-> regular PWM API (pwm.c).
+> hmm, i thought the configfs integration did more than just call the
+> create/destroy funcs. =A0considering the common gpio code has sysfs
+> hooks for playing with gpios from userspace, perhaps there should be =
+a
+> sysfs hook here too rather than requiring configfs ...
 
-hmm, i thought the configfs integration did more than just call the
-create/destroy funcs.  considering the common gpio code has sysfs
-hooks for playing with gpios from userspace, perhaps there should be a
-sysfs hook here too rather than requiring configfs ...
--mike
+The root issue is how to tell the kernel to create a new pseudo-device
+without kernel code.  Gpiolib accomplishes that by the "export"
+attribute.  I'm achieving the same thing, only with configfs.
+
+Configfs was designed explicitly for doing such things.  The gpiolib
+approach, while it obviously works, is somewhat an abuse of sysfs as I
+see things.  Sysfs is supposed to merely reflect the state of the
+kernel's internal device model.  Ggpiolib modifies that model state as
+a side-effect of writing to an attribute.  That seems wrong, no matter
+how well it works.
+
+I'll agree that the gpiolib approach works, and that there aren't many
+kernel users of configfs.  Maybe my selection of configfs instead of a
+sysfs export attribute is a feeble attempt to change that... :)
+
+
+b.g.
+--=20
+Bill Gatliff
+bgat@billgatliff.com
