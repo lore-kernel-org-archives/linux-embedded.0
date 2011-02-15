@@ -1,61 +1,60 @@
-From: Rob Landley <rob@landley.net>
+From: Florian Fainelli <florian@openwrt.org>
 Subject: Re: Minimal x86 memory requirements
-Date: Mon, 14 Feb 2011 20:39:54 -0600
-Message-ID: <4D59E77A.8030509@landley.net>
+Date: Tue, 15 Feb 2011 11:04:48 +0100
+Message-ID: <201102151104.48976.florian@openwrt.org>
 References: <4D59C9D5.4080909@linux.intel.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:sender:from:to:subject:date:user-agent:cc
+         :references:in-reply-to:organization:mime-version:content-type
+         :content-transfer-encoding:message-id;
+        bh=6cnolSeV+n15gw2zZgfMIKgVEzo/GOp1yjRO+OAhr10=;
+        b=a4SCQ9/juEtEECZjCFvaUIj0QrtJU4bFF12ocTPRKagMbCGUyqE8SOhHZj/nduSBRu
+         /ccURNOiLH1dmp94DlHCK2x9HUmitXa3QFor+r8wrlPw5iMDfrebBDNnrgKBtXfhe4FZ
+         abAuT/NyXc+yxKFPsYCAaWU+jXXtVAMHCBR84=
 In-Reply-To: <4D59C9D5.4080909@linux.intel.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain; charset="us-ascii"
 To: Darren Hart <dvhart@linux.intel.com>
 Cc: linux-embedded@vger.kernel.org
 
-On 02/14/2011 06:33 PM, Darren Hart wrote:
+Hello,
+
+On Tuesday 15 February 2011 01:33:25 Darren Hart wrote:
 > I'm looking to build a bare minimum x86 kernel that will boot and run
 > busybox, nothing else (and eventually less than that). Assuming I do
 > need USB-HID, IDE, and basic TCP/IP, what should I expect to be the
 > least RAM I could get away with just to boot off flash, get a getty,
 > login, and take a few directory listings.
+> 
+> If anyone would like to point me where to RTFM, that would be
+> appreciated as well :-)
 
-On a nommu system, if you configure out most of the PRINTK strings, you
-can run a reasonably useful system in 4 megabytes.  However, that's
-using a small flash-based initramfs with the block layer disabled.  I
-don't know if you can fit everything you need in there (USB, the block
-layer, and networking stack).  And if you want a MMU system, you'll add
-the overhead of page tables in there.
+OpenWrt runs currently on a RDC R-321x System-on-Chip which is i486 based [1] 
+and usually designed with 16MB of RAM, the bzImage itself is around 768KB w/ 
+the following features built-in:
 
-So while you _might_ still be able to trim it down to 4 megabytes, I'd
-budget somewhere in the 6 to 8 megs range.  Don't forget to statically
-link your busybox binary so you don't dirty physical pages with
-relocations.  (Against uClibc of course, Ulrich Drepper deprecated
-static linking in glibc because they suck at it so badly.)
+- TCP/IP networking
+- MTD support for CFI compatible NOR flashes
+- JFFS2/squashfs filesystem
 
-I note that the Linux kernel (last I checked, circa 2006) no longer
-booted in 2 megabytes of ram due to the relocations required to extract
-the thing when it gunzips it, it simply wouldn't let the mappings be
-that close.  Maybe that's been addressed, but I doubt it.
+When I load additionnal modules to be able to do NAT/USB/FAT filesystems for 
+instance, plus having must have daemons running (dnsmasq, dropbear, busybox, 
+hostapd ...), I still have around 3MB of available RAM (for a 16MB RAM 
+device). The filesystem itself is compressed using squashfs+lzma, and fits 
+within 3MB (loadable modules are inside, usable image at [2]).
 
-Something people were spending time on a while back was mapping the
-kernel directly out of flash (I can never keep NAND and NOR straight but
-the one that works more like normal memory) since the code segment is
-just a big read-only mapping block anyway.  I think these days it works
-fine, but I haven't tried it.  Doing that saves DRAM, but it needs
-actual mappable flash or ROM, and not a block device that faults pages
-into DRAM under under the covers when mapped.  All that XIP work
-(execute-in-place and binflat and such) was related to that as well.
-Note that flash may not be as FAST as dram so you take a performance
-hit, but they were worrying about the power consumption of requiring
-less DRAM to refresh.
+So from my perspective, you should be able to do all of this with a 16MB RAM 
+device, plus 4 to 8MB of Flash to be confortable with storing your filesystem.
 
-Does this help?  (Play with QEMU.  QEMU is awesome.  I have system
-images at http://landley.net/downloads/binaries which provide a static
-uClibc defconfig busybox binary you can try tweaking the kernel .config
-and such for.  It's defconfig so it's pretty big, but it should give you
-a reasonable idea.  If you want the busybox binaries by themselves, I
-copied them to http://busybox.net/downloads/binaries.  Remind me to
-update that for the new release...)
+Hope that helps.
 
-Rob
+[1]: http://wiki.openwrt.org/oldwiki/openwrtdocs/hardware/airlink101/ar525w
+[2]: http://downloads.openwrt.org/backfire/10.03.1-rc4/rdc/openwrt-rdc-
+squashfs-ar525w.img
+--
+Florian
