@@ -1,544 +1,161 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: [PWM v5 3/3] PWM: Atmel PWMC driver
-Date: Sat, 19 Feb 2011 22:10:43 -0600
-Message-ID: <1298175043-31727-4-git-send-email-bgat@billgatliff.com>
-References: <1298175043-31727-1-git-send-email-bgat@billgatliff.com>
+From: Mike Frysinger <vapier.adi@gmail.com>
+Subject: Re: [PWM v5 3/3] PWM: Atmel PWMC driver
+Date: Sun, 20 Feb 2011 17:31:28 -0500
+Message-ID: <AANLkTik_LqXS1DA-y3xOjXOCn_h7aNoZ533F+CK=ruZR@mail.gmail.com>
+References: <1298175043-31727-1-git-send-email-bgat@billgatliff.com> <1298175043-31727-4-git-send-email-bgat@billgatliff.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1298175043-31727-1-git-send-email-bgat@billgatliff.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc:content-type:content-transfer-encoding;
+        bh=VXcRrD/niXYA/GNbSH8Pg3SmwJKg+c4iKRKbOu6GT0U=;
+        b=S3gqIfoAVOm3ih5O2bBd9MvPZidz1nfBUjrcNMq+03kNeut3ugoJ+UPiSY5Vo5CFxg
+         lDV4UeT5palDSr8dNYJvtiEzwnpGo7Cy3ncpaz2+hulUoXI4HcySxpJmjl2G8XwDIf16
+         4WlexVFwrEW/Uirf/pbZ9mxv1OQpDxVZWUGUU=
+In-Reply-To: <1298175043-31727-4-git-send-email-bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
-Cc: Bill Gatliff <bgat@billgatliff.com>
+Content-Type: text/plain; charset="utf-8"
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: linux-embedded@vger.kernel.org
 
-Driver to allow the Atmel PWMC peripheral found on various
-AT91 SoCs to be controlled using the Generic PWM framework.
-Tested on the AT91SAM9263.
+On Sat, Feb 19, 2011 at 23:10, Bill Gatliff wrote:
+> +static inline void pwmc_writel(const struct atmel_pwmc *p, unsigned =
+offset, u32 val)
+> +static inline u32 pwmc_readl(const struct atmel_pwmc *p, unsigned of=
+fset)
+> +static inline void pwmc_chan_writel(const struct pwm_device *p,
+> +                                   u32 offset, u32 val)
+> +static inline u32 pwmc_chan_readl(const struct pwm_device *p, u32 of=
+fset)
+> +static inline int __atmel_pwmc_is_on(struct pwm_device *p)
+> +static inline void __atmel_pwmc_stop(struct pwm_device *p)
+> +static inline void __atmel_pwmc_start(struct pwm_device *p)
+> +static inline int __atmel_pwmc_config_polarity(struct pwm_device *p,
+> +                                             struct pwm_config *c)
+> +static inline int __atmel_pwmc_config_duty_ticks(struct pwm_device *=
+p,
+> +                                               struct pwm_config *c)
+> +static inline int __atmel_pwmc_config_period_ticks(struct pwm_device=
+ *p,
+> +                                                 struct pwm_config *=
+c)
 
-Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
----
- drivers/pwm/Makefile     |    1 +
- drivers/pwm/atmel-pwmc.c |  501 ++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 502 insertions(+), 0 deletions(-)
- create mode 100644 drivers/pwm/atmel-pwmc.c
+seems like a lot of unnecessary inlines.  while the first two might
+make sense since they're really just redirecting to the read/write i/o
+api, the rest are quite a bit bigger.
 
-diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index ecec3e4..d274fa0 100644
---- a/drivers/pwm/Makefile
-+++ b/drivers/pwm/Makefile
-@@ -4,3 +4,4 @@
- obj-$(CONFIG_GENERIC_PWM) := pwm.o
- 
- obj-$(CONFIG_GPIO_PWM)		+= gpio-pwm.o
-+obj-$(CONFIG_ATMEL_PWMC)	+= atmel-pwmc.o
-diff --git a/drivers/pwm/atmel-pwmc.c b/drivers/pwm/atmel-pwmc.c
-new file mode 100644
-index 0000000..053bb3b
---- /dev/null
-+++ b/drivers/pwm/atmel-pwmc.c
-@@ -0,0 +1,501 @@
-+/*
-+ * Atmel PWMC peripheral driver
-+ *
-+ * Copyright (C) 2011 Bill Gatliff <bgat@billgatliff.com>
-+ * Copyright (C) 2007 David Brownell
-+ *
-+ * This program is free software; you may redistribute and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful, but
-+ * WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-+ * General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-+ * USA
-+ */
-+#include <linux/module.h>
-+#include <linux/init.h>
-+#include <linux/slab.h>
-+#include <linux/clk.h>
-+#include <linux/err.h>
-+#include <linux/io.h>
-+#include <linux/interrupt.h>
-+#include <linux/platform_device.h>
-+#include <linux/completion.h>
-+#include <linux/pwm/pwm.h>
-+
-+enum {
-+	/* registers common to the PWMC peripheral */
-+	PWMC_MR = 0,
-+	PWMC_ENA = 4,
-+	PWMC_DIS = 8,
-+	PWMC_SR = 0xc,
-+	PWMC_IER = 0x10,
-+	PWMC_IDR = 0x14,
-+	PWMC_IMR = 0x18,
-+	PWMC_ISR = 0x1c,
-+
-+	/* registers per each PWMC channel */
-+	PWMC_CMR = 0,
-+	PWMC_CDTY = 4,
-+	PWMC_CPRD = 8,
-+	PWMC_CCNT = 0xc,
-+	PWMC_CUPD = 0x10,
-+
-+	/* how to find each channel */
-+	PWMC_CHAN_BASE = 0x200,
-+	PWMC_CHAN_STRIDE = 0x20,
-+
-+	/* CMR bits of interest */
-+	PWMC_CMR_CPD = 10,
-+	PWMC_CMR_CPOL = 9,
-+	PWMC_CMR_CALG = 8,
-+	PWMC_CMR_CPRE_MASK = 0xf,
-+};
-+
-+/* TODO: NCHAN==4 only for certain AT91-ish parts! */
-+#define NCHAN 4
-+struct atmel_pwmc {
-+	struct pwm_device p[NCHAN];
-+	struct pwm_device_ops ops;
-+	spinlock_t lock;
-+	struct completion complete;
-+	void __iomem *iobase;
-+	struct clk *clk;
-+	int irq;
-+	u32 ccnt_mask;
-+};
-+
-+/* TODO: debugfs attributes for peripheral register values */
-+
-+static inline void pwmc_writel(const struct atmel_pwmc *p, unsigned offset, u32 val)
-+{
-+	__raw_writel(val, p->iobase + offset);
-+}
-+
-+static inline u32 pwmc_readl(const struct atmel_pwmc *p, unsigned offset)
-+{
-+	return __raw_readl(p->iobase + offset);
-+}
-+
-+static inline void pwmc_chan_writel(const struct pwm_device *p,
-+				    u32 offset, u32 val)
-+{
-+	const struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	int chan = p - &ap->p[0];
-+
-+	if (PWMC_CMR == offset)
-+		val &= ((1 << PWMC_CMR_CPD)
-+			| (1 << PWMC_CMR_CPOL)
-+			| (1 << PWMC_CMR_CALG)
-+			| (PWMC_CMR_CPRE_MASK));
-+	else
-+		val &= ap->ccnt_mask;
-+
-+	pwmc_writel(ap, offset + PWMC_CHAN_BASE
-+		    + (chan * PWMC_CHAN_STRIDE), val);
-+}
-+
-+static inline u32 pwmc_chan_readl(const struct pwm_device *p, u32 offset)
-+{
-+	const struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	int chan = p - &ap->p[0];
-+
-+	return pwmc_readl(ap, offset + PWMC_CHAN_BASE
-+			  + (chan * PWMC_CHAN_STRIDE));
-+}
-+
-+static inline int __atmel_pwmc_is_on(struct pwm_device *p)
-+{
-+	struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	int chan = p - &ap->p[0];
-+
-+	return (pwmc_readl(ap, PWMC_SR) & BIT(chan)) ? 1 : 0;
-+}
-+
-+static inline void __atmel_pwmc_stop(struct pwm_device *p)
-+{
-+	struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	int chan = p - &ap->p[0];
-+
-+	pwmc_writel(ap, PWMC_DIS, BIT(chan));
-+}
-+
-+static inline void __atmel_pwmc_start(struct pwm_device *p)
-+{
-+	struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	int chan = p - &ap->p[0];
-+
-+	pwmc_writel(ap, PWMC_ENA, BIT(chan));
-+}
-+
-+static inline int __atmel_pwmc_config_polarity(struct pwm_device *p,
-+					      struct pwm_config *c)
-+{
-+	unsigned long cmr = pwmc_chan_readl(p, PWMC_CMR);
-+
-+	if (c->polarity)
-+		clear_bit(PWMC_CMR_CPOL, &cmr);
-+	else
-+		set_bit(PWMC_CMR_CPOL, &cmr);
-+	pwmc_chan_writel(p, PWMC_CMR, cmr);
-+	p->active_high = c->polarity ? 1 : 0;
-+
-+	dev_dbg(p->dev, "polarity %d\n", c->polarity);
-+	return 0;
-+}
-+
-+static inline int __atmel_pwmc_config_duty_ticks(struct pwm_device *p,
-+						struct pwm_config *c)
-+{
-+	unsigned long cmr, cprd, cpre, cdty;
-+
-+	cmr = pwmc_chan_readl(p, PWMC_CMR);
-+	cprd = pwmc_chan_readl(p, PWMC_CPRD);
-+
-+	cpre = cmr & PWMC_CMR_CPRE_MASK;
-+	clear_bit(PWMC_CMR_CPD, &cmr);
-+
-+	cdty = cprd - (c->duty_ticks >> cpre);
-+
-+	p->duty_ticks = c->duty_ticks;
-+
-+	if (__atmel_pwmc_is_on(p)) {
-+		pwmc_chan_writel(p, PWMC_CMR, cmr);
-+		pwmc_chan_writel(p, PWMC_CUPD, cdty);
-+	} else
-+		pwmc_chan_writel(p, PWMC_CDTY, cdty);
-+
-+	dev_dbg(p->dev, "duty_ticks = %lu cprd = %lx"
-+		" cdty = %lx cpre = %lx\n", p->duty_ticks,
-+		cprd, cdty, cpre);
-+
-+	return 0;
-+}
-+
-+static inline int __atmel_pwmc_config_period_ticks(struct pwm_device *p,
-+						  struct pwm_config *c)
-+{
-+	u32 cmr, cprd, cpre;
-+
-+	cpre = fls(c->period_ticks);
-+	if (cpre < 16)
-+		cpre = 0;
-+	else {
-+		cpre -= 15;
-+		if (cpre > 10)
-+			return -EINVAL;
-+	}
-+
-+	cmr = pwmc_chan_readl(p, PWMC_CMR);
-+	cmr &= ~PWMC_CMR_CPRE_MASK;
-+	cmr |= cpre;
-+
-+	cprd = c->period_ticks >> cpre;
-+
-+	pwmc_chan_writel(p, PWMC_CMR, cmr);
-+	pwmc_chan_writel(p, PWMC_CPRD, cprd);
-+	p->period_ticks = c->period_ticks;
-+
-+	dev_dbg(p->dev, "period_ticks = %lu cprd = %x cpre = %x\n",
-+		 p->period_ticks, cprd, cpre);
-+
-+	return 0;
-+}
-+
-+static int atmel_pwmc_config_nosleep(struct pwm_device *p, struct pwm_config *c)
-+{
-+	struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	int ret = 0;
-+	unsigned long flags;
-+	int chan = p - &ap->p[0];
-+
-+	spin_lock_irqsave(&ap->lock, flags);
-+
-+	switch (c->config_mask) {
-+
-+	case BIT(PWM_CONFIG_DUTY_TICKS):
-+		__atmel_pwmc_config_duty_ticks(p, c);
-+		break;
-+
-+	case BIT(PWM_CONFIG_STOP):
-+		__atmel_pwmc_stop(p);
-+		break;
-+
-+	case BIT(PWM_CONFIG_START):
-+		__atmel_pwmc_start(p);
-+		break;
-+
-+	case BIT(PWM_CONFIG_POLARITY):
-+		__atmel_pwmc_config_polarity(p, c);
-+		break;
-+
-+	case BIT(PWM_CONFIG_ENABLE_CALLBACK):
-+		pwmc_writel(ap, PWMC_IER, BIT(chan));
-+		break;
-+
-+	case BIT(PWM_CONFIG_DISABLE_CALLBACK):
-+		pwmc_writel(ap, PWMC_IDR, BIT(chan));
-+		break;
-+
-+	default:
-+		ret = -EINVAL;
-+		break;
-+	}
-+
-+	spin_unlock_irqrestore(&ap->lock, flags);
-+	return ret;
-+}
-+
-+static int atmel_pwmc_stop_sync(struct pwm_device *p)
-+{
-+	struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	int was_on = __atmel_pwmc_is_on(p);
-+	int chan = p - &ap->p[0];
-+	int ret;
-+
-+	if (was_on) {
-+		do {
-+			init_completion(&ap->complete);
-+			set_bit(FLAG_STOP, &p->flags);
-+			pwmc_writel(ap, PWMC_IER, BIT(chan));
-+
-+			dev_dbg(p->dev, "waiting on stop_sync completion...\n");
-+
-+			ret = wait_for_completion_interruptible(&ap->complete);
-+
-+			dev_dbg(p->dev, "stop_sync complete (%d)\n", ret);
-+
-+			if (ret)
-+				return ret;
-+		} while (test_bit(FLAG_STOP, &p->flags));
-+	}
-+
-+	return was_on;
-+}
-+
-+static int atmel_pwmc_config(struct pwm_device *p, struct pwm_config *c)
-+{
-+	int was_on = 0;
-+
-+	if (p->ops->config_nosleep) {
-+		if (!p->ops->config_nosleep(p, c))
-+			return 0;
-+	}
-+
-+	might_sleep();
-+
-+	dev_dbg(p->dev, "config_mask %lx\n", c->config_mask);
-+
-+	was_on = atmel_pwmc_stop_sync(p);
-+	if (was_on < 0)
-+		return was_on;
-+
-+	if (test_bit(PWM_CONFIG_PERIOD_TICKS, &c->config_mask)) {
-+		__atmel_pwmc_config_period_ticks(p, c);
-+		if (!test_bit(PWM_CONFIG_DUTY_TICKS, &c->config_mask)) {
-+			struct pwm_config d = {
-+				.config_mask = PWM_CONFIG_DUTY_TICKS,
-+				.duty_ticks = p->duty_ticks,
-+			};
-+			__atmel_pwmc_config_duty_ticks(p, &d);
-+		}
-+	}
-+
-+	if (test_bit(PWM_CONFIG_DUTY_TICKS, &c->config_mask))
-+		__atmel_pwmc_config_duty_ticks(p, c);
-+
-+	if (test_bit(PWM_CONFIG_POLARITY, &c->config_mask))
-+		__atmel_pwmc_config_polarity(p, c);
-+
-+	if (test_bit(PWM_CONFIG_START, &c->config_mask)
-+	    || (was_on && !test_bit(PWM_CONFIG_STOP, &c->config_mask)))
-+		__atmel_pwmc_start(p);
-+
-+	return 0;
-+}
-+
-+static int atmel_pwmc_request(struct pwm_device *p)
-+{
-+	struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&ap->lock, flags);
-+	clk_enable(ap->clk);
-+	p->tick_hz = clk_get_rate(ap->clk);
-+	__atmel_pwmc_stop(p);
-+	spin_unlock_irqrestore(&ap->lock, flags);
-+
-+	return 0;
-+}
-+
-+static void atmel_pwmc_release(struct pwm_device *p)
-+{
-+	struct atmel_pwmc *ap = pwm_get_drvdata(p);
-+	clk_disable(ap->clk);
-+}
-+
-+static irqreturn_t atmel_pwmc_irq(int irq, void *data)
-+{
-+	struct atmel_pwmc *ap = data;
-+	struct pwm_device *p;
-+	u32 isr;
-+	int chan;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&ap->lock, flags);
-+
-+	isr = pwmc_readl(ap, PWMC_ISR);
-+	for (chan = 0; isr; chan++, isr >>= 1) {
-+		p = &ap->p[chan];
-+		if (isr & 1) {
-+			pwm_callback(p);
-+			if (test_bit(FLAG_STOP, &p->flags)) {
-+				__atmel_pwmc_stop(p);
-+				clear_bit(FLAG_STOP, &p->flags);
-+			}
-+			complete_all(&ap->complete);
-+		}
-+	}
-+
-+	spin_unlock_irqrestore(&ap->lock, flags);
-+
-+	return IRQ_HANDLED;
-+}
-+
-+static int __devinit atmel_pwmc_probe(struct platform_device *pdev)
-+{
-+	struct atmel_pwmc *ap;
-+	struct resource *r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	int chan;
-+	int ret = 0;
-+
-+	ap = kzalloc(sizeof *ap, GFP_KERNEL);
-+	if (!ap) {
-+		ret = -ENOMEM;
-+		goto err_atmel_pwmc_alloc;
-+	}
-+
-+	spin_lock_init(&ap->lock);
-+	init_completion(&ap->complete);
-+	platform_set_drvdata(pdev, ap);
-+
-+	/* TODO: the datasheets are unclear as to how large CCNT
-+	 * actually is across all adopters of the PWMC; sixteen bits
-+	 * seems a safe assumption for now */
-+	ap->ccnt_mask = 0xffffUL;
-+
-+	ap->ops.request = atmel_pwmc_request;
-+	ap->ops.release = atmel_pwmc_release;
-+	ap->ops.config_nosleep = atmel_pwmc_config_nosleep;
-+	ap->ops.config = atmel_pwmc_config;
-+
-+	ap->clk = clk_get(&pdev->dev, "pwm_clk");
-+	if (IS_ERR(ap->clk)) {
-+		ret = -ENODEV;
-+		goto err_clk_get;
-+	}
-+
-+	ap->iobase = ioremap_nocache(r->start, r->end - r->start + 1);
-+	if (IS_ERR_OR_NULL(ap->iobase)) {
-+		ret = -ENODEV;
-+		goto err_ioremap;
-+	}
-+
-+	clk_enable(ap->clk);
-+	pwmc_writel(ap, PWMC_DIS, -1);
-+	pwmc_writel(ap, PWMC_IDR, -1);
-+	clk_disable(ap->clk);
-+
-+	for (chan = 0; chan < NCHAN; chan++) {
-+		ap->p[chan].ops = &ap->ops;
-+		pwm_set_drvdata(&ap->p[chan], ap);
-+		ret = pwm_register(&ap->p[chan], &pdev->dev, chan);
-+		if (ret)
-+			goto err_pwm_register;
-+	}
-+
-+	ap->irq = platform_get_irq(pdev, 0);
-+	if (ap->irq != -ENXIO) {
-+		ret = request_irq(ap->irq, atmel_pwmc_irq, 0,
-+				  dev_name(&pdev->dev), ap);
-+		if (ret)
-+			goto err_request_irq;
-+	}
-+
-+	return 0;
-+
-+err_request_irq:
-+err_pwm_register:
-+	for (chan = 0; chan < chan; chan++) {
-+		if (pwm_is_registered(&ap->p[chan]))
-+			pwm_unregister(&ap->p[chan]);
-+	}
-+
-+	iounmap(ap->iobase);
-+err_ioremap:
-+	clk_put(ap->clk);
-+err_clk_get:
-+	platform_set_drvdata(pdev, NULL);
-+	kfree(ap);
-+err_atmel_pwmc_alloc:
-+	dev_dbg(&pdev->dev, "%s: error, returning %d\n", __func__, ret);
-+	return ret;
-+}
-+
-+static int __devexit atmel_pwmc_remove(struct platform_device *pdev)
-+{
-+	struct atmel_pwmc *ap = platform_get_drvdata(pdev);
-+	int chan;
-+
-+	for (chan = 0; chan < NCHAN; chan++)
-+		if (pwm_is_registered(&ap->p[chan]))
-+			pwm_unregister(&ap->p[chan]);
-+
-+	clk_enable(ap->clk);
-+	pwmc_writel(ap, PWMC_IDR, -1);
-+	pwmc_writel(ap, PWMC_DIS, -1);
-+	clk_disable(ap->clk);
-+
-+	if (ap->irq != -ENXIO)
-+		free_irq(ap->irq, ap);
-+
-+	clk_put(ap->clk);
-+	iounmap(ap->iobase);
-+
-+	kfree(ap);
-+
-+	return 0;
-+}
-+
-+static struct platform_driver atmel_pwmc_driver = {
-+	.driver = {
-+		/* note: this name has to match the one in at91*_devices.c */
-+		.name = "atmel_pwmc",
-+		.owner = THIS_MODULE,
-+	},
-+	.probe = atmel_pwmc_probe,
-+	.remove = __devexit_p(atmel_pwmc_remove),
-+};
-+
-+static int __init atmel_pwmc_init(void)
-+{
-+	return platform_driver_register(&atmel_pwmc_driver);
-+}
-+module_init(atmel_pwmc_init);
-+
-+static void __exit atmel_pwmc_exit(void)
-+{
-+	platform_driver_unregister(&atmel_pwmc_driver);
-+}
-+module_exit(atmel_pwmc_exit);
-+
-+MODULE_AUTHOR("Bill Gatliff <bgat@billgatliff.com>");
-+MODULE_DESCRIPTION("Driver for Atmel PWMC peripheral");
-+MODULE_LICENSE("GPL");
-+MODULE_ALIAS("platform:atmel_pwmc");
--- 
-1.7.2.3
+> +static inline int __atmel_pwmc_config_polarity(struct pwm_device *p,
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 struct pwm_config *c)
+> +static inline int __atmel_pwmc_config_duty_ticks(struct pwm_device *=
+p,
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 struct pwm_config *c)
+> +static inline int __atmel_pwmc_config_period_ticks(struct pwm_device=
+ *p,
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 struct pwm_config *c)
+
+these funcs always return 0 and the callers never check the return
+value, so i guess these should return void instead
+
+> +static int atmel_pwmc_stop_sync(struct pwm_device *p)
+> +{
+> + =C2=A0 =C2=A0 =C2=A0 struct atmel_pwmc *ap =3D pwm_get_drvdata(p);
+> + =C2=A0 =C2=A0 =C2=A0 int was_on =3D __atmel_pwmc_is_on(p);
+> + =C2=A0 =C2=A0 =C2=A0 int chan =3D p - &ap->p[0];
+> + =C2=A0 =C2=A0 =C2=A0 int ret;
+> +
+> + =C2=A0 =C2=A0 =C2=A0 if (was_on) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 do {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 init_completion(&ap->complete);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 set_bit(FLAG_STOP, &p->flags);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 pwmc_writel(ap, PWMC_IER, BIT(chan));
+> +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 dev_dbg(p->dev, "waiting on stop_sync completion...\n");
+> +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 ret =3D wait_for_completion_interruptible(&ap->complete);
+> +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 dev_dbg(p->dev, "stop_sync complete (%d)\n", ret);
+> +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 if (ret)
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 } while (test_bit(=
+=46LAG_STOP, &p->flags));
+> + =C2=A0 =C2=A0 =C2=A0 }
+> +
+> + =C2=A0 =C2=A0 =C2=A0 return was_on;
+> +}
+
+if you changed this to return immediately when !was_on, then you
+wouldnt need to indent the entire block.
+
+> + =C2=A0 =C2=A0 =C2=A0 ap->iobase =3D ioremap_nocache(r->start, r->en=
+d - r->start + 1);
+
+isnt there a resource_size helper ?
+
+> + =C2=A0 =C2=A0 =C2=A0 if (IS_ERR_OR_NULL(ap->iobase)) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_ioremap;
+> + =C2=A0 =C2=A0 =C2=A0 }
+
+i dont think any of the io funcs return PTR_ERR.  they all return NULL
+or a valid address.
+
+> + =C2=A0 =C2=A0 =C2=A0 for (chan =3D 0; chan < NCHAN; chan++) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ap->p[chan].ops =3D=
+ &ap->ops;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 pwm_set_drvdata(&a=
+p->p[chan], ap);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D pwm_regist=
+er(&ap->p[chan], &pdev->dev, chan);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ret)
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 goto err_pwm_register;
+> + =C2=A0 =C2=A0 =C2=A0 }
+> +
+> +err_pwm_register:
+> + =C2=A0 =C2=A0 =C2=A0 for (chan =3D 0; chan < chan; chan++) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (pwm_is_registe=
+red(&ap->p[chan]))
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 pwm_unregister(&ap->p[chan]);
+> + =C2=A0 =C2=A0 =C2=A0 }
+
+if you wanted to be tricky, you could just have the unwind not change
+the value of "chan".
+while (--chan > 0)
+    pwm_unregister(&ap->p[chan]);
+
+otherwise, the "chan < chan" test makes no sense in the for loop.
+
+> +static int __devexit atmel_pwmc_remove(struct platform_device *pdev)
+> +{
+> + =C2=A0 =C2=A0 =C2=A0 struct atmel_pwmc *ap =3D platform_get_drvdata=
+(pdev);
+> + =C2=A0 =C2=A0 =C2=A0 int chan;
+> +
+> + =C2=A0 =C2=A0 =C2=A0 for (chan =3D 0; chan < NCHAN; chan++)
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (pwm_is_registe=
+red(&ap->p[chan]))
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 pwm_unregister(&ap->p[chan]);
+
+why do you test if it's registered ?  the probe function will abort if
+any do not register properly.
+-mike
