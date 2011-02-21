@@ -1,13 +1,13 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PWM v5 2/3] PWM: GPIO+hrtimer device emulation
-Date: Sun, 20 Feb 2011 18:39:07 -0600
-Message-ID: <AANLkTimYNhfPRKKruv-ZO08BBV=bkJHA4miiZ4+A0z03@mail.gmail.com>
+Subject: Re: [PWM v5 3/3] PWM: Atmel PWMC driver
+Date: Sun, 20 Feb 2011 18:40:55 -0600
+Message-ID: <AANLkTintizGb8Ky3ROdxXF45UUeZnLN5wUQmAARSwNHG@mail.gmail.com>
 References: <1298175043-31727-1-git-send-email-bgat@billgatliff.com>
-	<1298175043-31727-3-git-send-email-bgat@billgatliff.com>
-	<AANLkTikAGOtWkOiG_s+fUiYEVfewg4pzLdaW7S=iciWA@mail.gmail.com>
+	<1298175043-31727-4-git-send-email-bgat@billgatliff.com>
+	<AANLkTik_LqXS1DA-y3xOjXOCn_h7aNoZ533F+CK=ruZR@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTikAGOtWkOiG_s+fUiYEVfewg4pzLdaW7S=iciWA@mail.gmail.com>
+In-Reply-To: <AANLkTik_LqXS1DA-y3xOjXOCn_h7aNoZ533F+CK=ruZR@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -18,7 +18,9 @@ Cc: linux-embedded@vger.kernel.org
 Mike:
 
 
-Yep.  My rebasing technique obviously needs some work!  :)
+All great points, and you spotted a true bug--- the "chan < chan"
+junk.  Don't know how I missed that one.  Will fix all.
+
 
 b.g.
 -- 
