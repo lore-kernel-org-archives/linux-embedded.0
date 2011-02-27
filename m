@@ -1,10 +1,11 @@
 From: Tony Ibbs <tibs@tonyibbs.co.uk>
-Subject: [PATCH 1/5] Documentation for KBUS
-Date: Sun, 27 Feb 2011 18:11:44 +0000
-Message-ID: <ab146dd857b6cfa607b0ea426e1c99ddcebb756a.1298829754.git.tibs@tonyibbs.co.uk>
+Subject: [PATCH 2/5] External header file for KBUS
+Date: Sun, 27 Feb 2011 18:11:45 +0000
+Message-ID: <9d2ffc1567208d8890d7ef28f93f7a8914d753af.1298829754.git.tibs@tonyibbs.co.uk>
 References: <cover.1298829754.git.tibs@tonyibbs.co.uk>
+ <ab146dd857b6cfa607b0ea426e1c99ddcebb756a.1298829754.git.tibs@tonyibbs.co.uk>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <cover.1298829754.git.tibs@tonyibbs.co.uk>
+In-Reply-To: <ab146dd857b6cfa607b0ea426e1c99ddcebb756a.1298829754.git.tibs@tonyibbs.co.uk>
 In-Reply-To: <cover.1298829754.git.tibs@tonyibbs.co.uk>
 References: <cover.1298829754.git.tibs@tonyibbs.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
@@ -20,1237 +21,681 @@ From: Tibs <tibs@tonyibbs.co.uk>
 
 Signed-off-by: Tony Ibbs <tibs@tonyibbs.co.uk>
 ---
- Documentation/Kbus.txt | 1222 ++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 1222 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/Kbus.txt
+ include/linux/kbus_defns.h |  666 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 666 insertions(+), 0 deletions(-)
+ create mode 100644 include/linux/kbus_defns.h
 
-diff --git a/Documentation/Kbus.txt b/Documentation/Kbus.txt
+diff --git a/include/linux/kbus_defns.h b/include/linux/kbus_defns.h
 new file mode 100644
-index 0000000..7cf723f
+index 0000000..82779a6
 --- /dev/null
-+++ b/Documentation/Kbus.txt
-@@ -0,0 +1,1222 @@
-+=============================================
-+KBUS -- Lightweight kernel-mediated messaging
-+=============================================
-+
-+Summary
-+=======
-+KBUS provides lightweight kernel-mediated messaging for Linux.
-+
-+* "lightweight" means that there is no intent to provide complex or
-+  sophisticated mechanisms - if you need something more, consider DBUS or
-+  other alternatives.
-+
-+* "kernel-mediated" means that the actual business of message passing and
-+  message synchronisation is handled by a kernel module.
-+
-+* "for Linux" means what it says, since the Linux kernel is required.
-+
-+Initial use is expected to be in embedded systems.
-+
-+There is (at least initially) no intent to aim for a "fast" system - this is
-+not aimed at real-time systems.
-+
-+Although the implementation is kernel-mediated, there is a mechanism
-+("Limpets") for commnicating KBUS messages between buses and/or systems.
-+
-+Intentions
-+==========
-+KBUS is intended:
-+
-+* To be simple to use and simple to understand.
-+* To have a small codebase, written in C.
-+* To provide predictable message delivery.
-+* To give deterministic message ordering.
-+* To guarantee a reply to every request.
-+
-+It needs to be simple to use and understand because the expected users are
-+typically busy with other matters, and do not have time to spend learning
-+a complex messaging system.
-+
-+It needs to have a small codebase, written in C, because embedded systems
-+often lack resources, and may not have enough space for C++ libraries, or
-+messaging systems supporting more complex protocol stacks.
-+
-+Our own experience on embedded systems of various sizes indicates that
-+the last three points are especially important.
-+
-+Predictable message delivery means the user can know whether they can tell in
-+what circumstances messages will or will not be received.
-+
-+Deterministic message ordering means that all recipients of a given set of
-+messages will receive them in the same order as all other recpients (and this
-+will be the order in which the messages were sent). This is important when
-+several part of (for instance) an audio/video stack are interoperating.
-+
-+Guaranteeing that a request will always result in a reply means that the user
-+will be told if the intended replier has (for instance) crashed. This again
-+allows for simpler use of the system.
-+
-+The basics
-+==========
-+Python and C
-+------------
-+Although the KBUS kernel module is written in C, the module tests are written
-+in Python, and there is a Python module providing useful interfaces, which is
-+expected to be the normal way of using KBUS from Python.
-+
-+There is also a C library (libkbus) which provides a similar level of
-+abstraction, so that C programmers can use KBUS without having to handle the
-+low level details of sockets and message datastructures. Note that the C
-+programer using KBUS does need to have some awareness of how KBUS messages
-+work in order to get memory management right.
-+
-+Messages
-+========
-+Message names
-+-------------
-+All messages have names - for instance "$.Sensors.Kitchen".
-+
-+All message names start with "$.", followed by one or more alphanumeric words
-+separated by dots. There are two wildcard characters, "*" and "%", which can
-+be the last word of a name.
-+
-+Thus (in some notation or other)::
-+
-+    name := '$.'  [ word '.' ]+  ( word  | '*' | '%' )
-+    word := alphanumerics
-+
-+Case is significant. There is probably a limit on the maximum size of a
-+subname, and also on the maximum length of a message name.
-+
-+Names form a name hierarchy or tree - so "$.Sensors" might have children
-+"$.Sensors.Kitchen" and "$.Sensors.Bedroom".
-+
-+If the last word of a name is "*", then this is a wildcard name that also
-+includes all the child names at that level and below -- i.e., all the names
-+that start with the name up to the "*". So "$.Sensors.*" includes
-+"$.Sensors.Kitchen", "$.Sensors.Bedroom", "$.Sensors.Kitchen.FireAlarm",
-+"$.Sensors.Kitchen.Toaster", "$.Sensors.Bedroom.FireAlarm", and so on.
-+
-+If the last word of a name is "%", then this is a wildcard name that also
-+includes all the child names at that level -- i.e., all the names obtained by
-+replacing the "%" by another word. So "$.Sensors.%" includes
-+"$.Sensors.Kitchen" and "$.Sensors.Bedroom", but not
-+"$.Sensors.Kitchen.Toaster".
-+
-+Message ids
-+-----------
-+Every message is expected to have a unique id.
-+
-+A message id is made up of two parts, a network id and a serial number.
-+
-+The network id is used to carry useful information when a message is
-+transferred from one KBUS system to another (for instance, over a bridge). By
-+default (for local messages) it is 0.
-+
-+A serial number is used to identify the particular message within a network.
-+
-+If a message is sent via KBUS with a network id of 0, then KBUS itself will
-+assign a new message id to the message, with the network id (still) 0, and
-+with the serial number one more than the last serial number assigned. Thus for
-+local messages, message ids ascend, and their order is deterministic.
-+
-+If a message is sent via KBUS with a non-zero network id, then KBUS does not
-+touch its message id.
-+
-+Network ids are represented textually as ``{n,s}``, where ``n`` is the
-+network id and ``s`` is the serial number.
-+
-+    Message id {0,0} is reserved for use as an invalid message id. Both
-+    network id and serial number are unsigned 32-bit integers. Note that this
-+    means that local serial numbers will eventually wrap.
-+
-+Message content
-+---------------
-+Messages are made of the following parts:
-+
-+:start and end guards:
-+
-+  These are unsigned 32-bit words. 'start_guard' is notionally "Kbus",
-+  and 'end_guard' (the 32 bit word after the rest of the message) is
-+  notionally "subK". Obviously that depends on how one looks at the 32-bit
-+  word. Every message shall start with a start guard and end with an end
-+  guard (but see `Message implementation`_ for details).
-+
-+  These provide some help in checking that a message is well formed, and in
-+  particular the end guard helps to check for broken length fields.
-+
-+  If the message layout changes in an incompatible manner (this has happened
-+  once, and is strongly discouraged), then the start and end guards change.
-+
-+Unset
-+~~~~~
-+Unset values are 0, or have zero length (as appropriate).
-+
-+It is not possible for a message name to be unset.
-+
-+The message header
-+~~~~~~~~~~~~~~~~~~
-+:message id: identifies this particular message. This is made up of a network
-+  id and a serial number, and is discussed in `Message ids`_.
-+
-+  When replying to a message, copy this value into the 'In reply to' field.
-+
-+:in_reply_to: is the message id of the message that this is a reply to.
-+
-+  This shall be set to 0 unless this message *is* a reply to a previous
-+  message. In other words, if this value is non-0, then the message *is* a
-+  reply.
-+
-+:to: is the Ksock id identifying who the message is to be sent to.
-+
-+  When writing a new message, this should normally be set to 0, meaning
-+  "anyone listening" (but see below if "state" is being maintained).
-+
-+  When replying to a message, it shall be set to the 'from' value of the
-+  orginal message.
-+
-+  When constructing a request message (a message wanting a reply), then it can
-+  be set to a specific replier's Ksock id. When such a message is sent, if the
-+  replier bound (at that time) does not have that specific Ksock id, then the
-+  send will fail.
-+
-+:from: indicates the Ksock id of the message's sender.
-+
-+  When writing a new message, set this to 0, since KBUS will set it.
-+
-+  When reading a message, this will have been set by KBUS.
-+
-+:orig_from: this indicates the original sender of a message, when being
-+  transported via Limpet. This will be documented in more detail in the future.
-+
-+:final_to: this indicates the final target of a message, when being
-+  transported via Limpet. This will be documented in more detail in the future.
-+
-+:extra: this is a zero field, for future expansion. KBUS will always set this
-+  field to zero.
-+
-+:flags: indicates extra information about the message. See `Message Flags`_
-+  for detailed information.
-+
-+  When writing a message, typical uses include:
-+
-+  * the message is URGENT
-+  * a reply is wanted
-+
-+  When reading a message, typical uses include:
-+
-+  * the message is URGENT
-+  * a reply is wanted
-+  * a reply is wanted from the specific reader
-+
-+  The top 16 bits of the flags field is reserved for use by the user - KBUS
-+  will not touch it.
-+
-+:name_length: is the length of the message name in bytes. This will always be
-+  non-zero, as a message name must always be given.
-+
-+:data_length: is the length of the message data in bytes. It may be zero
-+  if there is no data associated with this message.
-+
-+:name: identifies the message. It must be terminated with a
-+  zero byte (as is normal for C - in the Python binding a normal Python string
-+  can be used, and the this will be done for you). Byte ordering is according
-+  to that of the platform.
-+
-+  In an "entire" message (see `Message implementation`_ below) the name shall
-+  be padded out to a multiple of 4 bytes. Neither the terminating zero byte
-+  nor the padding are included in the name length.  Padding should be with
-+  zero bytes.
-+
-+:data: is optional. KBUS does not touch the content of the
-+  data, but just copies it. Byte ordering is according to that of the
-+  platform.
-+
-+  In an "entire" message (see `Message implementation`_ below) the data shall,
-+  if present, be padded out to a multiple of 4 bytes. This padding is not
-+  included in the data length, and the padding bytes may be whatever byte
-+  values are convenient to the user. KBUS does not guarantee to copy the exact
-+  given padding bytes (in fact, current implementations just ignore them).
-+
-+Message implementation
-+~~~~~~~~~~~~~~~~~~~~~~
-+There are two ways in which a message may be constructed, "pointy" and
-+"entire".
-+See the ``kbus_defns.h`` header file for details.
-+
-+.. note:: The Python binding hides most of the detail of the message
-+   implementation from the user, so if you are using Python you may be able to
-+   skip this section.
-+
-+In a "pointy" message, the ``name`` and ``data`` fields in the message header
-+are C pointers to the actual name and data. If there is no data, then the
-+``data`` field is NULL. This is probably the simplest form of message for a C
-+programmer to create. This might be represented as::
-+
-+        start_guard: 'Kbus'
-+        id:          (0,0)
-+        in_reply_to: (0,0)
-+        to:          0
-+        from:        0
-+        name_len:    6
-+        data_len:    0
-+        name:        ---------------------------> "$.Fred"
-+        data:        NULL
-+        end_guard:   'subK'
-+
-+or (with data)::
-+
-+        start_guard: 'Kbus'
-+        id:          (0,0)
-+        in_reply_to: (0,0)
-+        to:          0
-+        from:        0
-+        name_len:    6
-+        data_len:    7
-+        name:        ---------------------------> "$.Fred"
-+        data:        ---------------------------> "abc1234"
-+        end_guard:   'subK'
-+
-+.. warning:: When writing a "pointy" message in C, be very careful not to
-+   free the name and data between the ``write`` and the SEND, as it is
-+   only when the message is sent that KBUS actually follows the ``name`` and
-+   ``data`` pointers.
-+
-+   *After* the SEND, KBUS will have taken its own copies of the name and
-+   (any) data.
-+
-+In an "entire" message, both ``name`` and ``data`` fields are required to be
-+NULL. The message header is followed by the message name (padded as described
-+above), any message data (also padded), and another end guard. This might be
-+represented as::
-+
-+        start_guard: 'Kbus'
-+        id:          (0,0)
-+        in_reply_to: (0,0)
-+        to:          0
-+        from:        0
-+        name_len:    6
-+        data_len:    0
-+        name:        NULL
-+        data:        NULL
-+        end_guard:   'subK'
-+        name_data:   '$.Fred\x0\x0'
-+        end_guard:   'subK'
-+
-+or (again with data)::
-+
-+        start_guard: 'Kbus'
-+        id:          (0,0)
-+        in_reply_to: (0,0)
-+        to:          0
-+        from:        0
-+        name_len:    6
-+        data_len:    7
-+        name:        NULL
-+        data:        NULL
-+        end_guard:   'subK'
-+        name_data:   '$.Fred\x0\x0'
-+        data_data:   'abc1234\x0'
-+        end_guard:   'subK'
-+
-+Note that in these examples:
-+
-+1. The message name is padded out to 6 bytes of name, plus one of terminating
-+   zero byte, plus another zero byte to make 8, but the message's ``name_len``
-+   is still 6.
-+2. When there is no data, there is no "data data" after the name data.
-+3. When there is data, the data is presented after the name, and is padded out
-+   to a multiple of 4 bytes (but without the necessity for a terminating zero
-+   byte, so it is possible to have no pad bytes if the data length is already
-+   a multiple of 4). Again, the ``data_len`` always reflects the "real" data
-+   length.
-+4. Although the data shown is presented as ASCII strings for these examples,
-+   it really is just bytes, with no assumption of its content/meaning.
-+
-+When writing/sending messages, either form may be used (again, the "pointy"
-+form may be simpler for C programmers).
-+
-+When reading messages, however, the "entire" form is always returned - this
-+removes questions about needing to free multiple returned datastructures (for
-+instance, what to do if the user were to ask for the NEXTMSG, read a few
-+bytes, and then DISCARD the rest).
-+
-+Limits
-+~~~~~~
-+Message names may not be shorter than 3 characters (since they must be at
-+least "$." plus another character). An arbitrary limit is also placed on the
-+maximum message length - this is currently 1000 characters, but may be
-+reviewed in the future.
-+
-+Message data may, of course, be of zero length.
-+
-+When reading a message, an "entire" message is always returned.
-+
-+    .. note:: When using C to work with KBUS messages, it is generally
-+       ill-advised to reference the message name and data "directly"::
-+
-+            char    *name = msg->name;
-+            uint8_t *data = msg->data;
-+
-+       since this will work for "pointy" messages, but not for "entire"
-+       messages (where the ``name`` field will be NULL). Instead, it
-+       is always better to do::
-+
-+            char    *name = kbus_msg_name_ptr(msg);
-+            uint8_t *data = kbus_msg_data_ptr(msg);
-+
-+       regardless of the message type.
-+
-+Message flags
-+-------------
-+KBUS reserves the bottom 16 bits of the flags word for predefined purposes
-+(although not all of those bits are yet used), and guarantees not to touch the
-+top 16 bits, which are available for use by the programmer as a particular
-+application may wish.
-+
-+The WANT_A_REPLY bit is set by the sender to indicate that a
-+reply is wanted. This makes the message into a request.
-+
-+    Note that setting the WANT_A_REPLY bit (i.e., a request) and
-+    setting 'in_reply_to' (i.e., a reply) is bound to lead to
-+    confusion, and the results are undefined (i.e., don't do it).
-+
-+The WANT_YOU_TO_REPLY bit is set by KBUS on a particular message
-+to indicate that the particular recipient is responsible for replying
-+to (this instance of the) message. Otherwise, KBUS clears it.
-+
-+The SYNTHETIC bit is set by KBUS when it generates a Status message, for
-+instance when a replier has gone away and will therefore not be sending a
-+reply to a request that has already been queued.
-+
-+    Note that KBUS does not check that a sender has not set this
-+    flag on a message, but doing so may lead to confusion.
-+
-+The URGENT bit is set by the sender if this message is to be
-+treated as urgent - i.e., it should be added to the *front* of the
-+recipient's message queue, not the back.
-+
-+Send flags
-+~~~~~~~~~~
-+There are two "send" flags, ALL_OR_WAIT and ALL_OR_FAIL.
-+Either one may be set, or both may be unset.
-+
-+   If both are set, the message will be rejected as invalid.
-+
-+   Both flags are ignored in reply messages (i.e., messages with the
-+   'in_reply_to' field set).
-+
-+If a message has ALL_OR_FAIL set, then a SEND will only succeed if the message
-+could be added to all the (intended) recipient's message queues. Otherwise,
-+SEND returns -EBUSY.
-+
-+If a message has ALL_OR_WAIT set, then a SEND will only succeed if the message
-+could be added to all the (intended) recipient's message queues. Otherwise
-+SEND returns -EAGAIN. In this case, the message is still being sent, and the
-+caller should either call DISCARD (to drop it), or else use poll/select to
-+wait for the send to finish. It will not be possible to call "write" until the
-+send has completed or been discarded.
-+
-+These are primarily intended for use in debugging systems. In particular, note
-+that the mechanisms dealing with ALL_OR_WAIT internally are unlikely to be
-+very efficient.
-+
-+.. note:: The send flags will be less effective when messages are being
-+   mediated via Limpets, as remote systems are involved.
-+
-+Things KBUS changes in a message
-+--------------------------------
-+In general, KBUS leaves the content of a message alone - mostly so that an
-+individual KBUS module can "pass through" messages from another domain.
-+However, it does change:
-+
-+- the message id's serial number (but only if its network id is unset)
-+- the 'from' id (to indicate the Ksock this message was sent from)
-+- the WANT_YOU_TO_REPLY bit in the flags (set or cleared as appropriate)
-+- the SYNTHETIC bit, which will always be unset in a message sent by a
-+  Sender
-+
-+KBUS will always set the 'extra' field to zero.
-+
-+Limpets will change:
-+
-+- the network id in any field that has one.
-+- the 'orig_from' and 'final_to' fields (which in general should only be
-+  manipulated by Limpets).
-+
-+Types of message
-+================
-+There are four basic message types:
-+
-+* Announcement -- a message aimed at any listeners, expecting no reply
-+* Request -- a message aimed at a replier, who is expected to reply
-+* Reply -- a reply to a request
-+* Status -- a message generated by KBUS
-+
-+The Python interface provides a Message base class, and subclasses thereof for
-+each of the "user" message types (but not currently for Status).
-+
-+Announcements
-+-------------
-+An announcement is the "plain" message type. It is a message that is being
-+sent for all bound listeners to "hear".
-+
-+When creating a new announcement message, it has:
-+
-+        :message id:   see `Message ids`_
-+        :in reply to:  unset (it's not a reply)
-+        :to:           unset (all announcements are broadcast to any listeners)
-+        :from:         unset (KBUS will set it)
-+        :flags:        typically unset, see `Message flags`_
-+        :message name: as appropriate
-+        :message data: as appropriate
-+
-+The Python interface provides an ``Announcement`` class to help in creating an
-+announcement message.
-+
-+Request message
-+---------------
-+A request message is a message that wants a reply.
-+
-+Since only one Ksock may bind as a replier for a given message name, a
-+request message wants a reply from a single Ksock. By default, this is
-+whichever Ksock has bound to the message name at the moment of sending, but
-+see `Stateful transactions`_.
-+
-+When creating a new request message, it has:
-+
-+        :message id:   see `Message ids`_
-+        :in reply to:  unset (it's not a reply)
-+        :to:           either unset, or a specific Ksock id if the request
-+                       should fail if that Ksock is (no longer) the replier
-+                       for this message name
-+        :from:         unset (KBUS will set it)
-+        :flags:        the "needs a reply" flag should be set.
-+                       KBUS will set the "you need to reply" flag in the
-+                       copy of the message delivered to its replier.
-+        :message name: as appropriate
-+        :message data: as appropriate
-+
-+When receiving a request message, the WANT_YOU_TO_REPLY flag will be set if it
-+is this recipient's responsibility to reply.
-+
-+The Python interface provides a ``Request`` class to help in creating a
-+request message.
-+
-+When a request message is sent, it is an error if there is no replier bound to
-+that message name.
-+
-+The message will, as normal, be delivered to all listeners, and will have the
-+"needs a reply" flag set wherever it is received. However, only the copy of
-+the message received by the replier will be marked with the WANT_YOU_TO_REPLY
-+flag.
-+
-+    So, if a particular file descriptor is bound as listener and replier
-+    for '$.Fred', it will receive two copies of the original message (one
-+    marked as needing reply from that file descriptor). However, when the
-+    reply is sent, only the "plain" listener will receive a copy of the reply
-+    message.
-+
-+Reply message
-+-------------
-+A reply message is the expected response after reading a request message.
-+
-+A reply message is distinguished by having a non-zero 'in reply to' value.
-+
-+Each reply message is in response to a specific request, as indicated by the
-+'in reply to' field in the message.
-+
-+The replier is helped to remember that it needs to reply to a request, because
-+the request has the WANT_YOU_TO_REPLY flag set.
-+
-+When a reply is sent, all listeners for that message name will receive it.
-+However, the original replier will not.
-+
-+When creating a new reply message, it has:
-+
-+        :message id:   see `Message ids`_
-+        :in reply to:  the request message's 'message id'
-+        :to:           the request message's 'from' id
-+        :from:         unset (KBUS will set it)
-+        :flags:        typically unset, see `Message flags`_
-+        :message name: the request message's 'message name'
-+        :message data: as appropriate
-+
-+The Python interface provides a ``Reply`` class to help in creating a reply
-+message, but more usefully there is also a ``reply_to`` function that creates
-+a Reply Message from the original Request.
-+
-+Status message
-+--------------
-+KBUS generates Status messages (also sometimes referred to as "synthetic"
-+messages) when a request message has been successfully sent, but the replier
-+is unable to reply (for instance, because it has closed its Ksock). KBUS thus
-+uses a Status message to provide the "reply" that it guarantees the sender
-+will get.
-+
-+As you might expect, a KBUS status message is thus (technically) a reply
-+message.
-+
-+A status message looks like:
-+
-+        :message id:   as normal
-+        :in reply to:  the 'message id' of the message whose sending or
-+                       processing caused this message.
-+        :to:           the Ksock id of the recipient of the message
-+        :from:         the Ksock id of the sender of the message - this will
-+                       be 0 if the sender is KBUS itself (which is assumed for
-+                       most exceptions)
-+        :flags:        typically unset, see `Message flags`_
-+        :message name: for KBUS exceptions, a message name in '$.KBUS.*'
-+        :message data: for KBUS exceptions, normally absent
-+
-+KBUS status messages always have '$.KBUS.<something>' names (this may be a
-+multi-level <something>), and are always in response to a previous message, so
-+always have an 'in reply to'.
-+
-+Requests and Replies
-+--------------------
-+KBUS guarantees that each Request will (eventually) be matched by a consequent
-+Reply (or Status [1]_) message, and only one such.
-+
-+The "normal" case is when the replier reads the request, and sends its own
-+reply back.
-+
-+If a Request message has been successfully SENT, there are the following other
-+cases to consider:
-+
-+1. The replier unbinds from that message name before reading the request
-+   message from its queue. In this case, KBUS removes the message from the
-+   repliers queue, and issues a "$.KBUS.Replier.Unbound" message.
-+
-+2. The replier closes itself (close the Ksock), but has not yet read the
-+   message. In this case, KBUS issues a "$.KBUS.Replier.GoneAway" message.
-+
-+3. The replier closes itself (closes the Ksock), has read the message, but has
-+   not yet (and now cannot) replied to it. In this case, KBUS issues a
-+   "$.KBUS.Replier.Ignored" message.
-+
-+4. SEND did not complete, and the replier closes itself before the message can
-+   be added to its message queue (by the POLL mechanism). In this case, KBUS
-+   issues a "$.KBUS.Replier.Disappeared" message.
-+
-+5. SEND did not complete, and an error occurs when the POLL mechanims tries to
-+   send the message. In this case, KBUS issues a "$.KBUS.ErrorSending"
-+   message.
-+
-+In all these cases, the 'in_reply_to' field is set to the original request's
-+message id. In the first three cases, the 'from' field will be set to the
-+Ksock id of the (originally intended) replier. In the last two cases, that
-+information is not available, and a 'from' of 0 (indicating KBUS itself) is
-+used.
-+
-+.. [1] Remember that a Status message is essentially a specialisation of a
-+       Reply message.
-+
-+.. note:: Limpets introduce some extra messages, which will be documented when
-+   the proper Limpet documentation is written.
-+
-+KBUS end points - Ksocks
-+========================
-+The KBUS devices
-+----------------
-+Message interactions happen via the KBUS devices. Installing the KBUS kernel
-+module always creates ``/dev/kbus0``, it may also create ``/dev/kbus1``, and
-+so on.
-+
-+    The number of devices to create is indicated by an argument at module
-+    installation, for instance::
-+
-+        # insmod kbus.ko num_kbus_devices=10
-+
-+Messages are sent by writing to a KBUS device, and received by reading from
-+the same device. A variety of useful ioctls are also provided. Each KBUS
-+device is independent - messages cannot be sent from ``/dev/kbus0`` to
-+``/dev/kbus1``, since there is no shared information.
-+
-+Ksocks
-+------
-+Specifically, messages are written to and read from KBUS device file
-+descriptors. Each such is termed a *Ksock* - this is a simpler term than "file
-+descriptor", and has some resonance with "socket".
-+
-+Each Ksock may be any (one or more) of:
-+
-+* a Sender (opening the device for read/write)
-+* a Listener (only needing to open the device for read)
-+* a Replier (opening the device for read/write)
-+
-+Every Ksock has an id. This is a 32-bit unsigned number assigned by KBUS when
-+the device is opened. The value 0 is reserved for KBUS itself.
-+
-+    The terms "listener id", "sender id", "replier id", etc., thus all refer
-+    to a Ksock id, depending on what it is being used for.
-+
-+Senders
-+-------
-+Message senders are called "senders". A sender should open a Ksock for read
-+and write, as it may need to read replies and error/status messages.
-+
-+A message is sent by:
-+
-+1. Writing the message to the Ksock (using the standard ``write`` function)
-+2. Calling the SEND ioctl on the Ksock, to actually send the message. This
-+   returns (via its arguments) the message id of the message sent. It also
-+   returns status information about the send
-+
-+        The status information is to be documented.
-+
-+The DISCARD ioctl can be used to "throw away" a partially written message,
-+before SEND has been called on it.
-+
-+If there are no listeners (of any type) bound to that message name, then the
-+message will be ignored.
-+
-+If the message is flagged as needing a reply, and there are no repliers bound
-+to that message name, then an error message will be sent to the sender, by
-+KBUS.
-+
-+It is not possible to send a message with a wildcard message name.
-+
-+    As a restriction this makes the life of the implementor and documentor
-+    easier. I believe it would also be confusing if provided.
-+
-+The sender does not need to bind to any message names in order to receive
-+error and status messages from KBUS.
-+
-+When a sender sends a Request, an internal note is made that it expects a
-+corresponding Reply (or possible a Status message from KBUS if the Replier
-+goes away or unbinds from that message name, before replying). A place for
-+that Reply is reserved in the sender's message queue. If the message queue
-+fills up (either with messages waiting to be read, or with reserved slots for
-+Replies), then the sender will not be able to send another Request until there
-+is room on the message queue again.
-+
-+    Hopefully, this can be resolved by the sender reading a message off its
-+    queue. However, if there are no messages to be read, and the queue is all
-+    reserved for replies, the only solution is for the sender to wait for a
-+    replier to send it something that it can then read.
-+
-+.. note:: What order do we describe things in? Don't forget:
-+
-+  If the message being sent is a request, then the replier bound to that
-+  message name will (presumably) write a reply to the request. Thus the normal
-+  sequence for a request is likely to be:
-+
-+  1. write the request message
-+  2. read the reply
-+
-+  The sender does *not* need to bind to anything in order to receive a reply to
-+  a request it has sent.
-+
-+      Of course, if a sender binds to listen to the name it uses for its
-+      request, then it will get a copy of the request as sent, and it will
-+      also get (an extra) copy of the reply. But see `Receiving messages once
-+      only`_.
-+
-+Listeners
-+---------
-+Message recipients are called "listeners".
-+
-+Listeners indicate that they want to receive particular messages, by using the
-+BIND ioctl on a Ksock to specify the name of the message that is to be
-+listened for. If the binding is to a wildcarded message name, then the
-+listener will receive all messages with names that match the wildcard.
-+
-+An ordinary listener will receive all messages with that name (sent to the
-+relevant Ksock). A listener may make more than one binding on the same Ksock
-+(indeed, it is allowed to bind to the same name more than once).
-+
-+Messages are received by:
-+
-+1. Using the NEXTMSG ioctl to request the next message (this also returns the
-+   messages length in bytes)
-+2. Calling the standard ``read`` function to read the message data.
-+
-+If NEXTMSG is called again, the next message will be readied for reading,
-+whether the previous message has been read (or partially read) or not.
-+
-+If a listener no longer wants to receive a particular message name, then they
-+can unbind from it, using the UNBIND ioctl. The message name and flags used in
-+an UNBIND must match those in the corresponding BIND. Any messages in the
-+listener's message queue which match that unbinding will be removed from the
-+queue (i.e., the listener will not actually receive them). This does *not*
-+affect the message currently being read.
-+
-+    Note that this has implication for binding and unbinding wildcards,
-+    which must also match.
-+
-+Closing the Ksock also unbinds all the message bindings made on it.
-+It does not affect message bindings made on other Ksocks.
-+
-+Repliers
-+--------
-+Repliers are a special sort of listener.
-+
-+For each message name, there may be a single "replier". A replier binds to a
-+message name in the same way as any other listener, but sets the "replier"
-+flag. If someone else has already bound to the same Ksock as a replier for
-+that message name, the request will fail.
-+
-+Repliers only receive Requests (messages that are marked as wanting a reply).
-+
-+A replier may (should? must?) reply to the request - this is done by sending
-+a Reply message through the Ksock from which the Request was read.
-+
-+It is perfectly legitimate to bind to a message as both replier and listener,
-+in which case two copies of the message will be read, once as replier, and
-+once as (just) listener (but see `Receiving messages once only`_).
-+
-+
-+When a request message is read by the appropriate replier, KBUS will mark
-+*that particular message* with the "you must reply" flag. This will not be set
-+on copies of that message read by any (non-replier) listeners.
-+
-+    So, in the case where a Ksock is bound as replier and listener for the
-+    same message name, only one of the two copies of the message received will
-+    be marked as "you must reply".
-+
-+If a replier binds to a wildcarded message name, then they are the *default*
-+replier for any message names satisfying that wildcard. If another replier
-+binds to a more specific message name (matching that wildcard),
-+then the specific message name binding "wins" - the wildcard replier will no
-+longer receive that message name.
-+
-+    In particular '$.Fred.Jim' is more specific than '$.Fred.%' which in turn
-+    is more specific than '$.Fred.*'
-+
-+This means that if a wildcard replier wants to guarantee to see all the
-+messages matching their wildcard, they also need to bind as a listener for the
-+same wildcarded name.
-+
-+For example:
-+
-+    Assume message names are of the form '$.Sensors.<Room>' or
-+    '$.Sensors.<Room>.<Measurement>'.
-+
-+    Replier 1 binds to '$.Sensors.*'. They will be the default replier for
-+    all sensor requests.
-+
-+    Replier 2 binds to '$.Sensors.%'. They will take over as the default
-+    replier for any room specific requests.
-+
-+    Replier 3 binds to '$.Sensors.Kitchen.Temperature'. They will take over as
-+    the replier for the kitchen temperature.
-+
-+    So:
-+
-+    - A message named '$.Sensors.Kitchen.Temperature' will go to replier 3.
-+    - A message named '$.Sensors.Kitchen' or '$.Sensors.LivingRoom' will go to
-+      replier 2.
-+    - A message named '$.Sensors.LivingRoom.Temperature' will go to replier 1.
-+
-+When a Replier is closed (technically, when its ``release`` function is
-+called by the kernel) KBUS traverses its outstanding message queue, and for
-+each Request that has not been answered, generates a Status message saying
-+that the Replier has "GoneAway".
-+
-+Similarly, if a Replier unbinds from replying to a mesage, KBUS traverses its
-+outstanding message queue, and for each Request that has not been answered, it
-+generates a Status message saying that it has "Unbound" from being a replier
-+for that message name. It also forgets the message, which it is now not going
-+to reply to.
-+
-+Lastly, when a Replier is closed, if it has read any Requests (technically,
-+called NEXTMSG to pop them from the message queue), but not actually replied
-+to them, then KBUS will send an "Ignored" Status message for each such
-+Request.
-+
-+More information
-+================
-+Stateful transactions
-+---------------------
-+It is possible to make stateful message transactions, by:
-+
-+1. sending a Request
-+2. receiving the Reply, and noting the Ksock id of the replier
-+3. sending another Request to that specific replier
-+4. and so on
-+
-+Sending a request to a particular Ksock will fail if that Ksock is no longer
-+bound as replier to the relevant message name. This allows a sender to
-+guarantee that it is communicating with a particular instance of the replier
-+for a message name.
-+
-+Queues filling up
-+-----------------
-+Messages are sent by a mechanism which:
-+
-+1. Checks the message is plausible (it has a plausible message name,
-+   and the right sort of "shape")
-+2. If the message is a Request, checks that the sender has room on its message
-+   queue for the (eventual) Reply.
-+3. Finds the Ksock ids of all the listeners and repliers bound to that
-+   messages name
-+4. Adds the message to the queue for each such listener/replier
-+
-+This can cause problems if one of the queues is already full (allowing
-+infinite expansion of queues would also cause problems, of couse).
-+
-+If a *sender* attempts to send a Request, but does not have room on its
-+message queue for the (corresponding) Reply, then the message will not be
-+sent, and the send will fail. Note that the message id will not be set, and
-+the blocking behaviours defined below do not occur.
-+
-+If a *replier* cannot receive a particular message, because its queue is full,
-+then the message will not be sent, and the send will fail with an error. This
-+does, however, set the message id (and thus the "last message id" on the
-+sender).
-+
-+Moreover, a sender can indicate if it wants a message to be:
-+
-+1. Added to all the listener queues, regardless, in which case it will block
-+   until that can be done (ALL_OR_WAIT, sender blocks)
-+2. Added to all the listener queues, and fail if that can't be done
-+   (ALL_OR_FAIL)
-+3. Added to all the listener queues that have room (the default)
-+
-+See `Message flags`_ for more details.
-+
-+Urgent messages
-+---------------
-+Messages may be flagged urgent. In this case they will be added to the front
-+of the destination message queue, rather than the end - in other words, they
-+will be the next message to be "popped" by NEXTMSG.
-+
-+Note that this means that if two urgent messages are sent to the same target,
-+and *then* a NEXTMSG/read occurs, the second urgent message will be popped and
-+read first.
-+
-+Select, write/send and "next message", blocking
-+-----------------------------------------------
-+.. warning:: At the moment, ``read`` and ``write`` are always non-blocking.
-+
-+``read`` returns more of the currently selected message, or EOF if there is no
-+more of that message to read (and thus also if there is no currently selected
-+message). The NEXTMSG ioctl is used to select ("pop") the next message.
-+
-+``write`` writes to the end of the currently-being-written message. The
-+DISCARD ioctl can be used to discard the data written so far, and the SEND
-+ioctl to send the (presumably completed message). Whilst the message is being
-+sent, it is not possible to use ``write``.
-+
-+Note that if SEND is used to send a Request, then KBUS ensures that there will
-+always be either a Reply or a Status message in response to that request.
-+
-+Specifically, if:
-+
-+1. The Replier "goes away" (and its "release" function is called) before
-+   reading the Request (specifically, before calling NEXTMSG to pop it from
-+   the message queue)
-+2. The Replier "goes away" (and its "release" function is called) before
-+   replying to a Request that it has already read (i.e., used NEXTMSG to pop
-+   from the message queue)
-+3. The Replier unbinds from that Request message name before reading the
-+   Request (with the same caveat on what that means)
-+4. Select/poll attempts to send the Request, and discovers that the
-+   Replier has disappeared since the initial SEND
-+5. Select/poll attempts to send the Request, and some other error occurs
-+
-+then KBUS will "reply" with an appropriate Status message.
-+
-+--------------------------------------------------
-+
-+KBUS support its own particular variation on blocking of message sending.
-+
-+First of all, it supports use of "select" to determine if there are any
-+messages waiting to be read. So, for instance (in Python)::
-+
-+        with Ksock(0,'rw') as sender:
-+            with Ksock(0,'r') as listener:
-+                (r,w,x) = select.select([listener],[],[],0)
-+                assert r == []
-+
-+                listener.bind('$.Fred')
-+                msg = Announcement('$.Fred','data')
-+                sender.send_msg(msg)
-+
-+                (r,w,x) = select.select([listener],[],[],0)
-+                assert r == [listener]
-+
-+This simply checks if there is a message in the Ksock's message list, waiting
-+to be "popped" with NEXTMSG.
-+
-+Secondly, ``write``, SEND and DISCARD interact in what is hoped to be a
-+sensible manner. Specifically:
-+
-+* When SEND (i.e., the SEND ioctl) is called, KBUS can either:
-+
-+  1. Succeed in sending the message. The Ksock is now ready for ``write`` to
-+     be called on it again.
-+  2. Failed in sending the message (possibly, if the message was a Request,
-+     with EADDRNOTAVAIL, indicating that there is no Replier for that
-+     Request). The Ksock is now ready for ``write`` to be called on it again.
-+  3. If the message was marked ALL_OR_WAIT, then it may fail with EAGAIN.
-+     In this case, the Ksock is still in sending state, and an attempt to
-+     call ``write`` will fail (with EALREADY). The caller can either use
-+     DISCARD to discard the message, or use select/poll to wait for the
-+     message to finish sending.
-+
-+Thus "select" for the write case checks whether it is allowed to call
-+"write" - for instance::
-+
-+        with Ksock(0,'rw') as sender:
-+            write_list = [sender]
-+            with Ksock(0,'r') as listener1:
-+                write_list= [sender,listener1]
-+                read_list = [listener1]
-+
-+                (r,w,x) = select.select(read_list,write_list,[],0)
-+                assert r == []
-+                assert w == [sender]
-+                assert x == []
-+
-+                with Ksock(0,'rw') as listener2:
-+                    write_list.append(listener2)
-+                    read_list.append(listener2)
-+
-+                    (r,w,x) = select.select(read_list,write_list,[],0)
-+                    assert r == []
-+                    assert len(w) == 2
-+                    assert sender in w
-+                    assert listener2 in w
-+                    assert x == []
-+
-+Receiving messages once only
-+----------------------------
-+In normal usage (and by default), if a Ksock binds to a message name multiple
-+times, it will receive multiple copies of a message. This can happen:
-+
-+* explicitly (the Ksock deliberately and explicitly binds to the same name
-+  more than once, seeking this effect).
-+* as a result of binding to a message name and a wildcard that includes the
-+  same name, or two overlapping wildcards.
-+* as a result of binding as Replier to a name, and also as Listener to the
-+  same name (possibly via a wildcard). In this case, multiple copies will
-+  only be received when a Request with that name is made.
-+
-+Several programmers have complained that the last case, in particular, is very
-+inconvenient, and thus the "receive a message once only" facility has been
-+added.
-+
-+Using the MSGONCEONLY IOCTL, it is possible to tell a Ksock that only one copy
-+of a particular message should be received, even if multiple are "due". In the
-+case of the Replier/Listener copies, it will always be the message to which
-+the Replier should reply (the one with WANT_YOU_TO_REPLY set) that will be
-+received.
-+
-+Please use this facility with care, and only if you really need it.
-+
-+IOCTLS
-+------
-+The KBUS ioctls are defined (with explanatory comments) in the kernel module
-+header file (``kbus_defns.h``). They are:
-+
-+:RESET:         Currently has no effect
-+:BIND:          Bind to a particular message name (possibly as replier).
-+:UNBIND:        Unbind from a binding - must match exactly.
-+:KSOCKID:       Determine the Ksock id of the Ksock used
-+:REPLIER:       Determine who is bound as replier to a particular message
-+                name. This returns 0 or the Ksock id of the replier.
-+:NEXTMSG:       Pop the next message from the Ksock's message queue, ready
-+                for reading (with ``read``), and return its length (in bytes).
-+                If there is no next message, return a length of 0.
-+                The length is always the length of an "entire" message (see
-+                `Message implementation`_).
-+:LENLEFT:       Determine how many bytes of the message currently being read
-+                are still to read.
-+:SEND:          Send the current outstanding message for this Ksock (i.e., the
-+                bytes written to the Ksock since the last SEND or DISCARD).
-+                Return the message id of the message, and maybe other status
-+                information.
-+:DISCARD:       Discard (throw away) the current outstanding message for this
-+                Ksock (i.e., any bytes written to the Ksock since the last
-+                SEND or DISCARD).
-+:LASTSENT:      Determine the message id of the last message SENT on this
-+                Ksock.
-+:MAXMSGS:       Set the maximum length of the (read) message queue for this
-+                KSOCK, and return the actual length that is set. An attempt
-+                to set the queue length to 0 will just return the current
-+                queue length.
-+:NUMMSGS:       Determine how many messages are outstanding in this Ksock's
-+                read queue.
-+:UNREPLIEDTO:   Determines how many Requests (marked "WANT_YOU_TO_REPLY")
-+                this Ksock still needs to reply to. This is primarily a
-+                development tool.
-+:MSGONLYONCE:   Determines whether only one copy of a message will be
-+                received, even if the message name is bound to multiple times.
-+                May also be used to query the current state.
-+:VERBOSE:       Determines whether verbose kernel messages should be output or
-+                not. Affects the *device* (the entire Ksock).
-+                May also be used to query the current state.
-+:NEWDEVICE:     Requests another KBUS device (``/dev/kbus/<n>``). The next
-+                KBUS device number (up to a maximum of 255) will be allocated.
-+                Returns the new device number.
-+:REPORTREPLIERBINDS: Request synthetic messages announcing Replier BIND/UNBIND
-+                events. These are messages named "$.KBUS.ReplierBindEvent",
-+                and are the only predefined messages with data.
-+                Both Python and C bindings provide a useful function to
-+                extract the ``is_bind``, ``binder`` and ``name`` values from
-+                the data.
-+
-+/proc/kbus/bindings
-+-------------------
-+``/proc/kbus/bindings`` is a debugging aid for reporting the listener id,
-+exclusive flag and message name for each binding, for each kbus device.
-+
-+An example might be::
-+
-+   $ cat /proc/kbus/bindings
-+   # <device> is bound to <Ksock-ID> in <process-PID> as <Replier|Listener> for <message-name>
-+     1:        1    22158  R  $.Sensors.*
-+     1:        2    22158  R  $.Sensors.Kitchen.Temperature
-+     1:        3    22158  L  $.Sensors.*
-+    13:        4    22159  L  $.Jim.*
-+    13:        1    22159  R  $.Fred
-+    13:        1    22159  L  $.Jim
-+    13:       14    23021  L  $.Jim.*
-+
-+This describes two KBUS devices (``/dev/kbus1`` and ``/dev/kbus13``).
-+
-+The first has bindings on Ksock ids 1, 2 and 3, for the given message names. The
-+"R" indicates a replier binding, the "L" indicates a listener (non-replier)
-+binding.
-+
-+The second has bindings on Ksock ids 4, 1 and 14. The order of the bindings
-+reported is *not* particularly significant.
-+
-+Note that there is no communication between the two devices, so Ksock id 1 on
-+device 1 is not related to (and has no commonality with) Ksock id 1 on device
-+13.
-+
-+/proc/kbus/stats
-+----------------
-+``/proc/kbus/stats`` is a debugging aid for reporting various statistics about
-+the KBUS devices and the Ksocks open on them.
-+
-+An example might be::
-+
-+  $ cat /proc/kbus/stats
-+  dev  0: next file 5 next msg 8 unsent unbindings 0
-+          ksock 4 last msg 0:7 queue 1 of 100
-+              read byte 0 of 0, wrote byte 52 (max 60), sending
-+              outstanding requests 0 (size 16, max 0), unsent replies 0 (max 0)
-+          ksock 3 last msg 0:5 queue 0 of 1
-+              read byte 0 of 0, wrote byte 0 (max 0), not sending
-+              outstanding requests 1 (size 16, max 0), unsent replies 0 (max 0)
-+
-+or::
-+
-+  $ cat /proc/kbus/stats
-+  dev  0: next file 4 next msg 101 unsent unbindings 0
-+          ksock 3 last msg 0:0 queue 100 of 100
-+                read byte 0 of 0, wrote byte 0 (max 0), not sending
-+                outstanding requests 0 (size 16, max 0), unsent replies 0 (max 0)
-+          ksock 2 last msg 0:100 queue 0 of 100
-+                read byte 0 of 0, wrote byte 0 (max 0), not sending
-+                outstanding requests 100 (size 102, max 92), unsent replies 0 (max 0)
-+
-+
-+Error numbers
-+-------------
-+The following error numbers get special use. In Python, they are all returned
-+as values inside the IOError exception.
-+
-+    Since we're trying to fit into the normal Un*x convention that negative
-+    values are error numbers, and since Un*x defines many of these for us,
-+    it is natural to make use of the relevant definitions. However, this also
-+    means that we are often using them in an unnatural sense. I've tried to
-+    make the error numbers used bear at least a vague relationship to their
-+    (mis)use in KBUS.
-+
-+:EADDRINUSE:    On attempting to bind a message name as replier: There is
-+                already a replier bound for this message
-+:EADDRNOTAVAIL: On attempting to send a Request message: There is no replier
-+                bound for this message's name.
-+
-+                On attempting to send a Reply message: The sender of the
-+                original request (i.e., the Ksock mentioned as the ``to``
-+                in the Reply) is no longer connected.
-+:EALREADY:      On attempting to write to a Ksock, when a previous send has
-+                returned EAGAIN. Either DISCARD the message, or use
-+                select/poll to wait for the send to complete, and write to be
-+                allowed.
-+:EBADMSG:       On attempting to bind, unbind or send a message: The message
-+                name is not valid. On sending, this can also be because the
-+                message name is a wildcard.
-+:EBUSY:         On attempting to send, then:
-+
-+                1. For a request, the replier's message queue is full.
-+                2. For any message, with ALL_OR_FAIL set, one of the
-+                   targetted listener/replier queues was full.
-+
-+:ECONNREFUSED:  On attempting to send a Reply, the intended recipient (the
-+                notional original sender of the Request) is not expecting
-+                a Reply with that message id in its 'in_reply_to'. Or, in
-+                other words, this appears to be an attempt to reply to the
-+                wrong message id or the wrong Ksock.
-+:EINVAL:        Something went wrong (generic error).
-+:EMSGSIZE:      On attempting to write a message: Data was written after
-+                the end of the message (i.e., after the final end guard
-+                of the message).
-+:ENAMETOOLONG:  On attempting to bind, unbind or send a message: The message
-+                name is too long.
-+:ENOENT:        On attempting to open a Ksock: There is no such device
-+                (normally because one has tried to open, for instance,
-+                '/dev/kbus9' when there are only 3 KBUS devices).
-+:ENOLCK:        On attempting to send a Request, when there is not enough room
-+                in the sender's message queue to guarantee that it can
-+                receive a reply for every Request already sent, *plus* this
-+                one. If there are oustanding messages in the sender's message
-+                queue, then the solution is to read some of them. Otherwise,
-+                the sender will have to wait until one of the Repliers
-+                replies to a previous Request (or goes away and KBUS replies
-+                for it).
-+
-+                When this error is received, the send has failed (just as if
-+                the message was invalid). The sender is not left in "sending"
-+                state, nor has the message been assigned a message id.
-+
-+                Note that this is *not* EAGAIN, since we do not want to block
-+                the sender (in the SEND) if it is up to the sender to perform
-+                a read to sort things out.
-+
-+:ENOMSG:        On attempting to send, when there is no message waiting to be
-+                sent (either because there has been no write since the last
-+                send, or because the message being written has been
-+                discarded).
-+:EPIPE:         On attempting to send 'to' a specific replier, the replier
-+                with that id is no longer bound to the given message's name.
-+
-+:EFAULT:    Memory allocation, copy from user space, or other such failed. This
-+            is normally very bad, it should not happen, UNLESS it is the result
-+            of calling an ioctl, when it indicates that the ioctl argument
-+            cannot be accessed.
-+
-+:ENOMEM:    Memory allocation failed (return NULL). This is normally very bad,
-+            it should not happen.
-+
-+:EAGAIN:    On attempting to send, the message being sent had ALL_OR_WAIT set,
-+            and one of the targetted listener/replier queues was full.
-+
-+            On attempting to unbind when Replier Bind Events have been
-+            requested, one or more of the KSocks bound to receive
-+            "$.KBUS.ReplierBindEvent" messages has a full message queue,
-+            and thus cannot receive the unbind event. The unbind has not been
-+            done.
-+
-+In the ``utils`` directory of the KBUS sources, there is a script called
-+``errno.py`` which takes an ``errno`` integer or name and prints out both the
-+"normal" meaning of that error number, and also (if there is one) the KBUS use
-+of it. For instance::
-+
-+    $ errno.py 1
-+    Error 1 (0x1) is EPERM: Operation not permitted
-+    $
-+    $ errno.py EPIPE
-+    EPIPE is error 32 (0x20): Broken pipe
-+
-+    KBUS:
-+    On attempting to send 'to' a specific replier, the replier with that id
-+    is no longer bound to the given message's name.
-+
++++ b/include/linux/kbus_defns.h
+@@ -0,0 +1,666 @@
++/* Kbus kernel module external headers
++ *
++ * This file provides the definitions (datastructures and ioctls) needed to
++ * communicate with the KBUS character device driver.
++ */
++
++/*
++ * ***** BEGIN LICENSE BLOCK *****
++ * Version: MPL 1.1
++ *
++ * The contents of this file are subject to the Mozilla Public License Version
++ * 1.1 (the "License"); you may not use this file except in compliance with
++ * the License. You may obtain a copy of the License at
++ * http://www.mozilla.org/MPL/
++ *
++ * Software distributed under the License is distributed on an "AS IS" basis,
++ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
++ * for the specific language governing rights and limitations under the
++ * License.
++ *
++ * The Original Code is the KBUS Lightweight Linux-kernel mediated
++ * message system
++ *
++ * The Initial Developer of the Original Code is Kynesim, Cambridge UK.
++ * Portions created by the Initial Developer are Copyright (C) 2009
++ * the Initial Developer. All Rights Reserved.
++ *
++ * Contributor(s):
++ *   Kynesim, Cambridge UK
++ *   Tony Ibbs <tibs@tonyibbs.co.uk>
++ *
++ * Alternatively, the contents of this file may be used under the terms of the
++ * GNU Public License version 2 (the "GPL"), in which case the provisions of
++ * the GPL are applicable instead of the above.  If you wish to allow the use
++ * of your version of this file only under the terms of the GPL and not to
++ * allow others to use your version of this file under the MPL, indicate your
++ * decision by deleting the provisions above and replace them with the notice
++ * and other provisions required by the GPL.  If you do not delete the
++ * provisions above, a recipient may use your version of this file under either
++ * the MPL or the GPL.
++ *
++ * ***** END LICENSE BLOCK *****
++ */
++
++#ifndef _kbus_defns
++#define _kbus_defns
++
++#if !__KERNEL__ && defined(__cplusplus)
++extern "C" {
++#endif
++
++#if __KERNEL__
++#include <linux/kernel.h>
++#include <linux/ioctl.h>
++#else
++#include <stdint.h>
++#include <sys/ioctl.h>
++#endif
++
++/*
++ * A message id is made up of two fields.
++ *
++ * If the network id is 0, then it is up to us (KBUS) to assign the
++ * serial number. In other words, this is a local message.
++ *
++ * If the network id is non-zero, then this message is presumed to
++ * have originated from another "network", and we preserve both the
++ * network id and the serial number.
++ *
++ * The message id {0,0} is special and reserved (for use by KBUS).
++ */
++struct kbus_msg_id {
++	__u32 network_id;
++	__u32 serial_num;
++};
++
++/*
++ * kbus_orig_from is used for the "originally from" and "finally to" ids
++ * in the message header. These in turn are used when messages are
++ * being sent between KBUS systems (via KBUS "Limpets"). KBUS the kernel
++ * module transmits them, unaltered, but does not use them (although
++ * debug messages may report them).
++ *
++ * An "originally from" or "finally to" id is made up of two fields, the
++ * network id (which indicates the Limpet, if any, that originally gated the
++ * message), and a local id, which is the Ksock id of the original sender
++ * of the message, on its local KBUS.
++ *
++ * If the network id is 0, then the "originally from" id is not being used.
++ *
++ * Limpets and these fields are discussed in more detail in the userspace
++ * KBUS documentation - see http://kbus-messaging.org/ for pointers to
++ * more information.
++ */
++struct kbus_orig_from {
++	__u32 network_id;
++	__u32 local_id;
++};
++
++/* When the user asks to bind a message name to an interface, they use: */
++struct kbus_bind_request {
++	__u32 is_replier;	/* are we a replier? */
++	__u32 name_len;
++	char *name;
++};
++
++/* When the user requests the id of the replier to a message, they use: */
++struct kbus_bind_query {
++	__u32 return_id;
++	__u32 name_len;
++	char *name;
++};
++
++/* When the user writes/reads a message, they use: */
++struct kbus_message_header {
++	/*
++	 * The guards
++	 * ----------
++	 *
++	 * * 'start_guard' is notionally "Kbus", and 'end_guard' (the 32 bit
++	 *   word after the rest of the message datastructure) is notionally
++	 *   "subK". Obviously that depends on how one looks at the 32-bit
++	 *   word. Every message datastructure shall start with a start guard
++	 *   and end with an end guard.
++	 *
++	 * These provide some help in checking that a message is well formed,
++	 * and in particular the end guard helps to check for broken length
++	 * fields.
++	 *
++	 * - 'id' identifies this particular message.
++	 *
++	 *   When a user writes a new message, they should set this to {0,0}.
++	 *   KBUS will then set a new message id for the message.
++	 *
++	 *   When a user reads a message, this will have been set by KBUS.
++	 *
++	 *   When a user replies to a message, they should copy this value
++	 *   into the 'in_reply_to' field, so that the recipient will know
++	 *   what message this was a reply to.
++	 *
++	 * - 'in_reply_to' identifies the message this is a reply to.
++	 *
++	 *   This shall be set to {0,0} unless this message *is* a reply to a
++	 *   previous message. In other words, if this value is non-0, then
++	 *   the message *is* a reply.
++	 *
++	 * - 'to' is who the message is to be sent to.
++	 *
++	 *   When a user writes a new message, this should normally be set
++	 *   to {0,0}, meaning "anyone listening" (but see below if "state"
++	 *   is being maintained).
++	 *
++	 *   When replying to a message, it shall be set to the 'from' value
++	 *   of the orginal message.
++	 *
++	 *   When constructing a request message (a message wanting a reply),
++	 *   the user can set it to a specific replier id, to produce a stateful
++	 *   request. This is normally done by copying the 'from' of a previous
++	 *   Reply from the appropriate replier. When such a message is sent,
++	 *   if the replier bound (at that time) does not have that specific
++	 *   id, then the send will fail.
++	 *
++	 *   Note that if 'to' is set, then 'orig_from' should also be set.
++	 *
++	 * - 'from' indicates who sent the message.
++	 *
++	 *   When a user is writing a new message, they should set this
++	 *   to {0,0}.
++	 *
++	 *   When a user is reading a message, this will have been set
++	 *   by KBUS.
++	 *
++	 *   When a user replies to a message, the reply should have its
++	 *   'to' set to the original messages 'from', and its 'from' set
++	 *   to {0,0} (see the "hmm" caveat under 'to' above, though).
++	 *
++	 * - 'orig_from' and 'final_to' are used when Limpets are mediating
++	 *   KBUS messages between KBUS devices (possibly on different
++	 *   machines). See the description by the datastructure definition
++	 *   above. The KBUS kernel preserves and propagates their values,
++	 *   but does not alter or use them.
++	 *
++	 * - 'extra' is currently unused, and KBUS will set it to zero.
++	 *   Future versions of KBUS may treat it differently.
++	 *
++	 * - 'flags' indicates the type of message.
++	 *
++	 *   When a user writes a message, this can be used to indicate
++	 *   that:
++	 *
++	 *   * the message is URGENT
++	 *   * a reply is wanted
++	 *
++	 *   When a user reads a message, this indicates if:
++	 *
++	 *   * the message is URGENT
++	 *   * a reply is wanted
++	 *
++	 *   When a user writes a reply, this field should be set to 0.
++	 *
++	 *   The top half of the 'flags' is not touched by KBUS, and may
++	 *   be used for any purpose the user wishes.
++	 *
++	 * - 'name_len' is the length of the message name in bytes.
++	 *
++	 *   This must be non-zero.
++	 *
++	 * - 'data_len' is the length of the message data in bytes. It may be
++	 *   zero if there is no data.
++	 *
++	 * - 'name' is a pointer to the message name. This should be null
++	 *   terminated, as is the normal case for C strings.
++	 *
++	 *   NB: If this is zero, then the name will be present, but after
++	 *   the end of this datastructure, and padded out to a multiple of
++	 *   four bytes (see kbus_entire_message). When doing this padding,
++	 *   remember to allow for the terminating null byte. If this field is
++	 *   zero, then 'data' shall also be zero.
++	 *
++	 * - 'data' is a pointer to the data. If there is no data (if
++	 *   'data_len' is zero), then this shall also be zero. The data is
++	 *   not touched by KBUS, and may include any values.
++	 *
++	 *   NB: If this is zero, then the data will occur immediately
++	 *   after the message name, padded out to a multiple of four bytes.
++	 *   See the note for 'name' above.
++	 *
++	 */
++	__u32 start_guard;
++	struct kbus_msg_id id;	/* Unique to this message */
++	struct kbus_msg_id in_reply_to;	/* Which message this is a reply to */
++	__u32 to;		/* 0 (empty) or a replier id */
++	__u32 from;		/* 0 (KBUS) or the sender's id */
++	struct kbus_orig_from orig_from;/* Cross-network linkage */
++	struct kbus_orig_from final_to;	/* Cross-network linkage */
++	__u32 extra;	/* ignored field - future proofing */
++	__u32 flags;	/* Message type/flags */
++	__u32 name_len;	/* Message name's length, in bytes */
++	__u32 data_len;	/* Message length, also in bytes */
++	char *name;
++	void *data;
++	__u32 end_guard;
++};
++
++#define KBUS_MSG_START_GUARD	0x7375624B
++#define KBUS_MSG_END_GUARD	0x4B627573
++
++/*
++ * When a message is returned by 'read', it is actually returned using the
++ * following datastructure, in which:
++ *
++ * - 'header.name' will point to 'rest[0]'
++ * - 'header.data' will point to 'rest[(header.name_len+3)/4]'
++ *
++ * followed by the name (padded to 4 bytes, remembering to allow for the
++ * terminating null byte), followed by the data (padded to 4 bytes) followed by
++ * (another) end_guard.
++ */
++struct kbus_entire_message {
++	struct kbus_message_header header;
++	__u32 rest[];
++};
++
++/*
++ * We limit a message name to at most 1000 characters (some limit seems
++ * sensible, after all)
++ */
++#define KBUS_MAX_NAME_LEN	1000
++
++/*
++ * The length (in bytes) of the name after padding, allowing for a terminating
++ * null byte.
++ */
++#define KBUS_PADDED_NAME_LEN(name_len)   (4 * ((name_len + 1 + 3) / 4))
++
++/*
++ * The length (in bytes) of the data after padding
++ */
++#define KBUS_PADDED_DATA_LEN(data_len)   (4 * ((data_len + 3) / 4))
++
++/*
++ * Given name_len (in bytes) and data_len (in bytes), return the
++ * length of the appropriate kbus_entire_message_struct, in bytes
++ *
++ * Note that we're allowing for a zero byte after the end of the message name.
++ *
++ * Remember that "sizeof" doesn't count the 'rest' field in our message
++ * structure.
++ */
++#define KBUS_ENTIRE_MSG_LEN(name_len, data_len)    \
++	(sizeof(struct kbus_entire_message) + \
++	 KBUS_PADDED_NAME_LEN(name_len) + \
++	 KBUS_PADDED_DATA_LEN(data_len) + 4)
++
++/*
++ * The message name starts at entire->rest[0].
++ * The message data starts after the message name - given the message
++ * name's length (in bytes), that is at index:
++ */
++#define KBUS_ENTIRE_MSG_DATA_INDEX(name_len)     ((name_len+1+3)/4)
++/*
++ * Given the message name length (in bytes) and the message data length (also
++ * in bytes), the index of the entire message end guard is thus:
++ */
++#define KBUS_ENTIRE_MSG_END_GUARD_INDEX(name_len, data_len)  \
++	((name_len+1+3)/4 + (data_len+3)/4)
++
++/*
++ * Find a pointer to the message's name.
++ *
++ * It's either the given name pointer, or just after the header (if the pointer
++ * is NULL)
++ */
++static inline char *kbus_msg_name_ptr(const struct kbus_message_header
++				      *hdr)
++{
++	if (hdr->name) {
++		return hdr->name;
++	} else {
++		struct kbus_entire_message *entire;
++		entire = (struct kbus_entire_message *)hdr;
++		return (char *)&entire->rest[0];
++	}
++}
++
++/*
++ * Find a pointer to the message's data.
++ *
++ * It's either the given data pointer, or just after the name (if the pointer
++ * is NULL)
++ */
++static inline void *kbus_msg_data_ptr(const struct kbus_message_header
++				      *hdr)
++{
++	if (hdr->data) {
++		return hdr->data;
++	} else {
++		struct kbus_entire_message *entire;
++		__u32 data_idx;
++
++		entire = (struct kbus_entire_message *)hdr;
++		data_idx = KBUS_ENTIRE_MSG_DATA_INDEX(hdr->name_len);
++		return (void *)&entire->rest[data_idx];
++	}
++}
++
++/*
++ * Find a pointer to the message's (second/final) end guard.
++ */
++static inline __u32 *kbus_msg_end_ptr(struct kbus_entire_message
++					 *entire)
++{
++	__u32 end_guard_idx =
++		KBUS_ENTIRE_MSG_END_GUARD_INDEX(entire->header.name_len,
++						entire->header.data_len);
++	return (__u32 *) &entire->rest[end_guard_idx];
++}
++
++/*
++ * Things KBUS changes in a message
++ * --------------------------------
++ * In general, KBUS leaves the content of a message alone. However, it does
++ * change:
++ *
++ * - the message id (if id.network_id is unset - it assigns a new serial
++ *   number unique to this message)
++ * - the from id (if from.network_id is unset - it sets the local_id to
++ *   indicate the Ksock this message was sent from)
++ * - the KBUS_BIT_WANT_YOU_TO_REPLY bit in the flags (set or cleared
++ *   as appropriate)
++ * - the SYNTHETIC bit, which KBUS will always unset in a user message
++ */
++
++/*
++ * Flags for the message 'flags' word
++ * ----------------------------------
++ * The KBUS_BIT_WANT_A_REPLY bit is set by the sender to indicate that a
++ * reply is wanted. This makes the message into a request.
++ *
++ *     Note that setting the WANT_A_REPLY bit (i.e., a request) and
++ *     setting 'in_reply_to' (i.e., a reply) is bound to lead to
++ *     confusion, and the results are undefined (i.e., don't do it).
++ *
++ * The KBUS_BIT_WANT_YOU_TO_REPLY bit is set by KBUS on a particular message
++ * to indicate that the particular recipient is responsible for replying
++ * to (this instance of the) message. Otherwise, KBUS clears it.
++ *
++ * The KBUS_BIT_SYNTHETIC bit is set by KBUS when it generates a synthetic
++ * message (an exception, if you will), for instance when a replier has
++ * gone away and therefore a reply will never be generated for a request
++ * that has already been queued.
++ *
++ *     Note that KBUS does not check that a sender has not set this
++ *     on a message, but doing so may lead to confusion.
++ *
++ * The KBUS_BIT_URGENT bit is set by the sender if this message is to be
++ * treated as urgent - i.e., it should be added to the *front* of the
++ * recipient's message queue, not the back.
++ *
++ * Send flags
++ * ==========
++ * There are two "send" flags, KBUS_BIT_ALL_OR_WAIT and KBUS_BIT_ALL_OR_FAIL.
++ * Either one may be set, or both may be unset.
++ *
++ *    If both bits are set, the message will be rejected as invalid.
++ *
++ *    Both flags are ignored in reply messages (i.e., messages with the
++ *    'in_reply_to' field set).
++ *
++ * If both are unset, then a send will behave in the default manner. That is,
++ * the message will be added to a listener's queue if there is room but
++ * otherwise the listener will (silently) not receive the message.
++ *
++ *     (Obviously, if the listener is a replier, and the message is a request,
++ *     then a KBUS message will be synthesised in the normal manner when a
++ *     request is lost.)
++ *
++ * If the KBUS_BIT_ALL_OR_WAIT bit is set, then a send should block until
++ * all recipients can be sent the message. Specifically, before the message is
++ * sent, all recipients must have room on their message queues for this
++ * message, and if they do not, the send will block until there is room for the
++ * message on all the queues.
++ *
++ * If the KBUS_BIT_ALL_OR_FAIL bit is set, then a send should fail if all
++ * recipients cannot be sent the message. Specifically, before the message is
++ * sent, all recipients must have room on their message queues for this
++ * message, and if they do not, the send will fail.
++ */
++
++/*
++ * When a $.KBUS.ReplierBindEvent message is constructed, we use the
++ * following to encapsulate its data.
++ *
++ * This indicates whether it is a bind or unbind event, who is doing the
++ * bind or unbind, and for what message name. The message name is padded
++ * out to a multiple of four bytes, allowing for a terminating null byte,
++ * but the name length is the length without said padding (so, in C terms,
++ * strlen(name)).
++ *
++ * As for the message header data structure, the actual data "goes off the end"
++ * of the datastructure.
++ */
++struct kbus_replier_bind_event_data {
++	__u32 is_bind;	/* 1=bind, 0=unbind */
++	__u32 binder;	/* Ksock id of binder */
++	__u32 name_len;	/* Length of name */
++	__u32 rest[];	/* Message name */
++};
++
++#if !__KERNEL__
++#define BIT(num)                 (((unsigned)1) << (num))
++#endif
++
++#define	KBUS_BIT_WANT_A_REPLY		BIT(0)
++#define KBUS_BIT_WANT_YOU_TO_REPLY	BIT(1)
++#define KBUS_BIT_SYNTHETIC		BIT(2)
++#define KBUS_BIT_URGENT			BIT(3)
++
++#define KBUS_BIT_ALL_OR_WAIT		BIT(8)
++#define KBUS_BIT_ALL_OR_FAIL		BIT(9)
++
++/*
++ * Standard message names
++ * ======================
++ * KBUS itself has some predefined message names.
++ *
++ * Synthetic Replies with no data
++ * ------------------------------
++ * These are sent to the original Sender of a Request when KBUS knows that the
++ * Replier is not going to Reply. In all cases, you can identify which message
++ * they concern by looking at the "in_reply_to" field:
++ *
++ * * Replier.GoneAway - the Replier has gone away before reading the Request.
++ * * Replier.Ignored - the Replier has gone away after reading a Request, but
++ *   before replying to it.
++ * * Replier.Unbound - the Replier has unbound (as Replier) from the message
++ *   name, and is thus not going to reply to this Request in its unread message
++ *   queue.
++ * * Replier.Disappeared - the Replier has disappeared when an attempt is made
++ *   to send a Request whilst polling (i.e., after EAGAIN was returned from an
++ *   earlier attempt to send a message). This typically means that the Ksock
++ *   bound as Replier closed.
++ * * ErrorSending - an unexpected error occurred when trying to send a Request
++ *   to its Replier whilst polling.
++ *
++ * Synthetic Announcements with no data
++ * ------------------------------------
++ * * UnbindEventsLost - sent (instead of a Replier Bind Event) when the unbind
++ *   events "set aside" list has filled up, and thus unbind events have been
++ *   lost.
++ */
++#define KBUS_MSG_NAME_REPLIER_GONEAWAY		"$.KBUS.Replier.GoneAway"
++#define KBUS_MSG_NAME_REPLIER_IGNORED		"$.KBUS.Replier.Ignored"
++#define KBUS_MSG_NAME_REPLIER_UNBOUND		"$.KBUS.Replier.Unbound"
++#define KBUS_MSG_NAME_REPLIER_DISAPPEARED	"$.KBUS.Replier.Disappeared"
++#define KBUS_MSG_NAME_ERROR_SENDING		"$.KBUS.ErrorSending"
++#define KBUS_MSG_NAME_UNBIND_EVENTS_LOST	"$.KBUS.UnbindEventsLost"
++
++/*
++ * Replier Bind Event
++ * ------------------
++ * This is the only message name for which KBUS generates data -- see
++ * kbus_replier_bind_event_data. It is also the only message name which KBUS
++ * does not allow binding to as a Replier.
++ *
++ * This is the message that is sent when a Replier binds or unbinds to another
++ * message name, if the KBUS_IOC_REPORTREPLIERBINDS ioctl has been used to
++ * request such notification.
++ */
++#define KBUS_MSG_NAME_REPLIER_BIND_EVENT	"$.KBUS.ReplierBindEvent"
++
++#define KBUS_IOC_MAGIC	'k'	/* 0x6b - which seems fair enough for now */
++/*
++ * RESET: reserved for future use
++ */
++#define KBUS_IOC_RESET	    _IO(KBUS_IOC_MAGIC,  1)
++/*
++ * BIND - bind a Ksock to a message name
++ * arg: struct kbus_bind_request, indicating what to bind to
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_BIND	   _IOW(KBUS_IOC_MAGIC,  2, char *)
++/*
++ * UNBIND - unbind a Ksock from a message id
++ * arg: struct kbus_bind_request, indicating what to unbind from
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_UNBIND	   _IOW(KBUS_IOC_MAGIC,  3, char *)
++/*
++ * KSOCKID - determine a Ksock's Ksock id
++ *
++ * The network_id for the current Ksock is, by definition, 0, so we don't need
++ * to return it.
++ *
++ * arg (out): __u32, indicating this Ksock's local_id
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_KSOCKID   _IOR(KBUS_IOC_MAGIC,  4, char *)
++/*
++ * REPLIER - determine the Ksock id of the replier for a message name
++ * arg: struct kbus_bind_query
++ *
++ *    - on input, specify the message name to ask about.
++ *    - on output, KBUS fills in the relevant Ksock id in the return_value,
++ *      or 0 if there is no bound replier
++ *
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_REPLIER  _IOWR(KBUS_IOC_MAGIC,  5, char *)
++/*
++ * NEXTMSG - pop the next message from the read queue
++ * arg (out): __u32, number of bytes in the next message, 0 if there is no
++ *            next message
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_NEXTMSG   _IOR(KBUS_IOC_MAGIC,  6, char *)
++/*
++ * LENLEFT - determine how many bytes are left to read of the current message
++ * arg (out): __u32, number of bytes left, 0 if there is no current read
++ *            message
++ * retval: 1 if there was a message, 0 if there wasn't, negative for failure
++ */
++#define KBUS_IOC_LENLEFT   _IOR(KBUS_IOC_MAGIC,  7, char *)
++/*
++ * SEND - send the current message
++ * arg (out): struct kbus_msg_id, the message id of the sent message
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_SEND	   _IOR(KBUS_IOC_MAGIC,  8, char *)
++/*
++ * DISCARD - discard the message currently being written (if any)
++ * arg: none
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_DISCARD    _IO(KBUS_IOC_MAGIC,  9)
++/*
++ * LASTSENT - determine the message id of the last message SENT
++ * arg (out): struct kbus_msg_id, {0,0} if there was no last message
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_LASTSENT  _IOR(KBUS_IOC_MAGIC, 10, char *)
++/*
++ * MAXMSGS - set the maximum number of messages on a Ksock read queue
++ * arg (in): __u32, the requested length of the read queue, or 0 to just
++ *           request how many there are
++ * arg (out): __u32, the length of the read queue after this call has
++ *            succeeded
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_MAXMSGS  _IOWR(KBUS_IOC_MAGIC, 11, char *)
++/*
++ * NUMMSGS - determine how many messages are in the read queue for this Ksock
++ * arg (out): __u32, the number of messages in the read queue.
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_NUMMSGS   _IOR(KBUS_IOC_MAGIC, 12, char *)
++/*
++ * UNREPLIEDTO - determine the number of requests (marked "WANT_YOU_TO_REPLY")
++ * which we still need to reply to.
++ * arg(out): __u32, said number
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_UNREPLIEDTO _IOR(KBUS_IOC_MAGIC, 13, char *)
++/*
++ * MSGONLYONCE - should we receive a message only once?
++ *
++ * This IOCTL tells a Ksock whether it should only receive a particular message
++ * once, even if it is both a Replier and Listener for the message (in which
++ * case it will always get the message as Replier, if appropriate), or if it is
++ * registered as multiple Listeners for the message.
++ *
++ * arg(in): __u32, 1 to change to "only once", 0 to change to the default,
++ * 0xFFFFFFFF to just return the current/previous state.
++ * arg(out): __u32, the previous state.
++ * retval: 0 for success, negative for failure (-EINVAL if arg in was not one
++ * of the specified values)
++ */
++#define KBUS_IOC_MSGONLYONCE  _IOWR(KBUS_IOC_MAGIC, 14, char *)
++/*
++ * VERBOSE - should KBUS output verbose "printk" messages (for this device)?
++ *
++ * This IOCTL tells a Ksock whether it should output debugging messages. It is
++ * only effective if the kernel module has been built with the VERBOSE_DEBUGGING
++ * flag set.
++ *
++ * arg(in): __u32, 1 to change to "verbose", 0 to change to "quiet",
++ * 0xFFFFFFFF to just return the current/previous state.
++ * arg(out): __u32, the previous state.
++ * retval: 0 for success, negative for failure (-EINVAL if arg in was not one
++ * of the specified values)
++ */
++#define KBUS_IOC_VERBOSE  _IOWR(KBUS_IOC_MAGIC, 15, char *)
++
++/*
++ * NEWDEVICE - request another KBUS device (/dev/kbus<n>).
++ *
++ * The next device number (up to a maximum of 255) will be allocated.
++ *
++ * arg(out): __u32, the new device number (<n>)
++ * retval: 0 for success, negative for failure
++ */
++#define KBUS_IOC_NEWDEVICE _IOR(KBUS_IOC_MAGIC, 16, char *)
++
++/*
++ * REPORTREPLIERBINDS - request synthetic messages announcing Replier
++ * bind/unbind events.
++ *
++ * If this flag is set, then when someone binds or unbinds to a message name as
++ * a Replier, KBUS will send out a synthetic Announcement of this fact.
++ *
++ * arg(in): __u32, 1 to change to "report", 0 to change to "do not report",
++ * 0xFFFFFFFF to just return the current/previous state.
++ * arg(out): __u32, the previous state.
++ * retval: 0 for success, negative for failure (-EINVAL if arg in was not one
++ * of the specified values)
++ */
++#define KBUS_IOC_REPORTREPLIERBINDS  _IOWR(KBUS_IOC_MAGIC, 17, char *)
++
++/* If adding another IOCTL, remember to increment the next number! */
++#define KBUS_IOC_MAXNR	17
++
++#if !__KERNEL__ && defined(__cplusplus)
++}
++#endif
++
++#endif /* _kbus_defns */
 -- 
 1.7.1
