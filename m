@@ -1,37 +1,69 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
-Subject: Re: [PWM v6 0/3] Implement a generic PWM framework
-Date: Sun, 27 Feb 2011 12:48:53 -0500
-Message-ID: <AANLkTimxcAwxX4wrwSa6pSQtvutmQ-v4n4M-=z-xRKcD@mail.gmail.com>
-References: <1298259345-9794-1-git-send-email-bgat@billgatliff.com> <AANLkTimwS+KsB3uRinY2WVzXQ6ZsuhY0ySAmHquTWff6@mail.gmail.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Tony Ibbs <tibs@tonyibbs.co.uk>
+Subject: [PATCH 0/5] RFC: KBUS messaging subsystem
+Date: Sun, 27 Feb 2011 18:11:43 +0000
+Message-ID: <cover.1298829754.git.tibs@tonyibbs.co.uk>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:in-reply-to:references:from:date
-         :message-id:subject:to:cc:content-type:content-transfer-encoding;
-        bh=+wL8l4hc/Xyuy/fo46TzLXbA7y5kgHV3sXwLCsX/xmI=;
-        b=gtrHpr1FkhI7idF4AA1TmiX5TJFS+uxFFL+9wzUVweby7fdv8xbCEdAzphGtXpt2D9
-         tiI2gKf9Cpy8c0rxTeWOzwUkDh8LdkeRDIMTlMrri9zJVtW1TLqhT+0nkyLtC8z6fraO
-         hcH27KgmMWGLXw4p4No5oNj1zQ8PNNYlwDAFo=
-In-Reply-To: <AANLkTimwS+KsB3uRinY2WVzXQ6ZsuhY0ySAmHquTWff6@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-embedded@vger.kernel.org
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Linux-embedded <linux-embedded@vger.kernel.org>
+Cc: Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>, Grant Likely <grant.likely@secretlab.ca>
 
-On Fri, Feb 25, 2011 at 21:38, Bill Gatliff wrote:
-> On Sun, Feb 20, 2011 at 9:35 PM, Bill Gatliff wrote:
->> This patch series contains the sixth attempt at implementation of
->> a generic PWM device interface framework. =C2=A0Think gpiolib, but f=
-or
->> devices and pseudo-devices that generate pulse-wave-modulated output=
-s.
->
-> Hearing no objections, does this mean that this code is finally ready
-> for a pull request? =C2=A0To whom do I send it?
+KBUS is a lightweight, Linux kernel mediated, message system,
+particularly intended for use in embedded environments.
 
-i'd start with akpm/lkml/linus and add yourself to MAINTAINERS for the
-pwm framework
--mike
+It is meant to be simple to use and understand. It is designed to
+provide predictable message delivery, deterministic message ordering,
+and a guaranteed reply for each request.
+
+It is especially aimed at situations where existing solutions,
+such as DBUS, cannot be used, typically because of system constraints.
+
+We have various customers using KBUS in real life, and believe it to
+be useful. I had a showcase table for KBUS at the ELCE in Cambridge,
+October last year, and there seemed to be interest.
+
+I am hoping to get a response from this list before attempting to send
+to the kernel list, since I believe this list should contain people
+who might be most interested in using it.
+
+The KBUS project home page is at http://kbus-messaging.org/, from
+which there are various useful links.
+
+There is a working repository with Linux 2.6.37 patched for KBUS,
+available via:
+
+ git pull git://github.com/crazyscot/linux-2.6-kbus.git kbus-2.6.37
+
+This is a resubmission of the original RFC to the Linux-Embedded list,
+having:
+
+a) changed to use __u32 instead of uint32_t and
+b) changed to use kernel messaging mechanisms (also removing
+   some messaging that should not be needed). These in response
+   to the suggestion of Sam Ravnborg
+c) split into multiple in-line patches, as is normal practice,
+   and as requested by Grant Likely
+
+Tibs (5):
+  Documentation for KBUS
+  External header file for KBUS
+  Kconfig files and Makefile for KBUS
+  Internal header file for KBUS
+  KBUS itself, the main source file
+
+ Documentation/Kbus.txt     | 1222 +++++++++++
+ include/linux/kbus_defns.h |  666 ++++++
+ init/Kconfig               |    3 +
+ ipc/Kconfig                |   99 +
+ ipc/Makefile               |    5 +
+ ipc/kbus.c                 | 4927 ++++++++++++++++++++++++++++++++++++++++++++
+ ipc/kbus_internal.h        |  709 +++++++
+ 7 files changed, 7631 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/Kbus.txt
+ create mode 100644 include/linux/kbus_defns.h
+ create mode 100644 ipc/Kconfig
+ create mode 100644 ipc/kbus.c
+ create mode 100644 ipc/kbus_internal.h
