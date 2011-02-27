@@ -1,50 +1,37 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] input: evdev: Add a read() callback
-Date: Sat, 26 Feb 2011 09:45:08 +0000
-Message-ID: <20110226094507.GA13253@opensource.wolfsonmicro.com>
-References: <1298297930-3937-1-git-send-email-bgat@billgatliff.com>
- <20110222002315.GA18299@sirena.org.uk>
- <AANLkTik8d1KZd_qSr2tKrBHq2X-9agA1BG7guK1SqzAd@mail.gmail.com>
- <20110222043302.GD18299@sirena.org.uk>
- <AANLkTikWA3Vsa2O4_yi1L78_xX18_7WqVKqhTaD1-6Wm@mail.gmail.com>
+From: Mike Frysinger <vapier.adi@gmail.com>
+Subject: Re: [PWM v6 0/3] Implement a generic PWM framework
+Date: Sun, 27 Feb 2011 12:48:53 -0500
+Message-ID: <AANLkTimxcAwxX4wrwSa6pSQtvutmQ-v4n4M-=z-xRKcD@mail.gmail.com>
+References: <1298259345-9794-1-git-send-email-bgat@billgatliff.com> <AANLkTimwS+KsB3uRinY2WVzXQ6ZsuhY0ySAmHquTWff6@mail.gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-input-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <AANLkTikWA3Vsa2O4_yi1L78_xX18_7WqVKqhTaD1-6Wm@mail.gmail.com>
-Sender: linux-input-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc:content-type:content-transfer-encoding;
+        bh=+wL8l4hc/Xyuy/fo46TzLXbA7y5kgHV3sXwLCsX/xmI=;
+        b=gtrHpr1FkhI7idF4AA1TmiX5TJFS+uxFFL+9wzUVweby7fdv8xbCEdAzphGtXpt2D9
+         tiI2gKf9Cpy8c0rxTeWOzwUkDh8LdkeRDIMTlMrri9zJVtW1TLqhT+0nkyLtC8z6fraO
+         hcH27KgmMWGLXw4p4No5oNj1zQ8PNNYlwDAFo=
+In-Reply-To: <AANLkTimwS+KsB3uRinY2WVzXQ6ZsuhY0ySAmHquTWff6@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
 To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-input@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: linux-embedded@vger.kernel.org
 
-On Fri, Feb 25, 2011 at 08:46:24PM -0600, Bill Gatliff wrote:
-> On Mon, Feb 21, 2011 at 10:33 PM, Mark Brown
-> <broonie@opensource.wolfsonmicro.com> wrote:
+On Fri, Feb 25, 2011 at 21:38, Bill Gatliff wrote:
+> On Sun, Feb 20, 2011 at 9:35 PM, Bill Gatliff wrote:
+>> This patch series contains the sixth attempt at implementation of
+>> a generic PWM device interface framework. =C2=A0Think gpiolib, but f=
+or
+>> devices and pseudo-devices that generate pulse-wave-modulated output=
+s.
+>
+> Hearing no objections, does this mean that this code is finally ready
+> for a pull request? =C2=A0To whom do I send it?
 
-> > But surely the most obvious solution here is to standardise a rate
-> > control interface?
-
-> Yes, and no.  A standardized rate control interface would deal with
-> the rate control problem, but leave the synchronization problem
-> unsolved.
-
-The main source of the problem with delayed readings was that
-applications weren't blocking waiting for events.  If applications block
-waiting for events then the data will be delivered to them promptly.
-For cases where multiple readings need to be synced IIO looks like the
-way forward.
-
-> > The problem you're trying to solve is also an issue for really common
-> > and standard things like touchscreens and polled switches/keys (the
-> > latter of which you mentioned in your mail) which are used by standard
-> > applications.
-
-> The existing "polled switch" implementation sets up a throttled
-> polling loop in kernel code.  The "polled switch" that I was thinking
-> of when I wrote the essay for the commit was "a switch that is polled
-> each time read() gets called".  I should have been clearer--- and
-> probably picked a different name.  :)
-
-It's the same thing, though - I'd really expect it to be handled by the
-same code in kernel.
+i'd start with akpm/lkml/linus and add yourself to MAINTAINERS for the
+pwm framework
+-mike
