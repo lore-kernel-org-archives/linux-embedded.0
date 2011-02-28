@@ -1,49 +1,42 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 0/5] RFC: KBUS messaging subsystem
-Date: Mon, 28 Feb 2011 00:52:33 -0700
-Message-ID: <AANLkTim8w4LKjGSekq6jNvvdeBrUYTUMFgCVeduPxiod@mail.gmail.com>
-References: <cover.1298829754.git.tibs@tonyibbs.co.uk> <20110228074859.GE7855@angua.secretlab.ca>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [GIT PULL] Generic PWM Device API
+Date: Mon, 28 Feb 2011 11:31:24 +0100
+Message-ID: <20110228103124.GI29521@pengutronix.de>
+References: <AANLkTi=rxzrnt0QZQPJFRboSW_Fyt6zQ5S9KD4Lp=hnU@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20110228074859.GE7855@angua.secretlab.ca>
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=rxzrnt0QZQPJFRboSW_Fyt6zQ5S9KD4Lp=hnU@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Tony Ibbs <tibs@tonyibbs.co.uk>
-Cc: Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Bill Gatliff <bgat@billgatliff.com>
+Cc: linux-kernel@vger.kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, linux-embedded@vger.kernel.org
 
-On Mon, Feb 28, 2011 at 12:48 AM, Grant Likely
-<grant.likely@secretlab.ca> wrote:
-> On Sun, Feb 27, 2011 at 06:11:43PM +0000, Tony Ibbs wrote:
->> KBUS is a lightweight, Linux kernel mediated, message system,
->> particularly intended for use in embedded environments.
->>
->> It is meant to be simple to use and understand. It is designed to
->> provide predictable message delivery, deterministic message ordering=
-,
->> and a guaranteed reply for each request.
->>
->> It is especially aimed at situations where existing solutions,
->> such as DBUS, cannot be used, typically because of system constraint=
-s.
->>
->> We have various customers using KBUS in real life, and believe it to
->> be useful. I had a showcase table for KBUS at the ELCE in Cambridge,
->> October last year, and there seemed to be interest.
->>
->> I am hoping to get a response from this list before attempting to se=
-nd
->> to the kernel list, since I believe this list should contain people
->> who might be most interested in using it.
->
-> Just go ahead and post to lkml. =A0There isn't a whole lot of point i=
-n
-> holding back from there, and that is the only way you'll get the leve=
-l
-> of review that you need to even be considered for merging.
+On Sun, Feb 27, 2011 at 09:38:38PM -0600, Bill Gatliff wrote:
+> Andrew, Linus:
+> 
+> 
+> The git repository described in the following pull request implements
+> a generic PWM device driver API.  This API is intended to eventually
+> supercede the existing PWM device drivers, but during a migration
+> period will coexist peacefully with them.
 
-In fact, I think I'll hold off on reviewing this series until lkml is
-cc'd so that I don't end up repeating myself.  :-)
+Sorry for the late answer, but it took some time to read the patches
+again.
 
-g.
+Is it a good idea to have to APIs for the same thing in the kernel?
+The old API has users whereas the new API has none. How can we migrate
+from one API to the other when for example the backlight pwm driver
+depends on the old API, SoC level drivers implement the old API, but
+the atmel pwm driver is only available for the new API?
+
+Sascha
+
+
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
