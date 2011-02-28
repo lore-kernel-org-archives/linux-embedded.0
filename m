@@ -1,32 +1,41 @@
-From: Tony Ibbs <tibs@tonyibbs.co.uk>
-Subject: Re: [PATCH 0/5] RFC: KBUS messaging subsystem
-Date: Mon, 28 Feb 2011 19:13:06 +0000
-Message-ID: <4C257760-AED9-4276-9256-8BC3AF1BF55E@tonyibbs.co.uk>
-References: <cover.1298829754.git.tibs@tonyibbs.co.uk> <20110228074859.GE7855@angua.secretlab.ca> <AANLkTim8w4LKjGSekq6jNvvdeBrUYTUMFgCVeduPxiod@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1082)
-Content-Transfer-Encoding: 7bit
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Re: [PATCH 5/5] KBUS source file
+Date: Mon, 28 Feb 2011 20:23:13 +0100
+Message-ID: <20110228192312.GA1832@merkur.ravnborg.org>
+References: <cover.1298829754.git.tibs@tonyibbs.co.uk> <3CEFF9DA-16D6-43E1-A8A5-658EB1D426C7@tonyibbs.co.uk>
+Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <AANLkTim8w4LKjGSekq6jNvvdeBrUYTUMFgCVeduPxiod@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <3CEFF9DA-16D6-43E1-A8A5-658EB1D426C7@tonyibbs.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+Content-Transfer-Encoding: 7bit
+To: Tony Ibbs <tibs@tonyibbs.co.uk>
+Cc: Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>, Grant Likely <grant.likely@secretlab.ca>
 
-
-On 28 Feb 2011, at 07:52, Grant Likely wrote:
-
-> On Mon, Feb 28, 2011 at 12:48 AM, Grant Likely
-> <grant.likely@secretlab.ca> wrote:
->> 
->> Just go ahead and post to lkml.  There isn't a whole lot of point in
->> holding back from there, and that is the only way you'll get the level
->> of review that you need to even be considered for merging.
+On Sun, Feb 27, 2011 at 07:26:49PM +0000, Tony Ibbs wrote:
+> Apologies, my fifth patch (the actual KBUS source file) appears to be
+> too long - I hadn't realise the 100,000 character limit on majordomo
+> messages. The file as submitted is that at:
 > 
-> In fact, I think I'll hold off on reviewing this series until lkml is
-> cc'd so that I don't end up repeating myself.  :-)
+>   https://github.com/crazyscot/linux-2.6-kbus/blob/6cc3262bd3e28757179dd8a0d30298dfb2f70845/ipc/kbus.c
 
-That echoes what someone else (offline) was saying earlier today. I think
-you are clearly right. Later in the week, unfortunately, though.
 
-Tibs
+You are using /proc/* to something that is not process related.
+At lkml you will be requested to use something else.
+
+You can conisder splitting this up in another file so you
+in the Makefile can use it conditionally.
+
+> If there is a better way for me to submit this, please let me know.
+
+One way you would not like....
+Let the first patches introduce core-functionality and add features
+in later patches - touching the same file many times.
+
+Also please submit the Makefile/Kconfig stuff in the _last_ mail.
+Otherwise you would ruin bisect because we cannot build kbus until
+you have the last files included.
+
+	Sam
