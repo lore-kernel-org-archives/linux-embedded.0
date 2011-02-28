@@ -1,36 +1,77 @@
-From: Randy Dunlap <rdunlap@xenotime.net>
-Subject: Re: [PATCH 5/5] KBUS source file
-Date: Sun, 27 Feb 2011 12:25:13 -0800
-Message-ID: <20110227122513.780bc947.rdunlap@xenotime.net>
-References: <cover.1298829754.git.tibs@tonyibbs.co.uk>
-	<3CEFF9DA-16D6-43E1-A8A5-658EB1D426C7@tonyibbs.co.uk>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: [GIT PULL] Generic PWM Device API
+Date: Sun, 27 Feb 2011 21:38:38 -0600
+Message-ID: <AANLkTi=rxzrnt0QZQPJFRboSW_Fyt6zQ5S9KD4Lp=hnU@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <3CEFF9DA-16D6-43E1-A8A5-658EB1D426C7@tonyibbs.co.uk>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tony Ibbs <tibs@tonyibbs.co.uk>
-Cc: Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>, Grant Likely <grant.likely@secretlab.ca>
+Content-Transfer-Encoding: 7bit
+To: linux-kernel@vger.kernel.org
+Cc: torvalds@linux-foundation.org, akpm@linux-foundation.org, linux-embedded@vger.kernel.org
 
-On Sun, 27 Feb 2011 19:26:49 +0000 Tony Ibbs wrote:
-
-> Apologies, my fifth patch (the actual KBUS source file) appears to be
-> too long - I hadn't realise the 100,000 character limit on majordomo
-> messages. The file as submitted is that at:
-> 
->   https://github.com/crazyscot/linux-2.6-kbus/blob/6cc3262bd3e28757179dd8a0d30298dfb2f70845/ipc/kbus.c
-> 
-> If there is a better way for me to submit this, please let me know.
-> 
-> The source is still
-> Signed-off-by: Tony Ibbs <tibs@tonyibbs.co.uk>--
+Andrew, Linus:
 
 
-linux-kernel@vger.kernel.org allows up to 400 KB iirc, though it might be
-300 KB.
+The git repository described in the following pull request implements
+a generic PWM device driver API.  This API is intended to eventually
+supercede the existing PWM device drivers, but during a migration
+period will coexist peacefully with them.
 
+This code has been discussed at length on the linux-embedded mailing
+list.  Noteworthy threads include:
+
+v6 (final) patches:
+   http://www.mail-archive.com/linux-embedded@vger.kernel.org/msg03291.html
+
+v5 patches:
+   http://www.mail-archive.com/linux-embedded@vger.kernel.org/msg03279.html
+
+v4 patches:
+   http://www.mail-archive.com/linux-embedded@vger.kernel.org/msg03263.html
+
+
+Thanks!
+
+
+b.g.
 ---
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+Bill Gatliff
+bgat@billgatliff.com
+
+--------
+
+The following changes since commit 493f3358cb289ccf716c5a14fa5bb52ab75943e5:
+
+  Merge branch 'pm-fixes' of
+git://git.kernel.org/pub/scm/linux/kernel/git/rafael/suspend-2.6
+(2011-02-25 15:15:17 -0800)
+
+are available in the git repository at:
+
+  git://git.billgatliff.com/pwm.git linux-next
+
+Bill Gatliff (3):
+      PWM: Implement a generic PWM framework
+      PWM: GPIO+hrtimer device emulation
+      PWM: Atmel PWMC driver
+
+ Documentation/pwm.txt    |  277 +++++++++++++++++++++
+ MAINTAINERS              |    8 +
+ drivers/Kconfig          |    2 +
+ drivers/Makefile         |    2 +
+ drivers/pwm/Kconfig      |   29 +++
+ drivers/pwm/Makefile     |    7 +
+ drivers/pwm/atmel-pwmc.c |  494 +++++++++++++++++++++++++++++++++++++
+ drivers/pwm/gpio-pwm.c   |  348 ++++++++++++++++++++++++++
+ drivers/pwm/pwm.c        |  610 ++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/pwm/pwm.h  |  155 ++++++++++++
+ 10 files changed, 1932 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/pwm.txt
+ create mode 100644 drivers/pwm/Kconfig
+ create mode 100644 drivers/pwm/Makefile
+ create mode 100644 drivers/pwm/atmel-pwmc.c
+ create mode 100644 drivers/pwm/gpio-pwm.c
+ create mode 100644 drivers/pwm/pwm.c
+ create mode 100644 include/linux/pwm/pwm.h
