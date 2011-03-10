@@ -1,26 +1,56 @@
-From: Alexander Stein <alexander.stein@systec-electronic.com>
+From: Bill Gatliff <bgat@billgatliff.com>
 Subject: Re: [PWM v7 3/3] PWM: Atmel PWMC driver
-Date: Thu, 10 Mar 2011 08:36:53 +0100
-Message-ID: <201103100836.54361.alexander.stein@systec-electronic.com>
-References: <1299701596-24665-1-git-send-email-bgat@billgatliff.com> <1299701596-24665-4-git-send-email-bgat@billgatliff.com>
+Date: Thu, 10 Mar 2011 15:34:42 -0600
+Message-ID: <AANLkTik7VgWW8r-fU5FuekxJGH-n6NxUdGJtfB-OXv6B@mail.gmail.com>
+References: <1299701596-24665-1-git-send-email-bgat@billgatliff.com>
+	<1299701596-24665-4-git-send-email-bgat@billgatliff.com>
+	<201103100836.54361.alexander.stein@systec-electronic.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1299701596-24665-4-git-send-email-bgat@billgatliff.com>
+In-Reply-To: <201103100836.54361.alexander.stein@systec-electronic.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: Bill Gatliff <bgat@billgatliff.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Alexander Stein <alexander.stein@systec-electronic.com>
 Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-On Wednesday 09 March 2011, 21:13:16 Bill Gatliff wrote:
-> Driver to allow the Atmel PWMC peripheral found on various
-> AT91 SoCs to be controlled using the Generic PWM framework.
-> Tested on the AT91SAM9263.
+Alexander:
 
-As far as I can see, the previosly support for pwm_channel_handler has been 
-dropped. The new API doesn't support such things.
-What do you think about adding this? It might be important to change the PWM 
-setup after a specific amount of time.
+On Thu, Mar 10, 2011 at 1:36 AM, Alexander Stein
+<alexander.stein@systec-electronic.com> wrote:
+> As far as I can see, the previosly support for pwm_channel_handler has been
+> dropped. The new API doesn't support such things.
+> What do you think about adding this? It might be important to change the PWM
+> setup after a specific amount of time.
 
-Alexander
+Reviewers of the implementation noted some race conditions, and had
+additional objections to the implementation.  They suggested that I
+reimplement channel handlers using genirq.
+
+Since the pwm_channel_handler implementation was broken, I removed it
+from the implementation.  I haven't yet started on the genirq-based
+approach, for two reasons: I'm trying to get everything else into
+mainline; and, I'm not quite sure yet how to stitch genirq together
+with "genpwm".
+
+There is a larger question, however, that I would like to hear your
+answer on since you seem interested in the subject: are end-of-period
+callbacks really necessary?  If you are trying to "ramp" a PWM signal
+from a low duty cycle to a high one, would an hrtimer suffice?
+Assuming that a PWM device driver can implement duty cycle and/or
+period changes without glitches, is it really necessary to stay so
+tightly synchronized to the PWM signal the way that an end-of-period
+callback would allow?
+
+In my work, I haven't encountered a need for end-of-period callbacks
+when doing mere PWM signal generation (though the topic is very
+important when counting pulses, which I'm considering a different
+implementation/API for).  I don't know if my experience is
+comprehensive, however.  Would love to hear your opinion.
+
+
+b.g.
+-- 
+Bill Gatliff
+bgat@billgatliff.com
