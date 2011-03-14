@@ -1,99 +1,47 @@
 From: Bill Gatliff <bgat@billgatliff.com>
-Subject: [PWM v8 0/3] Implement a generic PWM framework
-Date: Sat, 12 Mar 2011 22:24:06 -0600
-Message-ID: <1299990249-18264-1-git-send-email-bgat@billgatliff.com>
+Subject: Re: [PWM v8 1/3] PWM: Implement a generic PWM framework
+Date: Mon, 14 Mar 2011 09:29:00 -0500
+Message-ID: <AANLkTim9XhrHjQy8EmGAez6DV8e-aASDHUQOyf=cjvdM@mail.gmail.com>
+References: <1299990249-18264-1-git-send-email-bgat@billgatliff.com>
+	<1299990249-18264-2-git-send-email-bgat@billgatliff.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <1299990249-18264-2-git-send-email-bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
 To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 Cc: Bill Gatliff <bgat@billgatliff.com>
 
-This patch series contains the eigth attempt at implementation of a
-generic PWM device interface framework.  Think gpiolib, but for
-devices and pseudo-devices that generate pulse-wave-modulated outputs.
+Guys:
 
-Compared to the previous version, this patch series:
-
- * Eliminates redundant registration and request APIs
- * Fundamentally changes how device structures are managed
- * Adds a module owner to pwm_device_ops
-
-The struct device structures are now embedded into struct pwm_device,
-and are allocated, initialized, and registered during pwm_register();
-struct device unregistration takes place during pwm_unregister().
-This should significantly reduce the likelihood that a struct
-pwm_device get unregistered during sysfs interaction---though I am not
-100% sure I have all the cases covered.  Reviewers welcome!
-
-Module_get() and module_put() are now called when PWM devices are
-requested and released, respectively.  This prevents device operation
-module removal while a PWM device is in use.
-
-A git tree containing these patches may be found here:
-
-    http://git.billgatliff.com/pwm.git
-    git://git.billgatliff.com/pwm.git
-
-Functionally-speaking, this series has regressed somewhat from
-previous versions because I am currently focusing my attention on the
-API itself.  I include implementations only for GPIO+hrtimer devices
-and the Atmel PWMC peripheral as references in this series; I will
-post patches for LED drivers, PXA, Samsung, etc. devices once I know
-that the API itself is on its way to mainline.  (I believe that the
-two reference implementations sufficiently confirm the utility of the
-API itself).
-
-Conversion of existing machines and platforms to this API is
-relatively straightforward, but must be done in conjunction with the
-various users of PWM (LEDs, etc.) because PWM devices will now be
-referenced by struct pwm_device structures, rather than integers.
-Thus, there is potentially significant effort involved because
-platform data structures, etc. must be updated.  I have (re)started
-that effort twice already, and I prefer not to do so again until the
-target API is stable.
-
-The code in this series is significantly clearer and more
-straightforward than previous versions.  Thanks to everyone who helped
-me with this refactoring!  I'm pretty convinced that the code you see
-here is at last suitable for pulling into mainline.
-
-Finally, the attached code CAN be used to control devices that drive
-stepper motors and the like, but doing so is discouraged as I am
-anticipating a request to develop an API specifically for such
-situations.
+On Sat, Mar 12, 2011 at 10:24 PM, Bill Gatliff <bgat@billgatliff.com> w=
+rote:
+> +static ssize_t pwm_duty_ns_show(struct device *dev,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct =
+device_attribute *attr,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 char *b=
+uf)
+> +{
+> + =A0 =A0 =A0 struct pwm_device *p =3D to_pwm_device(dev);
+> + =A0 =A0 =A0 return sprintf(buf, "%lu\n", pwm_get_duty_ns(p));
+> +}
 
 
-Regards,
+What would happen if device_unregister() was called on the above
+device while duty_ns_show() was running?
+
+My hope is that the device_unregister() would decrement the usage
+count on the device, but the count would still be nonzero due to the
+running attribute method; thus, the device would not be deleted.  When
+the method exited, the usage count would become zero and THEN the
+device would disappear.  Is that how things work?  (I have looked at
+the code for device_unregister() and friends, but haven't yet been
+able to answer this question for myself; said code seems nontrivial).
 
 
 b.g.
-
-Bill Gatliff (3):
-  PWM: Implement a generic PWM framework
-  PWM: GPIO+hrtimer device emulation
-  PWM: Atmel PWMC driver
-
- Documentation/pwm.txt    |  289 ++++++++++++++++++++++
- MAINTAINERS              |    8 +
- drivers/Kconfig          |    2 +
- drivers/Makefile         |    2 +
- drivers/pwm/Kconfig      |   29 +++
- drivers/pwm/Makefile     |    7 +
- drivers/pwm/atmel-pwmc.c |  452 +++++++++++++++++++++++++++++++++++
- drivers/pwm/gpio-pwm.c   |  332 ++++++++++++++++++++++++++
- drivers/pwm/pwm.c        |  594 ++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/pwm/pwm.h  |  143 +++++++++++
- 10 files changed, 1858 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/pwm.txt
- create mode 100644 drivers/pwm/Kconfig
- create mode 100644 drivers/pwm/Makefile
- create mode 100644 drivers/pwm/atmel-pwmc.c
- create mode 100644 drivers/pwm/gpio-pwm.c
- create mode 100644 drivers/pwm/pwm.c
- create mode 100644 include/linux/pwm/pwm.h
-
--- 
-1.7.2.3
+--=20
+Bill Gatliff
+bgat@billgatliff.com
