@@ -1,47 +1,42 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: [PWM v8 1/3] PWM: Implement a generic PWM framework
-Date: Mon, 14 Mar 2011 09:29:00 -0500
-Message-ID: <AANLkTim9XhrHjQy8EmGAez6DV8e-aASDHUQOyf=cjvdM@mail.gmail.com>
-References: <1299990249-18264-1-git-send-email-bgat@billgatliff.com>
-	<1299990249-18264-2-git-send-email-bgat@billgatliff.com>
+From: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
+Subject: SPI controller laying around...
+Date: Tue, 15 Mar 2011 11:23:30 -0400
+Message-ID: <1300202610.8754.40.camel@jfddesk>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1299990249-18264-2-git-send-email-bgat@billgatliff.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:subject:from:to:content-type:date:message-id
+         :mime-version:x-mailer:content-transfer-encoding;
+        bh=kw87dfffeZjabtWJdJa8SjPYhUSMA45Op4yqdSBx2i4=;
+        b=Fd7z9h0SmJxCLLRQ/h3DJ3Ut5KNimjEAwVxT302FFokvRuIjhWuzebCcDRwFarRLcl
+         BdnPXWf/AGWac/lmksOkyyZl66nTc7qraQrCk3DGcF7Dul72ltIUELWMTQ9O0kvHX4b1
+         Oqg6HDwGpM9+0Ga0JpoJFszNa8u7GykodXAj4=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
-Cc: Bill Gatliff <bgat@billgatliff.com>
+Content-Type: text/plain; charset="us-ascii"
+To: linux-embedded@vger.kernel.org
 
-Guys:
+Hi all!
 
-On Sat, Mar 12, 2011 at 10:24 PM, Bill Gatliff <bgat@billgatliff.com> w=
-rote:
-> +static ssize_t pwm_duty_ns_show(struct device *dev,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct =
-device_attribute *attr,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 char *b=
-uf)
-> +{
-> + =A0 =A0 =A0 struct pwm_device *p =3D to_pwm_device(dev);
-> + =A0 =A0 =A0 return sprintf(buf, "%lu\n", pwm_get_duty_ns(p));
-> +}
+I need to perform some tests and I am in need of any SPI controller I
+could use through the standard SPI master framework of the kernel.
 
+I could perhaps hack the BIOS SPI for example (fool around with the chip
+select and solder some wires to export to a bread board. Or I am sure my
+workstation has one on the motherboard (dell vostro 430) for some odd
+functionnality... but it's not enumerated and probed as an SPI master. 
 
-What would happen if device_unregister() was called on the above
-device while duty_ns_show() was running?
+Or maybe even old ethernet cards I have lying around which could be
+hacked?
 
-My hope is that the device_unregister() would decrement the usage
-count on the device, but the count would still be nonzero due to the
-running attribute method; thus, the device would not be deleted.  When
-the method exited, the usage count would become zero and THEN the
-device would disappear.  Is that how things work?  (I have looked at
-the code for device_unregister() and friends, but haven't yet been
-able to answer this question for myself; said code seems nontrivial).
+Or a simple USB-SPI dongle? Anyone knows one that will just plain works
+with the kernel? 
 
+Any thoughts?
 
-b.g.
---=20
-Bill Gatliff
-bgat@billgatliff.com
+Note: I want to test if I can program a Xilinx FPGA from the CPU-SPI
+instead of the PROM that sits next to the FPGA, at the fastest speed
+available. I've already solved the PCI express appearance and
+disappearance of the device on its bus.
