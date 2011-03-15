@@ -1,7 +1,7 @@
 From: Jean-Francois Dagenais <jeff.dagenais@gmail.com>
 Subject: SPI controller laying around...
-Date: Tue, 15 Mar 2011 11:23:30 -0400
-Message-ID: <1300202610.8754.40.camel@jfddesk>
+Date: Tue, 15 Mar 2011 11:40:53 -0400
+Message-ID: <1300203653.8754.46.camel@jfddesk>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -9,10 +9,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:subject:from:to:content-type:date:message-id
          :mime-version:x-mailer:content-transfer-encoding;
-        bh=kw87dfffeZjabtWJdJa8SjPYhUSMA45Op4yqdSBx2i4=;
-        b=Fd7z9h0SmJxCLLRQ/h3DJ3Ut5KNimjEAwVxT302FFokvRuIjhWuzebCcDRwFarRLcl
-         BdnPXWf/AGWac/lmksOkyyZl66nTc7qraQrCk3DGcF7Dul72ltIUELWMTQ9O0kvHX4b1
-         Oqg6HDwGpM9+0Ga0JpoJFszNa8u7GykodXAj4=
+        bh=StrXmkcEl2YQIA75HUbsLUYPwm5rPFg2jKTgz4QonBM=;
+        b=jHIdgf2AjtkNymPrp4O+eoUZ5Cha3pMUXq3qqOHZ+hKhVP4ESueIYB06u93l1rGcPX
+         xjSf3A95ipQK8G5A4SRP783W0hLDTxnyl5YMIVgK/t7woO89+cuvKgwARM5JpiTqkZD4
+         zZm60MjFp956g1RY9/9EMsb3DMpV/FwZYTg8o=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
@@ -31,12 +31,12 @@ functionnality... but it's not enumerated and probed as an SPI master.
 Or maybe even old ethernet cards I have lying around which could be
 hacked?
 
-Or a simple USB-SPI dongle? Anyone knows one that will just plain works
+Or a simple USB-SPI dongle? Anyone knows one that will just plain work
 with the kernel? 
 
-Any thoughts?
+Any thoughts? Tools I should google for?
 
 Note: I want to test if I can program a Xilinx FPGA from the CPU-SPI
 instead of the PROM that sits next to the FPGA, at the fastest speed
 available. I've already solved the PCI express appearance and
-disappearance of the device on its bus.
+disappearance of the device on its bus. 
