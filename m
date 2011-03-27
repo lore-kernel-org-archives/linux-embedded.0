@@ -1,196 +1,211 @@
-From: James Chapman <jchapman@katalix.com>
+From: Tony Ibbs <tibs@tonyibbs.co.uk>
 Subject: Re: [PATCH 00/11] RFC: KBUS messaging subsystem
-Date: Thu, 24 Mar 2011 18:03:27 +0000
-Message-ID: <4D8B876F.8040802@katalix.com>
-References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <20110322133640.5d5c88e4@bike.lwn.net> <DBA665CD-BE12-4DC8-9B3F-4170BED789BD@tonyibbs.co.uk>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <DBA665CD-BE12-4DC8-9B3F-4170BED789BD@tonyibbs.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Date: Sun, 27 Mar 2011 20:07:16 +0100
+Message-ID: <7728FD71-8488-445F-B52E-542F7599BEA1@tonyibbs.co.uk>
+References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <20110322133640.5d5c88e4@bike.lwn.net> <DBA665CD-BE12-4DC8-9B3F-4170BED789BD@tonyibbs.co.uk> <4D8B876F.8040802@katalix.com>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4D8B876F.8040802@katalix.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tony Ibbs <tibs@tonyibbs.co.uk>, Jonathan Corbet <corbet@lwn.net>
-Cc: Grant Likely <grant.likely@secretlab.ca>, lkml <linux-kernel@vger.kernel.org>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+To: James Chapman <jchapman@katalix.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Grant Likely <grant.likely@secretlab.ca>, lkml <linux-kernel@vger.kernel.org>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
 
-On 23/03/2011 23:13, Tony Ibbs wrote:
-> 
-> On 22 Mar 2011, at 19:36, Jonathan Corbet wrote:
-> 
->> On Fri, 18 Mar 2011 17:21:09 +0000
->> Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
->>
->>> KBUS is a lightweight, Linux kernel mediated messaging system,
->>> particularly intended for use in embedded environments.
-> 
->> - Why kbus over, say, a user-space daemon and unix-domain sockets?  I'm
->>  not sure I see the advantage that comes with putting this into kernel
->>  space.
-> 
-> Mostly, a kernel module gives us reliability.
-> 
-> In particular, a kernel module allows us to guarantee that a replier
-> that "goes away" (including crashing) will be detected by KBUS, and
-> cause a synthetic reply to be sent, so that the sender can know that it
-> will not get a real reply.
+On 24 Mar 2011, at 18:03, James Chapman wrote:
+
+> On 23/03/2011 23:13, Tony Ibbs wrote:
+> ...stuff I've left out, because it's expanded on below...
 >
-> This same guarantee means that the sender end of a stateful dialogue can
-> be reliably told if the replier end disconnects and (some new version of
-> it) reconnects - in which case state presumably needs to be
-> reestablished.
-> 
-> Doing this in userspace would be difficult and unreliable.
-> 
-> There are other problems with userspace daemons, including setting up
-> many-to-many messaging, message atomicity, and so on. Our past
-> experience of other people's solutions (previous customers in
-> particular) is that it is perilously easy to get it wrong in userspace,
-> and especially to end up with race conditions.
+> I don't understand what Kbus really brings either.
 
-I don't understand what Kbus really brings either.
+From one angle, KBUS aims to fit the particular needs of the embedded
+user:
 
-With good sockets programming, it is possible to avoid most of the
-issues mentioned above. Frameworks like Glib and DBus can also help.
+1. It's relatively small (so it will fit in small environments)
+2. It's written in C (so no need for C++ libraries, etc., which are
+   relatively large)
+3. It's meant to be simple to learn (so it should be useful if you don't
+   have time or resource to learn something arguably more
+   complex/featureful)
+4. It's meant to be simple to use without anything but the kernel
+   module (i.e., you don't have to use the userspace libraries that
+   the overall project also provides).
 
-Have you considered other kernel messaging subsystems such as netlink
-sockets, connectors, POSIX message queues etc etc if you don't want DBus?
+These are limitations of possible use spaces.
 
-> 
->> - The interface is ... creative.
-> 
-> That's very tactfully put.
-> 
->>  If you have to do this in kernel space,
->>  it would be nice to do away with the split write()/ioctl() API for
->>  reading or writing messages.  It seems like either a write(), OR an
->>  ioctl() with a message data pointer would suffice; that would cut the
->>  number of syscalls the applications need to make too.
-> 
-> When the reader is reading a message, using 'read' seems very natural,
-> and is simple to explain. Because we always return an "entire" message
-> (i.e., one in which all the message data is in one chunk, rather than
-> a header pointing to message name and/or data), it also means that
-> memory handling on return to user space is much simplified. Doing an
-> ioctl first to find out the length of the message to come is also
-> simple to explain.
+We also know, from practical experience, that a hard-pressed engineer
+working on a project wants to be able to reach for a messaging solution
+that doesn't take more than (say) an afternoon to get to grips with,
+becase in general it is not anywhere near the main thrust of what
+they're doing, and they don't have the time or inclination to become
+expert in yet another domain. So it needs to be simple to explain and
+use.
 
-Eh? Network protocols routinely do this sort of thing with regular
-sockets. Read the message header then read the rest when you know how
-big the rest is. Of where you know the max size of all possible
-messages, do one read into a fixed size buffer.
+(Personally, I see this as the main failing of Dbus - even the tutorial
+states up front that it is an incomplete and unfinished document. It
+would be good if someone produced documentation that gives the same
+enthusiasm for Dbus as the 0mq people have done with their stuff.)
 
-> Also, in the case of reading a message, I can see clear advantage
-> in being able to "stream" the reading of the message data (for a
-> long and appropriately structured message).
-> 
-> Writing a message *could* be done with 'write' alone. I must admit that
-> having 'write' detect the end of the message by looking at it feels
-> wrong, somehow, but that's not a very compelling answer. It is,
-> however, definitely easier for the user to understand the error if
-> they try to <send> and get told they haven't written enough data
-> yet, rather than just waiting for the 'write' to magically complete.
+From another angle:
 
-A write to a socket would do the same. I don't get the bit about
-detecting the end of the message. I think this complexity is coming from
-using char devices for message passing.
+a. KBUS provides deterministic message ordering, so message order is
+   the same for everyone receiving messages (if A sends a message,
+   and B sends a message, then any of A, B, C, etc., who are listening
+   to messages of that name will receive them in the same order.
+   Consider messages for 'play', 'rewind' and 'pause', for instance.
+   Or 'left by X', 'forward by Y' and 'up by Z' in a non-open space).
+b. It guarantees that you'll get a Reply for a Request, even if that
+   reply is "you aren't going to get one because the replier has gone
+   away". This is done via message rather than error code, since it may
+   be determined some time after the sender has sent the original
+   message. Callback mechanisms can be used to similar effect, but are a
+   pain if you don't want them.
+c. It is not possible to send a request if the replier for that request
+   does not have room in its incoming message queue. Nor is it possible
+   to send a request if the sender does not have room for the (eventual)
+   reply (ok, that last is perhaps a bit obvious).
 
-> There is also a certain symmetry to using <nextmsg>/'read' and
-> 'write'/<send>, but as you said at the start, it's a bit unusual.
-> 
-> Using an ioctl instead of 'write' would involve a more complex ioctl
-> than we're otherwise commonly using, would lose the symmetry, and just
-> didn't feel right. It also means pointer handling for even the simplest
-> message.
-> 
->>  Even better might be to just use the socket API.
+Clearly, if the incoming and outgoing message queues are going be
+managed in this way (i.e., according to (c)), there needs to be a
+central daemon of some sort. Making sure that a daemon in userspace is
+reliable is hard, and making sure that it knows when one of its clients
+dies is also difficult (or perhaps "messy" would be a better word).
+This last is particularly easy in the kernel, of course. Kernel modules
+also come with a host of requirements and facilities that make them
+easier to make reliable. Being in the kernel also brings well-debugged
+handling for scalability issues, threading and multi-processing, all of
+which are difficult to get absolutely right in userspace.
 
-Agreed.
+Some things which perhaps are not made as clear in the documentation as
+they might be:
 
-> Whilst the current API is a bit odd, trying to use the socket API looked
-> to us as if it would be a worse fit.
-> 
-> The socket API doesn't seem to match what we wanted KBUS to do
-> particularly well. It's not, for instance, obvious how to do a 'recv' of
-> a variable length message that might be quite short or several hundred
-> KB long - does one 'recv' the header first, and then the body (which
-> isn't very nice)? Doing a 'next message' ioctl as current KBUS does
-> would feel really alien in a socket environment.
-> 
-> Of course, we'd still have to invent our own addressing scheme, and our
-> own ``struct *addr``, and appropriate socket options, and also decide
-> how the common options should apply or not (for instance, SO_ACCEPTCONN,
-> SO_BROADCAST). And how to work with accept/listen/bind and all the other
-> common calls.
->
-> Also, lazily on my part, it's fairly obvious how to write a file
-> interface for the kernel, but the socket API (from the inside) appears
-> to be more complex, and to have fewer examples with training wheels.
-> 
-> We *could* reimplement in terms of sockets, but I think the code would
-> get a lot bigger, and I think using the system would be a lot harder to
-> explain (I don't think the current message name binding mechanisms would
-> get any clearer, for instance).
+i.   KBUS is not client/server based. All senders/listeners (KBUS
+     clients) are peers in this respect. Any Ksock can send messages
+     (well, if it's opened for write), any Ksock can receive messages.
+ii.  Anyone can choose to listen to (receive) a message of a particular 
+     name. This is not dependent on who sends such a message.
+iii. A single Ksock can choose to be a replier for a message of a
+     particular name. This does not limit who may send request messages
+     of that name, just who can reply.
+iv.  From the above, it should be obvious that any request can be seen
+     (received) by any listeners to that same message name, even though
+     they can't reply to it. This makes debugging/logging the message
+     traffic on a system particular simple.
 
-Why would you need a new socket family?
+Also (this is definitely addressed in the documentation), there is
+limited wildcarding on message names - basically on the end of the
+message name. This can used when binding to a message name for either
+listening or replying.
 
-> And some of the semantics of KBUS (the sending of a message to say that
-> the expected replier has been replaced by a new one, for instance) seem
-> to fit oddly with how people expect sockets to work. Or being told that
-> the far end has gone away, or is not who one expected it to be.
+Finally, KBUS does not address message content. It is not intended to be
+an RPC mechanism (which I think is what Dbus, for instance, is mostly
+after?). It's up to the user to choose an appropriate way of describing
+data (of which there are many good examples). I don't think that's a
+particularly contentious point, though, but perhaps worth mentioning.
 
-Not really. It is what DBus is all about.
+> With good sockets programming, it is possible to avoid most of the
+> issues mentioned
 
-Perhaps KBUS is intended for uses where DBus is too big? Or is it to
-help port legacy RTOS apps to Linux? Shudder. :-)
+If someone who is a very good socket programmer wrote a user-space
+library to reproduce all of the things that KBUS does, then that would
+be very good (I'm unhappy with the concept of only solving "most" of the
+problems, though). I don't think I could do it (hiding client/server,
+handling many-to-many transfers over AF_UNIX, etc., etc.), but then I'd
+not claim to be a very good socket programmer. And I'd assume it would
+take rather more code (since one is, to an extent, fighting against the
+underlying paradigms).
 
-Perhaps I misunderstand what KBUS might do for me. It might be useful to
-present two simple apps implementing the same thing with, say, a unix
-socket and KBUS, e.g. sending a message reliably to another process and
-handling possible errors.
+I also don't see how you'd get away without some sort of identity
+broker, to indicate which socket(s) belong to whom (since I assume each
+Ksock-equivalent would need multiple sockets to handle the different
+things that need doing). And that's another moderately fiddly bunch of
+code to be tested.
 
-> Also, I'm afraid my experience is that people find sockets hard to
-> understand (not necessarily justifiably), whereas explaining KBUS to its
-> intended users is fairly simple - one can assume they know about file
-> interfaces, and people fairly easily accept a few "odd" extra calls. But
-> that may not be a very compelling reason from the inside of the
-> kernel...
-> 
->> - Does anything bound the size of a message fed into the kernel with
->>  write()?  I couldn't find it.  It seems like an application could
->>  consume arbitrary amounts of kernel memory.
-> 
-> That is indeed a misfeature. There should be a default limit, and some
-> way of changing it.
-> 
->> - It would be good to use the kernel's dynamic debugging and tracing
->>  facilities rather than rolling your own.
-> 
-> Mea culpa. KBUS's debug support grew rather erratically, and only
-> recently got converted to at least using dev_debug and friends.
-> Also, I'm not at all sure what the current kernel mechanisms are
-> (pointers are welcomed, since this is a clear case where normal
-> kernel conventions should be followed, and I don't know what they are).
-> 
->> - There's lots of kmalloc()/memset() pairs that could be kzalloc().
-> 
-> And I just missed that.
-> 
->> That's as far as I could get for now.
-> 
-> Thanks, it's all appreciated, and all makes sense.
-> 
-> (and I should say thank you since I started out writing KBUS with a copy
-> of Linux Device Drivers beside me, and bookmarks for various LWN
-> articles. It would all be a lot worse without those).
-> 
-> Hope this all makes sense - it's late here but I shan't have a chance to
-> reply tomorrow.
-> 
-> Tibs
+> Frameworks like Glib and DBus can also help.
 
+Glib is, surely, addressing different issues.
 
--- 
-James Chapman
-Katalix Systems Ltd
-http://www.katalix.com
-Catalysts for your Embedded Linux software development
+Dbus is simply too large for many of the places we want to do messaging.
+It is also, as I suggested above, not terribly simple to learn, so it is
+not going to be picked up by people as a potential solution when they
+"just" want to send messages. (Clearly, if one is wanting to communicate
+with systems that already use Dbus, this is a different matter, and I
+assume one can use existing examples to leverage oneself in such cases,
+and anyway one doesn't have a choice.) It's also not clear to me that
+Dbus allows one to do all the things we want to do with KBUS - I stand
+willing to be told that I just haven't found the right documentation for
+that, though.
+
+> Have you considered other kernel messaging subsystems such as netlink
+> sockets, connectors, POSIX message queues etc etc if you don't want DBus?
+
+As I understand it, netlink is explicitly lossy (from the connector
+documentation: "messages can be lost due to memory pressure or process'
+receiving queue overflowed"). So one would have the issue of handling
+acknowledgements and re-requests, and suddenly life is more complicated.
+
+If one were using netlink, I think connector looks like an excellent way
+to do it (it seems to have decent documentation, for a start), but it
+doesn't alleviate the lossy nature of netlink itself.
+
+In both cases, it's a lot simpler just not to do that - use a non-lossy
+approach in the first place.
+
+By 'sockets' I assume you mean over AF_UNIX, and to some extent I hope
+I've addressed that above. It didn't seem a very natural fit to what
+we're trying to achieve, so we didn't start from there.
+
+Posix message queues are interesting, but I don't see how it would be
+possble to do N-to-many messaging using them, without having to write
+almost all of KBUS-as-infrastructure anyway. Also, as I understand it,
+managing the existence of the exposed filesystem paths corresponding to
+message queues in a reliable manner is difficult.
+
+I'm not sure what other technologies are meant by "etc., etc.".
+
+> Why would you need a new socket family?
+
+I was assuming the alternative of writing a kernel module that "spoke"
+the sockets API, instead of the file API, but still had the KBUS code
+inside it (i.e., the internal management of queues, etc.), just as we've
+done with the normal file interface API in current KBUS. As I said
+before, we'd then need a new socket family - perhaps AF_KBUS. And I'd
+contend that if this were to preserve the intended uses of KBUS, it
+would be as "creative" a use of the socket interfaces as our current
+code is of the file API, and I think in context even more confusing.
+
+Or we could have taken a Poxix message queue style API, which would map
+directly to KBUS usage. That, however, would involve new system calls
+(i.e., replacing 'mq_' with 'kbus_') and I assume that's an absolute
+forbidden.
+
+> Perhaps KBUS is intended for uses where DBus is too big?
+
+Addressed above. It's one of the intentions.
+
+> Or is it to help port legacy RTOS apps to Linux?
+
+I don't understand this point - but assume it is not relevant.
+
+> Perhaps I misunderstand what KBUS might do for me.
+
+I hope the above helps a bit.
+
+> It might be useful to present two simple apps implementing the same
+> thing with, say, a unix socket and KBUS, e.g. sending a message
+> reliably to another process and handling possible errors.
+
+Indeed, this would be an interesting and valuable exercise. I'm afraid I
+don't see that I'm going to have time to produce such a thing in the
+near future, though.
+
+The EuroPython 2010 talk on the KBUS website does present some (very)
+simple examples of use, albeit in Python, and the kmsg application
+presents some very primitive usage (but hardly representative). I'm
+afraid the project is sparse on examples at the moment, as most of its
+use has been for customers who do not wish their code made public.
+
+All the best,
+    Tibs
