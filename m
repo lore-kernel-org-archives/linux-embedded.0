@@ -1,116 +1,44 @@
-From: Ben Gardiner <bengardiner@nanometrics.ca>
-Subject: Re: [PWM v9 2/3] PWM: GPIO+hrtimer device emulation
-Date: Wed, 6 Apr 2011 09:17:58 -0400
-Message-ID: <BANLkTikzBHJxToLPXQZCLN-GjbYHMfASLw@mail.gmail.com>
-References: <1301630392-20793-1-git-send-email-bgat@billgatliff.com>
-	<1301630392-20793-3-git-send-email-bgat@billgatliff.com>
+From: Constantine Shulyupin <const@makelinux.com>
+Subject: Super Fast Boot of Embedded Linux: 300 ms from boot loader to shell
+Date: Mon, 11 Apr 2011 17:02:19 +0300
+Message-ID: <BANLkTi=Zahmo_d1Fo7JnaD3iJHAuhSAZGQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=nanometrics.ca; s=google;
-        h=domainkey-signature:mime-version:in-reply-to:references:date
-         :message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=8fv7OsTXSDLtOyVd90mfZ9vaVQe+k7rcKJlXDBdUO5c=;
-        b=jwCX78UVdC97mAJgYLD4Twa6x9mwbPU+QuydYwoa65OT7+sbjMUt/H6kz3nlnNYIBm
-         pAef32ZiMiSrhMDwx7V0dd7391aDgJyE6WBCSacYGWKgconBOicclEo6sbUud85avSQ0
-         Ff1BMenwaYyDHcve7w/QD/Yidr/VHBEjmHSHA=
-In-Reply-To: <1301630392-20793-3-git-send-email-bgat@billgatliff.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
 
-Hi Bill,
+Hello all,
 
-I tested this series on da850evm from commit
-60124de319dc2800c0f75f44bf84471a8de0dbc5 of
-git://git.billgatliff.com/pwm.git.
+Make Linux Software presents the fastest ever embedded Linux boot for
+720 MHz ARM and NAND flash memory. Linux boot time is 300 milliseconds
+from boot loader to shell. The first goal of the project is to achieve
+a minimal boot time of a minimal but functional Linux system on common
+hardware. The second goal is to provide a platform for developing more
+functional systems with an even minimized boot time.
 
-With the following commands I was able to observe the production of a
-100Hz 50% output on a GPIO (specifically GPIO #125 which is GPIO7[13]
-on the SoC and J15[13] on the baseboard for other da850 users).
+Video of boot process:   http://youtu.be/747XLVbTgA4
 
-     mount config /config -t configfs
-     mkdir /config/gpio_pwm/125
-     echo 1 > /sys/class/pwm/gpio_pwm\:125/export
-     echo 10000000 > /sys/class/pwm/gpio_pwm\:125/period_ns
-     echo 5000000 > /sys/class/pwm/gpio_pwm\:125/duty_ns
-     echo 1 > /sys/class/pwm/gpio_pwm\:125/run
+Boot log with timestamps:
 
-I noticed that the following command did not stop the pwm output.
-     echo 0 > /sys/class/pwm/gpio_pwm\:125/run
+0.000 0.000: TI X-Loader 1.4.4ss Mar 26 2011 01:45:43
+0.000 0.000: Optimised by www.MakeLinux.com
+0.000 0.000: Loading
+0.237 0.237: Running
+0.237 0.000: CFG_LOADADDR=80008000
+0.249 0.012: *(int*)CFG_LOADADDR=e321f0d3
+0.276 0.027: Linux version 2.6.32 (const@makelinux.com)
+0.276 0.000: Starting application
+0.296 0.020: BusyBox v1.16.2 hush - the humble shell
 
-But the following command did (and I did not need to echo 1 >
-/sys/class/pwm/gpio_pwm\:125/unexport first)
-     rm -rf /config/gpio_pwm/125
+To learn more, please visit http://www.makelinux.com/emb/fastboot/omap
 
-The observations from my testing above are repeated in context below:
+Thanks.
 
-On Thu, Mar 31, 2011 at 11:59 PM, Bill Gatliff <bgat@billgatliff.com> w=
-rote:
-> Emulates a PWM device using a GPIO pin and an hrtimer. =A0Subject
-> to CPU, scheduler and hardware limitations, can support many
-> PWM outputs, e.g. as many as you have GPIO pins available for.
->
-> On a 200 MHz ARM9 processor, a PWM frequency of 100 Hz can be attaine=
-d
-> with this code so long as the duty cycle remains between about 20-80%=
-=2E
-> At higher or lower duty cycles, the transition events may arrive too
-> close for the scheduler and CPU to reliably service.
->
-> This driver supports creation of new GPIO+hrtimer PWM devices via
-> configfs:
->
-> =A0 # mount config /config -t configfs
-> =A0 # mkdir /config/gpio-pwm/<gpio number>
-
-minor: I observed that the configfs directory was 'gpio_pwm' not 'gpio-=
-pwm.'
-
-> The new PWM device will appear as /sys/class/pwm/gpio-pwm.<gpio numbe=
-r>.
->
-> Caveats:
-> =A0 * The GPIO pin number must be valid, not already in use
-> =A0 * The output state of the GPIO pin is configured when the PWM sta=
-rts
-> =A0 =A0 running i.e. not immediately upon request, because the polari=
-ty of
-> =A0 =A0 the inactive state of the pin isn't known until the pwm devic=
-e's
-> =A0 =A0 'polarity' attribute is configured
-> =A0 * After creating and binding the pwm device, you must then reques=
-t
-> =A0 =A0 it by writing to /sys/class/pwm/gpio-pwm.<gpio number>/export
->
-> Unbind and destroy the pwm device by first stopping and unexporting
-> the pwm device under sysfs as usual; then do:
-
-I observed that
-
-# echo 0 > /sys/class/pwm/gpio_pwm\:125/run
-
-did not stop the pwm output and that
-
-# echo 1 > /sys/class/pwm/gpio_pwm\:125/unexport
-
-was not required before rm -rf'ing the /config directory:
-> =A0 # rm -rf /config/gpio-pwm/<gpio number>
-
-> Signed-off-by: Bill Gatliff <bgat@billgatliff.com>
-
-Overall this is a really easy to user userspace interface -- it was a
-pleasure to setup and test.
-
-Tested-by: Ben Gardiner <bengardiner@nanometrics.ca>
-
-Best Regards,
-Ben Gardiner
-
----
-Nanometrics Inc.
-http://www.nanometrics.ca
+-- 
+Constantine Shulyupin
+http://www.MakeLinux.com/
+Embedded Linux Systems,
+Device Drivers, TI DaVinci
