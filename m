@@ -1,67 +1,70 @@
-From: Lukasz Majewski <majess1982@gmail.com>
-Subject: Re: [Vortex86] Vortex86DX SoC - HIGH_RESOLUTION_TIMER
-Date: Tue, 12 Apr 2011 22:14:03 +0200
-Message-ID: <20110412221403.1cc3f5c8@mig>
-References: <20110412212739.5658f030@mig>
-	<BANLkTikFFL1tPgBVwYBA3ocziNfGpW=ycQ@mail.gmail.com>
+From: Constantine Shulyupin <const@makelinux.com>
+Subject: Re: Super Fast Boot of Embedded Linux: 300 ms from boot loader to shell
+Date: Wed, 13 Apr 2011 17:53:45 +0300
+Message-ID: <BANLkTimLGVfS=wbkmYMRkirsARwFHNYWVw@mail.gmail.com>
+References: <BANLkTi=Zahmo_d1Fo7JnaD3iJHAuhSAZGQ@mail.gmail.com>
+	<4DA331F9.5070902@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <platform-driver-x86-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:date:from:to:cc:subject:message-id:in-reply-to
-         :references:x-mailer:mime-version:content-type
-         :content-transfer-encoding;
-        bh=31DvN7Y4DDj3FPyqYf4Vo3seclUG4iHXnboMGUapAJc=;
-        b=TqqvvQapDVrr27rhVxhWVN46k6TGDkVxvPCu64HBP5HC8KLNjdm+0TvvZ0lZEoC3a6
-         W06c92RVyeJxhPP0d93DrFS+JfhTpHur22B1N33L4YVQUcK2I1NxYMJlimQtJRvV97JP
-         Boc8Y312PbRx9x16ZlmkL+cHSwGtJYExf5IXQ=
-In-Reply-To: <BANLkTikFFL1tPgBVwYBA3ocziNfGpW=ycQ@mail.gmail.com>
-Sender: platform-driver-x86-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <4DA331F9.5070902@gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Alan Carvalho de Assis <acassis@gmail.com>
-Cc: linux-embedded@vger.kernel.org, linux-8086@vger.kernel.org, platform-driver-x86@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: linux-embedded@vger.kernel.org
 
-On Tue, 12 Apr 2011 17:59:47 -0200
-Alan Carvalho de Assis <acassis@gmail.com> wrote:
+Thank you Marco for your feedback. I've added summary of used
+optimization method:
+=95 Reduction of kernel and filesystem size
+=95 Kernel features: naked boot, initrd without compression
+=95 Optimization of NAND flash interface in boot loader
+=95 Boot time was measured with utility tstamp
+=95 You can find more detailed list of methods at http://elinux.org/Boo=
+t_Time
+=95 Techniques for improving embedded Linux startup time, presentation:
+http://www.makelinux.com/emb/fastboot/MontaVista
 
-> Hi Lukasz,
-> 
-> On 4/12/11, Lukasz Majewski <majess1982@gmail.com> wrote:
-> > Hi all,
-> >
-> > I'd like to kindly ask for some help with my embedded system.
-> >
-> > I'm using the Vortex86DX SoC (it's a x86 32 clone) on my PC104
-> > board.
-> >
-> > I've managed to apply and run the 2.6.33.7.2-rt30 RT linux.
-> >
-> > It supports the full preemption (PREEMPT_RT enabled).
-> >
-> 
-> I think you didn't send this email to right mailing list.
-> 
-> Please take a look here:
-> 
-> https://rt.wiki.kernel.org/index.php/Mailinglists
-> 
-> I suggest you to send your question to linux-rt-users@vger.kernel.org
-> 
-> Best Regards,
-> 
-> Alan
+Actually, detailed implementations of optimization methods are
+described in numerous documents.
 
-Hi Alan,
+On Mon, Apr 11, 2011 at 7:53 PM, Marco Stornelli
+<marco.stornelli@gmail.com> wrote:
+> Il 11/04/2011 16:02, Constantine Shulyupin ha scritto:
+>>
+>> Hello all,
+>>
+>> Make Linux Software presents the fastest ever embedded Linux boot fo=
+r
+>> 720 MHz ARM and NAND flash memory. Linux boot time is 300 millisecon=
+ds
+>> from boot loader to shell. The first goal of the project is to achie=
+ve
+>> a minimal boot time of a minimal but functional Linux system on comm=
+on
+>> hardware. The second goal is to provide a platform for developing mo=
+re
+>> functional systems with an even minimized boot time.
+>>
+>
+> Hi,
+>
+> is it a marketing announcement or a presentation of an innovative sol=
+ution?
+> In the first case don't send this kind of email to this mailing list.=
+ In the
+> second one, could you explain to us your "fast boot" solution or your=
+ kernel
+> modifications? I can't find any implementation details on the web sit=
+e.
+>
+> Marco
+>
 
-Thank you for the response.
 
-I've already sent this mail to PREEMPT-RT list.
 
-After that I've realized, that the problem with High Resolution Timer
-sources is more broad, and maybe developers from various x86 related
-mailing lists can help me a bit.
-
-Best regards,
-Lukasz
+--=20
+Constantine Shulyupin
+http://www.MakeLinux.com/
+Embedded Linux Systems,
+Device Drivers, TI DaVinci
