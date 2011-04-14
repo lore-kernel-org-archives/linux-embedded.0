@@ -1,49 +1,83 @@
-From: Matthieu CASTET <matthieu.castet@parrot.com>
-Subject: Re: Super Fast Boot of Embedded Linux: 300 ms from boot loader to
- shell
-Date: Thu, 14 Apr 2011 09:43:35 +0200
-Message-ID: <4DA6A5A7.2060701@parrot.com>
-References: <BANLkTi=Zahmo_d1Fo7JnaD3iJHAuhSAZGQ@mail.gmail.com>	<4DA331F9.5070902@gmail.com> <BANLkTimLGVfS=wbkmYMRkirsARwFHNYWVw@mail.gmail.com> <4DA5DD10.6030305@gmail.com>
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: Re: [PWM v9 0/3] Implement a generic PWM framework
+Date: Thu, 14 Apr 2011 10:12:51 -0500
+Message-ID: <BANLkTik6Ftsy2yTA7LBKTUDJkqXPf4JeSA@mail.gmail.com>
+References: <1301630392-20793-1-git-send-email-bgat@billgatliff.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4DA5DD10.6030305@gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1301630392-20793-1-git-send-email-bgat@billgatliff.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="windows-1252"
-To: Marco Stornelli <marco.stornelli@gmail.com>
-Cc: Constantine Shulyupin <const@makelinux.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Hi,
-
-Marco Stornelli a =E9crit :
-> Il 13/04/2011 16:53, Constantine Shulyupin ha scritto:
->> Thank you Marco for your feedback. I've added summary of used
->> optimization method:
->> =95 Reduction of kernel and filesystem size
->> =95 Kernel features: naked boot, initrd without compression
->> =95 Optimization of NAND flash interface in boot loader
->> =95 Boot time was measured with utility tstamp
->> =95 You can find more detailed list of methods at http://elinux.org/=
-Boot_Time
->> =95 Techniques for improving embedded Linux startup time, presentati=
-on:
->> http://www.makelinux.com/emb/fastboot/MontaVista
->>
->> Actually, detailed implementations of optimization methods are
->> described in numerous documents.
->=20
-> I really know. I was talking about *your* optimization method, but if=
- I=20
-> well understand you've just applied a list of well known methods.
-
-Not to say such case are not interesting : loading a linux kernel with =
-only a
-serial driver, a ramdisk and a shell as init doesn't reflect reality.
-
-In real product what you want if fast user interaction (sound, mounting=
- big
-filesystem with user data, lcd display, ...)
+Guys:
 
 
-Matthieu
+Anyone have any comment on this patch series?  Is it finally ready for =
+Linus?
+
+Thanks!
+
+
+b.g.
+
+
+On Thu, Mar 31, 2011 at 10:59 PM, Bill Gatliff <bgat@billgatliff.com> w=
+rote:
+> This patch series contains the ninth attempt at implementation of a
+> generic PWM device interface framework. =A0Think gpiolib, but for
+> devices and pseudo-devices that generate pulse-wave-modulated outputs=
+=2E
+>
+> Compared to the previous version, this patch series:
+>
+> =A0* Fixes an unbalanced get_device()/put_device()
+>
+> A git tree containing these patches may be found here:
+>
+> =A0 =A0http://git.billgatliff.com/pwm.git
+>
+>
+> Regards,
+>
+>
+> b.g.
+>
+> Bill Gatliff (3):
+> =A0PWM: Implement a generic PWM framework
+> =A0PWM: GPIO+hrtimer device emulation
+> =A0PWM: Atmel PWMC driver
+>
+> =A0Documentation/pwm.txt =A0 =A0| =A0276 ++++++++++++++++++++++
+> =A0MAINTAINERS =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A08 +
+> =A0drivers/Kconfig =A0 =A0 =A0 =A0 =A0| =A0 =A02 +
+> =A0drivers/Makefile =A0 =A0 =A0 =A0 | =A0 =A02 +
+> =A0drivers/pwm/Kconfig =A0 =A0 =A0| =A0 29 +++
+> =A0drivers/pwm/Makefile =A0 =A0 | =A0 =A07 +
+> =A0drivers/pwm/atmel-pwmc.c | =A0452 ++++++++++++++++++++++++++++++++=
+++++
+> =A0drivers/pwm/gpio-pwm.c =A0 | =A0332 ++++++++++++++++++++++++++
+> =A0drivers/pwm/pwm.c =A0 =A0 =A0 =A0| =A0580 ++++++++++++++++++++++++=
+++++++++++++++++++++++
+> =A0include/linux/pwm/pwm.h =A0| =A0143 ++++++++++++
+> =A010 files changed, 1831 insertions(+), 0 deletions(-)
+> =A0create mode 100644 Documentation/pwm.txt
+> =A0create mode 100644 drivers/pwm/Kconfig
+> =A0create mode 100644 drivers/pwm/Makefile
+> =A0create mode 100644 drivers/pwm/atmel-pwmc.c
+> =A0create mode 100644 drivers/pwm/gpio-pwm.c
+> =A0create mode 100644 drivers/pwm/pwm.c
+> =A0create mode 100644 include/linux/pwm/pwm.h
+>
+> --
+> 1.7.4.1
+>
+>
+
+
+
+--=20
+Bill Gatliff
+bgat@billgatliff.com
