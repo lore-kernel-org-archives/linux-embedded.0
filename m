@@ -1,34 +1,73 @@
-From: Greg KH <gregkh@suse.de>
-Subject: Re: [PWM v9 1/3] PWM: Implement a generic PWM framework
-Date: Thu, 14 Apr 2011 12:58:42 -0700
-Message-ID: <20110414195842.GA18872@suse.de>
-References: <1301630392-20793-1-git-send-email-bgat@billgatliff.com>
- <1301630392-20793-2-git-send-email-bgat@billgatliff.com>
- <BANLkTi=1Nh+EcZw_U6U8ZS2yVyqmCtuAcQ@mail.gmail.com>
+From: Alessio Igor Bogani <abogani@kernel.org>
+Subject: [PATCH 0/4] Speed up the symbols' resolution process V3
+Date: Fri, 15 Apr 2011 17:24:53 +0200
+Message-ID: <1302881097-563-1-git-send-email-abogani@kernel.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <BANLkTi=1Nh+EcZw_U6U8ZS2yVyqmCtuAcQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Bill Gatliff <bgat@billgatliff.com>, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Kay Sievers <kay.sievers@vrfy.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Alessio Igor Bogani <abogani@kernel.org>
 
-On Thu, Apr 14, 2011 at 01:49:27PM -0600, Grant Likely wrote:
-> > +static struct class pwm_class =3D {
-> > + =A0 =A0 =A0 .name =A0 =A0 =A0 =A0 =A0 =3D "pwm",
-> > + =A0 =A0 =A0 .owner =A0 =A0 =A0 =A0 =A0=3D THIS_MODULE,
-> > + =A0 =A0 =A0 .dev_attrs =A0 =A0 =A0=3D pwm_dev_attrs,
-> > +};
->=20
-> >From my understanding, class is deprecated.  I believe you should be
-> using bus_type directly now.  Check with Greg and Kay.
+The intent of this patch is to speed up the symbols resolution process.
 
-Yes, that is correct, please don't create new classes if at all
-possible.  And this code looks like it is fine to use a bus_type.
+This objective is achieved by sorting all ksymtab* and kcrctab* symbols
+(those which reside both in the kernel and in the modules) and thus use the
+fast binary search.
 
-thanks,
+To avoid adding lots of code for symbols sorting I rely on the linker which can
+easily do the job thanks to a little trick. The trick isn't really beautiful to
+see but permits minimal changes to the code and build process. Indeed the patch
+is very simple and short.
 
-greg k-h
+In the first place I changed the code for place every symbol in a different
+section (for example: "___ksymtab" sec "__" #sym) at compile time (this the
+above mentioned trick!). Thus I request to the linker to sort and merge all
+these sections into the appropriate ones (for example: "__ksymtab") at link
+time using the linker scripts. Once all symbols are sorted we can use binary
+search instead of the linear one.
+
+I'm fairly sure that this is a good speed improvement even though I haven't
+made any comprehensive benchmarking (but follow a simple one). In any case
+I would be very happy to receive suggestions about how made it. Collaterally,
+the boot time should be reduced also (proportionally to the number of modules
+and symbols nvolved at boot stage).
+
+I hope that you find that interesting!
+
+This work was supported by a hardware donation from the CE Linux Forum.
+
+Thanks to Ian Lance Taylor for help about how the linker works.
+
+Changes since V2:
+*) Fix a bug in each_symbol() semantics by Anders Kaseorg
+*) Split the work in three patches as requested by Rusty Russell
+*) Add a generic binary search implementation made by Tim Abbott
+*) Remove CONFIG_SYMBOLS_BSEARCH kernel option
+
+Changes since V1:
+*) Merge all patches into only one
+*) Remove few useless things
+*) Introduce CONFIG_SYMBOLS_BSEARCH kernel option 
+
+
+Alessio Igor Bogani (3):
+  module: Split the find_symbol_in_section function
+  module: Sort exported symbols
+  module: Use the binary search for symbols resolution
+
+Tim Abbott (1):
+  lib: Add generic binary search function to the kernel.
+
+ include/asm-generic/vmlinux.lds.h |   20 +++++++-------
+ include/linux/bsearch.h           |    9 ++++++
+ include/linux/module.h            |    7 +++--
+ kernel/module.c                   |   37 ++++++++++++++++---------
+ lib/Makefile                      |    3 +-
+ lib/bsearch.c                     |   53 +++++++++++++++++++++++++++++++++++++
+ scripts/module-common.lds         |   11 +++++++
+ 7 files changed, 113 insertions(+), 27 deletions(-)
+ create mode 100644 include/linux/bsearch.h
+ create mode 100644 lib/bsearch.c
