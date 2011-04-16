@@ -1,166 +1,145 @@
 From: Alessio Igor Bogani <abogani@kernel.org>
-Subject: [PATCH 2/4] module: Sort exported symbols
-Date: Sat, 16 Apr 2011 15:26:11 +0200
-Message-ID: <1302960373-5309-3-git-send-email-abogani@kernel.org>
+Subject: [PATCH 3/4] lib: Add generic binary search function to the kernel.
+Date: Sat, 16 Apr 2011 15:26:12 +0200
+Message-ID: <1302960373-5309-4-git-send-email-abogani@kernel.org>
 References: <1302960373-5309-1-git-send-email-abogani@kernel.org>
+Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
         h=domainkey-signature:sender:from:to:cc:subject:date:message-id
-         :x-mailer:in-reply-to:references;
-        bh=iUgaSnU4zC6QI6k0OfBZE0RGzEXCOp5g/mmX3on8nPU=;
-        b=CBMurJ5AJBOiDLbDGlp+A84MsanBL/lYmxuTOUHITh7LYmtzkQmJvVWc8KJJVSlfeI
-         tRVASDHHeUgwePnIiL6cVzY/zTB+Gnh2JhyjUgqIYUUMdrS15/evgQ3AzYcnGY8TqC5R
-         vUQ13DzXuoLLZ+3HmiGarruM2+rgP9uDo8kwg=
+         :x-mailer:in-reply-to:references:mime-version:content-type
+         :content-transfer-encoding;
+        bh=MiHk8rpzcQUgKyWyaSP3jXsj3aAuE0SmcKwRrpXo/BY=;
+        b=OaGqMW4ilb8vKQZT13F6FxkMvIKWg5UpgekZFKiNkSG80ukEz995APJ0Mg6TTk8fOx
+         GLQ6zji9HrfCCOBhDDCNwI9+kNAI/+OQCVHMAaG/QZ6+/vcV84suOphRkpOjzx4p5Hb+
+         /jedJ9uX5OPaGR2Rxx8ktmyn1vkVeT8TdzYYE=
 In-Reply-To: <1302960373-5309-1-git-send-email-abogani@kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="macroman"
 To: Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>
 Cc: LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Alessio Igor Bogani <abogani@kernel.org>
 
-This patch places every exported symbol in its own section
-(i.e. "___ksymtab__printk").  Thus the linker will use its SORT() directive
-to sort and finally merge all symbol in the right and final section
-(i.e. "__ksymtab").
+=46rom: Tim Abbott <tabbott@ksplice.com>
 
-This work was supported by a hardware donation from the CE Linux Forum.
+There a large number hand-coded binary searches in the kernel (run
+"git grep search | grep binary" to find many of them).  Since in my
+experience, hand-coding binary searches can be error-prone, it seems
+worth cleaning this up by providing a generic binary search function.
 
+This generic binary search implementation comes from Ksplice.  It has
+the same basic API as the C library bsearch() function.  Ksplice uses
+it in half a dozen places with 4 different comparison functions, and I
+think our code is substantially cleaner because of this.
+
+Signed-off-by: Tim Abbott <tabbott@ksplice.com>
+Extra-bikeshedding-by: Alan Jenkins <alan-jenkins@tuffmail.co.uk>
+Extra-bikeshedding-by: Andr=C3=A9 Goddard Rosa <andre.goddard@gmail.com=
+>
+Extra-bikeshedding-by: Rusty Russell <rusty@rustcorp.com.au>
+Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
 Signed-off-by: Alessio Igor Bogani <abogani@kernel.org>
 ---
- include/asm-generic/vmlinux.lds.h |   20 ++++++++++----------
- include/linux/module.h            |    4 ++--
- scripts/module-common.lds         |   11 +++++++++++
- 3 files changed, 23 insertions(+), 12 deletions(-)
+ include/linux/bsearch.h |    9 ++++++++
+ lib/Makefile            |    3 +-
+ lib/bsearch.c           |   53 +++++++++++++++++++++++++++++++++++++++=
+++++++++
+ 3 files changed, 64 insertions(+), 1 deletions(-)
+ create mode 100644 include/linux/bsearch.h
+ create mode 100644 lib/bsearch.c
 
-diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-index bd297a2..349e356 100644
---- a/include/asm-generic/vmlinux.lds.h
-+++ b/include/asm-generic/vmlinux.lds.h
-@@ -274,70 +274,70 @@
- 	/* Kernel symbol table: Normal symbols */			\
- 	__ksymtab         : AT(ADDR(__ksymtab) - LOAD_OFFSET) {		\
- 		VMLINUX_SYMBOL(__start___ksymtab) = .;			\
--		*(__ksymtab)						\
-+		*(SORT(___ksymtab__*))					\
- 		VMLINUX_SYMBOL(__stop___ksymtab) = .;			\
- 	}								\
- 									\
- 	/* Kernel symbol table: GPL-only symbols */			\
- 	__ksymtab_gpl     : AT(ADDR(__ksymtab_gpl) - LOAD_OFFSET) {	\
- 		VMLINUX_SYMBOL(__start___ksymtab_gpl) = .;		\
--		*(__ksymtab_gpl)					\
-+		*(SORT(___ksymtab_gpl__*))				\
- 		VMLINUX_SYMBOL(__stop___ksymtab_gpl) = .;		\
- 	}								\
- 									\
- 	/* Kernel symbol table: Normal unused symbols */		\
- 	__ksymtab_unused  : AT(ADDR(__ksymtab_unused) - LOAD_OFFSET) {	\
- 		VMLINUX_SYMBOL(__start___ksymtab_unused) = .;		\
--		*(__ksymtab_unused)					\
-+		*(SORT(___ksymtab_unused__*))				\
- 		VMLINUX_SYMBOL(__stop___ksymtab_unused) = .;		\
- 	}								\
- 									\
- 	/* Kernel symbol table: GPL-only unused symbols */		\
- 	__ksymtab_unused_gpl : AT(ADDR(__ksymtab_unused_gpl) - LOAD_OFFSET) { \
- 		VMLINUX_SYMBOL(__start___ksymtab_unused_gpl) = .;	\
--		*(__ksymtab_unused_gpl)					\
-+		*(SORT(___ksymtab_unused_gpl__*))			\
- 		VMLINUX_SYMBOL(__stop___ksymtab_unused_gpl) = .;	\
- 	}								\
- 									\
- 	/* Kernel symbol table: GPL-future-only symbols */		\
- 	__ksymtab_gpl_future : AT(ADDR(__ksymtab_gpl_future) - LOAD_OFFSET) { \
- 		VMLINUX_SYMBOL(__start___ksymtab_gpl_future) = .;	\
--		*(__ksymtab_gpl_future)					\
-+		*(SORT(___ksymtab_gpl_future__*))			\
- 		VMLINUX_SYMBOL(__stop___ksymtab_gpl_future) = .;	\
- 	}								\
- 									\
- 	/* Kernel symbol table: Normal symbols */			\
- 	__kcrctab         : AT(ADDR(__kcrctab) - LOAD_OFFSET) {		\
- 		VMLINUX_SYMBOL(__start___kcrctab) = .;			\
--		*(__kcrctab)						\
-+		*(SORT(___kcrctab__*))					\
- 		VMLINUX_SYMBOL(__stop___kcrctab) = .;			\
- 	}								\
- 									\
- 	/* Kernel symbol table: GPL-only symbols */			\
- 	__kcrctab_gpl     : AT(ADDR(__kcrctab_gpl) - LOAD_OFFSET) {	\
- 		VMLINUX_SYMBOL(__start___kcrctab_gpl) = .;		\
--		*(__kcrctab_gpl)					\
-+		*(SORT(___kcrctab_gpl__*))				\
- 		VMLINUX_SYMBOL(__stop___kcrctab_gpl) = .;		\
- 	}								\
- 									\
- 	/* Kernel symbol table: Normal unused symbols */		\
- 	__kcrctab_unused  : AT(ADDR(__kcrctab_unused) - LOAD_OFFSET) {	\
- 		VMLINUX_SYMBOL(__start___kcrctab_unused) = .;		\
--		*(__kcrctab_unused)					\
-+		*(SORT(___kcrctab_unused__*))				\
- 		VMLINUX_SYMBOL(__stop___kcrctab_unused) = .;		\
- 	}								\
- 									\
- 	/* Kernel symbol table: GPL-only unused symbols */		\
- 	__kcrctab_unused_gpl : AT(ADDR(__kcrctab_unused_gpl) - LOAD_OFFSET) { \
- 		VMLINUX_SYMBOL(__start___kcrctab_unused_gpl) = .;	\
--		*(__kcrctab_unused_gpl)					\
-+		*(SORT(___kcrctab_unused_gpl__*))			\
- 		VMLINUX_SYMBOL(__stop___kcrctab_unused_gpl) = .;	\
- 	}								\
- 									\
- 	/* Kernel symbol table: GPL-future-only symbols */		\
- 	__kcrctab_gpl_future : AT(ADDR(__kcrctab_gpl_future) - LOAD_OFFSET) { \
- 		VMLINUX_SYMBOL(__start___kcrctab_gpl_future) = .;	\
--		*(__kcrctab_gpl_future)					\
-+		*(SORT(___kcrctab_gpl_future__*))			\
- 		VMLINUX_SYMBOL(__stop___kcrctab_gpl_future) = .;	\
- 	}								\
- 									\
-diff --git a/include/linux/module.h b/include/linux/module.h
-index 5de4204..cfb9563 100644
---- a/include/linux/module.h
-+++ b/include/linux/module.h
-@@ -223,7 +223,7 @@ struct module_use {
- 	extern void *__crc_##sym __attribute__((weak));		\
- 	static const unsigned long __kcrctab_##sym		\
- 	__used							\
--	__attribute__((section("__kcrctab" sec), unused))	\
-+	__attribute__((section("___kcrctab" sec "__"#sym), unused))	\
- 	= (unsigned long) &__crc_##sym;
- #else
- #define __CRC_SYMBOL(sym, sec)
-@@ -238,7 +238,7 @@ struct module_use {
- 	= MODULE_SYMBOL_PREFIX #sym;                    	\
- 	static const struct kernel_symbol __ksymtab_##sym	\
- 	__used							\
--	__attribute__((section("__ksymtab" sec), unused))	\
-+	__attribute__((section("___ksymtab" sec "__"#sym), unused))	\
- 	= { (unsigned long)&sym, __kstrtab_##sym }
- 
- #define EXPORT_SYMBOL(sym)					\
-diff --git a/scripts/module-common.lds b/scripts/module-common.lds
-index 47a1f9a..055a8d5 100644
---- a/scripts/module-common.lds
-+++ b/scripts/module-common.lds
-@@ -5,4 +5,15 @@
-  */
- SECTIONS {
- 	/DISCARD/ : { *(.discard) }
+diff --git a/include/linux/bsearch.h b/include/linux/bsearch.h
+new file mode 100644
+index 0000000..90b1aa8
+--- /dev/null
++++ b/include/linux/bsearch.h
+@@ -0,0 +1,9 @@
++#ifndef _LINUX_BSEARCH_H
++#define _LINUX_BSEARCH_H
 +
-+	__ksymtab				: { *(SORT(___ksymtab__*)) }
-+	__ksymtab_gpl			: { *(SORT(___ksymtab_gpl__*)) }
-+	__ksymtab_unused		: { *(SORT(___ksymtab_unused__*)) }
-+	__ksymtab_unused_gpl	: { *(SORT(___ksymtab_unused_gpl__*)) }
-+	__ksymtab_gpl_future	: { *(SORT(___ksymtab_gpl_future__*)) }
-+	__kcrctab				: { *(SORT(___kcrctab__*)) }
-+	__kcrctab_gpl			: { *(SORT(___kcrctab_gpl__*)) }
-+	__kcrctab_unused		: { *(SORT(___kcrctab_unused__*)) }
-+	__kcrctab_unused_gpl	: { *(SORT(___kcrctab_unused_gpl__*)) }
-+	__kcrctab_gpl_future	: { *(SORT(___kcrctab_gpl_future__*)) }
- }
--- 
++#include <linux/types.h>
++
++void *bsearch(const void *key, const void *base, size_t num, size_t si=
+ze,
++	      int (*cmp)(const void *key, const void *elt));
++
++#endif /* _LINUX_BSEARCH_H */
+diff --git a/lib/Makefile b/lib/Makefile
+index ef0f285..4b49a24 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -21,7 +21,8 @@ lib-y	+=3D kobject.o kref.o klist.o
+=20
+ obj-y +=3D bcd.o div64.o sort.o parser.o halfmd4.o debug_locks.o rando=
+m32.o \
+ 	 bust_spinlocks.o hexdump.o kasprintf.o bitmap.o scatterlist.o \
+-	 string_helpers.o gcd.o lcm.o list_sort.o uuid.o flex_array.o
++	 string_helpers.o gcd.o lcm.o list_sort.o uuid.o flex_array.o \
++	 bsearch.o
+ obj-y +=3D kstrtox.o
+ obj-$(CONFIG_TEST_KSTRTOX) +=3D test-kstrtox.o
+=20
+diff --git a/lib/bsearch.c b/lib/bsearch.c
+new file mode 100644
+index 0000000..5b54758
+--- /dev/null
++++ b/lib/bsearch.c
+@@ -0,0 +1,53 @@
++/*
++ * A generic implementation of binary search for the Linux kernel
++ *
++ * Copyright (C) 2008-2009 Ksplice, Inc.
++ * Author: Tim Abbott <tabbott@ksplice.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; version 2.
++ */
++
++#include <linux/module.h>
++#include <linux/bsearch.h>
++
++/*
++ * bsearch - binary search an array of elements
++ * @key: pointer to item being searched for
++ * @base: pointer to first element to search
++ * @num: number of elements
++ * @size: size of each element
++ * @cmp: pointer to comparison function
++ *
++ * This function does a binary search on the given array.  The
++ * contents of the array should already be in ascending sorted order
++ * under the provided comparison function.
++ *
++ * Note that the key need not have the same type as the elements in
++ * the array, e.g. key could be a string and the comparison function
++ * could compare the string with the struct's name field.  However, if
++ * the key and elements in the array are of the same type, you can use
++ * the same comparison function for both sort() and bsearch().
++ */
++void *bsearch(const void *key, const void *base, size_t num, size_t si=
+ze,
++	      int (*cmp)(const void *key, const void *elt))
++{
++	size_t start =3D 0, end =3D num;
++	int result;
++
++	while (start < end) {
++		size_t mid =3D start + (end - start) / 2;
++
++		result =3D cmp(key, base + mid * size);
++		if (result < 0)
++			end =3D mid;
++		else if (result > 0)
++			start =3D mid + 1;
++		else
++			return (void *)base + mid * size;
++	}
++
++	return NULL;
++}
++EXPORT_SYMBOL(bsearch);
+--=20
 1.7.4.1
