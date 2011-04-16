@@ -1,7 +1,7 @@
 From: Wanlong Gao <wanlong.gao@gmail.com>
 Subject: Re: [PATCH 4/4] module: Use the binary search for symbols resolution
-Date: Sat, 16 Apr 2011 22:08:48 +0800
-Message-ID: <BANLkTikVMv_3vjypP=+ZCmn5BwEazRZ36w@mail.gmail.com>
+Date: Sat, 16 Apr 2011 22:32:08 +0800
+Message-ID: <BANLkTik9oekjUH6YXTda1P_dM231nEHQqA@mail.gmail.com>
 References: <1302960373-5309-1-git-send-email-abogani@kernel.org>
 	<1302960373-5309-5-git-send-email-abogani@kernel.org>
 Reply-To: wanlong.gao@gmail.com
@@ -12,10 +12,10 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         h=domainkey-signature:mime-version:sender:reply-to:in-reply-to
          :references:date:x-google-sender-auth:message-id:subject:from:to:cc
          :content-type;
-        bh=5JPYQG1kihiIZYerUie22OZqBed2NLaVSGRlMEF1L5w=;
-        b=GrLfEOkpOby5PJ4qpWHKsUn0ou+Vg1D5bg9SRHAORIn+0Vhsdec5S95u1v7uKM9X7i
-         00rV9n3RZyLRT6xnFr5D4YLAe39P9tfSpU5YlFLw1YDD3RV755JsOQM6UTv7z1NmqLbe
-         WA2b3N0WvdIRykSbyRyOD20Prt+1EoRQCaOZ0=
+        bh=EW1znlKmRJOKF88d2dRAv+uBU2s3H8oM4Q68PYB3+Qo=;
+        b=xukojKtD+Mqqy1TjU3lQpgDqwPnV626gtWCtWW5yqO7KSOQKbR9jCT6Nj2oeBV3NF5
+         ZBaun5BWx3eWvNvmdJgQLDk9DbTrLrEXjiBeOf6xorjKAGnNHc4ggGbU5fxipDe/mxcK
+         GDpxUKT0IzPddNQAJ8Mfd3FXRMZ8XYpp5eQhQ=
 In-Reply-To: <1302960373-5309-5-git-send-email-abogani@kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
@@ -74,6 +74,9 @@ On 4/16/11, Alessio Igor Bogani <abogani@kernel.org> wrote:
 > -	}
 > -	if (symnum >= syms->stop - syms->start)
 > +	sym = bsearch(fsa->name, syms->start, syms->stop - syms->start,
+As the bsearch func, why not change the syms->stop to syms->end ?
+Hmm..Just a stupid suggestion.
+Thanks
 > +		sizeof(struct kernel_symbol), cmp_name);
 > +
 > +	if (sym == NULL)
@@ -88,8 +91,6 @@ On 4/16/11, Alessio Igor Bogani <abogani@kernel.org> wrote:
 > 1.7.4.1
 >
 > --
-It seems like a great work .
-Thanks
 > To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
