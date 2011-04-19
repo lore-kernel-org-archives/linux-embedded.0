@@ -1,26 +1,135 @@
 From: Rusty Russell <rusty@rustcorp.com.au>
-Subject: Re: [PATCH 4/4] module: Use the binary search for symbols resolution
-Date: Tue, 19 Apr 2011 11:07:43 +0930
-Message-ID: <87liz73tso.fsf@rustcorp.com.au>
-References: <1302960373-5309-1-git-send-email-abogani@kernel.org> <1302960373-5309-5-git-send-email-abogani@kernel.org> <BANLkTik9oekjUH6YXTda1P_dM231nEHQqA@mail.gmail.com>
+Subject: Re: [PATCH 1/4] module: Restructure each_symbol() code
+Date: Tue, 19 Apr 2011 11:01:51 +0930
+Message-ID: <87r58z3u2g.fsf@rustcorp.com.au>
+References: <1302960373-5309-1-git-send-email-abogani@kernel.org> <1302960373-5309-2-git-send-email-abogani@kernel.org>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <BANLkTik9oekjUH6YXTda1P_dM231nEHQqA@mail.gmail.com>
+In-Reply-To: <1302960373-5309-2-git-send-email-abogani@kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: wanlong.gao@gmail.com, Alessio Igor Bogani <abogani@kernel.org>
-Cc: Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>
+To: Alessio Igor Bogani <abogani@kernel.org>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Alessio Igor Bogani <abogani@kernel.org>
 
-On Sat, 16 Apr 2011 22:32:08 +0800, Wanlong Gao <wanlong.gao@gmail.com> wrote:
-> > +	sym = bsearch(fsa->name, syms->start, syms->stop - syms->start,
-> As the bsearch func, why not change the syms->stop to syms->end ?
-> Hmm..Just a stupid suggestion.
+On Sat, 16 Apr 2011 15:26:10 +0200, Alessio Igor Bogani <abogani@kernel.org> wrote:
+> Restructure code to better integrate future improvements.
 
+I like all the rest, but I find the function names here a bit confusing.
 
-The names are derived from the linker symbols for end of sections, which
-is __stop_<sectionname>.
+How about using this (untested!) patch instead?
 
-Cheers,
+Thanks!
 Rusty.
+---
+Subject: module: each_symbol_section instead of each_symbol
+
+Instead of having a callback function for each symbol in the kernel,
+have a callback for each array of symbols.
+
+This eases the logic when we move to sorted symbols and binary search.
+
+Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
+
+diff --git a/include/linux/module.h b/include/linux/module.h
+--- a/include/linux/module.h
++++ b/include/linux/module.h
+@@ -477,8 +477,9 @@ const struct kernel_symbol *find_symbol(
+ 					bool warn);
+ 
+ /* Walk the exported symbol table */
+-bool each_symbol(bool (*fn)(const struct symsearch *arr, struct module *owner,
+-			    unsigned int symnum, void *data), void *data);
++bool each_symbol_section(bool (*fn)(const struct symsearch *arr,
++				    struct module *owner,
++				    void *data), void *data);
+ 
+ /* Returns 0 and fills in value, defined and namebuf, or -ERANGE if
+    symnum out of range. */
+diff --git a/kernel/module.c b/kernel/module.c
+--- a/kernel/module.c
++++ b/kernel/module.c
+@@ -240,23 +240,24 @@ static bool each_symbol_in_section(const
+ 				   struct module *owner,
+ 				   bool (*fn)(const struct symsearch *syms,
+ 					      struct module *owner,
+-					      unsigned int symnum, void *data),
++					      void *data),
+ 				   void *data)
+ {
+-	unsigned int i, j;
++	unsigned int j;
+ 
+ 	for (j = 0; j < arrsize; j++) {
+-		for (i = 0; i < arr[j].stop - arr[j].start; i++)
+-			if (fn(&arr[j], owner, i, data))
+-				return true;
++		if (fn(&arr[j], owner, data))
++			return true;
+ 	}
+ 
+ 	return false;
+ }
+ 
+ /* Returns true as soon as fn returns true, otherwise false. */
+-bool each_symbol(bool (*fn)(const struct symsearch *arr, struct module *owner,
+-			    unsigned int symnum, void *data), void *data)
++bool each_symbol_section(bool (*fn)(const struct symsearch *arr,
++				    struct module *owner,
++				    void *data),
++			 void *data)
+ {
+ 	struct module *mod;
+ 	static const struct symsearch arr[] = {
+@@ -309,7 +310,7 @@ bool each_symbol(bool (*fn)(const struct
+ 	}
+ 	return false;
+ }
+-EXPORT_SYMBOL_GPL(each_symbol);
++EXPORT_SYMBOL_GPL(each_symbol_section);
+ 
+ struct find_symbol_arg {
+ 	/* Input */
+@@ -323,9 +324,9 @@ struct find_symbol_arg {
+ 	const struct kernel_symbol *sym;
+ };
+ 
+-static bool find_symbol_in_section(const struct symsearch *syms,
+-				   struct module *owner,
+-				   unsigned int symnum, void *data)
++static bool test_symbol_for_find(const struct symsearch *syms,
++				 struct module *owner,
++				 unsigned int symnum, void *data)
+ {
+ 	struct find_symbol_arg *fsa = data;
+ 
+@@ -365,6 +366,19 @@ static bool find_symbol_in_section(const
+ 	return true;
+ }
+ 
++static bool find_symbol_in_section(const struct symsearch *syms,
++				   struct module *owner,
++				   void *data)
++{
++	unsigned int i;
++
++	for (i = 0; i < syms->stop - syms->start; i++) {
++		if (test_symbol_for_find(syms, owner, i, data))
++			return true;
++	}
++	return false;
++}
++
+ /* Find a symbol and return it, along with, (optional) crc and
+  * (optional) module which owns it.  Needs preempt disabled or module_mutex. */
+ const struct kernel_symbol *find_symbol(const char *name,
+@@ -379,7 +393,7 @@ const struct kernel_symbol *find_symbol(
+ 	fsa.gplok = gplok;
+ 	fsa.warn = warn;
+ 
+-	if (each_symbol(find_symbol_in_section, &fsa)) {
++	if (each_symbol_section(find_symbol_in_section, &fsa)) {
+ 		if (owner)
+ 			*owner = fsa.owner;
+ 		if (crc)
