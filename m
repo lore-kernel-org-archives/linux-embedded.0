@@ -1,49 +1,41 @@
-From: Wanlong Gao <wanlong.gao@gmail.com>
-Subject: Re: [PATCH 4/4] module: Use the binary search for symbols resolution
-Date: Tue, 19 Apr 2011 20:46:52 +0800
-Message-ID: <4DAD843C.7060409@gmail.com>
-References: <1302960373-5309-1-git-send-email-abogani@kernel.org> <1302960373-5309-5-git-send-email-abogani@kernel.org> <BANLkTik9oekjUH6YXTda1P_dM231nEHQqA@mail.gmail.com> <87liz73tso.fsf@rustcorp.com.au> <4DACE8F4.2050807@gmail.com> <87aafmo4mi.fsf@rustcorp.com.au>
-Mime-Version: 1.0
+From: Tony Ibbs <tibs@tonyibbs.co.uk>
+Subject: Re: [PATCH] extra/1 Allow setting the maximum KBUS message size
+Date: Tue, 19 Apr 2011 20:33:07 +0100
+Message-ID: <8A323683-36E6-464E-91DC-AD30CA84C1E0@tonyibbs.co.uk>
+References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <20110322133640.5d5c88e4@bike.lwn.net> <DBA665CD-BE12-4DC8-9B3F-4170BED789BD@tonyibbs.co.uk> <32934D05-E7A7-4A2C-92EF-96A0580F2234@tonyibbs.co.uk> <20110415164608.489d82bf@bike.lwn.net> <20110418140110.GD9462@sirena.org.uk>
+Mime-Version: 1.0 (Apple Message framework v1082)
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
-         :cc:subject:references:in-reply-to:content-type
-         :content-transfer-encoding;
-        bh=dPetkJkTMnpt79/odj0jbWfyGSrry5dnKWNV2kC4G7w=;
-        b=wY1vTINCl8oWAvhL1EEWZCGAx29VpBIVpJVDfoDqVZoOnGe/rffQucyhUdbpDXX3P4
-         mKejWBrHEVV6Mt6JA4+0g08VkJ/skbCAIVXKTLvRksQiDYLfs1E70/oGi7RddWrrm8pC
-         AZ7wS4ZxR8AvjQAsNY2R7S5sNeHyagiQ3ibKI=
-In-Reply-To: <87aafmo4mi.fsf@rustcorp.com.au>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20110418140110.GD9462@sirena.org.uk>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Rusty Russell <rusty@rustcorp.com.au>
-Cc: Alessio Igor Bogani <abogani@kernel.org>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Jonathan Corbet <corbet@lwn.net>, Grant Likely <grant.likely@secretlab.ca>, lkml <linux-kernel@vger.kernel.org>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>, James Chapman <jchapman@katalix.com>
 
-  2011-4-19 19:35, Rusty Russell wroted:
-> On Tue, 19 Apr 2011 09:44:20 +0800, Wanlong Gao<wanlong.gao@gmail.com>  wrote:
->>    2011-4-19 9:37, Rusty Russell wroted:
->>> On Sat, 16 Apr 2011 22:32:08 +0800, Wanlong Gao<wanlong.gao@gmail.com>   wrote:
->>>>> +	sym = bsearch(fsa->name, syms->start, syms->stop - syms->start,
->>>> As the bsearch func, why not change the syms->stop to syms->end ?
->>>> Hmm..Just a stupid suggestion.
->>>
->>>
->>> The names are derived from the linker symbols for end of sections, which
->>> is __stop_<sectionname>.
->>>
->>> Cheers,
->>> Rusty.
->> As this , why not change the bsearch's "end" to "stop", too ? It will be
->> more readable.
->
-> I'm confused.  bsearch uses a count, not an end pointer...
->
-> Rusty.
 
-Hmm...I see, I see . I made a mistake on this func .
-Thanks for your explanation.
+On 18 Apr 2011, at 15:01, Mark Brown wrote:
 
-Best regards
+> On Fri, Apr 15, 2011 at 04:46:08PM -0600, Jonathan Corbet wrote:
+> 
+>> That means getting more people to look at the patch, which could be hard.
+>> The problem is that, if you wait, they'll only squeal when the code is
+>> close to going in, and you could find yourself set back a long way.  A
+>> good first step might be to CC Andrew Morton on your next posting.
+> 
+> One other thing that it'd be good to see is a contrast and compare with
+> other similar things like the Android binder that are floating around.
+
+I'm aiming to write a smallish example of using KBUS for something not
+entirely boring, and that will hopefully work as a starting point for
+comparisons. Unfortunately (for this purpose, anyway), the next couple
+of weekends (including four days of public holiday!) are taken up with
+other things, so it will be a little while.
+
+That will probably be an appropriate thing to CC Andrew Morton.
+
+Comparative examples of how to do something similar with other means may
+take longer, of course.
+
+Thanks,
+	Tibs
