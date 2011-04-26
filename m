@@ -1,41 +1,73 @@
-From: Tony Ibbs <tibs@tonyibbs.co.uk>
-Subject: Re: [PATCH] extra/1 Allow setting the maximum KBUS message size
-Date: Tue, 19 Apr 2011 20:33:07 +0100
-Message-ID: <8A323683-36E6-464E-91DC-AD30CA84C1E0@tonyibbs.co.uk>
-References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <20110322133640.5d5c88e4@bike.lwn.net> <DBA665CD-BE12-4DC8-9B3F-4170BED789BD@tonyibbs.co.uk> <32934D05-E7A7-4A2C-92EF-96A0580F2234@tonyibbs.co.uk> <20110415164608.489d82bf@bike.lwn.net> <20110418140110.GD9462@sirena.org.uk>
-Mime-Version: 1.0 (Apple Message framework v1082)
-Content-Transfer-Encoding: 7bit
+From: Bill Gatliff <bgat@billgatliff.com>
+Subject: Expose regulator:set_consumer_device_supply()?
+Date: Mon, 25 Apr 2011 21:16:55 -0500
+Message-ID: <BANLkTi=dCHXEtv+=+sRaDp_Pt3zQy5o7ug@mail.gmail.com>
+Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20110418140110.GD9462@sirena.org.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Jonathan Corbet <corbet@lwn.net>, Grant Likely <grant.likely@secretlab.ca>, lkml <linux-kernel@vger.kernel.org>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>, James Chapman <jchapman@katalix.com>
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
+
+Guys:
 
 
-On 18 Apr 2011, at 15:01, Mark Brown wrote:
+I have been looking at incorporating use of the voltage regulator
+framework into one of my platforms, and have come across a problem
+that I'm not quite sure how to solve.
 
-> On Fri, Apr 15, 2011 at 04:46:08PM -0600, Jonathan Corbet wrote:
-> 
->> That means getting more people to look at the patch, which could be hard.
->> The problem is that, if you wait, they'll only squeal when the code is
->> close to going in, and you could find yourself set back a long way.  A
->> good first step might be to CC Andrew Morton on your next posting.
-> 
-> One other thing that it'd be good to see is a contrast and compare with
-> other similar things like the Android binder that are floating around.
+In a nutshell, I have a lot of i2c chips, each of which is powered by
+its own voltage regulator.  Among other things, I'm trying to write
+the i2c drivers so that they are as platform-agnostic as possible,
+because I intend for these drivers to be reused on future platforms
+with different voltage regulator layouts.  On future platforms
+regulators might be shared with multiple i2c chips, for example.
 
-I'm aiming to write a smallish example of using KBUS for something not
-entirely boring, and that will hopefully work as a starting point for
-comparisons. Unfortunately (for this purpose, anyway), the next couple
-of weekends (including four days of public holiday!) are taken up with
-other things, so it will be a little while.
+What I'm hoping for is i2c driver code that asks for a regulator based
+on the name of the pin to which the regulator is connected.  So
+instead of doing this:
 
-That will probably be an appropriate thing to CC Andrew Morton.
+i2c_chip_probe(i2c_client *this, ...)
+{
+...
+   /* request the name of a regulator that will change
+    * when the platform changes; ugh */
+   reg = regulator_get(NULL, "VREG_U11");
+...
+}
 
-Comparative examples of how to do something similar with other means may
-take longer, of course.
+... I can do this:
 
-Thanks,
-	Tibs
+i2c_chip_probe(i2c_client *this, ...)
+{
+...
+   /* ask for the regulator connected to our VDD pin */
+   reg = regulator_get(this, "VDD");
+...
+}
+
+The problem with i2c devices is that if you register them with
+i2c_register_board_info(), you don't have a device pointer that you
+can associate a regulator with.  So you have to register the regulator
+after the i2c chip gets registered, which means doing it in the i2c
+chip's probe method.  Ugly, and it won't work when regulators are
+shared between devices.
+
+A much cleaner way might be to pass a struct regulator_dev pointer in
+the i2c chip's platform data, and then use something similar to
+set_consumer_device_supply() to add the i2c chip's "VDD" pin as a
+consumer of the regulator.  Or maybe that function exactly.
+
+Any reason why we couldn't expose set_consumer_device_supply(), so
+that I can add a device as a regulator consumer after a regulator is
+already registered?
+
+
+Curious,
+
+
+b.g.
+-- 
+Bill Gatliff
+bgat@billgatliff.com
