@@ -1,55 +1,102 @@
-From: Bill Gatliff <bgat@billgatliff.com>
-Subject: Re: Expose regulator:set_consumer_device_supply()?
-Date: Tue, 26 Apr 2011 16:15:23 -0500
-Message-ID: <BANLkTi=KxNRktf3SOzQKK-stu6i+g8n2EA@mail.gmail.com>
-References: <BANLkTi=dCHXEtv+=+sRaDp_Pt3zQy5o7ug@mail.gmail.com>
-	<20110426083350.GA20595@sirena.org.uk>
-	<BANLkTimmpx5ZThXj705Yn_wRQ6bF7VzwPw@mail.gmail.com>
-	<20110426161516.GC11848@opensource.wolfsonmicro.com>
+From: Dirk Behme <dirk.behme@googlemail.com>
+Subject: Re: [PATCH 0/4] Speed up the symbols' resolution process V4
+Date: Wed, 27 Apr 2011 17:31:14 +0200
+Message-ID: <4DB836C2.6000504@googlemail.com>
+References: <1302960373-5309-1-git-send-email-abogani@kernel.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20110426161516.GC11848@opensource.wolfsonmicro.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
+         :cc:subject:references:in-reply-to:content-type
+         :content-transfer-encoding;
+        bh=ieanuavLB2gFQc9UVw7dVvFYMDW8cF2YlUzL3E0umUI=;
+        b=g8byKq+jboypwhh0c7O9aEpXTSbPoqlpAl/KQzkBUToFOBDtf69uGpENMI3uPWUtEK
+         OWmYWv9VvODXC3LJUiJwn/YOb85oar0B23olceWC4PGJmo+hj4SSOF6KcqTLuJYwT/FQ
+         5SIc2NqTBL2puLVxCtK7IcVxe0qu/upxz3Dkc=
+In-Reply-To: <1302960373-5309-1-git-send-email-abogani@kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Alessio Igor Bogani <abogani@kernel.org>
+Cc: Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>
 
-Mark:
-
-On Tue, Apr 26, 2011 at 11:15 AM, Mark Brown
-<broonie@opensource.wolfsonmicro.com> wrote:
+On 16.04.2011 15:26, Alessio Igor Bogani wrote:
+> The intent of this patch is to speed up the symbols resolution process.
 >
-> No. =A0As I said in the text you've quoted above you can also specify=
- the
-> device mapping using the dev_name() of the device.
+> This objective is achieved by sorting all ksymtab* and kcrctab* symbols
+> (those which reside both in the kernel and in the modules) and thus use the
+> fast binary search.
+>
+> To avoid adding lots of code for symbols sorting I rely on the linker which can
+> easily do the job thanks to a little trick. The trick isn't really beautiful to
+> see but permits minimal changes to the code and build process. Indeed the patch
+> is very simple and short.
+>
+> In the first place I changed the code for place every symbol in a different
+> section (for example: "___ksymtab" sec "__" #sym) at compile time (this the
+> above mentioned trick!). Thus I request to the linker to sort and merge all
+> these sections into the appropriate ones (for example: "__ksymtab") at link
+> time using the linker scripts. Once all symbols are sorted we can use binary
+> search instead of the linear one.
+>
+> I'm fairly sure that this is a good speed improvement even though I haven't
+> made any comprehensive benchmarking (but follow a simple one). In any case
+> I would be very happy to receive suggestions about how made it. Collaterally,
+> the boot time should be reduced also (proportionally to the number of modules
+> and symbols nvolved at boot stage).
+>
+> I hope that you find that interesting!
+>
+> This work was supported by a hardware donation from the CE Linux Forum.
+>
+> Thanks to Ian Lance Taylor for help about how the linker works.
+>
+>
+> Changes since V3:
+> *) Please ignore this version completely
+>
+> Changes since V2:
+> *) Fix a bug in each_symbol() semantics by Anders Kaseorg
+> *) Split the work in three patches as requested by Rusty Russell
+> *) Add a generic binary search implementation made by Tim Abbott
+> *) Remove CONFIG_SYMBOLS_BSEARCH kernel option
+>
+> Changes since V1:
+> *) Merge all patches into only one
+> *) Remove few useless things
+> *) Introduce CONFIG_SYMBOLS_BSEARCH kernel option
+>
+>
+> Alessio Igor Bogani (3):
+>    module: Restructure each_symbol() code
+>    module: Sort exported symbols
+>    module: Use the binary search for symbols resolution
+>
+> Tim Abbott (1):
+>    lib: Add generic binary search function to the kernel.
+>
+>   include/asm-generic/vmlinux.lds.h |   20 ++++----
+>   include/linux/bsearch.h           |    9 ++++
+>   include/linux/module.h            |    4 +-
+>   kernel/module.c                   |   84 ++++++++++++++++++++++++++++---------
+>   lib/Makefile                      |    3 +-
+>   lib/bsearch.c                     |   53 +++++++++++++++++++++++
+>   scripts/module-common.lds         |   11 +++++
+>   7 files changed, 151 insertions(+), 33 deletions(-)
+>   create mode 100644 include/linux/bsearch.h
+>   create mode 100644 lib/bsearch.c
 
-Aah!  I see it now--- the regulator_consumer_supply structure will
-take either the consumer's struct device pointer, or the device name
-of the consumer's struct device.  The device name can easily be
-predicted (controlled, in fact) before the consumer itself is
-registered; in the case of i2c devices, it's the bus-id, i.e.
-"0-0038".
+Tested-by: Dirk Behme <dirk.behme@googlemail.com>
 
-Now it all fits together for me.  Thanks for your patience!
+On an embedded ARM system insmoding a large number of modules the 
+overall module load time is improved up to ~1s. Great! :)
 
-> It means you get reams of code in drivers conditionally using the
-> regulator API, all of which adds needless complexity all over the tre=
-e
-> as people invariably make everything conditional on the regulator not
-> being there when they shouldn't. =A0This then means you also end up w=
-ith
-> no meaningful error handling, all errors just get silently eaten.
+It would be nice to get these patches into mainline asap.
 
-Now I think I see your point: better to have drivers check the result
-of regulator_get() themselves, rather than test a pointer coming in
-with the platform data.  And since regulators are often registered as
-platform devices themselves, there is no way to get a valid result
-from regulator_get() in early-init board code anyway.
+Many thanks
+
+Dirk
 
 
-b.g.
---=20
-Bill Gatliff
-bgat@billgatliff.com
