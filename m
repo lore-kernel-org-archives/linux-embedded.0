@@ -1,60 +1,39 @@
-From: Dirk Behme <dirk.behme@googlemail.com>
+From: Alessio Igor Bogani <abogani@kernel.org>
 Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
-Date: Wed, 04 May 2011 17:34:03 +0200
-Message-ID: <4DC171EB.6030900@googlemail.com>
+Date: Wed, 4 May 2011 19:30:58 +0200
+Message-ID: <BANLkTimFmSEykpoOWkicOe8vQFZNZdFoFA@mail.gmail.com>
 References: <1304455330-2728-1-git-send-email-abogani@kernel.org>
+	<4DC171EB.6030900@googlemail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
-         :cc:subject:references:in-reply-to:content-type
-         :content-transfer-encoding;
-        bh=Z8PbPPdcWJ+DWZyZZdOg2EqDEWaKcxV48fIR+07Tius=;
-        b=GzNjog+plIo8uyco0uhfP6vLjC9sxrGJotC7GDOKzfS7gnKegqQRiIzcIbEHJmBnDo
-         o6TevRyqildxUN6NlUU7EBgJkO3KPjo74r6agzphxwxQQkE/8vpnkMJM78rkxDhX8co+
-         kwJGFFvyJBjBssq05gQIydvkvxljQinHbresw=
-In-Reply-To: <1304455330-2728-1-git-send-email-abogani@kernel.org>
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:sender:in-reply-to:references:date
+         :x-google-sender-auth:message-id:subject:from:to:cc:content-type;
+        bh=XP5Am6T6phxtOUmL6FCeRlNq0QG1zH1zjZOsMWjhGlE=;
+        b=RiDtlTEnu+Zy01lp5sTedResGlFWjwF4A33m/FSa3k6SOnLVJaJaKF5w/J6CNBBCUq
+         NN39GLQmD0AYQ3dSvCTxhl+U51RTsOTSMeArr2yZ7VSzVhIR/jI/XTVAH7BhsAdFAQJf
+         6VMwhBe/wVfvcHFGdBqX+/YBkrK/FZQCWmARs=
+In-Reply-To: <4DC171EB.6030900@googlemail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Alessio Igor Bogani <abogani@kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Dirk Behme <dirk.behme@googlemail.com>
 Cc: Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>
 
-On 03.05.2011 22:42, Alessio Igor Bogani wrote:
-> This work was supported by a hardware donation from the CE Linux Forum.
+Dear Mr. Behme,
+
+2011/5/4 Dirk Behme <dirk.behme@googlemail.com>:
+[...]
+> How is this patch related to patch 4/4
 >
-> Signed-off-by: Alessio Igor Bogani<abogani@kernel.org>
-> ---
->   kernel/module.c |    6 ++----
->   1 files changed, 2 insertions(+), 4 deletions(-)
+> http://marc.info/?l=linux-kernel&m=130296062420328&w=1
 >
-> diff --git a/kernel/module.c b/kernel/module.c
-> index 6a34337..a1f841e 100644
-> --- a/kernel/module.c
-> +++ b/kernel/module.c
-> @@ -2055,10 +2055,8 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
->   	const struct kernel_symbol *stop)
->   {
->   	const struct kernel_symbol *ks = start;
-> -	for (; ks<  stop; ks++)
-> -		if (strcmp(ks->name, name) == 0)
-> -			return ks;
-> -	return NULL;
-> +	return bsearch(ks->name, start, stop - start,
-> +			sizeof(struct kernel_symbol), cmp_name);
->   }
->
->   static int is_exported(const char *name, unsigned long value,
+> of the recently sent patch set? Is it a replacement? Or an add on to this
+> (i.e. patch #5)?
 
-How is this patch related to patch 4/4
+Sorry it's my fault: This patch is an add on to that patch set.
 
-http://marc.info/?l=linux-kernel&m=130296062420328&w=1
-
-of the recently sent patch set? Is it a replacement? Or an add on to 
-this (i.e. patch #5)?
-
-Many thanks
-
-Dirk
+Ciao,
+Alessio
