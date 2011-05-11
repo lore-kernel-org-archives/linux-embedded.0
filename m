@@ -1,47 +1,45 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [RFC PATCH] arm: drop Execute-In-Place
-Date: Fri, 6 May 2011 09:07:36 +0300
-Message-ID: <20110506060733.GP27860@atomide.com>
-References: <1304607121-13612-1-git-send-email-plagnioj@jcrosoft.com>
-	<4DC2E5AA.5010604@am.sony.com> <4DC2E669.2000101@am.sony.com>
-	<1304620350.2398.29.camel@i7.infradead.org>
-	<4DC2EF19.5010309@am.sony.com>
-	<alpine.LFD.2.00.1105051453280.24613@xanadu.home>
-	<BANLkTimfKJPcDN+L4+z1DnsMv_BMOHpyew@mail.gmail.com>
-	<4DC2F6B0.80800@am.sony.com>
-	<alpine.LFD.2.00.1105051518580.24613@xanadu.home>
+From: Mike Frysinger <vapier.adi@gmail.com>
+Subject: Re: [PATCH 0/4] Speed up the symbols' resolution process V4
+Date: Tue, 10 May 2011 23:32:46 -0400
+Message-ID: <BANLkTi=y60Jt3-OMzbxQJzGkvzCzNJfJtA@mail.gmail.com>
+References: <1302960373-5309-1-git-send-email-abogani@kernel.org>
 Mime-Version: 1.0
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc:content-type;
+        bh=7Ou7Igs65CmD2AU/AfSuvX3rxam5L7dPrAYLy0mQfxA=;
+        b=dltAEZoRL/V48zUpO4PNZYQtoYB67WUaTvBg6WjOaC7Ww1EI0/FUJRATatP5spjeNQ
+         xn4sVzpodEPAkaieGucCJmQYgfuKoRo8iHvZVpC6ocT10J03rIg9if9JGsMmTEAuq7Jc
+         4LikWYCyt0k+FB3GWdDxDYTnjmMVbdnsPtJo0=
+In-Reply-To: <1302960373-5309-1-git-send-email-abogani@kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.2.00.1105051518580.24613@xanadu.home>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>, 
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>, 
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, linux-embedded <linux-embedded@vger.kernel.org>, Mike Frysinger <vapier.adi@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Tim Bird <tim.bird@am.sony.com>, Eric Miao <eric.miao@canonical.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Alessio Igor Bogani <abogani@kernel.org>
+Cc: Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>
 
-* Nicolas Pitre <nicolas.pitre@linaro.org> [110505 22:23]:
-> On Thu, 5 May 2011, Tim Bird wrote:
-> > 
-> > I should add that I tried to use XIP on omap (for research purposes),
-> > but it was broken and I didn't have time to fix it.  My bad.
-> 
-> OMAP is doing pretty nasty things with their early serial port support.  
-> This is most likely to screw up XIP.
+On Sat, Apr 16, 2011 at 09:26, Alessio Igor Bogani wrote:
+> In the first place I changed the code for place every symbol in a different
+> section (for example: "___ksymtab" sec "__" #sym) at compile time (this the
+> above mentioned trick!). Thus I request to the linker to sort and merge all
+> these sections into the appropriate ones (for example: "__ksymtab") at link
+> time using the linker scripts. Once all symbols are sorted we can use binary
+> search instead of the linear one.
 
-Yes to debug it you'd have to hardcode the uart_phys and virt
-in the debug-macro.S for DEBUG_LL and EARLY_PRINTK. But should
-be easy enough to do for anybody using XIP.
+this breaks symbol prefixed arches (like Blackfin):
+  CC      kernel/softirq.o
+/tmp/ccp3A6LU.s: Assembler messages:
+/tmp/ccp3A6LU.s:3734: Error: symbol `___ksymtab__local_bh_enable' is
+already defined
+make[1]: *** [kernel/softirq.o] Error 1
 
-Of course there may also be other issues too :)
+this is because your new system of section naming happens to overlap
+actual symbol names and the gnu assembler does not allow you to
+declare a section and a symbol with the same name.
 
-Tony
+might be better to pick a separator that cannot appear in a symbol
+name.  so rather than "__", use "+".  or some other funky char.
+-mike
