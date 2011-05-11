@@ -1,82 +1,115 @@
-From: Alessio Igor Bogani <abogani@kernel.org>
+From: Mike Frysinger <vapier.adi@gmail.com>
 Subject: Re: [PATCH 0/4] Speed up the symbols' resolution process V4
-Date: Wed, 11 May 2011 17:25:40 +0200
-Message-ID: <BANLkTi=OXuR4iJFqUEa4pA=yO0aXaqEzyA@mail.gmail.com>
+Date: Wed, 11 May 2011 11:52:56 -0400
+Message-ID: <BANLkTikFSN-DkkPNPtv1VigCg08YoB_q2g@mail.gmail.com>
 References: <1302960373-5309-1-git-send-email-abogani@kernel.org>
-	<BANLkTi=y60Jt3-OMzbxQJzGkvzCzNJfJtA@mail.gmail.com>
-	<BANLkTimfFEv+vZ8dYvhG0oj2Q4g+KnG4aA@mail.gmail.com>
-	<BANLkTinDiGCaKPtS+ZpKf2swJpParJ4eew@mail.gmail.com>
-	<BANLkTi=JXq+V783amiJB-qLX=7PaeH-83w@mail.gmail.com>
+ <BANLkTi=y60Jt3-OMzbxQJzGkvzCzNJfJtA@mail.gmail.com> <BANLkTimfFEv+vZ8dYvhG0oj2Q4g+KnG4aA@mail.gmail.com>
+ <BANLkTinDiGCaKPtS+ZpKf2swJpParJ4eew@mail.gmail.com> <BANLkTi=JXq+V783amiJB-qLX=7PaeH-83w@mail.gmail.com>
+ <BANLkTi=OXuR4iJFqUEa4pA=yO0aXaqEzyA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:sender:in-reply-to:references:date
-         :x-google-sender-auth:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=bJxCiPzmVWrgGiJTRk2IpYShCMsOIpmZjT9HePkqWmo=;
-        b=p/c8zZdF/EWqTbClK8aq8BtzHSWGdWnjos7+Jd8LNgU7Bfgt+cVjUF3R/d6ZaP2wXq
-         izR5q7ueUjMYiptmx9M0AEZV55tZ6FaHHFYUObsIZdA4Jq5a6sYhiYqgseuGjFXKWDjA
-         J03+R+DSH6IqHBkqgVOIPBXeA8yvGy0HDsh4Y=
-In-Reply-To: <BANLkTi=JXq+V783amiJB-qLX=7PaeH-83w@mail.gmail.com>
+        h=domainkey-signature:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc:content-type:content-transfer-encoding;
+        bh=278NwIVoDy81/sgzujqUsiL/LxSBO+U2L9VE2z9qLWg=;
+        b=XfoqvI0v0NoAQIEvk70OIF9QyfhyutAMt3WGTDnUfvi6KHZwvKeY00AQdBBvs4BWyI
+         Z/cytu6Rg7OOcwmXKLS2c7fWTOJemr22KlRzLAhk1L1/mtrriswOsYS+Gp59wjinRPsm
+         wpGgq0n2xZ9khXWV/ut9rmRFNzh9UnGL9ZZX8=
+In-Reply-To: <BANLkTi=OXuR4iJFqUEa4pA=yO0aXaqEzyA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="utf-8"
-To: Mike Frysinger <vapier.adi@gmail.com>
+To: Alessio Igor Bogani <abogani@kernel.org>
 Cc: Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Jason Wessel <jason.wessel@windriver.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>
 
-Dear Mr. Frysinger,
-
-2011/5/11 Mike Frysinger <vapier.adi@gmail.com>:
-[...]
->> Sorry I don't think that is a good choice from a long term point of
->> view. What do you think to add MODULE_SYMBOL_PREFIX to section names
->> instead? In this way symbol and section names should always be
->> different also on symbol prefixed archs (which are blackfin and
->> h8300).
+On Wed, May 11, 2011 at 11:25, Alessio Igor Bogani wrote:
+> 2011/5/11 Mike Frysinger:
+>>> Sorry I don't think that is a good choice from a long term point of
+>>> view. What do you think to add MODULE_SYMBOL_PREFIX to section name=
+s
+>>> instead? In this way symbol and section names should always be
+>>> different also on symbol prefixed archs (which are blackfin and
+>>> h8300).
+>>
+>> that doesnt work. =C2=A0it simply delays the problem to another set =
+of
+>> underscores. =C2=A0so with that change, local_bh_enable/_local_bh_en=
+able
+>> work, but now send_remote_softirq/__send_remote_softirq fail:
 >
-> that doesnt work. =C2=A0it simply delays the problem to another set o=
-f
-> underscores. =C2=A0so with that change, local_bh_enable/_local_bh_ena=
-ble
-> work, but now send_remote_softirq/__send_remote_softirq fail:
+> In my opinion it should work. if I use SYMBOL_PREFIX + two underscore
+> for section name I should always obtain different names.
+> So if SYMBOL_PREFIX is "_" section name will be "___", if
+> SYMBOL_PREFIX is "__" section name will be "____" and so on.
 
-In my opinion it should work. if I use SYMBOL_PREFIX + two underscore
-for section name I should always obtain different names.
-So if SYMBOL_PREFIX is "_" section name will be "___", if
-SYMBOL_PREFIX is "__" section name will be "____" and so on.
+i dont follow your logic.  SYMBOL_PREFIX is simply an underscore for
+Blackfin, so you are not guaranteed unique names when you're only
+prefixing more underscores.  the issue isnt with a symbol colliding
+with itself, the issue is with a symbol colliding with another symbol
+that has underscores added to its name.
 
-> =C2=A0CC =C2=A0 =C2=A0 =C2=A0kernel/softirq.o
-> nano /tmp/cconhYy1.s: Assembler messages:
-> /tmp/cconhYy1.s:3664: Error: symbol `___ksymtab___send_remote_softirq=
-'
-> is already defined
-> make[1]: *** [kernel/softirq.o] Error 1
+if you export _foo/foo, you'll get an error with the current code:
+/* EXPORT_SYMBOL(foo); */
+        .section        ___ksymtab__foo,"a",@progbits
+___ksymtab_foo:
+/* EXPORT_SYMBOL(_foo); */
+        .section        ___ksymtab___foo,"a",@progbits
+___ksymtab__foo:
 
-I'm a bit confused. I can build a kernel here:
-$ make ARCH=3Dblackfin CROSS_COMPILE=3D"bfin-uclinux-" defconfig
-*** Default configuration is based on 'BF537-STAMP_defconfig'
-[...]
-$ make ARCH=3Dblackfin CROSS_COMPILE=3D"bfin-uclinux-"
-  CHK     include/linux/version.h
-  CHK     include/generated/utsrelease.h
-  CALL    scripts/checksyscalls.sh
-[...]
-  OBJCOPY arch/blackfin/boot/vmlinux.bin
-  GZIP    arch/blackfin/boot/vmlinux.bin.gz
-  UIMAGE  arch/blackfin/boot/vmImage.gz
-Image Name:   bf537-0.2-2.6.39-rc3-00004-gf26a
-Created:      Wed May 11 17:06:45 2011
-Image Type:   Blackfin Linux Kernel Image (gzip compressed)
-Data Size:    986471 Bytes =3D 963.35 kB =3D 0.94 MB
-Load Address: 00001000
-Entry Point:  001a8518
-  Building modules, stage 2.
-  MODPOST 69 modules
+you can see how the first section and the last symbol collide
 
-Unfortunately I can't make skyeye emulator works to test the obtained
-kernel image.
+by putting the symbol prefix along the lines of the separator, you
+delay it to __foo/foo:
+/* EXPORT_SYMBOL(foo); */
+        .section        ___ksymtab___foo,"a",@progbits
+___ksymtab_foo:
+/* EXPORT_SYMBOL(__foo); */
+        .section        ___ksymtab_____foo,"a",@progbits
+___ksymtab___foo:
 
-Ciao,
-Alessio
+the Blackfin toolchain puts the prefix before the ksymtab part while
+you're putting it after, so there is always a possibility of collision
+unless you pick a split char that doesnt include an underscore.
+
+>> =C2=A0CC =C2=A0 =C2=A0 =C2=A0kernel/softirq.o
+>> nano /tmp/cconhYy1.s: Assembler messages:
+>> /tmp/cconhYy1.s:3664: Error: symbol `___ksymtab___send_remote_softir=
+q'
+>> is already defined
+>> make[1]: *** [kernel/softirq.o] Error 1
+>
+> I'm a bit confused. I can build a kernel here:
+> $ make ARCH=3Dblackfin CROSS_COMPILE=3D"bfin-uclinux-" defconfig
+
+it's failing for me with current linux-next and the patch you posted
+previously.  also, you dont need to set CROSS_COMPILE as that is the
+default value for ARCH=3Dblackfin ...
+
+> Unfortunately I can't make skyeye emulator works to test the obtained
+> kernel image.
+
+skyeye is crap.  the latest upstream gdb/sim code can boot a kernel,
+but if you aren't up-to-date with that, this binary i've been using
+locally should work too:
+http://blackfin.uclinux.org/uimages/bfin-elf-run
+
+$ bfin-elf-run --env operating --model bf537 --sirev 2 ./vmlinux
+earlyprintk=3Dserial,uart0 console=3DttyBF0
+Linux version 2.6.39-rc7-ADI-2011R1-pre-00132-g9d91c9a
+(vapier@vapier-m) (gcc version 4.3.5 (ADI-trunk/git-ce854ee) ) #16 Wed
+May 11 11:55:28 EDT 2011
+register early platform devices
+bootconsole [early_shadow0] enabled
+bootconsole [early_BFuart0] enabled
+early printk enabled on early_BFuart0
+Limiting kernel memory to 56MB due to anomaly 05000263
+Board Memory: 64MB
+Kernel Managed Memory: 64MB
+Memory map:
+  fixedcode =3D 0x00000400-0x00000490
+  text      =3D 0x00001000-0x000f7f30
+  rodata    =3D 0x000f7f30-0x001456ac
+=2E............
+-mike
