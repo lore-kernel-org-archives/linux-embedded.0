@@ -1,71 +1,37 @@
-From: Dirk Behme <dirk.behme@googlemail.com>
+From: Anders Kaseorg <andersk@ksplice.com>
 Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
-Date: Mon, 16 May 2011 17:36:09 +0200
-Message-ID: <4DD14469.5030804@googlemail.com>
+Date: Mon, 16 May 2011 14:02:09 -0400
+Message-ID: <BANLkTi=2jW5PHB6QCaddHeZH0P=9PKWosw@mail.gmail.com>
 References: <1304455330-2728-1-git-send-email-abogani@kernel.org>
+	<4DD14469.5030804@googlemail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
-         :cc:subject:references:in-reply-to:content-type
-         :content-transfer-encoding;
-        bh=BBksg+ySc8qhK5CQX9+jNkpYMF5jKkrjzvLr90Dp4uM=;
-        b=DdzZvVE4Hq3JBzbY9vx/zsgeoT3uARyJGcAWJ4bkM2uZROePbATzSSgB2GOeHA2Fch
-         Ul/+Fr9eCY9azu9HbeEh3wUTwMpZ7h68+vn+3k0cFo5sVaDkrUjh0HD5+030bZeiX8YT
-         LAn9f2K4DKL2U393G6S0qZByokXbTJpXG6f5o=
-In-Reply-To: <1304455330-2728-1-git-send-email-abogani@kernel.org>
+        d=ksplice.com; s=google;
+        h=domainkey-signature:mime-version:in-reply-to:references:date
+         :message-id:subject:from:to:cc:content-type;
+        bh=bCR0SbHwGYD3CS0dRToCHvkoD/isFze21OJugSCeFZI=;
+        b=N2qvPX/cosuozodrkCFd1vJf1EP9kU+HHrdRA7jZmWYFdtoVz9Uqnp+14JeumQWigU
+         DTIyDZ1Y0d0DTDV+jM+PwVFW5FLbAotvTpmkNiEvMKOAPx/gS1kCbSEjt4tCOgjvdZIT
+         6rJcvEGPs+p65VT5bn2Y3FzWkx8ZfqPktEg98=
+In-Reply-To: <4DD14469.5030804@googlemail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Alessio Igor Bogani <abogani@kernel.org>
-Cc: Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Anders Kaseorg <andersk@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Dirk Behme <dirk.behme@googlemail.com>
+Cc: Alessio Igor Bogani <abogani@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>
 
-On 03.05.2011 22:42, Alessio Igor Bogani wrote:
-> This work was supported by a hardware donation from the CE Linux Forum.
->
-> Signed-off-by: Alessio Igor Bogani<abogani@kernel.org>
-> ---
->   kernel/module.c |    6 ++----
->   1 files changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/kernel/module.c b/kernel/module.c
-> index 6a34337..a1f841e 100644
-> --- a/kernel/module.c
-> +++ b/kernel/module.c
-> @@ -2055,10 +2055,8 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
->   	const struct kernel_symbol *stop)
->   {
->   	const struct kernel_symbol *ks = start;
-> -	for (; ks<  stop; ks++)
-> -		if (strcmp(ks->name, name) == 0)
-> -			return ks;
-> -	return NULL;
-> +	return bsearch(ks->name, start, stop - start,
-> +			sizeof(struct kernel_symbol), cmp_name);
->   }
+On Mon, May 16, 2011 at 11:36, Dirk Behme <dirk.behme@googlemail.com> wrote:
+> Then, thinking again, results in the question if the first argument of
+> bsearch() shouldn't be 'name' rather than 'ks->name'?
 
-Back porting this patch to a 2.6.34.9 based ARM system fails with an 
-Oops at 0x00000004. Debugging shows that both start and stop are 0 in 
-this case resulting in ks->name accessing 0x00000004. The original 
-code checked for this by 'ks < stop' in the for loop.
+Yes, it should be.
 
-So the first idea was that the code should be
+> Then it would be the job of cmp_name() to check for start == stop == 0?
 
-if(k < stop)
-	return bsearch();
-else
-	return NULL;
+Actually bsearch already handles this case correctly (it will make no
+calls to cmp_name and return NULL), so nothing needs to specially
+check for it.
 
-Then, thinking again, results in the question if the first argument of 
-bsearch() shouldn't be 'name' rather than 'ks->name'? Then it would be 
-the job of cmp_name() to check for start == stop == 0? I.e.
-
-return bsearch(name, ...);
-
-?
-
-Best regards
-
-Dirk
+Anders
