@@ -1,37 +1,49 @@
-From: Anders Kaseorg <andersk@ksplice.com>
-Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
-Date: Mon, 16 May 2011 14:02:09 -0400
-Message-ID: <BANLkTi=2jW5PHB6QCaddHeZH0P=9PKWosw@mail.gmail.com>
-References: <1304455330-2728-1-git-send-email-abogani@kernel.org>
-	<4DD14469.5030804@googlemail.com>
-Mime-Version: 1.0
+From: Alessio Igor Bogani <abogani@kernel.org>
+Subject: [PATCH] module: Use binary search in lookup_symbol()
+Date: Mon, 16 May 2011 22:23:40 +0200
+Message-ID: <1305577420-3685-1-git-send-email-abogani@kernel.org>
+References: <BANLkTi=2jW5PHB6QCaddHeZH0P=9PKWosw@mail.gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ksplice.com; s=google;
-        h=domainkey-signature:mime-version:in-reply-to:references:date
-         :message-id:subject:from:to:cc:content-type;
-        bh=bCR0SbHwGYD3CS0dRToCHvkoD/isFze21OJugSCeFZI=;
-        b=N2qvPX/cosuozodrkCFd1vJf1EP9kU+HHrdRA7jZmWYFdtoVz9Uqnp+14JeumQWigU
-         DTIyDZ1Y0d0DTDV+jM+PwVFW5FLbAotvTpmkNiEvMKOAPx/gS1kCbSEjt4tCOgjvdZIT
-         6rJcvEGPs+p65VT5bn2Y3FzWkx8ZfqPktEg98=
-In-Reply-To: <4DD14469.5030804@googlemail.com>
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:sender:from:to:cc:subject:date:message-id
+         :x-mailer:in-reply-to:references;
+        bh=HFWnEjWjlRuk42+KoDDkQ4qkRFZUssrFQu3WMta9JR4=;
+        b=t4dkKSQB447uO9RQCW1+uUMFovR7t79rSL/NEbY8EChCEbq5jbsZXcCib/EPUWDTDl
+         RQZ4uyzb6A6P9WA0Q/uqOSolQVsww87pWb/MzlUCZRkXK9Muxenva4tez6YA8Q8wNOAP
+         ws3kPBJ1iIPeqWcKYar042WTPTF5ceF1BD2gs=
+In-Reply-To: <BANLkTi=2jW5PHB6QCaddHeZH0P=9PKWosw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Dirk Behme <dirk.behme@googlemail.com>
-Cc: Alessio Igor Bogani <abogani@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>, Tim Abbott <tabbott@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>
+To: Rusty Russell <rusty@rustcorp.com.au>
+Cc: Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>, Dirk Behme <dirk.behme@googlemail.com>, Alessio Igor Bogani <abogani@kernel.org>
 
-On Mon, May 16, 2011 at 11:36, Dirk Behme <dirk.behme@googlemail.com> wrote:
-> Then, thinking again, results in the question if the first argument of
-> bsearch() shouldn't be 'name' rather than 'ks->name'?
+This work was supported by a hardware donation from the CE Linux Forum.
 
-Yes, it should be.
+Signed-off-by: Alessio Igor Bogani <abogani@kernel.org>
+---
+ kernel/module.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
 
-> Then it would be the job of cmp_name() to check for start == stop == 0?
-
-Actually bsearch already handles this case correctly (it will make no
-calls to cmp_name and return NULL), so nothing needs to specially
-check for it.
-
-Anders
+diff --git a/kernel/module.c b/kernel/module.c
+index 6a34337..54355c5 100644
+--- a/kernel/module.c
++++ b/kernel/module.c
+@@ -2055,10 +2055,8 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
+ 	const struct kernel_symbol *stop)
+ {
+ 	const struct kernel_symbol *ks = start;
+-	for (; ks < stop; ks++)
+-		if (strcmp(ks->name, name) == 0)
+-			return ks;
+-	return NULL;
++	return bsearch(name, start, stop - start,
++			sizeof(struct kernel_symbol), cmp_name);
+ }
+ 
+ static int is_exported(const char *name, unsigned long value,
+-- 
+1.7.4.1
