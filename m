@@ -1,87 +1,65 @@
-From: Florian Fainelli <florian@openwrt.org>
-Subject: Re: [PATCH 00/11] RFC: KBUS messaging subsystem
-Date: Tue, 17 May 2011 10:50:38 +0200
-Message-ID: <201105171050.38903.florian@openwrt.org>
-References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <20110322133640.5d5c88e4@bike.lwn.net>
+From: Dirk Behme <dirk.behme@googlemail.com>
+Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
+Date: Tue, 17 May 2011 21:18:26 +0200
+Message-ID: <4DD2CA02.9040707@googlemail.com>
+References: <BANLkTi=2jW5PHB6QCaddHeZH0P=9PKWosw@mail.gmail.com> <1305577420-3685-1-git-send-email-abogani@kernel.org> <878vu6nftw.fsf@rustcorp.com.au>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:sender:from:to:subject:date:user-agent:cc
-         :references:in-reply-to:organization:mime-version:content-type
-         :content-transfer-encoding:message-id;
-        bh=o6w8urFY328mQ46dgBmlezXO0mmraZbm8E5EoXYw5Ws=;
-        b=lSjGaeFnyZYxxylGlQYMS9VEEtODvA3uopLZQxHr+FRrH6FKNNjTfN1erE79IeXjKj
-         prSJG1CcpDO/xCGvQdUItt7VQ1bBwixRLgSw05aDm2O6uNnbWd8r4/jinf/2M76+bRRg
-         B73MVn1S/gOYh3/6uO4RRMrSSkXkYbR6J6zgA=
-In-Reply-To: <20110322133640.5d5c88e4@bike.lwn.net>
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
+         :cc:subject:references:in-reply-to:content-type
+         :content-transfer-encoding;
+        bh=3s2qvQCI1f5vFNCz+9sZjP4LwhCr2lkqMBsivNio3FI=;
+        b=Ea7RtSPVXoQlQiVyqjJwgXtXRnzkonpL6J3QQFF6TgRhNQmkzU1VhapUoDV2LMm2zd
+         eYZGYbTwWypyJvkZ2o7LuQCQrcxXwpd18oW51fUSbRJZEoBthAfGgwkrSh2zjJ5w/U//
+         fNGYgy0jlYiZNqPnalkITun5ibEcSAKTIKcWs=
+In-Reply-To: <878vu6nftw.fsf@rustcorp.com.au>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
-To: Jonathan Corbet <corbet@lwn.net>
-Cc: Tony Ibbs <tibs@tonyibbs.co.uk>, Grant Likely <grant.likely@secretlab.ca>, lkml <linux-kernel@vger.kernel.org>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Rusty Russell <rusty@rustcorp.com.au>
+Cc: Alessio Igor Bogani <abogani@kernel.org>, Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>
 
-Hello,
+On 17.05.2011 05:52, Rusty Russell wrote:
+> On Mon, 16 May 2011 22:23:40 +0200, Alessio Igor Bogani<abogani@kernel.org>  wrote:
+>> This work was supported by a hardware donation from the CE Linux Forum.
+>>
+>> Signed-off-by: Alessio Igor Bogani<abogani@kernel.org>
+>> ---
+>>   kernel/module.c |    6 ++----
+>>   1 files changed, 2 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/kernel/module.c b/kernel/module.c
+>> index 6a34337..54355c5 100644
+>> --- a/kernel/module.c
+>> +++ b/kernel/module.c
+>> @@ -2055,10 +2055,8 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
+>>   	const struct kernel_symbol *stop)
+>>   {
+>>   	const struct kernel_symbol *ks = start;
+>> -	for (; ks<  stop; ks++)
+>> -		if (strcmp(ks->name, name) == 0)
+>> -			return ks;
+>> -	return NULL;
+>> +	return bsearch(name, start, stop - start,
+>> +			sizeof(struct kernel_symbol), cmp_name);
+>>   }
+>>
+>>   static int is_exported(const char *name, unsigned long value,
+>
+> Applied.
 
-Sorry for this late answer.
+Sorry, but where have you applied it?
 
-On Tuesday 22 March 2011 20:36:40 Jonathan Corbet wrote:
-> On Fri, 18 Mar 2011 17:21:09 +0000
-> 
-> Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
-> > KBUS is a lightweight, Linux kernel mediated messaging system,
-> > particularly intended for use in embedded environments.
-> 
-> I've spent a bit of time looking at this code...this isn't a detailed
-> review by any stretch, more like a few impressions.
-> 
-> - Why kbus over, say, a user-space daemon and unix-domain sockets?  I'm
->   not sure I see the advantage that comes with putting this into kernel
->   space.
+With the version above we should get a warning
 
-I also fail to see why this would be required. In my opininon you are trading 
-the reliability over complexity by putting this in the kernel.
+kernel/module.c: In function 'lookup_symbol':
+kernel/module.c:1809: warning: unused variable 'ks'
 
-Most implementations (if not all) involving system-wide message delivery for 
-other daemons are running in user-space. Having a daemon for message delivery 
-to other kbus clients/servers does not not seem less reliable to me. If you 
-had in mind that this daemon might be killed under OOM conditions, then maybe 
-your whole system has an issue, issue which could be circumvented by making 
-sure the messaging process gets respawned when possible (upstart like 
-mechanism or such).
+?
 
-> 
-> - The interface is ... creative.  If you have to do this in kernel space,
->   it would be nice to do away with the split write()/ioctl() API for
->   reading or writing messages.  It seems like either a write(), OR an
->   ioctl() with a message data pointer would suffice; that would cut the
->   number of syscalls the applications need to make too.
-> 
->   Even better might be to just use the socket API.
+Best regards
 
-Indeed, I would also suggest having a look at what generic netlink already 
-provides like messages per application PID, multicasting and marshaling. If 
-you intend to keep a part of it in the kernel, you should have a look at this, 
-because from my experience with generic netlink, most of the hard job you are 
-re-doing here, has already been done in a generic manner.
-
-> 
-> - Does anything bound the size of a message fed into the kernel with
->   write()?  I couldn't find it.  It seems like an application could
->   consume arbitrary amounts of kernel memory.
-> 
-> - It would be good to use the kernel's dynamic debugging and tracing
->   facilities rather than rolling your own.
-> 
-> - There's lots of kmalloc()/memset() pairs that could be kzalloc().
-> 
-> That's as far as I could get for now.
-> 
-> Thanks,
-> 
-> jon
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded"
-> in the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Dirk
