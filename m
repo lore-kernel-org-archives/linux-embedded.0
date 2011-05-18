@@ -1,94 +1,82 @@
-From: Alessio Igor Bogani <abogani@kernel.org>
-Subject: (unknown)
-Date: Wed, 18 May 2011 20:55:25 +0200
-Message-ID: <1305744925-8162-1-git-send-email-abogani@kernel.org>
-References: <4DD305B3.3000707@am.sony.com>
+From: Greg KH <greg@kroah.com>
+Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
+Date: Wed, 18 May 2011 12:21:10 -0700
+Message-ID: <20110518192110.GB26945@kroah.com>
+References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com>
+ <1305665763-3988-1-git-send-email-abogani@kernel.org>
+ <20110517232241.GA19140@kroah.com>
+ <4DD305B3.3000707@am.sony.com>
+ <20110518075428.GA29998@infradead.org>
+ <4DD3FB1C.3040103@am.sony.com>
+Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:sender:from:to:cc:subject:date:message-id
-         :x-mailer:in-reply-to:references;
-        bh=6LhrhXfTMn1/1ibfz2IW94IHrEGAvUDirfze25I5I2Y=;
-        b=K4A+IePJmyH0R/hZGSKY6Rn7a+MOOVx3JAPtjdLh0D/6FRVnewnPD0c1ArVzohawkn
-         ThfRaDrU1fCcKFCuBK0VynK2hhyL2iPYno5lPtjtEeaC+t4EApFA1oAoXLgxKSSobNuj
-         Fk5Yo53cuoJoAOVYo0/VmO9pO2T6I8TlZ2hG4=
-Subject: 
-In-Reply-To: <4DD305B3.3000707@am.sony.com>
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/relaxed; d=messagingengine.com; h=date:from:to:cc:subject:message-id:references:mime-version:content-type:in-reply-to; s=smtpout; bh=k2FeB1X+IVKp8B8114FxGUqxU9A=; b=cxwb5WUoZqJPC+hHx1abYxEf+Qf3KGrLvaoUT892MnJGiT5w3l3ywwSbebiuXg8vOWJoOH57jtl9E63U46+JbxJ9P/0z+nxfjZWNMwN5gpvNvo5yzo+9UBbbBVnvmpYC7zSKDABm1nrG0vUAaqaxAKydyyGHNXZe12BhLvamzWk=
+Content-Disposition: inline
+In-Reply-To: <4DD3FB1C.3040103@am.sony.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Greg KH <greg@kroah.com>, Rusty Russell <rusty@rustcorp.com.au>, Tim Bird <tim.bird@am.sony.com>, Christoph Hellwig <hch@infradead.org>
-Cc: Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>, Dirk Behme <dirk.behme@googlemail.com>, Alessio Igor Bogani <abogani@kernel.org>
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Alessio Igor Bogani <abogani@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>, Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>, Dirk Behme <dirk.behme@googlemail.com>
 
-Dear Mr. Bird, Dear Mr. Kroah-Hartman,
+On Wed, May 18, 2011 at 10:00:12AM -0700, Tim Bird wrote:
+> On 05/18/2011 12:54 AM, Christoph Hellwig wrote:
+> > On Tue, May 17, 2011 at 04:33:07PM -0700, Tim Bird wrote:
+> >> That said, I can answer Greg's question.  This is to speed up
+> >> the symbol resolution on module loading.  The last numbers I
+> >> saw showed a reduction of about 15-20% for the module load
+> >> time, for large-ish modules.  Of course this is highly dependent
+> >> on the size of the modules, what they do at load time, and how many
+> >> symbols are looked up to link them into the kernel.
+> > 
+> > How large are these very large modules, and what are good examples for
+> > that?
+> 
+> usbcore seems to be a large-ish module whose
+> load time is improved by this.  More details follow:
 
-Sorry for my very bad English.
+Then add the module to the kernel image, that's what a lot of distros do
+now to solve this issue.
 
-2011/5/18 Tim Bird <tim.bird@am.sony.com>:
-[...]
-> Alessio - do you have any timings you can share for the speedup?
+> I don't know the exact modules, but Alan Jenkins reported a .3
+> second reduction in overall boot time, on a EEE PC, presumably
+> running a stock Linux distribution, and loading 41 modules.
+> 
+> See http://lkml.org/lkml/2009/11/3/93
 
-You can find a little benchmark using ftrace at end of this email:
-https://lkml.org/lkml/2011/4/5/341
+That's good to know.
 
-> On 05/17/2011 04:22 PM, Greg KH wrote:
->> On Tue, May 17, 2011 at 10:56:03PM +0200, Alessio Igor Bogani wrote:
->>> This work was supported by a hardware donation from the CE Linux Forum.
-[...]
->> Please explain why you make a change, not just who sponsored the change,
->> that's not very interesting to developers.
+> Carmelo Amoroso reported some good performance gains
+> in this presentation:
+> http://elinux.org/images/1/18/C_AMOROSO_Fast_lkm_loader_ELC-E_2009.pdf
+> (See slide 22).
+> 
+> He doesn't report the overall time savings, and
+> he was using a different method (hash tables as opposed to
+> binary search), but I believe the results are comparable
+> to what the binary search enhancement provides.
+> 
+> The biggest offenders in his testing were usbcore,
+> ehci_hcd and ohci_hcd.
 
-You are right. I apologize.
+Why those?  The size of them, or something else?  They don't seem to
+have very many symbols they need to look up compared to anything else
+that I can tell.
 
-This patch is a missing piece (not essential it is only a further little
-optimization) of this little patchset:
-https://lkml.org/lkml/2011/4/16/48
+Is something else going on here due to the serialization of the USB
+drivers themselves?
 
-Unfortunately I forgot to include this patch in the series (my first error)
-then I avoided explaining the changes because I had thought that those were
-already enough explained in the cover-letter of the patchset (my second error).
+> > And why do people overly care for the load time?
+> 
+> To reduce overall boot time.
 
-Sorry for my mistakes.
+To reduce it even more, build the modules into the kernel :)
 
-Is this better?
+I'm not saying I object to this patch, I just want a whole lot more
+information in it when submitted as currently there was no justification
+for the change at all.
 
-Subject: [PATCH] module: Use binary search in lookup_symbol()
+thanks,
 
-The function is_exported() with its helper function lookup_symbol() are used to
-verify if a provided symbol is effectively exported by the kernel or by the
-modules. Now that both have their symbols sorted we can replace a linear search
-with a binary search which provide a considerably speed-up.
-
-This work was supported by a hardware donation from the CE Linux Forum.
-
-Signed-off-by: Alessio Igor Bogani <abogani@kernel.org>
----
- kernel/module.c |    7 ++-----
- 1 files changed, 2 insertions(+), 5 deletions(-)
-
-diff --git a/kernel/module.c b/kernel/module.c
-index 1e2b657..795bdc7 100644
---- a/kernel/module.c
-+++ b/kernel/module.c
-@@ -2055,11 +2055,8 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
- 	const struct kernel_symbol *start,
- 	const struct kernel_symbol *stop)
- {
--	const struct kernel_symbol *ks = start;
--	for (; ks < stop; ks++)
--		if (strcmp(ks->name, name) == 0)
--			return ks;
--	return NULL;
-+	return bsearch(name, start, stop - start,
-+			sizeof(struct kernel_symbol), cmp_name);
- }
- 
- static int is_exported(const char *name, unsigned long value,
---
-
-Thank you very much!
-
-Ciao,
-Alessio
+greg k-h
