@@ -1,58 +1,59 @@
-From: Dirk Behme <dirk.behme@googlemail.com>
+From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
-Date: Wed, 18 May 2011 17:26:56 +0200
-Message-ID: <4DD3E540.8000205@googlemail.com>
-References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com> <1305665763-3988-1-git-send-email-abogani@kernel.org>
+Date: Wed, 18 May 2011 10:00:12 -0700
+Message-ID: <4DD3FB1C.3040103@am.sony.com>
+References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com> <1305665763-3988-1-git-send-email-abogani@kernel.org> <20110517232241.GA19140@kroah.com> <4DD305B3.3000707@am.sony.com> <20110518075428.GA29998@infradead.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=gamma;
-        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
-         :cc:subject:references:in-reply-to:content-type
-         :content-transfer-encoding;
-        bh=rIUa5KqYUSZfq5Nc5j4Xe9us6xYfn2BBWTN63DlB5NU=;
-        b=LNy+DZmxoE3eh2AN11l0sdBDVzIUdomPbKqrhOnXvTp2hIlg32dla49mv2lZJFh6NF
-         1A5Tlo9JcKWnu8hcZrvNeWRlBY79xaQBpwFop/y9417PTWXyYVwOl0zKiTlBRDNCP5GT
-         03aRoxecCCoUFcp7F8yhD35ilSmKohyeGTrbM=
-In-Reply-To: <1305665763-3988-1-git-send-email-abogani@kernel.org>
+In-Reply-To: <20110518075428.GA29998@infradead.org>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Alessio Igor Bogani <abogani@kernel.org>
-Cc: Rusty Russell <rusty@rustcorp.com.au>, Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Greg KH <greg@kroah.com>, Alessio Igor Bogani <abogani@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>, Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>, Dirk Behme <dirk.behme@googlemail.com>
 
-On 17.05.2011 22:56, Alessio Igor Bogani wrote:
-> This work was supported by a hardware donation from the CE Linux Forum.
->
-> Signed-off-by: Alessio Igor Bogani<abogani@kernel.org>
-> ---
->   kernel/module.c |    7 ++-----
->   1 files changed, 2 insertions(+), 5 deletions(-)
->
-> diff --git a/kernel/module.c b/kernel/module.c
-> index 1e2b657..795bdc7 100644
-> --- a/kernel/module.c
-> +++ b/kernel/module.c
-> @@ -2055,11 +2055,8 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
->   	const struct kernel_symbol *start,
->   	const struct kernel_symbol *stop)
->   {
-> -	const struct kernel_symbol *ks = start;
-> -	for (; ks<  stop; ks++)
-> -		if (strcmp(ks->name, name) == 0)
-> -			return ks;
-> -	return NULL;
-> +	return bsearch(name, start, stop - start,
-> +			sizeof(struct kernel_symbol), cmp_name);
->   }
->
->   static int is_exported(const char *name, unsigned long value,
+On 05/18/2011 12:54 AM, Christoph Hellwig wrote:
+> On Tue, May 17, 2011 at 04:33:07PM -0700, Tim Bird wrote:
+>> That said, I can answer Greg's question.  This is to speed up
+>> the symbol resolution on module loading.  The last numbers I
+>> saw showed a reduction of about 15-20% for the module load
+>> time, for large-ish modules.  Of course this is highly dependent
+>> on the size of the modules, what they do at load time, and how many
+>> symbols are looked up to link them into the kernel.
+> 
+> How large are these very large modules, and what are good examples for
+> that?
 
-The old version with the warning is in linux-next now
+usbcore seems to be a large-ish module whose
+load time is improved by this.  More details follow:
 
-http://git.kernel.org/?p=linux/kernel/git/next/linux-next.git;a=commitdiff;h=903996de9b35213aaa4162c24351a2cb2931d9ac
+I don't know the exact modules, but Alan Jenkins reported a .3
+second reduction in overall boot time, on a EEE PC, presumably
+running a stock Linux distribution, and loading 41 modules.
 
-Best regards
+See http://lkml.org/lkml/2009/11/3/93
 
-Dirk
+Carmelo Amoroso reported some good performance gains
+in this presentation:
+http://elinux.org/images/1/18/C_AMOROSO_Fast_lkm_loader_ELC-E_2009.pdf
+(See slide 22).
+
+He doesn't report the overall time savings, and
+he was using a different method (hash tables as opposed to
+binary search), but I believe the results are comparable
+to what the binary search enhancement provides.
+
+The biggest offenders in his testing were usbcore,
+ehci_hcd and ohci_hcd.
+
+> And why do people overly care for the load time?
+
+To reduce overall boot time.
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Workgroup of the Linux Foundation
+Senior Staff Engineer, Sony Network Entertainment
+=============================
