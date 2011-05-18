@@ -1,29 +1,58 @@
-From: Christoph Hellwig <hch@infradead.org>
+From: Dirk Behme <dirk.behme@googlemail.com>
 Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
-Date: Wed, 18 May 2011 03:54:28 -0400
-Message-ID: <20110518075428.GA29998@infradead.org>
-References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com>
- <1305665763-3988-1-git-send-email-abogani@kernel.org>
- <20110517232241.GA19140@kroah.com>
- <4DD305B3.3000707@am.sony.com>
+Date: Wed, 18 May 2011 17:26:56 +0200
+Message-ID: <4DD3E540.8000205@googlemail.com>
+References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com> <1305665763-3988-1-git-send-email-abogani@kernel.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4DD305B3.3000707@am.sony.com>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Greg KH <greg@kroah.com>, Alessio Igor Bogani <abogani@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>, Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>, Dirk Behme <dirk.behme@googlemail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=gamma;
+        h=domainkey-signature:message-id:date:from:user-agent:mime-version:to
+         :cc:subject:references:in-reply-to:content-type
+         :content-transfer-encoding;
+        bh=rIUa5KqYUSZfq5Nc5j4Xe9us6xYfn2BBWTN63DlB5NU=;
+        b=LNy+DZmxoE3eh2AN11l0sdBDVzIUdomPbKqrhOnXvTp2hIlg32dla49mv2lZJFh6NF
+         1A5Tlo9JcKWnu8hcZrvNeWRlBY79xaQBpwFop/y9417PTWXyYVwOl0zKiTlBRDNCP5GT
+         03aRoxecCCoUFcp7F8yhD35ilSmKohyeGTrbM=
+In-Reply-To: <1305665763-3988-1-git-send-email-abogani@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Alessio Igor Bogani <abogani@kernel.org>
+Cc: Rusty Russell <rusty@rustcorp.com.au>, Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>
 
-On Tue, May 17, 2011 at 04:33:07PM -0700, Tim Bird wrote:
-> That said, I can answer Greg's question.  This is to speed up
-> the symbol resolution on module loading.  The last numbers I
-> saw showed a reduction of about 15-20% for the module load
-> time, for large-ish modules.  Of course this is highly dependent
-> on the size of the modules, what they do at load time, and how many
-> symbols are looked up to link them into the kernel.
+On 17.05.2011 22:56, Alessio Igor Bogani wrote:
+> This work was supported by a hardware donation from the CE Linux Forum.
+>
+> Signed-off-by: Alessio Igor Bogani<abogani@kernel.org>
+> ---
+>   kernel/module.c |    7 ++-----
+>   1 files changed, 2 insertions(+), 5 deletions(-)
+>
+> diff --git a/kernel/module.c b/kernel/module.c
+> index 1e2b657..795bdc7 100644
+> --- a/kernel/module.c
+> +++ b/kernel/module.c
+> @@ -2055,11 +2055,8 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
+>   	const struct kernel_symbol *start,
+>   	const struct kernel_symbol *stop)
+>   {
+> -	const struct kernel_symbol *ks = start;
+> -	for (; ks<  stop; ks++)
+> -		if (strcmp(ks->name, name) == 0)
+> -			return ks;
+> -	return NULL;
+> +	return bsearch(name, start, stop - start,
+> +			sizeof(struct kernel_symbol), cmp_name);
+>   }
+>
+>   static int is_exported(const char *name, unsigned long value,
 
-How large are these very large modules, and what are good examples for
-that?  And why do people overly care for the load time?
+The old version with the warning is in linux-next now
+
+http://git.kernel.org/?p=linux/kernel/git/next/linux-next.git;a=commitdiff;h=903996de9b35213aaa4162c24351a2cb2931d9ac
+
+Best regards
+
+Dirk
