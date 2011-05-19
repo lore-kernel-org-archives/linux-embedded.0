@@ -1,51 +1,92 @@
-From: Rusty Russell <rusty@rustcorp.com.au>
-Subject: Re: [PATCH] module: Use binary search in lookup_symbol()
-Date: Wed, 18 May 2011 10:37:52 +0930
-Message-ID: <87liy4n7dj.fsf@rustcorp.com.au>
-References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com> <1305665763-3988-1-git-send-email-abogani@kernel.org> <20110517232241.GA19140@kroah.com>
+From: Jeff Mahoney <jeffm@suse.de>
+Subject: Re: module boot time (was Re: [PATCH] module: Use binary search in
+ lookup_symbol())
+Date: Thu, 19 May 2011 15:56:31 -0400
+Message-ID: <4DD575EF.2060008@suse.de>
+References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com> <1305665763-3988-1-git-send-email-abogani@kernel.org> <20110517232241.GA19140@kroah.com> <4DD305B3.3000707@am.sony.com> <20110518075428.GA29998@infradead.org> <4DD3FB1C.3040103@am.sony.com> <20110518192110.GB26945@kroah.com> <4DD435B7.9090702@am.sony.com> <20110518213451.GA23702@kroah.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20110517232241.GA19140@kroah.com>
+In-Reply-To: <20110518213451.GA23702@kroah.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Greg KH <greg@kroah.com>, Alessio Igor Bogani <abogani@kernel.org>
-Cc: Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, Tim Bird <tim.bird@am.sony.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>, Dirk Behme <dirk.behme@googlemail.com>
+To: Greg KH <greg@kroah.com>
+Cc: Tim Bird <tim.bird@am.sony.com>, Christoph Hellwig <hch@infradead.org>, Alessio Igor Bogani <abogani@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>, Anders Kaseorg <andersk@ksplice.com>, Tim Abbott <tabbott@ksplice.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Jason Wessel <jason.wessel@windriver.com>, Dirk Behme <dirk.behme@googlemail.com>
 
-On Tue, 17 May 2011 16:22:41 -0700, Greg KH <greg@kroah.com> wrote:
-> On Tue, May 17, 2011 at 10:56:03PM +0200, Alessio Igor Bogani wrote:
-> > This work was supported by a hardware donation from the CE Linux Forum.
-> > 
-> > Signed-off-by: Alessio Igor Bogani <abogani@kernel.org>
-> > ---
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+On 05/18/2011 05:34 PM, Greg KH wrote:
+> On Wed, May 18, 2011 at 02:10:15PM -0700, Tim Bird wrote:
+>>>>> And why do people overly care for the load time?
+>>>>
+>>>> To reduce overall boot time.
+>>>
+>>> To reduce it even more, build the modules into the kernel :)
+>>
+>> That's what I do most of the time.  For some projects,
+>> it is useful to build certain things as modules so you can
+>> defer initializing them until later in the boot sequence.
+>> You can get some critical user-space tasks running, then
+>> come back later to initialize USB and other drivers.
+>> On cameras, it's not uncommon to want to get to user
+>> space in the first 500 milliseconds.
 > 
-> That's nice, but _why_ do this change?  What does it buy us?
+> That's common even on desktops and servers, and using the bootchart code
+> in the kernel helps find those bottlenecks.
 > 
-> Please explain why you make a change, not just who sponsored the change,
-> that's not very interesting to developers.
+>> Sony has some code which allows us to both statically link
+>> drivers and defer their initialization, but it's kind of
+>> kludgy and requires modifying the module declarations
+>> for the code you want to defer.  Let me know if you think
+>> this is worth doing an RFC about.
+> 
+> I don't think that's worth it, there has been talk, and some initial
+> code, about adding kernel modules to the kernel image itself, which
+> would solve a lot of the i/o time of loading modules, and solves some
+> other boot speed problems.  That work was done by Jeff Mahoney, but I
+> think he ran into some "interesting" linker issues and had to shelve it
+> due to a lack of time :(
 
-I was going to let this pass, but since Greg flagged it...
+I had a few attempts at this before I had to move on to other things. I
+haven't gotten a chance to take another look.
 
-It's sufficient given the context (it's the tail end of a series of
-patches), but it's preferable to allude to the other patches in a case
-like this.  For example:
+I had two approaches:
 
-        Now we have sorted symbols, we can use binary search for
-        kallsyms lookups as well.
+1) Statically link in modules post-build. This actually worked but had
+some large caveats. The first was that an un-relocated image (vmlinux.o)
+was needed in order to make it work and a ~ 200 MB footprint to gain a
+fairly small win in boot time didn't seem like a good tradeoff. The
+other issue was more important and is what made me abandon this
+approach: If the entire image is re-linked then the debuginfo package
+that we as a distributor offer but don't typically install becomes
+invalid. Our support teams would not be too thrilled with the idea of
+crash dumps that can't be used.
 
-(1) "Now we have sorted symbols" indicates to the reader that this has
-    just recently become possible.
-(2) "as well." indicates that this was not the main justification for
-    sorting the symbols.
- 
-Ideally you would add some numbers, like so:
+2) Build a "megamodule" that is loaded like an initramfs but is already
+internally linked and requires no additional userspace. I got the
+megamodule creation working but didn't get the loading aspect of it done
+yet.
 
-        On my machine 'cat /proc/kallsyms' only takes 0.02 seconds, but
-        this halves it to 0.01 seconds.
+In both cases, I added the regular initcall sections to the modules in
+addition to the module sections so they'd be loaded in the order they
+would have been if they were actually statically linked.
 
-(That's my results under kvm, which is a poor way to do timing, but you
-get the idea).
+I hadn't thought about it until now and it may not actually work, but it
+could be possible to use the megamodule approach *and* link it into a
+static vmlinux image as an appended section that's optionally used.
 
-Thanks,
-Rusty.
+- -Jeff
+
+- -- 
+Jeff Mahoney
+SUSE Labs
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.17 (GNU/Linux)
+Comment: Using GnuPG with SUSE - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAk3Vde8ACgkQLPWxlyuTD7LxPgCeIuBHX+KnedsMzBz3H8JrwsGG
+etgAn0J5tEwjnTFuIWFLdhzR9QHpSmq5
+=Jtc/
+-----END PGP SIGNATURE-----
