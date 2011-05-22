@@ -1,115 +1,120 @@
-From: Jeff Mahoney <jeffm@suse.de>
-Subject: Re: module boot time (was Re: [PATCH] module: Use binary search in
- lookup_symbol())
-Date: Sat, 21 May 2011 10:23:50 -0400
-Message-ID: <4DD7CAF6.1000501@suse.de>
-References: <BANLkTinPG100vbVAN1RZWb3h9Xuu6SKJ0Q@mail.gmail.com> <1305665763-3988-1-git-send-email-abogani@kernel.org> <20110517232241.GA19140@kroah.com> <4DD305B3.3000707@am.sony.com> <20110518075428.GA29998@infradead.org> <4DD3FB1C.3040103@am.sony.com> <20110518192110.GB26945@kroah.com> <4DD435B7.9090702@am.sony.com> <20110518213451.GA23702@kroah.com> <4DD575EF.2060008@suse.de> <4DD6DD39.2090302@am.sony.com>
-Mime-Version: 1.0
+From: Tony Ibbs <tibs@tonyibbs.co.uk>
+Subject: Re: [PATCH 00/11] RFC: KBUS messaging subsystem
+Date: Sun, 22 May 2011 20:58:13 +0100
+Message-ID: <37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk>
+References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <20110322133640.5d5c88e4@bike.lwn.net> <201105171050.38903.florian@openwrt.org>
+Mime-Version: 1.0 (Apple Message framework v1084)
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4DD6DD39.2090302@am.sony.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201105171050.38903.florian@openwrt.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Greg KH <greg@kroah.com>, LKML <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>
+To: Florian Fainelli <florian@openwrt.org>
+Cc: Jonathan Corbet <corbet@lwn.net>, Grant Likely <grant.likely@secretlab.ca>, lkml <linux-kernel@vger.kernel.org>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
-
-On 05/20/2011 05:29 PM, Tim Bird wrote:
-> On 05/19/2011 12:56 PM, Jeff Mahoney wrote:
->> On 05/18/2011 05:34 PM, Greg KH wrote:
->>> I don't think that's worth it, there has been talk, and some initial
->>> code, about adding kernel modules to the kernel image itself, which
->>> would solve a lot of the i/o time of loading modules, and solves some
->>> other boot speed problems.  That work was done by Jeff Mahoney, but I
->>> think he ran into some "interesting" linker issues and had to shelve it
->>> due to a lack of time :(
->>
->> I had a few attempts at this before I had to move on to other things. I
->> haven't gotten a chance to take another look.
->>
->> I had two approaches:
->>
->> 1) Statically link in modules post-build. This actually worked but had
->> some large caveats. The first was that an un-relocated image (vmlinux.o)
->> was needed in order to make it work and a ~ 200 MB footprint to gain a
->> fairly small win in boot time didn't seem like a good tradeoff. The
->> other issue was more important and is what made me abandon this
->> approach: If the entire image is re-linked then the debuginfo package
->> that we as a distributor offer but don't typically install becomes
->> invalid. Our support teams would not be too thrilled with the idea of
->> crash dumps that can't be used.
->>
->> 2) Build a "megamodule" that is loaded like an initramfs but is already
->> internally linked and requires no additional userspace. I got the
->> megamodule creation working but didn't get the loading aspect of it done
->> yet.
->>
->> In both cases, I added the regular initcall sections to the modules in
->> addition to the module sections so they'd be loaded in the order they
->> would have been if they were actually statically linked.
->>
->> I hadn't thought about it until now and it may not actually work, but it
->> could be possible to use the megamodule approach *and* link it into a
->> static vmlinux image as an appended section that's optionally used.
+On 17 May 2011, at 09:50, Florian Fainelli wrote:
+ 
+> Hello,
 > 
+> Sorry for this late answer.
+
+Not a problem from here, all responses are helpful. In, turn, apologies
+for taking so long to reply.
+
+> Most implementations (if not all) involving system-wide message
+> delivery for other daemons are running in user-space.
+
+OK. Although I certainly wouldn't claim to have anywhere near a complete
+list of such (an annotated list of all the messaging systems on Linux
+would be rather interesting, though!).
+
+> If you had in mind that this daemon might be killed under OOM
+> conditions, then maybe your whole system has an issue, which
+> could be circumvented by making sure the messaging process gets
+> respawned when possible (upstart like mechanism or such).
+
+OOM isn't particularly an issue I'd worried about for any part of the
+system. Other things tend to cause user processes to crash - using
+ffmpeg on random video data, for instance. Of course, that is clearly
+not a problem for KBUS itself.
+
+Respawning itself isn't directly a problem, but getting everyone talking
+to everyone else again is typically a nasty pain (and one users don't
+want to think about), so one tends to want one's messaging handler to be
+*very* robust. I think the discipline of working in-kernel helps with
+that, although I'd be surprised if that were considered enough reason to
+add a new kernel module!
+
+> From: Jonathan Corbet <corbet@lwn.net>
+> Date: 22 March 2011 19:36:40 GMT
+>
+> >   Even better might be to just use the socket API.
 > 
-> What was the use case for this?   My use case is that I want
-> to use all the modules compiled into the kernel, but I don't
-> want to run some modules' initcalls until well after kernel
-> and user-space startup.
-> 
-> My solution is very simple - create a new initcall macro for
-> the initcalls I want to defer, along with a new 'deferred' initcall
-> section where the function entries can be accumulated.  Then,
-> I avoid freeing init memory at standard initcall time.  Once
-> the main user-space has initialized, it echos to a /proc file
-> to cause the deferred initcalls to be called, and the init memory
-> to be freed.
-> 
-> I'm attaching the patch below, because it's short enough to
-> see what's going on without a lot of digging.
-> 
-> This method eliminates the linking cost for module loading,
-> saves the memory overhead of the ELF module format, and gives
-> me control over when the deferred modules will be initialized.
-> The big downside is that you have to manually change the definition
-> for the initcall from 'module_init' to 'deferred_module_init'
-> for the modules you want to defer.  Maybe there's a simple way
-> to control this with a kernel config? That would make this a pretty
-> nice, generic, system for deferring module initialization, IMHO.
-> 
-> If your use case is that you want all the modules present, but
-> want to initialize only some of them later, then maybe a list of
-> module names could be passed into the /proc interface, and the
-> routine could selectively initialize the deferred modules.
+> Indeed, I would also suggest having a look at what generic netlink already 
+> provides like messages per application PID, multicasting and marshaling.
 
-Yep, it seems like we were going after different use cases. Mine was to
-eliminate the initramfs except where userspace portions of it are needed.
+As I said in an earlier message, I'd ignored netlink because it sounded
+as if were intrinsically losssy (no way of not losing messages if a
+queue got full) which is a problem for KBUS requests/replies.
 
-We improved the boot time of the openSUSE kernel by statically linking
-the most popular drivers into the kernel. I'm not a fan of that approach
-for a generic distribution kernel but you can't argue with the numbers.
-In the ideal case, the initcalls would happen in the same order they
-would if they were statically linked in. Wed get the boot speed of a
-static kernel with the flexibility advantages of shipping modules.
+On the other hand, understanding netlink from scratch is somewhat
+difficult (I've just spent some hours doing more research, and don't
+feel like I've begun to get a good idea of its boundaries yet).
 
-Your approach might ultimately dovetail nicely into that but since I
-didn't have the time to get something functional, I don't have numbers
-of my own.
+I have also been reading the libnl documentation, which seems to make
+the userspace end somewhat less complex, and looks like a good thing.
 
-- -Jeff
+> If you intend to keep a part of it in the kernel, you should have a
+> look at this, because from my experience with generic netlink, most of
+> the hard job you are re-doing here, has already been done in a generic
+> manner.
 
-- -- 
-Jeff Mahoney
-SuSE Labs
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.16 (GNU/Linux)
-Comment: Using GnuPG with SUSE - http://enigmail.mozdev.org/
+It looks interesting, but the worrying part of statements like this is
+always the "most of".
 
-iEYEARECAAYFAk3XyvYACgkQLPWxlyuTD7LlYwCgmQv86e0lxu6e5mfvwcevAIDb
-7nwAn1jb6694mQ+vkcVD0bDsrKvQXOV1
-=Q5xL
------END PGP SIGNATURE-----
+Is your suggestion that netlink would be a better API than the current
+"creating" use of a file API for communicating from user space to the
+KBUS kernel module, and then back?
+
+The LWN article http://lwn.net/Articles/131802/ makes that sound
+plausible (assuming one can still detect "release" events for netlink
+sockets - I assume one can). At first glance I'm not sure how much
+harder it is to program such a netlink interface "bare" (without a
+userspace library such as libnl) than it is to use the current KBUS
+interface in such a manner.
+
+(Aside: a quick look at my current KBUS build shows kbus.ko as 60KB,
+libkbus.so (the C userspace library on top of the "raw" usage) as 54KB,
+and libnl.so as 277KB - although I don't know how Ubuntu build the
+latter, and it obviously also includes all sorts of data description
+handling which KBUS deliberately does not. So netlink smaller if "bare",
+and bigger, but not a huge amount, if used with its library.)
+
+I'm not entirely sure what happens if either end of the netlink API
+doesn't respond in a timely manner - is netlink allowed to throw things
+away?
+
+Or did you mean that netlink is appropriate to replace some/much of the
+KBUS kernel module as well? In that case I'd have to think about it a
+lot more to have an informed opinion.
+
+Anyway.
+
+What I'm working on at the moment is an email in which I try to restate
+what we are/were trying to do with KBUS, with simple examples of the
+sorts of call we're talking about, and ask if that is a sensible thing
+to have in the kernel, emphasising that we are more worried about the
+functionality than the API.
+
+If the concept is a good thing but our implementation of it is
+objectionable (e.g., we need to rewrite to a less "creative" interface,
+be more sockety, or whatever), then so be it, we'll need to rewrite.
+
+If you'd be willing to look at that email when it is posted, I hope it
+will be easier to point at specific things and say "yes, that would be
+better done with netlink" or, perhaps, "netlink would not address this,
+but one might attack it in this way".
+
+Thanks,
+    Tibs
