@@ -1,183 +1,47 @@
-From: Randy Dunlap <rdunlap@xenotime.net>
+From: Namhyung Kim <namhyung@gmail.com>
 Subject: Re: [PATCH] Revised patch
-Date: Thu, 9 Jun 2011 10:47:16 -0700
-Message-ID: <20110609104716.c8827a51.rdunlap@xenotime.net>
+Date: Fri, 10 Jun 2011 02:47:25 +0900
+Message-ID: <1307641645.1326.1.camel@leonhard>
 References: <AANLkTikbPwMS0VGsMH64CGhDUEmvOwUzYnXSV0q3eW9_@mail.gmail.com>
-	<1307640826-22618-1-git-send-email-amurray@mpcdata.com>
+	 <1307640826-22618-1-git-send-email-amurray@mpcdata.com>
+	 <1307641202.13329.22.camel@Joe-Laptop>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1307640826-22618-1-git-send-email-amurray@mpcdata.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:subject:from:to:cc:in-reply-to:references
+         :content-type:date:message-id:mime-version:x-mailer
+         :content-transfer-encoding;
+        bh=wJ+T3Nx1yMvHK3nchHJvcAKDIro+Scw7xxkMEGqTgWg=;
+        b=Woy1LSaYiYc94h+f5jad54TmSHUB/DuDrW1lcrVPBTibYNinkJ3P35MP3mAbAdHh8Y
+         L+VgKErmIEMrxkR19FmiBIuoHIQpfXk/DVBB47DZWy9rt2+gzMMy+6awGf05G9ALodPF
+         46PX6Rm6XJLs5Sx3dnCqik84Hn24704hiP15g=
+In-Reply-To: <1307641202.13329.22.camel@Joe-Laptop>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Andrew Murray <amurray@mpcdata.com>
-Cc: joe@perches.com, w.sang@pengutronix.de, geert@linux-m68k.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, trivial@kernel.org, udknight@gmail.com, namhyung@gmail.com, Andrew Murray <amurray@mpc-data.co.uk>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Joe Perches <joe@perches.com>
+Cc: Andrew Murray <amurray@mpcdata.com>, w.sang@pengutronix.de, geert@linux-m68k.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, trivial@kernel.org, rdunlap@xenotime.net, udknight@gmail.com, Andrew Murray <amurray@mpc-data.co.uk>
 
-On Thu,  9 Jun 2011 18:33:46 +0100 Andrew Murray wrote:
+2011-06-09 (=EB=AA=A9), 10:40 -0700, Joe Perches:
+> On Thu, 2011-06-09 at 18:33 +0100, Andrew Murray wrote:
+> > Hi,
+> > I've updated this patch based on your feedback. This covers all the=
+ recent feedback.
+>=20
+> Hey Andrew.
+>=20
+> You're missing the "%pB" backtrace extension.
+>=20
 
-> Hi,
-> 
-> I've updated this patch based on your feedback. This covers all the recent feedback.
-> 
-> From: Andrew Murray <amurray@mpc-data.co.uk>
-> 
-> This patch updates the incomplete documentation concerning the printk
-> extended format specifiers.
+http://marc.info/?l=3Dlinux-kernel&m=3D130093458112438&w=3D2
 
-Thanks.  A few comments below...
-
-> Signed-off-by: Andrew Murray <amurray@mpc-data.co.uk>
-> 
-> ---
->  Documentation/printk-formats.txt |  113 +++++++++++++++++++++++++++++++++++++-
->  1 files changed, 111 insertions(+), 2 deletions(-)
-> 
-> diff --git a/Documentation/printk-formats.txt b/Documentation/printk-formats.txt
-> index 1b5a5dd..2968cbf 100644
-> --- a/Documentation/printk-formats.txt
-> +++ b/Documentation/printk-formats.txt
-> @@ -9,7 +9,115 @@ If variable is of Type,		use printk format specifier:
->  		size_t			%zu or %zx
->  		ssize_t			%zd or %zx
->  
-> -Raw pointer value SHOULD be printed with %p.
-> +Raw pointer value SHOULD be printed with %p. The kernel supports
-> +the following extended format specifiers for pointer types:
-> +
-> +Symbols/Function Pointers:
-> +
-> +	%pF	versatile_init+0x0/0x110
-> +	%pf	versatile_init
-> +	%pS	versatile_init+0x0/0x110
-> +	%ps	versatile_init
-> +
-> +	For printing symbols and function pointers. The 'S' and 's' specifiers
-> +	result in the symbol name with ('S') or without ('s') offsets. Where
-> +	this is used on a kernel without KALLSYMS - the symbol address is
-> +	printed instead.
-> +
-> +	On ia64, ppc64 and parisc64 architectures function pointers are
-> +	actually function descriptors which must first be resolved. The 'F' and
-> +	'f' specifiers perform this resolution and then provide the same
-> +	functionality as the 'S' and 's' specifiers.
-> +
-> +Kernel Pointers:
-> +
-> +	%pK	0x01234567 or 0x0123456789abcdef
-> +
-> +	For printing kernel pointers which should be hidden from unprivileged
-> +	users. The behaviour of %pK depends on the kptr_restrict sysctl - see
-> +	Documentation/sysctl/kernel.txt for more details.
-> +
-> +Struct Resources:
-> +
-> +	%pr	[mem 0x60000000-0x6fffffff flags 0x2200] or
-> +		[mem 0x0000000060000000-0x000000006fffffff flags 0x2200]
-> +	%pR	[mem 0x60000000-0x6fffffff pref] or
-> +		[mem 0x0000000060000000-0x000000006fffffff pref]
-> +
-> +	For printing struct resources. The 'R' and 'r' specifiers result in a
-> +	printed resource with ('R') or without ('r') a decoded flags member.
-> +
-> +MAC/FDDI addresses:
-> +
-> +	%pM	00:01:02:03:04:05
-> +	%pMF	00-01-02-03-04-05
-> +	%pm	000102030405
-> +
-> +	For printing 6-byte MAC/FDDI addresses in hex notation. The 'M' and 'm'
-> +	specifiers result in a printed address with ('M') or without ('m') byte
-> +	separators. The default byte separator is the colon (':').
-> +
-> +	Where FDDI addresses are concerned the 'F' specifier can be used after
-> +	the 'M' specifier to use dash ('-') separators instead of the default
-> +	separator.
-> +
-> +IPv4 addresses:
-> +
-> +	%pI4	1.2.3.4
-> +	%pi4	001.002.003.004
-> +	%p[Ii][hnbl]
-> +	
-> +	For printing IPv4 dot-separated decimal addresses. The 'I4' and 'i4'
-> +	specifiers result in a printed address with ('i4') or without ('I4')
-> +	leading zeros.
-> +
-> +	The additional 'h', 'n', 'b', and 'l' specifiers are used to specify
-> +	host, network, big or little endian order addresses respectively. Where
-> +	no specifier is provided the default network/big endian order is used.
-> +
-
-I would hyphenate the -endian types, but won't insist on that.
-
-> +IPv6 addresses:
-> +
-> +	%pI6	0001:0002:0003:0004:0005:0006:0007:0008
-> +	%pi6	00010002000300040005000600070008
-> +	%pI6c	1:2:3:4:5:6:7:8
-> +
-> +	For printing IPv6 network-order 16 bit hex addresses. The 'I6' and 'i6'
-
-	                                16-bit
-
-> +	specifiers result in a printed address with ('I6') or without ('i6')
-> +	colon-separators. Leading zeros are always used.
-> +
-> +	The additional 'c' specifier can be used with the 'I' specifier to
-> +	print a compressed IPv6 address as described by
-> +	http://tools.ietf.org/html/rfc5952
-> +
-> +UUID/GUID addresses:
-> +
-> +	%pUb	00010203-0405-0607-0809-0a0b0c0d0e0f
-> +	%pUB	00010203-0405-0607-0809-0A0B0C0D0E0F
-> +	%pUl	03020100-0504-0706-0809-0a0b0c0e0e0f
-> +	%pUL	03020100-0504-0706-0809-0A0B0C0E0E0F
-> +
-> +	For printing 16 byte UUID/GUIDs addresses. The additional 'l', 'L',
-
-	             16-byte
-
-> +	'b' and 'B' specifiers are used to specify a little endian order in
-> +	lower ('l') or upper case ('L') hex characters - and big endian order
-> +	in lower ('b') or upper case ('B') hex characters.
-> +
-> +	Where no additional specifiers are used the default little endian
-> +	order with lower case hex characters will be printed.
-> +
-> +struct va_format:
-> +
-> +	%pV	
-> +
-> +	For printing struct va_format structures. These contain a format string
-> +	and va_list as follows:
-> +
-> +	struct va_format {
-> +		const char *fmt;
-> +		va_list *va;
-> +	};
-> +
-> +	Do not use this feature without some mechanism to verify the
-> +	correctness of the format string and va_list arguments.
->  
->  u64 SHOULD be printed with %llu/%llx, (unsigned long long):
+Just for your information. :)
+Thanks.
 
 
-%pB is missing?
- * - 'B' For backtraced symbolic direct pointers with offset
+--=20
+Regards,
+Namhyung Kim
 
-
-> @@ -32,4 +140,5 @@ Reminder: sizeof() result is of type size_t.
->  Thank you for your cooperation and attention.
->  
->  
-> -By Randy Dunlap <rdunlap@xenotime.net>
-> +By Randy Dunlap <rdunlap@xenotime.net> and
-> +Andrew Murray <amurray@mpc-data.co.uk>
-> -- 
-
-
----
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
