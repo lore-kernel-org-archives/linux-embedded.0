@@ -1,55 +1,68 @@
-From: Jiri Kosina <jkosina@suse.cz>
-Subject: Re: [PATCH] Bootgraph.pl bug fix
-Date: Fri, 10 Jun 2011 15:00:38 +0200 (CEST)
-Message-ID: <alpine.LNX.2.00.1106101459570.22872@pobox.suse.cz>
-References: <1307655610-28446-1-git-send-email-amurray@mpcdata.com>
+From: wu zhangjin <wuzhangjin@gmail.com>
+Subject: About the "Tiny Linux Kernel" project
+Date: Sat, 11 Jun 2011 00:41:18 +0800
+Message-ID: <BANLkTikupJVJtF1hbnC6Y67E8ma7xNmeGg@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1307655610-28446-1-git-send-email-amurray@mpcdata.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:date:message-id:subject:from:to:cc
+         :content-type;
+        bh=Xjl0B1fSyrju+rWhckmszjHMhvUSfduSjuF3KcWaaBA=;
+        b=L5wzL00krPyjHAtOrJJ78oIrj940TUjJY/dBEtIrPG6FrQIVQq/U6fKXe7M4cJToi/
+         vvOjlLHEqQYoX6kB03auQ8f5oLca8JF0brXG1iP7FPdEqgTVQEKOqVCdqMvEkp4ITqAJ
+         e6BJ+JiDnfdYxjnzAJqyb/38bdw8c+nEOxDBc=
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Andrew Murray <amurray@mpcdata.com>
-Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Murray <amurray@mpc-data.co.uk>, Arjan van de Ven <arjan@infradead.org>
+To: celinux-dev@tree.celinuxforum.org, linux-embedded@vger.kernel.org
+Cc: Tim Bird <tim.bird@am.sony.com>, Dongdong Deng <libfetion@gmail.com>, Nicholas Mc Guire <der.herr@hofr.at>, Zhan Rongkai <zhanrongkai@gmail.com>
 
-On Thu, 9 Jun 2011, Andrew Murray wrote:
+Hi, embedded folks
 
-> This patch removes the assumption of the bootgraph.pl script that the
-> timing information reported by PRINTK_TIME will contain at least one
-> entry with a time of less than 100 seconds.
-> 
-> Not all boards correctly reset the system timer and in many cases the
-> inital times reported by PRINTK_TIME is high. When this occurs the
-> bootchart.pl script fails to give any useful output.
-> 
-> This patch sets the $firsttime variable to the largest value expected
-> by PRINTK_TIME
-> 
-> Signed-off-by: Andrew Murray <amurray@mpc-data.co.uk>
-> ---
->  scripts/bootgraph.pl |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/scripts/bootgraph.pl b/scripts/bootgraph.pl
-> index 12caa82..b78fca9 100644
-> --- a/scripts/bootgraph.pl
-> +++ b/scripts/bootgraph.pl
-> @@ -44,7 +44,7 @@ my %end;
->  my %type;
->  my $done = 0;
->  my $maxtime = 0;
-> -my $firsttime = 100;
-> +my $firsttime = 99999;
->  my $count = 0;
->  my %pids;
->  my %pidctr;
+"Linux has gained more and more new features in recent years but at
+the same time has increased the kernel image size bit by bit. The new
+features do expand the applications a lot but their increased size
+also limit the application of Linux in some specific places."
 
-Adding Arjan to CC. Arjan, if you are OK with the patch, I can take it 
-through my tree with your Ack.
+So, I have launched a new "Tiny Linux Kernel" project, which was a
+'continuator' of the forthgoer: Linux-Tiny[1]. This project was
+sponsored by the "CELF Open Project 2011"[2] and its main development
+will happen in the coming 4 months and of course, I hope this will be
+maintained forever from now on.
 
-Thanks,
+1. Proposal
 
--- 
-Jiri Kosina
-SUSE Labs
+http://elinux.org/Work_on_Tiny_Linux_Kernel
+
+2. Developmenet management
+
+http://tinylab.org/index.php/projects/tinylinux/
+
+3. Git repository
+
+git://gitorious.org/tinylab/tinylinux.git
+
+@https://gitorious.org/tinylab/tinylinux
+
+The primary development effort have been put into the 2.6.35/dev/*
+branches, most of the arch related parts are only for MIPS platform
+currently, they will be migrated for another 3 main architectures:
+ARM, PowerPC and X86. After getting enough patches of cleaning up and
+fixing up, will create 2.6.35/stable/* branches and then
+linux-next/dev/*, linux-next/upstream/* and at last maintain a branch
+for the long-term 2.6.35 and upstream some of them to the mainline
+3.x.y.
+
+Most of the existing patches in the 2.6.35/dev/* branches are
+experimental and some of them may even be 'ugly', they are only demos
+for the ideas proposed. Welcome your comments, tests, defect reports
+and even patches.
+
+Thanks & Best Regards,
+Wu Zhangjin
+
+--
+[1] http://elinux.org/Linux_Tiny
+[2] http://elinux.org/CELF_Open_Project_Proposal_2011
