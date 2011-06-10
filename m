@@ -1,42 +1,55 @@
-From: Randy Dunlap <rdunlap@xenotime.net>
-Subject: Re: [PATCH] printk-formats.txt documentation update
-Date: Thu, 9 Jun 2011 15:57:24 -0700
-Message-ID: <20110609155724.e9115778.rdunlap@xenotime.net>
-References: <20110609124549.48117a75.rdunlap@xenotime.net>
-	<1307654688-28015-1-git-send-email-amurray@mpcdata.com>
-	<20110609145130.7fda9bd1.rdunlap@xenotime.net>
-	<1307656829.13329.53.camel@Joe-Laptop>
-	<20110609153742.2ad54aaa.rdunlap@xenotime.net>
-	<1307660018.18831.4.camel@Joe-Laptop>
+From: Jiri Kosina <jkosina@suse.cz>
+Subject: Re: [PATCH] Bootgraph.pl bug fix
+Date: Fri, 10 Jun 2011 15:00:38 +0200 (CEST)
+Message-ID: <alpine.LNX.2.00.1106101459570.22872@pobox.suse.cz>
+References: <1307655610-28446-1-git-send-email-amurray@mpcdata.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1307660018.18831.4.camel@Joe-Laptop>
+In-Reply-To: <1307655610-28446-1-git-send-email-amurray@mpcdata.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Joe Perches <joe@perches.com>
-Cc: Andrew Murray <amurray@mpcdata.com>, w.sang@pengutronix.de, geert@linux-m68k.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, trivial@kernel.org, udknight@gmail.com, namhyung@gmail.com, Andrew Murray <amurray@mpc-data.co.uk>
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Andrew Murray <amurray@mpcdata.com>
+Cc: linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Murray <amurray@mpc-data.co.uk>, Arjan van de Ven <arjan@infradead.org>
 
-On Thu, 09 Jun 2011 15:53:38 -0700 Joe Perches wrote:
+On Thu, 9 Jun 2011, Andrew Murray wrote:
 
-> On Thu, 2011-06-09 at 15:37 -0700, Randy Dunlap wrote:
-> > On Thu, 09 Jun 2011 15:00:29 -0700 Joe Perches wrote:
-> > see www.incredibleenglish.com/pdf/Hyphens.pdf, section 1,
-> > "Hyphenate unit modifiers."
-> > 
-> > Or see http://www.ehow.com/how_4473498_use-hyphen-sentence.html, section 1,
-> > "Link compound modifiers with hyphens."
-> > 
-> > Or see http://www.getitwriteonline.com/archive/040201HyphAdj.htm
+> This patch removes the assumption of the bootgraph.pl script that the
+> timing information reported by PRINTK_TIME will contain at least one
+> entry with a time of less than 100 seconds.
 > 
-> Whatever floats your boat but my 5th grade English teacher
-> Sr. Mary likely would have been appalled by those articles.
+> Not all boards correctly reset the system timer and in many cases the
+> inital times reported by PRINTK_TIME is high. When this occurs the
+> bootchart.pl script fails to give any useful output.
 > 
-> cheers, Joe
+> This patch sets the $firsttime variable to the largest value expected
+> by PRINTK_TIME
+> 
+> Signed-off-by: Andrew Murray <amurray@mpc-data.co.uk>
+> ---
+>  scripts/bootgraph.pl |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/scripts/bootgraph.pl b/scripts/bootgraph.pl
+> index 12caa82..b78fca9 100644
+> --- a/scripts/bootgraph.pl
+> +++ b/scripts/bootgraph.pl
+> @@ -44,7 +44,7 @@ my %end;
+>  my %type;
+>  my $done = 0;
+>  my $maxtime = 0;
+> -my $firsttime = 100;
+> +my $firsttime = 99999;
+>  my $count = 0;
+>  my %pids;
+>  my %pidctr;
 
-Thanks.
+Adding Arjan to CC. Arjan, if you are OK with the patch, I can take it 
+through my tree with your Ack.
 
----
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+Thanks,
+
+-- 
+Jiri Kosina
+SUSE Labs
