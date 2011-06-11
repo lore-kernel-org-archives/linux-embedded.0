@@ -1,25 +1,67 @@
-From: Arjan van de Ven <arjan@infradead.org>
-Subject: Re: [PATCH] Bootgraph.pl bug fix
-Date: Fri, 10 Jun 2011 20:21:23 -0700
-Message-ID: <20110610202123.6e9df89c@infradead.org>
-References: <1307655610-28446-1-git-send-email-amurray@mpcdata.com>
-	<alpine.LNX.2.00.1106101459570.22872@pobox.suse.cz>
+From: wu zhangjin <wuzhangjin@gmail.com>
+Subject: Re: [Celinux-dev] About the "Tiny Linux Kernel" project
+Date: Sat, 11 Jun 2011 11:28:59 +0800
+Message-ID: <BANLkTi=EXY-fn9zem9MNRebA4vmGDbk8pQ@mail.gmail.com>
+References: <BANLkTikupJVJtF1hbnC6Y67E8ma7xNmeGg@mail.gmail.com>
+	<4DF2B3EC.6020700@am.sony.com>
+	<4DF2B952.30309@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.LNX.2.00.1106101459570.22872@pobox.suse.cz>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=domainkey-signature:mime-version:in-reply-to:references:date
+         :message-id:subject:from:to:cc:content-type
+         :content-transfer-encoding;
+        bh=Yd0iTI4KZqG7i9PXYhyA2Untf6WGJwIYK7ysO6IkD44=;
+        b=URFT8Oy5UuEGmU4Bw6ezQ7z6S5TE/DME3MdYforuqUVTodlObhUk4M78Q/fk3sC1Rn
+         NfkZEQWtN0jslcOVg9ubEwK0KOAsoZNIFUY6zrRSqhUwWivprcUxcKrn/F5nl3DXsC0E
+         GtohDnM4LfSatJyk9OeCJ5jJ5cZPZqQYup2FQ=
+In-Reply-To: <4DF2B952.30309@am.sony.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: Jiri Kosina <jkosina@suse.cz>
-Cc: Andrew Murray <amurray@mpcdata.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Murray <amurray@mpc-data.co.uk>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Tim Bird <tim.bird@am.sony.com>
+Cc: Dongdong Deng <libfetion@gmail.com>, Zhan Rongkai <zhanrongkai@gmail.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "celinux-dev@tree.celinuxforum.org" <celinux-dev@tree.celinuxforum.org>
 
-On Fri, 10 Jun 2011 15:00:38 +0200 (CEST)
-Jiri Kosina <jkosina@suse.cz> wrote:
+Hi, Tim
 
-> 
-> Adding Arjan to CC. Arjan, if you are OK with the patch, I can take
-> it through my tree with your Ack.
+On Sat, Jun 11, 2011 at 8:39 AM, Tim Bird <tim.bird@am.sony.com> wrote:
+> On 06/10/2011 05:16 PM, Tim Bird wrote:
+>> The system has a full network and bluetooth stack, sensor
+>> monitoring software, and a web browser.
+> Oops. Should be "web server". =A0I don't know of a modern
+> browser that fits in less than 3 meg.
 
-I don't mind the patch, although I feel pitty for those having to work
-with such broken systems...
+=46or such a system, I suggest you use the idea in another project
+launched by me ;-)
+
+It is vnstagsvg: http://vnstatsvg.sourceforge.net/
+
+"vnStatSVG is a web front-end to vnStat(a network traffic logger). it
+only requires a cgi-supported http server setup but also generates a
+graphical report with SVG. and with the support of AJAX, it has a very
+scalable architecture, hence, it is suited to the resource-limited
+distributed & embedded linux system."
+
+So, the httpd web server provided by busybox is enough, therefore you
+can simply ignore the "web server" ;-)
+
+If you want the background idea of this project, welcome to read my
+paper: "A CGI+AJAX+SVG based monitoring method for distributed and
+embedded system".
+
+Best Regards,
+Wu Zhangjin
+
+> =A0-- Tim
+>
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D
+> Tim Bird
+> Architecture Group Chair, CE Workgroup of the Linux Foundation
+> Senior Staff Engineer, Sony Network Entertainment
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D
+>
+>
