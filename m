@@ -1,49 +1,30 @@
-From: Joaco <root@sysdev.org>
-Subject: Re: [Celinux-dev] About the "Tiny Linux Kernel" project
-Date: Sat, 11 Jun 2011 08:25:07 -0800 (PST)
-Message-ID: <201106111625.p5BGP79P016455@sysdev.org>
-References: <4DF2B952.30309@am.sony.com>
+From: Jiri Kosina <jkosina@suse.cz>
+Subject: Re: [PATCH] Bootgraph.pl bug fix
+Date: Mon, 13 Jun 2011 00:05:28 +0200 (CEST)
+Message-ID: <alpine.LNX.2.00.1106130004590.22872@pobox.suse.cz>
+References: <1307655610-28446-1-git-send-email-amurray@mpcdata.com> <alpine.LNX.2.00.1106101459570.22872@pobox.suse.cz> <20110610202123.6e9df89c@infradead.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4DF2B952.30309@am.sony.com> from "Tim Bird" at Jun 10, 2011 05:39:46 PM
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20110610202123.6e9df89c@infradead.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Arjan van de Ven <arjan@infradead.org>
+Cc: Andrew Murray <amurray@mpcdata.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Murray <amurray@mpc-data.co.uk>
 
-I am happy with elinks-13.0 text mode browser.  At 2.9Mb, it fits nicely  
-in a less than 128Mb compact flash image. I use it with my Advantech 
-board.
+On Fri, 10 Jun 2011, Arjan van de Ven wrote:
 
-I can even connect with Yahoo Mail Classsic to read mail and 
-have had very few problems browsing most sites.  I can always connect, 
-its just the quality of the browse that is not as good, as say Opera11!
-But its nicely functional in a less than 80Mb Linux FS.
-
-TonyB
-
+> > Adding Arjan to CC. Arjan, if you are OK with the patch, I can take
+> > it through my tree with your Ack.
 > 
-> On 06/10/2011 05:16 PM, Tim Bird wrote:
-> > The system has a full network and bluetooth stack, sensor
-> > monitoring software, and a web browser.
-> Oops. Should be "web server".  I don't know of a modern
-> browser that fits in less than 3 meg.
->  -- Tim
-> 
-> =============================
-> Tim Bird
-> Architecture Group Chair, CE Workgroup of the Linux Foundation
-> Senior Staff Engineer, Sony Network Entertainment
-> =============================
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> I don't mind the patch, although I feel pitty for those having to work
+> with such broken systems...
 
-  __      __  _     I N C.               http://www.sysdev.org
-/ __|\\// __||  \  __   __          /         tonyb@sysdev.org
-\__ \ \/\__ \||)|/ O_)\/ /        \/  System Tools / Utilities
-|___/ || ___/|_ /\___|\_/        WIntel / Linux Device Drivers
+Indeed.
+
+Thanks, I have applied it with your Acked-by.
+
+-- 
+Jiri Kosina
+SUSE Labs
