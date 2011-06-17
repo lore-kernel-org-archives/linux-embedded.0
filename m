@@ -1,34 +1,30 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
-Subject: Re: [PWM v9 0/3] Implement a generic PWM framework
-Date: Wed, 15 Jun 2011 11:33:00 -0400
-Message-ID: <BANLkTikD66EheEQem82yPocCs6Bzqoa4kg@mail.gmail.com>
-References: <1301630392-20793-1-git-send-email-bgat@billgatliff.com>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: debugging multi threaded applicatiosn on arm - status?
+Date: Fri, 17 Jun 2011 11:39:27 +0200
+Message-ID: <20110617093927.GA28305@merkur.ravnborg.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=domainkey-signature:mime-version:in-reply-to:references:from:date
-         :message-id:subject:to:cc:content-type:content-transfer-encoding;
-        bh=bXJG61Bq2MhNM4cMhar1R1tU2gXL44qbiZNLlh90BFY=;
-        b=QTiu2WLnorbd5lzrveAHaXiOLNyX4RaHImXmGoGMEeJApg8b36Kiwtgd6btW/xBBsc
-         oerSWdQ6o6wRJ2XbI6Tk+htMnc+S0tlnJEPa7zOup9Ifi+sqF/YZF2P5R8QXvXhIT8a+
-         QbnX0ymGcFO8yX9kRlPGUZqC5AhI/pVrGtLmA=
-In-Reply-To: <1301630392-20793-1-git-send-email-bgat@billgatliff.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Bill Gatliff <bgat@billgatliff.com>
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
 
-On Thu, Mar 31, 2011 at 23:59, Bill Gatliff wrote:
-> This patch series contains the ninth attempt at implementation of a
-> generic PWM device interface framework. =C2=A0Think gpiolib, but for
-> devices and pseudo-devices that generate pulse-wave-modulated outputs=
-=2E
+Is it possible to bebug multi-threaded applications using gdb on ARM these days?
 
-i was made aware of the existing code in linux/pwm.h.  seems that this
-framework should absorb that since there are already drivers built on
-top of it (i see a backlight, led, and input driver), and we dont want
-two frameworks doing exactly the same thing.
--mike
+We have had trobules getting this to work - but I do not have the details at hand atm.
+I am just curious if this is supposed to work or not.
+
+We have an arm target running: 2.6.32.8 #1 PREEMPT
+CPU: ARM926EJ-S rev 5 (v5l) (Atmel AT91SAM9263)
+
+The kernel is only lightly modifed - mostly with a few
+propriatary drivers and a few driver hacks (not suitable for mainline).
+
+It is a long story why we use such an old version.
+
+Our applications uses threads and we use glibc 2.10.1 with NPTL enabled.
+So far we have survived using the powerfull printf debugging :-)
+
+	Sam
