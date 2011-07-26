@@ -1,47 +1,53 @@
-From: Christoph Hellwig <hch@infradead.org>
+From: David Wagner <david.wagner@free-electrons.com>
 Subject: Re: [PATCH] UBI: new module ubiblk: block layer on top of UBI
-Date: Tue, 26 Jul 2011 08:34:53 -0400
-Message-ID: <20110726123453.GA18513@infradead.org>
-References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>
-	<1311683250-7921-1-git-send-email-david.wagner@free-electrons.com>
+Date: Tue, 26 Jul 2011 14:58:57 +0200
+Message-ID: <4E2EBA11.6000700@free-electrons.com>
+References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com> <1311683250-7921-1-git-send-email-david.wagner@free-electrons.com> <20110726123453.GA18513@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1311683250-7921-1-git-send-email-david.wagner@free-electrons.com>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: linux-mtd-bounces@lists.infradead.org
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: David Wagner <david.wagner@free-electrons.com>
-Cc: linux-embedded@vger.kernel.org, dedekind1@gmail.com, linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org, tim.bird@am.sony.com, dwmw2@infradead.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20110726123453.GA18513@infradead.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Christoph Hellwig <hch@infradead.org>
+Cc: linux-mtd@lists.infradead.org, dedekind1@gmail.com, dwmw2@infradead.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, tim.bird@am.sony.com
 
-> TODO:
->  * the modules keeps a table of the devices which length is the maximum number
->    of UBI volumes.  It should make use of a linked list.
+On 07/26/2011 02:34 PM, Christoph Hellwig wrote:
+>> TODO:
+>>  * the modules keeps a table of the devices which length is the
+maximum number
+>>    of UBI volumes.  It should make use of a linked list.
+>
+> A linked list isn't very nice either.  Try using idr, which gives you
+> both an allocator for the minor number space, and a way to look up
+> the structure by that index.
+>
 
-A linked list isn't very nice either.  Try using idr, which gives you
-both an allocator for the minor number space, and a way to look up
-the structure by that index.
+I'll take a look ; is it really worth it, though ? I look in the table
+only when a volume is created, resized, or removed (that is, rarely) and
+there are really few items (I bet, between 1 and 8 ; max possible is 4096).
 
-> Advantages of ubiblk over gluebi+mtdblock_ro:
+>> Advantages of ubiblk over gluebi+mtdblock_ro:
+>
+> This section should be in the main commit log, and not that part with
+> the changelog which gets dropped.
 
-This section should be in the main commit log, and not that part with
-the changelog which gets dropped.
+Will do.
 
-> +int major;
+>> +int major;
+>
+> Please don't use global variables with generic names.  In this case you
+> should neither make it global nor give it a generic name.
+>
 
-Please don't use global variables with generic names.  In this case you
-should neither make it global nor give it a generic name.
+fixed.
 
 
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Thank you for your feedback :)
+
+-- 
+David Wagner, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
