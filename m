@@ -1,76 +1,32 @@
-From: Pekka Enberg <penberg@kernel.org>
+From: Tony Ibbs <tibs@tonyibbs.co.uk>
 Subject: Re: RFC: [Restatement] KBUS messaging subsystem
-Date: Wed, 3 Aug 2011 23:48:26 +0300
-Message-ID: <CAOJsxLFSdPO2ebjM9W9JaNcX80COzn=Y3hFukXZjn+1yY4ivZQ@mail.gmail.com>
-References: <cover.1300450604.git.tibs@tonyibbs.co.uk>
-	<201105171050.38903.florian@openwrt.org>
-	<37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk>
-	<201107061815.36294.florian@openwrt.org>
-	<5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk>
-Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Date: Sun, 7 Aug 2011 17:47:19 +0100
+Message-ID: <D4FF13B8-FD82-4E87-96DA-87A22DD536E4@tonyibbs.co.uk>
+References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <201105171050.38903.florian@openwrt.org> <37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk> <201107061815.36294.florian@openwrt.org> <5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk> <CADkLE3XRg6N2cWHXH_JsU56tfw5v5XmJJLfLBM_RtWJRMcZWtA@mail.gmail.com> <81866CAA-9010-4167-A556-84191E0BDFBA@tonyibbs.co.uk>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=mime-version:sender:in-reply-to:references:date
-         :x-google-sender-auth:message-id:subject:from:to:cc:content-type
-         :content-transfer-encoding;
-        bh=gR3+4pY3iKcqRwGBy1gRpoqnrq+mwHK3JcQXnbbPkXY=;
-        b=BL9FQOwPkJsv3XaDXXQZ828eXZxILlO9PeH+Q7GXCixcMTiMN7w0Ly0KqByMyxjWFu
-         zzyNOCr0Sz13jUJrVYY4F3cxeS6BWR3G/N+HxOkZVizVp6PQIrdes35NukUBZKdposgn
-         aoDb3kgu90Aqiw5cWMisJ6U8dXVxQ4Z8EFVEg=
-In-Reply-To: <5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk>
+In-Reply-To: <81866CAA-9010-4167-A556-84191E0BDFBA@tonyibbs.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="us-ascii"
 To: Tony Ibbs <tibs@tonyibbs.co.uk>
-Cc: lkml <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Florian Fainelli <florian@openwrt.org>, Grant Likely <grant.likely@secretlab.ca>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+Cc: Colin Walters <walters@verbum.org>, lkml <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Florian Fainelli <florian@openwrt.org>, Grant Likely <grant.likely@secretlab.ca>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
 
-Hi Tony,
 
-Your description doesn't really explain what you want to use this
-thing exactly for in userspace.
+On 3 Aug 2011, at 21:14, Tony Ibbs wrote:
 
-On Fri, Jul 29, 2011 at 12:48 AM, Tony Ibbs <tibs@tonyibbs.co.uk> wrote=
-:
-> So why did we write it as a kernel module?
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> As implementors, a kernel module makes a lot of sense. Not least
-> because:
->
-> * It gives us a lot of things for free, including list handling,
-> =A0reference counting, thread safety and (on larger systems)
-> =A0multi-processor support, which we would otherwise have to write an=
-d
-> =A0debug ourselves. This also keeps our codebase smaller.
+> On 29 Jul 2011, at 00:58, Colin Walters wrote:
+> 
+>> You don't mention what your performance requirements are
+>> (if any) for example.
+> 
+> We don't particularly have any...
 
-That's not a reason to put this into the kernel, really.
+My colleague says that he has previously done measurements that show
+KBUS to be about 3 times slower than using shared memory and futexes,
+but (of course) much simpler to use.
 
-> * It helps give us reliability, partly because of the code we're
-> =A0relying on, partly because of the strictures of working in the
-> =A0kernel, partly by shielding us from userspace.
+His implication is, I believe, that this is a respectable speed.
 
-So now instead of crashing in userspace, we crash the kernel? This
-seems like a bogus argument as well.
-
-> * It reduces message copying (we have userspace to kernel back to
-> =A0userspace, as opposed to a userspace daemon communicating with
-> =A0clients via sockets)
-
-Now this sounds like a real reason but you'd have to explain why you
-can't reuse existing zero-copy mechanisms like splice() and tee().
-
-> * It makes it simple for us to tell when a message recipient has "gon=
-e
-> =A0away", as the kernel will call our "release" callback for us.
-
-Again, sounds like a reasonable technical requirement but doesn't
-really justify putting all this code into the kernel.
-
-> * It allows us to provide the functionality on systems without
-> =A0requiring anything much beyond /dev and maybe /proc in userspace.
-
-Why is this important?
-
-                                Pekka
+Tibs
