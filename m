@@ -1,57 +1,81 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: RFC: [Restatement] KBUS messaging subsystem
-Date: Mon, 15 Aug 2011 14:46:46 +0300
-Message-ID: <CAOJsxLEg-9hAQG99TkM+tqdTjZkpZwubOu1qM-6m7B5apZmh_w@mail.gmail.com>
-References: <cover.1300450604.git.tibs@tonyibbs.co.uk>
-	<201105171050.38903.florian@openwrt.org>
-	<37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk>
-	<201107061815.36294.florian@openwrt.org>
-	<5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk>
-	<CAOJsxLFSdPO2ebjM9W9JaNcX80COzn=Y3hFukXZjn+1yY4ivZQ@mail.gmail.com>
-	<63D130AC-E6DF-4A61-BB69-30212D238F37@tonyibbs.co.uk>
+From: Artem Bityutskiy <dedekind1@gmail.com>
+Subject: Re: [PATCH] UBI: new module ubiblk: block layer on top of UBI
+Date: Mon, 15 Aug 2011 14:56:02 +0300
+Message-ID: <1313409368.2583.14.camel@sauron>
+References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>
+	 <1311683250-7921-1-git-send-email-david.wagner@free-electrons.com>
+Reply-To: dedekind1@gmail.com
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=mime-version:sender:in-reply-to:references:date
-         :x-google-sender-auth:message-id:subject:from:to:cc:content-type;
-        bh=fneoGXY8cvOB2ceWQAqT0VWiGt/2qfPDnQx0KWLXD/g=;
-        b=s72J9WfPw/QCYprZvQ7P2pJgKyvoHrUAmvKgZQH8lbTUAqDxm+XfPGxO3hP9L3O4lP
-         MKTcIKoALz1o4jNrcXmO0ulRbfiDtzBLoBxOde0mZCIZX+A/T6FEGGaSCDzS6CtWBCCj
-         /7mntE6NnYCIyaHiH66t3yFs/0rvYxHU8mEVU=
-In-Reply-To: <63D130AC-E6DF-4A61-BB69-30212D238F37@tonyibbs.co.uk>
+        h=subject:from:reply-to:to:cc:date:in-reply-to:references
+         :content-type:x-mailer:content-transfer-encoding:message-id
+         :mime-version;
+        bh=cUI//Yw1SqKTSAXOPUiLsssk3+9cB6RwYPEl4eVnT0k=;
+        b=bPlpWcGhsKVwwOL/ZOVUMBs/pQHoI5amZ2ctrowjiWnK93zghAWqZk4Hd2feBaEe/m
+         5OROKFAOLEEDhthp2xUHN3k/12cxZCVV/5bbdDAe3taxr89hGPxv8qTg128USzo1kyfO
+         oLhgt8nNtDf81WO5VvN6JjA19UV5XOEdCTuAw=
+In-Reply-To: <1311683250-7921-1-git-send-email-david.wagner@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tony Ibbs <tibs@tonyibbs.co.uk>
-Cc: lkml <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Florian Fainelli <florian@openwrt.org>, Grant Likely <grant.likely@secretlab.ca>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+To: David Wagner <david.wagner@free-electrons.com>
+Cc: linux-mtd@lists.infradead.org, dwmw2@infradead.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, tim.bird@am.sony.com
 
-Hi Tony,
+On Tue, 2011-07-26 at 14:27 +0200, David Wagner wrote:
+> Advantages of ubiblk over gluebi+mtdblock_ro:
+> 
+>  * Simpler architecture
+> 
+>  * The numbering of devices is much easier with ubiblk than with
+>    gluebi+mtdblock_ro. With gluebi+mtdblock_ro, you get one additional
+>    MTD device for each UBI volume, so the number of MTD devices grows
+>    quite a lot and is a bit difficult to understand. For example,
+>    mtdblock[0-4] might be your real MTD partitions, while mtdblock[5-9]
+>    might be your UBI volumes.
+>    It also means that if a new real MTD
+>    partition is added, the number of all the MTD devices exposing UBI
+>    volumes will be incremented by one, which is a bit
+>    confusing/annoying.
+>    As well, if you add an UBI volume, the mtdblock devices that are
+>    emulated on top of volumes that come after this new one will have
+>    their ID incremented.
+> 
+>  * The performance appears to be slightly better with ubiblk than
+>    gluebi+mtdblock_ro, according to our benchmarks (see
+>    http://elinux.org/Flash_Filesystem_Benchmarks_2.6.39)
 
-On Sun, Aug 7, 2011 at 11:24 PM, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
-> Real examples of usage that aren't the STB are a bit difficult to give
-> because they belong to customer projects that we're not allowed to
-> talk about.
+Hi, sounds good.
 
-That's part of the problem, I suppose. We usually don't merge new
-kernel facilities unless we're able to understand (and see) real
-applications that need them.
+However, what I think is wrong is to follow the MTD + mtdblock approach:
+mtdblock creates a block device for every MTD device - this is wasteful
+and confusing. Indeed, it is wasteful because we end up with potentially
+many unneeded block devices which are not used but consume resources.
+Confusing is because people get impression that /dev/mtdblock* are the
+right interfaces to access the MTD devices, which is wrong.
 
-On Sun, Aug 7, 2011 at 11:24 PM, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
-> I assume the real point of your post is that I wrote about the reasons
-> why we made KBUS a kernel module, but did not really address the
-> reasons why KBUS might want to be a kernel module in general usage.
+You can say that gluebi is also doing something like that - yes, this is
+because gluebi is kind of temporary solution for software which cannot
+work with UBI. We wanted to keep it very simple.
 
-I simply don't see a convincing argument why existing IPC and other
-kernel mechanisms are not sufficient to implement what you need. I'm
-sure there is one but it's not apparent from your emails.
+My suggestion is to do something similar to UBI:
 
-The whole thing feels more like "lets put a message broker into the
-kernel" rather than set of kernel APIs that make sense. I suppose the
-rather extensive ioctl() ABI is partly to blame here.
+* make ubiblk register its own character device (/dev/ubiblk_ctl,
+similar to /dev/ubi_ctl).
+* add a couple of ioclts to create / delete ubiblk devices (similar to
+UBI attach/detach)
+* add a couple of user-space tools to mtd-utils to create / delete
+ubiblk devices (similar to ubiattach / ubidetach).
 
-I'm not saying you need to implement everything in userspace but I'm
-also not convinced we want _all of this_ in the kernel.
+The other reason why I think this more complex approach is justified is
+that when / if you decide to add R/W support to ubiblk, you'd have
+troubles with the current approach (e.g., what if the UBI volume you are
+looking at is not ubiblk-formatted?)
 
-                          Pekka
+I think it should be rather easy to implement /dev/ubiblk_ctl.
+
+-- 
+Best Regards,
+Artem Bityutskiy
