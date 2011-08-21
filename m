@@ -1,238 +1,88 @@
-From: David Wagner <david.wagner@free-electrons.com>
-Subject: [PATCH] Tools for controling ubiblk
-Date: Wed, 17 Aug 2011 16:20:47 +0200
-Message-ID: <1313590847-3839-1-git-send-email-david.wagner@free-electrons.com>
-References: <1313587042-30846-1-git-send-email-david.wagner@free-electrons.com>
-Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1313587042-30846-1-git-send-email-david.wagner@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
+From: Tony Ibbs <tibs@tonyibbs.co.uk>
+Subject: Re: RFC: [Restatement] KBUS messaging subsystem
+Date: Sun, 21 Aug 2011 14:28:39 +0100
+Message-ID: <1825A697-7D60-44D0-8150-BC0E9F0DEB67@tonyibbs.co.uk>
+References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <201105171050.38903.florian@openwrt.org> <37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk> <201107061815.36294.florian@openwrt.org> <5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk> <CAOJsxLFSdPO2ebjM9W9JaNcX80COzn=Y3hFukXZjn+1yY4ivZQ@mail.gmail.com> <63D130AC-E6DF-4A61-BB69-30212D238F37@tonyibbs.co.uk> <CAOJsxLEg-9hAQG99TkM+tqdTjZkpZwubOu1qM-6m7B5apZmh_w@mail.gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <CAOJsxLEg-9hAQG99TkM+tqdTjZkpZwubOu1qM-6m7B5apZmh_w@mail.gmail.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="utf-8"
-To: linux-mtd <linux-mtd@lists.infradead.org>
-Cc: Artem Bityutskiy <dedekind1@gmail.com>, linux-embedded <linux-embedded@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>, David Wagner <david.wagner@free-electrons.com>
+Content-Type: text/plain; charset="us-ascii"
+To: Pekka Enberg <penberg@kernel.org>
+Cc: lkml <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Florian Fainelli <florian@openwrt.org>, Grant Likely <grant.likely@secretlab.ca>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
 
-ubiblk_ctrl sends an appropriate ioctl to ubiblk control node.
 
-ubiblkadd and ubiblkdel are wrappers around ubiblk_ctrl.
-The syntax is:
-	ubiblk{add,del} x y
-where x is the UBI device number and y the volume ID.
+On 15 Aug 2011, at 12:46, Pekka Enberg wrote:
 
-Signed-off-by: David Wagner <david.wagner@free-electrons.com>
----
+> Hi Tony,
 
-This is a preliminary version: it has the control device node hardcoded=
- which is
-probably not nice.
+Hi. Thanks for your reply
 
- Makefile                  |    6 ++-
- include/mtd/ubiblk-user.h |   43 ++++++++++++++++++++
- ubi-utils/ubiblk_ctrl.c   |   95 +++++++++++++++++++++++++++++++++++++=
-++++++++
- ubi-utils/ubiblkadd       |    2 +
- ubi-utils/ubiblkdel       |    2 +
- 5 files changed, 147 insertions(+), 1 deletions(-)
- create mode 100644 include/mtd/ubiblk-user.h
- create mode 100644 ubi-utils/ubiblk_ctrl.c
- create mode 100755 ubi-utils/ubiblkadd
- create mode 100755 ubi-utils/ubiblkdel
+> On Sun, Aug 7, 2011 at 11:24 PM, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
+>> Real examples of usage that aren't the STB are a bit difficult to give
+>> because they belong to customer projects that we're not allowed to
+>> talk about.
+> 
+> That's part of the problem, I suppose. We usually don't merge new
+> kernel facilities unless we're able to understand (and see) real
+> applications that need them.
 
-diff --git a/Makefile b/Makefile
-index 67e42ce..2859a8c 100644
---- a/Makefile
-+++ b/Makefile
-@@ -27,12 +27,16 @@ MTD_BINS =3D \
- 	sumtool #jffs2reader
- UBI_BINS =3D \
- 	ubiupdatevol ubimkvol ubirmvol ubicrc32 ubinfo ubiattach \
--	ubidetach ubinize ubiformat ubirename mtdinfo ubirsvol
-+	ubidetach ubinize ubiformat ubirename mtdinfo ubirsvol \
-+	ubiblk_ctrl
-+UBI_SCRIPTS =3D \
-+	ubiblkadd ubiblkdel
-=20
- BINS =3D $(MTD_BINS)
- BINS +=3D mkfs.ubifs/mkfs.ubifs
- BINS +=3D $(addprefix ubi-utils/,$(UBI_BINS))
- SCRIPTS =3D flash_eraseall
-+SCRIPTS +=3D $(addprefix ubi-utils/,$(UBI_SCRIPTS))
-=20
- TARGETS =3D $(BINS)
- TARGETS +=3D lib/libmtd.a
-diff --git a/include/mtd/ubiblk-user.h b/include/mtd/ubiblk-user.h
-new file mode 100644
-index 0000000..fa0d007
---- /dev/null
-+++ b/include/mtd/ubiblk-user.h
-@@ -0,0 +1,43 @@
-+/*
-+ * Copyright =C2=A9 Free Electrons, 2011
-+ * Copyright =C2=A9 International Business Machines Corp., 2006
-+ *
-+ * This program is free software; you can redistribute it and/or modif=
-y
-+ * it under the terms of the GNU General Public License as published b=
-y
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-+ * the GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307=
- USA
-+ *
-+ * Author: David Wagner
-+ * Some code taken from ubi-user.h
-+ */
-+
-+#ifndef __UBIBLK_USER_H__
-+#define __UBIBLK_USER_H__
-+
-+#include <linux/types.h>
-+
-+/* Structure to be passed to UBIBLK_IOCADD or IOCDEL ioctl */
-+struct ubiblk_ctrl_req {
-+	__s32 ubi_num;
-+	__s32 vol_id;
-+};
-+
-+/* ioctl commands of the UBI control character device */
-+
-+#define UBIBLK_CTRL_IOC_MAGIC 'O'
-+
-+/* Create a ubiblk device from a UBI volume */
-+#define UBIBLK_IOCADD _IOW(UBIBLK_CTRL_IOC_MAGIC, 0x10, struct ubiblk_=
-ctrl_req)
-+/* Delete a ubiblk device */
-+#define UBIBLK_IOCDEL _IOW(UBIBLK_CTRL_IOC_MAGIC, 0x11, struct ubiblk_=
-ctrl_req)
-+
-+#endif
-diff --git a/ubi-utils/ubiblk_ctrl.c b/ubi-utils/ubiblk_ctrl.c
-new file mode 100644
-index 0000000..1132f35
---- /dev/null
-+++ b/ubi-utils/ubiblk_ctrl.c
-@@ -0,0 +1,95 @@
-+/*
-+ * Copyright (c) Free Electrons, 2011
-+ *
-+ * This program is free software; you can redistribute it and/or modif=
-y
-+ * it under the terms of the GNU General Public License as published b=
-y
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-+ * the GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-+ *
-+ * Author: David Wagner
-+ */
-+
-+#include <stdlib.h>
-+#include <stdio.h>
-+#include <string.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <unistd.h>
-+#include <libgen.h>
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <sys/ioctl.h>
-+#include <mtd/ubiblk-user.h>
-+
-+#define CONTROL_NODE "/dev/ubiblk_ctrl"
-+
-+void usage(char *exec_path)
-+{
-+	fprintf(stderr, "%s <-a|-d> <-u UBI_DEVICE_NUMBER> <-v VOLUME_ID>\n",
-+			basename(exec_path));
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	int ubi_num =3D -2, vol_id =3D -1;
-+	int fd;
-+	struct ubiblk_ctrl_req req;
-+	int ret;
-+	int command;
-+
-+	int option;
-+
-+	while ((option =3D getopt(argc, argv, "adu:v:")) !=3D -1) {
-+		switch (option) {
-+		case 'a':
-+			command =3D UBIBLK_IOCADD;
-+			break;
-+		case 'd':
-+			command =3D UBIBLK_IOCDEL;
-+			break;
-+		case 'u':
-+			ubi_num =3D atoi(optarg);
-+			break;
-+		case 'v':
-+			vol_id =3D atoi(optarg);
-+			break;
-+		}
-+	}
-+=09
-+	if (command !=3D UBIBLK_IOCDEL && command !=3D UBIBLK_IOCADD) {
-+		usage(argv[0]);
-+		return EXIT_FAILURE;
-+	}
-+	if (vol_id =3D=3D -1 || vol_id =3D=3D -1) {
-+		usage(argv[0]);
-+		return EXIT_FAILURE;
-+	}
-+=09
-+	req.ubi_num =3D ubi_num;
-+	req.vol_id =3D vol_id;
-+
-+	fd =3D open(CONTROL_NODE, O_RDONLY);
-+	if (fd =3D=3D -1) {
-+		fprintf(stderr, "Error while opening the control node: %s\n",
-+				strerror(errno));
-+		return EXIT_FAILURE;
-+	}=09
-+
-+	ret =3D ioctl(fd, command, &req);
-+	if (ret =3D=3D -1) {
-+		fprintf(stderr, "Error while ioctl: %s\n", strerror(errno));
-+		close(fd);
-+		return EXIT_FAILURE;
-+	}
-+	close(fd);
-+	return EXIT_SUCCESS;
-+}
-diff --git a/ubi-utils/ubiblkadd b/ubi-utils/ubiblkadd
-new file mode 100755
-index 0000000..fd8fbdd
---- /dev/null
-+++ b/ubi-utils/ubiblkadd
-@@ -0,0 +1,2 @@
-+#! /bin/sh
-+ubiblk_ctrl -a -u $0 -v $1
-diff --git a/ubi-utils/ubiblkdel b/ubi-utils/ubiblkdel
-new file mode 100755
-index 0000000..40a1fd1
---- /dev/null
-+++ b/ubi-utils/ubiblkdel
-@@ -0,0 +1,2 @@
-+#! /bin/sh
-+ubiblk_ctrl -d -u $0 -v $1
---=20
-1.7.0.4
+I understand. It is a bit of a chicken-and-egg problem.
+
+> On Sun, Aug 7, 2011 at 11:24 PM, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
+>> I assume the real point of your post is that I wrote about the reasons
+>> why we made KBUS a kernel module, but did not really address the
+>> reasons why KBUS might want to be a kernel module in general usage.
+> 
+> I simply don't see a convincing argument why existing IPC and other
+> kernel mechanisms are not sufficient to implement what you need. I'm
+> sure there is one but it's not apparent from your emails.
+
+Our major concern, strongly based on experience, is that given the
+existing kernel mechanisms, users do not build robust (or even
+sometimes working!) solutions for inter-process communication.
+
+This is in large part because they do not realise (at the start) how
+difficult this is to do. Especially if they want to keep it small.
+
+The only *sure* way of solving this is to provide a mechanism that is
+"always there", and that really means a solution provided by the
+kernel. This needs to be at a higher level than what is currently
+available, but obviously what exactly is provided is then a matter for
+discussion. We'd obviously argue that KBUS hits a "sweet spot" for the
+needs we perceive, given our application areas.
+
+> The whole thing feels more like "lets put a message broker into the
+> kernel" rather than set of kernel APIs that make sense. I suppose the
+> rather extensive ioctl() ABI is partly to blame here.
+
+I'm not sure what you mean by "message broker", except that it's
+plainly meant to be a bad thing - the wikipedia meaning doesn't seem
+terribly applicable to KBUS, as it covers an awful lot more territory
+(mind, the discussion page is amusing).
+
+I'll freely admit we started with the idea of what functionality we
+wanted and then chose a simple-to-implement API to make it happen.
+
+*If* KBUS were in the kernel, with its current functionality, what API
+would you expect? (not just "a sockety one", but what actual API?) If
+one recasts as a sockety API, how is many new socket options better
+than a set of ioctls? (or is that just one of those questions to which
+the answer is "well, it is"?)
+
+> I'm not saying you need to implement everything in userspace but I'm
+> also not convinced we want _all of this_ in the kernel.
+
+That's quite understandable. So, given the functionality we want, what
+would you put in the kernel, and what in userspace? (I'm personally
+sceptical about how much can be split this way, but still)
+
+(I realise that both this and the previous question are asking you to
+do work, but I'm honestly hoping that even if KBUS-as-is is not
+applicable, we might figure out an irreducible set of higher level
+constructs than those which are currently present which will attack
+the problem we wrote KBUS to attack.)
+
+Tibs
