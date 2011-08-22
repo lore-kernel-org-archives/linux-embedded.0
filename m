@@ -1,88 +1,153 @@
-From: Tony Ibbs <tibs@tonyibbs.co.uk>
+From: Bryan Donlan <bdonlan@gmail.com>
 Subject: Re: RFC: [Restatement] KBUS messaging subsystem
-Date: Sun, 21 Aug 2011 14:28:39 +0100
-Message-ID: <1825A697-7D60-44D0-8150-BC0E9F0DEB67@tonyibbs.co.uk>
-References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <201105171050.38903.florian@openwrt.org> <37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk> <201107061815.36294.florian@openwrt.org> <5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk> <CAOJsxLFSdPO2ebjM9W9JaNcX80COzn=Y3hFukXZjn+1yY4ivZQ@mail.gmail.com> <63D130AC-E6DF-4A61-BB69-30212D238F37@tonyibbs.co.uk> <CAOJsxLEg-9hAQG99TkM+tqdTjZkpZwubOu1qM-6m7B5apZmh_w@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Transfer-Encoding: 7bit
+Date: Sun, 21 Aug 2011 21:15:31 -0400
+Message-ID: <CAF_S4t-RV1SACnkwW9RsVWEXv-jHujvnLZh-NMfDZi4YzfJwdw@mail.gmail.com>
+References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <201105171050.38903.florian@openwrt.org>
+ <37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk> <201107061815.36294.florian@openwrt.org>
+ <5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk> <CAOJsxLFSdPO2ebjM9W9JaNcX80COzn=Y3hFukXZjn+1yY4ivZQ@mail.gmail.com>
+ <63D130AC-E6DF-4A61-BB69-30212D238F37@tonyibbs.co.uk> <CAOJsxLEg-9hAQG99TkM+tqdTjZkpZwubOu1qM-6m7B5apZmh_w@mail.gmail.com>
+ <1825A697-7D60-44D0-8150-BC0E9F0DEB67@tonyibbs.co.uk>
+Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <CAOJsxLEg-9hAQG99TkM+tqdTjZkpZwubOu1qM-6m7B5apZmh_w@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+         :cc:content-type;
+        bh=98XUenE7vCnB+1absBXzpGsjUKDQpFMvOA5gSuNK2Oo=;
+        b=HokB2/G9ndTdLvqmJpdGnelQWfKVSfYQCucbZZFPDJJxxa16ArQqnkl48nrUD2WkcO
+         5TvzNpLMTOp5cFwJmUJQWoPvrY/JOOEmUK9478MwtEUUaujdiFtFyNVK2HEZ+ooDaDg8
+         zuFfHT1ZreMvMfj8SeBMvOfLJ2iCPM7ASicGw=
+In-Reply-To: <1825A697-7D60-44D0-8150-BC0E9F0DEB67@tonyibbs.co.uk>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Pekka Enberg <penberg@kernel.org>
-Cc: lkml <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Florian Fainelli <florian@openwrt.org>, Grant Likely <grant.likely@secretlab.ca>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+Content-Transfer-Encoding: 7bit
+To: Tony Ibbs <tibs@tonyibbs.co.uk>
+Cc: Pekka Enberg <penberg@kernel.org>, lkml <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Florian Fainelli <florian@openwrt.org>, Grant Likely <grant.likely@secretlab.ca>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
 
+On Sun, Aug 21, 2011 at 09:28, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
+>
+> On 15 Aug 2011, at 12:46, Pekka Enberg wrote:
+>
+>> I simply don't see a convincing argument why existing IPC and other
+>> kernel mechanisms are not sufficient to implement what you need. I'm
+>> sure there is one but it's not apparent from your emails.
+>
+> Our major concern, strongly based on experience, is that given the
+> existing kernel mechanisms, users do not build robust (or even
+> sometimes working!) solutions for inter-process communication.
+>
+> This is in large part because they do not realise (at the start) how
+> difficult this is to do. Especially if they want to keep it small.
+>
+> The only *sure* way of solving this is to provide a mechanism that is
+> "always there", and that really means a solution provided by the
+> kernel. This needs to be at a higher level than what is currently
+> available, but obviously what exactly is provided is then a matter for
+> discussion. We'd obviously argue that KBUS hits a "sweet spot" for the
+> needs we perceive, given our application areas.
+>
+>> The whole thing feels more like "lets put a message broker into the
+>> kernel" rather than set of kernel APIs that make sense. I suppose the
+>> rather extensive ioctl() ABI is partly to blame here.
+>
+> I'm not sure what you mean by "message broker", except that it's
+> plainly meant to be a bad thing - the wikipedia meaning doesn't seem
+> terribly applicable to KBUS, as it covers an awful lot more territory
+> (mind, the discussion page is amusing).
+>
+> I'll freely admit we started with the idea of what functionality we
+> wanted and then chose a simple-to-implement API to make it happen.
+>
+> *If* KBUS were in the kernel, with its current functionality, what API
+> would you expect? (not just "a sockety one", but what actual API?) If
+> one recasts as a sockety API, how is many new socket options better
+> than a set of ioctls? (or is that just one of those questions to which
+> the answer is "well, it is"?)
 
-On 15 Aug 2011, at 12:46, Pekka Enberg wrote:
+I think this may well be the core problem here - is KBUS, as proposed,
+a general API lots of people will find useful, or is it something that
+will fit _your_ usecase well, but other usecases poorly?
+Designing a good API, of course, is quite difficult, but it _must_ be
+done before integrating anything with upstream Linux, as once
+something is merged it has to be supported for decades, even if it
+turns out to be useless for 99% of usecases.
 
-> Hi Tony,
+Some good questions to ask might be:
+* Does this system play nice with namespaces?
+* What limits are in place to prevent resource exhaustion attacks?
+* Can libdbus or other such existing message brokers swap out their
+existing central-routing-process based communications with this new
+system without applications being aware?
 
-Hi. Thanks for your reply
+Keep in mind also that the kernel API need not match the
+application-visible API, if you can add a userspace library to
+translate to the API you want. So, for example, instead of numbering
+kbuses, you could define them as a new AF_UNIX protocol, and place
+them in the abstract socket namespace (ie, they'd have names like
+"\0kbus-0"). Doing something like this avoids creating a new
+namespace, and non-embedded devices could place these new primitives
+in a tmpfs or other more visible location. It also makes it very cheap
+(and a non-privileged operation!) to create kbuses.
 
-> On Sun, Aug 7, 2011 at 11:24 PM, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
->> Real examples of usage that aren't the STB are a bit difficult to give
->> because they belong to customer projects that we're not allowed to
->> talk about.
-> 
-> That's part of the problem, I suppose. We usually don't merge new
-> kernel facilities unless we're able to understand (and see) real
-> applications that need them.
+So, let's look at your requirements:
 
-I understand. It is a bit of a chicken-and-egg problem.
+* Message broadcast API with prefix filtering
+* Deterministic ordering
+* Possible to snoop on all messages being passed through
+* Must not require any kind of central userspace daemon
+* Needs a race-less way of 1) Advertising (and locking) as a replier
+for a particular message type and 2) Detecting when the replier dies
+(and synthesizing error replies in this event)
 
-> On Sun, Aug 7, 2011 at 11:24 PM, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
->> I assume the real point of your post is that I wrote about the reasons
->> why we made KBUS a kernel module, but did not really address the
->> reasons why KBUS might want to be a kernel module in general usage.
-> 
-> I simply don't see a convincing argument why existing IPC and other
-> kernel mechanisms are not sufficient to implement what you need. I'm
-> sure there is one but it's not apparent from your emails.
+Now, to minimize this definition, why not remove prefix filtering from
+the kernel? For low-volume buses, it doesn't hurt to do the filtering
+in userspace (right?). If you want to reduce the volume of messages
+received, do it on a per-bus granularity (and set up lots of buses
+instead). After all, you can always connect to multiple buses if you
+need to listen for multiple message types. For replier registration,
+then, it would be done on a per-bus granularity, not a per-message
+granularity.
 
-Our major concern, strongly based on experience, is that given the
-existing kernel mechanisms, users do not build robust (or even
-sometimes working!) solutions for inter-process communication.
+So we now have an API that might (as an example) look like this:
 
-This is in large part because they do not realise (at the start) how
-difficult this is to do. Especially if they want to keep it small.
+* Creation of buses - socket(AF_UNIX, SOCK_DGRAM, PROTO_KBUS),
+followed by bind() either to a file or in the abstract namespace
+* Advertising as a replier on a socket - setsockopt(SOL_KBUS,
+KBUS_REPLIER, &one); - returns -EEXIST if a replier is already present
+* Sending/receiving messages - ordinary sendto/recvfrom. If a reply is
+desired, use sendmsg with an ancillary data item indicating a reply is
+desired
+* Notification on replier death (or replier buffer overflow etc):
+empty message with ancillary data attached informing of the error
+condition
+* 64-bit global counter on all messages (or messages where requested
+by the client) to give a deterministic order between messages sent on
+multiple buses (reported via ancillary data)
+* Resource limitation based on memory cgroup or something? Not sure
+what AF_UNIX uses already, but you could probably use the same system.
+* Perhaps support SCM_RIGHTS/SCM_CREDENTIALS transfers as well?
 
-The only *sure* way of solving this is to provide a mechanism that is
-"always there", and that really means a solution provided by the
-kernel. This needs to be at a higher level than what is currently
-available, but obviously what exactly is provided is then a matter for
-discussion. We'd obviously argue that KBUS hits a "sweet spot" for the
-needs we perceive, given our application areas.
+This is a much simpler kernel API, don't you think? It's also easy to
+see how dbus could use it as well - just add a method to filter
+unicast messages from being seen by other uninterested clients, create
+a kbus socket for each dbus connection (with appropriate symlinks for
+any registered aliases), and have the owner of a connection socket
+register itself as a replier. Now you can send dbus broadcast messages
+across the KBUS socket as usual, and perhaps send replies to unicast
+messages over a socket passed in over a SCM_CREDENTIALS transfer.
+Alternately, you could assign connection IDs, and have a control
+message to route unicast replies to their sender - in any case, these
+details are something dbus people would need to comment on, if they're
+interested, but you can see that it's a use case that shows promise
+(I'm not familiar with the dbus security model, however, and so I'm
+not sure if this'll play well with it).
 
-> The whole thing feels more like "lets put a message broker into the
-> kernel" rather than set of kernel APIs that make sense. I suppose the
-> rather extensive ioctl() ABI is partly to blame here.
+In short, API minimalism is key to acceptance in the upstream kernel.
+Try to pare down the core API to the bare minimum to get what you
+need, rather than implementing your final use case directly into the
+kernel using ioctls or whatnot.
 
-I'm not sure what you mean by "message broker", except that it's
-plainly meant to be a bad thing - the wikipedia meaning doesn't seem
-terribly applicable to KBUS, as it covers an awful lot more territory
-(mind, the discussion page is amusing).
+Thanks,
 
-I'll freely admit we started with the idea of what functionality we
-wanted and then chose a simple-to-implement API to make it happen.
-
-*If* KBUS were in the kernel, with its current functionality, what API
-would you expect? (not just "a sockety one", but what actual API?) If
-one recasts as a sockety API, how is many new socket options better
-than a set of ioctls? (or is that just one of those questions to which
-the answer is "well, it is"?)
-
-> I'm not saying you need to implement everything in userspace but I'm
-> also not convinced we want _all of this_ in the kernel.
-
-That's quite understandable. So, given the functionality we want, what
-would you put in the kernel, and what in userspace? (I'm personally
-sceptical about how much can be split this way, but still)
-
-(I realise that both this and the previous question are asking you to
-do work, but I'm honestly hoping that even if KBUS-as-is is not
-applicable, we might figure out an irreducible set of higher level
-constructs than those which are currently present which will attack
-the problem we wrote KBUS to attack.)
-
-Tibs
+Bryan
