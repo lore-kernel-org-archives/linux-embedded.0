@@ -1,153 +1,303 @@
-From: Bryan Donlan <bdonlan@gmail.com>
-Subject: Re: RFC: [Restatement] KBUS messaging subsystem
-Date: Sun, 21 Aug 2011 21:15:31 -0400
-Message-ID: <CAF_S4t-RV1SACnkwW9RsVWEXv-jHujvnLZh-NMfDZi4YzfJwdw@mail.gmail.com>
-References: <cover.1300450604.git.tibs@tonyibbs.co.uk> <201105171050.38903.florian@openwrt.org>
- <37F5AF18-99E5-4516-B31F-00F7BD348ADE@tonyibbs.co.uk> <201107061815.36294.florian@openwrt.org>
- <5F531701-B760-45F0-989D-669013409FE8@tonyibbs.co.uk> <CAOJsxLFSdPO2ebjM9W9JaNcX80COzn=Y3hFukXZjn+1yY4ivZQ@mail.gmail.com>
- <63D130AC-E6DF-4A61-BB69-30212D238F37@tonyibbs.co.uk> <CAOJsxLEg-9hAQG99TkM+tqdTjZkpZwubOu1qM-6m7B5apZmh_w@mail.gmail.com>
- <1825A697-7D60-44D0-8150-BC0E9F0DEB67@tonyibbs.co.uk>
+From: Artem Bityutskiy <dedekind1@gmail.com>
+Subject: Re: [PATCHv3] UBI: new module ubiblk: block layer on top of UBI
+Date: Mon, 22 Aug 2011 10:39:47 +0300
+Message-ID: <1313998793.2644.49.camel@sauron>
+References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>
+	 <1313587042-30846-1-git-send-email-david.wagner@free-electrons.com>
+Reply-To: dedekind1@gmail.com
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
-         :cc:content-type;
-        bh=98XUenE7vCnB+1absBXzpGsjUKDQpFMvOA5gSuNK2Oo=;
-        b=HokB2/G9ndTdLvqmJpdGnelQWfKVSfYQCucbZZFPDJJxxa16ArQqnkl48nrUD2WkcO
-         5TvzNpLMTOp5cFwJmUJQWoPvrY/JOOEmUK9478MwtEUUaujdiFtFyNVK2HEZ+ooDaDg8
-         zuFfHT1ZreMvMfj8SeBMvOfLJ2iCPM7ASicGw=
-In-Reply-To: <1825A697-7D60-44D0-8150-BC0E9F0DEB67@tonyibbs.co.uk>
+        h=subject:from:reply-to:to:cc:date:in-reply-to:references
+         :content-type:x-mailer:content-transfer-encoding:message-id
+         :mime-version;
+        bh=W5/paiP6f3CztN+O1QL1iPo+FjgNLq8ZEVeKazs2aC0=;
+        b=f/tJzK7uBCeKGKIRBadgimTmAKQP3gwOWieewvD/gUAo44D9yxqkSnpB8TNJmEMTrF
+         d04SmR4bUCSPJynNj+6UYp4+zosDfwszu4snSoTBpPlGE4v2bU0j9Opr3OAYvVY/Gspp
+         wkyoN5izQF/yE2Pq0NVcjrkofRnvmK7y+NuXs=
+In-Reply-To: <1313587042-30846-1-git-send-email-david.wagner@free-electrons.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Tony Ibbs <tibs@tonyibbs.co.uk>
-Cc: Pekka Enberg <penberg@kernel.org>, lkml <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Jonathan Corbet <corbet@lwn.net>, Florian Fainelli <florian@openwrt.org>, Grant Likely <grant.likely@secretlab.ca>, Linux-embedded <linux-embedded@vger.kernel.org>, Tibs at Kynesim <tibs@kynesim.co.uk>, Richard Watts <rrw@kynesim.co.uk>
+To: david.wagner@free-electrons.com
+Cc: linux-mtd <linux-mtd@lists.infradead.org>, linux-embedded <linux-embedded@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
 
-On Sun, Aug 21, 2011 at 09:28, Tony Ibbs <tibs@tonyibbs.co.uk> wrote:
->
-> On 15 Aug 2011, at 12:46, Pekka Enberg wrote:
->
->> I simply don't see a convincing argument why existing IPC and other
->> kernel mechanisms are not sufficient to implement what you need. I'm
->> sure there is one but it's not apparent from your emails.
->
-> Our major concern, strongly based on experience, is that given the
-> existing kernel mechanisms, users do not build robust (or even
-> sometimes working!) solutions for inter-process communication.
->
-> This is in large part because they do not realise (at the start) how
-> difficult this is to do. Especially if they want to keep it small.
->
-> The only *sure* way of solving this is to provide a mechanism that is
-> "always there", and that really means a solution provided by the
-> kernel. This needs to be at a higher level than what is currently
-> available, but obviously what exactly is provided is then a matter for
-> discussion. We'd obviously argue that KBUS hits a "sweet spot" for the
-> needs we perceive, given our application areas.
->
->> The whole thing feels more like "lets put a message broker into the
->> kernel" rather than set of kernel APIs that make sense. I suppose the
->> rather extensive ioctl() ABI is partly to blame here.
->
-> I'm not sure what you mean by "message broker", except that it's
-> plainly meant to be a bad thing - the wikipedia meaning doesn't seem
-> terribly applicable to KBUS, as it covers an awful lot more territory
-> (mind, the discussion page is amusing).
->
-> I'll freely admit we started with the idea of what functionality we
-> wanted and then chose a simple-to-implement API to make it happen.
->
-> *If* KBUS were in the kernel, with its current functionality, what API
-> would you expect? (not just "a sockety one", but what actual API?) If
-> one recasts as a sockety API, how is many new socket options better
-> than a set of ioctls? (or is that just one of those questions to which
-> the answer is "well, it is"?)
+Hi,
 
-I think this may well be the core problem here - is KBUS, as proposed,
-a general API lots of people will find useful, or is it something that
-will fit _your_ usecase well, but other usecases poorly?
-Designing a good API, of course, is quite difficult, but it _must_ be
-done before integrating anything with upstream Linux, as once
-something is merged it has to be supported for decades, even if it
-turns out to be useless for 99% of usecases.
+thanks for the patch, it is quite good I think, but I still have few
+comments. I did not review very carefully because of limited amount of
+free time.
 
-Some good questions to ask might be:
-* Does this system play nice with namespaces?
-* What limits are in place to prevent resource exhaustion attacks?
-* Can libdbus or other such existing message brokers swap out their
-existing central-routing-process based communications with this new
-system without applications being aware?
+There are few checkpatch.pl complaints, could you please take a look?
 
-Keep in mind also that the kernel API need not match the
-application-visible API, if you can add a userspace library to
-translate to the API you want. So, for example, instead of numbering
-kbuses, you could define them as a new AF_UNIX protocol, and place
-them in the abstract socket namespace (ie, they'd have names like
-"\0kbus-0"). Doing something like this avoids creating a new
-namespace, and non-embedded devices could place these new primitives
-in a tmpfs or other more visible location. It also makes it very cheap
-(and a non-privileged operation!) to create kbuses.
+Note, often I give a comment for one place, but there are many other
+similar places with the same stuff.
 
-So, let's look at your requirements:
+On Wed, 2011-08-17 at 15:17 +0200, david.wagner@free-electrons.com
+wrote:
+> TODO:
+>  * the modules keeps a table of the devices which length is the maximum number
+>    of UBI volumes.  There should be a better solution (linked list or, as
+>    Christoph Hellwig suggests, a radix tree (idr)).
 
-* Message broadcast API with prefix filtering
-* Deterministic ordering
-* Possible to snoop on all messages being passed through
-* Must not require any kind of central userspace daemon
-* Needs a race-less way of 1) Advertising (and locking) as a replier
-for a particular message type and 2) Detecting when the replier dies
-(and synthesizing error replies in this event)
+Wold be nice to do the same change for UBI, BTW :-)
 
-Now, to minimize this definition, why not remove prefix filtering from
-the kernel? For low-volume buses, it doesn't hurt to do the filtering
-in userspace (right?). If you want to reduce the volume of messages
-received, do it on a per-bus granularity (and set up lots of buses
-instead). After all, you can always connect to multiple buses if you
-need to listen for multiple message types. For replier registration,
-then, it would be done on a per-bus granularity, not a per-message
-granularity.
+> Here is the v3 of ubiblk implementing ioctls for on-demand creation/removal of
+> ubiblk device ; is it what you were thinking of ?
 
-So we now have an API that might (as an example) look like this:
+Looks like.
 
-* Creation of buses - socket(AF_UNIX, SOCK_DGRAM, PROTO_KBUS),
-followed by bind() either to a file or in the abstract namespace
-* Advertising as a replier on a socket - setsockopt(SOL_KBUS,
-KBUS_REPLIER, &one); - returns -EEXIST if a replier is already present
-* Sending/receiving messages - ordinary sendto/recvfrom. If a reply is
-desired, use sendmsg with an ancillary data item indicating a reply is
-desired
-* Notification on replier death (or replier buffer overflow etc):
-empty message with ancillary data attached informing of the error
-condition
-* 64-bit global counter on all messages (or messages where requested
-by the client) to give a deterministic order between messages sent on
-multiple buses (reported via ancillary data)
-* Resource limitation based on memory cgroup or something? Not sure
-what AF_UNIX uses already, but you could probably use the same system.
-* Perhaps support SCM_RIGHTS/SCM_CREDENTIALS transfers as well?
+[snip]
 
-This is a much simpler kernel API, don't you think? It's also easy to
-see how dbus could use it as well - just add a method to filter
-unicast messages from being seen by other uninterested clients, create
-a kbus socket for each dbus connection (with appropriate symlinks for
-any registered aliases), and have the owner of a connection socket
-register itself as a replier. Now you can send dbus broadcast messages
-across the KBUS socket as usual, and perhaps send replies to unicast
-messages over a socket passed in over a SCM_CREDENTIALS transfer.
-Alternately, you could assign connection IDs, and have a control
-message to route unicast replies to their sender - in any case, these
-details are something dbus people would need to comment on, if they're
-interested, but you can see that it's a use case that shows promise
-(I'm not familiar with the dbus security model, however, and so I'm
-not sure if this'll play well with it).
+> +config MTD_UBI_UBIBLK
+> +	tristate "Read-only block transition layer on top of UBI"
+> +	help
+> +	   Read-only block interface on top of UBI.
+> +
+> +	   This option adds ubiblk, which creates a read-ony block device from
+> +	   UBI volumes.  It makes it possible to use block filesystems on top of
+> +	   UBI (and thus, on top of MTDs while avoiding bad blocks).
 
-In short, API minimalism is key to acceptance in the upstream kernel.
-Try to pare down the core API to the bare minimum to get what you
-need, rather than implementing your final use case directly into the
-kernel using ioctls or whatnot.
+s/block filesystems/R/O block filesystems/
+s/on top of UBI/on top of UBI volumes/
+s/and thus, on top of MTDs/and hence, on top of MTD devices/
+> +
+> +	   ubiblk devices are created by sending appropriate ioctl to the
+> +	   ubiblk_ctrl device node.
 
-Thanks,
+s/sending/invoking/
 
-Bryan
+[snip]
+
+Would be good to add a section to the UBI Documentation describing
+ubiblk by sending a patch against mtd-www:
+
+http://git.infradead.org/mtd-www.git
+
+[snip]
+
+> +/*
+> + * Structure representing a ubiblk device, proxying a UBI volume
+> + */
+> +struct ubiblk_dev {
+> +	struct ubi_volume_desc *vol_desc;
+> +	struct ubi_volume_info *vol_info;
+
+Since this piece of code is part of drivers/mtd/ubi/, I think that it
+makes sense to make it very consistent with the rest of the code. It is
+then better to use consistent names for variables of this type: "desc"
+and "vi".
+
+> +	int ubi_num;
+> +	int vol_id;
+> +
+> +	/* Block stuff */
+> +	struct gendisk *gd;
+> +	struct request_queue *rq;
+> +	struct task_struct *thread;
+
+Here is one comment I got from hch once which I also saved in the git
+history: 6f904ff0e39ea88f81eb77e8dfb4e1238492f0a8
+
+    hch: a convention I tend to use and I've seen in various places
+    is to always use _task for the storage of the task_struct pointer,
+    and thread everywhere else.  This especially helps with having
+    foo_thread for the actual thread and foo_task for a global
+    variable keeping the task_struct pointer
+
+Let's follow it and call this field "<something_meaningful>_task", e.g.,
+"req_task" (request queue/dispatcher/etc task) ? Keep using "_thread"
+for other stuff.
+
+You can also change UBI correspondingly.
+
+> +	/* Protects the access to the UBI volume */
+> +	struct mutex lock;
+
+Lets call all locks <something_meaningful>_lock, e.g., volumes_lock or
+vol_lock.
+
+> +
+> +	/* Avoids concurrent accesses to the request queue */
+> +	spinlock_t queue_lock;
+> +};
+
+And for consistency, it is better to use kerneldoc comments, like the
+rest of UBI, but if you hate them, I will not insist.
+
+[snip]
+
+> +	mutex_lock(&dev->lock);
+> +	set_capacity(dev->gd,
+> +		     (vol_info->size * vol_info->usable_leb_size) >> 9);
+> +	mutex_unlock(&dev->lock);
+> +	pr_debug("Resized ubiblk%d_%d to %d LEBs\n", vol_info->ubi_num,
+> +		 vol_info->vol_id, vol_info->size);
+
+If you find a way to properly use dev_dbg() instead of pr_debug(), your
+messages will be automatically prefixed with "ubiblk%d_%d", and your
+messages will be shorter - so less code, smaller binary size. See below
+my other comment.
+
+[snip]
+
+> +static int ubiblk_notify(struct notifier_block *nb,
+> +			 unsigned long notification_type, void *ns_ptr)
+> +{
+> +	struct ubi_notification *nt = ns_ptr;
+> +
+> +	switch (notification_type) {
+> +	case UBI_VOLUME_ADDED:
+> +		break;
+> +	case UBI_VOLUME_REMOVED:
+> +		ubiblk_remove(&nt->vi);
+> +		break;
+> +	case UBI_VOLUME_RESIZED:
+> +		ubiblk_resized(&nt->vi);
+> +		break;
+> +	case UBI_VOLUME_UPDATED:
+> +		break;
+> +	case UBI_VOLUME_RENAMED:
+> +		break;
+> +	default:
+> +		break;
+
+Please, remove cases which do nothing and let them end up in "default:".
+
+[snip]
+
+> +static long ubiblk_ctrl_ioctl(struct file *file, unsigned int cmd,
+> +			      unsigned long arg)
+> +{
+> +	int err = 0;
+> +	void __user *argp = (void __user *)arg;
+> +
+> +	struct ubi_volume_desc *vol_desc;
+> +	struct ubi_volume_info vol_info;
+> +	struct ubiblk_ctrl_req req;
+> +
+> +	if (!capable(CAP_SYS_RESOURCE))
+> +		return -EPERM;
+> +
+> +	err = copy_from_user(&req, argp, sizeof(struct ubiblk_ctrl_req));
+> +	if (err)
+> +		return -EFAULT;
+> +
+> +	if (req.ubi_num < 0 || req.vol_id < 0)
+> +		return -EINVAL;
+> +
+> +	vol_desc = ubi_open_volume(req.ubi_num, req.vol_id, UBI_READONLY);
+> +	if (IS_ERR(vol_desc)) {
+> +		pr_err("Opening volume %d on device %d failed\n",
+> +		       req.vol_id, req.ubi_num);
+
+Because dynamic_debug usually adds prefixes to messages, or pr_fmt is
+usually used to add a prefix, I suggest to make all pr_* / dev_*
+messages to start with small letter.
+
+Also, should we use dev_* macros instead? I have always thought that
+pr_* is used only if you do not have "struct device", no? But you do
+have it, AFAICS:
+
+1. For messages which are not related to a specific ubiblk device,
+ubi_blk_ctrl_dev.this_device (may be ubi_blk_ctrk_dev then can be
+shortened to ctrl_dev?)
+
+2. For messages that are about a specific device - not exactly sure, but
+I bet there is a struct device for your ubiblk_%d_%d device. Probably
+disk_to_dev(<struct ubiblk_dev>->gd)
+
+Try to find this out and test. We should not use pr_* unless there is a
+good reason why dev_* does not work.
+
+> +		return PTR_ERR(vol_desc);
+> +	}
+> +
+> +	ubi_get_volume_info(vol_desc, &vol_info);
+> +
+> +	switch (cmd) {
+> +	case UBIBLK_IOCADD:
+> +		pr_info("Creating a ubiblk device proxing ubi%d:%d\n",
+> +			req.ubi_num, req.vol_id);
+> +		ubiblk_create(&vol_info);
+
+Please, return the error code!
+
+> +		break;
+> +	case UBIBLK_IOCDEL:
+> +		pr_info("Removing ubiblk from ubi%d:%d\n",
+> +			req.ubi_num, req.vol_id);
+> +		ubiblk_remove(&vol_info);
+
+And here!
+
+[snip]
+
+> +static int __init ubi_ubiblk_init(void)
+> +{
+> +	int ret = 0;
+> +
+> +	pr_info("UBIBLK starting\n");
+
+Please, kill this message, it looks more like tracing, not info. I
+suggest you to add one single message at the end like "blah blah
+initialized, major number %d".
+
+> +
+> +	ret = register_blkdev(0, "ubiblk");
+> +	if (ret <= 0) {
+> +		pr_err("UBIBLK: could not register_blkdev\n");
+> +		return -ENODEV;
+> +	}
+> +	ubiblk_major = ret;
+> +	pr_info("UBIBLK: device's major: %d\n", ubiblk_major);
+
+Please, kill this message as well, or turn it into pr_debug()/dev_dbg().
+
+Talking about messages:
+
+1. Remove this UBIBLK: prefix from all of them. Rationale: if dynamic
+debug is enabled, the dynamic debug infrastructure will add it for you,
+see "Documentation/dynamic-debug-howto.txt". Otherwise you can always
+define "pr_fmt" and add the prefix you wish.
+
+[snip]
+
+> +static void __exit ubi_ubiblk_exit(void)
+> +{
+> +	int i;
+> +
+> +	pr_info("UBIBLK: going to exit\n");
+
+Please, kill these. Again, if you really feel like it - add one single
+message like "blah exited" at the end.
+
+[snip]
+
+> +/* Structure to be passed to UBIBLK_IOCADD or IOCDEL ioctl */
+> +struct ubiblk_ctrl_req {
+> +	__s32 ubi_num;
+> +	__s32 vol_id;
+> +};
+> +
+> +/* ioctl commands of the UBI control character device */
+
+Please, document here that you share "O" with UBI. Also document this in
+UBI in a separate patch.
+
+> +
+> +#define UBIBLK_CTRL_IOC_MAGIC 'O'
+> +
+> +/* Create a ubiblk device from a UBI volume */
+> +#define UBIBLK_IOCADD _IOW(UBIBLK_CTRL_IOC_MAGIC, 0x10, struct ubiblk_ctrl_req)
+> +/* Delete a ubiblk device */
+> +#define UBIBLK_IOCDEL _IOW(UBIBLK_CTRL_IOC_MAGIC, 0x11, struct ubiblk_ctrl_req)
+> +
+> +#endif
+
+
+-- 
+Best Regards,
+Artem Bityutskiy
