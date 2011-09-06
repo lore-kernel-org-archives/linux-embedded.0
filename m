@@ -1,28 +1,43 @@
-From: David Wagner <david.wagner@free-electrons.com>
+From: Artem Bityutskiy <dedekind1@gmail.com>
 Subject: Re: [PATCHv3] UBI: new module ubiblk: block layer on top of UBI
-Date: Thu, 01 Sep 2011 14:55:12 +0200
-Message-ID: <4E5F80B0.9060908@free-electrons.com>
-References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>	<201108241823.20904.arnd@arndb.de>	<1314256010.18988.18.camel@sauron>
-	<201108251712.40894.arnd@arndb.de>
+Date: Tue, 06 Sep 2011 06:44:58 +0300
+Message-ID: <1315280704.19067.14.camel@sauron>
+References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>
+	 <201108241823.20904.arnd@arndb.de> <1314256010.18988.18.camel@sauron>
+	 <201108251712.40894.arnd@arndb.de>
+Reply-To: dedekind1@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=subject:from:reply-to:to:cc:date:in-reply-to:references
+         :content-type:x-mailer:content-transfer-encoding:message-id
+         :mime-version;
+        bh=LaQU1LOoy7JrvHjmn4grRDg4rb/yt61bhpUf2qEKrZo=;
+        b=W4nQQpj01Pe7IUzFxiA9SWbjETSbqN8RTWLmoxb9bLHW3vOi18yALITkO7mnAHr06R
+         tcZckMxpkmYbUPMrl6iNPYG/VxHCIhI/T1RE3Y/sWtr7bmvOk+SppeQIDtyfnGnx5au5
+         jWXL3rWmje3iECPfXuak/JEXqk974kMIx58A0=
 In-Reply-To: <201108251712.40894.arnd@arndb.de>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: linux-mtd-bounces@lists.infradead.org
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-embedded <linux-embedded@vger.kernel.org>, dedekind1@gmail.com, lkml <linux-kernel@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
+Cc: david.wagner@free-electrons.com, linux-mtd <linux-mtd@lists.infradead.org>, linux-embedded <linux-embedded@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
 
-On 08/25/2011 05:12 PM, Arnd Bergmann wrote:
+Hi, sorry for long delay, did not have time to read my mail.
+
+On Thu, 2011-08-25 at 17:12 +0200, Arnd Bergmann wrote:
+> > I think this wasteful. Why should I have block devices which I do not
+> > need? If I have 4 UBI volumes, and need only one ubiblk, why should I
+> > waste my resources for 3 more of them (e.g., I do not want to waste
+> > memory for struct inode for each sysfs entry which these useless block
+> > devices will add). Also, will this mean 3 more block devices registered?
+> > 
+> > I think it is much uglier to have 3 "dummy" block devices and confuse
+> > users than have one nice control character device. For the sake of not
+> > having a separate control chardev?
+> 
 > The cost of a block device node in the kernel is rather low. Nowadays,
 > sysfs does not even permanently use inodes for entries, it has a much
 > more compact internal representation IIRC.
@@ -32,27 +47,34 @@ On 08/25/2011 05:12 PM, Arnd Bergmann wrote:
 > possible to put a root file system on it or do something else without
 > requiring a user space tool to issue an ioctl.
 
-Before patch v3, every existing and new UBI volumes were "proxyfied" by
-ubiblk and it was, indeed, one of our goal to be able to have a rootfs
-on it.  Patch v3 hinders that goal but it could still be achievable by
-adding a module parameter that would explicitly create a ubiblk device
-for a UBI volume at boot time.
+Yes, I understand, but the cost of each block device is not zero, I did
+not measure it, but I believe it would be in Kilobytes. Also, littering
+sysfs and /dev with useless block devices is not beautiful - why would
+a user want to have or see fake and useless block devices? And as David
+said, for some UBI volumes we do not want to have block devices at all.
 
-I for one am fine with both solutions (keep the ioctl + add a kernel
-parameter and throwing the ioctl away and go back "automatically create
-a ubiblk for each UBI volume").  However, I agree that it doesn't make
-sense to create a ubiblk device on top of UBI volumes containing, for
-instance, a ubifs.
+And BTW, mtdblock is uses exactly this technique, and I had to write
+many times to different confused people that they should not look at
+those "/dev/mtdblockX" devices, as if they did not exist...
 
-	Best Regards,
-	David.
+IOW, I think automatic creation for all UBI volumes has more drawbacks
+than advantages.
+
+> Evidently you can do everything you need even with that user space
+> tool, but IMHO the complexity of doing that is way bigger than
+> just creating the block devices right away.
+
+Well, it is jut another step to a set of steps one usually needs to do
+to attach an MTD device, create an UBI volume, etc.
+
+> It's not a dummy bus, in this approach it would be a the bus that gets
+> used by all ubiblk devices, which is a very common concept by itself.
+> It's more like the classic understanding of a 'device class' that Greg
+> wants to see get replaced by bus_types in the kernel.
+
+Yes, this sounds OK. Although UBI already has notifiers, so we could
+just add 2 more events.
 
 -- 
-David Wagner, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+Best Regards,
+Artem Bityutskiy
