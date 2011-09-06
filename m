@@ -1,80 +1,61 @@
 From: Artem Bityutskiy <dedekind1@gmail.com>
 Subject: Re: [PATCHv3] UBI: new module ubiblk: block layer on top of UBI
-Date: Tue, 06 Sep 2011 06:44:58 +0300
-Message-ID: <1315280704.19067.14.camel@sauron>
+Date: Tue, 06 Sep 2011 07:10:03 +0300
+Message-ID: <1315282208.19067.24.camel@sauron>
 References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>
-	 <201108241823.20904.arnd@arndb.de> <1314256010.18988.18.camel@sauron>
-	 <201108251712.40894.arnd@arndb.de>
+	<201108241823.20904.arnd@arndb.de> <1314256010.18988.18.camel@sauron>
+	<201108251712.40894.arnd@arndb.de> <1315280704.19067.14.camel@sauron>
 Reply-To: dedekind1@gmail.com
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=subject:from:reply-to:to:cc:date:in-reply-to:references
-         :content-type:x-mailer:content-transfer-encoding:message-id
-         :mime-version;
-        bh=LaQU1LOoy7JrvHjmn4grRDg4rb/yt61bhpUf2qEKrZo=;
-        b=W4nQQpj01Pe7IUzFxiA9SWbjETSbqN8RTWLmoxb9bLHW3vOi18yALITkO7mnAHr06R
-         tcZckMxpkmYbUPMrl6iNPYG/VxHCIhI/T1RE3Y/sWtr7bmvOk+SppeQIDtyfnGnx5au5
-         jWXL3rWmje3iECPfXuak/JEXqk974kMIx58A0=
-In-Reply-To: <201108251712.40894.arnd@arndb.de>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=gamma;
+	h=subject:from:reply-to:to:cc:date:in-reply-to:references
+	:content-type:x-mailer:content-transfer-encoding:message-id
+	:mime-version; bh=DaCSirDznfwla2LxOC+lEYvgeV3WC6hnjuoYW+L0ixs=;
+	b=CsU2uVCGnY5u+KRFKEwm+ry+s1EElJXV46oCyQupIruLXzWsN4+jIH+LoIJ/m4rLOE
+	bm8zFfbTssQTJRdhmzovoq8wCC9dCZ9To2gHzJdpvSIbC59CsGiAoKk6LkPGvCrLcrsT
+	XK9w8jy7Ge5rP+1GnzMmCxMua6BFrPPqpb1y0=
+In-Reply-To: <1315280704.19067.14.camel@sauron>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: linux-mtd-bounces@lists.infradead.org
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: david.wagner@free-electrons.com, linux-mtd <linux-mtd@lists.infradead.org>, linux-embedded <linux-embedded@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, david.wagner@free-electrons.com, lkml <linux-kernel@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
 
-Hi, sorry for long delay, did not have time to read my mail.
-
-On Thu, 2011-08-25 at 17:12 +0200, Arnd Bergmann wrote:
-> > I think this wasteful. Why should I have block devices which I do not
-> > need? If I have 4 UBI volumes, and need only one ubiblk, why should I
-> > waste my resources for 3 more of them (e.g., I do not want to waste
-> > memory for struct inode for each sysfs entry which these useless block
-> > devices will add). Also, will this mean 3 more block devices registered?
-> > 
-> > I think it is much uglier to have 3 "dummy" block devices and confuse
-> > users than have one nice control character device. For the sake of not
-> > having a separate control chardev?
+On Tue, 2011-09-06 at 06:44 +0300, Artem Bityutskiy wrote:
+> > It's not a dummy bus, in this approach it would be a the bus that gets
+> > used by all ubiblk devices, which is a very common concept by itself.
+> > It's more like the classic understanding of a 'device class' that Greg
+> > wants to see get replaced by bus_types in the kernel.
 > 
-> The cost of a block device node in the kernel is rather low. Nowadays,
-> sysfs does not even permanently use inodes for entries, it has a much
-> more compact internal representation IIRC.
-> 
-> The main advantage of this approach is not having to set up the 
-> block device at all, it would just be there, which e.g. makes it
-> possible to put a root file system on it or do something else without
-> requiring a user space tool to issue an ioctl.
+> Yes, this sounds OK. Although UBI already has notifiers, so we could
+> just add 2 more events.
 
-Yes, I understand, but the cost of each block device is not zero, I did
-not measure it, but I believe it would be in Kilobytes. Also, littering
-sysfs and /dev with useless block devices is not beautiful - why would
-a user want to have or see fake and useless block devices? And as David
-said, for some UBI volumes we do not want to have block devices at all.
+Hmm, with notifications the error handling becomes a problem - we want
+the ioctls for creating/removing the block device to be synchronous,
+and, should an error occur, we want to return the error code to the
+user-space. So the existing notifications mechanism does not work well.
 
-And BTW, mtdblock is uses exactly this technique, and I had to write
-many times to different confused people that they should not look at
-those "/dev/mtdblockX" devices, as if they did not exist...
-
-IOW, I think automatic creation for all UBI volumes has more drawbacks
-than advantages.
-
-> Evidently you can do everything you need even with that user space
-> tool, but IMHO the complexity of doing that is way bigger than
-> just creating the block devices right away.
-
-Well, it is jut another step to a set of steps one usually needs to do
-to attach an MTD device, create an UBI volume, etc.
-
-> It's not a dummy bus, in this approach it would be a the bus that gets
-> used by all ubiblk devices, which is a very common concept by itself.
-> It's more like the classic understanding of a 'device class' that Greg
-> wants to see get replaced by bus_types in the kernel.
-
-Yes, this sounds OK. Although UBI already has notifiers, so we could
-just add 2 more events.
+Not sure about the bus approach - David, could you take a look at it
+please? If we can handle errors there - then we could indeed re-use the
+UBI control device. We could even re-use the ioctl data structures for
+UBI volumes creation/removal - we have plenty of space there reserved
+for future extensions.
 
 -- 
 Best Regards,
 Artem Bityutskiy
+
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
