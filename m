@@ -1,72 +1,162 @@
-From: =?utf-8?B?TGFtYnJlY2h0IErDvHJnZW4=?= <J.Lambrecht@TELEVIC.com>
-Subject: [PATCH] net: phy: Add config option to specify external switch port
- to be used if switch is used as PHY
-Date: Thu, 8 Sep 2011 08:54:07 +0200
-Message-ID: <4E68668F.9060008@televic.com>
+From: Florian Fainelli <florian@openwrt.org>
+Subject: Re: [PATCH] net: phy: Add config option to specify external switch port to be used if switch is used as PHY
+Date: Thu, 8 Sep 2011 10:39:35 +0200
+Message-ID: <201109081039.35272.florian@openwrt.org>
+References: <4E68668F.9060008@televic.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <netdev-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=sender:from:organization:to:subject:date:user-agent:cc:references
+         :in-reply-to:mime-version:content-type:content-transfer-encoding
+         :message-id;
+        bh=et3+8Le2HBHgEfGy9Nb18Tq3aok2RzzLBrKofMfWNQs=;
+        b=L9MoaHJwaZwvuGL20dp6eQ0o/1Yl4R6F9lCZXy9DAJ4tV1c8hUkIZRIWyoQ3UPpScB
+         0CmnwDsApwZvYHOigRXyCfxTRcGl1wvqWD+k/Gy6qbIAg0KM6cncxoGivqPMRtiE8jxO
+         ZfRGB8ouh0PTb4k+Gp/IyKwZc3e88RHgW68sA=
+In-Reply-To: <4E68668F.9060008@televic.com>
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: "netdev@vger.kernel.org" <netdev@vger.kernel.org>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: Text/Plain; charset="windows-1252"
+To: Lambrecht =?utf-8?q?J=C3=BCrgen?= <J.Lambrecht@televic.com>
+Cc: "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-SGVsbG8sDQoNCkluIG91ciBlbWJlZGRlZCBkZXNpZ25zLCB0aGlzIGlzIGEgdXNlZnVsIHBhdGNo
-LiBNYXliZSBpdCBjYW4gYmUgdXNlZnVsIA0KZm9yIHNvbWVib2R5IGVsc2UgdG9vLg0KT3IgbWF5
-YmUgdGhlcmUgYXJlIGFscmVhZHkgYmV0dGVyIHNvbHV0aW9ucz8NCkkga25vdyBJIGNvdWxkIGFs
-c28gd3JpdGUgYSBkcml2ZXIgZm9yIG91ciBzd2l0Y2gsIGJ1dCB0aGF0IGlzIHRvbyBtdWNoIA0K
-ZWZmb3J0IGp1c3QgdG8gc2VsZWN0IHRoZSBhY3RpdmUgcG9ydC4NCg0KS2luZCByZWdhcmRzLA0K
-SsO8cmdlbg0KDQogICBJbiBlbWJlZGRlZCBkZXNpZ24sIGluc3RlYWQgb2YgYSBQSFksIHNvbWV0
-aW1lcyBhIHN3aXRjaCBpcyB1c2VkIHRoYXQNCiAgICAgICAgICAgYmVoYXZlcyBhcyBhIFBIWSB0
-aHJvdWdoIGl0cyBNSUkgcG9ydC4gRm9yIGV4YW1wbGUgdG8gdXNlIGEgZGFpc3kNCiAgICAgICAg
-ICAgY2hhaW4gbmV0d29yayBjb25maWd1cmF0aW9uIGluc3RlYWQgb2YgYW4gZXhwZW5zaXZlIHN0
-YXIgY29uZmlnLg0KICAgICAgICAgICBJbiB0aGF0IGNhc2UsIG1hbnkgcGh5IHBvcnRzIGFyZSBh
-dmFpbGFibGUsIGJ1dCBvbmx5IDEgc2hvdWxkIA0KYmUgdXNlZA0KICAgICAgICAgICB0byBjaGVj
-ayBsaW5rIHN0YXR1cywgYW5kIG5vdCB0aGUgZmlyc3Qgb25lIGF2YWlsYWJsZSBhcyBpcyANCnRo
-ZSBjYXNlDQogICAgICAgICAgIHdpdGhvdXQgdGhpcyBjb25maWd1cmF0aW9uICh0aGF0IGlzLCBz
-ZXQgdG8gaXRzIGRlZmF1bHQgdmFsdWUgMCkuDQogICAgICAgICAgIFNvIHRoaXMgb3B0aW9ucyBz
-cGVjaWZpZXMgdGhlIHN3aXRjaCBwb3J0IG51bWJlciB0byBiZSB1c2VkIA0KdG8gY2hlY2sNCiAg
-ICAgICAgICAgbGluayBzdGF0dXMsIGJlY2F1c2UgaWYgdGhlIGxpbmsgaXMgZG93biwgbm8gZGF0
-YSBpcyBzZW50IGJ5IHRoZQ0KICAgICAgICAgICBUQ1AvSVAgc3RhY2suDQoNClNpZ25lZC1vZmYt
-Ynk6IErDvHJnZW4gTGFtYnJlY2h0IDxKLkxhbWJyZWNodEB0ZWxldmljLmNvbT4NCi0tLQ0KICBk
-cml2ZXJzL25ldC9waHkvS2NvbmZpZyAgICB8ICAgMTQgKysrKysrKysrKysrKysNCiAgZHJpdmVy
-cy9uZXQvcGh5L21kaW9fYnVzLmMgfCAgICA5ICsrKysrKysrKw0KICAyIGZpbGVzIGNoYW5nZWQs
-IDIzIGluc2VydGlvbnMoKyksIDAgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJz
-L25ldC9waHkvS2NvbmZpZyBiL2RyaXZlcnMvbmV0L3BoeS9LY29uZmlnDQppbmRleCBhNzAyNDQz
-Li41NTQ1NjFmIDEwMDY0NA0KLS0tIGEvZHJpdmVycy9uZXQvcGh5L0tjb25maWcNCisrKyBiL2Ry
-aXZlcnMvbmV0L3BoeS9LY29uZmlnDQpAQCAtMTMsNiArMTMsMjAgQEAgbWVudWNvbmZpZyBQSFlM
-SUINCg0KICBpZiBQSFlMSUINCg0KK2NvbmZpZyBTV0lUQ0hfUEhZDQorICAgICAgIGludCAiRXh0
-ZXJuYWwgc3dpdGNoIHBvcnQgdG8gYmUgdXNlZCBpZiBzd2l0Y2ggaXMgdXNlZCBhcyBQSFkiDQor
-ICAgICAgIGRlZmF1bHQgIjAiDQorICAgICAgIGhlbHANCisgICAgICAgICBJbiBlbWJlZGRlZCBk
-ZXNpZ24sIGluc3RlYWQgb2YgYSBQSFksIHNvbWV0aW1lcyBhIHN3aXRjaCBpcyANCnVzZWQgdGhh
-dA0KKyAgICAgICAgIGJlaGF2ZXMgYXMgYSBQSFkgdGhyb3VnaCBpdHMgTUlJIHBvcnQuIEZvciBl
-eGFtcGxlIHRvIHVzZSBhIGRhaXN5DQorICAgICAgICAgY2hhaW4gbmV0d29yayBjb25maWd1cmF0
-aW9uIGluc3RlYWQgb2YgYW4gZXhwZW5zaXZlIHN0YXIgY29uZmlnLg0KKyAgICAgICAgIEluIHRo
-YXQgY2FzZSwgbWFueSBwaHkgcG9ydHMgYXJlIGF2YWlsYWJsZSwgYnV0IG9ubHkgMSBzaG91bGQg
-DQpiZSB1c2VkDQorICAgICAgICAgdG8gY2hlY2sgbGluayBzdGF0dXMsIGFuZCBub3QgdGhlIGZp
-cnN0IG9uZSBhdmFpbGFibGUgYXMgaXMgDQp0aGUgY2FzZQ0KKyAgICAgICAgIHdpdGhvdXQgdGhp
-cyBjb25maWd1cmF0aW9uICh0aGF0IGlzLCBzZXQgdG8gaXRzIGRlZmF1bHQgdmFsdWUgMCkuDQor
-ICAgICAgICAgU28gdGhpcyBvcHRpb25zIHNwZWNpZmllcyB0aGUgc3dpdGNoIHBvcnQgbnVtYmVy
-IHRvIGJlIHVzZWQgdG8gDQpjaGVjaw0KKyAgICAgICAgIGxpbmsgc3RhdHVzLCBiZWNhdXNlIGlm
-IHRoZSBsaW5rIGlzIGRvd24sIG5vIGRhdGEgaXMgc2VudCBieSB0aGUNCisgICAgICAgICBUQ1Av
-SVAgc3RhY2suDQorDQogIGNvbW1lbnQgIk1JSSBQSFkgZGV2aWNlIGRyaXZlcnMiDQoNCiAgY29u
-ZmlnIE1BUlZFTExfUEhZDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9uZXQvcGh5L21kaW9fYnVzLmMg
-Yi9kcml2ZXJzL25ldC9waHkvbWRpb19idXMuYw0KaW5kZXggNmM1OGRhMi4uMDE2NDM3YSAxMDA2
-NDQNCi0tLSBhL2RyaXZlcnMvbmV0L3BoeS9tZGlvX2J1cy5jDQorKysgYi9kcml2ZXJzL25ldC9w
-aHkvbWRpb19idXMuYw0KQEAgLTExMiw3ICsxMTIsMTQgQEAgaW50IG1kaW9idXNfcmVnaXN0ZXIo
-c3RydWN0IG1paV9idXMgKmJ1cykNCiAgICAgICAgIGlmIChidXMtPnJlc2V0KQ0KICAgICAgICAg
-ICAgICAgICBidXMtPnJlc2V0KGJ1cyk7DQoNCisgICAgICAgLyogVGhlIGNvbmZpZyBiZWxvdyBp
-cyBhbHdheXMgYXZhaWxibGUgd2l0aCBDT05GSUdfUEhZTElCLiBJZiAwLCB0aGUNCisgICAgICAg
-ICAgYmVoYXZpb3IgaXMgYXMgYmVmb3JlIHdpdGhvdXQgdGhpcyBwYXRjaCAob3IgUDAgb2YgdGhl
-IHN3aXRjaCBpcw0KKyAgICAgICAgICB0YWtlbiBiZWNhdXNlIGl0IGlzIHRoZSBmaXJzdCBvbmUg
-Zm91bmQpLiAqLw0KKyNpZiBDT05GSUdfU1dJVENIX1BIWQ0KKyAgICAgICBpID0gQ09ORklHX1NX
-SVRDSF9QSFk7DQorI2Vsc2UNCiAgICAgICAgIGZvciAoaSA9IDA7IGkgPCBQSFlfTUFYX0FERFI7
-IGkrKykgew0KKyNlbmRpZg0KICAgICAgICAgICAgICAgICBpZiAoKGJ1cy0+cGh5X21hc2sgJiAo
-MSA8PCBpKSkgPT0gMCkgew0KICAgICAgICAgICAgICAgICAgICAgICAgIHN0cnVjdCBwaHlfZGV2
-aWNlICpwaHlkZXY7DQoNCkBAIC0xMjIsNyArMTI5LDkgQEAgaW50IG1kaW9idXNfcmVnaXN0ZXIo
-c3RydWN0IG1paV9idXMgKmJ1cykNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdv
-dG8gZXJyb3I7DQogICAgICAgICAgICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAgICAgICB9
-DQorI2lmICFDT05GSUdfU1dJVENIX1BIWQ0KICAgICAgICAgfQ0KKyNlbmRpZg0KDQogICAgICAg
-ICBidXMtPnN0YXRlID0gTURJT0JVU19SRUdJU1RFUkVEOw0KICAgICAgICAgcHJfaW5mbygiJXM6
-IHByb2JlZFxuIiwgYnVzLT5uYW1lKTsNCi0tDQoxLjcuMQ0K
+Hello Jurgen,
+
+On Thursday 08 September 2011 08:54:07 Lambrecht J=C3=BCrgen wrote:
+> Hello,
+>=20
+> In our embedded designs, this is a useful patch. Maybe it can be usef=
+ul
+> for somebody else too.
+> Or maybe there are already better solutions?
+> I know I could also write a driver for our switch, but that is too mu=
+ch
+> effort just to select the active port.
+
+This is not going to work well with all switches out there. You could u=
+se the=20
+fixed-PHY driver to make your ethernet driver see the link as always up=
+ between=20
+the MAC and switch CPU port.
+
+A better solution would be to have proper switch drivers and user-space=
+, which=20
+reminds me that we (OpenWrt) should at some point propose our switch dr=
+ivers=20
+[1] for review.
+
+[1]:=20
+https://dev.openwrt.org/browser/trunk/target/linux/generic/files/driver=
+s/net/phy/
+
+>=20
+> Kind regards,
+> J=C3=BCrgen
+>=20
+>    In embedded design, instead of a PHY, sometimes a switch is used t=
+hat
+>            behaves as a PHY through its MII port. For example to use =
+a
+> daisy chain network configuration instead of an expensive star config=
+=2E In
+> that case, many phy ports are available, but only 1 should be used
+>            to check link status, and not the first one available as i=
+s
+> the case
+>            without this configuration (that is, set to its default va=
+lue
+> 0). So this options specifies the switch port number to be used to ch=
+eck
+>            link status, because if the link is down, no data is sent =
+by the
+>            TCP/IP stack.
+>=20
+> Signed-off-by: J=C3=BCrgen Lambrecht <J.Lambrecht@televic.com>
+> ---
+>   drivers/net/phy/Kconfig    |   14 ++++++++++++++
+>   drivers/net/phy/mdio_bus.c |    9 +++++++++
+>   2 files changed, 23 insertions(+), 0 deletions(-)
+>=20
+> diff --git a/drivers/net/phy/Kconfig b/drivers/net/phy/Kconfig
+> index a702443..554561f 100644
+> --- a/drivers/net/phy/Kconfig
+> +++ b/drivers/net/phy/Kconfig
+> @@ -13,6 +13,20 @@ menuconfig PHYLIB
+>=20
+>   if PHYLIB
+>=20
+> +config SWITCH_PHY
+> +       int "External switch port to be used if switch is used as PHY=
+"
+> +       default "0"
+> +       help
+> +         In embedded design, instead of a PHY, sometimes a switch is
+> used that
+> +         behaves as a PHY through its MII port. For example to use a=
+ daisy
+> +         chain network configuration instead of an expensive star co=
+nfig.
+> +         In that case, many phy ports are available, but only 1 shou=
+ld
+> be used
+> +         to check link status, and not the first one available as is
+> the case
+> +         without this configuration (that is, set to its default val=
+ue 0).
+> +         So this options specifies the switch port number to be used=
+ to
+> check
+> +         link status, because if the link is down, no data is sent b=
+y the
+> +         TCP/IP stack.
+> +
+>   comment "MII PHY device drivers"
+>=20
+>   config MARVELL_PHY
+> diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
+> index 6c58da2..016437a 100644
+> --- a/drivers/net/phy/mdio_bus.c
+> +++ b/drivers/net/phy/mdio_bus.c
+> @@ -112,7 +112,14 @@ int mdiobus_register(struct mii_bus *bus)
+>          if (bus->reset)
+>                  bus->reset(bus);
+>=20
+> +       /* The config below is always availble with CONFIG_PHYLIB. If=
+ 0,
+> the +          behavior is as before without this patch (or P0 of the
+> switch is +          taken because it is the first one found). */
+> +#if CONFIG_SWITCH_PHY
+> +       i =3D CONFIG_SWITCH_PHY;
+> +#else
+>          for (i =3D 0; i < PHY_MAX_ADDR; i++) {
+> +#endif
+>                  if ((bus->phy_mask & (1 << i)) =3D=3D 0) {
+>                          struct phy_device *phydev;
+>=20
+> @@ -122,7 +129,9 @@ int mdiobus_register(struct mii_bus *bus)
+>                                  goto error;
+>                          }
+>                  }
+> +#if !CONFIG_SWITCH_PHY
+>          }
+> +#endif
+>=20
+>          bus->state =3D MDIOBUS_REGISTERED;
+>          pr_info("%s: probed\n", bus->name);
+> --
+> 1.7.1
+> N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=
+=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=
+=BF=BD^=EF=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=
+^=EF=BF=BD)=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDw*=1Fjg=EF=BF=BD=EF=BF=BD=
+=EF=BF=BD=1E=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=DD=A2j/=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=DE=96=EF=BF=BD=EF=BF=BD2=EF=BF=BD=DE=99=
+=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD
+> &=EF=BF=BD)=DF=A1=EF=BF=BDa=EF=BF=BD=EF=BF=BD=7F=EF=BF=BD=EF=BF=BD=1E=
+=EF=BF=BDG=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=0F=EF=BF=BDj:+v=EF=BF=BD=
+=EF=BF=BD=EF=BF=BDw=EF=BF=BD=EF=BF=BD=D9=A5
+
+--=20
+=46lorian
