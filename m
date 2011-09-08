@@ -1,47 +1,48 @@
-From: Francois Romieu <romieu@fr.zoreil.com>
-Subject: Re: [PATCH] net: phy: Add config option to specify external switch port to be used if switch is used as PHY
-Date: Thu, 8 Sep 2011 12:13:15 +0200
-Message-ID: <20110908101315.GA27909@electric-eye.fr.zoreil.com>
+From: =?utf-8?B?TGFtYnJlY2h0IErDvHJnZW4=?= <J.Lambrecht@TELEVIC.com>
+Subject: Re: [PATCH] net: phy: Add config option to specify external switch
+ port to be used if switch is used as PHY
+Date: Thu, 8 Sep 2011 13:59:34 +0200
+Message-ID: <4E68AE26.5020707@televic.com>
 References: <4E68668F.9060008@televic.com>
+ <20110908101315.GA27909@electric-eye.fr.zoreil.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4E68668F.9060008@televic.com>
-Sender: netdev-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20110908101315.GA27909@electric-eye.fr.zoreil.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Lambrecht =?utf-8?Q?J=C3=BCrgen?= <J.Lambrecht@TELEVIC.com>
+To: Francois Romieu <romieu@fr.zoreil.com>
 Cc: "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-Lambrecht J=C3=BCrgen <J.Lambrecht@TELEVIC.com> :
-[...]
-> diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
-> index 6c58da2..016437a 100644
-> --- a/drivers/net/phy/mdio_bus.c
-> +++ b/drivers/net/phy/mdio_bus.c
-> @@ -112,7 +112,14 @@ int mdiobus_register(struct mii_bus *bus)
->          if (bus->reset)
->                  bus->reset(bus);
->=20
-> +       /* The config below is always availble with CONFIG_PHYLIB. If=
- 0, the
-> +          behavior is as before without this patch (or P0 of the swi=
-tch is
-> +          taken because it is the first one found). */
-> +#if CONFIG_SWITCH_PHY
-> +       i =3D CONFIG_SWITCH_PHY;
-> +#else
->          for (i =3D 0; i < PHY_MAX_ADDR; i++) {
-> +#endif
->                  if ((bus->phy_mask & (1 << i)) =3D=3D 0) {
->                          struct phy_device *phydev;
-
-This config option may help your platform but it is nowhere reusable on=
- a
-slightly different one (each mii_bus behavior is changed).
-
-Which driver(s) do you use that you can not set phy_mask directly ?
-
---=20
-Ueimor
+T24gMDkvMDgvMjAxMSAxMjoxMyBQTSwgRnJhbmNvaXMgUm9taWV1IHdyb3RlOg0KPg0KPiBMYW1i
+cmVjaHQgSsO8cmdlbiA8Si5MYW1icmVjaHRAVEVMRVZJQy5jb20+IDoNCj4gWy4uLl0NCj4gPiBk
+aWZmIC0tZ2l0IGEvZHJpdmVycy9uZXQvcGh5L21kaW9fYnVzLmMgYi9kcml2ZXJzL25ldC9waHkv
+bWRpb19idXMuYw0KPiA+IGluZGV4IDZjNThkYTIuLjAxNjQzN2EgMTAwNjQ0DQo+ID4gLS0tIGEv
+ZHJpdmVycy9uZXQvcGh5L21kaW9fYnVzLmMNCj4gPiArKysgYi9kcml2ZXJzL25ldC9waHkvbWRp
+b19idXMuYw0KPiA+IEBAIC0xMTIsNyArMTEyLDE0IEBAIGludCBtZGlvYnVzX3JlZ2lzdGVyKHN0
+cnVjdCBtaWlfYnVzICpidXMpDQo+ID4gICAgICAgICAgaWYgKGJ1cy0+cmVzZXQpDQo+ID4gICAg
+ICAgICAgICAgICAgICBidXMtPnJlc2V0KGJ1cyk7DQo+ID4NCj4gPiArICAgICAgIC8qIFRoZSBj
+b25maWcgYmVsb3cgaXMgYWx3YXlzIGF2YWlsYmxlIHdpdGggQ09ORklHX1BIWUxJQi4gDQo+IElm
+IDAsIHRoZQ0KPiA+ICsgICAgICAgICAgYmVoYXZpb3IgaXMgYXMgYmVmb3JlIHdpdGhvdXQgdGhp
+cyBwYXRjaCAob3IgUDAgb2YgdGhlIA0KPiBzd2l0Y2ggaXMNCj4gPiArICAgICAgICAgIHRha2Vu
+IGJlY2F1c2UgaXQgaXMgdGhlIGZpcnN0IG9uZSBmb3VuZCkuICovDQo+ID4gKyNpZiBDT05GSUdf
+U1dJVENIX1BIWQ0KPiA+ICsgICAgICAgaSA9IENPTkZJR19TV0lUQ0hfUEhZOw0KPiA+ICsjZWxz
+ZQ0KPiA+ICAgICAgICAgIGZvciAoaSA9IDA7IGkgPCBQSFlfTUFYX0FERFI7IGkrKykgew0KPiA+
+ICsjZW5kaWYNCj4gPiAgICAgICAgICAgICAgICAgIGlmICgoYnVzLT5waHlfbWFzayAmICgxIDw8
+IGkpKSA9PSAwKSB7DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgIHN0cnVjdCBwaHlfZGV2
+aWNlICpwaHlkZXY7DQo+DQo+IFRoaXMgY29uZmlnIG9wdGlvbiBtYXkgaGVscCB5b3VyIHBsYXRm
+b3JtIGJ1dCBpdCBpcyBub3doZXJlIHJldXNhYmxlIG9uIGENCj4gc2xpZ2h0bHkgZGlmZmVyZW50
+IG9uZSAoZWFjaCBtaWlfYnVzIGJlaGF2aW9yIGlzIGNoYW5nZWQpLg0KPg0KPiBXaGljaCBkcml2
+ZXIocykgZG8geW91IHVzZSB0aGF0IHlvdSBjYW4gbm90IHNldCBwaHlfbWFzayBkaXJlY3RseSA/
+DQo+DQpUaGUgSFcgZHJpdmVyIGlzICdGRUMnIGZvciBpTVggRXRoZXJuZXQuIEZvciB0aGUgUEhZ
+LCBqdXN0IE1JSSBhbmQgUEhZTElCLg0KSSBhbSByYXRoZXIgbmV3IHRvIGxpbnV4LCBkaWRuJ3Qg
+a25ldyBwaHlfbWFzay4gQ2hlY2tlZCBpdCBub3csIGFuZCBpcyANCm5vdCBzZXQgaW4gZmVjLmMu
+DQpZb3UgbWVhbiB0aGVuIHRvIHBhdGNoIGRyaXZlcnMvbmV0L2ZlYy5jIGluIHRoZSBzYW1lIHdh
+eSAoYXMgbXkgY3VycmVudCANCnBhdGNoKSB0byBzZXQgdGhlIHBoeV9tYXNrIGluc3RlYWQgKHZp
+YSBtZW51Y29uZmlnLCBvciBpbiB0aGUgcGxhdGZvcm0gDQppbml0KT8NCg0KVGhhbmtzIGZvciB5
+b3VyIHJlcGx5LA0KSsO8cmdlbg0KPg0KPg0KPiAtLQ0KPiBVZWltb3INCj4NCg0KDQotLSANCkrD
+vHJnZW4gTGFtYnJlY2h0DQpSJkQgQXNzb2NpYXRlDQpUZWw6ICszMiAoMCk1MSAzMDMwNDUgICAg
+RmF4OiArMzIgKDApNTEgMzEwNjcwDQpodHRwOi8vd3d3LnRlbGV2aWMtcmFpbC5jb20NClRlbGV2
+aWMgUmFpbCBOViAtIExlbyBCZWthZXJ0bGFhbiAxIC0gODg3MCBJemVnZW0gLSBCZWxnaXVtDQpD
+b21wYW55IG51bWJlciAwODI1LjUzOS41ODEgLSBSUFIgS29ydHJpamsNCg==
