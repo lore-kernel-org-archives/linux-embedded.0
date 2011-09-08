@@ -1,53 +1,72 @@
-From: Artem Bityutskiy <dedekind1@gmail.com>
-Subject: Re: [PATCH] document ubiblk's usage of the same ioctl magic as a
- part of UBI
-Date: Tue, 06 Sep 2011 07:58:50 +0300
-Message-ID: <1315285135.19067.59.camel@sauron>
-References: <1314202540-5562-1-git-send-email-david.wagner@free-electrons.com>
-	 <1314202916-6982-1-git-send-email-david.wagner@free-electrons.com>
-Reply-To: dedekind1@gmail.com
+From: =?utf-8?B?TGFtYnJlY2h0IErDvHJnZW4=?= <J.Lambrecht@TELEVIC.com>
+Subject: [PATCH] net: phy: Add config option to specify external switch port
+ to be used if switch is used as PHY
+Date: Thu, 8 Sep 2011 08:54:07 +0200
+Message-ID: <4E68668F.9060008@televic.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=subject:from:reply-to:to:cc:date:in-reply-to:references
-         :content-type:x-mailer:content-transfer-encoding:message-id
-         :mime-version;
-        bh=PCIOcKCuJZIvk79i6vxZ6YHkUZ4zKNxmV2Wi4dmA82U=;
-        b=k/ww7SUAaK7fvnFGUCVrc4Z5WLyxkXsZ1XFwRtxnbnDB5dEblY8hDBvXTUeeXOYPwk
-         yzv8Wv9Gjtk8A+qC/ZKuC/O80vCDhWZgSfoqVHNaamPBaRkAvAc0GKIPMrLyA+Z515R2
-         637NNII0nDo+m12jdRAkF+LuC7884n9QAvGh0=
-In-Reply-To: <1314202916-6982-1-git-send-email-david.wagner@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: David Wagner <david.wagner@free-electrons.com>
-Cc: linux-mtd <linux-mtd@lists.infradead.org>, linux-embedded <linux-embedded@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
+To: "netdev@vger.kernel.org" <netdev@vger.kernel.org>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-On Wed, 2011-08-24 at 18:21 +0200, David Wagner wrote:
-> ---
->  include/mtd/ubi-user.h |    1 +
->  1 files changed, 1 insertions(+), 0 deletions(-)
-> 
-> diff --git a/include/mtd/ubi-user.h b/include/mtd/ubi-user.h
-> index 3c41097..7c8bfe3 100644
-> --- a/include/mtd/ubi-user.h
-> +++ b/include/mtd/ubi-user.h
-> @@ -188,6 +188,7 @@
->  /* Set an UBI volume property */
->  #define UBI_IOCSETVOLPROP _IOW(UBI_VOL_IOC_MAGIC, 6, \
->  			       struct ubi_set_vol_prop_req)
-> +/* If you add ioctls here, please note that ubiblk uses 'O'/0x10-0x11 */
->  
->  /* Maximum MTD device name length supported by UBI */
->  #define MAX_UBI_MTD_NAME_LEN 127
-
-Let's postpone this patch and the user-space tool until ubiblk is ready
-for inclusion. I sent you some comments - the main one is the block
-device reference counting and making sure that the underlying UBI volume
-does not disappear when you use it.
-
--- 
-Best Regards,
-Artem Bityutskiy
+SGVsbG8sDQoNCkluIG91ciBlbWJlZGRlZCBkZXNpZ25zLCB0aGlzIGlzIGEgdXNlZnVsIHBhdGNo
+LiBNYXliZSBpdCBjYW4gYmUgdXNlZnVsIA0KZm9yIHNvbWVib2R5IGVsc2UgdG9vLg0KT3IgbWF5
+YmUgdGhlcmUgYXJlIGFscmVhZHkgYmV0dGVyIHNvbHV0aW9ucz8NCkkga25vdyBJIGNvdWxkIGFs
+c28gd3JpdGUgYSBkcml2ZXIgZm9yIG91ciBzd2l0Y2gsIGJ1dCB0aGF0IGlzIHRvbyBtdWNoIA0K
+ZWZmb3J0IGp1c3QgdG8gc2VsZWN0IHRoZSBhY3RpdmUgcG9ydC4NCg0KS2luZCByZWdhcmRzLA0K
+SsO8cmdlbg0KDQogICBJbiBlbWJlZGRlZCBkZXNpZ24sIGluc3RlYWQgb2YgYSBQSFksIHNvbWV0
+aW1lcyBhIHN3aXRjaCBpcyB1c2VkIHRoYXQNCiAgICAgICAgICAgYmVoYXZlcyBhcyBhIFBIWSB0
+aHJvdWdoIGl0cyBNSUkgcG9ydC4gRm9yIGV4YW1wbGUgdG8gdXNlIGEgZGFpc3kNCiAgICAgICAg
+ICAgY2hhaW4gbmV0d29yayBjb25maWd1cmF0aW9uIGluc3RlYWQgb2YgYW4gZXhwZW5zaXZlIHN0
+YXIgY29uZmlnLg0KICAgICAgICAgICBJbiB0aGF0IGNhc2UsIG1hbnkgcGh5IHBvcnRzIGFyZSBh
+dmFpbGFibGUsIGJ1dCBvbmx5IDEgc2hvdWxkIA0KYmUgdXNlZA0KICAgICAgICAgICB0byBjaGVj
+ayBsaW5rIHN0YXR1cywgYW5kIG5vdCB0aGUgZmlyc3Qgb25lIGF2YWlsYWJsZSBhcyBpcyANCnRo
+ZSBjYXNlDQogICAgICAgICAgIHdpdGhvdXQgdGhpcyBjb25maWd1cmF0aW9uICh0aGF0IGlzLCBz
+ZXQgdG8gaXRzIGRlZmF1bHQgdmFsdWUgMCkuDQogICAgICAgICAgIFNvIHRoaXMgb3B0aW9ucyBz
+cGVjaWZpZXMgdGhlIHN3aXRjaCBwb3J0IG51bWJlciB0byBiZSB1c2VkIA0KdG8gY2hlY2sNCiAg
+ICAgICAgICAgbGluayBzdGF0dXMsIGJlY2F1c2UgaWYgdGhlIGxpbmsgaXMgZG93biwgbm8gZGF0
+YSBpcyBzZW50IGJ5IHRoZQ0KICAgICAgICAgICBUQ1AvSVAgc3RhY2suDQoNClNpZ25lZC1vZmYt
+Ynk6IErDvHJnZW4gTGFtYnJlY2h0IDxKLkxhbWJyZWNodEB0ZWxldmljLmNvbT4NCi0tLQ0KICBk
+cml2ZXJzL25ldC9waHkvS2NvbmZpZyAgICB8ICAgMTQgKysrKysrKysrKysrKysNCiAgZHJpdmVy
+cy9uZXQvcGh5L21kaW9fYnVzLmMgfCAgICA5ICsrKysrKysrKw0KICAyIGZpbGVzIGNoYW5nZWQs
+IDIzIGluc2VydGlvbnMoKyksIDAgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJz
+L25ldC9waHkvS2NvbmZpZyBiL2RyaXZlcnMvbmV0L3BoeS9LY29uZmlnDQppbmRleCBhNzAyNDQz
+Li41NTQ1NjFmIDEwMDY0NA0KLS0tIGEvZHJpdmVycy9uZXQvcGh5L0tjb25maWcNCisrKyBiL2Ry
+aXZlcnMvbmV0L3BoeS9LY29uZmlnDQpAQCAtMTMsNiArMTMsMjAgQEAgbWVudWNvbmZpZyBQSFlM
+SUINCg0KICBpZiBQSFlMSUINCg0KK2NvbmZpZyBTV0lUQ0hfUEhZDQorICAgICAgIGludCAiRXh0
+ZXJuYWwgc3dpdGNoIHBvcnQgdG8gYmUgdXNlZCBpZiBzd2l0Y2ggaXMgdXNlZCBhcyBQSFkiDQor
+ICAgICAgIGRlZmF1bHQgIjAiDQorICAgICAgIGhlbHANCisgICAgICAgICBJbiBlbWJlZGRlZCBk
+ZXNpZ24sIGluc3RlYWQgb2YgYSBQSFksIHNvbWV0aW1lcyBhIHN3aXRjaCBpcyANCnVzZWQgdGhh
+dA0KKyAgICAgICAgIGJlaGF2ZXMgYXMgYSBQSFkgdGhyb3VnaCBpdHMgTUlJIHBvcnQuIEZvciBl
+eGFtcGxlIHRvIHVzZSBhIGRhaXN5DQorICAgICAgICAgY2hhaW4gbmV0d29yayBjb25maWd1cmF0
+aW9uIGluc3RlYWQgb2YgYW4gZXhwZW5zaXZlIHN0YXIgY29uZmlnLg0KKyAgICAgICAgIEluIHRo
+YXQgY2FzZSwgbWFueSBwaHkgcG9ydHMgYXJlIGF2YWlsYWJsZSwgYnV0IG9ubHkgMSBzaG91bGQg
+DQpiZSB1c2VkDQorICAgICAgICAgdG8gY2hlY2sgbGluayBzdGF0dXMsIGFuZCBub3QgdGhlIGZp
+cnN0IG9uZSBhdmFpbGFibGUgYXMgaXMgDQp0aGUgY2FzZQ0KKyAgICAgICAgIHdpdGhvdXQgdGhp
+cyBjb25maWd1cmF0aW9uICh0aGF0IGlzLCBzZXQgdG8gaXRzIGRlZmF1bHQgdmFsdWUgMCkuDQor
+ICAgICAgICAgU28gdGhpcyBvcHRpb25zIHNwZWNpZmllcyB0aGUgc3dpdGNoIHBvcnQgbnVtYmVy
+IHRvIGJlIHVzZWQgdG8gDQpjaGVjaw0KKyAgICAgICAgIGxpbmsgc3RhdHVzLCBiZWNhdXNlIGlm
+IHRoZSBsaW5rIGlzIGRvd24sIG5vIGRhdGEgaXMgc2VudCBieSB0aGUNCisgICAgICAgICBUQ1Av
+SVAgc3RhY2suDQorDQogIGNvbW1lbnQgIk1JSSBQSFkgZGV2aWNlIGRyaXZlcnMiDQoNCiAgY29u
+ZmlnIE1BUlZFTExfUEhZDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9uZXQvcGh5L21kaW9fYnVzLmMg
+Yi9kcml2ZXJzL25ldC9waHkvbWRpb19idXMuYw0KaW5kZXggNmM1OGRhMi4uMDE2NDM3YSAxMDA2
+NDQNCi0tLSBhL2RyaXZlcnMvbmV0L3BoeS9tZGlvX2J1cy5jDQorKysgYi9kcml2ZXJzL25ldC9w
+aHkvbWRpb19idXMuYw0KQEAgLTExMiw3ICsxMTIsMTQgQEAgaW50IG1kaW9idXNfcmVnaXN0ZXIo
+c3RydWN0IG1paV9idXMgKmJ1cykNCiAgICAgICAgIGlmIChidXMtPnJlc2V0KQ0KICAgICAgICAg
+ICAgICAgICBidXMtPnJlc2V0KGJ1cyk7DQoNCisgICAgICAgLyogVGhlIGNvbmZpZyBiZWxvdyBp
+cyBhbHdheXMgYXZhaWxibGUgd2l0aCBDT05GSUdfUEhZTElCLiBJZiAwLCB0aGUNCisgICAgICAg
+ICAgYmVoYXZpb3IgaXMgYXMgYmVmb3JlIHdpdGhvdXQgdGhpcyBwYXRjaCAob3IgUDAgb2YgdGhl
+IHN3aXRjaCBpcw0KKyAgICAgICAgICB0YWtlbiBiZWNhdXNlIGl0IGlzIHRoZSBmaXJzdCBvbmUg
+Zm91bmQpLiAqLw0KKyNpZiBDT05GSUdfU1dJVENIX1BIWQ0KKyAgICAgICBpID0gQ09ORklHX1NX
+SVRDSF9QSFk7DQorI2Vsc2UNCiAgICAgICAgIGZvciAoaSA9IDA7IGkgPCBQSFlfTUFYX0FERFI7
+IGkrKykgew0KKyNlbmRpZg0KICAgICAgICAgICAgICAgICBpZiAoKGJ1cy0+cGh5X21hc2sgJiAo
+MSA8PCBpKSkgPT0gMCkgew0KICAgICAgICAgICAgICAgICAgICAgICAgIHN0cnVjdCBwaHlfZGV2
+aWNlICpwaHlkZXY7DQoNCkBAIC0xMjIsNyArMTI5LDkgQEAgaW50IG1kaW9idXNfcmVnaXN0ZXIo
+c3RydWN0IG1paV9idXMgKmJ1cykNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdv
+dG8gZXJyb3I7DQogICAgICAgICAgICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAgICAgICB9
+DQorI2lmICFDT05GSUdfU1dJVENIX1BIWQ0KICAgICAgICAgfQ0KKyNlbmRpZg0KDQogICAgICAg
+ICBidXMtPnN0YXRlID0gTURJT0JVU19SRUdJU1RFUkVEOw0KICAgICAgICAgcHJfaW5mbygiJXM6
+IHByb2JlZFxuIiwgYnVzLT5uYW1lKTsNCi0tDQoxLjcuMQ0K
