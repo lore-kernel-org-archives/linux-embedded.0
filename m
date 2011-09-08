@@ -1,48 +1,44 @@
-From: =?utf-8?B?TGFtYnJlY2h0IErDvHJnZW4=?= <J.Lambrecht@TELEVIC.com>
-Subject: Re: [PATCH] net: phy: Add config option to specify external switch
- port to be used if switch is used as PHY
-Date: Thu, 8 Sep 2011 13:59:34 +0200
-Message-ID: <4E68AE26.5020707@televic.com>
-References: <4E68668F.9060008@televic.com>
- <20110908101315.GA27909@electric-eye.fr.zoreil.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCHv3] UBI: new module ubiblk: block layer on top of UBI
+Date: Thu, 8 Sep 2011 17:26:00 +0200
+Message-ID: <201109081726.00769.arnd@arndb.de>
+References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>
+	<1315280704.19067.14.camel@sauron>
+	<1315282208.19067.24.camel@sauron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20110908101315.GA27909@electric-eye.fr.zoreil.com>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-To: Francois Romieu <romieu@fr.zoreil.com>
-Cc: "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <1315282208.19067.24.camel@sauron>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: linux-mtd-bounces@lists.infradead.org
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: dedekind1@gmail.com
+Cc: linux-embedded <linux-embedded@vger.kernel.org>, david.wagner@free-electrons.com, lkml <linux-kernel@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
 
-T24gMDkvMDgvMjAxMSAxMjoxMyBQTSwgRnJhbmNvaXMgUm9taWV1IHdyb3RlOg0KPg0KPiBMYW1i
-cmVjaHQgSsO8cmdlbiA8Si5MYW1icmVjaHRAVEVMRVZJQy5jb20+IDoNCj4gWy4uLl0NCj4gPiBk
-aWZmIC0tZ2l0IGEvZHJpdmVycy9uZXQvcGh5L21kaW9fYnVzLmMgYi9kcml2ZXJzL25ldC9waHkv
-bWRpb19idXMuYw0KPiA+IGluZGV4IDZjNThkYTIuLjAxNjQzN2EgMTAwNjQ0DQo+ID4gLS0tIGEv
-ZHJpdmVycy9uZXQvcGh5L21kaW9fYnVzLmMNCj4gPiArKysgYi9kcml2ZXJzL25ldC9waHkvbWRp
-b19idXMuYw0KPiA+IEBAIC0xMTIsNyArMTEyLDE0IEBAIGludCBtZGlvYnVzX3JlZ2lzdGVyKHN0
-cnVjdCBtaWlfYnVzICpidXMpDQo+ID4gICAgICAgICAgaWYgKGJ1cy0+cmVzZXQpDQo+ID4gICAg
-ICAgICAgICAgICAgICBidXMtPnJlc2V0KGJ1cyk7DQo+ID4NCj4gPiArICAgICAgIC8qIFRoZSBj
-b25maWcgYmVsb3cgaXMgYWx3YXlzIGF2YWlsYmxlIHdpdGggQ09ORklHX1BIWUxJQi4gDQo+IElm
-IDAsIHRoZQ0KPiA+ICsgICAgICAgICAgYmVoYXZpb3IgaXMgYXMgYmVmb3JlIHdpdGhvdXQgdGhp
-cyBwYXRjaCAob3IgUDAgb2YgdGhlIA0KPiBzd2l0Y2ggaXMNCj4gPiArICAgICAgICAgIHRha2Vu
-IGJlY2F1c2UgaXQgaXMgdGhlIGZpcnN0IG9uZSBmb3VuZCkuICovDQo+ID4gKyNpZiBDT05GSUdf
-U1dJVENIX1BIWQ0KPiA+ICsgICAgICAgaSA9IENPTkZJR19TV0lUQ0hfUEhZOw0KPiA+ICsjZWxz
-ZQ0KPiA+ICAgICAgICAgIGZvciAoaSA9IDA7IGkgPCBQSFlfTUFYX0FERFI7IGkrKykgew0KPiA+
-ICsjZW5kaWYNCj4gPiAgICAgICAgICAgICAgICAgIGlmICgoYnVzLT5waHlfbWFzayAmICgxIDw8
-IGkpKSA9PSAwKSB7DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgIHN0cnVjdCBwaHlfZGV2
-aWNlICpwaHlkZXY7DQo+DQo+IFRoaXMgY29uZmlnIG9wdGlvbiBtYXkgaGVscCB5b3VyIHBsYXRm
-b3JtIGJ1dCBpdCBpcyBub3doZXJlIHJldXNhYmxlIG9uIGENCj4gc2xpZ2h0bHkgZGlmZmVyZW50
-IG9uZSAoZWFjaCBtaWlfYnVzIGJlaGF2aW9yIGlzIGNoYW5nZWQpLg0KPg0KPiBXaGljaCBkcml2
-ZXIocykgZG8geW91IHVzZSB0aGF0IHlvdSBjYW4gbm90IHNldCBwaHlfbWFzayBkaXJlY3RseSA/
-DQo+DQpUaGUgSFcgZHJpdmVyIGlzICdGRUMnIGZvciBpTVggRXRoZXJuZXQuIEZvciB0aGUgUEhZ
-LCBqdXN0IE1JSSBhbmQgUEhZTElCLg0KSSBhbSByYXRoZXIgbmV3IHRvIGxpbnV4LCBkaWRuJ3Qg
-a25ldyBwaHlfbWFzay4gQ2hlY2tlZCBpdCBub3csIGFuZCBpcyANCm5vdCBzZXQgaW4gZmVjLmMu
-DQpZb3UgbWVhbiB0aGVuIHRvIHBhdGNoIGRyaXZlcnMvbmV0L2ZlYy5jIGluIHRoZSBzYW1lIHdh
-eSAoYXMgbXkgY3VycmVudCANCnBhdGNoKSB0byBzZXQgdGhlIHBoeV9tYXNrIGluc3RlYWQgKHZp
-YSBtZW51Y29uZmlnLCBvciBpbiB0aGUgcGxhdGZvcm0gDQppbml0KT8NCg0KVGhhbmtzIGZvciB5
-b3VyIHJlcGx5LA0KSsO8cmdlbg0KPg0KPg0KPiAtLQ0KPiBVZWltb3INCj4NCg0KDQotLSANCkrD
-vHJnZW4gTGFtYnJlY2h0DQpSJkQgQXNzb2NpYXRlDQpUZWw6ICszMiAoMCk1MSAzMDMwNDUgICAg
-RmF4OiArMzIgKDApNTEgMzEwNjcwDQpodHRwOi8vd3d3LnRlbGV2aWMtcmFpbC5jb20NClRlbGV2
-aWMgUmFpbCBOViAtIExlbyBCZWthZXJ0bGFhbiAxIC0gODg3MCBJemVnZW0gLSBCZWxnaXVtDQpD
-b21wYW55IG51bWJlciAwODI1LjUzOS41ODEgLSBSUFIgS29ydHJpamsNCg==
+On Tuesday 06 September 2011, Artem Bityutskiy wrote:
+> Not sure about the bus approach - David, could you take a look at it
+> please? If we can handle errors there - then we could indeed re-use the
+> UBI control device. We could even re-use the ioctl data structures for
+> UBI volumes creation/removal - we have plenty of space there reserved
+> for future extensions.
+
+I would generally recommend using new ioctl commands. ioctl numbers
+are cheap, but complexity in data structures is not, because every
+user who wants to deal with the data structures has to understand
+them. Also, changing the ABI is always tricky since you have to
+provide backward and forwards compatibility with existing kernels
+and with existing user space.
+
+	Arnd
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
