@@ -1,68 +1,98 @@
-From: Arnd Bergmann <arnd@arndb.de>
+From: David Wagner <david.wagner@free-electrons.com>
 Subject: Re: [PATCHv3] UBI: new module ubiblk: block layer on top of UBI
-Date: Fri, 9 Sep 2011 16:25:13 +0200
-Message-ID: <201109091625.13253.arnd@arndb.de>
-References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com> <201109081726.00769.arnd@arndb.de> <1315569206.7905.41.camel@sauron>
+Date: Fri, 09 Sep 2011 16:41:53 +0200
+Message-ID: <4E6A25B1.8070400@free-electrons.com>
+References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>	
+	<1315280704.19067.14.camel@sauron>
+	<1315282208.19067.24.camel@sauron>	
+	<201109081726.00769.arnd@arndb.de>
+	<1315569206.7905.41.camel@sauron>
 Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
 In-Reply-To: <1315569206.7905.41.camel@sauron>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: Text/Plain; charset="us-ascii"
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: linux-mtd-bounces@lists.infradead.org
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
 To: dedekind1@gmail.com
-Cc: david.wagner@free-electrons.com, linux-mtd <linux-mtd@lists.infradead.org>, linux-embedded <linux-embedded@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-embedded <linux-embedded@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
 
-On Friday 09 September 2011, Artem Bityutskiy wrote:
+On 09/09/2011 01:53 PM, Artem Bityutskiy wrote:
 > On Thu, 2011-09-08 at 17:26 +0200, Arnd Bergmann wrote:
-> > On Tuesday 06 September 2011, Artem Bityutskiy wrote:
-> > > Not sure about the bus approach - David, could you take a look at it
-> > > please? If we can handle errors there - then we could indeed re-use the
-> > > UBI control device. We could even re-use the ioctl data structures for
-> > > UBI volumes creation/removal - we have plenty of space there reserved
-> > > for future extensions.
-> > 
-> > I would generally recommend using new ioctl commands. ioctl numbers
-> > are cheap, but complexity in data structures is not, because every
-> > user who wants to deal with the data structures has to understand
-> > them. Also, changing the ABI is always tricky since you have to
-> > provide backward and forwards compatibility with existing kernels
-> > and with existing user space.
+>> On Tuesday 06 September 2011, Artem Bityutskiy wrote:
+>>> Not sure about the bus approach - David, could you take a look at it
+>>> please? If we can handle errors there - then we could indeed re-use the
+>>> UBI control device. We could even re-use the ioctl data structures for
+>>> UBI volumes creation/removal - we have plenty of space there reserved
+>>> for future extensions.
+>>
+
+@Arnd:
+> * Use the existing UBI control device for the block devices as
+>   well and just add two more ioctls to create the devices.
+>   You can add a logical bus_type for this so that the ubi block
+>   driver gets automatically loaded matched with the device when
+>   one is created using the control device.
+
+I certainly miss some background, I'm not sure I understand how this
+works: bus_type seems suitable for pluggable devices that possess a
+device ID which matches against a driver that will then get loaded.  But
+ubiblk devices are created by ubiblk.
+So, are you suggesting to move ubiblk_create() to UBI and add a
+MODULE_ALIAS to ubiblk (actually, I don't know what it would contain) ?
+
+(I just saw that you sent an email while I was writing this one ;
+however, I still understand. I'll try and read how scsi does that).
+
+
+@Artem:
+> Sorry, I wonted to talk about situations when someone opens an ubiblk
+> device while the underlying UBI volume is being removed, but then though
+> this is trivial and forgot to erase the last sentence.
+
+Ah, yes, I guess we need to hold a vol_lock in ubiblk_remove() ?
+
+
+> Anyway, I suggest the following algorithm:
 > 
-> Hmm, what do we do if ubiblk module is not loaded, and UBI would have
-> to return an error (because the block device cannot be created), how
-> will UBI know that ubiblk is not there? Any direct call to ubiblk from
-> UBI would be a direct dependency and would require ubiblk to be always
-> loaded, which is bad.
+> 1. Stick with the own cdev approach - the driver becomes very simple
+>    in this case - we review it.
 
-No, the idea of this approach is that the main ubi driver creates
-a device, which can always succeed. It's just that there won't
-be a block device node created, because that is part of what
-the ubiblk driver does.
+This is the way it's implemented in v4, right ?
 
-Compare this to how scsi works:
+BTW, those are the changes made so far since v4:
+ * Add missing headers (they are included by other headers but it seems
+   to be good practice not to rely on that).
 
-A scsi host driver scans the host controller and adds scsi devices
-internal to the kernel, each of them have a specific type (disk,
-tape, ...). If the scsi disk driver is loaded, it will create
-a blockdev for each disk device. It doesn't matter in which order
-the drivers are loaded though.
+ * Remove an macro rendered useless with the linked lists
 
-In case of ubiblk, it's similar, except that there is no way for
-the ubi layer to know if some partition should be a block device or
-not, so it relies on user space to tell it.
+ * correct some formatting in kerneldoc comments
 
-Well, actually, you /could/ encode this somewhere so that the main
-ubi layer creates different kinds of devices based on what it finds:
-a ubiblk_device when it finds a partition that was created as a
-block device or gluebi_device for gluebi or a ubifs volume.
+ * introduce refcounting to avoid multiple opens or closing a UBI
+   volume while still in use
 
-> IOW, we need a blocking mechanism to call the upper layer's function
-> (ubiblk) from the lower layer (UBI) which can return an error, and which
-> allows to check if a ubiblk exists at all. Do we have such mechanism?
-> 
-> Actually the fact of invoking upper layers from lower makes me worry.
+ * make checkpatch happy about assignation inside a condition
 
-Yes, you should not do that.
+ * use DEFINE_MUTEX for devlist_lock
 
-	Arnd
+
+	Best Regards,
+	David
+
+-- 
+David Wagner, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
