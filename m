@@ -1,98 +1,155 @@
-From: Ricard Wanderlof <ricard.wanderlof@axis.com>
-Subject: Re: [PATCHv6] UBI: new module ubiblk: block layer on top of UBI
-Date: Mon, 26 Sep 2011 11:17:22 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1109261103590.12195@lnxricardw.se.axis.com>
-References: <1308922482-14967-1-git-send-email-david.wagner@free-electrons.com>
-	<1316678312-8913-1-git-send-email-david.wagner@free-electrons.com>
+From: Vineeth <vneethv@gmail.com>
+Subject: Re: Timer interrupt on Linux 3.0.3
+Date: Mon, 26 Sep 2011 14:41:56 +0530
+Message-ID: <CAFbQSaAoug6Sc-ANFUaE0Y9dQROHcNxtzevj2itiArME4aHR6A@mail.gmail.com>
+References: <CAFbQSaD-c=QqSsq__VtBEcMCJabnBi4AP4KunDNV7u7xXAuaTw@mail.gmail.com>
+	<4E73816C.6000304@freescale.com>
+	<CAFbQSaBcdLCoVY471mVLAyM=eYDSN77=DODPasMaAEm6pRm7jQ@mail.gmail.com>
+	<4E7A3DED.9030402@freescale.com>
+	<CAEZ9+qnSXXi5w9BbwyaQWQybCtaCsJ0T5j5ySEjOkpnnYmr7aA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <1316678312-8913-1-git-send-email-david.wagner@free-electrons.com>
+Content-Type: multipart/mixed; boundary="===============5046279248166263743=="
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=gamma;
+	h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+	:cc:content-type;
+	bh=PdLgFzkSzkNrFIcYmx+mJ1PSaQnaMHNFdHdVL7J2z3o=;
+	b=ChIhU8kEoXRKenQJn/RZRW0AYHWdhjxXujlGXhTXFbB7Qmx0jOfNPVwJlD2/rfL4R2
+	T100xS5g7PYYvJfw3zR2iinxmCCrB2Bg6fTlh+xR7EwxRMINkvdxR8qv+05ipI5LcCQf
+	dNNp+XHMvMVKmBcqeVdwrZOC8uacd6/ESEilU=
+In-Reply-To: <CAEZ9+qnSXXi5w9BbwyaQWQybCtaCsJ0T5j5ySEjOkpnnYmr7aA@mail.gmail.com>
 List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: linux-mtd-bounces@lists.infradead.org
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-Content-Type: text/plain; charset="iso-8859-1"; format="flowed"
-To: David Wagner <david.wagner@free-electrons.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-embedded <linux-embedded@vger.kernel.org>, Artem Bityutskiy <dedekind1@gmail.com>, lkml <linux-kernel@vger.kernel.org>, linux-mtd <linux-mtd@lists.infradead.org>, Tim Bird <tim.bird@am.sony.com>, David Woodhouse <dwmw2@infradead.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+To: Scott Wood <scottwood@freescale.com>, linuxppc-dev@lists.ozlabs.org, linux-embedded@vger.kernel.org
+Cc: mohanreddykv@gmail.com
 
+--===============5046279248166263743==
+Content-Type: multipart/alternative; boundary=0015175cd5fe23524f04add48ed7
 
-On Thu, 22 Sep 2011, David Wagner wrote:
+--0015175cd5fe23524f04add48ed7
+Content-Type: text/plain; charset=ISO-8859-1
 
-> ubiblk is a read-only block layer on top of UBI.  It presents UBI volumes=
- as
-> ...
+Hi,
 
-I decided to try this out, as I've been looking for a flexible =
+there's a good news which is pretty bad. Good news is that we identified why
+our processor timer not working. its because the TBEN in our board is pulled
+LOW. which means the decrementer and the timebase registers wont work.
 
-block-device-on-ubi scheme for using a cramfs or squashfs root file system =
+The board design cannot be changed !!! but we have an MPC107 connected with
+our processor. Our plan is to use the timer of MPC107 and register our
+timer_interrupt function with this timer interrupt. I think that's the only
+workaround left now.
 
-over UBI without having to resort to gluebi (which in its current =
+Thanks
+Vineeth
 
-implementation is too inflexible for my needs).
+On Thu, Sep 22, 2011 at 11:52 AM, MohanReddy koppula <mohanreddykv@gmail.com
+> wrote:
 
-This can't be considered a complete test, as I basically just booted the =
+> I had the same issue with an MPC885 board. My kernel was 2.6.33. On
+> that board decrementer exception was not working. I replaced the
+> board, took new board (MPC885 only, just another board) and the same
+> kernel worked fine. I don't know how the problem was solved.
+>
+> -Mohan
+>
+> On 9/22/11, Scott Wood <scottwood@freescale.com> wrote:
+> > On 09/21/2011 01:56 AM, Vineeth wrote:
+> >>>> What was the issue?  You really should try to make this work rather
+> than
+> >>>> hack around it.
+> >>
+> >> what we found was the decrementer is not generating an exception when it
+> >> becomes 0. and the timebase registers are not getting incremented too.
+> >
+> > Does the decrementer actually tick until it reaches zero, or do it and
+> > the timebase never tick?
+> >
+> > Is the TBEN input to the CPU asserted?
+> >
+> > -Scott
+> >
+> > _______________________________________________
+> > Linuxppc-dev mailing list
+> > Linuxppc-dev@lists.ozlabs.org
+> > https://lists.ozlabs.org/listinfo/linuxppc-dev
+> >
+>
 
-system a couple of times, using a cramfs file system residing in an UBI =
+--0015175cd5fe23524f04add48ed7
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-volume. I compiled ubiblk built in to the kernel, not as a module; =
+Hi,<br><br>there&#39;s a good news which is pretty bad. Good news is that w=
+e identified why our processor timer not working. its because the TBEN in o=
+ur board is pulled LOW. which means the decrementer and the timebase regist=
+ers wont work.<br>
 
-furthermore, I'm running 2.6.35 for various reasons, so had to backport =
+<br>The board design cannot be changed !!! but we have an MPC107 connected =
+with our processor. Our plan is to use the timer of MPC107 and register our=
+ timer_interrupt function with this timer interrupt. I think that&#39;s the=
+ only workaround left now.<br>
 
-kstrtoul from 2.6.39 in order to get it to build.
+<br>Thanks<br>Vineeth<br><br><div class=3D"gmail_quote">On Thu, Sep 22, 201=
+1 at 11:52 AM, MohanReddy koppula <span dir=3D"ltr">&lt;<a href=3D"mailto:m=
+ohanreddykv@gmail.com">mohanreddykv@gmail.com</a>&gt;</span> wrote:<br><blo=
+ckquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #c=
+cc solid;padding-left:1ex;">
 
-But for what it's worth, it does confirm that it in fact works to set up a =
+I had the same issue with an MPC885 board. My kernel was 2.6.33. On<br>
+that board decrementer exception was not working. I replaced the<br>
+board, took new board (MPC885 only, just another board) and the same<br>
+kernel worked fine. I don&#39;t know how the problem was solved.<br>
+<br>
+-Mohan<br>
+<div><div></div><div class=3D"h5"><br>
+On 9/22/11, Scott Wood &lt;<a href=3D"mailto:scottwood@freescale.com">scott=
+wood@freescale.com</a>&gt; wrote:<br>
+&gt; On 09/21/2011 01:56 AM, Vineeth wrote:<br>
+&gt;&gt;&gt;&gt; What was the issue? =A0You really should try to make this =
+work rather than<br>
+&gt;&gt;&gt;&gt; hack around it.<br>
+&gt;&gt;<br>
+&gt;&gt; what we found was the decrementer is not generating an exception w=
+hen it<br>
+&gt;&gt; becomes 0. and the timebase registers are not getting incremented =
+too.<br>
+&gt;<br>
+&gt; Does the decrementer actually tick until it reaches zero, or do it and=
+<br>
+&gt; the timebase never tick?<br>
+&gt;<br>
+&gt; Is the TBEN input to the CPU asserted?<br>
+&gt;<br>
+&gt; -Scott<br>
+&gt;<br>
+</div></div>&gt; _______________________________________________<br>
+&gt; Linuxppc-dev mailing list<br>
+&gt; <a href=3D"mailto:Linuxppc-dev@lists.ozlabs.org">Linuxppc-dev@lists.oz=
+labs.org</a><br>
+&gt; <a href=3D"https://lists.ozlabs.org/listinfo/linuxppc-dev" target=3D"_=
+blank">https://lists.ozlabs.org/listinfo/linuxppc-dev</a><br>
+&gt;<br>
+</blockquote></div><br>
 
-ubiblk device at boot time for the root filesystem.
+--0015175cd5fe23524f04add48ed7--
 
-There doesn't seem to be a userspace application for attaching/detaching =
+--===============5046279248166263743==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-ubiblk devices. I hacked together something based on ubinfo, I could post =
-
-it, but perhaps something more thorough is forthcoming?
-
-A couple of comments below:
-
-> +/**
-> + * ubiblk_ctrl_ioctl - ioctl handling for proxying/unproxying a UBI volu=
-me
-> + *
-> + * @file: the file on which the ioctl was invoked (usunsed)
-                                                     ^^^^^^^ typo: unused
-> + * @cmd: the ioctl type
-> + * @arg: additional command informations
-> + */
-> +static long ubiblk_ctrl_ioctl(struct file *file, unsigned int cmd,
-> +                             unsigned long arg)
-
-
-> +/**
-> + * ubiblk_parse_volume_param - parse the "volume" module parameter
-> + *
-> + * @ubi_num: where to store the UBI device number
-> + * @vol_id: where to store the volume ID
-> + */
-> +static int __init ubiblk_parse_volume_param(int *ubi_num, int *vol_id)
-> +{
-> +       char *tokens[2] =3D {NULL, NULL};
-> +       char buf[VOL_PARAM_MAXLEN];
-> +       char *pbuf =3D buf;
-> +       int len =3D strlen(buf);
-                            ^^^  this needs to be volume, not buf.
-
-/Ricard
--- =
-
-Ricard Wolf Wanderl=F6f                           ricardw(at)axis.com
-Axis Communications AB, Lund, Sweden            www.axis.com
-Phone +46 46 272 2016                           Fax +46 46 13 61 30
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+_______________________________________________
+Linuxppc-dev mailing list
+Linuxppc-dev@lists.ozlabs.org
+https://lists.ozlabs.org/listinfo/linuxppc-dev
+--===============5046279248166263743==--
