@@ -1,43 +1,28 @@
-From: Peter Waechtler <pwaechtler@mac.com>
-Subject: Re: debugging multi threaded applicatiosn on arm - status?
-Date: Sun, 9 Oct 2011 09:55:15 +0000 (UTC)
-Message-ID: <loom.20111009T115000-485@post.gmane.org>
-References: <20110617093927.GA28305@merkur.ravnborg.org> <4DFB4C8D.40208@2net.co.uk> <20110617153930.GA28570@merkur.ravnborg.org>
+From: Michael Opdenacker <michael.opdenacker@free-electrons.com>
+Subject: Embedded Linux Conference Europe 2011 videos
+Date: Mon, 07 Nov 2011 08:14:06 +0100
+Message-ID: <4EB7853E.3040503@free-electrons.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+To: CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded mailing list <linux-embedded@vger.kernel.org>
 
-Sam Ravnborg <sam <at> ravnborg.org> writes:
-> 
-> >> Is it possible to bebug multi-threaded applications using gdb on ARM these 
-days?
-> >>
-> >
-> > It works for me, using various ARM 926 and Cortex A8 chips and kernel  
-> > versions from 2.6.27 to the present day. Which version of gbd do you  
-> > have? gdb version 7.x works much better than 6.x in my experience.
-> 
-> We are using 6.8 - which may be the culprint.
-> Does it work with NPTL too?
-> 
+Greetings,
 
-Sam,
+We are pleased to release the videos of the Embedded Linux Conference
+Europe that took place one week ago in Prague:
+http://free-electrons.com/blog/elce-2011-videos/
 
-why don't you describe what's not working?
+Happy downloads!
 
-I guess you have a stripped libpthread and gdb isn't able to fetch
-the thread infos via libthread_db.so.
+Michael.
 
-On ARM you must not strip libpthread too much - see
-
-http://sourceware.org/gdb/wiki/FAQ   question 6
-
-
-  Peter
-
-
-
+-- 
+Michael Opdenacker, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
++33 484 253 396
