@@ -1,34 +1,41 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: A new Subsystem for Current Management
-Date: Tue, 8 Nov 2011 13:56:49 +0000
-Message-ID: <20111108135649.GA21630@sirena.org.uk>
-References: <D6D887BA8C9DFF48B5233887EF04654109F10AF2C7@bgsmsx502.gar.corp.intel.com>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Remote IP setup of devices in a network
+Date: Tue, 8 Nov 2011 19:54:21 +0100
+Message-ID: <20111108185421.GA27727@merkur.ravnborg.org>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <D6D887BA8C9DFF48B5233887EF04654109F10AF2C7@bgsmsx502.gar.corp.intel.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: "R, Durgadoss" <durgadoss.r@intel.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+To: Linux-embedded <linux-embedded@vger.kernel.org>
 
-On Tue, Nov 08, 2011 at 04:39:17PM +0530, R, Durgadoss wrote:
+I am faced with a challenge that we ship devices which are
+all preconfigured to a fixed IP address, and we want to provide
+an easy solution to do remote IP configuration of all devices
+connected to the same network.
+In other words - all devices are reachable by a broadcast package.
 
-> [I have posted this on lm-sensors and platform-drivers-x86
-> lists earlier. As per some recommendations there, posting it
-> here]
+The network may or may not include a DHCP server - which
+we in any case do not have control over.
 
-lkml would probably be useful.  It'd also help if you could publish code
-along with your mail, in general people are much more likely to review
-concrete code.
+In the typical situation we will assign static IP
+addresses to the devices - but sometimes we may also
+configure them to DHCP.
 
-> In simple terms, this framework will offer something like this:
-> 	Current[1-N]_limit - set of current limits
-> 	Voltage[1-X]_limit - set of voltage limits
+So we are looking for a (de facto?) way to do this.
+Any hints?
 
-What would the voltage limits be?  Whatever is going on here there
-should be some integration with the regulator framework, modern
-regulators are often able to report when they go out of regulator and
-able to impose current limits.
+I haved tried to ask google without luck.
+
+The idea is to use an UDP broadcast to discover all devices,
+and a similar UDP broadcast to configure the devices.
+In the latter the MAC will be the key to address individual devices.
+
+As we are talking less than 100 devices this looks quite doable.
+But I do not want to invent something again if it already exists.
+
+Thanks in advance for any inputs,
+
+	Sam
