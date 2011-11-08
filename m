@@ -1,115 +1,34 @@
-From: Christian Gagneraud <chris@techworks.ie>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: A new Subsystem for Current Management
-Date: Tue, 08 Nov 2011 11:58:00 +0000
-Message-ID: <4EB91948.50708@techworks.ie>
+Date: Tue, 8 Nov 2011 13:56:49 +0000
+Message-ID: <20111108135649.GA21630@sirena.org.uk>
 References: <D6D887BA8C9DFF48B5233887EF04654109F10AF2C7@bgsmsx502.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <D6D887BA8C9DFF48B5233887EF04654109F10AF2C7@bgsmsx502.gar.corp.intel.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: "R, Durgadoss" <durgadoss.r@intel.com>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-On 08/11/11 11:09, R, Durgadoss wrote:
-> Hi All,
+On Tue, Nov 08, 2011 at 04:39:17PM +0530, R, Durgadoss wrote:
 
-Hi Durga,
-
->
-> [Very Sorry for the Big Email]
->
 > [I have posted this on lm-sensors and platform-drivers-x86
 > lists earlier. As per some recommendations there, posting it
 > here]
->
-> As we all know, Linux is increasingly being used in handhelds.
-> The Hardware that supports the handhelds is also becoming
-> Performance-centric. With this, we need a way to efficiently
-> monitor the current consumption of the platform and take actions
-> when the platform draws more current, than it should.
->
-> Where this can happen ?
-> -----------------------
-> In a handheld, there are many components that demand high
-> Current. For example, Camera Flash, Video Streaming, 3G Voice
-> Call etc. Typically, two or more of these components are used
-> simultaneously in a real-time scenario. When this happens, the
-> current draw of the platform surges. If this surge lasts for
-> more than a specific time, it could crash the platform irrecoverably.
->
-> How do we tackle this ?
-> -----------------------
-> In Intel Medfield (Atom based) platform we had a driver that
-> Configures the current limits. When the platform current draws
-> more current than the programmed limit, the hardware generates
-> interrupt. The driver receives this interrupt and notifies the
-> user space to take appropriate actions.
-> The patch and the subsequent discussions can be found here:
-> http://comments.gmane.org/gmane.linux.drivers.platform.x86.devel/1197
->
-> To Generalize:
-> --------------
-> With many more platforms to come, having a separate driver for each
-> results in heavy code duplication. Also, there arises a problem of
-> where to put these kind of drivers ? Hence I propose the idea of having
-> a Current Management subsystem.
->
-> This will provide a generic ABI, API, so that the platform specific
-> drivers can register with this framework (and thus avail the basic
-> needs) and handle the events in their own way.
->
+
+lkml would probably be useful.  It'd also help if you could publish code
+along with your mail, in general people are much more likely to review
+concrete code.
+
 > In simple terms, this framework will offer something like this:
 > 	Current[1-N]_limit - set of current limits
 > 	Voltage[1-X]_limit - set of voltage limits
-> 	Controllers[1-Y]_enable - These are the components by throttling/
->        disabling which the current consumption can be brought down.
 
-Could you elaborate a bit more on this, perhaps by taking the Medfield 
-platform as an example. I don't see above any reference to timers or 
-maybe it's part of {Current|Voltage}[1-X]_limit?
-
-As well, it would be nice if this system could work nicely beside 
-linux-iio. For example to provide the ability to plot currents and 
-voltages, and see when/why the actions have been taken.
-
-Chris
-
->
-> With the Controllers we can follow two approaches:
-> A) Each component driver registers with the current framework and gets
-> notified when the current surge happens. On receiving the notification,
-> it throttles its performance. There will be a follow-up notification,
-> indicating that 'we are out of the high current' situation; so that
-> the component resumes to operation at its full performance.
->
-> B) The Current framework forwards the notification to the upper
-> layers and lets them decide what to do.
->
-> I agree that A) bloats the size of all the component drivers a bit,
-> but considering the fact that the surge has to be brought down as
-> soon as possible (and the delay in reacting to the event if we
-> pass it to the upper layers) I am inclined towards A).
->
-> I would like to see the opinion of the community on this entire
-> stuff, before I start writing some code.
->
-> Please Help,
-> Durga
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
--- 
-Christian Gagneraud,
-Embedded systems engineer.
-Techworks Marine
-1 Harbour road
-Dun Laoghaire
-Co. Dublin
-Ireland
-Tel: + 353 (0) 1 236 5990
-Web: http://www.techworks.ie/
+What would the voltage limits be?  Whatever is going on here there
+should be some integration with the regulator framework, modern
+regulators are often able to report when they go out of regulator and
+able to impose current limits.
