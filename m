@@ -1,51 +1,83 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: Embedded Linux Conference Europe 2011 videos
-Date: Mon, 7 Nov 2011 09:38:12 +0100
-Message-ID: <20111107083812.GA4949@pengutronix.de>
-References: <4EB7853E.3040503@free-electrons.com>
+From: "R, Durgadoss" <durgadoss.r@intel.com>
+Subject: A new Subsystem for Current Management
+Date: Tue, 8 Nov 2011 16:39:17 +0530
+Message-ID: <D6D887BA8C9DFF48B5233887EF04654109F10AF2C7@bgsmsx502.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="BXVAT5kNtrzKuDFl"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4EB7853E.3040503@free-electrons.com>
+Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Michael Opdenacker <michael.opdenacker@free-electrons.com>
-Cc: CE Linux Developers List <celinux-dev@tree.celinuxforum.org>, linux-embedded mailing list <linux-embedded@vger.kernel.org>
+To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
+Hi All,
 
---BXVAT5kNtrzKuDFl
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+[Very Sorry for the Big Email]
 
-On Mon, Nov 07, 2011 at 08:14:06AM +0100, Michael Opdenacker wrote:
-> Greetings,
->=20
-> We are pleased to release the videos of the Embedded Linux Conference
-> Europe that took place one week ago in Prague:
-> http://free-electrons.com/blog/elce-2011-videos/
+[I have posted this on lm-sensors and platform-drivers-x86
+lists earlier. As per some recommendations there, posting it
+here]
 
-Wow, that was _very_ fast! Congrats and thanks!
+As we all know, Linux is increasingly being used in handhelds.
+The Hardware that supports the handhelds is also becoming
+Performance-centric. With this, we need a way to efficiently
+monitor the current consumption of the platform and take actions
+when the platform draws more current, than it should.
 
-   Wolfram
+Where this can happen ?
+-----------------------
+In a handheld, there are many components that demand high
+Current. For example, Camera Flash, Video Streaming, 3G Voice
+Call etc. Typically, two or more of these components are used
+simultaneously in a real-time scenario. When this happens, the
+current draw of the platform surges. If this surge lasts for
+more than a specific time, it could crash the platform irrecoverably.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+How do we tackle this ?
+-----------------------
+In Intel Medfield (Atom based) platform we had a driver that
+Configures the current limits. When the platform current draws
+more current than the programmed limit, the hardware generates
+interrupt. The driver receives this interrupt and notifies the
+user space to take appropriate actions.
+The patch and the subsequent discussions can be found here:
+http://comments.gmane.org/gmane.linux.drivers.platform.x86.devel/1197
 
---BXVAT5kNtrzKuDFl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+To Generalize:
+--------------
+With many more platforms to come, having a separate driver for each
+results in heavy code duplication. Also, there arises a problem of
+where to put these kind of drivers ? Hence I propose the idea of having
+a Current Management subsystem.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
+This will provide a generic ABI, API, so that the platform specific
+drivers can register with this framework (and thus avail the basic
+needs) and handle the events in their own way.
 
-iEYEARECAAYFAk63mPQACgkQD27XaX1/VRvZzACeLMWp7wNeoXb13U/KlezQw3gV
-Gx4AnifR4Eush1C7CtrmEc7o+QLjkinb
-=TBWE
------END PGP SIGNATURE-----
+In simple terms, this framework will offer something like this:
+	Current[1-N]_limit - set of current limits
+	Voltage[1-X]_limit - set of voltage limits
+	Controllers[1-Y]_enable - These are the components by throttling/
+      disabling which the current consumption can be brought down.
 
---BXVAT5kNtrzKuDFl--
+With the Controllers we can follow two approaches:
+A) Each component driver registers with the current framework and gets
+notified when the current surge happens. On receiving the notification,
+it throttles its performance. There will be a follow-up notification,
+indicating that 'we are out of the high current' situation; so that
+the component resumes to operation at its full performance.
+
+B) The Current framework forwards the notification to the upper
+layers and lets them decide what to do.
+
+I agree that A) bloats the size of all the component drivers a bit,
+but considering the fact that the surge has to be brought down as
+soon as possible (and the delay in reacting to the event if we
+pass it to the upper layers) I am inclined towards A).
+
+I would like to see the opinion of the community on this entire
+stuff, before I start writing some code.
+
+Please Help,
+Durga
