@@ -1,69 +1,55 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: A new Subsystem for Current Management
-Date: Thu, 10 Nov 2011 15:04:43 +0000
-Message-ID: <20111110150442.GG3832@opensource.wolfsonmicro.com>
-References: <D6D887BA8C9DFF48B5233887EF04654109F1111F6C@bgsmsx502.gar.corp.intel.com>
+From: Vineeth <vneethv@gmail.com>
+Subject: AFDX Support in Linux
+Date: Thu, 17 Nov 2011 13:30:03 +0530
+Message-ID: <CAFbQSaDuFmtqvMwZHTZygi4Z03DPU1c=2OfvWt2GRm6VLv00CA@mail.gmail.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <D6D887BA8C9DFF48B5233887EF04654109F1111F6C@bgsmsx502.gar.corp.intel.com>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============7256466417816956094=="
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=gamma;
+ h=mime-version:from:date:message-id:subject:to:content-type;
+ bh=9amsul1LuFrl2dCPHuzwdAD/VyphmE0OnNDwyNyw6jg=;
+ b=wMtwldWPK7mvTnYMM24zZZiNdw8ilvWCSpWOQoweWjmf/oahkR38PrSAI4nCSfXP/S
+ JH53B5L5695eqmtIIZBqUZAneR+J51WnGkQqzbYGMWO7XOMjO6jvbZv37oIp5eGq/hKg
+ DFper1dwmCVHVpHLkHntfnwV8H3SXAPd9ANak=
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+To: linuxppc-dev@lists.ozlabs.org, linux-embedded@vger.kernel.org
+
+--===============7256466417816956094==
+Content-Type: multipart/alternative; boundary=000e0ce03e30dd9d1704b1e99c83
+
+--000e0ce03e30dd9d1704b1e99c83
+Content-Type: text/plain; charset=ISO-8859-1
+
+Do we have AFDX support in Linux/Rt-Linux ?
+tried grep.couldnt find any.
+
+Thanks
+Vineeth
+
+--000e0ce03e30dd9d1704b1e99c83
+Content-Type: text/html; charset=ISO-8859-1
+
+Do we have AFDX support in Linux/Rt-Linux ?<br>tried grep.couldnt find any.<br><br>Thanks<br>Vineeth<br>
+
+--000e0ce03e30dd9d1704b1e99c83--
+
+--===============7256466417816956094==
 Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
-To: "R, Durgadoss" <durgadoss.r@intel.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Content-Disposition: inline
 
-On Thu, Nov 10, 2011 at 04:58:27PM +0530, R, Durgadoss wrote:
-
-> > > 	Current[1-N]_limit - set of current limits
-> > > 	Voltage[1-X]_limit - set of voltage limits
-
-> > What would the voltage limits be?  Whatever is going on here there
-> > should be some integration with the regulator framework, modern
-> > regulators are often able to report when they go out of regulator and
-> > able to impose current limits.
-
-> These (limits) are configurable voltage limits. The HW generates an
-> Interrupt when any of these configured voltage limits are crossed.
-> Similarly, for Current also.
-
-> Now, Say there are 3 current limits that we can program.
-> On the first and second limit violation we take some actions,
-> and control the current consumption, so that it does not hit the
-> worst current limit.
-
-So what you mean is that these are maxima.  
-
-I'm not sure that the voltage limits are terribly useful on regulated
-supplies; the voltages tend not to be varied autonomously by hardware
-and even where they are they're not directly tied to power consumption
-which is usually the actual problem.  On unregulated supplies like the
-battery output it's more useful and it's something that the existing
-power framework already has some support for reporting current flows,
-my first guess would be that for the unregulated supplies you'd build on
-top of that (and there will be overlap with the charger management for
-the devices that need hand holding to do that).
-
-Current limits are more generally useful, they apply equally well to
-regulated and unregulated supplies.
-
-You probably want to tie this stuff in with the thermal management work
-that people are starting to look at - it sounds like you're basically
-trying to look at a different aspect of the same problem.
-
-> Do you think, we can fit this into the regulator framework ?
-
-That's not something that the hardware generally supports; for voltages
-you'll usually just get an out of regulation notification and current
-limits generally just give you a single trip point.
-
-> But I would like to see a 'consumer' driver that uses the framework
-> efficiently, so that I can get some more idea. Could you point to
-> some source files ?
-
-find linux-2.6 -type f | xargs grep -l regulator_
-
-should show a bunch of devices, nothing actually using any form of
-limiting at the minute though.  Any regulator driver which notifies will
-be able to show when it goes out of regulation.
+_______________________________________________
+Linuxppc-dev mailing list
+Linuxppc-dev@lists.ozlabs.org
+https://lists.ozlabs.org/listinfo/linuxppc-dev
+--===============7256466417816956094==--
