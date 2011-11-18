@@ -1,15 +1,17 @@
 From: David Daney <ddaney.cavm@gmail.com>
-Subject: [PATCH RFC 0/5] Speed booting by sorting exception tables at build time.
-Date: Fri, 18 Nov 2011 11:37:43 -0800
-Message-ID: <1321645068-20475-1-git-send-email-ddaney.cavm@gmail.com>
+Subject: [PATCH RFC 4/5] MIPS:  Select BUILDTIME_EXTABLE_SORT
+Date: Fri, 18 Nov 2011 11:37:47 -0800
+Message-ID: <1321645068-20475-5-git-send-email-ddaney.cavm@gmail.com>
+References: <1321645068-20475-1-git-send-email-ddaney.cavm@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=from:to:cc:subject:date:message-id:x-mailer;
-        bh=GqVKUDn4yRs13MiiGOUCH42C8c01ma13PsdHAMnoCIQ=;
-        b=istNv290cWVq5h5c/srXLC+INTIbg1gJ5FDXl+bVeKAIBe8BbspcGS6/3ySQsjzO4h
-         NuD/fiWkcGmPhWsGddjX/L6pntVRzKMO9L9rg5oI5LYTjk+KKRBNwI23kYA+Xq+Nktp8
-         zVRHxvjHV5zi/CZ8S7HmFS8/zC8UV6zDRDDPE=
+        h=from:to:cc:subject:date:message-id:x-mailer:in-reply-to:references;
+        bh=NNp2WWMB6TPLoXfP2DLUu9TIuxy8zY9y1tjlPZUeH0s=;
+        b=h1CkD+oKmwh5Fj2UgSmEN8x0ABFbJiyQe+Yl3tXUDwAIXfGfx4XDOzgve02j5qkFoN
+         nsn7wCAeYtP7ci/i6sgCBS+zH5eJ76zKYrfYOwT7USx6XEj1JViJAxckpXD3L0eiz3v2
+         Bz3CyIuFL/Gr8omFBV8IDDrFw/ZvP2zcmSC+o=
+In-Reply-To: <1321645068-20475-1-git-send-email-ddaney.cavm@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
@@ -20,57 +22,25 @@ Cc: David Daney <david.daney@cavium.com>
 
 From: David Daney <david.daney@cavium.com>
 
-I noticed when booting MIPS64 kernels that sorting of the main
-__ex_table was taking a long time (2,692,220 cycles or 3.3 mS at
-800MHz to be exact).  That is not too bad for real silicon
-implementations, but when running on a slow simulator, it can be
-significant.
+We can sort the exeception table at build time for MIPS, so let's do
+it.
 
-I can get this down to about 1,000,000 cycles by supplying a custom
-swap function for the sort, but even better is to eliminate it
-entirely by doing the sort at build time. That is the idea behind
-this patch set.
+Signed-off-by: David Daney <david.daney@cavium.com>
+---
+ arch/mips/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-Here is more or less what I did:
-
-o A flag word is added to the kernel to indicate that the __ex_table
-  is already sorted.  sort_main_extable() checks this and if it is
-  clear, returns without doing the sort.
-
-o I shamelessly stole code from recordmcount and created a new build
-  time helper program 'sortextable'.  This is run on the final vmlinux
-  image, it sorts the table, and then clears the flag word.
-
-Potential areas for improvement:
-
-o Sort module exception tables too.
-
-o Get rit of the flag word, and assume that if an architecture supports
-  build time sorting, that it must have been done.
-
-o Add support for architectures other than MIPS and x86
-
-Any comments most welcome,
-
-David Daney (5):
-  scripts: Add sortextable to sort the kernel's exception table.
-  extable: Skip sorting if sorted at build time.
-  kbuild/extable: Hook up sortextable into the build system.
-  MIPS:  Select BUILDTIME_EXTABLE_SORT
-  x86: Select BUILDTIME_EXTABLE_SORT
-
- Makefile              |   10 ++
- arch/mips/Kconfig     |    1 +
- arch/x86/Kconfig      |    1 +
- init/Kconfig          |    3 +
- kernel/extable.c      |    8 ++-
- scripts/.gitignore    |    1 +
- scripts/Makefile      |    1 +
- scripts/sortextable.c |  273 +++++++++++++++++++++++++++++++++++++++++++++++++
- scripts/sortextable.h |  168 ++++++++++++++++++++++++++++++
- 9 files changed, 465 insertions(+), 1 deletions(-)
- create mode 100644 scripts/sortextable.c
- create mode 100644 scripts/sortextable.h
-
+diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
+index 0c55582..adfe083 100644
+--- a/arch/mips/Kconfig
++++ b/arch/mips/Kconfig
+@@ -25,6 +25,7 @@ config MIPS
+ 	select GENERIC_IRQ_SHOW
+ 	select HAVE_ARCH_JUMP_LABEL
+ 	select IRQ_FORCED_THREADING
++	select BUILDTIME_EXTABLE_SORT
+ 
+ menu "Machine selection"
+ 
 -- 
 1.7.2.3
