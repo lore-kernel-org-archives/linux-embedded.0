@@ -1,55 +1,56 @@
-From: Vineeth <vneethv@gmail.com>
-Subject: AFDX Support in Linux
-Date: Thu, 17 Nov 2011 13:30:03 +0530
-Message-ID: <CAFbQSaDuFmtqvMwZHTZygi4Z03DPU1c=2OfvWt2GRm6VLv00CA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7256466417816956094=="
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=gamma;
- h=mime-version:from:date:message-id:subject:to:content-type;
- bh=9amsul1LuFrl2dCPHuzwdAD/VyphmE0OnNDwyNyw6jg=;
- b=wMtwldWPK7mvTnYMM24zZZiNdw8ilvWCSpWOQoweWjmf/oahkR38PrSAI4nCSfXP/S
- JH53B5L5695eqmtIIZBqUZAneR+J51WnGkQqzbYGMWO7XOMjO6jvbZv37oIp5eGq/hKg
- DFper1dwmCVHVpHLkHntfnwV8H3SXAPd9ANak=
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-To: linuxppc-dev@lists.ozlabs.org, linux-embedded@vger.kernel.org
-
---===============7256466417816956094==
-Content-Type: multipart/alternative; boundary=000e0ce03e30dd9d1704b1e99c83
-
---000e0ce03e30dd9d1704b1e99c83
-Content-Type: text/plain; charset=ISO-8859-1
-
-Do we have AFDX support in Linux/Rt-Linux ?
-tried grep.couldnt find any.
-
-Thanks
-Vineeth
-
---000e0ce03e30dd9d1704b1e99c83
-Content-Type: text/html; charset=ISO-8859-1
-
-Do we have AFDX support in Linux/Rt-Linux ?<br>tried grep.couldnt find any.<br><br>Thanks<br>Vineeth<br>
-
---000e0ce03e30dd9d1704b1e99c83--
-
---===============7256466417816956094==
-Content-Type: text/plain; charset="us-ascii"
+From: David Daney <ddaney.cavm@gmail.com>
+Subject: [PATCH RFC 2/5] extable: Skip sorting if sorted at build time.
+Date: Fri, 18 Nov 2011 11:37:45 -0800
+Message-ID: <1321645068-20475-3-git-send-email-ddaney.cavm@gmail.com>
+References: <1321645068-20475-1-git-send-email-ddaney.cavm@gmail.com>
+Return-path: <linux-arch-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=gamma;
+        h=from:to:cc:subject:date:message-id:x-mailer:in-reply-to:references;
+        bh=JAZFN0rrR5RwoS38mMQQ6FuAa7XM8IRQfDR5QS02QSQ=;
+        b=iYUpo6+72huDT5qtAwpzEjy6py0yce4ARKIV5qiSGt10jFuAjvTXtspt0CRn+QxphX
+         UBSyHO7vqBpU8+8MRJ+ZbybwGtbmJM27YxEV0BF5zMMVnKGgaWH7MkPQclSMCbF+FkxI
+         OHGIt5RStDWF/UHWv1QMMVvsUqN4wt6uAqRXQ=
+In-Reply-To: <1321645068-20475-1-git-send-email-ddaney.cavm@gmail.com>
+Sender: linux-arch-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+To: linux-mips@linux-mips.org, ralf@linux-mips.org, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-embedded@vger.kernel.org, x86@kernel.org
+Cc: David Daney <david.daney@cavium.com>
 
-_______________________________________________
-Linuxppc-dev mailing list
-Linuxppc-dev@lists.ozlabs.org
-https://lists.ozlabs.org/listinfo/linuxppc-dev
---===============7256466417816956094==--
+From: David Daney <david.daney@cavium.com>
+
+If the build program sortextable has already sorted the exception
+table, don't sort it again.
+
+Signed-off-by: David Daney <david.daney@cavium.com>
+---
+ kernel/extable.c |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+diff --git a/kernel/extable.c b/kernel/extable.c
+index 5339705..fe35a63 100644
+--- a/kernel/extable.c
++++ b/kernel/extable.c
+@@ -35,10 +35,16 @@ DEFINE_MUTEX(text_mutex);
+ extern struct exception_table_entry __start___ex_table[];
+ extern struct exception_table_entry __stop___ex_table[];
+ 
++/* Cleared by build time tools if the table is already sorted. */
++u32 __initdata main_extable_sort_needed = 1;
++
+ /* Sort the kernel's built-in exception table */
+ void __init sort_main_extable(void)
+ {
+-	sort_extable(__start___ex_table, __stop___ex_table);
++	if (main_extable_sort_needed)
++		sort_extable(__start___ex_table, __stop___ex_table);
++	else
++		pr_notice("__ex_table already sorted, skipping sort\n");
+ }
+ 
+ /* Given an address, look for it in the exception tables. */
+-- 
+1.7.2.3
