@@ -1,40 +1,56 @@
-From: David Daney <ddaney.cavm@gmail.com>
-Subject: Re: [PATCH RFC 3/5] kbuild/extable: Hook up sortextable into the
- build system.
-Date: Tue, 22 Nov 2011 13:38:37 -0800
-Message-ID: <4ECC165D.60300@gmail.com>
-References: <1321645068-20475-1-git-send-email-ddaney.cavm@gmail.com> <1321645068-20475-4-git-send-email-ddaney.cavm@gmail.com> <4EC9046C.3050708@suse.cz>
+From: Linux Rules <linuzoo@gmail.com>
+Subject: Help needed with porting 32-bit user ioctl to run on a 64-bit kernel
+Date: Wed, 30 Nov 2011 11:42:04 -0800
+Message-ID: <CA+ib0qH_8Ex10sjYH7abbFgaQaRRwKq73exn3jehjpts+Hx=aQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arch-owner@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=gamma;
-        h=message-id:date:from:user-agent:mime-version:to:cc:subject
-         :references:in-reply-to:content-type:content-transfer-encoding;
-        bh=OTe1NWb5ZLVGTGRj6kNzFlDGFs/jCu0XfzAVsuE7CTY=;
-        b=kFUTdGFvRFJQzLQJ175Q85kgnJ31WYjyduNbWSKInCmff8kuKS7drlylzHWpGzHtab
-         kaIZGwd4UYEJK9Y9dgEFKGPfJcEyBURoOF3XO6YBwK1xZq+fXFVWj/Rkyiiw7h4G9V5y
-         M8LeB6tNFUzBLiqelhnQuRvxKy1uL32eIXgNY=
-In-Reply-To: <4EC9046C.3050708@suse.cz>
-Sender: linux-arch-owner@vger.kernel.org
+        h=mime-version:date:message-id:subject:from:to:content-type;
+        bh=bGo+oLsmVOe3OiLYl41PvofLL4u91Ku4vB4VJnPaPAo=;
+        b=LQILVc+a0uUh51HMiHPBOkjlIDBVK3+O+mC+rhZn0ClPyDvlZlD2lfiLzw9aNebWYN
+         gToJhTYyxDApHmd+Zfw4BIfbxFQ7gRyk6YZhVT+nobENqUwOPhS6BrW1GqC7QkxIzr+x
+         r7+RbAVUYp4BbcfOrfXLyLWFhPWZ+fuQqzle4=
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Michal Marek <mmarek@suse.cz>
-Cc: David Daney <ddaney.cavm@gmail.com>, "linux-mips@linux-mips.org" <linux-mips@linux-mips.org>, "ralf@linux-mips.org" <ralf@linux-mips.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arch@vger.kernel.org" <linux-arch@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, David Daney <david.daney@cavium.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org
 
-On 11/20/2011 05:45 AM, Michal Marek wrote:
-> On 18.11.2011 20:37, David Daney wrote:
->> +	$(if $(CONFIG_BUILDTIME_EXTABLE_SORT),				\
->> +	$(Q)$(if $($(quiet)cmd_sortextable),				\
->> +	  echo '  $($(quiet)cmd_sortextable)  vmlinux'&&)		\
->> +	  $(cmd_sortextable)  vmlinux)
->
-> Why do you opencode $(call cmd,sortextable) here?
->
+All,
 
-Mostly just mimicking the other code in the vicinity.
+I am working on porting 32-bit application code to run over a 64-bit kernel.
 
-I will try to improve it in the next version of the patch.
+The 32 bit code calls socket ioctl to programs some registers in the
+driver (e1000) and then opens a raw socket.
 
-Thanks,
-David Daney
+The struct ifreq is used to construct the command as expected.
+
+The problem i am facing is that, the data which is copied back into
+the ioctl buffer is not visible in the user space at all.
+
+[32-bit user space if req with command] ==> [IOCTL] ==> [64-bit
+KERNEL] ==> [reads register copies result into ifreq->ifr_data in
+kernel] ==> [The copied data is not visible in the user code].
+
+Since the data i require is having a length of only 4 bytes,  i used
+the ifr_data field itself as a buffer instead of using it as a pointer
+to a buffer because i see that the ifreq structure is of 32 bytes
+length and ifr_name is part of a union which has a size of 16 bytes.
+
+I tried to do some debugging on this issue and found these:
+
+the struct ifreq is 32 byte in 32-bit user space but is 40 bytes in
+kernel space, this is probably because of the size of sockaddr inside
+ifreq which is different for 64-bit, also copy_from/to_user is not
+required because do_ioctl is already working on a copy of the ifreq
+buffer.
+
+I did some googling and found suggestions to use compat_ioctl to do
+the porting, but that is pertaining to using the file_operations
+structure, netdevice does not have a compat_ioctl, does it?
+
+Any help is appreciated in this regard.
+
+kind regards,
+mz.
