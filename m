@@ -1,73 +1,113 @@
-From: Brian Swetland <swetland@google.com>
+From: david@lang.hm
 Subject: Re: RFC: android logger feedback request
-Date: Wed, 21 Dec 2011 20:58:20 -0800
-Message-ID: <CANqkERDwpVqnYsC_0kQSyVohcoFK1vCEjXe+CwgdpMcNdKTkLQ@mail.gmail.com>
-References: <4EF264C3.6000104@am.sony.com>
-	<20111221231956.GB23859@suse.de>
-	<4EF27B85.9080801@am.sony.com>
-	<20111222005114.GA22541@suse.de>
-	<4EF288B4.1070601@am.sony.com>
-	<20111222014718.GA13085@suse.de>
-	<4EF29217.7040408@am.sony.com>
-	<20111222034717.GB14174@suse.de>
-	<CAPXgP10ikqHFn41wc1HPsKHyaC7fe1WGC2eHqs-hdRaZ7XCTLw@mail.gmail.com>
-	<CANqkERCcciVxybh=66K5xxzzGmgw=fg0vwmcitWZ1y=DTxxtOA@mail.gmail.com>
-	<alpine.DEB.2.02.1112212044240.28597@asgard.lang.hm>
+Date: Wed, 21 Dec 2011 21:01:41 -0800 (PST)
+Message-ID: <alpine.DEB.2.02.1112212057460.28597@asgard.lang.hm>
+References: <4EF264C3.6000104@am.sony.com> <20111221231956.GB23859@suse.de> <4EF27B85.9080801@am.sony.com> <20111222122026.3a0fae36@notabene.brown> <CANqkERC+mdSGxk4tiU7+dbauSXqqANN+Z+TTb_pVXoPq+k=rJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="680960-179270985-1324530101=:28597"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=beta;
-        h=mime-version:in-reply-to:references:date:message-id:subject:from:to
-         :cc:x-system-of-record:content-type:content-transfer-encoding;
-        bh=lWV/8DX6yV4jX2/eTftQOYHNcq890PIPP6e+ix2LZZg=;
-        b=nRzHVlZdyBhqi9yIo29gESWLnynGYhKMtfABgJlmLnKr2E6c4rsBHwhFmjXEXvTdMs
-         soLuCTLRf8kYZ7qM9OOA==
-In-Reply-To: <alpine.DEB.2.02.1112212044240.28597@asgard.lang.hm>
+In-Reply-To: <CANqkERC+mdSGxk4tiU7+dbauSXqqANN+Z+TTb_pVXoPq+k=rJg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: david@lang.hm
-Cc: Kay Sievers <kay.sievers@vrfy.org>, Greg KH <gregkh@suse.de>, Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Lennart Poettering <lennart@poettering.net>
+To: Brian Swetland <swetland@google.com>
+Cc: NeilBrown <neilb@suse.de>, Tim Bird <tim.bird@am.sony.com>, Greg KH <gregkh@suse.de>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Kay Sievers <kay.sievers@vrfy.org>, Lennart Poettering <lennart@poettering.net>
 
-On Wed, Dec 21, 2011 at 8:47 PM,  <david@lang.hm> wrote:
-> On Wed, 21 Dec 2011, Brian Swetland wrote:
->> Any thoughts as to how one could allow N userspace agents to log to =
-a
->> single shared buffer without one agent, if buggy or malicious,
->> spamming out all the other contents of the log? =C2=A0This is one of=
- the
->> main reasons we maintain separate logs in Android today, and are
->> likely to continue doing so until we figure out how resolve the issu=
-e.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--680960-179270985-1324530101=:28597
+Content-Type: TEXT/PLAIN; charset="utf-8"; format="flowed"
+Content-Transfer-Encoding: 8bit
+
+On Wed, 21 Dec 2011, Brian Swetland wrote:
+
+> On Wed, Dec 21, 2011 at 5:20 PM, NeilBrown <neilb@suse.de> wrote:
+>> On Wed, 21 Dec 2011 16:36:21 -0800 Tim Bird <tim.bird@am.sony.com> wrote:
+>>
+>>> On 12/21/2011 03:19 PM, Greg KH wrote:
+>>>> That all describes the current code, but you haven't described what's
+>>>> wrong with the existing syslog interface that requires this new driver
+>>>> to be written.  And why can't the existing interface be fixed to address
+>>>> these (potential) shortcomings?
+>>>
+>>>>> One specific question I have is where is the most appropriate
+>>>>> place for this code to live, in the kernel source tree?
+>>>>> Other embedded systems might want to use this system (it
+>>>>> is simpler than syslog, and superior in some ways), so I don't
+>>>>> think it should remain in an android-specific directory.
+>>>>
+>>>> What way is it superior?
+>>>
+>>> Here are some ways that this code is superior to syslog:
+>>
+>> It is certainly nice and simple.  It really looks more like a filesystem than
+>> a char device though...  though they aren't really files so much as lossy
+>> pipes.  I don't think that's a problem though, lots of things in filesystems
+>> don't behave exactly like files.
+>>
+>> If you created a 'logbuf' filesystem that used libfs to provide a single
+>> directory in which privileged processes could create files then you wouldn't
+>> need the kernel to "know" the allowed logs: radio, events, main, system.
+>> The size could be set by ftruncate() (by privileged used again) rather than
+>> being hardcoded.
+<<SNIP>>
+>> The result would be much the same amount of code, but an interface which has
+>> fewer details hard-coded and is generally more versatile and accessible.
 >
-> note that you still don't prevent one app from blowing out the logs, =
-all you
-> do is separate the logs into a handfulof categories and limit the app
-> (through standard filesystem permissions) to only blowing out one cat=
-egory
-> of logs.
+> Moving away from hard coding the names/sizes of the logs in the driver
+> is something that has been on the todo list for a while.  One thing
+> we'd likely want to accomplish there is avoid creating a vector for
+> consuming large amounts of memory by creating new logs.
 >
-> or do I misunderstand this and you actually keep a separate queue for=
- each
-> pid (which would seem to be a problem as you no longer know how much =
-space
-> you need)
+> One planned change (likely to happen in the Android J release
+> timeframe) is to adjust permissions such that any process can write
+> messages, but unless they belong to the correct group they can only
+> read back messages written by their own PID.  This is to allow apps to
+> grab their own log output after a crash or during a user problem
+> report without needing to grant them the ability to read all log
+> messages.
+>
+> Currently the logger driver does not provide a mechanism for allowing
+> logs to survive a reboot (unlike the ramconsole), but this is
+> functionality that we've thought about adding.  Generally the kernel
+> logs are most interesting after an unexpected panic/reboot, but
+> getting a picture of what userspace has been up to can be useful too.
+>
+> The goals behind the logger driver have been:
+> - keep userland and kernel logging separate (so that spammy userland
+> logging doesn't make us lose critical kernel logs or the other way
+> round)
+> - make log writing very inexpensive -- avoid having to pass messages
+> between processes (more critical on ARM9 platforms where this implied
+> extra cache flushing), avoid having to make several syscalls to write
+> a log message (getting time of day, etc), and so on
+> - make log writing reliable -- don't trust userland to report its
+> timestamp, PID, or to correctly format the datagrams, etc
+> - allow a log watching process (logcat) to easily pull data from all
+> logs at once
+> - avoid committing a vast amount of memory to logging
+> - try to prevent clients from spamming each other out of log space
+> (only successful on a coarse granularity right now with the
+> main/system/radio/events logs)
+> - ensure logs are not lost at the moment an app crashes
+>
+> On one hand, having each app (per PID) be able to create their own
+> logs up to a specified size limit could be really useful and is
+> something we've kicked around -- for one it would allow us to avoid
+> the ever present request from userspace developers to increase the log
+> size because of too much log spam ("reduce log spam" never seems to be
+> an answer that makes them happy) -- but we haven't come up with a
+> reasonable plan for dealing with "well if we allow 16KB of log per app
+> and the user installs 100 apps, they may be pinning up to 1.6MB of ram
+> worst case", and so on.
 
-You're correct -- that's the model at present.  We'd like to move to a
-model where we have better control and are kicking around ideas for
-how to do this for the next platform version.
+At this point you are starting to sound like something much closer to a 
+traditional syslog daemon. you are adding so many variations, persistant 
+storage, etc that you really don't want to have to have all this in the 
+kernel, make these be interfaces into a userspace logging tool (ideally 
+syslog compatible), and you have the option to easily have different 
+policies, consuming different amounts of space, depending on the device 
+and how resource limited it is.
 
-The rate at which apps push data into logs is pretty amazing at times.
- The system booting (maybe 10-20 services and 10+ apps starting up)
-can blow through 256K of ringbuffer in seconds.
-
-Having enough context available when something crashes to be able to
-diagnose what went wrong, especially when problems could involve
-interaction between multiple agents in multiple processes is important
-for the frameworks and apps teams.
-
-Trying to get individual developers to be frugal with their logging
-has turned out to be mostly a losing battle.
-
-Brian
+David Lang
+--680960-179270985-1324530101=:28597--
