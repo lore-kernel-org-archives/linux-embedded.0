@@ -1,42 +1,19 @@
-From: Greg KH <gregkh@suse.de>
+From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: RFC: android logger feedback request
-Date: Wed, 21 Dec 2011 17:49:55 -0800
-Message-ID: <20111222014955.GB13085@suse.de>
-References: <4EF264C3.6000104@am.sony.com>
- <20111221231956.GB23859@suse.de>
- <4EF27B85.9080801@am.sony.com>
- <20111222122026.3a0fae36@notabene.brown>
+Date: Wed, 21 Dec 2011 18:14:07 -0800
+Message-ID: <4EF2926F.1080403@am.sony.com>
+References: <4EF264C3.6000104@am.sony.com>	<20111221231956.GB23859@suse.de>	<4EF27B85.9080801@am.sony.com> <20111222122026.3a0fae36@notabene.brown>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20111222122026.3a0fae36@notabene.brown>
-Sender: linux-embedded-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: NeilBrown <neilb@suse.de>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Brian Swetland <swetland@google.com>, Kay Sievers <kay.sievers@vrfy.org>, Lennart Poettering <lennart@poettering.net>
+Cc: Greg KH <gregkh@suse.de>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Brian Swetland <swetland@google.com>, Kay Sievers <kay.sievers@vrfy.org>, Lennart Poettering <lennart@poettering.net>
 
-On Thu, Dec 22, 2011 at 12:20:26PM +1100, NeilBrown wrote:
-> On Wed, 21 Dec 2011 16:36:21 -0800 Tim Bird <tim.bird@am.sony.com> wrote:
-> 
-> > On 12/21/2011 03:19 PM, Greg KH wrote:
-> > > That all describes the current code, but you haven't described what's
-> > > wrong with the existing syslog interface that requires this new driver
-> > > to be written.  And why can't the existing interface be fixed to address
-> > > these (potential) shortcomings?
-> > 
-> > 
-> > >> One specific question I have is where is the most appropriate
-> > >> place for this code to live, in the kernel source tree?
-> > >> Other embedded systems might want to use this system (it
-> > >> is simpler than syslog, and superior in some ways), so I don't
-> > >> think it should remain in an android-specific directory.
-> > > 
-> > > What way is it superior?
-> > 
-> > Here are some ways that this code is superior to syslog:
-> 
+On 12/21/2011 05:20 PM, NeilBrown wrote:
 > It is certainly nice and simple.  It really looks more like a filesystem than
 > a char device though...  though they aren't really files so much as lossy
 > pipes.  I don't think that's a problem though, lots of things in filesystems
@@ -60,7 +37,19 @@ On Thu, Dec 22, 2011 at 12:20:26PM +1100, NeilBrown wrote:
 > The result would be much the same amount of code, but an interface which has
 > fewer details hard-coded and is generally more versatile and accessible.
 
-But, almost all of this is already in the syslog system call today,
-right?  So why create a new user api for something we have?
+This is a very interesting suggestion.  I think it would be good to
+create a prototype of this and see how it affects the user-space code
+as well as what the kernel-side issues would be (and to check whether
+this would change any of the current logger semantics).
 
-greg k-h
+It would also have the side effect of allowing runtime modification of
+the buffer size, though I'm not sure whether that's useful or not.
+
+Thanks!
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Workgroup of the Linux Foundation
+Senior Staff Engineer, Sony Network Entertainment
+=============================
