@@ -1,93 +1,118 @@
-From: Brian Swetland <swetland@google.com>
+From: Kay Sievers <kay.sievers@vrfy.org>
 Subject: Re: RFC: android logger feedback request
-Date: Wed, 21 Dec 2011 20:22:49 -0800
-Message-ID: <CANqkERCcciVxybh=66K5xxzzGmgw=fg0vwmcitWZ1y=DTxxtOA@mail.gmail.com>
-References: <4EF264C3.6000104@am.sony.com>
-	<20111221231956.GB23859@suse.de>
-	<4EF27B85.9080801@am.sony.com>
-	<20111222005114.GA22541@suse.de>
-	<4EF288B4.1070601@am.sony.com>
-	<20111222014718.GA13085@suse.de>
-	<4EF29217.7040408@am.sony.com>
-	<20111222034717.GB14174@suse.de>
-	<CAPXgP10ikqHFn41wc1HPsKHyaC7fe1WGC2eHqs-hdRaZ7XCTLw@mail.gmail.com>
+Date: Thu, 22 Dec 2011 05:36:02 +0100
+Message-ID: <CAPXgP13T1vTJjQvzhPLt48_8P5LNKgyVSQxvFtjXmVPX0pH=yQ@mail.gmail.com>
+References: <4EF264C3.6000104@am.sony.com> <20111221231956.GB23859@suse.de>
+ <4EF27B85.9080801@am.sony.com> <20111222122026.3a0fae36@notabene.brown>
+ <CANqkERC+mdSGxk4tiU7+dbauSXqqANN+Z+TTb_pVXoPq+k=rJg@mail.gmail.com> <20111222034953.GC14174@suse.de>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=beta;
-        h=mime-version:in-reply-to:references:date:message-id:subject:from:to
-         :cc:x-system-of-record:content-type;
-        bh=7yhg6+MVkMvxP/m49N8o7T+VbKfTPQS+qXiy2EvIx20=;
-        b=rmjs3GvLY5qMqX0yVwWqQOcrDfZH+j2/nXBwWwGl4rAswcssJP4pYME/IV5u9ePwYt
-         S/vIBG1gmtqitlEBd48A==
-In-Reply-To: <CAPXgP10ikqHFn41wc1HPsKHyaC7fe1WGC2eHqs-hdRaZ7XCTLw@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+        d=vrfy.org; s=google;
+        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+         :cc:content-type:content-transfer-encoding;
+        bh=bkIhDuLgUbgu4No+Ckc4tZP8V5Tw19ae6hfrshgqtHs=;
+        b=PKWp2+j+Xy/n1dOuUn1xUJCoEZCiLF3lzmN9XorIrPB0UMwD4YSZpgX3+1W6N8xaE4
+         YC26r00lb+2mN0alFA0dZTmY0uDZzvo/LmDf321sCwpZtCAaSHamV+F5AArpYV4RcyA9
+         CMBiYK+z/xGetKP3ZU7GOxVKePg3KBgB7YfXw=
+In-Reply-To: <20111222034953.GC14174@suse.de>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Kay Sievers <kay.sievers@vrfy.org>
-Cc: Greg KH <gregkh@suse.de>, Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Lennart Poettering <lennart@poettering.net>
+Content-Type: text/plain; charset="iso-8859-1"
+To: Greg KH <gregkh@suse.de>
+Cc: Brian Swetland <swetland@google.com>, NeilBrown <neilb@suse.de>, Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Lennart Poettering <lennart@poettering.net>
 
-On Wed, Dec 21, 2011 at 8:12 PM, Kay Sievers <kay.sievers@vrfy.org> wrote:
+On Thu, Dec 22, 2011 at 04:49, Greg KH <gregkh@suse.de> wrote:
+> On Wed, Dec 21, 2011 at 06:34:08PM -0800, Brian Swetland wrote:
+>> The goals behind the logger driver have been:
+>> - keep userland and kernel logging separate (so that spammy userland
+>> logging doesn't make us lose critical kernel logs or the other way
+>> round)
 >
-> We would like to have for the general Linux use case is a kmsg, that
-> supports structured data, but looks the same as it looks today to
-> current and legacy tools.
->
-> We would like to have every printk that does not start with a
-> KERN_CONT to create a record in the kmsg buffer. This record would
-> carry directly a timestamp, the log facility and the log level and a
-> reference to the usual human readable string.
->
-> The current kmsg prefixing of the timestamp would be a runtime switch,
-> and just added when the records are traversed, instead of the current
-> buffer printing.
->
-> In addition to this common data, every record can carry a
-> 'dictionary', which basically looks like a process environment, means
-> KEY=value pairs. The additional data can carry all the stuff that is
-> needed for structured logging and provides the base for machine
-> readable log information.
->
-> We don't want to separate multiple stores to avoid ordering problems
-> when the messages need to be merged from the multiple streams on the
-> receiver side.
->
-> I think this is theoretically all possible with the current kmsg,
-> without breaking anything. The current interfaces would iterate over
-> the record list and print out the human readable parts and skip the
-> metadata, instead of just copying a linear byte stream. To tools, it
-> could look the same as it is currently. It's just that the ring buffer
-> is not a byte- but a record-buffer.
->
-> Advanced tools could get a new interface or switch the old interface
-> to pipe out the structured data too.
->
-> In the systemd journal, we have an ASCII-like stream format that
-> carries out structured data and is binary data capable.
->
-> If we want to think about any next generation logging, I'm convinced,
-> we need to support records, structured data and binary data; anything
-> else is unlikely worth to change the current stuff.
+> Wouldn't a simple userspace daemon solve this, writing the data to a
+> ramfs file?
 
-Any thoughts as to how one could allow N userspace agents to log to a
-single shared buffer without one agent, if buggy or malicious,
-spamming out all the other contents of the log?  This is one of the
-main reasons we maintain separate logs in Android today, and are
-likely to continue doing so until we figure out how resolve the issue.
+That's what the systemd journal does in /run when /var is not writable
+or the /var/log/journal directory does not exist. All just lands on a
+tmpfs until the next reboot. The journal database just acts as a
+ringbuffer on a filesystem.
 
-Having everything in one unified log definitely has benefits (it
-certainly makes keeping everything ordered and reading everything back
-simpler), however we can't control third party applications (by
-design), so systems that require apps to "just don't do that" are not
-really solving that problem for us.
+>> - make log writing very inexpensive -- avoid having to pass messages
+>> between processes (more critical on ARM9 platforms where this implie=
+d
+>> extra cache flushing), avoid having to make several syscalls to writ=
+e
+>> a log message (getting time of day, etc), and so on
+>
+> ramfs?
 
-Also, as I mentioned earlier, from a security standpoint it is highly
-desirable to be able to restrict which records certain readers can
-read.  Convincing third party app developers to not log sensitive or
-PII data remains a challenge -- providing the ability for filtered
-read access allows some mitigation (app can retrieve it's own logs for
-a bug report but can't sift through all logs looking for interesting
-tidbits).
+The receiver gets almost all of this from the socket with
+SCM_TIMESTAP, and SCM_CREDENTIALS. Needed stuff can be added in a
+similar way. This is trusted, reliable and pretty cheap to retrieve
+data.
 
-Brian
+>> - make log writing reliable -- don't trust userland to report its
+>> timestamp, PID, or to correctly format the datagrams, etc
+>
+> existing userspace printk tty driver?
+
+Sockets provide all that today already in a trusted way.
+
+>> - allow a log watching process (logcat) to easily pull data from all
+>> logs at once
+>
+> what do you mean by "at once"?
+
+/proc/kmsg provides that today, which is basically just a file wrapper
+around the kernel's (misleadingly named) syslog() call.
+
+>> - avoid committing a vast amount of memory to logging
+>
+> memory where, in code or in the data being logged?
+>
+>> - try to prevent clients from spamming each other out of log space
+>> (only successful on a coarse granularity right now with the
+>> main/system/radio/events logs)
+>> - ensure logs are not lost at the moment an app crashes
+>
+> Which logs?
+
+Things need rate limits and quota based on the remaining buffer or
+disk space. The systemd journal maintains a separate journal for every
+login-uid, so every logged in user gets his own journal database,
+which can not overflow the systems database or the databases of the
+other users.
+
+Every user can log to the journal, but only the journal daemon can
+write to the databases. The user can directly read back its own
+journal database, but not write it.
+
+>> On one hand, having each app (per PID) be able to create their own
+>> logs up to a specified size limit could be really useful and is
+>> something we've kicked around -- for one it would allow us to avoid
+>> the ever present request from userspace developers to increase the l=
+og
+>> size because of too much log spam ("reduce log spam" never seems to =
+be
+>> an answer that makes them happy) -- but we haven't come up with a
+>> reasonable plan for dealing with "well if we allow 16KB of log per a=
+pp
+>> and the user installs 100 apps, they may be pinning up to 1.6MB of r=
+am
+>> worst case", and so on.
+>
+> I think the userspace printk and syslog might already handle most of
+> this today. =C2=A0Tim, care to look into that and see if it does or n=
+ot?
+
+It's very simple what we have here in the kernel, and if syslog
+facility prefixes are used, it can probably replace most of the
+Android log solution just fine. We can not really protect one store to
+flush the entire buffer though, that's what the 4 separated stores can
+easily provide.
+
+But as mentioned, I think we want the ability to work with structured
+data, which both kernel tools are incapable of.
+
+Kay
