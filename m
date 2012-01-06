@@ -1,406 +1,231 @@
-From: Geunsik Lim <leemgs1@gmail.com>
+From: Tim Bird <tim.bird@am.sony.com>
 Subject: Re: RFC: android logger feedback request
-Date: Thu, 5 Jan 2012 00:34:27 +0900
-Message-ID: <CABiHV1QUR6vc5fnm5+YVKiYVX2UF-VFS7ZKTa=7FAFtikbHKrg@mail.gmail.com>
-References: <4EF264C3.6000104@am.sony.com>
-	<20111228163925.6c37df26.akpm@linux-foundation.org>
+Date: Fri, 6 Jan 2012 12:56:27 -0800
+Message-ID: <4F075FFB.4090703@am.sony.com>
+References: <4EF264C3.6000104@am.sony.com>	<20111221231956.GB23859@suse.de>	<4EF27B85.9080801@am.sony.com>	<20111222122026.3a0fae36@notabene.brown>	<alpine.DEB.2.02.1112212050060.28597@asgard.lang.hm>	<CANqkERBPayBWjFp2nCDZA2CByJQwHMoeXe62ZutZr8QkWtcTLg@mail.gmail.com> <20111222180517.20bce47d@notabene.brown>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=gamma;
-        h=mime-version:in-reply-to:references:date:message-id:subject:from:to
-         :cc:content-type:content-transfer-encoding;
-        bh=e4uu4fCquWcMQwA8JqHfGdsaTEGyI8LrGMJExJvkamY=;
-        b=aB4nb0we6T9Ut/C93aOIbTJ16/tJzWPfZIgxXSPANDiMBm8JOZ3iiS26/gNGhQYjOJ
-         Z+5cFaGRzJ6rRUsTnpoDekbk/qeTSZHqQDB4t+Ed2PsMDfKTGlKt7+krj+MbbXzc58sG
-         9bBE9ASt4cOlStRvfRPx1Uxcq5u73wRLZYm/s=
-In-Reply-To: <20111228163925.6c37df26.akpm@linux-foundation.org>
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20111222180517.20bce47d@notabene.brown>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Tim Bird <tim.bird@am.sony.com>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Greg KH <gregkh@suse.de>, Brian Swetland <swetland@google.com>
+Content-Type: text/plain; charset="us-ascii"
+To: NeilBrown <neilb@suse.de>
+Cc: Brian Swetland <swetland@google.com>, "david@lang.hm" <david@lang.hm>, Greg KH <gregkh@suse.de>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, john stultz <johnstul@us.ibm.com>, Kay Sievers <kay.sievers@vrfy.org>, Lennart Poettering <lennart@poettering.net>, Andrew Morton <akpm@osdl.org>, david@lang.hm, Paul McKenney <paul.mckenney@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Thu, Dec 29, 2011 at 9:39 AM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> On Wed, 21 Dec 2011 14:59:15 -0800
-> Tim Bird <tim.bird@am.sony.com> wrote:
->
->> Hi all,
->>
->> I'm looking for feedback on the Android logger code,
->
-> The code looks nice.
->
->>
->> ...
->>
->> +/* logger_offset - returns index 'n' into the log via (optimized) m=
-odulus */
->> +#define logger_offset(n) =C2=A0 =C2=A0 ((n) & (log->size - 1))
->> +
->
-> This macro depends upon the presence of a local variable called "log"
-> and is therefore all stinky. =C2=A0Pass "log" in as an arg and conver=
-t it to
-> a regular C function.
->
->>
->> ...
->>
->> +/*
->> + * get_entry_len - Grabs the length of the payload of the next entr=
-y starting
->> + * from 'off'.
->> + *
->> + * Caller needs to hold log->mutex.
->> + */
->> +static __u32 get_entry_len(struct logger_log *log, size_t off)
->> +{
->> + =C2=A0 =C2=A0 __u16 val;
->> +
->> + =C2=A0 =C2=A0 switch (log->size - off) {
->> + =C2=A0 =C2=A0 case 1:
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 memcpy(&val, log->buffer=
- + off, 1);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 memcpy(((char *) &val) +=
- 1, log->buffer, 1);
->
-> So numbers in the buffer are in host endian order. =C2=A0That's worth
-> capturing in a comment somewhere.
->
-> There must be a way of doing the above more neatly, using
-> log->buffer[off] and log->buffer[0]. =C2=A0Perhaps using
-> include/linux/unaligned/packed_struct.h.
->
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 break;
->> + =C2=A0 =C2=A0 default:
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 memcpy(&val, log->buffer=
- + off, 2);
->
-> get_unaligned()
->
->> + =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 return sizeof(struct logger_entry) + val;
->> +}
->> +
->>
->> ...
->>
->> +static ssize_t logger_read(struct file *file, char __user *buf,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0size_t count, loff_t *pos)
->> +{
->> + =C2=A0 =C2=A0 struct logger_reader *reader =3D file->private_data;
->> + =C2=A0 =C2=A0 struct logger_log *log =3D reader->log;
->> + =C2=A0 =C2=A0 ssize_t ret;
->> + =C2=A0 =C2=A0 DEFINE_WAIT(wait);
->> +
->> +start:
->> + =C2=A0 =C2=A0 while (1) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 prepare_to_wait(&log->wq=
-, &wait, TASK_INTERRUPTIBLE);
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mutex_lock(&log->mutex);
->
-> If mutex_lock() had to wait for the mutex, it will return in state
-> TASK_RUNNING, thus rubbing out the effects of prepare_to_wait(). =C2=A0=
-We'll
-> just loop again so this is a benign buglet.
->
-> Could we lose a wakeup by running prepaer_to_wait() outside the lock?
-> I don't think so, but I stopped thinking about it when I saw the abov=
-e
-> bug. =C2=A0These two lines should be switched around.
->
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D (log->w_off =3D=3D=
- reader->r_off);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mutex_unlock(&log->mutex=
-);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (!ret)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 break;
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (file->f_flags & O_NO=
-NBLOCK) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 ret =3D -EAGAIN;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 break;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (signal_pending(curre=
-nt)) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 ret =3D -EINTR;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 break;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 schedule();
->> + =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 finish_wait(&log->wq, &wait);
->> + =C2=A0 =C2=A0 if (ret)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
->> +
->> + =C2=A0 =C2=A0 mutex_lock(&log->mutex);
->> +
->> + =C2=A0 =C2=A0 /* is there still something to read or did we race? =
-*/
->> + =C2=A0 =C2=A0 if (unlikely(log->w_off =3D=3D reader->r_off)) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mutex_unlock(&log->mutex=
-);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto start;
->> + =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 /* get the size of the next entry */
->> + =C2=A0 =C2=A0 ret =3D get_entry_len(log, reader->r_off);
->> + =C2=A0 =C2=A0 if (count < ret) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -EINVAL;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto out;
->> + =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 /* get exactly one entry from the log */
->> + =C2=A0 =C2=A0 ret =3D do_read_log_to_user(log, reader, buf, ret);
->> +
->> +out:
->> + =C2=A0 =C2=A0 mutex_unlock(&log->mutex);
->> +
->> + =C2=A0 =C2=A0 return ret;
->> +}
->> +
->>
->> ...
->>
->> +/*
->> + * clock_interval - is a < c < b in mod-space? Put another way, doe=
-s the line
->> + * from a to b cross c?
->> + */
->
-> This is where my little brain started to hurt. =C2=A0I assume it's co=
-rrect ;)
->
->> +static inline int clock_interval(size_t a, size_t b, size_t c)
->> +{
->> + =C2=A0 =C2=A0 if (b < a) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (a < c || b >=3D c)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 return 1;
->> + =C2=A0 =C2=A0 } else {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (a < c && b >=3D c)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 return 1;
->> + =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 return 0;
->> +}
->
-> The explicit inline(s) are increaseingly old-fashioned. =C2=A0gcc is =
-good
-> about this now.
->
->>
->> ...
->>
->> +static ssize_t do_write_log_from_user(struct logger_log *log,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 const void __user =
-*buf, size_t count)
->> +{
->> + =C2=A0 =C2=A0 size_t len;
->> +
->> + =C2=A0 =C2=A0 len =3D min(count, log->size - log->w_off);
->> + =C2=A0 =C2=A0 if (len && copy_from_user(log->buffer + log->w_off, =
-buf, len))
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -EFAULT;
->> +
->> + =C2=A0 =C2=A0 if (count !=3D len)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (copy_from_user(log->=
-buffer, buf + len, count - len))
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 return -EFAULT;
->
-> Is it correct to simply return here without updating ->w_off?
-> We've just copied "len" bytes in from userspace.
->
->> + =C2=A0 =C2=A0 log->w_off =3D logger_offset(log->w_off + count);
->> +
->> + =C2=A0 =C2=A0 return count;
->> +}
->> +
->> +/*
->> + * logger_aio_write - our write method, implementing support for wr=
-ite(),
->> + * writev(), and aio_write(). Writes are our fast path, and we try =
-to optimize
->> + * them above all else.
->> + */
->> +ssize_t logger_aio_write(struct kiocb *iocb, const struct iovec *io=
-v,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0unsigned long nr_segs, loff_t ppos)
->> +{
->> + =C2=A0 =C2=A0 struct logger_log *log =3D file_get_log(iocb->ki_fil=
-p);
->> + =C2=A0 =C2=A0 size_t orig =3D log->w_off;
->> + =C2=A0 =C2=A0 struct logger_entry header;
->> + =C2=A0 =C2=A0 struct timespec now;
->> + =C2=A0 =C2=A0 ssize_t ret =3D 0;
->> +
->> + =C2=A0 =C2=A0 now =3D current_kernel_time();
->> +
->> + =C2=A0 =C2=A0 header.pid =3D current->tgid;
->> + =C2=A0 =C2=A0 header.tid =3D current->pid;
->
-> hm, I thought task_struct.pid was the pid.
-It's right.
->
-> Also, pids are not unique system-wide. =C2=A0If the user is using PID
-I think that this code is  correct because  current->tgid means
-process id of user-space
-and current->pid means thread id of user-space actually.  Is it not mak=
-e sense?
+I'm back from vacation - sorry for the long delay in responding.
 
-> namespaces then the logs will contain what may be fatally confusing d=
-uplicates.
-> This needs to be fixed, I expect.
-header.tid as a thread id of user-space is unique system-wide at least
-although header.pid is not unqueue system-wide.
-Why should we think/understand  that the logs contain duplicated
-information to users
-who run logcat command for collecting and viewing system debug output?
-Thanks.
->
-> There are broader namespace issues which should be thought about. =C2=
-=A0Does
-> it make sense for readers in one container to be returned logs from a
-> different container? =C2=A0Perhaps the do-it-via-a-filesystem proposa=
-ls can
-> address this.
->
->> + =C2=A0 =C2=A0 header.sec =3D now.tv_sec;
->> + =C2=A0 =C2=A0 header.nsec =3D now.tv_nsec;
->> + =C2=A0 =C2=A0 header.len =3D min_t(size_t, iocb->ki_left, LOGGER_E=
-NTRY_MAX_PAYLOAD);
->> +
->> + =C2=A0 =C2=A0 /* null writes succeed, return zero */
->> + =C2=A0 =C2=A0 if (unlikely(!header.len))
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return 0;
->> +
->> + =C2=A0 =C2=A0 mutex_lock(&log->mutex);
->> +
->> + =C2=A0 =C2=A0 /*
->> + =C2=A0 =C2=A0 =C2=A0* Fix up any readers, pulling them forward to =
-the first readable
->> + =C2=A0 =C2=A0 =C2=A0* entry after (what will be) the new write off=
-set. We do this now
->> + =C2=A0 =C2=A0 =C2=A0* because if we partially fail, we can end up =
-with clobbered log
->> + =C2=A0 =C2=A0 =C2=A0* entries that encroach on readable buffer.
->> + =C2=A0 =C2=A0 =C2=A0*/
->> + =C2=A0 =C2=A0 fix_up_readers(log, sizeof(struct logger_entry) + he=
-ader.len);
->> +
->> + =C2=A0 =C2=A0 do_write_log(log, &header, sizeof(struct logger_entr=
-y));
->> +
->> + =C2=A0 =C2=A0 while (nr_segs-- > 0) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 size_t len;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ssize_t nr;
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /* figure out how much o=
-f this vector we can keep */
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 len =3D min_t(size_t, io=
-v->iov_len, header.len - ret);
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /* write out this segmen=
-t's payload */
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 nr =3D do_write_log_from=
-_user(log, iov->iov_base, len);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (unlikely(nr < 0)) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 log->w_off =3D orig;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 mutex_unlock(&log->mutex);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 return nr;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 iov++;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret +=3D nr;
->> + =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 mutex_unlock(&log->mutex);
->> +
->> + =C2=A0 =C2=A0 /* wake up any blocked readers */
->> + =C2=A0 =C2=A0 wake_up_interruptible(&log->wq);
->> +
->> + =C2=A0 =C2=A0 return ret;
->> +}
->> +
->>
->> ...
->>
->> +static int logger_release(struct inode *ignored, struct file *file)
->> +{
->> + =C2=A0 =C2=A0 if (file->f_mode & FMODE_READ) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct logger_reader *re=
-ader =3D file->private_data;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 list_del(&reader->list);
->
-> locking for reader->list?
->
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 kfree(reader);
->> + =C2=A0 =C2=A0 }
->> +
->> + =C2=A0 =C2=A0 return 0;
->> +}
->>
->> ...
->>
->> +static long logger_ioctl(struct file *file, unsigned int cmd, unsig=
-ned long arg)
->
-> ew...
->
->> +static struct logger_log *get_log_from_minor(int minor)
->> +{
->> + =C2=A0 =C2=A0 if (log_main.misc.minor =3D=3D minor)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return &log_main;
->> + =C2=A0 =C2=A0 if (log_events.misc.minor =3D=3D minor)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return &log_events;
->> + =C2=A0 =C2=A0 if (log_radio.misc.minor =3D=3D minor)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return &log_radio;
->> + =C2=A0 =C2=A0 if (log_system.misc.minor =3D=3D minor)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return &log_system;
->> + =C2=A0 =C2=A0 return NULL;
->> +}
->
-> ew...
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kerne=
-l" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
-> Please read the FAQ at =C2=A0http://www.tux.org/lkml/
+First, let me say thanks to all those who have responded with ideas
+and suggestions.  I'll be following up on many of them in the new
+few weeks.  This is a background task for me, so it will likely
+go relatively slowly.  I have volunteer offers of assistance,
+and some resources available for contract work, but it might take time
+to set that up.  In general, though, things should be able to move forward.
 
+I could respond to a lot of messages individually, but
+to conserve space I'll focus on this one, and present an overall
+idea for how I plan to proceed.
 
+On 12/21/2011 11:05 PM, NeilBrown wrote:
+> Possibly it would be useful to be clear what we all *are* really interested
+> in, because I suspect there is a lot of variety.
+> 
+> You appear to be interested in providing a great platform for a phone, in
+> minimising unnecessary churn in that platform, and in having the freedom to
+> optimise various aspects however you see fit.  You appear to have little
+> problem with maintaining some components out-of-mainline. This is all
+> perfectly valid and very much in the spirit of "freedom" that binds us
+> together.
+> 
+> Others want to be able to run a main-line kernel underneath the Android
+> user-space - and that is perfectly reasonable as well.
+> 
+> I don't much care about either of those, but I want "Linux" to be "high
+> quality" (according to my own personal standards of course) which means
+> keeping bad stuff out (though you could argue that the horse has well and
+> truly bolted there) and including good and useful stuff in.  And I think
+> Android has something to offer on both sides there :-)
 
---=20
-Best regards,
-Geunsik Lim, Samsung Electronics
-Homepage: http://leemgs.fedorapeople.org
------------------------------------------------------------------------
-To unsubscribe from this list: send the line "unsubscribe linux-kernel"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-info.html
-Please read the FAQ at=C2=A0 http://www.tux.org/lkml/
------------------------------------------------------------------------
+Thanks very much for this.  I think it *is* important to take a step
+back and compare goals, to see how we can achieve the best result for
+all parties.
+
+> 
+> Weighing all that up, I don't think it is useful to set our goal on "getting
+> Android to use a mainline kernel" - that isn't going to happen.
+> Rather we should focus primarily on "making it *possible* to run android
+> user-space on mainline".
+> 
+> That could involve two things
+> 1/ Making sure the interfaces that Android uses are abstracted at a suitable
+>   level so that when running a mainline kernel you can just slip in an
+>   alternate shared library with compatible functionality.
+> 2/ Adding functionality to Linux so that it is possible to provide the
+>   functionality that Android needs.
+
+Agreed.
+
+> Android should not *have* to use the interface that the "mainline
+> community" decides is preferred, but nor should mainline be required to
+> include the drivers that Android wants to use.  History shows us that isn't
+> going to happen.
+
+I agree with the sentiment in the first sentence, but I would like to
+make a few observations about this code, and the problem in general,
+for consideration.  I'll do this below because it's a bit philosophical,
+and I'd rather focus on "the way forward" first.
+
+> But if there was a fairly low-level API that Android used, then those in the
+> community could who want Android on a mainline kernel could work to implement
+> that API with whatever mixture of user-space and kernel-space that achieves
+> consensus.
+> Android could of course change to use the community version eventually if
+> they found that was a good thing, or could keep using their own.
+> 
+> So: bringing this back to the android logger...
+>   What I would like to see is a low-level API which is used to access logging
+>   for which alternate implementations could be written.  Ideally this would
+>   be embodied in a single .so, but we have the source so that doesn't need to
+>   be a barrier.
+>   Then we could argue to our heart's content about how best to implement that
+>   API - Journal and nsyslogd and rsyslogd could all implement it in different
+>   ways and we could be one step closer to running Android on a mainline
+>   kernel, but the Android developers don't need to be involved (but can if
+>   they want to of course).
+> 
+>   I would be important that the API is specified clearly - neither under
+>   specified nor over-specified. That means that the Android implementation
+>   would need to explicitly forbid anything that isn't explicit permitted.
+>   This is because most testing will happen on the Android platform so it's
+>   actual behaviour will become the defacto standard.
+> 
+>   Could that be a possible way forward?
+
+I'd like to pursue this, as well as some of the minor code cleanups
+suggested by Andrew Morton.  Here's what I'm thinking:
+
+I'd like to implement Neil's file-system based solution as a test case,
+and compare that with the existing code.  I like the elegance of using
+existing filesystem semantics, and the removal of some hard-coded limits
+and policy from the kernel.  A lower priority would be to also try
+a user-space-only solution, as described by Arnd.  Optimally, it would
+be nice to have all three systems to compare (char dev, log fs, and
+ram fs) against each other.
+
+I'll try to use these under the existing logger library API to see if the
+current semantics expected by Android user space can be preserved.  This
+would minimize the churn to Android user space.  Before this (or any other
+changes for that matter) could be rolled out in an official Android
+release, there would be a lot of testing required, to make sure something
+hasn't been broken.  I want to avoid asking the Google developers to
+do this, as they have something that works now, and there's little incentive
+to change it.  I'm tackling this problem as something of a wider issue
+for the industry.
+
+Separately, I'd like to apply the changes requested by Andrew Morton
+to the existing char dev driver, as just simple cleanups.  This, however,
+also will require some testing to avoid regressions.
+
+On a separate track, I want to compare the requirements discussed in this
+thread with what systemd is doing (and how /dev/kmsg is being used) to see
+if there are issues that inform a possible more general solution for
+logging in the future.  To this end, it might be good to set up a
+meeting at a future event (ELC or collab summit, depending on what
+people plan to come to) to discuss things face-to-face.
+
+I'm hoping that the existing code can live in staging while we sort
+this out longer term.  This code has lived out of mainline for several
+years, and I don't think we're in any kind of rush.  I plan to record
+the requirements and the plan for this on a wiki page I've set up at:
+http://elinux.org/Mainline_Android_logger_project, but I may also record
+some of the simple cleanup requests in a TODO file in staging.
+
+Also, separately, we'll likely do some benchmarking of the various
+systems, as part of our overall comparison effort - to address questions
+about the tradeoffs involved - particularly between implementing this
+in or out of kernel and between existing and new kernel infrastructure.
+
+[warning - next part is long...]
+
+Now, having said all that, let me go off into some philosophical weeds...
+
+This code is only about 700 lines long, and specializes the kernel for
+an extremely popular (by usage) user space stack.  Code of
+lower quality which specializes the kernel for much less-used hardware
+has been admitted into the kernel with significantly less fuss than
+this code has received.  That's not an argument to accept the code
+as is, it's just an observation about the relative hurdle that this
+code faces compared to lots of other code that goes into the kernel.
+(And please don't interpret this as dissatisfaction with the feedback
+received.)
+
+If this code were a character driver for an obscure serial port
+on a lesser-known chip architecture, I don't think it would get
+any attention at all.  As it is, it's looking like at least a few
+man months of work will be required, as well as some relatively
+unneeded changes to Android user space, to get this feature into
+a permanently acceptable state.  I wouldn't be surprised to see
+this stretch into a few calendar years.
+
+Code that specializes the kernel in weird ways is accepted into
+the kernel all the time, and I've tried to figure out why this
+particular bit of code is treated differently.  Especially since
+this code is self-contained, configurable, and imposes no
+perceivable long-term maintenance burden.  (That's not true of
+all Android patches, but I believe it's true of this one).
+
+I have a few theories:
+1) this is not tied to hardware, and as such represents a general
+feature (but people are not at all required to treat it as such,
+just as they are not required to use other people's weird drivers).
+
+2) people want to avoid duplication with other similar features
+(again, since it's self-contained and configurable, I don't know
+why it would bother people if this existed in tandem with other
+solutions - especially since it's so small)
+
+3) there is really no maintainer for this feature category, so
+discussions get bogged down as varying requirements and solutions
+are suggested, which can not easily be compared against each other
+(especially for non-existent implementations)  In particular, it's
+unclear who I have to get the approval of for this code or some
+derivative of it to be accepted.  That makes the development task
+a very open-ended one.
+
+4) this is for a popular use case, as opposed to some minor
+outlying thing, and so people perceive the need to get it
+exactly right.  In this sense, the code would be a victim of
+it's own success.
+
+5) blocking this is perceived to be a way to accomplish a
+larger, related goal (if this is true then it has lots of
+interesting implications for the economics of open source
+work)
+
+In general, there is a tension between the normal nature of adapting
+the kernel to the most general use cases, and the specialization
+that is performed in developing an embedded product.  Often
+times, solutions to embedded requirements are very finely tuned
+to a particular field of use or situation, and don't lend themselves
+easily to the type of generalization that mainlining usually requires.
+
+Which brings me to my last point and a question.
+Is it inconceivable for there to be a category of code in the
+Linux kernel which supports ONLY Android user space, and no
+other?  That is, must every Android patch be generalized in
+some manner to a broader use case?
+
+I suspect some of them (particularly binder) will not lend
+themselves easily to this type of generalization.
+Knowing the answer to this question would help me gauge the
+amount of effort required for this project, and the
+net value of continuing it.
+
+Thanks and regards,
+ -- Tim
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Workgroup of the Linux Foundation
+Senior Staff Engineer, Sony Network Entertainment
+=============================
