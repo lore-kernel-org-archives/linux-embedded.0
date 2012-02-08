@@ -1,43 +1,71 @@
-From: Frank Rowand <frank.rowand@am.sony.com>
-Subject: Re: [PATCH 1/5] logger: Change logger_offset() from macro to function
-Date: Tue, 7 Feb 2012 19:22:37 -0800
-Message-ID: <4F31EA7D.2010706@am.sony.com>
-References: <4F31DC31.6040303@am.sony.com>
-Reply-To: <frank.rowand@am.sony.com>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: [PATCH 2/5 v2] logger: simplify and optimize get_entry_len
+Date: Wed, 8 Feb 2012 10:37:57 -0800
+Message-ID: <4F32C105.4060700@am.sony.com>
+References: <4F31DC31.6040303@am.sony.com> <4F31DDC7.1050107@am.sony.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <4F31DC31.6040303@am.sony.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <4F31DDC7.1050107@am.sony.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@am.sony.com>
-Cc: Greg KH <gregkh@suse.de>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Brian Swetland <swetland@google.com>, Dima Zavin <dima@android.com>, Andrew Morton <akpm@osdl.org>
+To: Greg KH <gregkh@linuxfoundation.org>, linux-embedded <linux-embedded@vger.kernel.org>, linux kernel <linux-kernel@vger.kernel.org>, Brian Swetland <swetland@google.com>, Dima Zavin <dima@android.com>, Andrew Morton <akpm@osdl.org>
 
-On 02/07/12 18:21, Tim Bird wrote:
-> Convert to function and add log as a parameter, rather than relying
-> on log in the context of the macro.
-> 
-> Signed-off-by: Tim Bird <tim.bird@am.sony.com>
-> ---
->  drivers/staging/android/logger.c |   16 ++++++++++------
->  1 files changed, 10 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/staging/android/logger.c b/drivers/staging/android/logger.c
-> index ffc2d04..92456d7 100644
-> --- a/drivers/staging/android/logger.c
-> +++ b/drivers/staging/android/logger.c
-> @@ -60,7 +60,11 @@ struct logger_reader {
->  };
-> 
->  /* logger_offset - returns index 'n' into the log via (optimized) modulus */
-> -#define logger_offset(n)	((n) & (log->size - 1))
-> +size_t logger_offset(struct logger_log *log, size_t n)
-> +{
-> +	return n & (log->size-1);
+Make this code slightly easier to read, and eliminate calls
+to sub-routines.  Some of these were previously optimized away
+by the compiler, but one memcpy was not.
 
-        return n & (log->size - 1);
-> +}
-> +
+In my testing, this makes the code about 20% smaller, and
+has no sub-routine calls and no branches (on ARM).
 
-Reviewed-by: Frank Rowand <frank.rowand@am.sony.com>
+v2 of this patch is, IMHO, easier to read than v1. Compared to
+that patch it uses __u8 instead of unsigned char, for
+consistency with the __u16 val data type, simplifies the
+conditional expression, adds a another comment, and
+moves a common statement out of the if.
+
+Signed-off-by: Tim Bird <tim.bird@am.sony.com>
+---
+ drivers/staging/android/logger.c |   20 ++++++++++++--------
+ 1 files changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/staging/android/logger.c b/drivers/staging/android/logger.c
+index 92456d7..3475cb7 100644
+--- a/drivers/staging/android/logger.c
++++ b/drivers/staging/android/logger.c
+@@ -93,20 +93,24 @@ static inline struct logger_log *file_get_log(struct file *file)
+  * get_entry_len - Grabs the length of the payload of the next entry starting
+  * from 'off'.
+  *
++ * An entry length is 2 bytes (16 bits) in host endian order.
++ * In the log, the length does not include the size of the log entry structure.
++ * This function returns the size including the log entry structure.
++ *
+  * Caller needs to hold log->mutex.
+  */
+ static __u32 get_entry_len(struct logger_log *log, size_t off)
+ {
+ 	__u16 val;
+
+-	switch (log->size - off) {
+-	case 1:
+-		memcpy(&val, log->buffer + off, 1);
+-		memcpy(((char *) &val) + 1, log->buffer, 1);
+-		break;
+-	default:
+-		memcpy(&val, log->buffer + off, 2);
+-	}
++	/* copy 2 bytes from buffer, in memcpy order, */
++	/* handling possible wrap at end of buffer */
++
++	((__u8 *)&val)[0] = log->buffer[off];
++	if (likely(off+1 < log->size))
++		((__u8 *)&val)[1] = log->buffer[off+1];
++	else
++		((__u8 *)&val)[1] = log->buffer[0];
+
+ 	return sizeof(struct logger_entry) + val;
+ }
+-- 
+1.7.2.3
