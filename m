@@ -1,69 +1,67 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Handling of modular boards
-Date: Fri, 4 May 2012 19:58:51 +0100
-Message-ID: <20120504185850.GO14230@opensource.wolfsonmicro.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: Handling of modular boards
+Date: Fri, 4 May 2012 19:34:08 +0000
+Message-ID: <201205041934.08830.arnd@arndb.de>
+References: <20120504185850.GO14230@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Thv7PGoFpDPJ7Oar"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <20120504185850.GO14230@opensource.wolfsonmicro.com>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>
-Cc: linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: Text/Plain; charset="us-ascii"
+To: linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
+On Friday 04 May 2012, Mark Brown wrote:
+> Quite a few reference platforms (including Wolfson ones, which is why
+> I'm particularly interested) use replaceable modules to allow
+> configuration changes.  Since we can often identify the configuration at
+> runtime we should ideally do that but currently there's no infrastructure 
+> to help with that, generally this seems to be done in arch code for the
+> machine but this doesn't scale when even the CPU might change and isn't
+> terribly device tree compatible either.
+> 
+> For reference the code for current Wolfson plugin modules is in
+> arch/arm/mach-s3c64xx/mach-crag6410-module.c.
 
---Thv7PGoFpDPJ7Oar
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Mark,
 
-Quite a few reference platforms (including Wolfson ones, which is why
-I'm particularly interested) use replaceable modules to allow
-configuration changes.  Since we can often identify the configuration at
-runtime we should ideally do that but currently there's no infrastructure=
-=20
-to help with that, generally this seems to be done in arch code for the
-machine but this doesn't scale when even the CPU might change and isn't
-terribly device tree compatible either.
+Thanks for getting the discussion started. I've seen the same issue come
+up for arch/arm/mach-ux500/board-mop500*uib.c and for the beaglebone.
+I'm sure there are many more, but we should make sure that everyone
+of these can live with whatever we come up with.
 
-For reference the code for current Wolfson plugin modules is in
-arch/arm/mach-s3c64xx/mach-crag6410-module.c.
+> The most obvious current fit here is the MFD subsystem but it feels like
+> we need some slightly different infastructure to what MFD currently
+> provides.  MFD is really set up to handle platform devices with a core
+> and linear ranges of resources fanning out from that core since they're
+> really oriented around chips.  In contrast these boards are more about
+> remapping random collections of potentially unrelated resources and
+> instantiating devices on all sorts of buses and share more with board
+> files.
+> 
+> I'm just starting to put some stuff together for this so I was wondering
+> if anyone had been thinking about this and had any bright ideas for how
+> to handle it, and also if people think that MFD is a good fit for this
+> or if we should split the silicon MFDs from these PCBs.
 
-The most obvious current fit here is the MFD subsystem but it feels like
-we need some slightly different infastructure to what MFD currently
-provides.  MFD is really set up to handle platform devices with a core
-and linear ranges of resources fanning out from that core since they're
-really oriented around chips.  In contrast these boards are more about
-remapping random collections of potentially unrelated resources and
-instantiating devices on all sorts of buses and share more with board
-files.
+One idea that I've heard before is to put device tree fragments into the
+kernel and dynamically add them to the device tree that was passed by the
+boot loader whenever we detect the presence of a specific device.
+This obviously means it works only for boards using DT for booting, but
+it allows us to use some infrastructure that we already have.
 
-I'm just starting to put some stuff together for this so I was wondering
-if anyone had been thinking about this and had any bright ideas for how
-to handle it, and also if people think that MFD is a good fit for this
-or if we should split the silicon MFDs from these PCBs.
+Another idea was to put all the possible extensions into the device tree
+for a given board and disable them by default, putting it into the
+responsibility of the boot loader to enable the one that is actually
+being used. This has serious scalibility problems when there are many
+possible extensions and also relies more on the boot loader than I would
+like.
 
---Thv7PGoFpDPJ7Oar
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+An intermediate solution that I really like is the ability to
+stuff device tree fragments on extension board themselves, but that
+can only work for new designs and causes problems when that information
+is not actually correct.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPpCbfAAoJEBus8iNuMP3dfkEP/RXH/DIzrKS0pEbgWJi5GTUX
-9Z+ijMeWfyrx6bA0vGKVIbeyPwJzf1ziIL4W1GsEB8QRvrZj3zwCI3p7pVd0CjCn
-Zyhog0EAOtmsfsn5Cs3u+7dCov39cfKKvfg8Zj3Ksmkp9A6AQbami403TwSUg6Ye
-CLbm2ZcQZcLaqQpguzsXkkDxZSi90Oi+GCLMHAbVRRfZL6p3QPaJSXkaAuDtx6gR
-0zUwszMaJoxRGndbOr9r2dJ5pBBs+IV2gjcffg651v3Kh4JGzIyOWWm8u25zufrq
-VdI5zRnDlOAL3UJzeDMKHFuNczGgvuqMxWeSmKe91nYL+rg2i9Dw0qXU/ZngVSbi
-ZlkqfXjq7GVwVAYkBvPK7yjM0Q87fOPTps+K5WIM1HQUASA+DH1vRNpbwaJ0sx6S
-MlqvzD5J54U96My1+0h09V7WS96VwKgPBaSsdJURZcP/paZslTsyHDpz9lp6NOOx
-nVJ6ip9KPxG8AGHKndjfyc0Kr1GhHip5NEmCIFNNzvc8obpSPRmBLBA5Zo8HmUC8
-qfTP8mC8zbRB13fj2fssa40fl6FWtr5wXlc3q7Idkvg+f/1p5hb+AjJwBv41Tn76
-Y7UP9g6WUPMidNB95zp1Yq3pYTV/IaBGxqXIcx1HjVcCx/RrC/l+7hkfWRTMfM/1
-mLnymYQITdUjMWu9gnXn
-=DmpE
------END PGP SIGNATURE-----
-
---Thv7PGoFpDPJ7Oar--
+	Arnd
