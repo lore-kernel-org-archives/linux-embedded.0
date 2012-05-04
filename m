@@ -1,44 +1,34 @@
-From: Wolfgang Denk <wd@denx.de>
+From: Stephen Warren <swarren@wwwdotorg.org>
 Subject: Re: Handling of modular boards
-Date: Fri, 04 May 2012 22:54:41 +0200
-Message-ID: <20120504205441.D293120645E@gemini.denx.de>
-References: <20120504185850.GO14230@opensource.wolfsonmicro.com> <201205041934.08830.arnd@arndb.de> <20120504203357.6B79B206451@gemini.denx.de> <201205042039.25794.arnd@arndb.de>
+Date: Fri, 04 May 2012 14:59:37 -0600
+Message-ID: <4FA44339.2010808@wwwdotorg.org>
+References: <20120504185850.GO14230@opensource.wolfsonmicro.com> <4FA432E9.9050606@wwwdotorg.org> <20120504203857.49EAD206451@gemini.denx.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <201205042039.25794.arnd@arndb.de>
+In-Reply-To: <20120504203857.49EAD206451@gemini.denx.de>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Samuel Ortiz <sameo@linux.intel.com>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+To: Wolfgang Denk <wd@denx.de>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Igor Grinberg <grinberg@compulab.co.il>, linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Dear Arnd,
-
-In message <201205042039.25794.arnd@arndb.de> you wrote:
->
-> > On the other hand, some of the issues we're trying to solve here
-> > for the kernel are also present in the boot loader, so this needs to
-> > do this anyway - whether by inserting new or modifying (enabling or
-> > disabling) existing properties in the DT is not really relevant here.
+On 05/04/2012 02:38 PM, Wolfgang Denk wrote:
+> Dear Stephen,
 > 
-> I haven't seen a case where the add-on board is actually required
-> for booting. What examples are you thinking of?
+> In message <4FA432E9.9050606@wwwdotorg.org> you wrote:
+>>
+>> representation of how to identify the child boards, and then have the
+>> kernel only use/parse certain chunks of the DT based on the ID results.
+> 
+> I expect that this will quickly cause problems, for example in those
+> many cases where pins and peripheral functions are multiplexed, or
+> usable for different purposes. I would not want to maintain a DT that
+> has to describe all combinations used by some boards - in a way that
+> does not cause conflicts on either of them.
 
-There are systems (and I bet it will be a growing number) where U-Boot
-itself uses the DT for configuration.  Also, there are functions that
-are needed both by the boot loader and the kernel - for example to
-dislay a splash screen the boot loader needs to initialize the
-display, so it must be able to detect which type of LCD is attached
-(resolution, color-depth, orientation) - the device tree comes in very
-handy here.  Why should Linux re-do all such things?
-
-Best regards,
-
-Wolfgang Denk
-
--- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-I must follow the people.  Am I not their leader? - Benjamin Disraeli
+With the DT pinctrl bindings, you can define the pinctrl configuration
+required to interact with particular child boards in the DT chunk for
+that child board. So, I think this would work out fine; you wouldn't
+have to represent a huge maze/array of conditional pinctrl settings in
+the main board file.
