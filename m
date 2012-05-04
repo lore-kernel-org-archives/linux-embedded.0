@@ -1,74 +1,69 @@
-From: Florian Fainelli <florian@openwrt.org>
-Subject: Call for presentations for the LSM embedded and open hardware track
- 2012
-Date: Tue, 06 Mar 2012 15:24:41 +0100
-Message-ID: <4F561E29.2050301@openwrt.org>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Handling of modular boards
+Date: Fri, 4 May 2012 19:58:51 +0100
+Message-ID: <20120504185850.GO14230@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=sender:message-id:date:from:organization:user-agent:mime-version:to
-         :subject:content-type:content-transfer-encoding;
-        bh=tca880pBm4p4LGOVvKt45QuFKzi2oJU/327nawLTrG4=;
-        b=fJbjkZ5PTjhmA1j1aZPQrUbF7VQI0Ae+TjZ0/8uWp+tKvcPt/+FrEA7N8DZhIaAp+0
-         2KvezjEsY++NN1PGyeMQvp0y6P/skM+WrHKHFyoU+vlKTGOl30DqfBfXp6ycKScSPY5D
-         dwXFePo0aarn45q+lKwdzymXRB2ePnwZU9HhWMKM47/OXA0GLtVhKZL6R1IjtV1HdzQc
-         L78LYpuO1wVYlKrzaDzm8+m3KNwv8b4k/RNRLumprfbAJ1QzLsqusps4oaaYy0bxtYOh
-         32prE5ptv4bxuC07Io6CqsWDXnlCaGH8tAzW0UhtIUUrzpeyYjqKWxCK2xUmTyO06Ao+
-         REsA==
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Thv7PGoFpDPJ7Oar"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"; format="flowed"
-To: linux-embedded@vger.kernel.org
+To: Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>
+Cc: linux-arm-kernel@lists.infradead.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-The Libre Software Meeting (LSM) is an annual event on free software=20
-taking place in july in France since 2000. The LSM meeting is organized=
-=20
-this year in Geneva, Switzerland from 7th to 12th July. Amongst several=
-=20
-tracks, the Libre Software Meeting will feature an =C2=AB Embedded Syst=
-ems=20
-and Open Hardware =C2=BB track, for which the call for presentations ha=
-s been=20
-released recently.
 
-The purpose of the =E2=80=9CEmbedded Systems and Open Hardware=E2=80=9D=
- session is to=20
-give the state of the art of free software for embedded systems and Ope=
-n=20
-Hardware. Technical topics of this session include but are not limited =
-to:
+--Thv7PGoFpDPJ7Oar
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-*   Embedded OS Development kernel architecture, implementation and por=
-t=20
-for embedded systems
-*   Embedded Development Tools: tool chains and project cases (tool=20
-chain projects, packaging for cross compilation, portability =E2=80=A6)
-*   Embedded Linux, BSD, or any other free operating system
-*   Real-time extensions for Linux: RTLinux, RTAI=E2=80=A6
-*   Hard real-time kernels: eCos, RTEMS, ADEOS, Xenomai=E2=80=A6
-*   Soft Real-time kernels
-*   Embedded Java, LUA, Python ...
-*   GUI for embedded systems: EFL, Qt, Gtk=E2=80=A6
-*   Linux and System on Chip (SoC)
-*   Open Hardware, Open design, free IP modules (Intellectual Property)=
+Quite a few reference platforms (including Wolfson ones, which is why
+I'm particularly interested) use replaceable modules to allow
+configuration changes.  Since we can often identify the configuration at
+runtime we should ideally do that but currently there's no infrastructure=
 =20
-and softcores: opencores, OpenRISC, NIOS, Microblaze, LEONSparc, FPGA=E2=
-=80=A6
+to help with that, generally this seems to be done in arch code for the
+machine but this doesn't scale when even the CPU might change and isn't
+terribly device tree compatible either.
 
-The conferences will last 30 minutes, questions included. Round tables=20
-will be organized. Synthetic presentations are scheduled to last 20=20
-minutes. PDF versions of the presentation are not mandatory but they=20
-will be greatly appreciated (with an online web access just after the=20
-LSM event, they are a very useful documentation source for the entire=20
-community).
+For reference the code for current Wolfson plugin modules is in
+arch/arm/mach-s3c64xx/mach-crag6410-module.c.
 
-If you plan to participate and to propose a presentation, please send a=
-=20
-message as soon as possible to the following address:=20
-embedded@listes2012.rmll.info with a summary of your presentation (and=20
-if you can, a summary in English too) no later than 31th march 2012.=20
-=46eel free to forward this Call For Presentation to other places or to=
-=20
-everyone you think could be interested.
+The most obvious current fit here is the MFD subsystem but it feels like
+we need some slightly different infastructure to what MFD currently
+provides.  MFD is really set up to handle platform devices with a core
+and linear ranges of resources fanning out from that core since they're
+really oriented around chips.  In contrast these boards are more about
+remapping random collections of potentially unrelated resources and
+instantiating devices on all sorts of buses and share more with board
+files.
+
+I'm just starting to put some stuff together for this so I was wondering
+if anyone had been thinking about this and had any bright ideas for how
+to handle it, and also if people think that MFD is a good fit for this
+or if we should split the silicon MFDs from these PCBs.
+
+--Thv7PGoFpDPJ7Oar
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJPpCbfAAoJEBus8iNuMP3dfkEP/RXH/DIzrKS0pEbgWJi5GTUX
+9Z+ijMeWfyrx6bA0vGKVIbeyPwJzf1ziIL4W1GsEB8QRvrZj3zwCI3p7pVd0CjCn
+Zyhog0EAOtmsfsn5Cs3u+7dCov39cfKKvfg8Zj3Ksmkp9A6AQbami403TwSUg6Ye
+CLbm2ZcQZcLaqQpguzsXkkDxZSi90Oi+GCLMHAbVRRfZL6p3QPaJSXkaAuDtx6gR
+0zUwszMaJoxRGndbOr9r2dJ5pBBs+IV2gjcffg651v3Kh4JGzIyOWWm8u25zufrq
+VdI5zRnDlOAL3UJzeDMKHFuNczGgvuqMxWeSmKe91nYL+rg2i9Dw0qXU/ZngVSbi
+ZlkqfXjq7GVwVAYkBvPK7yjM0Q87fOPTps+K5WIM1HQUASA+DH1vRNpbwaJ0sx6S
+MlqvzD5J54U96My1+0h09V7WS96VwKgPBaSsdJURZcP/paZslTsyHDpz9lp6NOOx
+nVJ6ip9KPxG8AGHKndjfyc0Kr1GhHip5NEmCIFNNzvc8obpSPRmBLBA5Zo8HmUC8
+qfTP8mC8zbRB13fj2fssa40fl6FWtr5wXlc3q7Idkvg+f/1p5hb+AjJwBv41Tn76
+Y7UP9g6WUPMidNB95zp1Yq3pYTV/IaBGxqXIcx1HjVcCx/RrC/l+7hkfWRTMfM/1
+mLnymYQITdUjMWu9gnXn
+=DmpE
+-----END PGP SIGNATURE-----
+
+--Thv7PGoFpDPJ7Oar--
