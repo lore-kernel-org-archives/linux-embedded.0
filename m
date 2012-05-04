@@ -1,38 +1,47 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+From: Wolfgang Denk <wd@denx.de>
 Subject: Re: Handling of modular boards
-Date: Fri, 4 May 2012 21:07:00 +0100
-Message-ID: <20120504200659.GQ14230@opensource.wolfsonmicro.com>
-References: <20120504185850.GO14230@opensource.wolfsonmicro.com>
- <201205041934.08830.arnd@arndb.de>
+Date: Fri, 04 May 2012 22:33:57 +0200
+Message-ID: <20120504203357.6B79B206451@gemini.denx.de>
+References: <20120504185850.GO14230@opensource.wolfsonmicro.com> <201205041934.08830.arnd@arndb.de>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <201205041934.08830.arnd@arndb.de>
+In-reply-to: <201205041934.08830.arnd@arndb.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-On Fri, May 04, 2012 at 07:34:08PM +0000, Arnd Bergmann wrote:
+Dear Arnd,
 
+In message <201205041934.08830.arnd@arndb.de> you wrote:
+>
 > One idea that I've heard before is to put device tree fragments into the
 > kernel and dynamically add them to the device tree that was passed by the
 > boot loader whenever we detect the presence of a specific device.
 > This obviously means it works only for boards using DT for booting, but
 > it allows us to use some infrastructure that we already have.
+> 
+> Another idea was to put all the possible extensions into the device tree
+> for a given board and disable them by default, putting it into the
+> responsibility of the boot loader to enable the one that is actually
+> being used. This has serious scalibility problems when there are many
+> possible extensions and also relies more on the boot loader than I would
+> like.
 
-I think anything that relies on bootloaders (or DT for that matter) is a
-bit of a non-starter for my personal use cases.  Even where we're using
-DT relying on a sane bootloader seems a bit scary - my personal use
-cases would rely on updating this stuff in the field for non-technical
-users who would have trouble recovering from issues.
+On the other hand, some of the issues we're trying to solve here
+for the kernel are also present in the boot loader, so this needs to
+do this anyway - whether by inserting new or modifying (enabling or
+disabling) existing properties in the DT is not really relevant here.
 
-> An intermediate solution that I really like is the ability to
-> stuff device tree fragments on extension board themselves, but that
-> can only work for new designs and causes problems when that information
-> is not actually correct.
 
-I can see the theory, but I can also see some practical concerns.  And
-with the boards I'm working with we currently have 8 bits of data so...
+Best regards,
+
+Wolfgang Denk
+
+-- 
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+Our business is run on trust.  We trust you will pay in advance.
