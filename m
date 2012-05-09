@@ -1,52 +1,63 @@
-From: Alessandro Rubini <rubini@gnudd.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: Handling of modular boards
-Date: Wed, 9 May 2012 10:41:02 +0200
-Message-ID: <20120509084102.GA16228@mail.gnudd.com>
-References: <CACRpkdbyp=BNGn8Eub6vcAgB9CS5PhYcGt2foi8kNxA3oU5Fzg@mail.gmail.com>
-  <20120504185850.GO14230@opensource.wolfsonmicro.com>
-  <4FA432E9.9050606@wwwdotorg.org>
-  <20120504204455.GR14230@opensource.wolfsonmicro.com>
+Date: Wed, 9 May 2012 18:12:33 +0100
+Message-ID: <20120509171233.GL3955@opensource.wolfsonmicro.com>
+References: <20120504185850.GO14230@opensource.wolfsonmicro.com>
+ <201205041934.08830.arnd@arndb.de>
+ <CACRpkdb4LGXfJ72uODr841O7M4FGTYKa1X7y6ekeLUw9vaL=mw@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="/0D4jGRsNl8cPNu/"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CACRpkdbyp=BNGn8Eub6vcAgB9CS5PhYcGt2foi8kNxA3oU5Fzg@mail.gmail.com>
+In-Reply-To: <CACRpkdb4LGXfJ72uODr841O7M4FGTYKa1X7y6ekeLUw9vaL=mw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linus.walleij@linaro.org
-Cc: broonie@opensource.wolfsonmicro.com, swarren@wwwdotorg.org, sameo@linux.intel.com, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, grinberg@compulab.co.il, olof@lixom.net, arnd@ardb.de, linux-arm-kernel@lists.infradead.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hello.
 
->> This is another issue - a similar set of problems does apply to some PCI
->> type cards where the PCI device is essentially a bridge to a typical
->> embedded system - though practically speaking it's much less severe.
-> 
-> I think Alessandro is working on a board like that right now, so looping
-> in Ale to this discussion to get his attention...
+--/0D4jGRsNl8cPNu/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> I think Alessandro is working on a board like that right now, so looping
-> in Ale to this discussion to get his attention...
+On Tue, May 08, 2012 at 02:26:54PM +0200, Linus Walleij wrote:
+> On Fri, May 4, 2012 at 9:34 PM, Arnd Bergmann <arnd@arndb.de> wrote:
 
-Yes, that's it. The vendor of my thing has wrapped everything under
-pci headers, so the "typical embedded system", which actually is a
-demasculated ARM SoC is self-described by PCI (no need for device tree)
+> > Thanks for getting the discussion started. I've seen the same issue come
+> > up for arch/arm/mach-ux500/board-mop500*uib.c and for the beaglebone.
+> > I'm sure there are many more, but we should make sure that everyone
+> > of these can live with whatever we come up with.
 
-A previous poster said:
->>> b) Doesn't integrate well with hotplug; the DT for the board
->>> configuration is static at boot. What if a board can be unplugged and
->>> another plugged in; a reboot or similar would be needed to adjust the
->>> kernel to this.
+> The same issue sort of comes up with any system that uses the idiom
+> to have a few GPIO lines indicate in a binary code what version of the
+> board we're dealing with and what devices are thus on it, right?
 
-I think you need some enumeration mechanism in this case. Actually, I
-think this will become common in the near future, as you can reprogram
-your FPGA devices while the system runs.
+> We have this issue for the U9540 reference design and potentially
+> on the Snowball as well.
 
-The issue is real, and I'm involved in a self-description project; it
-allows to use the well-known bus abstraction (with bus controller,
-devices, drivers) to ease handling soft cores that may come and go
-while the system is alive.
+Yes, I think that's basically the same problem.
 
-Thank you Linus for involving me, I'll now go to read the whole thread
-/alessandro
+--/0D4jGRsNl8cPNu/
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJPqqV5AAoJEBus8iNuMP3dubkP/ig0bcbV70YSY3mW4Im8OwA6
+nVbGILSoGgQMQS43bbNp+lnYc0QePA5QDn1U5CXMU5ZkU370Vq1qli9HyyXJ3whn
+4B6wOmqfhaGwg66VDOdEpuFCN/rPg+dFVj1gUOZynCk7lg7AAekUw2coJ72EZcYi
+hx9+mX7teLLTWXywV+Iyf0fSbvDcMllULEdrB6Nex28dAc27TnkY5DB+nj14lHIO
+ZQMmN3nmFbcqrgZ1pqj3FICUnD1ioHvVspYVCqr2osCuDZLX1vgipxttxN8pWWT3
+ZI1hhRwtGy/Pxg4NPy2fTVNnAnZlp9CPcz6r6ug9raWq6WcWdMDTNlmEcj5Oih5e
+xU+6rapTyv3SKCk1rNpLxcp6Dprlot34kWIkHRxOFhw903jBUA8gJlToEMvfqCj8
+cA/gF8EgrKgVjfEByWgHEVWzWBAhk/Uoz9bBd3goznBMgQO28VgtrBy66v0q/5Az
+wrhs5jafVBjZ6uVP1Dopv9CF5rImjtQqpTSa/7GKqSoSIuHMctQxLSflhit179J1
+0HC1QD5YuO2FTerTDK0JnsQ09Ih3OTE7RSRnZRJp0Edo8y80wztzUlPXFZy0Jt9p
+UONT4+/bHTxobfG+msRiT7BPojPPWBZkPahI6+SCnCT8LFjxb5L6WO/SMKSSqp4I
+fyhYYgDFiVYHhJwSd+Ru
+=Q92r
+-----END PGP SIGNATURE-----
+
+--/0D4jGRsNl8cPNu/--
