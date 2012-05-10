@@ -1,61 +1,59 @@
-From: Igor Grinberg <grinberg@compulab.co.il>
+From: Stephen Warren <swarren@wwwdotorg.org>
 Subject: Re: Handling of modular boards
-Date: Thu, 10 May 2012 15:40:56 +0300
-Message-ID: <4FABB758.7000702@compulab.co.il>
-References: <20120504185850.GO14230@opensource.wolfsonmicro.com> <201205041934.08830.arnd@arndb.de> <20120504203357.6B79B206451@gemini.denx.de> <20120504220944.GT14230@opensource.wolfsonmicro.com>
+Date: Thu, 10 May 2012 10:11:05 -0600
+Message-ID: <4FABE899.9040602@wwwdotorg.org>
+References: <20120504185850.GO14230@opensource.wolfsonmicro.com> <4FA432E9.9050606@wwwdotorg.org> <20120510104311.GB30103@trinity.fluff.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <20120504220944.GT14230@opensource.wolfsonmicro.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20120510104311.GB30103@trinity.fluff.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Wolfgang Denk <wd@denx.de>, Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+To: Ben Dooks <ben@trinity.fluff.org>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Samuel Ortiz <sameo@linux.intel.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Igor Grinberg <grinberg@compulab.co.il>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@ardb.de>, linux-arm-kernel@lists.infradead.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
-
-On 05/05/12 01:09, Mark Brown wrote:
-> On Fri, May 04, 2012 at 10:33:57PM +0200, Wolfgang Denk wrote:
+On 05/10/2012 04:43 AM, Ben Dooks wrote:
+> On Fri, May 04, 2012 at 01:50:01PM -0600, Stephen Warren wrote:
+>> On 05/04/2012 12:58 PM, Mark Brown wrote:
+>>> Quite a few reference platforms (including Wolfson ones, which is why
+>>> I'm particularly interested) use replaceable modules to allow
+>>> configuration changes.  Since we can often identify the configuration at
+>>> runtime we should ideally do that but currently there's no infrastructure 
+>>> to help with that...
+>>
+>> So, I'll respond within the context of device tree, although perhaps you
+>> were looking for something more general?
+>>
+>> I was just asked basically the same question internally to NVIDIA. One
+>> option that was floated was to store the device tree in chunks and have
+>> the bootloader piece them together. You'd start with the DT for the
+>> basic CPU board, probe what HW was available, and then graft in the
+>> content of additional DT chunks and pass the final result to the kernel.
+>> The advantages here are:
+>>
+>> a) The DT is stored in chunks for each plugin board, so there's no bloat
+>> in the DT that gets passed to the kernel; it contains exactly what's on
+>> the board.
 > 
->> On the other hand, some of the issues we're trying to solve here
->> for the kernel are also present in the boot loader, so this needs to
->> do this anyway - whether by inserting new or modifying (enabling or
->> disabling) existing properties in the DT is not really relevant here.
-> 
-> FWIW if the bootloader can usefully handle this stuff I think that's a
-> good approach but there is substantial variation in quality of
-> implementation between bootloaders and even when the bootloader is a
-> good one it's not always practical to update it or the data it relies
-> on.
+> Interesting, but how does it sort ofu things like mapping GPIO lines from
+> the add-in board's view to the rest of the system?
 
-I agree on this (and also with Ben), all our boards/extensions/base boards/etc
-can be discovered in the boot loader and we will use the DT to pass
-the relevant information on the attached extensions and used base board.
+To be fully general, we'd need to have some kind of proxy GPIO object
+that always exists on the main board, for the plugin boards to provide
+GPIOs to, or consume GPIOs from.
 
-Also, most (if not all) of our boards/extensions have I2C EEPROM which
-describes the devices on that board/extension which is useful for
-building/extending the DT in the bootloader.
+The simple case of a GPIO provider being on the main board and the
+consumer being on a plugin board doesn't need this. The case of the GPIO
+provider being on a plugin board, and the only GPIO consumer being on
+the main board might not need this.
 
-- -- 
-Regards,
-Igor.
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.17 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+But if the GPIO provider is on one plugin board, and the GPIO consumer
+on another, we'd want to have the DT chunks for each plugin board be
+completely independent, so you'd need to route everything through
+something that always exists, in the motherboard's DT. I haven't really
+thought how that would look yet.
 
-iQIcBAEBAgAGBQJPq7dXAAoJEBDE8YO64Efag7sQAJ4Ipk/A24p6mO6ROtcd+q2s
-gGlEjLHeZ7sNPnwCOCakCgX7+SYXKBv6w5aWKM70eLDUfoVLu9eaUeT4sYd2fGtR
-4xFVkcYRenzkuO7MZ3GccAAF4Hg4WwMAn/3StIJU6pyBY7OmOsbqnoTa7PJjKr/J
-HwwM8g8eo3q4tg2sB5P922Fol61BK2Wo3S7I9kzHtnwUx9yW3aG2mf/ublfXHUkQ
-3RKfXrdREFJL30j9SrJzh6wVqQoE9Y7UrYs1BIiAs9AL/d2+eYgSPNKh/iBw+26f
-V+Tr8t9xPyP1b1HGUjLVtGmwWtLncws2kfYnMcjvLKgES967SRbSboqRqwJL95yR
-h9xKoVVrqC9lCXZn/uZCHmRaj/7DaPqr4/tbJefJTcU4ErS7bv/QxXARaj41SmS9
-sq8A+qefiKaleBfinmiXjoCu8QcUKmfLF8oLt52tylb/4CUnipf4jLbnQ9fdPxGB
-gQnrlg6T3WVTR7fzhOsXrgHQvocJa+3/YSYUyWbNvfjJBWFV6ZqERjTQCvhkXivG
-bbwBn6tHAol+tRAUfGudlwzcaZZGbJ+vvK/GmSCI+tSfgz++O9uvd0spklatB4ab
-NyikQLZBvSufnyWSY6Mp3iShhwgGZosxu9OGgQzclEh1tC8LQEbxOwETaRi/7uGq
-PkkXsoPrmBc0C0dO+fIc
-=icYW
------END PGP SIGNATURE-----
+I think this is probably true irrespective of whether the bootloader is
+merging the DT chunks, or the kernel did it during boot, or any other
+way of constructing the final complete DT.
