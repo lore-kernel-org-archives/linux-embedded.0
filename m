@@ -1,63 +1,47 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+From: Ben Dooks <ben@trinity.fluff.org>
 Subject: Re: Handling of modular boards
-Date: Wed, 9 May 2012 18:12:33 +0100
-Message-ID: <20120509171233.GL3955@opensource.wolfsonmicro.com>
+Date: Thu, 10 May 2012 11:43:11 +0100
+Message-ID: <20120510104311.GB30103@trinity.fluff.org>
 References: <20120504185850.GO14230@opensource.wolfsonmicro.com>
- <201205041934.08830.arnd@arndb.de>
- <CACRpkdb4LGXfJ72uODr841O7M4FGTYKa1X7y6ekeLUw9vaL=mw@mail.gmail.com>
+ <4FA432E9.9050606@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="/0D4jGRsNl8cPNu/"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CACRpkdb4LGXfJ72uODr841O7M4FGTYKa1X7y6ekeLUw9vaL=mw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <4FA432E9.9050606@wwwdotorg.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Igor Grinberg <grinberg@compulab.co.il>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Samuel Ortiz <sameo@linux.intel.com>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Igor Grinberg <grinberg@compulab.co.il>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@ardb.de>, linux-arm-kernel@lists.infradead.org
+
+On Fri, May 04, 2012 at 01:50:01PM -0600, Stephen Warren wrote:
+> On 05/04/2012 12:58 PM, Mark Brown wrote:
+> > Quite a few reference platforms (including Wolfson ones, which is why
+> > I'm particularly interested) use replaceable modules to allow
+> > configuration changes.  Since we can often identify the configuration at
+> > runtime we should ideally do that but currently there's no infrastructure 
+> > to help with that...
+> 
+> So, I'll respond within the context of device tree, although perhaps you
+> were looking for something more general?
+> 
+> I was just asked basically the same question internally to NVIDIA. One
+> option that was floated was to store the device tree in chunks and have
+> the bootloader piece them together. You'd start with the DT for the
+> basic CPU board, probe what HW was available, and then graft in the
+> content of additional DT chunks and pass the final result to the kernel.
+> The advantages here are:
+> 
+> a) The DT is stored in chunks for each plugin board, so there's no bloat
+> in the DT that gets passed to the kernel; it contains exactly what's on
+> the board.
+
+Interesting, but how does it sort ofu things like mapping GPIO lines from
+the add-in board's view to the rest of the system?
 
 
---/0D4jGRsNl8cPNu/
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+-- 
+Ben Dooks, ben@fluff.org, http://www.fluff.org/ben/
 
-On Tue, May 08, 2012 at 02:26:54PM +0200, Linus Walleij wrote:
-> On Fri, May 4, 2012 at 9:34 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-
-> > Thanks for getting the discussion started. I've seen the same issue come
-> > up for arch/arm/mach-ux500/board-mop500*uib.c and for the beaglebone.
-> > I'm sure there are many more, but we should make sure that everyone
-> > of these can live with whatever we come up with.
-
-> The same issue sort of comes up with any system that uses the idiom
-> to have a few GPIO lines indicate in a binary code what version of the
-> board we're dealing with and what devices are thus on it, right?
-
-> We have this issue for the U9540 reference design and potentially
-> on the Snowball as well.
-
-Yes, I think that's basically the same problem.
-
---/0D4jGRsNl8cPNu/
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPqqV5AAoJEBus8iNuMP3dubkP/ig0bcbV70YSY3mW4Im8OwA6
-nVbGILSoGgQMQS43bbNp+lnYc0QePA5QDn1U5CXMU5ZkU370Vq1qli9HyyXJ3whn
-4B6wOmqfhaGwg66VDOdEpuFCN/rPg+dFVj1gUOZynCk7lg7AAekUw2coJ72EZcYi
-hx9+mX7teLLTWXywV+Iyf0fSbvDcMllULEdrB6Nex28dAc27TnkY5DB+nj14lHIO
-ZQMmN3nmFbcqrgZ1pqj3FICUnD1ioHvVspYVCqr2osCuDZLX1vgipxttxN8pWWT3
-ZI1hhRwtGy/Pxg4NPy2fTVNnAnZlp9CPcz6r6ug9raWq6WcWdMDTNlmEcj5Oih5e
-xU+6rapTyv3SKCk1rNpLxcp6Dprlot34kWIkHRxOFhw903jBUA8gJlToEMvfqCj8
-cA/gF8EgrKgVjfEByWgHEVWzWBAhk/Uoz9bBd3goznBMgQO28VgtrBy66v0q/5Az
-wrhs5jafVBjZ6uVP1Dopv9CF5rImjtQqpTSa/7GKqSoSIuHMctQxLSflhit179J1
-0HC1QD5YuO2FTerTDK0JnsQ09Ih3OTE7RSRnZRJp0Edo8y80wztzUlPXFZy0Jt9p
-UONT4+/bHTxobfG+msRiT7BPojPPWBZkPahI6+SCnCT8LFjxb5L6WO/SMKSSqp4I
-fyhYYgDFiVYHhJwSd+Ru
-=Q92r
------END PGP SIGNATURE-----
-
---/0D4jGRsNl8cPNu/--
+Large Hadron Colada: A large Pina Colada that makes the universe disappear.
