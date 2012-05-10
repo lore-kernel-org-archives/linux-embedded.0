@@ -1,29 +1,28 @@
-From: Ben Dooks <ben-linux@fluff.org>
+From: Igor Grinberg <grinberg@compulab.co.il>
 Subject: Re: Handling of modular boards
-Date: Thu, 10 May 2012 11:41:36 +0100
-Message-ID: <20120510104136.GA30103@trinity.fluff.org>
-References: <20120504185850.GO14230@opensource.wolfsonmicro.com>
- <201205041934.08830.arnd@arndb.de>
- <20120504203357.6B79B206451@gemini.denx.de>
- <20120504220944.GT14230@opensource.wolfsonmicro.com>
+Date: Thu, 10 May 2012 15:40:56 +0300
+Message-ID: <4FABB758.7000702@compulab.co.il>
+References: <20120504185850.GO14230@opensource.wolfsonmicro.com> <201205041934.08830.arnd@arndb.de> <20120504203357.6B79B206451@gemini.denx.de> <20120504220944.GT14230@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <20120504220944.GT14230@opensource.wolfsonmicro.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Wolfgang Denk <wd@denx.de>, linux-embedded@vger.kernel.org, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@arndb.de>, Stephen Warren <swarren@wwwdotorg.org>, Linus Walleij <linus.walleij@linaro.org>, linux-kernel@vger.kernel.org, Igor Grinberg <grinberg@compulab.co.il>, Olof Johansson <olof@lixom.net>, Lee Jones <lee.jones@linaro.org>, Arnd Bergmann <arnd@ardb.de>, linux-arm-kernel@lists.infradead.org
+Cc: Wolfgang Denk <wd@denx.de>, Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@ardb.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-On Fri, May 04, 2012 at 11:09:45PM +0100, Mark Brown wrote:
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+On 05/05/12 01:09, Mark Brown wrote:
 > On Fri, May 04, 2012 at 10:33:57PM +0200, Wolfgang Denk wrote:
 > 
-> > On the other hand, some of the issues we're trying to solve here
-> > for the kernel are also present in the boot loader, so this needs to
-> > do this anyway - whether by inserting new or modifying (enabling or
-> > disabling) existing properties in the DT is not really relevant here.
+>> On the other hand, some of the issues we're trying to solve here
+>> for the kernel are also present in the boot loader, so this needs to
+>> do this anyway - whether by inserting new or modifying (enabling or
+>> disabling) existing properties in the DT is not really relevant here.
 > 
 > FWIW if the bootloader can usefully handle this stuff I think that's a
 > good approach but there is substantial variation in quality of
@@ -31,19 +30,32 @@ On Fri, May 04, 2012 at 11:09:45PM +0100, Mark Brown wrote:
 > good one it's not always practical to update it or the data it relies
 > on.
 
-I agree, the list of devices should be in the device-tree handed to
-whatever OS is being booted. It isn't a Linux specific problem that
-we're looking at here.
+I agree on this (and also with Ben), all our boards/extensions/base boards/etc
+can be discovered in the boot loader and we will use the DT to pass
+the relevant information on the attached extensions and used base board.
 
-Any operating system, pre-OS test suite, etc. is going going to need
-this information, and in my view the bootloader should be doing whatever
-is needed to create a device-tree to passed through to the next loaded
-system.
+Also, most (if not all) of our boards/extensions have I2C EEPROM which
+describes the devices on that board/extension which is useful for
+building/extending the DT in the bootloader.
 
-Also, having the information available to $bootloader means the user
-can verify the presence of the peripherals before the OS is loaded.
+- -- 
+Regards,
+Igor.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.17 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
 
--- 
-Ben Dooks, ben@fluff.org, http://www.fluff.org/ben/
-
-Large Hadron Colada: A large Pina Colada that makes the universe disappear.
+iQIcBAEBAgAGBQJPq7dXAAoJEBDE8YO64Efag7sQAJ4Ipk/A24p6mO6ROtcd+q2s
+gGlEjLHeZ7sNPnwCOCakCgX7+SYXKBv6w5aWKM70eLDUfoVLu9eaUeT4sYd2fGtR
+4xFVkcYRenzkuO7MZ3GccAAF4Hg4WwMAn/3StIJU6pyBY7OmOsbqnoTa7PJjKr/J
+HwwM8g8eo3q4tg2sB5P922Fol61BK2Wo3S7I9kzHtnwUx9yW3aG2mf/ublfXHUkQ
+3RKfXrdREFJL30j9SrJzh6wVqQoE9Y7UrYs1BIiAs9AL/d2+eYgSPNKh/iBw+26f
+V+Tr8t9xPyP1b1HGUjLVtGmwWtLncws2kfYnMcjvLKgES967SRbSboqRqwJL95yR
+h9xKoVVrqC9lCXZn/uZCHmRaj/7DaPqr4/tbJefJTcU4ErS7bv/QxXARaj41SmS9
+sq8A+qefiKaleBfinmiXjoCu8QcUKmfLF8oLt52tylb/4CUnipf4jLbnQ9fdPxGB
+gQnrlg6T3WVTR7fzhOsXrgHQvocJa+3/YSYUyWbNvfjJBWFV6ZqERjTQCvhkXivG
+bbwBn6tHAol+tRAUfGudlwzcaZZGbJ+vvK/GmSCI+tSfgz++O9uvd0spklatB4ab
+NyikQLZBvSufnyWSY6Mp3iShhwgGZosxu9OGgQzclEh1tC8LQEbxOwETaRi/7uGq
+PkkXsoPrmBc0C0dO+fIc
+=icYW
+-----END PGP SIGNATURE-----
