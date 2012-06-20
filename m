@@ -1,63 +1,44 @@
-From: Christophe Aeschlimann <c.aeschlimann@acn-group.ch>
-Subject: Re: Q: file system for embedded
-Date: Thu, 14 Jun 2012 16:48:57 +0200
-Message-ID: <4FD9F9D9.7080101@acn-group.ch>
-References: <CAJ2oMh++ji7YBrx6UcLdhPVDmLuTZCr8kGQR8aEAYWyob_ccBQ@mail.gmail.com> <CAJ2oMhLpMJZ_UT1Z+12s7=5hGjRbA9WNvv3CU4m9B2rDp9yr3Q@mail.gmail.com> <4FD9A22B.7060207@acn-group.ch> <CAJ2oMhKB6684j2_ZzRopCxipnUnuu9GbACCMg08OsHBJ7u6=_g@mail.gmail.com>
+From: Vishal Nandanwar <operational.people@gmail.com>
+Subject: Need help regarding the USB mass storage driver
+Date: Wed, 20 Jun 2012 15:09:20 +0530
+Message-ID: <CAKB833nfHQwdHzCFV6ELrk1-XZT-SN8WxMs=kzO=C8+6foTrDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <CAJ2oMhKB6684j2_ZzRopCxipnUnuu9GbACCMg08OsHBJ7u6=_g@mail.gmail.com>
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:date:message-id:subject:from:to:content-type;
+        bh=krNQe7pyS5WF2nCkDPdYZ1xoXNFCxJodcYx0R5nbPIA=;
+        b=qcjSPeQvKvbK1Q8uc18W4qG2C8EqSe9Rcz6/oQQWOSTBYYww3b65cHqtHLa45zDB0s
+         x8C3UY5VVzduseOqYWNz281tS9wZI7m1IBjfP1wQh3BJAJI4Wl67nfwxnnurZrQVwRso
+         I69LC0A7UdiO5kOx/MGwcYwf0us2ipbOjeTYWkORDQncdVIsH4TnGpwFlukgXRWegSq1
+         2yf9HN//dXSLUpVgjX0PBvSpl/0EDNxYbI+5PlzvTkPSkTl3PYy/6hV12wSjGUdbCJ4S
+         ujDeKfkn2bJ8eP21IrkZUKnDT3MQ21lC5DZyRXefI7S2q/D4SuwBFXwpTSJthQwEsGAZ
+         P02w==
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Ran Shalit <ranshalit@gmail.com>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Linux Docs <linux-doc@vger.kernel.org>, Linux Embedded Group <linux-embedded@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Linux USB <linux-usb@vger.kernel.org>, Platform driver x86 <platform-driver-x86@vger.kernel.org>
 
-Le 14.06.2012 14:58, Ran Shalit a =E9crit :
+Hi,
 
-=20
-> Hi Christophe,
->=20
-> Thanks for the reply.
-> I have no need to write to flash during the main application
-> execution: I will program the configuration and executable before
-> start of execution, and after initialization there is no need to writ=
-e
-> again to flash.
+I am working on a USB mass storage driver for a pen drive. I have done
+coding as per the USB_skeleton.c file provided in Linux 3.2 source
+code. I could assign the driver to pen drive when pen driver is
+inserted in USB connector.
 
+I am stuck in data transfer,  could not do the data transfer. During
+enumeration interface sub class is 06 i.e. SCSI transparent command
+set. Please find my questions below.
 
-How are you going to program the flash ? Which initialization ?
+1. Where are these SCSI transparent command set documented?
+2. Is there any sample code(apart from Linux source) which describes
+the SCSI transparent command set and mass storage driver?
+3. When I connect the pen drive and associate my driver, pop up
+doesn't appear on the screen for this device. but when default
+driver(usb_storage) is used this pop up does appear. What I need to do
+here?
 
-> What I still do not understand is why cramfs, ubifs are recommended
-> for embedded if they access the flash.
+Any thing other I need to take care here?
 
-
-=46or the reasons I gave in my previous email. I never used cramfs but =
-I
-see that it is a read-only compressed format (like supported in JFFS2)
-which decompresses your data on-the-fly before read/execution hence
-allowing to store more information if your flash is small.
-
-> Is accessing the flash not a problem in embedded linux ?=20
-
-I'm not sure what you mean here. It's not a problem, but it requires
-some care.
-
-> What does it mean using mlockall with cramfs ?
-
-
-Well if you don't have swap enabled mlockall has no effect since there
-is nowhere to swap anyway. But I'm not sure I understand your question.
-
-> Regards, Ran
-
-
-Regards,
-
---=20
-Christophe Aeschlimann
-
-Embedded Software Engineer & IT Manager
-ACN Advanced Communications Networks S.A.
-2000 - Neuch=E2tel, Switzerland
-Tel. +41 32 724 74 31
+Vishal N
