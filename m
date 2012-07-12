@@ -1,55 +1,49 @@
-From: Li Yang-R58472 <r58472@freescale.com>
-Subject: RE: rionet driver with MMIO DMA capability
-Date: Fri, 6 Jul 2012 02:51:41 +0000
-Message-ID: <94F013E7935FF44C83EBE7784D62AD3F0934AA59@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <CAFbQSaDWXTg429q-tTRvcgAEsA1OmHzFVhPNOmSRnWjMpSZfpA@mail.gmail.com>
+From: Tim Bird <tim.bird@am.sony.com>
+Subject: [announce] Embedded Linux Conference Call for Presentations
+Date: Thu, 12 Jul 2012 11:21:05 -0700
+Message-ID: <4FFF1591.5010304@am.sony.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <CAFbQSaDWXTg429q-tTRvcgAEsA1OmHzFVhPNOmSRnWjMpSZfpA@mail.gmail.com>
-Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: Vineeth <vneethv@gmail.com>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linuxppc-embedded@ozlabs.org" <linuxppc-embedded@ozlabs.org>, Wood Scott-B07421 <B07421@freescale.com>, "mporter@kernel.crashing.org" <mporter@kernel.crashing.org>
-Cc: "ranenikhil19@gmail.com" <ranenikhil19@gmail.com>, Alexandre Bounine <alexandre.bounine@idt.com>
+Content-Type: text/plain; charset="us-ascii"
+To: linux-embedded <linux-embedded@vger.kernel.org>
 
+Hello everyone,
 
+I'm writing to remind you all that the ELC Europe 2012
+Call for Presentations is currently open.  The conference
+is in November (5-7) this year, in Barcelona Spain.
+We are again co-located with LinuxCon Europe.
 
-> -----Original Message-----
-> From: Linuxppc-dev [mailto:linuxppc-dev-
-> bounces+leoli=3Dfreescale.com@lists.ozlabs.org] On Behalf Of Vineeth
-> Sent: Wednesday, July 04, 2012 1:16 AM
-> To: linux-embedded@vger.kernel.org; linuxppc-dev@lists.ozlabs.org;
-> linuxppc-embedded@ozlabs.org; Wood Scott-B07421;
-> mporter@kernel.crashing.org
-> Cc: ranenikhil19@gmail.com
-> Subject: rionet driver with MMIO DMA capability
->=20
->=20
-> Hi,
->=20
-> With kernel mainstream version 3.5.rc-5 there's SRIO low level driver
-> with DMA support for MMIO. But the rionet driver in the same kernel
-> version doesnt support MMIO.
->=20
-> We are trying to find the maximum bandwidth that we can achieve using=
- our
-> custom board's(quad MPC8641 )=A0 4-lane SRIO.
-> Now we are worried how to use this SRIO low level driver effectively =
-?
->=20
-> The RIOnet driver (with 3.5.-rc5) uses message based communication. T=
-his
-> doesnt use the DMA capability of low level driver. with this we are
-> getting a bandwidth of nearly 900Mbps, which is very less.
->=20
-> Is there any example code or modified middle ware driver for rionet/ =
-or
-> any code which uses the low level driver apis with MMIO DMA??
+We're very excited for this opportunity once again to get
+together as an industry and community, to talk about embedded
+Linux. If you have been working on some aspect of embedded
+Linux, such as security, audio, video, graphics, system size,
+bootup time, power management, distribution, build systems
+or tools, please consider submitting a proposal for the event.
 
-We provided the support for DMA in the old BSPs but didn't got the luck=
- to make it upstream.  I heard Alex (CCed) is working on an upstream-ab=
-le version of the feature.  Probably he can help to provide some code.
+The deadline for proposal submissions is August 1, which is
+coming up in just a few weeks.  It's right during vacation
+season in Europe, so please don't forget!
 
-Leo
+For details on submitting a presentation proposal, please see:
+http://events.linuxfoundation.org/events/embedded-linux-conference-europe/cfp
+
+We had a great time last year.  For examples of previous
+presentations, see: http://elinux.org/ELCE_2011_Presentations
+or look at last year's schedule:
+http://events.linuxfoundation.org/archive/2011/embedded-linux-conference-europe/schedule
+
+I look forward to hearing about the interesting things you're
+working on, and to seeing you at the event.
+
+Thanks and regards,
+ -- Tim Bird
+
+=============================
+Tim Bird
+Architecture Group Chair, CE Workgroup of the Linux Foundation
+Senior Staff Engineer, Sony Network Entertainment
+=============================
