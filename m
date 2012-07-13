@@ -1,49 +1,42 @@
-From: Tim Bird <tim.bird@am.sony.com>
-Subject: [announce] Embedded Linux Conference Call for Presentations
-Date: Thu, 12 Jul 2012 11:21:05 -0700
-Message-ID: <4FFF1591.5010304@am.sony.com>
+From: David Cullen <David.Cullen-fr0PuLqsQ4HoKIiMyRuXRw@public.gmane.org>
+Subject: Help with testing "flash-kernel" for stable release update (SRU)
+Date: Fri, 13 Jul 2012 17:30:41 +0000
+Message-ID: <50005B41.9070600@koe-americas.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-embedded-owner@vger.kernel.org>
-Sender: linux-embedded-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded <linux-embedded@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+Content-Language: en-US
+Content-ID: <5295940D81B5B8409D52A64FB3EF30E0-fr0PuLqsQ4HoKIiMyRuXRw@public.gmane.org>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: "linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org" <linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, "ubuntu-devel-discuss-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org" <ubuntu-devel-discuss-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org>, "linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 
-Hello everyone,
+Hello,
 
-I'm writing to remind you all that the ELC Europe 2012
-Call for Presentations is currently open.  The conference
-is in November (5-7) this year, in Barcelona Spain.
-We are again co-located with LinuxCon Europe.
+I submitted a patch for "flash-kernel" to Ubuntu to solve this problem:
 
-We're very excited for this opportunity once again to get
-together as an industry and community, to talk about embedded
-Linux. If you have been working on some aspect of embedded
-Linux, such as security, audio, video, graphics, system size,
-bootup time, power management, distribution, build systems
-or tools, please consider submitting a proposal for the event.
+> Kernel /boot/vmlinuz-3.4.0-1-linaro-lt-omap does not match your subarchitecture
+> omap4, therefore not writing it to flash.
 
-The deadline for proposal submissions is August 1, which is
-coming up in just a few weeks.  It's right during vacation
-season in Europe, so please don't forget!
+The problem has been reported as
 
-For details on submitting a presentation proposal, please see:
-http://events.linuxfoundation.org/events/embedded-linux-conference-europe/cfp
+    https://bugs.launchpad.net/ubuntu/+source/flash-kernel/+bug/1023952
 
-We had a great time last year.  For examples of previous
-presentations, see: http://elinux.org/ELCE_2011_Presentations
-or look at last year's schedule:
-http://events.linuxfoundation.org/archive/2011/embedded-linux-conference-europe/schedule
+I submitted a patch, but for the patch to be included in a "stable
+release update" (aka SRU), it needs to be tested on a BeagleBoard-xM.
 
-I look forward to hearing about the interesting things you're
-working on, and to seeing you at the event.
+If you are running Ubuntu on a BeagleBoard-xM, will you help me test
+this patch?
 
-Thanks and regards,
- -- Tim Bird
-
-=============================
-Tim Bird
-Architecture Group Chair, CE Workgroup of the Linux Foundation
-Senior Staff Engineer, Sony Network Entertainment
-=============================
+-- 
+Thank you,
+David Cullen
