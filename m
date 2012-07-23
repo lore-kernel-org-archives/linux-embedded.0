@@ -1,42 +1,35 @@
-From: David Cullen <David.Cullen-fr0PuLqsQ4HoKIiMyRuXRw@public.gmane.org>
-Subject: Help with testing "flash-kernel" for stable release update (SRU)
-Date: Fri, 13 Jul 2012 17:30:41 +0000
-Message-ID: <50005B41.9070600@koe-americas.com>
+From: Chris Simmonds <chris.simmonds@2net.co.uk>
+Subject: History of embedded Linux
+Date: Mon, 23 Jul 2012 16:00:05 +0100
+Message-ID: <500D66F5.5030906@2net.co.uk>
+Reply-To: chris@2net.co.uk
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-Content-Language: en-US
-Content-ID: <5295940D81B5B8409D52A64FB3EF30E0-fr0PuLqsQ4HoKIiMyRuXRw@public.gmane.org>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: "linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org" <linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, "ubuntu-devel-discuss-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org" <ubuntu-devel-discuss-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org>, "linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded <linux-embedded@vger.kernel.org>
 
-Hello,
+Hi,
 
-I submitted a patch for "flash-kernel" to Ubuntu to solve this problem:
+This is a little off-topic, but I have a bee in my bonnet about 
+documenting where "embedded Linux" came from. As a starting point, I 
+have written up a time line of key events, which is here
 
-> Kernel /boot/vmlinuz-3.4.0-1-linaro-lt-omap does not match your subarchitecture
-> omap4, therefore not writing it to flash.
+http://embedded-linux.co.uk/embedded-history
 
-The problem has been reported as
+I am aware that there is a lot that I have missed, or misunderstood, so 
+if you have a few minutes to spare perhaps you could have a look at it 
+and tell me what I have got wrong. I am not sure where I am going with 
+this, but I would like to use it as the basis of a longer document/web 
+site/garden shed on the topic of the evolution of Linux as an embedded 
+operating system.
 
-    https://bugs.launchpad.net/ubuntu/+source/flash-kernel/+bug/1023952
+Oh, one last thing. If someone has some reasonably reliable figures of 
+the numbers of Linux products shipped, that would be nice. Ideally I 
+would like a graph that goes from zero in 1995 to NNN million in 2012. I 
+know, its a dream, can't be done...
 
-I submitted a patch, but for the patch to be included in a "stable
-release update" (aka SRU), it needs to be tested on a BeagleBoard-xM.
-
-If you are running Ubuntu on a BeagleBoard-xM, will you help me test
-this patch?
-
--- 
-Thank you,
-David Cullen
+Bye for now,
+Chris Simmonds
