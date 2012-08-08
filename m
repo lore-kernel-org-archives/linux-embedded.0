@@ -1,23 +1,24 @@
-From: Jassi Brar <jaswinder.singh@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: block: mmcblkN: use slot index instead of
- dynamic name index
-Date: Mon, 6 Aug 2012 21:45:54 +0530
-Message-ID: <CAJe_Zhes3u0xSK9g+-MAd9MSRn2Tsg1v8OnA9rNCbgOfj+kPBQ@mail.gmail.com>
-References: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com>
-	<8739402g1m.fsf@octavius.laptop.org>
+From: Dirk Behme <dirk.behme@de.bosch.com>
+Subject: Re: [PATCH 1/2] mmc: block: mmcblkN: use slot index instead of dynamic
+ name index
+Date: Wed, 8 Aug 2012 08:12:22 +0200
+Message-ID: <50220346.4030606@de.bosch.com>
+References: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com> <8739402g1m.fsf@octavius.laptop.org>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
 In-Reply-To: <8739402g1m.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
 To: Chris Ball <cjb@laptop.org>
-Cc: Dirk Behme <dirk.behme@de.bosch.com>, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-embedded@vger.kernel.org
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linaro-dev@lists.linaro.org" <linaro-dev@lists.linaro.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>
 
-On 6 August 2012 21:01, Chris Ball <cjb@laptop.org> wrote:
+Hi Chris,
+
+On 06.08.2012 17:31, Chris Ball wrote:
 > Hi,
->
+> 
 > On Mon, Aug 06 2012, Dirk Behme wrote:
 >> On embedded devices, often there is a combination of removable mmc
 >> devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
@@ -35,12 +36,19 @@ On 6 August 2012 21:01, Chris Ball <cjb@laptop.org> wrote:
 >> ensuring that the non-removable mmc device is associated always
 >> with the same mmcblkN. Independent of the availability of the removable
 >> one.
->
-> I like this change in principle, but doesn't it break boot for everyone
+> 
+> I like this change in principle,
+
+Thanks :)
+
+> but doesn't it break boot for everyone
 > currently using e.g. root=/dev/mmcblk0p1 on slot index 2?  That doesn't
 > sound like an acceptable regression.
->
-It shouldn't break boot for any user already doing the right thing.
-If the user's platform probes only slot-2, it will still be 'mmcblk0'
-If the platform probes slot-1 & 2, it is fundamentally unsafe to count
-upon the card in slot-2 to be enumerated before the one in slot-1.
+
+I'm not really an expert of the code in block.c. Could you imagine a 
+change which has the same result we'd like to get with the proposed 
+patch but doesn't have the regression you mention?
+
+Many thanks and best regards
+
+Dirk
