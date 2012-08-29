@@ -1,43 +1,39 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
+From: Brad Arnold <brad@check-it.ca>
 Subject: Re: Expose system Serial Number to userspace.
-Date: Wed, 29 Aug 2012 19:07:10 +0200
-Message-ID: <503E4C3E.3030608@gmail.com>
-References: <09ee18b0d2e3d7f34a9e510b3f8d7702@mail.gmail.com> <503E3DDB.8050708@gmail.com> <75d49b059819c35d03995bd86e72d6fb@mail.gmail.com>
+Date: Wed, 29 Aug 2012 14:47:02 -0600
+Message-ID: <CADoavCcgYy_PrGkiO3rGZNvg6C1uKFQtqHffR=BviPKiWjdgvQ@mail.gmail.com>
+References: <09ee18b0d2e3d7f34a9e510b3f8d7702@mail.gmail.com>
+	<alpine.LFD.2.02.1208291143101.1784@xanadu.home>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=message-id:date:from:user-agent:mime-version:to:cc:subject
-         :references:in-reply-to:content-type:content-transfer-encoding;
-        bh=h++XL5HzqoJ5dsevc6eGM7eSoq2+lhMklgXSj7HINhs=;
-        b=x2Awv8MzRgdvpSjHLCZy0/IYDSeSJdtPTg1l2M0ju7TY2uwnnq34b1cXfLnblVrw1M
-         Odo9CcAGn3Ao2AbgHAJM6sL1gU9PfaORnEmU94MmwrOU6UeIgzM+IfKIR9oUxaH98Yiy
-         MSgyuwWSxAmxeBY8La20T6HL7bUU37seat/YS5VVOb8Oi3NSO8+/VZGZ/nG+B1WZvCZG
-         AC/6mfFGDvq0vnCMbpmYv/+MbzhoLenVWBoWbVqEKyIySgFQNB8hAWCYU/qOLm7X7Es2
-         cJwGmf7mLAmgOWRvEInZ+VRQrMXDaj0bu4PPvAd09c9Z4vH554cGOOV5R4Pgr7ngapIH
-         lo4g==
-In-Reply-To: <75d49b059819c35d03995bd86e72d6fb@mail.gmail.com>
+In-Reply-To: <alpine.LFD.2.02.1208291143101.1784@xanadu.home>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Brad Arnold <brad@check-it.ca>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Nicolas Pitre <nico@fluxnic.net>
 Cc: linux-embedded@vger.kernel.org
 
-Il 29/08/2012 18:57, Brad Arnold ha scritto:
-> That'll help me move along. I'm currently storing the mac and serial in
-> the u-boot environment, but I was thinking I might want to move those two
-> to the OTP. But at least having some level of write protection in u-boot
-> is nice. I wasn't aware that this existed, because it's disabled by
-> default in the config for Marvell boards.
+On Wed, Aug 29, 2012 at 9:50 AM, Nicolas Pitre <nico@fluxnic.net> wrote:
 >
-> I'll have to look at that example program futher...
+> On Wed, 29 Aug 2012, Brad Arnold wrote:
 >
-> Brad
+> > Hi,
+> >
+> > I'm working on an embedded board which uses u-boot + linux. At
+> > manufacturing time, the device serial number will be programmed into OTP
+> > memory on NAND (probably from within u-boot). We'd like the linux kernel
+> > to make this serial number available to be read from userspace. Is there
+> > an accepted method to do this sort of thing?
+>
+> A serial number field is available from /proc/cpuinfo already.  you just
+> have to initialize it through the system_serial_high and
+> system_serial_low global variables.
 >
 >
+> Nicolas
 
-(Please no top-posting). Of course, if you have got a separate flash 
-partition for the uboot env, you can map it read-only in linux, it's safer.
+Actually, I guess even better than initializing through the two
+variables is to pass the serial directly from u-boot using the tag.
 
-Marco
+Brad
