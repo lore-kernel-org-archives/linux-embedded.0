@@ -1,64 +1,72 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: [FOSDEM] Embedded and mobile devroom CFP
-Date: Tue, 13 Nov 2012 18:54:36 +0100
-Message-ID: <CAMuHMdW01kOof+Z24_oywFaOJJa-y7faFJOf8XD=L80BF_66vQ@mail.gmail.com>
+From: Alexander Varnin <fenixk19@mail.ru>
+Subject: Need help adding platform UIO devices to board
+Date: Wed, 28 Nov 2012 22:53:23 +0400
+Message-ID: <50B65DA3.9000707@mail.ru>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=mime-version:sender:date:x-google-sender-auth:message-id:subject
-         :from:to:content-type;
-        bh=qyuUOTcP+w4AtslAmb+JM7AE23iLtgVNAiU1fQ9Qx+s=;
-        b=vUAVAPPwfZGHqA13HiroCu5tNTPqzX3AEJhI2pLe39lX/gR3x1TiRkJhUHyrk3rCKx
-         NkjzfuSrb3Xe2h8QtY3vFG0HMScPHhbw5i7XPcV/lKbdPEHhwTSB9CmG4YqJJsiPqjk4
-         Ow1Rap8qyz4tNI5KHBWPR5eZTtw1CtQhJH+G91W1HK+AJvaXSwJXOf3QG/6M66QfbSo+
-         UyziHUbCVWIvQWr025DfEPTfvezvJ6TX+cYO6QKAn7DJxtMH+xExNZkK2VkhE90AEDPN
-         3fE601sz1dLupMczzCGOxYD7aPyuaERAHy/ucRAwG9awGQE63p7uEqeBLLTyxSwDqv/Y
-         SJWg==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mail.ru; s=mail;
+	h=Content-Transfer-Encoding:Content-Type:Subject:To:MIME-Version:From:Date:Message-ID; bh=Nvf30NS+jmTjAenjZgpb9WI4Mh4ga/hSbKuamscK3eo=;
+	b=rdJjg+Jku3VKUt3fLAjp5Ihn0RB39hIq7w/AFimVP74yARo7JB2M5M9S1qVz+XYNL5X/y+DmGXHpm2CMN0v+8vmUB+kZCIoHqGuHGT0aBeSbusD9czxrd4yMBTUr84LL;
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: CE Linux Developers List <celinux-dev@lists.celinuxforum.org>, Linux Embedded <linux-embedded@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-Every year there is a special dedicated track for embedded and mobile
-projects at Fosdem (see: http://www.fosdem.org/). If you are interested to
-highlight or give a talk about your project check out the cfp.
+Hello!
+I'm trying to add UIO device to my system to handle interrupt. But i'm
+facing following problem. Docs says, on reading device /dev/uio0 it will
+block until interrupt occurs. I've made simple program for test. It
+tries to write 1 to enable interrupts.
 
-FOSDEM will be held the 2nd and 3th of February 2013 in Brussels,
-Belgium. As usual and for the 10th time there will be an embedded and
-mobile room.
-For this years program we are looking for people who would like to do
-a presentation about their or their community's projects in this area.
-These projects must be Free Software or Open Source.
-For example involvement and experiences with projects like Arduino,
-Tizen, Jolla, Mer, Beagleboard, Openembedded, Android, OpenWrt, Yocto,
-Linaro... Kernel hacks for maximising memory usage, using filesystems
-on flash, power management, ...
-We are also interested in short tutorials, project overviews,
-achievements, ports to new hardware and hardware hacking, real life
-deployments, ... all are welcome and all submissions will be reviewed
-by our panel.
-Submissions require a small abstract and short speaker presentation
-and should be submitted to fosdem.embedded at gmail.com before the 25th
-of December 2012
+    #include <unistd.h>
+    #include <errno.h>
+    #include <fcntl.h>
+    #include <stdio.h>
 
-The panel consists of:
+    int main()
+    {
+        int fd;
+        char c = 1;
+        fd = open("/dev/uio0", O_RDONLY);
+        if (fd<0) {
+            printf("open error: %d\n", errno);
+             return 0;
+        }
+        printf("fd == %d\n", fd);
+        int res = write(fd, &c, 1);
+        if(res<0) {
+            printf("write error: %d\n", errno);
+        }
+        return 0;
+    }
 
-Philippe De Swert
-Peter De Schrijver
-Thomas Petazzoni
-Geert Uytterhoeven
+And as the output i get
 
-Thanks!
+    fd ==
+    3                                                                        
 
-Gr{oetje,eeting}s,
+    write error: 9 
 
-                        Geert
+error 9 means "bad file descriptor". File /dev/uio0 is here.
+/sys/class/uio/uio0 folder i also. Reading are fails the same way.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+Here is how i add device to the system in board specific code
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+    static struct uio_info cross_uio_info = {
+       .name = "uio_mcross",
+       .version = "0.1",
+       .irq = IRQ_EINT14,
+       .irq_flags = 0,
+    };
+
+    static struct platform_device minipos_cross_device = {
+        .name          = "uio_pdrv_genirq",
+        .id          = -1,
+        .dev              = {
+          .platform_data = &cross_uio_info,
+        }
+    };
+
+and then add platform device.
+Please, help.
