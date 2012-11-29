@@ -1,55 +1,33 @@
-From: Nicholas Mc Guire <der.herr@hofr.at>
+From: Alexander Varnin <fenixk19@mail.ru>
 Subject: Re: Need help adding platform UIO devices to board
-Date: Wed, 28 Nov 2012 20:03:53 +0100
-Message-ID: <20121128190353.GA20385@opentech.at>
-References: <50B65DA3.9000707@mail.ru>
+Date: Thu, 29 Nov 2012 13:29:49 +0400
+Message-ID: <50B72B0D.80904@mail.ru>
+References: <50B65DA3.9000707@mail.ru> <20121128190353.GA20385@opentech.at>
 Mime-Version: 1.0
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <50B65DA3.9000707@mail.ru>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mail.ru; s=mail;
+	h=Content-Transfer-Encoding:Content-Type:In-Reply-To:References:Subject:CC:To:MIME-Version:From:Date:Message-ID; bh=LEyjbzDjFyCKyuM3vZO37UBWctFYshIK75cWCV1O6rI=;
+	b=3ebwlTAa+aqAAiiRKV0k/VUXV+5J3ZGvgdqEhkR6/H89AalgjygAM9yBZDDipivSFffybXcvImlGNHXkwvVUMjF0p0/nJGHMD7O6Q2XPbu6YL+Iz0TNFrixnM9uIBbcm;
+In-Reply-To: <20121128190353.GA20385@opentech.at>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Alexander Varnin <fenixk19@mail.ru>
+Content-Type: text/plain; charset="utf-8"; format="flowed"
+To: Nicholas Mc Guire <der.herr@hofr.at>
 Cc: linux-embedded@vger.kernel.org
 
-On Wed, 28 Nov 2012, Alexander Varnin wrote:
-
-> Hello!
-> I'm trying to add UIO device to my system to handle interrupt. But i'm
-> facing following problem. Docs says, on reading device /dev/uio0 it will
-> block until interrupt occurs. I've made simple program for test. It
-> tries to write 1 to enable interrupts.
-> 
->     #include <unistd.h>
->     #include <errno.h>
->     #include <fcntl.h>
->     #include <stdio.h>
-> 
->     int main()
->     {
->         int fd;
->         char c = 1;
->         fd = open("/dev/uio0", O_RDONLY);
->         if (fd<0) {
->             printf("open error: %d\n", errno);
->              return 0;
->         }
->         printf("fd == %d\n", fd);
->         int res = write(fd, &c, 1);
->         if(res<0) {
->             printf("write error: %d\n", errno);
->         }
->         return 0;
->     }
+28.11.2012 23:03, Nicholas Mc Guire =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> open O_RDONLY and then write to it ?
 >
-open O_RDONLY and then write to it ?
-
-return of 9 == EBADF
-
-man 2 write
-
- EBADF  fd is not a valid file descriptor or is not open for writing.
-
-hofrat 
+> return of 9 =3D=3D EBADF
+>
+> man 2 write
+>
+>   EBADF  fd is not a valid file descriptor or is not open for writing=
+=2E
+>
+> hofrat
+Yes, sorry, stupid mistake.
+But with the correct rights O_RDWR i get error 22 EINVAL both on read=20
+and write.
+So problem is still there.
