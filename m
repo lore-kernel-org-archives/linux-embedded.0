@@ -1,40 +1,90 @@
-From: Alexander Varnin <fenixk19@mail.ru>
-Subject: Re: Need help adding platform UIO devices to board
-Date: Thu, 29 Nov 2012 13:47:25 +0400
-Message-ID: <50B72F2D.30101@mail.ru>
-References: <50B65DA3.9000707@mail.ru> <20121128190353.GA20385@opentech.at> <50B72B0D.80904@mail.ru>
+From: "zhaoyilong" <registcn@gmail.com>
+Subject: opening DEBUG in compressed/head.S, kernel crashed
+Date: Sun, 13 Jan 2013 20:38:39 +0800
+Message-ID: <CDB1F2C87B4043CEB341E2066361C326@VIU9IM6TKCWEEDX>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mail.ru; s=mail;
-	h=Content-Transfer-Encoding:Content-Type:In-Reply-To:References:Subject:CC:To:MIME-Version:From:Date:Message-ID; bh=KZoB1B9mK6QzDkOJVakg/0cfM5zu2DSK434/mDFjd/s=;
-	b=1TQFQl/P4WneGrjqUf3cN1rg6YKfOc/VWgQEEUiC9I707owlRAz9wizujDWZ1zy6At6Ih6K0vYRHgpAb5dbGM1zRBjWXDa2RvutEPlUacLQtnlO1EiLXLU+QybmEFIsN;
-In-Reply-To: <50B72B0D.80904@mail.ru>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=x-received:message-id:from:to:subject:date:x-priority
+         :x-msmail-priority:x-mailer:x-mimeole:x-rfc2646;
+        bh=6iIXED9LeHVf0lGwLTkseRHnzjyQuznHfSnAu0LBdRY=;
+        b=0Mq9x089Y7ohzHdA4oE11nKWubOo4Zu64JRCl/OUB8MrBHEDOhH1nXsYz4It923lpg
+         dPh2BFt0m7DsiOb91K4sWzF6fIQgtz1B6R9wHJ6+5mqvcnC93Y5JwYpniKnmoM1qc2mP
+         cydXMuPAFK5Efy95qphYRZ6Koc0i3U4XXsvQ0zWsr6z4jc/Wq95BAq4X+z3mbqsBV08F
+         HbsTMjUu/4EjZFYgybDYFKi4eTIj8uSJEqEkTeF6AmTS4c3Wse4c//Xz9WanjMMDVlLK
+         gcS2C4Nj7YQ5M33y2rukCskGVKrhDFHaoyK2LlWh72BJjHgbKHYp13ddN2LAGmmJDg/y
+         qjwg==
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="utf-8"; format="flowed"
-To: Nicholas Mc Guire <der.herr@hofr.at>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset="iso-8859-1"
+To: linux- embedded <linux-embedded@vger.kernel.org>
 
-29.11.2012 13:29, Alexander Varnin =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> 28.11.2012 23:03, Nicholas Mc Guire =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> Yes, sorry, stupid mistake.
-> But with the correct rights O_RDWR i get error 22 EINVAL both on read=
-=20
-> and write.
-> So problem is still there.
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe=20
-> linux-embedded" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-Seems to be solved.
+ When I open the macro DEBUG in the front of  file
+arch/arm/boot/decompressed/head.S,the kernel runs and stops at"Uncompre=
+ssing
+Linux... done, booting the kernel."
+CONFIG_DEBUG_ICEDCC is closed by default, so I am sure  the code runs t=
+othe
+following branch:
+=2E..........
+=2E..........
+=2E..........
+=2Emacro kputc,val
+mov r0, \val
+bl putc
+=2Eendm
 
-Problem was due to lines
+=2Emacro kphex,val,len
+mov r0, \val
+mov r1, #\len
+bl phex
+=2Eendm
 
-if (count !=3D sizeof(s32))
-return -EINVAL;
+=2Emacro debug_reloc_start
+#ifdef DEBUG
+kputc #'\n'
+kphex r6, 8 /* processor id */
+kputc #':'
+kphex r7, 8 /* architecture id */
+=2E..........
+=2E..........
+=2E..........
 
-in uio_read kernel function.
+Problem is happened in a context like this:
 
-I've made read of 4 bytes, and it is ok.
+    I have a board use cpu S5PV210,and an ok kernel provide by the fact=
+ory
+anda  kernel download from kernel.org which carshed after printing "sta=
+rting
+kernel..." to dnw.
+    To debug this,I want to test the macro kputc provided in this file=A1=
+=AA=A1=AA
+using ok kernel.
+I add a line "kputc #'a' " after the tag ".text", then make error says
+"undefined reference to `putc' ",it seems that compiler cant find "putc=
+"
+used in
+the definition of macro =A1=B0kputc=A1=B1.
+    This is an ok kernel,so I cant say the serial port is not open=A1=AA=
+=A1=AAcan
+this mean "putc" is defined already?.
+
+So I open DEBUG hoping to see debugging info by kernel itself,but it st=
+ops
+at"Uncompressing Linux... done, booting the kernel."
+Opening DEBUG will lead to the call of =A1=B0kputc #'\n' =A1=B1 in the =
+code above
+which will also call putc!
+
+Here,my questions comes:
+
+1=A1=A2Why the error "  undefined reference to `putc'  " disappeared?
+2=A1=A2Why it stops at"Uncompressing Linux... done, booting the kernel.=
+"?
+3=A1=A2Can this error ( undefined reference to `putc'  ) mean the seria=
+l port is
+not open? Where is it defined ?
+Is it refer to the C function or just an assembly macro=A3=BF=20
+
