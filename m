@@ -1,7 +1,7 @@
 From: "zhaoyilong" <registcn@gmail.com>
-Subject: opening DEBUG in compressed/head.S, kernel crashed
-Date: Sun, 13 Jan 2013 20:38:39 +0800
-Message-ID: <CDB1F2C87B4043CEB341E2066361C326@VIU9IM6TKCWEEDX>
+Subject: [head.S]open DEBUG in compressed/head.S, kernel crashed...
+Date: Mon, 14 Jan 2013 09:32:57 +0800
+Message-ID: <4052303313A346B080201EF904FAFE13@VIU9IM6TKCWEEDX>
 Mime-Version: 1.0
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
@@ -9,19 +9,19 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20120113;
         h=x-received:message-id:from:to:subject:date:x-priority
          :x-msmail-priority:x-mailer:x-mimeole:x-rfc2646;
-        bh=6iIXED9LeHVf0lGwLTkseRHnzjyQuznHfSnAu0LBdRY=;
-        b=0Mq9x089Y7ohzHdA4oE11nKWubOo4Zu64JRCl/OUB8MrBHEDOhH1nXsYz4It923lpg
-         dPh2BFt0m7DsiOb91K4sWzF6fIQgtz1B6R9wHJ6+5mqvcnC93Y5JwYpniKnmoM1qc2mP
-         cydXMuPAFK5Efy95qphYRZ6Koc0i3U4XXsvQ0zWsr6z4jc/Wq95BAq4X+z3mbqsBV08F
-         HbsTMjUu/4EjZFYgybDYFKi4eTIj8uSJEqEkTeF6AmTS4c3Wse4c//Xz9WanjMMDVlLK
-         gcS2C4Nj7YQ5M33y2rukCskGVKrhDFHaoyK2LlWh72BJjHgbKHYp13ddN2LAGmmJDg/y
-         qjwg==
+        bh=WSOcUOhLlNf3IRA7ydHWdlM+yvKDQvvYx6EpD42tJW4=;
+        b=QZM0kOZGkR4MqIrnTx8ekQq4Z+C4bTy4sm+5hq/tcEnACuZhu2qI/dc6bW7orIO85J
+         y2ONBaWb7PMYjhpJHVMfe3Rc8P6kmjDW1K00GWI+MZKp3azlvY5MelXIMHNntxEqHNqE
+         7/6OOH8753R0iWD7vfFetUowd98fbl+lP21+9vrCDqpySEcSBacWF04BlDpony9mBrhf
+         CQIWSxO2d3qQ6wwume/RauSwJG5lFx9uBrSnF5kF9zvEDwqEvQsS4NvftzfB02mcIWZG
+         GuAFwWg6sqDCG9tIBMBEnE/e8DYifGtag210a0Du7EcE3LUgdbsuXjxMsvAkQ+Kv3I+q
+         xLew==
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: TEXT/PLAIN; charset="iso-8859-1"
 To: linux- embedded <linux-embedded@vger.kernel.org>
 
- When I open the macro DEBUG in the front of  file
+When I open the macro DEBUG in the front of  file
 arch/arm/boot/decompressed/head.S,the kernel runs and stops at"Uncompre=
 ssing
 Linux... done, booting the kernel."
@@ -86,5 +86,5 @@ Here,my questions comes:
 3=A1=A2Can this error ( undefined reference to `putc'  ) mean the seria=
 l port is
 not open? Where is it defined ?
-Is it refer to the C function or just an assembly macro=A3=BF=20
+Is it refer to the C function or just an assembly macro=A3=BF
 
