@@ -1,33 +1,37 @@
-From: "zhaoyilong" <registcn@gmail.com>
-Subject: I can only receive email from lkml,why?
-Date: Tue, 15 Jan 2013 14:51:05 +0800
-Message-ID: <DEF31CF8E8D94A6DBE84EC341CC50655@VIU9IM6TKCWEEDX>
+From: "Steven J. Hill" <sjhill@realitydiluted.com>
+Subject: Re: I can only receive email from lkml,why?
+Date: Tue, 15 Jan 2013 09:19:01 -0600
+Message-ID: <50F57365.90000@realitydiluted.com>
+References: <DEF31CF8E8D94A6DBE84EC341CC50655@VIU9IM6TKCWEEDX>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=x-received:message-id:from:to:cc:subject:date:x-priority
-         :x-msmail-priority:x-mailer:x-mimeole:x-rfc2646;
-        bh=7OTypTeV6/oN0ikmCT66a+DP0Uodz0YmfVrdVm63Lyw=;
-        b=ZnFckS1NCrp4/jIsYKNFzIRpj/ccDAI9Z8uD0ug1QOcd/Ac6Ex2g6SNvkmdl3+EXL0
-         98ST9gV5s0HnY5F6cic5U/yU73ax5OuVOAlVtaM10MqvlbK2gz2UyEbX9vvG74KFgPJW
-         Y3BlYvHw8nnv3IJTyevxLLM5FhlE97u/qosWZyNOvYf9PCfXOW0gyedOmW1FXl2qbYkr
-         ezwbRkhj2Zh54oB/OQaY7p4hMsRQYdEyXVHgLPqfEkzk0C7YYuhcWvVPYilqfYguFujG
-         5hLZxOFMClmEdnTtkV3mb21HUypH9Sp+GFl6BVCM8joiGdcVhRNy9PkbzIjj0FnERHCI
-         D+kg==
+In-Reply-To: <DEF31CF8E8D94A6DBE84EC341CC50655@VIU9IM6TKCWEEDX>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: chuansheng.liu@intel.com
-Cc: linux- embedded <linux-embedded@vger.kernel.org>
+To: zhaoyilong <registcn@gmail.com>
+Cc: chuansheng.liu@intel.com, linux- embedded <linux-embedded@vger.kernel.org>
 
-Are you chinese?
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-Sorry to disturb you for a simple question.
+On 01/15/2013 12:51 AM, zhaoyilong wrote:
+> Are you chinese?
+> 
+> Sorry to disturb you for a simple question.
+> 
+> I have set text coded with utf-8 and use plain text rather than html.
+> 
+> But why cant I receive email from lkml? thx!
+> 
+Because this is the 'linux-embedded' mailing list?
 
-I have set text coded with utf-8 and use plain text rather than html.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
 
-But why cant I receive email from lkml?
-thx!
-
+iEYEARECAAYFAlD1c2UACgkQgyK5H2Ic36dGbQCdFQDjebWU09dOE58CdVjdP9ri
+WDEAn158GtamdlM2eSfqF5tcsPzm4MMj
+=Epva
+-----END PGP SIGNATURE-----
