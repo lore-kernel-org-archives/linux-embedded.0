@@ -1,62 +1,63 @@
-From: "zhaoyilong" <registcn@gmail.com>
+From: "Vladimir Murzin" <murzin.v@gmail.com>
 Subject: Re: I can only receive email from lkml,why?
-Date: Wed, 16 Jan 2013 15:05:18 +0800
-Message-ID: <332D9BE41E234CB9A30949E739F17209@VIU9IM6TKCWEEDX>
-References: <DEF31CF8E8D94A6DBE84EC341CC50655@VIU9IM6TKCWEEDX> <50F57365.90000@realitydiluted.com>
+Date: Wed, 16 Jan 2013 07:45:28 +0000
+Message-ID: <469714033-1358322345-cardhu_decombobulator_blackberry.rim.net-727621543-@b18.c12.bise7.blackberry>
+References: <DEF31CF8E8D94A6DBE84EC341CC50655@VIU9IM6TKCWEEDX>
+  <50F57365.90000@realitydiluted.com>
+  <332D9BE41E234CB9A30949E739F17209@VIU9IM6TKCWEEDX>
+Reply-To: murzin.v@gmail.com
+Mime-Version: 1.0
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20120113;
-        h=x-received:message-id:from:to:references:subject:date:x-priority
-         :x-msmail-priority:x-mailer:x-rfc2646:x-mimeole;
-        bh=/M5S7Hez7b6ynwGwdg2cXmCLCTVu8QXQjRRTDNGh8OM=;
-        b=DLN9kEKb6iLOALjx9G1fdBgXABja3GtClu7cxuBUbR+JpGfuRqg+KWt2+1355qjeCp
-         cdv7QepAbjtJqvAsNOfDAkPpjFOV20Dl23AapxQcOSVc62yP8lZQ/IuxFNh8C+XSGVGi
-         gJJ/NdrcFYxbzofRxgQaqTWJdITppNXKBTpmfugnqtWMxLtEGkdf0+ib8r95rCI+V87V
-         Bp1fc3PwZmnaJlBB3oOHBb62kJSU2iMf/s2xvpxHdAlMiXEFdeXr9aGLvvpjHKrYUkxr
-         yi7wfMKARSM9THQNSATbW4u/KmmTplt40nZdWxbfKUWHxQiA7lgmcWEXpBjnLjUt5IUi
-         mkhw==
+        h=x-received:x-rim-org-msg-ref-id:message-id
+         :content-transfer-encoding:reply-to:x-priority:references
+         :in-reply-to:sensitivity:importance:subject:to:from:date
+         :content-type:mime-version;
+        bh=vUs2UcaV8uGx+Oy3yfg9GExTXfnahHcIwIvpOpQe07Y=;
+        b=E23Gdy0I0GKDTSXTM1lYD75O+mMq9ENqVW5d+u8GPxgcNpVCWSAD9pV7H8JqEhcw36
+         O8ipuD9PJB2TF7QfhbEcuFcv3tHFV02BuL9AodSShNZszE2i3o3KPALyURdYiR/FDfqF
+         gsNEFFrzlybcxYi8IiD32aUHl2vW15c/5LolfQT031AIrxki0cNuxD0oxK8SdAVH+jiq
+         afgcjKFWfdPhWfz6r5sRA3X98Xv/+hZDocQ6JKSSD+DZN0Js+dVTd15+GGWcfHjQTAFK
+         VLEYD4z0ZDz2k9M8gcttuIRoFDoE/GzNLSDfSvspo6iYZj7sbtb7EnOlH/8AhKnzYqCu
+         ym2A==
+In-Reply-To: <332D9BE41E234CB9A30949E739F17209@VIU9IM6TKCWEEDX>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: linux- embedded <linux-embedded@vger.kernel.org>, "Steven J. Hill" <sjhill@realitydiluted.com>
+To: zhaoyilong <registcn@gmail.com>, linux-embedded-owner@vger.kernel.org, linux- embedded <linux-embedded@vger.kernel.org>, "Steven J. Hill" <sjhill@realitydiluted.com>
 
-sorry,but I mean all the lists from majordomo.
-Since you can see a email semd to someone(not you) and copy to 
-linux-embeded,is that mean I am successed in joining to this list?
-
-But nobody answer my first question emailed.Is it because my question too 
-easy? nobody answer easy question ,is this a normal phenomenon?
------ Original Message ----- 
-From: "Steven J. Hill" <sjhill@realitydiluted.com>
-To: "zhaoyilong" <registcn@gmail.com>
-Cc: <chuansheng.liu@intel.com>; "linux- embedded" 
-<linux-embedded@vger.kernel.org>
-Sent: Tuesday, January 15, 2013 11:19 PM
-Subject: Re: I can only receive email from lkml,why?
-
-
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA1
->
-> On 01/15/2013 12:51 AM, zhaoyilong wrote:
->> Are you chinese?
->>
->> Sorry to disturb you for a simple question.
->>
->> I have set text coded with utf-8 and use plain text rather than html.
->>
->> But why cant I receive email from lkml? thx!
->>
-> Because this is the 'linux-embedded' mailing list?
->
-> -----BEGIN PGP SIGNATURE-----
-> Version: GnuPG v1.4.11 (GNU/Linux)
-> Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
->
-> iEYEARECAAYFAlD1c2UACgkQgyK5H2Ic36dGbQCdFQDjebWU09dOE58CdVjdP9ri
-> WDEAn158GtamdlM2eSfqF5tcsPzm4MMj
-> =Epva
-> -----END PGP SIGNATURE----- 
-
+SEkhDQoNCkhhdmUgeW91IGNoZWNrZWQgc2V0dGluZ3MgZm9yIHlvdXIgc3BhbSBmaWx0ZXI/DQoN
+CkJlc3Qgd2lzaGVzDQpWbGFkaW1pcg0KLS0NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+CkZyb206CSJ6aGFveWlsb25nIiA8cmVnaXN0Y25AZ21haWwuY29tPg0KU2VuZGVyOglsaW51eC1l
+bWJlZGRlZC1vd25lckB2Z2VyLmtlcm5lbC5vcmcNCkRhdGU6CVdlZCwgMTYgSmFuIDIwMTMgMTU6
+MDU6MTggDQpUbzogbGludXgtIGVtYmVkZGVkPGxpbnV4LWVtYmVkZGVkQHZnZXIua2VybmVsLm9y
+Zz47IFN0ZXZlbiBKLiBIaWxsPHNqaGlsbEByZWFsaXR5ZGlsdXRlZC5jb20+DQpTdWJqZWN0OiBS
+ZTogSSBjYW4gb25seSByZWNlaXZlIGVtYWlsIGZyb20gbGttbCx3aHk/DQoNCnNvcnJ5LGJ1dCBJ
+IG1lYW4gYWxsIHRoZSBsaXN0cyBmcm9tIG1ham9yZG9tby4NClNpbmNlIHlvdSBjYW4gc2VlIGEg
+ZW1haWwgc2VtZCB0byBzb21lb25lKG5vdCB5b3UpIGFuZCBjb3B5IHRvIA0KbGludXgtZW1iZWRl
+ZCxpcyB0aGF0IG1lYW4gSSBhbSBzdWNjZXNzZWQgaW4gam9pbmluZyB0byB0aGlzIGxpc3Q/DQoN
+CkJ1dCBub2JvZHkgYW5zd2VyIG15IGZpcnN0IHF1ZXN0aW9uIGVtYWlsZWQuSXMgaXQgYmVjYXVz
+ZSBteSBxdWVzdGlvbiB0b28gDQplYXN5PyBub2JvZHkgYW5zd2VyIGVhc3kgcXVlc3Rpb24gLGlz
+IHRoaXMgYSBub3JtYWwgcGhlbm9tZW5vbj8NCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0g
+DQpGcm9tOiAiU3RldmVuIEouIEhpbGwiIDxzamhpbGxAcmVhbGl0eWRpbHV0ZWQuY29tPg0KVG86
+ICJ6aGFveWlsb25nIiA8cmVnaXN0Y25AZ21haWwuY29tPg0KQ2M6IDxjaHVhbnNoZW5nLmxpdUBp
+bnRlbC5jb20+OyAibGludXgtIGVtYmVkZGVkIiANCjxsaW51eC1lbWJlZGRlZEB2Z2VyLmtlcm5l
+bC5vcmc+DQpTZW50OiBUdWVzZGF5LCBKYW51YXJ5IDE1LCAyMDEzIDExOjE5IFBNDQpTdWJqZWN0
+OiBSZTogSSBjYW4gb25seSByZWNlaXZlIGVtYWlsIGZyb20gbGttbCx3aHk/DQoNCg0KPiAtLS0t
+LUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0tLS0tDQo+IEhhc2g6IFNIQTENCj4NCj4gT24gMDEv
+MTUvMjAxMyAxMjo1MSBBTSwgemhhb3lpbG9uZyB3cm90ZToNCj4+IEFyZSB5b3UgY2hpbmVzZT8N
+Cj4+DQo+PiBTb3JyeSB0byBkaXN0dXJiIHlvdSBmb3IgYSBzaW1wbGUgcXVlc3Rpb24uDQo+Pg0K
+Pj4gSSBoYXZlIHNldCB0ZXh0IGNvZGVkIHdpdGggdXRmLTggYW5kIHVzZSBwbGFpbiB0ZXh0IHJh
+dGhlciB0aGFuIGh0bWwuDQo+Pg0KPj4gQnV0IHdoeSBjYW50IEkgcmVjZWl2ZSBlbWFpbCBmcm9t
+IGxrbWw/IHRoeCENCj4+DQo+IEJlY2F1c2UgdGhpcyBpcyB0aGUgJ2xpbnV4LWVtYmVkZGVkJyBt
+YWlsaW5nIGxpc3Q/DQo+DQo+IC0tLS0tQkVHSU4gUEdQIFNJR05BVFVSRS0tLS0tDQo+IFZlcnNp
+b246IEdudVBHIHYxLjQuMTEgKEdOVS9MaW51eCkNCj4gQ29tbWVudDogVXNpbmcgR251UEcgd2l0
+aCBUaHVuZGVyYmlyZCAtIGh0dHA6Ly93d3cuZW5pZ21haWwubmV0Lw0KPg0KPiBpRVlFQVJFQ0FB
+WUZBbEQxYzJVQUNna1FneUs1SDJJYzM2ZEdiUUNkRlFEamViV1UwOWRPRTU4Q2RWamRQOXJpDQo+
+IFdERUFuMTU4R3RhbWRsTTJlU2ZxRjV0Y3NQem00TU1qDQo+ID1FcHZhDQo+IC0tLS0tRU5EIFBH
+UCBTSUdOQVRVUkUtLS0tLSANCg0KDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LWVtYmVkZGVkIiBpbg0KdGhlIGJvZHkg
+b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21v
+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
