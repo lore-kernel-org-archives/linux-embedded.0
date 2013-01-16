@@ -1,63 +1,89 @@
-From: "Vladimir Murzin" <murzin.v@gmail.com>
-Subject: Re: I can only receive email from lkml,why?
-Date: Wed, 16 Jan 2013 07:45:28 +0000
-Message-ID: <469714033-1358322345-cardhu_decombobulator_blackberry.rim.net-727621543-@b18.c12.bise7.blackberry>
-References: <DEF31CF8E8D94A6DBE84EC341CC50655@VIU9IM6TKCWEEDX>
-  <50F57365.90000@realitydiluted.com>
-  <332D9BE41E234CB9A30949E739F17209@VIU9IM6TKCWEEDX>
-Reply-To: murzin.v@gmail.com
+From: "zhaoyilong" <registcn@gmail.com>
+Subject: How to use DEBUG macros in compressed/head.S
+Date: Wed, 16 Jan 2013 16:17:39 +0800
+Message-ID: <94B6F8A1EDC14A8CB9308D5F65F19892@VIU9IM6TKCWEEDX>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20120113;
-        h=x-received:x-rim-org-msg-ref-id:message-id
-         :content-transfer-encoding:reply-to:x-priority:references
-         :in-reply-to:sensitivity:importance:subject:to:from:date
-         :content-type:mime-version;
-        bh=vUs2UcaV8uGx+Oy3yfg9GExTXfnahHcIwIvpOpQe07Y=;
-        b=E23Gdy0I0GKDTSXTM1lYD75O+mMq9ENqVW5d+u8GPxgcNpVCWSAD9pV7H8JqEhcw36
-         O8ipuD9PJB2TF7QfhbEcuFcv3tHFV02BuL9AodSShNZszE2i3o3KPALyURdYiR/FDfqF
-         gsNEFFrzlybcxYi8IiD32aUHl2vW15c/5LolfQT031AIrxki0cNuxD0oxK8SdAVH+jiq
-         afgcjKFWfdPhWfz6r5sRA3X98Xv/+hZDocQ6JKSSD+DZN0Js+dVTd15+GGWcfHjQTAFK
-         VLEYD4z0ZDz2k9M8gcttuIRoFDoE/GzNLSDfSvspo6iYZj7sbtb7EnOlH/8AhKnzYqCu
-         ym2A==
-In-Reply-To: <332D9BE41E234CB9A30949E739F17209@VIU9IM6TKCWEEDX>
+        h=x-received:message-id:from:to:subject:date:x-priority
+         :x-msmail-priority:x-mailer:x-rfc2646:x-mimeole;
+        bh=Z4pj3oEc9sLHXeqFXY+iSA9aO/W08ud3lL+iS0hRfHI=;
+        b=jjC8Mhfgx6aCZb1UFn1bcWHaUDfzibeBt4zDS7ZxeLVNnh9W6OjDk8N8PLb8Y+HMi0
+         1LJQ/j9aOxzhp39WKG8WK2Dpso0NSXjHwG1fnK7+wsjxw7UEMjG/e2F0hIxRM+NnwjsF
+         o5a2q2aOfphPvly6TK5tjw4iBJyWccB+z+lAqlrbwtzC2ebTFg+Rkpoy0z80nJudpD+q
+         QHqURZ+wtJ4CD6L7kewTQTcRsue2XEhihBPrKX0BMLXLBX87rwUsCVomdPtfulHJBYA4
+         JriRUf2Hli3Xzu9YBKWdTTOH3jc1jJ2YzA6GjWVYZ8qJPiDTaKMBBqRiBzqPbV+LiLOx
+         J3MQ==
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: zhaoyilong <registcn@gmail.com>, linux-embedded-owner@vger.kernel.org, linux- embedded <linux-embedded@vger.kernel.org>, "Steven J. Hill" <sjhill@realitydiluted.com>
+Content-Type: TEXT/PLAIN; charset="windows-1252"
+To: linux- embedded <linux-embedded@vger.kernel.org>
 
-SEkhDQoNCkhhdmUgeW91IGNoZWNrZWQgc2V0dGluZ3MgZm9yIHlvdXIgc3BhbSBmaWx0ZXI/DQoN
-CkJlc3Qgd2lzaGVzDQpWbGFkaW1pcg0KLS0NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-CkZyb206CSJ6aGFveWlsb25nIiA8cmVnaXN0Y25AZ21haWwuY29tPg0KU2VuZGVyOglsaW51eC1l
-bWJlZGRlZC1vd25lckB2Z2VyLmtlcm5lbC5vcmcNCkRhdGU6CVdlZCwgMTYgSmFuIDIwMTMgMTU6
-MDU6MTggDQpUbzogbGludXgtIGVtYmVkZGVkPGxpbnV4LWVtYmVkZGVkQHZnZXIua2VybmVsLm9y
-Zz47IFN0ZXZlbiBKLiBIaWxsPHNqaGlsbEByZWFsaXR5ZGlsdXRlZC5jb20+DQpTdWJqZWN0OiBS
-ZTogSSBjYW4gb25seSByZWNlaXZlIGVtYWlsIGZyb20gbGttbCx3aHk/DQoNCnNvcnJ5LGJ1dCBJ
-IG1lYW4gYWxsIHRoZSBsaXN0cyBmcm9tIG1ham9yZG9tby4NClNpbmNlIHlvdSBjYW4gc2VlIGEg
-ZW1haWwgc2VtZCB0byBzb21lb25lKG5vdCB5b3UpIGFuZCBjb3B5IHRvIA0KbGludXgtZW1iZWRl
-ZCxpcyB0aGF0IG1lYW4gSSBhbSBzdWNjZXNzZWQgaW4gam9pbmluZyB0byB0aGlzIGxpc3Q/DQoN
-CkJ1dCBub2JvZHkgYW5zd2VyIG15IGZpcnN0IHF1ZXN0aW9uIGVtYWlsZWQuSXMgaXQgYmVjYXVz
-ZSBteSBxdWVzdGlvbiB0b28gDQplYXN5PyBub2JvZHkgYW5zd2VyIGVhc3kgcXVlc3Rpb24gLGlz
-IHRoaXMgYSBub3JtYWwgcGhlbm9tZW5vbj8NCi0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0g
-DQpGcm9tOiAiU3RldmVuIEouIEhpbGwiIDxzamhpbGxAcmVhbGl0eWRpbHV0ZWQuY29tPg0KVG86
-ICJ6aGFveWlsb25nIiA8cmVnaXN0Y25AZ21haWwuY29tPg0KQ2M6IDxjaHVhbnNoZW5nLmxpdUBp
-bnRlbC5jb20+OyAibGludXgtIGVtYmVkZGVkIiANCjxsaW51eC1lbWJlZGRlZEB2Z2VyLmtlcm5l
-bC5vcmc+DQpTZW50OiBUdWVzZGF5LCBKYW51YXJ5IDE1LCAyMDEzIDExOjE5IFBNDQpTdWJqZWN0
-OiBSZTogSSBjYW4gb25seSByZWNlaXZlIGVtYWlsIGZyb20gbGttbCx3aHk/DQoNCg0KPiAtLS0t
-LUJFR0lOIFBHUCBTSUdORUQgTUVTU0FHRS0tLS0tDQo+IEhhc2g6IFNIQTENCj4NCj4gT24gMDEv
-MTUvMjAxMyAxMjo1MSBBTSwgemhhb3lpbG9uZyB3cm90ZToNCj4+IEFyZSB5b3UgY2hpbmVzZT8N
-Cj4+DQo+PiBTb3JyeSB0byBkaXN0dXJiIHlvdSBmb3IgYSBzaW1wbGUgcXVlc3Rpb24uDQo+Pg0K
-Pj4gSSBoYXZlIHNldCB0ZXh0IGNvZGVkIHdpdGggdXRmLTggYW5kIHVzZSBwbGFpbiB0ZXh0IHJh
-dGhlciB0aGFuIGh0bWwuDQo+Pg0KPj4gQnV0IHdoeSBjYW50IEkgcmVjZWl2ZSBlbWFpbCBmcm9t
-IGxrbWw/IHRoeCENCj4+DQo+IEJlY2F1c2UgdGhpcyBpcyB0aGUgJ2xpbnV4LWVtYmVkZGVkJyBt
-YWlsaW5nIGxpc3Q/DQo+DQo+IC0tLS0tQkVHSU4gUEdQIFNJR05BVFVSRS0tLS0tDQo+IFZlcnNp
-b246IEdudVBHIHYxLjQuMTEgKEdOVS9MaW51eCkNCj4gQ29tbWVudDogVXNpbmcgR251UEcgd2l0
-aCBUaHVuZGVyYmlyZCAtIGh0dHA6Ly93d3cuZW5pZ21haWwubmV0Lw0KPg0KPiBpRVlFQVJFQ0FB
-WUZBbEQxYzJVQUNna1FneUs1SDJJYzM2ZEdiUUNkRlFEamViV1UwOWRPRTU4Q2RWamRQOXJpDQo+
-IFdERUFuMTU4R3RhbWRsTTJlU2ZxRjV0Y3NQem00TU1qDQo+ID1FcHZhDQo+IC0tLS0tRU5EIFBH
-UCBTSUdOQVRVUkUtLS0tLSANCg0KDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LWVtYmVkZGVkIiBpbg0KdGhlIGJvZHkg
-b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCk1vcmUgbWFqb3Jkb21v
-IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+When I open the macro DEBUG in the front of  file
+arch/arm/boot/decompressed/head.S,the kernel runs and stops at"Uncompre=
+ssing
+Linux... done, booting the kernel."
+CONFIG_DEBUG_ICEDCC is closed by default, so I am sure  the code runs t=
+othe
+following branch:
+=2E..........
+=2E..........
+=2E..........
+=2Emacro kputc,val
+mov r0, \val
+bl putc
+=2Eendm
+
+=2Emacro kphex,val,len
+mov r0, \val
+mov r1, #\len
+bl phex
+=2Eendm
+
+=2Emacro debug_reloc_start
+#ifdef DEBUG
+kputc #'\n'
+kphex r6, 8 /* processor id */
+kputc #':'
+kphex r7, 8 /* architecture id */
+=2E..........
+=2E..........
+=2E..........
+
+Problem is happened in a context like this:
+
+    I have a board use cpu S5PV210,and an ok kernel provide by the fact=
+ory
+anda  kernel download from kernel.org which carshed after printing "sta=
+rting
+kernel..." to dnw.
+    To debug this,I want to test the macro kputc provided in this file=97=
+=97
+using ok kernel.
+I add a line "kputc #'a' " after the tag ".text", then make error says
+"undefined reference to `putc' ",it seems that compiler cant find "putc=
+"
+used in
+the definition of macro =93kputc=94.
+    This is an ok kernel,so I cant say the serial port is not open=97=97=
+can
+this mean "putc" is defined already?.
+
+So I open DEBUG hoping to see debugging info by kernel itself,but it st=
+ops
+at"Uncompressing Linux... done, booting the kernel."
+Opening DEBUG will lead to the call of =93kputc #'\n' =94 in the code a=
+bove
+which will also call putc!
+
+Here,my questions comes:
+
+1?Why the error "  undefined reference to `putc'  " disappeared?
+2?Why it stops at"Uncompressing Linux... done, booting the kernel."?
+3?Can this error ( undefined reference to `putc'  ) mean the serial por=
+t is
+not open? Where is it defined ?
+Is it refer to the C function or just an assembly macro?
+
