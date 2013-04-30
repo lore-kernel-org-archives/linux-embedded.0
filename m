@@ -1,58 +1,59 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: How to use DEBUG macros in compressed/head.S
-Date: Wed, 16 Jan 2013 11:05:33 -0600
-Message-ID: <1358355933.32505.38@driftwood>
-References: <94B6F8A1EDC14A8CB9308D5F65F19892@VIU9IM6TKCWEEDX>
+From: Ashoka K <ashok.vinu@gmail.com>
+Subject: Need help to measure and tune the latency in Linux RT
+Date: Tue, 30 Apr 2013 13:57:21 +0530
+Message-ID: <CALJd4cbfqRFiGHshv8A+0A8kFo_qW=rvREsdgj3jQ=-0Rix0-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <94B6F8A1EDC14A8CB9308D5F65F19892@VIU9IM6TKCWEEDX> (from
-	registcn@gmail.com on Wed Jan 16 02:17:39 2013)
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+Return-path: <linux-newbie-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:x-received:date:message-id:subject:from:to
+         :content-type;
+        bh=G6lT9HA4JVHMlzlYUgQPMOWcMmq8M4pFsphxKdqlX/A=;
+        b=ej3r0Ar5/bx5/K8EgwF0dHSY2ClQFfvMXEWknIRH8SGLgwY90AlTLeHGn1pcts8c6F
+         ItEpR4MGRQyTCZF1actZp+tLxHwSObCiiZ+tYdzO+1MQbADsCn80w3mgsjHWHUR0NMO9
+         Xhc/1ovfxngCZ5RUxg9iY7ZwvlqveKWrLWZi9CJfupi/mLeyqrRB9Arh+V6jEdK3vZH1
+         V1Q4VKEcH8W4Nmc7NYu34WLViQsbFEoKQRiaTcjHmriyun+0D+hph9Hhrozn2fy45/Oz
+         Fw7tDUFKePLEG44dGyjvnschPMFpTqVlEkszI9Y9fSpU0jAnAx/IZ/u382EWmL/aLtBg
+         +hOg==
+Sender: linux-newbie-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; delsp="Yes"; format="Flowed"
-To: zhaoyilong <registcn@gmail.com>
-Cc: linux- embedded <linux-embedded@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: linux-embedded@vger.kernel.org, linux-newbie@vger.kernel.org
 
-On 01/16/2013 02:17:39 AM, zhaoyilong wrote:
-> When I open the macro DEBUG in the front of  file
-> arch/arm/boot/decompressed/head.S,the kernel runs and stops  
-> at"Uncompressing
-> Linux... done, booting the kernel."
+Hi,
 
-No, that's just the last thing it output.
+I have an embedded system running 2.6.33 cross compiled for ARM OMAP
+with 1 GHZ uni-processor system.
 
-I seldom find other people's debug code useful. I stick a printf()  
-variant in the code at a place I want to see what it's doing, and then  
-I know what the output means. I only enable their debug code if I'm  
-sending the output to the person who wrote said debug code. (There are  
-exceptions, but they're exceptions to a useful rule of thumb.)
+The application has many threads and processes (around 15 total). In
+that 1 thread is time critical and must run every interval confiurable
+as 2, 4 or 8 milli sec etc. There is another thread which transfers
+Images to a FTP or to HMI etc, whoever requested the image.
+With this image transfer enabled my critical process misses the
+deadline and timesout. This critical thread is at RR priority 50. I
+used a HR timer thread with RR pri 55 to wakeup the critical thread
+every 1 milli sec to do the job.
+If image transfer is enabled i see that real time thread misses deadlines.
 
-At this level, you can do direct writes to the serial chip ala:
+All traffic is flowing on common ethernet connection. Does it affect
+in any way ?
 
-    
-http://balau82.wordpress.com/2010/02/28/hello-world-for-bare-metal-arm-using-qemu/
+How to find out where the kernel is waiting or delaying to schedule
+the critical thread even though it is at higher RR priority. How to
+measure the latency ?
 
-Note that's for qemu, which pauses when it gets a port write. For real  
-hardware you need to check the status bit before sending the next  
-character, basically spinning on a port read until the relevant bit  
-gets set/cleared to indicate the hardware's done with the last thing  
-you sent it. I don't remember the check off the top of my head (last  
-time I needed it I dug it out of the uboot source), but if you're just  
-debugging you can do a delay loop between each write. (This is assuming  
-your serial port is already set to the right speed, which it had to be  
-to spit out the above message. Presumably the bootloader did it for  
-you.)
+I am trying to use Oprofile tool, but got some error in cross
+compiling. Doesn't these tools add their own latency to the original
+problem ?
 
-(And this is assuming your board layout has an 8250/16550a UART variant  
-mapped at a knowable address, which basically they all do because it's  
-dirt simple and the patents expired years ago. They get weird and  
-bespoke about setting buffer sizes but you don't really have to care at  
-this level.)
+Any tools ? which one is better. Please provide your input on this.
 
-Most likely you can find whatever spit out the text you _did_ see, and  
-copy it to produce more text from places in the code you'd like  
-visibility into.
 
-Rob
+Regards
+Ashoka.  K
+--
+To unsubscribe from this list: send the line "unsubscribe linux-newbie" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Please read the FAQ at http://www.linux-learn.org/faqs
