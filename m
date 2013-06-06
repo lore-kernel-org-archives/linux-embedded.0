@@ -1,197 +1,52 @@
-From: Joe Perches <joe@perches.com>
-Subject: [PATCH] ext4: Reduce object size when !CONFIG_PRINTK
-Date: Tue,  4 Jun 2013 19:55:05 -0700
-Message-ID: <a629c1c6359886419e24179dbb04484a88e6b0f2.1370400427.git.joe@perches.com>
-Return-path: <linux-ext4-owner@vger.kernel.org>
-Sender: linux-ext4-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Dirk Behme <dirk.behme@de.bosch.com>
+Subject: Boot time: Optimize CPU bring up?
+Date: Thu, 6 Jun 2013 13:48:30 +0200
+Message-ID: <51B0770E.3070601@de.bosch.com>
+Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-To: linux-kernel@vger.kernel.org
-Cc: Dave Kleikamp <dave.kleikamp@oracle.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-embedded@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, linux-ext4@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded@vger.kernel.org
+Cc: dirk.behme@gmail.com
 
-Reduce the object size ~10% could be useful for embedded
-systems.
+Hi,
 
-Add #ifdef CONFIG_PRINTK #else #endif blocks
-to hold formats and arguments, passing " " to
-functions when !CONFIG_PRINTK and still verifying
-format and arguments with no_printk.
+on a ARMv7 Freescale i.MX6 based system we are looking at optimizing the 
+kernel boot time. Booting a 3.5.7 kernel with SMP=y and the kernel 
+option 'nosmp' (the i.MX6 has single, dual and quad CPU versions) we get
 
-$ size fs/ext4/built-in.o*
-   text	   data	    bss	    dec	    hex	filename
- 239375	    610	    888	 240873	  3ace9	fs/ext4/built-in.o.new
- 264167	    738	    888	 265793	  40e41	fs/ext4/built-in.o.old
 
-    $ grep -E "CONFIG_EXT4|CONFIG_PRINTK" .config
-    # CONFIG_PRINTK is not set
-    CONFIG_EXT4_FS=y
-    CONFIG_EXT4_USE_FOR_EXT23=y
-    CONFIG_EXT4_FS_POSIX_ACL=y
-    # CONFIG_EXT4_FS_SECURITY is not set
-    # CONFIG_EXT4_DEBUG is not set
+[    0.255927] hw perfevents: enabled with ARMv7 Cortex-A9 PMU driver, 7 
+counters available
+[    0.256033] Setting up static identity map for 0x10426a28 - 0x10426a80
+[    0.260204] initcall spawn_ksoftirqd+0x0/0x58 returned 0 after 9765 usecs
+[    0.270363] initcall init_workqueues+0x0/0x39c returned 0 after 9765 
+usecs
+[    0.290265] initcall cpu_stop_init+0x0/0xd0 returned 0 after 19531 usecs
+[    0.310449] initcall rcu_spawn_kthreads+0x0/0xc0 returned 0 after 
+19531 usecs
+[    0.310699] Brought up 1 CPUs
+[    0.310712] SMP: Total of 1 processors activated (1581.05 BogoMIPS).
 
-Signed-off-by: Joe Perches <joe@perches.com>
----
- fs/ext4/ext4.h  | 80 +++++++++++++++++++++++++++++++++++++++++++++++----------
- fs/ext4/super.c | 15 ++++++-----
- 2 files changed, 75 insertions(+), 20 deletions(-)
 
-diff --git a/fs/ext4/ext4.h b/fs/ext4/ext4.h
-index 019db3c..f4baeb06 100644
---- a/fs/ext4/ext4.h
-+++ b/fs/ext4/ext4.h
-@@ -2164,42 +2164,96 @@ extern int ext4_alloc_flex_bg_array(struct super_block *sb,
- 				    ext4_group_t ngroup);
- extern const char *ext4_decode_error(struct super_block *sb, int errno,
- 				     char nbuf[16]);
-+
- extern __printf(4, 5)
- void __ext4_error(struct super_block *, const char *, unsigned int,
- 		  const char *, ...);
--#define ext4_error(sb, message...)	__ext4_error(sb, __func__,	\
--						     __LINE__, ## message)
- extern __printf(5, 6)
--void ext4_error_inode(struct inode *, const char *, unsigned int, ext4_fsblk_t,
-+void __ext4_error_inode(struct inode *, const char *, unsigned int, ext4_fsblk_t,
- 		      const char *, ...);
- extern __printf(5, 6)
--void ext4_error_file(struct file *, const char *, unsigned int, ext4_fsblk_t,
-+void __ext4_error_file(struct file *, const char *, unsigned int, ext4_fsblk_t,
- 		     const char *, ...);
- extern void __ext4_std_error(struct super_block *, const char *,
- 			     unsigned int, int);
- extern __printf(4, 5)
- void __ext4_abort(struct super_block *, const char *, unsigned int,
- 		  const char *, ...);
--#define ext4_abort(sb, message...)	__ext4_abort(sb, __func__, \
--						       __LINE__, ## message)
- extern __printf(4, 5)
- void __ext4_warning(struct super_block *, const char *, unsigned int,
- 		    const char *, ...);
--#define ext4_warning(sb, message...)	__ext4_warning(sb, __func__, \
--						       __LINE__, ## message)
- extern __printf(3, 4)
--void ext4_msg(struct super_block *, const char *, const char *, ...);
-+void __ext4_msg(struct super_block *, const char *, const char *, ...);
- extern void __dump_mmp_msg(struct super_block *, struct mmp_struct *mmp,
- 			   const char *, unsigned int, const char *);
--#define dump_mmp_msg(sb, mmp, msg)	__dump_mmp_msg(sb, mmp, __func__, \
--						       __LINE__, msg)
- extern __printf(7, 8)
- void __ext4_grp_locked_error(const char *, unsigned int,
- 			     struct super_block *, ext4_group_t,
- 			     unsigned long, ext4_fsblk_t,
- 			     const char *, ...);
--#define ext4_grp_locked_error(sb, grp, message...) \
--	__ext4_grp_locked_error(__func__, __LINE__, (sb), (grp), ## message)
-+
-+#ifdef CONFIG_PRINTK
-+
-+#define ext4_error_inode(inode, func, line, block, fmt, ...)		\
-+	__ext4_error_inode(inode, func, line, block, fmt, ##__VA_ARGS__)
-+#define ext4_error_file(file, func, line, block, fmt, ...)		\
-+	__ext4_error_file(file, func, line, block, fmt, ##__VA_ARGS__)
-+#define ext4_error(sb, fmt, ...)					\
-+	__ext4_error(sb, __func__, __LINE__, fmt, ##__VA_ARGS__)
-+#define ext4_abort(sb, fmt, ...)					\
-+	__ext4_abort(sb, __func__, __LINE__, fmt, ##__VA_ARGS__)
-+#define ext4_warning(sb, fmt, ...)					\
-+	__ext4_warning(sb, __func__, __LINE__, fmt, ##__VA_ARGS__)
-+#define ext4_msg(sb, level, fmt, ...)				\
-+	__ext4_msg(sb, level, fmt, ##__VA_ARGS__)
-+#define dump_mmp_msg(sb, mmp, msg)					\
-+	__dump_mmp_msg(sb, mmp, __func__, __LINE__, msg)
-+#define ext4_grp_locked_error(sb, grp, ino, block, fmt, ...)		\
-+	__ext4_grp_locked_error(__func__, __LINE__, sb, grp, ino, block, \
-+				fmt, ##__VA_ARGS__)
-+
-+#else
-+
-+#define ext4_error_inode(inode, func, line, block, fmt, ...)		\
-+do {									\
-+	no_printk(fmt, ##__VA_ARGS__);					\
-+	__ext4_error_inode(inode, "", 0, block, " ");			\
-+} while (0)
-+#define ext4_error_file(file, func, line, block, fmt, ...)		\
-+do {									\
-+	no_printk(fmt, ##__VA_ARGS__);					\
-+	__ext4_error_file(file, "", 0, block, " ");			\
-+} while (0)
-+#define ext4_error(sb, fmt, ...)					\
-+do {									\
-+	no_printk(fmt, ##__VA_ARGS__);					\
-+	__ext4_error(sb, "", 0, " ");					\
-+} while (0)
-+#define ext4_abort(sb, fmt, ...)					\
-+do {									\
-+	no_printk(fmt, ##__VA_ARGS__);					\
-+	__ext4_abort(sb, "", 0, " ");					\
-+} while (0)
-+#define ext4_warning(sb, fmt, ...)					\
-+do {									\
-+	no_printk(fmt, ##__VA_ARGS__);					\
-+	__ext4_warning(sb, "", 0, " ");					\
-+} while (0)
-+#define ext4_msg(sb, level, fmt, ...)					\
-+do {									\
-+	no_printk(fmt, ##__VA_ARGS__);					\
-+	__ext4_msg(sb, "", " ");					\
-+} while (0)
-+#define dump_mmp_msg(sb, mmp, msg)					\
-+	__dump_mmp_msg(sb, mmp, "", 0, "")
-+#define ext4_grp_locked_error(sb, grp, ino, block, fmt, ...)		\
-+do {									\
-+	no_printk(fmt, ##__VA_ARGS__);				\
-+	__ext4_grp_locked_error("", 0, sb, grp, ino, block, " ");	\
-+} while (0)
-+
-+#endif
-+
- extern void ext4_update_dynamic_rev(struct super_block *sb);
- extern int ext4_update_compat_feature(handle_t *handle, struct super_block *sb,
- 					__u32 compat);
-diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index a9c1438..2e2825b 100644
---- a/fs/ext4/super.c
-+++ b/fs/ext4/super.c
-@@ -422,9 +422,9 @@ void __ext4_error(struct super_block *sb, const char *function,
- 	ext4_handle_error(sb);
- }
- 
--void ext4_error_inode(struct inode *inode, const char *function,
--		      unsigned int line, ext4_fsblk_t block,
--		      const char *fmt, ...)
-+void __ext4_error_inode(struct inode *inode, const char *function,
-+			unsigned int line, ext4_fsblk_t block,
-+			const char *fmt, ...)
- {
- 	va_list args;
- 	struct va_format vaf;
-@@ -451,9 +451,9 @@ void ext4_error_inode(struct inode *inode, const char *function,
- 	ext4_handle_error(inode->i_sb);
- }
- 
--void ext4_error_file(struct file *file, const char *function,
--		     unsigned int line, ext4_fsblk_t block,
--		     const char *fmt, ...)
-+void __ext4_error_file(struct file *file, const char *function,
-+		       unsigned int line, ext4_fsblk_t block,
-+		       const char *fmt, ...)
- {
- 	va_list args;
- 	struct va_format vaf;
-@@ -580,7 +580,8 @@ void __ext4_abort(struct super_block *sb, const char *function,
- 		panic("EXT4-fs panic from previous error\n");
- }
- 
--void ext4_msg(struct super_block *sb, const char *prefix, const char *fmt, ...)
-+void __ext4_msg(struct super_block *sb,
-+		const char *prefix, const char *fmt, ...)
- {
- 	struct va_format vaf;
- 	va_list args;
--- 
-1.8.1.2.459.gbcd45b4.dirty
+I.e. ~55ms just for bringing up the 1 CPU.
 
+Looking into some details, e.g. cpu_stop_init(), the ~19531 usecs are 
+there because the system 'hangs' 2 jiffies (CONFIG_HZ=100) in 
+cpu_v7_do_idle().
+
+For testing purposes switching to CONFIG_HZ=1000 reduces above 54ms to 
+just ~4ms. But we are unsure to switch the whole system to 
+CONFIG_HZ=1000 just to optimize this part of the boot process.
+
+Does anybody know why all the above parts are idling for some jiffies? 
+Is there any other optimization than CONFIG_HZ=1000 possible?
+
+In case there are any patches floating around or this was already 
+discussed, any link would be nice.
+
+Many thanks and best regards
+
+Dirk
