@@ -1,210 +1,74 @@
-From: Phillip Lougher <phillip@squashfs.org.uk>
-Subject: [PATCH 1/2] Squashfs: add LZ4 compression support
-Date: Mon, 22 Jul 2013 03:21:02 +0100
-Message-ID: <1374459663-15363-2-git-send-email-phillip@squashfs.org.uk>
+From: Gu Zheng <guz.fnst@cn.fujitsu.com>
+Subject: Re: [PATCH 0/2] Squashfs: add LZ4 compression
+Date: Mon, 22 Jul 2013 11:05:30 +0800
+Message-ID: <51ECA17A.3060401@cn.fujitsu.com>
 References: <1374459663-15363-1-git-send-email-phillip@squashfs.org.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1374459663-15363-1-git-send-email-phillip@squashfs.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-To: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-embedded@vger.kernel.org
-Cc: Phillip Lougher <phillip@squashfs.org.uk>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <1374459663-15363-1-git-send-email-phillip@squashfs.org.uk>
+Sender: linux-fsdevel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Phillip Lougher <phillip@squashfs.org.uk>
+Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-embedded@vger.kernel.org
 
-Add support for reading file systems compressed with the
-LZ4 compression algorithm.
+Hi Phillip,
+	Have some tests been carried out to confirm that Squashfs really 
+can get benefit from LZ4 compression, comparing with lzo?
 
-This patch adds the LZ4 decompressor wrapper code.
+Thanks,
+Gu
 
-Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>
----
- fs/squashfs/lz4_wrapper.c |  163 +++++++++++++++++++++++++++++++++++++++++++++
- fs/squashfs/squashfs_fs.h |    1 +
- 2 files changed, 164 insertions(+)
- create mode 100644 fs/squashfs/lz4_wrapper.c
+On 07/22/2013 10:21 AM, Phillip Lougher wrote:
 
-diff --git a/fs/squashfs/lz4_wrapper.c b/fs/squashfs/lz4_wrapper.c
-new file mode 100644
-index 0000000..681ed94
---- /dev/null
-+++ b/fs/squashfs/lz4_wrapper.c
-@@ -0,0 +1,163 @@
-+/*
-+ * Squashfs - a compressed read only filesystem for Linux
-+ *
-+ * Copyright (c) 2013
-+ * Phillip Lougher <phillip@squashfs.org.uk>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version 2,
-+ * or (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-+ *
-+ * lz4_wrapper.c
-+ */
-+
-+#include <linux/buffer_head.h>
-+#include <linux/mutex.h>
-+#include <linux/slab.h>
-+#include <linux/vmalloc.h>
-+#include <linux/lz4.h>
-+
-+#include "squashfs_fs.h"
-+#include "squashfs_fs_sb.h"
-+#include "squashfs.h"
-+#include "decompressor.h"
-+
-+#define LZ4_LEGACY	1
-+
-+struct lz4_comp_opts {
-+	__le32 version;
-+	__le32 flags;
-+};
-+
-+struct squashfs_lz4 {
-+	void *input;
-+	void *output;
-+};
-+
-+
-+
-+static void *lz4_init(struct squashfs_sb_info *msblk, void *buff, int len)
-+{
-+	struct lz4_comp_opts *comp_opts = buff;
-+	int block_size = max_t(int, msblk->block_size, SQUASHFS_METADATA_SIZE);
-+	struct squashfs_lz4 *stream;
-+	int err = -ENOMEM;
-+
-+	/* LZ4 compressed filesystems always have compression options */
-+	if(comp_opts == NULL || len < sizeof(*comp_opts)) {
-+		err = -EIO;
-+		goto failed;
-+	}
-+	if(le32_to_cpu(comp_opts->version) != LZ4_LEGACY) {
-+		/* LZ4 format currently used by the kernel is the 'legacy'
-+		 * format */
-+		ERROR("Unknown LZ4 version\n");
-+		err = -EINVAL;
-+		goto failed;
-+	}
-+
-+	stream = kzalloc(sizeof(*stream), GFP_KERNEL);
-+	if (stream == NULL)
-+		goto failed;
-+	stream->input = vmalloc(block_size);
-+	if (stream->input == NULL)
-+		goto failed2;
-+	stream->output = vmalloc(block_size);
-+	if (stream->output == NULL)
-+		goto failed3;
-+
-+	return stream;
-+
-+failed3:
-+	vfree(stream->input);
-+failed2:
-+	kfree(stream);
-+failed:
-+	ERROR("Failed to initialise LZ4 decompressor\n");
-+	return ERR_PTR(err);
-+}
-+
-+
-+static void lz4_free(void *strm)
-+{
-+	struct squashfs_lz4 *stream = strm;
-+
-+	if (stream) {
-+		vfree(stream->input);
-+		vfree(stream->output);
-+	}
-+	kfree(stream);
-+}
-+
-+
-+static int lz4_uncompress(struct squashfs_sb_info *msblk, void **buffer,
-+	struct buffer_head **bh, int b, int offset, int length, int srclength,
-+	int pages)
-+{
-+	struct squashfs_lz4 *stream = msblk->stream;
-+	void *buff = stream->input;
-+	int avail, i, bytes = length, res;
-+	size_t dest_len = srclength;
-+
-+	mutex_lock(&msblk->read_data_mutex);
-+
-+	for (i = 0; i < b; i++) {
-+		wait_on_buffer(bh[i]);
-+		if (!buffer_uptodate(bh[i]))
-+			goto block_release;
-+
-+		avail = min(bytes, msblk->devblksize - offset);
-+		memcpy(buff, bh[i]->b_data + offset, avail);
-+		buff += avail;
-+		bytes -= avail;
-+		offset = 0;
-+		put_bh(bh[i]);
-+	}
-+
-+	res = lz4_decompress_unknownoutputsize(stream->input, length,
-+					stream->output, &dest_len);
-+	if (res)
-+		goto failed;
-+
-+	bytes = dest_len;
-+	for (i = 0, buff = stream->output; bytes && i < pages; i++) {
-+		avail = min_t(int, bytes, PAGE_CACHE_SIZE);
-+		memcpy(buffer[i], buff, avail);
-+		buff += avail;
-+		bytes -= avail;
-+	}
-+	if (bytes)
-+		goto failed;
-+
-+	mutex_unlock(&msblk->read_data_mutex);
-+	return dest_len;
-+
-+block_release:
-+	for (; i < b; i++)
-+		put_bh(bh[i]);
-+
-+failed:
-+	mutex_unlock(&msblk->read_data_mutex);
-+
-+	ERROR("lz4 decompression failed, data probably corrupt\n");
-+	return -EIO;
-+}
-+
-+const struct squashfs_decompressor squashfs_lz4_comp_ops = {
-+	.init = lz4_init,
-+	.free = lz4_free,
-+	.decompress = lz4_uncompress,
-+	.id = LZ4_COMPRESSION,
-+	.name = "lz4",
-+	.supported = 1
-+};
-diff --git a/fs/squashfs/squashfs_fs.h b/fs/squashfs/squashfs_fs.h
-index 9e2349d..ee0be5c 100644
---- a/fs/squashfs/squashfs_fs.h
-+++ b/fs/squashfs/squashfs_fs.h
-@@ -237,6 +237,7 @@ struct meta_index {
- #define LZMA_COMPRESSION	2
- #define LZO_COMPRESSION		3
- #define XZ_COMPRESSION		4
-+#define LZ4_COMPRESSION		5
- 
- struct squashfs_super_block {
- 	__le32			s_magic;
--- 
-1.7.10.4
+> Hi
+> 
+> Now that LZ4 compression support is in 3.11-rc1, I have written the
+> following two patches for Squashfs to use it.
+> 
+> Phillip Lougher (2):
+>   Squashfs: add LZ4 compression support
+>   Squashfs: Add LZ4 compression configuration option
+> 
+>  Documentation/filesystems/squashfs.txt |    8 +-
+>  fs/squashfs/Kconfig                    |   15 +++
+>  fs/squashfs/Makefile                   |    1 +
+>  fs/squashfs/decompressor.c             |    7 ++
+>  fs/squashfs/decompressor.h             |    4 +
+>  fs/squashfs/lz4_wrapper.c              |  163 ++++++++++++++++++++++++++++++++
+>  fs/squashfs/squashfs_fs.h              |    1 +
+>  7 files changed, 195 insertions(+), 4 deletions(-)
+>  create mode 100644 fs/squashfs/lz4_wrapper.c
+> 
+> These patches are also available in the git tree here:
+> 
+> browse: https://git.kernel.org/cgit/linux/kernel/git/pkl/squashfs-lz4.git
+> git clone: git://git.kernel.org/pub/scm/linux/kernel/git/pkl/squashfs-lz4.git
+> 
+> LZ4 support has (obviously) also been added to the squashfs-tools
+> (Mksquashfs and Unsquashfs).  This is available from the Squashfs-tools
+> git repository here:
+> 
+> browse: https://git.kernel.org/cgit/fs/squashfs/squashfs-tools.git
+> git clone: git://git.kernel.org/pub/scm/fs/squashfs/squashfs-tools.git
+> 
+> When building the squashfs-tools edit the Makefile to enable LZ4
+> support (by default it is disabled).
+> 
+> LZ4 compression can be specified by using the -comp option, e.g.
+> % mksquashfs xxx img.sqsh -comp lz4
+> 
+> The use of LZ4 high compression can be specified using -Xhc, e.g.
+> 
+> % mksquashfs xxx img.sqsh -comp lz4 -Xhc
+> 
+> Phillip
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+> 
+
+
