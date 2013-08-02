@@ -1,43 +1,30 @@
-From: Marco Stornelli <marco.stornelli@gmail.com>
+From: Jon Sevy <jsevy@cs.drexel.edu>
 Subject: Re: AMP on an SMP system
-Date: Fri, 02 Aug 2013 17:58:05 +0200
-Message-ID: <51FBD70D.2030500@gmail.com>
-References: <51FB6EE1.3090708@lumino.de> <20130802114225.GR3880@pengutronix.de> <51FBA261.10301@lumino.de> <51FBC7FE.4000403@gmail.com> <51FBCF46.4080700@lumino.de> <51FBD223.9020809@gmail.com> <51FBD782.9070309@lumino.de>
+Date: Fri, 02 Aug 2013 12:16:20 -0400
+Message-ID: <yubr9upq3v2s0lvt9ljxqj6a.1375460180792@email.android.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=message-id:date:from:user-agent:mime-version:to:cc:subject
-         :references:in-reply-to:content-type:content-transfer-encoding;
-        bh=G/3XNbB+r0r+muyodCO69nJGBKtqGhLvo9pigqlXwGg=;
-        b=JVbXECxWdfWAfMp1PQngvhlpMkeitE+sULwFaac7H7fsekcImThBXTqaJksFyLBOHy
-         XPc1tX+T3136Q7UlztUi5zmKlf0+PdjIf6GrSJheMihiiRQBbKrDyeaLUN4cuGq2ZU5L
-         u+Vrj4okWElhjOAitIAj5DSR7EZAu5B+Mc6GGHbXwBW7hM9xo8UdUXiIQdSw+TMFWENn
-         oDINB8heVXgkEP4CzZT11VuL3AbPjOGLXmZxB7qqxJguB8klAm7o/omeM47zrH8MOyRs
-         7IB2/mWFFEsQgIMe5W0dRQ5Aw7iYyMvDLh2CwSepcSCmiq6sGI+ePipq6zS87H8ONl7M
-         +3HA==
-In-Reply-To: <51FBD782.9070309@lumino.de>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Michael Schnell <mschnell@lumino.de>
-Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+To: Marco Stornelli <marco.stornelli@gmail.com>
+Cc: Michael Schnell <mschnell@lumino.de>, linux-embedded@vger.kernel.org
 
-Il 02/08/2013 18:00, Michael Schnell ha scritto:
-> On 08/02/2013 05:37 PM, Marco Stornelli wrote:
->>
->> I don't know your hw so my consideration are really general.
-> The hardware is not decided yet (it will be some A9 thingy). So for me
-> "really general" is just fine.
->
->> ISRs in rt kernel doesn't exist or at least the only work is to wake
->> up the kernel thread for the management.
-> I see.
->
-> But how to determine the max latency for this ?
->
-
-Maybe on eLinux.org you can find some number.
-
-Marco
+WW91IG1pZ2h0IHRyeSB0aGUgT3BlbiBTb3VyY2UgQXV0b21hdGlvbiBEZXZlbG9wbWVudCBMYWJz
+IHdlYnNpdGUgZm9yIHJlYWwtdGltZSBMaW51eCBsYXRlbmN5IG1lYXN1cmVtZW50cyBhbmQgbWV0
+aG9kb2xvZ3k6Cmh0dHA6Ly93d3cub3NhZGwub3JnLwogIFwKICBKb24KCk1hcmNvIFN0b3JuZWxs
+aSA8bWFyY28uc3Rvcm5lbGxpQGdtYWlsLmNvbT4gd3JvdGU6Cgo+SWwgMDIvMDgvMjAxMyAxODow
+MCwgTWljaGFlbCBTY2huZWxsIGhhIHNjcml0dG86Cj4+IE9uIDA4LzAyLzIwMTMgMDU6MzcgUE0s
+IE1hcmNvIFN0b3JuZWxsaSB3cm90ZToKPj4+Cj4+PiBJIGRvbid0IGtub3cgeW91ciBodyBzbyBt
+eSBjb25zaWRlcmF0aW9uIGFyZSByZWFsbHkgZ2VuZXJhbC4KPj4gVGhlIGhhcmR3YXJlIGlzIG5v
+dCBkZWNpZGVkIHlldCAoaXQgd2lsbCBiZSBzb21lIEE5IHRoaW5neSkuIFNvIGZvciBtZQo+PiAi
+cmVhbGx5IGdlbmVyYWwiIGlzIGp1c3QgZmluZS4KPj4KPj4+IElTUnMgaW4gcnQga2VybmVsIGRv
+ZXNuJ3QgZXhpc3Qgb3IgYXQgbGVhc3QgdGhlIG9ubHkgd29yayBpcyB0byB3YWtlCj4+PiB1cCB0
+aGUga2VybmVsIHRocmVhZCBmb3IgdGhlIG1hbmFnZW1lbnQuCj4+IEkgc2VlLgo+Pgo+PiBCdXQg
+aG93IHRvIGRldGVybWluZSB0aGUgbWF4IGxhdGVuY3kgZm9yIHRoaXMgPwo+Pgo+Cj5NYXliZSBv
+biBlTGludXgub3JnIHlvdSBjYW4gZmluZCBzb21lIG51bWJlci4KPgo+TWFyY28KPgo+LS0KPlRv
+IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBs
+aW51eC1lbWJlZGRlZCIgaW4KPnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
+ci5rZXJuZWwub3JnCj5Nb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
+b3JnL21ham9yZG9tby1pbmZvLmh0bWwK
