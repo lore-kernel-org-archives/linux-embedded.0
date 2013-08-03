@@ -1,30 +1,94 @@
-From: Jon Sevy <jsevy@cs.drexel.edu>
+From: Robert Schwebel <r.schwebel@pengutronix.de>
 Subject: Re: AMP on an SMP system
-Date: Fri, 02 Aug 2013 12:16:20 -0400
-Message-ID: <yubr9upq3v2s0lvt9ljxqj6a.1375460180792@email.android.com>
+Date: Sat, 3 Aug 2013 21:11:49 +0200
+Message-ID: <20130803191149.GU3880@pengutronix.de>
+References: <51FB6EE1.3090708@lumino.de>
+ <20130802114225.GR3880@pengutronix.de>
+ <51FBA261.10301@lumino.de>
+ <51FBC7FE.4000403@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <51FBC7FE.4000403@gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 To: Marco Stornelli <marco.stornelli@gmail.com>
 Cc: Michael Schnell <mschnell@lumino.de>, linux-embedded@vger.kernel.org
 
-WW91IG1pZ2h0IHRyeSB0aGUgT3BlbiBTb3VyY2UgQXV0b21hdGlvbiBEZXZlbG9wbWVudCBMYWJz
-IHdlYnNpdGUgZm9yIHJlYWwtdGltZSBMaW51eCBsYXRlbmN5IG1lYXN1cmVtZW50cyBhbmQgbWV0
-aG9kb2xvZ3k6Cmh0dHA6Ly93d3cub3NhZGwub3JnLwogIFwKICBKb24KCk1hcmNvIFN0b3JuZWxs
-aSA8bWFyY28uc3Rvcm5lbGxpQGdtYWlsLmNvbT4gd3JvdGU6Cgo+SWwgMDIvMDgvMjAxMyAxODow
-MCwgTWljaGFlbCBTY2huZWxsIGhhIHNjcml0dG86Cj4+IE9uIDA4LzAyLzIwMTMgMDU6MzcgUE0s
-IE1hcmNvIFN0b3JuZWxsaSB3cm90ZToKPj4+Cj4+PiBJIGRvbid0IGtub3cgeW91ciBodyBzbyBt
-eSBjb25zaWRlcmF0aW9uIGFyZSByZWFsbHkgZ2VuZXJhbC4KPj4gVGhlIGhhcmR3YXJlIGlzIG5v
-dCBkZWNpZGVkIHlldCAoaXQgd2lsbCBiZSBzb21lIEE5IHRoaW5neSkuIFNvIGZvciBtZQo+PiAi
-cmVhbGx5IGdlbmVyYWwiIGlzIGp1c3QgZmluZS4KPj4KPj4+IElTUnMgaW4gcnQga2VybmVsIGRv
-ZXNuJ3QgZXhpc3Qgb3IgYXQgbGVhc3QgdGhlIG9ubHkgd29yayBpcyB0byB3YWtlCj4+PiB1cCB0
-aGUga2VybmVsIHRocmVhZCBmb3IgdGhlIG1hbmFnZW1lbnQuCj4+IEkgc2VlLgo+Pgo+PiBCdXQg
-aG93IHRvIGRldGVybWluZSB0aGUgbWF4IGxhdGVuY3kgZm9yIHRoaXMgPwo+Pgo+Cj5NYXliZSBv
-biBlTGludXgub3JnIHlvdSBjYW4gZmluZCBzb21lIG51bWJlci4KPgo+TWFyY28KPgo+LS0KPlRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBs
-aW51eC1lbWJlZGRlZCIgaW4KPnRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdl
-ci5rZXJuZWwub3JnCj5Nb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwK
+Hi,
+
+On Fri, Aug 02, 2013 at 04:53:50PM +0200, Marco Stornelli wrote:
+> > In fact I need a way to do very guaranteed low latency. regarding the
+> > high clock rate (about 1 GHz) modern ARM chips can provide, maybe
+> > preempt-rt with the cpu affinity might be a decent way to go.
+
+Modern hardware has lots of features which makes them basically not
+deterministic.
+
+One recent example: on MX6 (quadcore Cortex-A9), when you run a certain
+cpuburn tool, the temperature rises up to the maximum allowed value in
+just a couple of seconds, and then you either have the choice to burn
+your hardware or to use the tempmon interrupt to throttle down the speed
+of the cpu. You can imagine what all that means for latencies.
+
+So if you want to use a reasonably modern hardware, it is always a
+matter of "high system probability" of not missing a cycle.
+
+> Just to be clear: at the moment there isn't an easy way to dedicate
+> "completely" a cpu for a task. The last time I tried (some years ago
+> actually) to use exclusive cpu set, the scheduler didn't do a good
+> work because it was designed for SMP, not SMP minus some piece.
+> However you can try and you can report your results. It would be
+> interesting.
+
+Without having done some tests myself, I would expect that the -rt folks
+have such scenarios.
+
+> > The raining questions include
+> >   - how to calculate the maximum latency that can be guaranteed ? (i.e.
+> > does the Kernel impose any spinlocks and interrupt disables on the would
+> > be AMP subsystem ?)
+
+You can't. And you can't, even if you try to run bare-metal software on
+a dedicated core. I can't imagine how for example the cache influences
+between the cores could be determined.
+
+> No. You can use full dyn tick for example to disable timer
+> interrupt, but it has got some pros and cons, especially with very
+> low latency requirement.
+> 
+> >  - how to assign an interrupt (e.g. a dedicated timer) to the subsystem ?
+> 
+> Interrupt handler are kernel thread, so you can schedule your kernel
+> thread on your "normal" cpu.
+
+The really great thing with preempt-rt is that it is all Linux and
+POSIX. No need to invent new things like program starters, inter-
+process-communication and even inter-processor-communication.
+ 
+> >  - Do the interrupts immediately call the ISR of the cpu "under
+> >affinity" or is some additional latency imposed by the Kernel
+> 
+> AFAIC, no latency for cpu "under affinity".
+> 
+> >(and how
+> >many cpu cycles at max are needed to enter the ISR) ?
+> 
+> It's difficult to answer to this question because the performance
+> depends on your system. From my last statistics I saw that with an
+> rt linux kernel you can stay below 50us for the interrupt latency.
+
+Here is an MX53 (single core cortex-a8) in the OSADL testlab:
+https://www.osadl.org/Latency-plot-of-system-in-rack-0-slot.qa-latencyplot-r0s5.0.html
+
+But note that multicore is quite different. I'd suggest that you measure
+yourself.
+
+rsc
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
