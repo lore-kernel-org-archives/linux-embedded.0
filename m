@@ -1,84 +1,42 @@
-From: Michael Opdenacker <michael.opdenacker@free-electrons.com>
-Subject: [PATCH v2] init: make init failures more explicit
-Date: Fri, 18 Oct 2013 14:00:33 +0200
-Message-ID: <1382097633-10166-1-git-send-email-michael.opdenacker@free-electrons.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v2] init: make init failures more explicit
+Date: Fri, 18 Oct 2013 14:20:54 +0200
+Message-ID: <CAMuHMdXas3ALeMXkj1YuDARVAL4Ln19UjXm8oRiGoLyKBc_B7A@mail.gmail.com>
+References: <1382097633-10166-1-git-send-email-michael.opdenacker@free-electrons.com>
+Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:sender:in-reply-to:references:date:message-id:subject
+         :from:to:cc:content-type;
+        bh=H5MVgA5ric/5BKUwu9b/2H5S7Sz+lO+KxGlTweAff4o=;
+        b=M7cWSdcNg9UzW/4scK3qu86xDgyrdUVW60KqJ/Q14o1lVLxzDOnF+sJd6xBtN2gX8J
+         O7Y9HFIQvoNGBhM88kKNne7sY647UyyXQD1/3s6Sxkj82SkQcnWdicMOkBY1lD+y/33G
+         CSNFHPHupH/85LvoNPBwwEZTtUgcLSrEKsNBx3z9ss4HONsVxTtamfdfnIr7t1YjBzmV
+         fwkOZl2FLI1bnqZfTIlGIJX4KrqJs6RinV9NRN407yru84oDL/pYJhYt0gG0vk4KyWUq
+         wRYt/BoqcNYpNBAZbq3EfHaeqOlGGOehRr7kcfZoVvILBOREt5APQjW4Bk2KYApDdN0o
+         RIeQ==
+In-Reply-To: <1382097633-10166-1-git-send-email-michael.opdenacker@free-electrons.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: akpm@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, janne.karhunen@gmail.com, geert@linux-m68k.org, Michael Opdenacker <michael.opdenacker@free-electrons.com>
+To: Michael Opdenacker <michael.opdenacker@free-electrons.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, janne.karhunen@gmail.com
 
-This patch proposes to make init failures more explicit.
+On Fri, Oct 18, 2013 at 2:00 PM, Michael Opdenacker
+<michael.opdenacker@free-electrons.com> wrote:
+> +               pr_err("Starting init: %s exists but couldn't execute it (error: %d - see errno-base.h and errno.h)\n",
 
-Before this, the "No init found" message didn't help much.
-It could sometimes be misleading and actually mean
-"No *working* init found".
+IMHO the "- see errno-base.h and errno.h" is a bit overkill.
 
-This message could hide many different issues:
-- no init program candidates found at all
-- some init program candidates exist but can't be executed
-  (missing execute permissions, failed to load shared libraries,
-  executable compiled for an unknown architecture...)
+Gr{oetje,eeting}s,
 
-This patch notifies the kernel user when a candidate init program is
-found but can't be executed. The error code is displayed, to quickly
-find the root cause. "No init found" is also replaced by
-"No working init found", which is more correct.
+                        Geert
 
-This will help embedded Linux developers (especially the new comers),
-regularly making and debugging new root filesystems.
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-Signed-off-by: Michael Opdenacker <michael.opdenacker@free-electrons.com>
----
- init/main.c | 24 +++++++++++++++++++-----
- 1 file changed, 19 insertions(+), 5 deletions(-)
-
-diff --git a/init/main.c b/init/main.c
-index 63d3e8f..3662767 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -811,6 +811,20 @@ static int run_init_process(const char *init_filename)
- 		(const char __user *const __user *)envp_init);
- }
- 
-+static int try_to_run_init_process(const char *init_filename)
-+{
-+	int ret;
-+
-+	ret = run_init_process(init_filename);
-+
-+	if (ret && ret != -ENOENT) {
-+		pr_err("Starting init: %s exists but couldn't execute it (error: %d - see errno-base.h and errno.h)\n",
-+		       init_filename, ret);
-+	}
-+
-+	return ret;
-+}
-+
- static noinline void __init kernel_init_freeable(void);
- 
- static int __ref kernel_init(void *unused)
-@@ -843,13 +857,13 @@ static int __ref kernel_init(void *unused)
- 		pr_err("Failed to execute %s.  Attempting defaults...\n",
- 			execute_command);
- 	}
--	if (!run_init_process("/sbin/init") ||
--	    !run_init_process("/etc/init") ||
--	    !run_init_process("/bin/init") ||
--	    !run_init_process("/bin/sh"))
-+	if (!try_to_run_init_process("/sbin/init") ||
-+	    !try_to_run_init_process("/etc/init") ||
-+	    !try_to_run_init_process("/bin/init") ||
-+	    !try_to_run_init_process("/bin/sh"))
- 		return 0;
- 
--	panic("No init found.  Try passing init= option to kernel. "
-+	panic("No working init found.  Try passing init= option to kernel. "
- 	      "See Linux Documentation/init.txt for guidance.");
- }
- 
--- 
-1.8.1.2
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
