@@ -1,30 +1,83 @@
-From: Rob Landley <rob@landley.net>
-Subject: Re: [JOB] ARM Embedded Developer - 100% Telecommute
-Date: Mon, 09 Sep 2013 21:13:54 -0500
-Message-ID: <1378779234.8385.19@driftwood>
-References: <0aac01ceadb0$fcad0590$f60710b0$@com>
-	<1378779104.8385.18@driftwood>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1378779104.8385.18@driftwood> (from rob@landley.net on Mon Sep  9
-	21:11:44 2013)
-Content-Disposition: inline
-Sender: linux-embedded-owner@vger.kernel.org
+From: Michael Opdenacker <michael.opdenacker@free-electrons.com>
+Subject: [PATCH] init: make init failures more explicit
+Date: Fri, 18 Oct 2013 10:47:29 +0200
+Message-ID: <1382086049-14386-1-git-send-email-michael.opdenacker@free-electrons.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; delsp="Yes"; format="Flowed"
-To: Rob Landley <rob@landley.net>
-Cc: OSJ <opensourcestaffing@gmail.com>, linux-embedded@vger.kernel.org
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: akpm@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Michael Opdenacker <michael.opdenacker@free-electrons.com>
 
-On 09/09/2013 09:11:44 PM, Rob Landley wrote:
-> On 09/09/2013 06:04:49 PM, OSJ wrote:
->> I have a client looking for a remote ARM Embedded Developer with the
->> following skills:
+This patch proposes to make init failures more explicit.
 
-The balsa email client is kind of annoying. Removing an email from the  
-cc: list doesn't actually take effect until you click somewhere else to  
-change focus. I really need to switch to a less broken one.
+Before this, the "No init found" message didn't help much.
+It could sometimes be misleading and actually mean
+"No *working* init found".
 
-Sorry for spamming the list,
+This message could hide many different issues:
+- no init program candidates found at all
+- some init program candidates exist but can't be executed
+  (missing execute permissions, failed to load shared libraries,
+  executable compiled for an unknown architecture...)
 
-Rob
+This patch notifies the kernel user when a candidate
+init program is found but can't be executed. It also replaces
+"No init found" by "No working init found", which is more correct.
+
+This will help embedded Linux developers (especially the new comers),
+regularly making and debugging new root filesystems.
+
+Signed-off-by: Michael Opdenacker <michael.opdenacker@free-electrons.com>
+---
+ init/main.c | 24 +++++++++++++++++++-----
+ 1 file changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/init/main.c b/init/main.c
+index 63d3e8f..a9a2833 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -811,6 +811,20 @@ static int run_init_process(const char *init_filename)
+ 		(const char __user *const __user *)envp_init);
+ }
+ 
++static int try_to_run_init_process(const char *init_filename)
++{
++	int ret;
++
++	ret = run_init_process(init_filename);
++
++	if (ret && ret != -ENOENT) {
++		pr_err("Starting init: %s exists but couldn't execute it\n",
++		       init_filename);
++	}
++
++	return ret;
++}
++
+ static noinline void __init kernel_init_freeable(void);
+ 
+ static int __ref kernel_init(void *unused)
+@@ -843,13 +857,13 @@ static int __ref kernel_init(void *unused)
+ 		pr_err("Failed to execute %s.  Attempting defaults...\n",
+ 			execute_command);
+ 	}
+-	if (!run_init_process("/sbin/init") ||
+-	    !run_init_process("/etc/init") ||
+-	    !run_init_process("/bin/init") ||
+-	    !run_init_process("/bin/sh"))
++	if (!try_to_run_init_process("/sbin/init") ||
++	    !try_to_run_init_process("/etc/init") ||
++	    !try_to_run_init_process("/bin/init") ||
++	    !try_to_run_init_process("/bin/sh"))
+ 		return 0;
+ 
+-	panic("No init found.  Try passing init= option to kernel. "
++	panic("No working init found.  Try passing init= option to kernel. "
+ 	      "See Linux Documentation/init.txt for guidance.");
+ }
+ 
+-- 
+1.8.1.2
