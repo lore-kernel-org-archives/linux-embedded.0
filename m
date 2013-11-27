@@ -1,42 +1,75 @@
-From: Richard Cochran <richardcochran@gmail.com>
+From: Wolfgang Denk <wd@denx.de>
 Subject: Re: Evolution of Linux kernel sizes
-Date: Wed, 27 Nov 2013 10:59:14 +0100
-Message-ID: <20131127095914.GA4609@netboy>
+Date: Wed, 27 Nov 2013 16:17:26 +0100
+Message-ID: <20131127151726.DCE57380416@gemini.denx.de>
 References: <CAMuHMdUr2Vr9+STwcYf1PcB=PF+u3SJxU3LYnzqQ+vdbDsp71A@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-type:content-disposition:in-reply-to:user-agent;
-        bh=F2Vh2LLlQptqLifB+M32viMoIW1h+gRVH5/WMXXvZOY=;
-        b=rMFkqZLf4TJxESqU1dYLS1fOTqixBaFgC44NGH67irvxN+VwXazndHSBVuFFgAkQwK
-         rlhTHwC+dKa1m6YolQRE/u0NDH3JSWalbkV9iQaW5QPhROpg+ebOJXQu54Y7FSh1N5El
-         oqPpwa1/1vWmofYiUpP0/ibd91YitWaxDxyaGm9tvgHZBbLI1Vg2xFS2qDwCi7OvaBVM
-         8uaujPVNclnRQlAATmw+z1VcKxo3obUIM1hbRawzFHvjjoJiAM/yhzXhcXvLjsYa91TO
-         ElwlHjOhjhUw0OLf6v492teHwJx3HM9w9bnMKvv+o01aQqTWj1FVe5iugTelixDVNrBE
-         doSA==
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdUr2Vr9+STwcYf1PcB=PF+u3SJxU3LYnzqQ+vdbDsp71A@mail.gmail.com>
+In-reply-to: <CAMuHMdUr2Vr9+STwcYf1PcB=PF+u3SJxU3LYnzqQ+vdbDsp71A@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Geert Uytterhoeven <geert@linux-m68k.org>
 Cc: Linux/m68k <linux-m68k@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Wed, Nov 27, 2013 at 10:35:25AM +0100, Geert Uytterhoeven wrote:
-> For v3.13-rc1, the top 10 is:
+Dear Geert,
+
+In message <CAMuHMdUr2Vr9+STwcYf1PcB=PF+u3SJxU3LYnzqQ+vdbDsp71A@mail.gmail.com> you wrote:
+>
+> Below are the static kernel sizes (as reported by "size") for m68k
+> multi-platform kernels (m68k/multi_defconfig), for kernel versions
+> 2.6.28 to 3.12:
 > 
-> Disabling CONFIG_NET saves 1038404 bytes
-> Disabling CONFIG_INET saves 572034 bytes
-
+>    text    data     bss     dec     hex filename
 ...
+> 4010686  220476  190220 4421382  437706 vmlinux-v3.12
 
-> I hope you find this useful!
+It's even more dramatic if you look further back.  The U-Boot README
+still has examples of 2.4.4 kernels for PowerPC _including_ network
+support:
 
-As another poor soul stuck with tiny resources, thank you for this
-work! Now, if I could only leave networking out...
+        -> tools/mkimage -l examples/uImage.TQM850L
+        Image Name:   2.4.4 kernel for TQM850L
+        Created:      Wed Jul 19 02:34:59 2000
+        Image Type:   PowerPC Linux Kernel Image (gzip compressed)
+        Data Size:    335725 Bytes = 327.86 kB = 0.32 MB
+        Load Address: 0x00000000
+        Entry Point:  0x00000000
 
-Thanks,
-Richard
+resp. the same kernel using an uncompressed image:
+
+	Image Type:   PowerPC Linux Kernel Image (uncompressed)
+	Data Size:    792160 Bytes = 773.59 kB = 0.76 MB
+
+Those were the days then, 13 years ago...
+
+Today:
+
+	Image Name:   Linux-3.12.0-11101-gfe9baba
+	Created:      Wed Nov 27 15:05:33 2013
+	Image Type:   PowerPC Linux Kernel Image (gzip compressed)
+	Data Size:    1509145 Bytes = 1473.77 kB = 1.44 MB
+	Load Address: 00000000
+	Entry Point:  00000000
+
+	Image Type:   PowerPC Linux Kernel Image (uncompressed)
+	Data Size:    3172240 Bytes = 3097.89 kB = 3.03 MB
+
+Compressed:   1509145 / 335725 = 4.50
+Uncompressed: 3172240 / 792160 = 4.00
+
+
+
+[1] http://git.denx.de/?p=u-boot.git;a=blob;f=README#l5142
+
+Best regards,
+
+Wolfgang Denk
+
+-- 
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
+I think it's a new feature. Don't tell anyone it was an accident. :-)
+  -- Larry Wall on s/foo/bar/eieio in <10911@jpl-devvax.JPL.NASA.GOV>
