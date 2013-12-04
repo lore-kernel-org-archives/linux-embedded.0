@@ -1,75 +1,62 @@
-From: Wolfgang Denk <wd@denx.de>
-Subject: Re: Evolution of Linux kernel sizes
-Date: Wed, 27 Nov 2013 16:17:26 +0100
-Message-ID: <20131127151726.DCE57380416@gemini.denx.de>
-References: <CAMuHMdUr2Vr9+STwcYf1PcB=PF+u3SJxU3LYnzqQ+vdbDsp71A@mail.gmail.com>
+From: Leon Pollak <leonp@plris.com>
+Subject: U-Boot <-> Kernel; NAND operation proposal
+Date: Wed, 04 Dec 2013 18:39:48 +0200
+Message-ID: <18990519.GPctzMhBYx@leonp.plris.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: <CAMuHMdUr2Vr9+STwcYf1PcB=PF+u3SJxU3LYnzqQ+vdbDsp71A@mail.gmail.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Linux/m68k <linux-m68k@vger.kernel.org>, Linux Embedded <linux-embedded@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-embedded@vger.kernel.org
 
-Dear Geert,
+Hello, all.
 
-In message <CAMuHMdUr2Vr9+STwcYf1PcB=PF+u3SJxU3LYnzqQ+vdbDsp71A@mail.gmail.com> you wrote:
->
-> Below are the static kernel sizes (as reported by "size") for m68k
-> multi-platform kernels (m68k/multi_defconfig), for kernel versions
-> 2.6.28 to 3.12:
-> 
->    text    data     bss     dec     hex filename
-...
-> 4010686  220476  190220 4421382  437706 vmlinux-v3.12
+I beg your pardon ahead for possible stupidity and inconsistency of what 
+I am going to say - this may be simply because of the lack of 
+experience. Below is my story and proposal as the result.
 
-It's even more dramatic if you look further back.  The U-Boot README
-still has examples of 2.4.4 kernels for PowerPC _including_ network
-support:
+During the last 2 years, my product, which is based on DM368 (ARM7 based 
+TI CPU) and Micron's NAND flashes (256MiB, 2K page) behaves unstably. 
+This means that some units from time to time refuse to boot for 
+different reasons.
 
-        -> tools/mkimage -l examples/uImage.TQM850L
-        Image Name:   2.4.4 kernel for TQM850L
-        Created:      Wed Jul 19 02:34:59 2000
-        Image Type:   PowerPC Linux Kernel Image (gzip compressed)
-        Data Size:    335725 Bytes = 327.86 kB = 0.32 MB
-        Load Address: 0x00000000
-        Entry Point:  0x00000000
+Today, after so long time and so many corrections, I can say that most 
+of the problems (not all!), which lead to the unit unable to start to 
+the end (to the application) where because of the incompatible modes of 
+NAND operating between u-boot and kernel.
 
-resp. the same kernel using an uncompressed image:
+For example, in the configuration I started from, which was supplied by 
+some vendor as evaluation board, u-boot was configured to use 4-bit HW 
+ECC, while kernel used 1-bit SW ECC.
 
-	Image Type:   PowerPC Linux Kernel Image (uncompressed)
-	Data Size:    792160 Bytes = 773.59 kB = 0.76 MB
+The OOB layouts used in both systems were different.
+Also BBT were configured differently.
 
-Those were the days then, 13 years ago...
+There were several other "small things", which combination was 
+inconsistent and produced the incorrect NAND functioning, which finally 
+in some cases made the unit inoperative.
 
-Today:
+--
 
-	Image Name:   Linux-3.12.0-11101-gfe9baba
-	Created:      Wed Nov 27 15:05:33 2013
-	Image Type:   PowerPC Linux Kernel Image (gzip compressed)
-	Data Size:    1509145 Bytes = 1473.77 kB = 1.44 MB
-	Load Address: 00000000
-	Entry Point:  00000000
+The major issue here is that such inconsistencies are not manifested in 
+some way, until the unit suddenly refuse to boot up after 2 weeks or 2 
+years.
 
-	Image Type:   PowerPC Linux Kernel Image (uncompressed)
-	Data Size:    3172240 Bytes = 3097.89 kB = 3.03 MB
+All this lead me to the following thought (very draftly):
 
-Compressed:   1509145 / 335725 = 4.50
-Uncompressed: 3172240 / 792160 = 4.00
+Each NAND has the "spare free" area in the first (zero) block, which is 
+used for storing CIS information. This information does not occupy all 
+the block, which usually is several hundreds of kilobytes.
+So, this "spare" place may be used for storing some descriptive 
+information of ALL possible NAND flash and its service parameters.
+I am speaking about ECC bits, Sw/HW, OOB layout, BBT layout, patter 
+places, bad block marks, and everything else you can imagine.
 
+Further, this information must be used both by u-boot and kernel. Or 
+even by other components, for example, RBL/UBL in DM36x from TI.
 
-
-[1] http://git.denx.de/?p=u-boot.git;a=blob;f=README#l5142
-
-Best regards,
-
-Wolfgang Denk
-
+Thanks to all who read this.
+Best Regards
 -- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
-Phone: (+49)-8142-66989-10 Fax: (+49)-8142-66989-80 Email: wd@denx.de
-I think it's a new feature. Don't tell anyone it was an accident. :-)
-  -- Larry Wall on s/foo/bar/eieio in <10911@jpl-devvax.JPL.NASA.GOV>
+Leon Pollak
