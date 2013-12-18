@@ -1,62 +1,75 @@
-From: Leon Pollak <leonp@plris.com>
-Subject: U-Boot <-> Kernel; NAND operation proposal
-Date: Wed, 04 Dec 2013 18:39:48 +0200
-Message-ID: <18990519.GPctzMhBYx@leonp.plris.com>
+From: =?utf-8?B?TGFtYnJlY2h0IErDvHJnZW4=?= <J.Lambrecht@TELEVIC.com>
+Subject: Re: U-Boot <-> Kernel; NAND operation proposal
+Date: Wed, 18 Dec 2013 11:03:15 +0100
+Message-ID: <52B172E3.5030503@televic.com>
+References: <18990519.GPctzMhBYx@leonp.plris.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <18990519.GPctzMhBYx@leonp.plris.com>
+Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+To: Leon Pollak <leonp@plris.com>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-Hello, all.
-
-I beg your pardon ahead for possible stupidity and inconsistency of what 
-I am going to say - this may be simply because of the lack of 
-experience. Below is my story and proposal as the result.
-
-During the last 2 years, my product, which is based on DM368 (ARM7 based 
-TI CPU) and Micron's NAND flashes (256MiB, 2K page) behaves unstably. 
-This means that some units from time to time refuse to boot for 
-different reasons.
-
-Today, after so long time and so many corrections, I can say that most 
-of the problems (not all!), which lead to the unit unable to start to 
-the end (to the application) where because of the incompatible modes of 
-NAND operating between u-boot and kernel.
-
-For example, in the configuration I started from, which was supplied by 
-some vendor as evaluation board, u-boot was configured to use 4-bit HW 
-ECC, while kernel used 1-bit SW ECC.
-
-The OOB layouts used in both systems were different.
-Also BBT were configured differently.
-
-There were several other "small things", which combination was 
-inconsistent and produced the incorrect NAND functioning, which finally 
-in some cases made the unit inoperative.
-
---
-
-The major issue here is that such inconsistencies are not manifested in 
-some way, until the unit suddenly refuse to boot up after 2 weeks or 2 
-years.
-
-All this lead me to the following thought (very draftly):
-
-Each NAND has the "spare free" area in the first (zero) block, which is 
-used for storing CIS information. This information does not occupy all 
-the block, which usually is several hundreds of kilobytes.
-So, this "spare" place may be used for storing some descriptive 
-information of ALL possible NAND flash and its service parameters.
-I am speaking about ECC bits, Sw/HW, OOB layout, BBT layout, patter 
-places, bad block marks, and everything else you can imagine.
-
-Further, this information must be used both by u-boot and kernel. Or 
-even by other components, for example, RBL/UBL in DM36x from TI.
-
-Thanks to all who read this.
-Best Regards
--- 
-Leon Pollak
+SGkgTGVvbiwNCg0KeW91IGJldHRlciBwb3N0IHRoaXMgdG8gbGludXgtbXRkQGxpc3RzLmluZnJh
+ZGVhZC5vcmcuDQpZb3Ugd2lsbCBnZXQgYSBiZXR0ZXIgcmVzcG9uc2UgdGhlcmUuDQoNCk9uIDEy
+LzA0LzIwMTMgMDU6MzkgUE0sIExlb24gUG9sbGFrIHdyb3RlOg0KPiBIZWxsbywgYWxsLg0KPg0K
+PiBJIGJlZyB5b3VyIHBhcmRvbiBhaGVhZCBmb3IgcG9zc2libGUgc3R1cGlkaXR5IGFuZCBpbmNv
+bnNpc3RlbmN5IG9mIHdoYXQNCj4gSSBhbSBnb2luZyB0byBzYXkgLSB0aGlzIG1heSBiZSBzaW1w
+bHkgYmVjYXVzZSBvZiB0aGUgbGFjayBvZg0KPiBleHBlcmllbmNlLiBCZWxvdyBpcyBteSBzdG9y
+eSBhbmQgcHJvcG9zYWwgYXMgdGhlIHJlc3VsdC4NCj4NCj4gRHVyaW5nIHRoZSBsYXN0IDIgeWVh
+cnMsIG15IHByb2R1Y3QsIHdoaWNoIGlzIGJhc2VkIG9uIERNMzY4IChBUk03IGJhc2VkDQo+IFRJ
+IENQVSkgYW5kIE1pY3JvbidzIE5BTkQgZmxhc2hlcyAoMjU2TWlCLCAySyBwYWdlKSBiZWhhdmVz
+IHVuc3RhYmx5Lg0KWW91IGhhdmUgbGludXggb24gQVJNNywgdUNsaW51eCB0aGVuPw0KPiBUaGlz
+IG1lYW5zIHRoYXQgc29tZSB1bml0cyBmcm9tIHRpbWUgdG8gdGltZSByZWZ1c2UgdG8gYm9vdCBm
+b3INCj4gZGlmZmVyZW50IHJlYXNvbnMuDQpJIHRoaW5rIGJvb3RpbmcgZnJvbSBOQU5EIGlzIGEg
+YmFkIGlkZWEgZm9yIGVtYmVkZGVkIGRldmljZXMuIE5BTkQgaGFzIA0KYml0LXJvdCAoYWxzbyBj
+YWxsZWQgDQpyZWFkLWRpc3R1cmIoaHR0cDovL2Vjb3Muc291cmNld2FyZS5vcmcvbWwvZWNvcy1k
+aXNjdXNzLzIwMTEtMDUvbXNnMDAwNzQuaHRtbCkpIA0KKGh0dHA6Ly93d3cubGludXgtbXRkLmlu
+ZnJhZGVhZC5vcmcvZG9jL3ViaWZzLmh0bWwjTF91Ymlmc19tbGMpLCBldmVuIA0Kd2hlbiBqdXN0
+IHJlYWRpbmcgKHRoZSBib290bG9hZGVyIGJpbmFyeSkuIFNvIHN1ZGRlbmx5IHRoZSBib290IGJp
+bmFyeSANCmNvdWxkIGhhdmUgZS5nLiBhIGJpdC1mbGlwLg0KQnV0IG1heWJlIHlvdSBhbHJlYWR5
+IGhhdmUgcmVkdW5kYW50IGJvb3QgaW1hZ2VzPw0KV2UgYWx3YXlzIHVzZSBOT1IgZmxhc2ggdG8g
+Ym9vdC4NCj4NCj4gVG9kYXksIGFmdGVyIHNvIGxvbmcgdGltZSBhbmQgc28gbWFueSBjb3JyZWN0
+aW9ucywgSSBjYW4gc2F5IHRoYXQgbW9zdA0KPiBvZiB0aGUgcHJvYmxlbXMgKG5vdCBhbGwhKSwg
+d2hpY2ggbGVhZCB0byB0aGUgdW5pdCB1bmFibGUgdG8gc3RhcnQgdG8NCj4gdGhlIGVuZCAodG8g
+dGhlIGFwcGxpY2F0aW9uKSB3aGVyZSBiZWNhdXNlIG9mIHRoZSBpbmNvbXBhdGlibGUgbW9kZXMg
+b2YNCj4gTkFORCBvcGVyYXRpbmcgYmV0d2VlbiB1LWJvb3QgYW5kIGtlcm5lbC4NCj4NCj4gRm9y
+IGV4YW1wbGUsIGluIHRoZSBjb25maWd1cmF0aW9uIEkgc3RhcnRlZCBmcm9tLCB3aGljaCB3YXMg
+c3VwcGxpZWQgYnkNCj4gc29tZSB2ZW5kb3IgYXMgZXZhbHVhdGlvbiBib2FyZCwgdS1ib290IHdh
+cyBjb25maWd1cmVkIHRvIHVzZSA0LWJpdCBIVw0KPiBFQ0MsIHdoaWxlIGtlcm5lbCB1c2VkIDEt
+Yml0IFNXIEVDQy4NCj4NCj4gVGhlIE9PQiBsYXlvdXRzIHVzZWQgaW4gYm90aCBzeXN0ZW1zIHdl
+cmUgZGlmZmVyZW50Lg0KPiBBbHNvIEJCVCB3ZXJlIGNvbmZpZ3VyZWQgZGlmZmVyZW50bHkuDQo+
+DQo+IFRoZXJlIHdlcmUgc2V2ZXJhbCBvdGhlciAic21hbGwgdGhpbmdzIiwgd2hpY2ggY29tYmlu
+YXRpb24gd2FzDQo+IGluY29uc2lzdGVudCBhbmQgcHJvZHVjZWQgdGhlIGluY29ycmVjdCBOQU5E
+IGZ1bmN0aW9uaW5nLCB3aGljaCBmaW5hbGx5DQo+IGluIHNvbWUgY2FzZXMgbWFkZSB0aGUgdW5p
+dCBpbm9wZXJhdGl2ZS4NCj4NCj4gLS0NCj4NCj4gVGhlIG1ham9yIGlzc3VlIGhlcmUgaXMgdGhh
+dCBzdWNoIGluY29uc2lzdGVuY2llcyBhcmUgbm90IG1hbmlmZXN0ZWQgaW4NCj4gc29tZSB3YXks
+IHVudGlsIHRoZSB1bml0IHN1ZGRlbmx5IHJlZnVzZSB0byBib290IHVwIGFmdGVyIDIgd2Vla3Mg
+b3IgMg0KPiB5ZWFycy4NCj4NCj4gQWxsIHRoaXMgbGVhZCBtZSB0byB0aGUgZm9sbG93aW5nIHRo
+b3VnaHQgKHZlcnkgZHJhZnRseSk6DQo+DQo+IEVhY2ggTkFORCBoYXMgdGhlICJzcGFyZSBmcmVl
+IiBhcmVhIGluIHRoZSBmaXJzdCAoemVybykgYmxvY2ssIHdoaWNoIGlzDQo+IHVzZWQgZm9yIHN0
+b3JpbmcgQ0lTIGluZm9ybWF0aW9uLiBUaGlzIGluZm9ybWF0aW9uIGRvZXMgbm90IG9jY3VweSBh
+bGwNCihJIHRoaW5rIHRoZSBleHBlcnRzIG9uIGxpbnV4LW10ZCB3aWxsIGtub3cgdGhpcyBzdGFu
+ZHMgZm9yIENhcmQgDQpJbmZvcm1hdGlvbiBTdHJ1Y3R1cmUsIGJ1dCBJIGRpZG4ndCA7LSkNCj4g
+dGhlIGJsb2NrLCB3aGljaCB1c3VhbGx5IGlzIHNldmVyYWwgaHVuZHJlZHMgb2Yga2lsb2J5dGVz
+Lg0KPiBTbywgdGhpcyAic3BhcmUiIHBsYWNlIG1heSBiZSB1c2VkIGZvciBzdG9yaW5nIHNvbWUg
+ZGVzY3JpcHRpdmUNCj4gaW5mb3JtYXRpb24gb2YgQUxMIHBvc3NpYmxlIE5BTkQgZmxhc2ggYW5k
+IGl0cyBzZXJ2aWNlIHBhcmFtZXRlcnMuDQo+IEkgYW0gc3BlYWtpbmcgYWJvdXQgRUNDIGJpdHMs
+IFN3L0hXLCBPT0IgbGF5b3V0LCBCQlQgbGF5b3V0LCBwYXR0ZXINCj4gcGxhY2VzLCBiYWQgYmxv
+Y2sgbWFya3MsIGFuZCBldmVyeXRoaW5nIGVsc2UgeW91IGNhbiBpbWFnaW5lLg0KPg0KPiBGdXJ0
+aGVyLCB0aGlzIGluZm9ybWF0aW9uIG11c3QgYmUgdXNlZCBib3RoIGJ5IHUtYm9vdCBhbmQga2Vy
+bmVsLiBPcg0KPiBldmVuIGJ5IG90aGVyIGNvbXBvbmVudHMsIGZvciBleGFtcGxlLCBSQkwvVUJM
+IGluIERNMzZ4IGZyb20gVEkuDQpJIHRoaW5rIHRoYXQgaXMgYSBnb29kIGlkZWEuIEkgcmVjZW50
+bHkgYWxzbyBoYWQgbmFuZCBmbGFzaCBpc3N1ZXMgd2l0aCANCkJCVCBsYXlvdXQuDQpZb3UgYmV0
+dGVyIGFsc28gcG9zdCB0aGlzIHRvIHRoZSB1Ym9vdCBhbmQgYmFyZWJveCAodWJvb3QgdjIpIG1h
+aWxpbmcgDQpsaXN0OyBJIG9ubHkga25vdyBiYXJlYm94Og0KYmFyZWJveEBsaXN0cy5pbmZyYWRl
+YWQub3JnDQoNCktpbmQgcmVnYXJkcywNCkrDvHJnZW4NCg0KPg0KPiBUaGFua3MgdG8gYWxsIHdo
+byByZWFkIHRoaXMuDQo+IEJlc3QgUmVnYXJkcw0KDQoNCi0tIA0KSsO8cmdlbiBMYW1icmVjaHQN
+ClImRCBBc3NvY2lhdGUNCk1vYmlsZTogKzMyIDQ5OSA2NDQgNTMxDQpUZWw6ICszMiAoMCk1MSAz
+MDMwNDUgICAgRmF4OiArMzIgKDApNTEgMzEwNjcwDQpodHRwOi8vd3d3LnRlbGV2aWMtcmFpbC5j
+b20NClRlbGV2aWMgUmFpbCBOViAtIExlbyBCZWthZXJ0bGFhbiAxIC0gODg3MCBJemVnZW0gLSBC
+ZWxnaXVtDQpDb21wYW55IG51bWJlciAwODI1LjUzOS41ODEgLSBSUFIgS29ydHJpamsNCg==
