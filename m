@@ -1,52 +1,62 @@
-From: Florian Fainelli <f.fainelli@gmail.com>
+From: Heiko Schocher <hs@denx.de>
 Subject: Re: GPIO triggers kernel reboot
-Date: Sat, 25 Jan 2014 18:54:40 -0800
-Message-ID: <52E478F0.60903@gmail.com>
-References: <52E3E031.6040709@denx.de>
+Date: Mon, 27 Jan 2014 07:17:18 +0100
+Message-ID: <52E5F9EE.2020707@denx.de>
+References: <52E3E031.6040709@denx.de> <371E240E6FC1D44DA5E51EE9DCDCB7845E5EA0A1@NA-MBX-01.mgc.mentorg.com> <371E240E6FC1D44DA5E51EE9DCDCB7845E5EA0E1@NA-MBX-01.mgc.mentorg.com>
+Reply-To: hs@denx.de
 Mime-Version: 1.0
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=message-id:date:from:user-agent:mime-version:to:cc:subject
-         :references:in-reply-to:content-type:content-transfer-encoding;
-        bh=V2mf+Jd5yG7f50ORilqRbaFTp17vnWtpVTolrNh/6NA=;
-        b=QQhSybXOon4DNNK5H+ELbpbwWXZXxmMOOmgiLGThAtilGE0GrasaBxuOU+f+6TLBqf
-         TpyapX4TKLFsQotBgdu14LckCY6S38mtAbSAl1j1EK8I1lUL07hRtRZ3jRI28Y0bsHG9
-         g8Bl/XX+Tv2Zm4w7C/L+k2gdd8n4KlUUlB4cZA/GtrBnh6QpAhlA4L+0K6Eg1J8LoBqW
-         3XoA7HMMc9SE0jJVvHOg1XEOGVC8ss3rxsF4vDesuZG8SllSWKmLqd5WDaE4kyayGHzy
-         eYS1lXsof8LFDZdjF5w4uzw1S/8+mSdSsNZ+0o7SyGl24clc6jIn5eXaqb2v7eXr6+iG
-         3nPQ==
-In-Reply-To: <52E3E031.6040709@denx.de>
+In-Reply-To: <371E240E6FC1D44DA5E51EE9DCDCB7845E5EA0E1@NA-MBX-01.mgc.mentorg.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-9"; format="flowed"
-To: hs@denx.de, linux-embedded@vger.kernel.org
-Cc: Wolfgang Denk <wd@denx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: "Mehaffey, John" <John_Mehaffey@mentor.com>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Wolfgang Denk <wd@denx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Le 25/01/2014 08:02, Heiko Schocher a =E9crit :
-> Hello all,
+Hello John,
+
+Am 25.01.2014 21:24, schrieb Mehaffey, John:
+>> -----Original Message-----
+>> From: linux-embedded-owner@vger.kernel.org
+>> [mailto:linux-embedded-owner@vger.kernel.org] On Behalf Of Heiko
+>> Schocher
+>> Sent: Saturday, January 25, 2014 8:03 AM
+>> To: linux-embedded@vger.kernel.org
+>> Cc: Wolfgang Denk; linux-arm-kernel@lists.infradead.org
+>> Subject: GPIO triggers kernel reboot
+>>
+>> Hello all,
+>>
+>> is it possible to reboot current mainline kernel triggered from a GPIO in kernel space?
+>>
+>> If not, how can be done this, so that it has a chance to go into mainline?
+>>
+>> Thanks for any suggestions
+>>
+>> bye,
+>> Heiko
 >
-> is it possible to reboot current mainline kernel triggered from a
-> GPIO in kernel space?
->
-> If not, how can be done this, so that it has a chance to go into
-> mainline?
+> Hi Heiko,
+> Call kexec() from the GPIO driver.
+> It will take some effort to get it right :)
 
-Your GPIO could (should) be bound to a gpio-keys driver which will=20
-deliver key presses event; which you can ultimately bind to the action=20
-of triggering a system reboot.
+Thanks for your answer!
+Hmm.. but has this a chance to go into mainline?
 
-Granted, this makes you cross a lot of layers, and requires user-space=20
-to implemnt the reboot policy, but what you are asking for is both a=20
-mechanism and policy mix, which is usually not accepted.
+> Or if a simple reboot is all that you want, examine the several reboot APIs in kernel/reboot.c
 
-You are probably working with HW which won't change, but wiring a reset=
-=20
-button to a system reset output is usually much simpler ;)
+A current implementation from a customer is for an arm, am335x based board
+to add in board setup code:
 
->
-> Thanks for any suggestions
->
-> bye,
-> Heiko
+         ret = request_irq(OMAP_GPIO_IRQ(RESET_BUTTON_IRQ_GPIO)
+                 , (irq_handler_t)arm_pm_restart, IRQF_TRIGGER_LOW, "reset button", NULL);
+
+and as I want to bring this board to mainline, I think this is not
+an acceptable/good way ... or?
+
+bye,
+Heiko
+-- 
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
