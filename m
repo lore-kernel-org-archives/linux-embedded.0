@@ -1,52 +1,49 @@
-From: Rob Landley <rob@landley.net>
-Subject: New aboriginal linux release with 3.14 kernel.
-Date: Sun, 04 May 2014 11:45:35 -0500
-Message-ID: <53666EAF.80700@landley.net>
+From: Dirk Behme <dirk.behme@gmail.com>
+Subject: Boot time: Initial main memory initialization optimizations?
+Date: Mon, 05 May 2014 17:40:56 +0200
+Message-ID: <5367B108.8080206@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=message-id:date:from:user-agent:mime-version:to:subject
+         :content-type:content-transfer-encoding;
+        bh=lFwCQT+jMv3gvUxYec+HkfJ7CE63U8zBQBEKHfq7Dv0=;
+        b=H2hX8PiZvdEIkw9b8tGvt0+mOSXAHGLocWLCS52iXb3L41a/mPsAf322wECknAf+Hj
+         9siTHHUTfSeuH2o1vDm7c2ybVThePHyTiw2Nj8aCB4tN2472itmpATNlJVo1GH8TEWJj
+         8AlQRBuyJWxmT773uO/ikObmosFFjv/L0LlhYDL2VOmfz4cT91HTaqm2Qy0yNKDjF+H+
+         E78BmCcOTco7PMUulhL4tnzWoKuNs3A3KHxKEHK0aHIR5K4JRzI9rIH03hFQH/IL1vwb
+         6UQRUiNjJqcBjACJo3Zx59Jq0JTQxjo8wpaN/DBoC+5R5YOprAZGE+nsMJ4rHL3qJUpE
+         YGbw==
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-To: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: Linux Embedded <linux-embedded@vger.kernel.org>
 
-It's reasonably standlone useful at this point, so I thought you might
-want to know:
+Hi,
 
-http://landley.net/aboriginal/about.html
+regarding boot time optimization, on an embedded ARM Cortex-A9 based 
+system with 512MB or 1GB main memory, we found that initializing this 
+main memory takes a somehow large amount of time.
 
-It's a tiny Linux system (9 packages total but they boil down to
-"busybox, uClibc, and the last gplv2 release of gcc") all cross compiled
-to several different targets (arm, mips, powerpc, sparc, x86, sh4, etc)
-and packaged up to run under qemu (tested with qemu 2.0).
+Initializing 512MB takes <= ~100ms, the additional 512MB on the 1GB 
+take <= ~100ms additionally, too. So in sum <= ~200ms for 1GB.
 
-You basically wget a tarball, extract it, "./run-emulator.sh", and
-you've got a shell prompt in an emulated system. (Type exit when done.)
-There are also "./dev-environment.sh" and "./native-build.sh" scripts
-that launch qemu in more complicated ways; the about page explains those.
+Having a short look to this, it looks like most of the time is spent 
+in arch/arm/mm/init.c in 
+bootmem_init()/arm_bootmem_init()/arm_bootmem_free().
 
-I find it useful for cross platform regression testing (does new release
-of package X work on target Y?), and also for replacing cross compiling
-with native compiling under emulation. (One of those 9 packages is
-distcc so it can call out to the cross compiler while still doing native
-compiling; this speeds up the non-autoconf bits of the build by a factor
-of 7.)
+Has anybody already looked into this if there are any optimizations 
+possible? Maybe even some hacks, if the main memory size (512MB/1GB) 
+is always known? Any pointers?
 
-My smoketest for new releases is building static  strace and dropbear
-binaries for each target (you can download those from
-http://landley.net/aboriginal/bin even if you don't care about the rest
-of the project, or reproduce it yourself with the automated build-image
-files in
-http://landley.net/aboriginal/control-images/downloads/binaries).
+I'm looking for reducing (a) the overall init time and maybe (b) the 
+dependency on the memory size.
 
-Step 1 of doing real work is often "build Linux From Scratch" under it,
-and then play further in that chroot. The lfs-bootstrap.hdc build-image
-might help, and the about page tells you how to use it.
+Thanks
 
-Years ago a friend and I did a GIANT PRESENTATION about all of this.
-It's a few years out of date but still covers the theory pretty well:
-https://speakerdeck.com/mirell/developing-for-non-x86-targets-using-qemu
+Dirk
 
-There's a mailing list if you've got questions.
 
-Rob
+
