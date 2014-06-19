@@ -1,85 +1,46 @@
-From: Manuel Reimer <Manuel.Spam@nurfuerspam.de>
-Subject: Re: "make oldconfig" kills config options when cross compiling
-Date: Sat, 24 May 2014 21:13:53 +0200
-Message-ID: <llqr1h$sgm$1@ger.gmane.org>
-References: <ll2ku7$uu$1@ger.gmane.org> <53754D22.2060108@infradead.org>
+From: Wojciech Koszek <wojciech.koszek@xilinx.com>
+Subject: [OT, JOB] Xilinx, San Jose: 2 full-time openings for embedded
+ systems/embedded software group
+Date: Thu, 19 Jun 2014 00:33:22 +0000
+Message-ID: <e3ea554d-2608-4b80-94f8-d0e924d453c0@BN1AFFO11FD008.protection.gbl>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <53754D22.2060108@infradead.org>
+Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: linux-embedded@vger.kernel.org
+To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-On 05/16/2014 01:26 AM, Randy Dunlap wrote:
-> In 3.7 (where that original config file came from), ARCH_MXS did NOT depend on
-> ARCH_MULTI_V5.  Somewhere between 3.7 and 3.14, someone decided that ARCH_MXS should
-> depend on ARCH_MULTI_V5.  You can probably enable that kconfig option and then
-> enable ARCH_MXS.
+Hello,
 
-I had to add the following to my config:
+[This isn't strictly Linux-related, I know, I know. But I assumed some of you may like embedded systems. We're the same group as guys who did Linux for Xilinx FPGA SoC (Zynq). We also use a lot of Open-Source stuff and look for people with open-source code reading/writing skills]
 
-CONFIG_ARCH_MULTI_V5=y
-CONFIG_ARCH_MULTI_V6_V7=n
-CONFIG_ARCH_MULTI_V7=n
+Xilinx (San Jose, California) has 2 full-time openings for people interested in software development, embedded systems, SoC chips, ARM architecture and FPGAs. Ideal candidate would love seeing hardware and software cooperate. As a member of our team you'll spend most of your time with Vim/Emacs, designing, writing, testing and breaking our proprietary OS. It's written in BSD-style ANSI C and assembler, has 101k lines of code and is used across the company in all sorts of unusual ways.
 
-With these three lines "make oldconfig" seemed to no longer kill 
-important config entries.
+If that sounds interesting to you, here are the links:
 
-"make uImage" failed. I got asked to specify a "LOADADDR" so I created 
-my image like this:
+IRC104504: http://tinyurl.com/XILINX-IRC104504
+IRC104645: http://tinyurl.com/XILINX-IRC104645
 
-LOADADDR=0x40008000 make uImage
+If you think you qualify, send an e-mail with attached resume in the PDF file to:
 
-But the resulting kernel fails to boot. The error message makes sense. 
-Maybe a bug in imx23.dtsi? In fact the serial port "duart: 
-serial@80070000" does not have a "dma-names" property:
+pssa_hiring (at) xilinx.com
 
-http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/arch/arm/boot/dts/imx23.dtsi#n496
+E-mail should have a format:
 
-But is this a blocker and can cause the kernel boot to stop?
+To: pssa_hiring (at) xilinx.com
+From: you@mail.domain
+Subject: IRC104504 or IRC104645
 
-Boot log follows:
+Otherwise it'll go to spam.
 
-U-Boot 2013.10 (Jan 08 2014 - 14:49:21) Arch Linux ARM
+Thanks,
 
-CPU:   Freescale i.MX23 rev1.4 at 454 MHz
-BOOT:  SSP SD/MMC #0
-DRAM:  64 MiB
-MMC:   MXS MMC: 0
-*** Warning - bad CRC, using default environment
+--
+Wojciech A. Koszek
+Sr Systems Design Engineer
+wojciech.koszek (at) xilinx.com
 
-In:    serial
-Out:   serial
-Err:   serial
-Net:   Net Initialization Skipped
-No ethernet found.
-Hit any key to stop autoboot:  0
-mmc0 is current device
-SD/MMC found on device 0
-170 bytes read in 101 ms (1000 Bytes/s)
-Importing environment from mmc (uEnv.txt)...
-Checking if uenvcmd is set ...
-Running loaduimage ...
-2542832 bytes read in 848 ms (2.9 MiB/s)
-9888 bytes read in 124 ms (77.1 KiB/s)
-Booting from mmc ...
-## Booting kernel from Legacy Image at 42000000 ...
-    Image Name:   Linux-3.14.4-9-ARCH
-    Image Type:   ARM Linux Kernel Image (uncompressed)
-    Data Size:    2542768 Bytes = 2.4 MiB
-    Load Address: 40008000
-    Entry Point:  40008000
-    Verifying Checksum ... OK
-## Flattened Device Tree blob at 41000000
-    Booting using the fdt blob at 0x41000000
-    Loading Kernel Image ... OK
-    Loading Device Tree to 43b63000, end 43b6869f ... OK
 
-Starting kernel ...
-
-[    0.000000] of_irq_init: children remain, but no parents
-[    1.970000] of_dma_request_slave_channel: dma-names property of node 
-'/apb@80000000/apbx@80040000/serial@80070000' missing or empty
-
+This email and any attachments are intended for the sole use of the named recipient(s) and contain(s) confidential information that may be proprietary, privileged or copyrighted under applicable law. If you are not the intended recipient, do not read, copy, or forward this email message or any attachments. Delete this email message and any attachments immediately.
