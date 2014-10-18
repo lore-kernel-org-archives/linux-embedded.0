@@ -1,106 +1,40 @@
-From: manty kuma <mantykuma@gmail.com>
-Subject: Re: cpuidle - minimum time for sleep
-Date: Fri, 10 Oct 2014 12:22:55 +0900
-Message-ID: <CAB6A5-BJZtcT0GZpYC=TOeXrEC+mvTCxKkVftObxzt3OkNadHQ@mail.gmail.com>
-References: <CAJ2oMhJXi-wxZJFcmm3LsTQOC35tAVKwr1PihUc0CmbnNtfPVQ@mail.gmail.com>
-	<11792.1412881303@turing-police.cc.vt.edu>
+From: Dirk Behme <dirk.behme@gmail.com>
+Subject: Why is the deferred initcall patch not mainline?
+Date: Sat, 18 Oct 2014 07:07:30 +0200
+Message-ID: <5441F592.6090807@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0574089394210601613=="
-Return-path: <kernelnewbies-bounces@kernelnewbies.org>
-In-Reply-To: <11792.1412881303@turing-police.cc.vt.edu>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies>,
-	<mailto:kernelnewbies-request@kernelnewbies.org?subject=unsubscribe>
-List-Archive: <http://lists.kernelnewbies.org/pipermail/kernelnewbies>
-List-Post: <mailto:kernelnewbies@kernelnewbies.org>
-List-Help: <mailto:kernelnewbies-request@kernelnewbies.org?subject=help>
-List-Subscribe: <http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies>,
-	<mailto:kernelnewbies-request@kernelnewbies.org?subject=subscribe>
-Sender: kernelnewbies-bounces@kernelnewbies.org
-Errors-To: kernelnewbies-bounces@kernelnewbies.org
-To: Valdis Kletnieks <Valdis.Kletnieks@vt.edu>
-Cc: linux-omap@vger.kernel.org, kernelnewbies <kernelnewbies@kernelnewbies.org>, linux-embedded@vger.kernel.org, Ran Shalit <ranshalit@gmail.com>, linux-pm@vger.kernel.org
-
---===============0574089394210601613==
-Content-Type: multipart/alternative; boundary=001a11c3319ea90f7e050509102f
-
---001a11c3319ea90f7e050509102f
-Content-Type: text/plain; charset=UTF-8
-
->> Does anybody know what is the minimum expected time for sleep period
->> with the cpuidle ?
-By sleep period do you mean sleep time for complete device or only for
-cpu's? If you want to check for device as a whole, you can see the print in
-the kernel log. If you want to check programmatically,
-suspend_devices_and_enter() is the function.
-
-On Fri, Oct 10, 2014 at 4:01 AM, <Valdis.Kletnieks@vt.edu> wrote:
-
-> On Thu, 09 Oct 2014 21:28:23 +0300, Ran Shalit said:
->
-> > Does anybody know what is the minimum expected time for sleep period
-> > with the cpuidle ?
->
-> Both processor dependent and sleep level dependent.  There's a certain
-> amount of latency induced by the hardware waking up.
->
-> Look at /sys/devices/system/cpu/cpu*/cpuidle/state*/latency
->
-> _______________________________________________
-> Kernelnewbies mailing list
-> Kernelnewbies@kernelnewbies.org
-> http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies
->
->
-
---001a11c3319ea90f7e050509102f
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>&gt;&gt;=20
-Does anybody know what is the minimum expected time for sleep period<br>&gt=
-;&gt; with the cpuidle ?<br>By sleep period do you mean sleep time for comp=
-lete device or only for cpu&#39;s? If you want to check for device as a who=
-le, you can see the print in the kernel log. If you want to check programma=
-tically, suspend_devices_and_enter() is the function.<br></div></div><div c=
-lass=3D"gmail_extra"><br><div class=3D"gmail_quote">On Fri, Oct 10, 2014 at=
- 4:01 AM,  <span dir=3D"ltr">&lt;<a href=3D"mailto:Valdis.Kletnieks@vt.edu"=
- target=3D"_blank">Valdis.Kletnieks@vt.edu</a>&gt;</span> wrote:<br><blockq=
-uote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc =
-solid;padding-left:1ex"><span class=3D"">On Thu, 09 Oct 2014 21:28:23 +0300=
-, Ran Shalit said:<br>
-<br>
-&gt; Does anybody know what is the minimum expected time for sleep period<b=
-r>
-&gt; with the cpuidle ?<br>
-<br>
-</span>Both processor dependent and sleep level dependent.=C2=A0 There&#39;=
-s a certain<br>
-amount of latency induced by the hardware waking up.<br>
-<br>
-Look at /sys/devices/system/cpu/cpu*/cpuidle/state*/latency<br>
-<br>_______________________________________________<br>
-Kernelnewbies mailing list<br>
-<a href=3D"mailto:Kernelnewbies@kernelnewbies.org">Kernelnewbies@kernelnewb=
-ies.org</a><br>
-<a href=3D"http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies" t=
-arget=3D"_blank">http://lists.kernelnewbies.org/mailman/listinfo/kernelnewb=
-ies</a><br>
-<br></blockquote></div><br></div>
-
---001a11c3319ea90f7e050509102f--
-
-
---===============0574089394210601613==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <linux-embedded-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=message-id:date:from:user-agent:mime-version:to:cc:subject
+         :content-type:content-transfer-encoding;
+        bh=PhYJeh0v5Mpi9IHm+wAKuieS6TA/kcM50eJopp1ZAUE=;
+        b=tfGimCCgz96H4ZDyISxFa0pIMItqFLBOUS1V64gUCduU2kexqdQLc+HDFdYC4YfS1r
+         57YiOrAZXKTBaDgtr7jBGTwwfmLscbEYCDRtzHMiQ2bDEjQ91Gpy4jb2xKhS/5oB0DQC
+         imU787DOn55P4c96EHOZjjtOLo4ta44h7Ae1odACI2oTknRNc98bZKS5r8m+BSsFqlKS
+         cKKBVgG8jtDIkZ/dYxKVBxwVokZKnCoLE3lnXixAC/mkMHbABPvjuunv5sTx6300u4L/
+         j+iKPKsVLnyjqhRfpt774gbo5g1Zb2x6yweAtQ5R1JUI3EoPYO9xJJChUEEv4xI0khtp
+         CzIQ==
+Sender: linux-embedded-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; format="flowed"
+To: linux-embedded@vger.kernel.org
+Cc: Alexandre Belloni <alexandre.belloni@free-electrons.com>, Tim Bird <tim.bird@am.sony.com>, Christopher_Hallinan@mentor.com
 
-_______________________________________________
-Kernelnewbies mailing list
-Kernelnewbies@kernelnewbies.org
-http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies
+Hi,
 
---===============0574089394210601613==--
+During the ELCE 2014 in Duesseldorf in Chris Hallinan's talk [1] there 
+has been the unanswered question why the deferred initcall patch [2] 
+isn't mainline, yet.
 
+Anybody remembers?
+
+Best regards
+
+Dirk
+
+
+[1] http://sched.co/1yG5fmY
+
+[2] http://elinux.org/Deferred_Initcalls
