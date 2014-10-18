@@ -1,40 +1,35 @@
-From: Dirk Behme <dirk.behme@gmail.com>
-Subject: Why is the deferred initcall patch not mainline?
-Date: Sat, 18 Oct 2014 07:07:30 +0200
-Message-ID: <5441F592.6090807@gmail.com>
+From: "Bird, Tim" <Tim.Bird@sonymobile.com>
+Subject: RE: Why is the deferred initcall patch not mainline?
+Date: Sat, 18 Oct 2014 10:11:27 +0200
+Message-ID: <nngd3gtlr4ltyk2mo7p2sn30.1413619885726@email.android.com>
+References: <5441F592.6090807@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=message-id:date:from:user-agent:mime-version:to:cc:subject
-         :content-type:content-transfer-encoding;
-        bh=PhYJeh0v5Mpi9IHm+wAKuieS6TA/kcM50eJopp1ZAUE=;
-        b=tfGimCCgz96H4ZDyISxFa0pIMItqFLBOUS1V64gUCduU2kexqdQLc+HDFdYC4YfS1r
-         57YiOrAZXKTBaDgtr7jBGTwwfmLscbEYCDRtzHMiQ2bDEjQ91Gpy4jb2xKhS/5oB0DQC
-         imU787DOn55P4c96EHOZjjtOLo4ta44h7Ae1odACI2oTknRNc98bZKS5r8m+BSsFqlKS
-         cKKBVgG8jtDIkZ/dYxKVBxwVokZKnCoLE3lnXixAC/mkMHbABPvjuunv5sTx6300u4L/
-         j+iKPKsVLnyjqhRfpt774gbo5g1Zb2x6yweAtQ5R1JUI3EoPYO9xJJChUEEv4xI0khtp
-         CzIQ==
+In-Reply-To: <5441F592.6090807@gmail.com>
+Content-Language: en-US
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: linux-embedded@vger.kernel.org
-Cc: Alexandre Belloni <alexandre.belloni@free-electrons.com>, Tim Bird <tim.bird@am.sony.com>, Christopher_Hallinan@mentor.com
+Content-Type: text/plain; charset="windows-1252"
+To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Dirk Behme <dirk.behme@gmail.com>
+Cc: Alexandre Belloni <alexandre.belloni@free-electrons.com>, "tim.bird@am.sony.com" <tim.bird@am.sony.com>, "Christopher_Hallinan@mentor.com" <Christopher_Hallinan@mentor.com>
 
-Hi,
-
-During the ELCE 2014 in Duesseldorf in Chris Hallinan's talk [1] there 
-has been the unanswered question why the deferred initcall patch [2] 
-isn't mainline, yet.
-
-Anybody remembers?
-
-Best regards
-
-Dirk
-
-
-[1] http://sched.co/1yG5fmY
-
-[2] http://elinux.org/Deferred_Initcalls
+VGhlIGFuc3dlciBpcyBwcmV0dHkgZWFzeSwgSSB0aGluay4gIEkgdHJpZWQgdG8gbWFpbmxpbmUg
+aXQgb25jZSBidXQgZmFpbGVkLCBhbmQgZGlkbid0IHJlYWxseSB0cnkgYWdhaW4uIElmIGl0IGlz
+IGJlaW5nIGZvdW5kIHVzZWZ1bCwgIHdlIHNob3VsZCB0cnkgdG8gbWFpbmxpbmUgaXQgYWdhaW4s
+ICB0aGlzIHRpbWUgd2l0aCBtb3JlIHBlcnNpc3RlbmNlLiAgVGhlIHJlYXNvbiBpdCBnb3QgcmVq
+ZWN0ZWQgYmVmb3JlIElJUkMgd2FzIHRoYXQgeW91IGNhbiBhY2NvbXBsaXNoIGEgc2ltaWxhciB0
+aGluZyB3aXRoIG1vZHVsZXMsIHdpdGggbm8gY2hhbmdlcyB0byB0aGUga2VybmVsLiBCdXQgdGhh
+dCBkb2Vzbid0IGNvdmVyIHRoZSBjYXNlIHdoZXJlIHRoZSBsb2FkYWJsZSBtb2R1bGVzIGZlYXR1
+cmUgb2YgdGhlIGtlcm5lbCBpcyB0dXJuZWQgb2ZmLCB3aGljaCBpcyBjb21tb24gaW4gdmVyeSBz
+bWFsbCBzeXN0ZW1zLg0KDQogIC0tIFRpbQ0KDQpTZW50IGZyb20gbXkgU29ueSBzbWFydHBob25l
+IG9uIFQtTW9iaWxl4oCZcyA0RyBMVEUgTmV0d29yaw0KDQoNCi0tLS0gRGlyayBCZWhtZSB3cm90
+ZSAtLS0tDQoNCkhpLA0KDQpEdXJpbmcgdGhlIEVMQ0UgMjAxNCBpbiBEdWVzc2VsZG9yZiBpbiBD
+aHJpcyBIYWxsaW5hbidzIHRhbGsgWzFdIHRoZXJlDQpoYXMgYmVlbiB0aGUgdW5hbnN3ZXJlZCBx
+dWVzdGlvbiB3aHkgdGhlIGRlZmVycmVkIGluaXRjYWxsIHBhdGNoIFsyXQ0KaXNuJ3QgbWFpbmxp
+bmUsIHlldC4NCg0KQW55Ym9keSByZW1lbWJlcnM/DQoNCkJlc3QgcmVnYXJkcw0KDQpEaXJrDQoN
+Cg0KWzFdIGh0dHA6Ly9zY2hlZC5jby8xeUc1Zm1ZDQoNClsyXSBodHRwOi8vZWxpbnV4Lm9yZy9E
+ZWZlcnJlZF9Jbml0Y2FsbHMNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
+ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtZW1iZWRkZWQiIGluDQp0aGUgYm9keSBvZiBh
+IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KTW9yZSBtYWpvcmRvbW8gaW5m
+byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
