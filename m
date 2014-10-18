@@ -1,35 +1,58 @@
-From: "Bird, Tim" <Tim.Bird@sonymobile.com>
-Subject: RE: Why is the deferred initcall patch not mainline?
-Date: Sat, 18 Oct 2014 10:11:27 +0200
-Message-ID: <nngd3gtlr4ltyk2mo7p2sn30.1413619885726@email.android.com>
+From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Subject: Re: Why is the deferred initcall patch not mainline?
+Date: Sat, 18 Oct 2014 16:05:37 +0200
+Message-ID: <20141018140536.GA10616@piout.net>
 References: <5441F592.6090807@gmail.com>
+ <nngd3gtlr4ltyk2mo7p2sn30.1413619885726@email.android.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <5441F592.6090807@gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <nngd3gtlr4ltyk2mo7p2sn30.1413619885726@email.android.com>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="windows-1252"
-To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Dirk Behme <dirk.behme@gmail.com>
-Cc: Alexandre Belloni <alexandre.belloni@free-electrons.com>, "tim.bird@am.sony.com" <tim.bird@am.sony.com>, "Christopher_Hallinan@mentor.com" <Christopher_Hallinan@mentor.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: "Bird, Tim" <Tim.Bird@sonymobile.com>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Dirk Behme <dirk.behme@gmail.com>, "tim.bird@am.sony.com" <tim.bird@am.sony.com>, "Christopher_Hallinan@mentor.com" <Christopher_Hallinan@mentor.com>
 
-VGhlIGFuc3dlciBpcyBwcmV0dHkgZWFzeSwgSSB0aGluay4gIEkgdHJpZWQgdG8gbWFpbmxpbmUg
-aXQgb25jZSBidXQgZmFpbGVkLCBhbmQgZGlkbid0IHJlYWxseSB0cnkgYWdhaW4uIElmIGl0IGlz
-IGJlaW5nIGZvdW5kIHVzZWZ1bCwgIHdlIHNob3VsZCB0cnkgdG8gbWFpbmxpbmUgaXQgYWdhaW4s
-ICB0aGlzIHRpbWUgd2l0aCBtb3JlIHBlcnNpc3RlbmNlLiAgVGhlIHJlYXNvbiBpdCBnb3QgcmVq
-ZWN0ZWQgYmVmb3JlIElJUkMgd2FzIHRoYXQgeW91IGNhbiBhY2NvbXBsaXNoIGEgc2ltaWxhciB0
-aGluZyB3aXRoIG1vZHVsZXMsIHdpdGggbm8gY2hhbmdlcyB0byB0aGUga2VybmVsLiBCdXQgdGhh
-dCBkb2Vzbid0IGNvdmVyIHRoZSBjYXNlIHdoZXJlIHRoZSBsb2FkYWJsZSBtb2R1bGVzIGZlYXR1
-cmUgb2YgdGhlIGtlcm5lbCBpcyB0dXJuZWQgb2ZmLCB3aGljaCBpcyBjb21tb24gaW4gdmVyeSBz
-bWFsbCBzeXN0ZW1zLg0KDQogIC0tIFRpbQ0KDQpTZW50IGZyb20gbXkgU29ueSBzbWFydHBob25l
-IG9uIFQtTW9iaWxl4oCZcyA0RyBMVEUgTmV0d29yaw0KDQoNCi0tLS0gRGlyayBCZWhtZSB3cm90
-ZSAtLS0tDQoNCkhpLA0KDQpEdXJpbmcgdGhlIEVMQ0UgMjAxNCBpbiBEdWVzc2VsZG9yZiBpbiBD
-aHJpcyBIYWxsaW5hbidzIHRhbGsgWzFdIHRoZXJlDQpoYXMgYmVlbiB0aGUgdW5hbnN3ZXJlZCBx
-dWVzdGlvbiB3aHkgdGhlIGRlZmVycmVkIGluaXRjYWxsIHBhdGNoIFsyXQ0KaXNuJ3QgbWFpbmxp
-bmUsIHlldC4NCg0KQW55Ym9keSByZW1lbWJlcnM/DQoNCkJlc3QgcmVnYXJkcw0KDQpEaXJrDQoN
-Cg0KWzFdIGh0dHA6Ly9zY2hlZC5jby8xeUc1Zm1ZDQoNClsyXSBodHRwOi8vZWxpbnV4Lm9yZy9E
-ZWZlcnJlZF9Jbml0Y2FsbHMNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
-ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtZW1iZWRkZWQiIGluDQp0aGUgYm9keSBvZiBh
-IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+Hi,
+
+On 18/10/2014 at 10:11:27 +0200, Bird, Tim wrote :
+> The answer is pretty easy, I think.  I tried to mainline it once but failed, and didn't really try again. If it is being found useful,  we should try to mainline it again,  this time with more persistence.  The reason it got rejected before IIRC was that you can accomplish a similar thing with modules, with no changes to the kernel. But that doesn't cover the case where the loadable modules feature of the kernel is turned off, which is common in very small systems.
+> 
+
+There is also the case of subsystems that can't be compiled as modules.
+I didn't even try to push that to the mainline because I believe we
+prefer not having code without any users/calls in the kernel. You would
+still have to patch your kernel to use deferred_module_init().
+
+It is also quite easy to port, maybe you can try to push it to mainline
+or if you want I can try to send an updated patch myself.
+
+> ---- Dirk Behme wrote ----
+> 
+> Hi,
+> 
+> During the ELCE 2014 in Duesseldorf in Chris Hallinan's talk [1] there
+> has been the unanswered question why the deferred initcall patch [2]
+> isn't mainline, yet.
+> 
+> Anybody remembers?
+> 
+> Best regards
+> 
+> Dirk
+> 
+> 
+> [1] http://sched.co/1yG5fmY
+> 
+> [2] http://elinux.org/Deferred_Initcalls
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-embedded" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Alexandre Belloni, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
