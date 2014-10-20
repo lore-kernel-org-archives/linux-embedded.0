@@ -1,52 +1,45 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: v3.18-rc1 bloat-o-meter
-Date: Mon, 20 Oct 2014 11:09:28 +0200
-Message-ID: <CAMuHMdV5VPEqJ2WeZTc=Tg_vSRJPYgzQib9m-_fnqLzJ_vpDdA@mail.gmail.com>
+Date: Mon, 20 Oct 2014 11:16:53 +0200
+Message-ID: <20141020091653.GA3524@pd.tnic>
 References: <alpine.DEB.2.02.1410201018230.24954@ayla.of.borg>
-	<20141020090637.GA3654@pd.tnic>
+ <20141020090637.GA3654@pd.tnic>
+ <CAMuHMdV5VPEqJ2WeZTc=Tg_vSRJPYgzQib9m-_fnqLzJ_vpDdA@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=mime-version:sender:in-reply-to:references:date:message-id:subject
-         :from:to:cc:content-type;
-        bh=qjtfDOO6k78Xcz61HguN/eBM7Jyy5zlNesC8oSpCqc4=;
-        b=ATUsKDfmxEqTO43iEVbCZa+wtTgOIdvE2Z8+7V/bDKUUkSw8qzc08PkAXu+IiDTtx3
-         FMurpZUBZnZMjZpptMqee0GNlTrPwgU5Gz7gBj0/flAbscXnVkr7aeItQWi3QnitYvnu
-         CVYQ3NpQgvaVBOZHzu3RbeRcVTbjgTxpmEA1Dq6hlOX0fHhKOKHDEJEYS2nWzS9kf7LI
-         KqaR+balWZoQgwy5BQ0XCpkzRO5noXWxSHlWYsgifPltD0BtUOo0ssCSC12H6DZ2iEki
-         J20e8KSJmUpiEZ4rYXy53T20T8uFv/C83znIdaNmQFbvG9l9bJtA09Y2+Qrb0+CFos+N
-         /yfQ==
-In-Reply-To: <20141020090637.GA3654@pd.tnic>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=alien8.de; s=alien8;
+	t=1413796634; bh=20aq1fKGQ/zgiC1OaNLBZ5sTVht6/oz5e/wxwxsh5LI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:In-Reply-To; b=n/BxjOhCFM5tQm8wSjMWbbXvk4ri/AJQ6EBDKT
+	Wnq0UgnvF7aY0b6BNbE6vgW+qfOxAlMejvz8fyA0cyZ67X6nZlRfKzuhmCRwS6O04Uk
+	G2nwqxxqNnOMK0tMFL6dhQs4OUnujq9uGroGXyw8XiBytaLdqZgZ5MlYHJdc3sByh8=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=alien8.de; s=alien8;
+	t=1413796634; bh=20aq1fKGQ/zgiC1OaNLBZ5sTVht6/oz5e/wxwxsh5LI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:In-Reply-To; b=n/BxjOhCFM5tQm8wSjMWbbXvk4ri/AJQ6EBDKT
+	Wnq0UgnvF7aY0b6BNbE6vgW+qfOxAlMejvz8fyA0cyZ67X6nZlRfKzuhmCRwS6O04Uk
+	G2nwqxxqNnOMK0tMFL6dhQs4OUnujq9uGroGXyw8XiBytaLdqZgZ5MlYHJdc3sByh8=
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdV5VPEqJ2WeZTc=Tg_vSRJPYgzQib9m-_fnqLzJ_vpDdA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Borislav Petkov <bp@alien8.de>
+To: Geert Uytterhoeven <geert@linux-m68k.org>
 Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, Linux Kernel Development <linux-kernel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
 
-Hi Boris,
+On Mon, Oct 20, 2014 at 11:09:28AM +0200, Geert Uytterhoeven wrote:
+> Sure. Compile two kernel images, and run
+> 
+>     scripts/bloat-o-meter <image1> <image2>
 
-On Mon, Oct 20, 2014 at 11:06 AM, Borislav Petkov <bp@alien8.de> wrote:
-> On Mon, Oct 20, 2014 at 10:37:19AM +0200, Geert Uytterhoeven wrote:
->>       Hi all,
->>
->> Below is the bloat-o-meter output when comparing an m68k/atari_defconfig
->> kernel for v3.17 and v3.18-rc1.
->
-> That looks cool, can I run this for other arches too?
+Ha, that's even upstream :-)
 
-Sure. Compile two kernel images, and run
+Thanks Geert!
 
-    scripts/bloat-o-meter <image1> <image2>
+-- 
+Regards/Gruss,
+    Boris.
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
+Sent from a fat crate under my desk. Formatting is fine.
 --
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
