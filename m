@@ -1,45 +1,38 @@
-From: Borislav Petkov <bp@alien8.de>
+From: Alexei Starovoitov <alexei.starovoitov@gmail.com>
 Subject: Re: v3.18-rc1 bloat-o-meter
-Date: Mon, 20 Oct 2014 11:16:53 +0200
-Message-ID: <20141020091653.GA3524@pd.tnic>
+Date: Mon, 20 Oct 2014 17:57:30 +0200
+Message-ID: <CAADnVQJsbNHs-S9gMF7P6FwHvHTfFSTPGNTLXAo5tJ8mpB5t6Q@mail.gmail.com>
 References: <alpine.DEB.2.02.1410201018230.24954@ayla.of.borg>
- <20141020090637.GA3654@pd.tnic>
- <CAMuHMdV5VPEqJ2WeZTc=Tg_vSRJPYgzQib9m-_fnqLzJ_vpDdA@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=alien8.de; s=alien8;
-	t=1413796634; bh=20aq1fKGQ/zgiC1OaNLBZ5sTVht6/oz5e/wxwxsh5LI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:In-Reply-To; b=n/BxjOhCFM5tQm8wSjMWbbXvk4ri/AJQ6EBDKT
-	Wnq0UgnvF7aY0b6BNbE6vgW+qfOxAlMejvz8fyA0cyZ67X6nZlRfKzuhmCRwS6O04Uk
-	G2nwqxxqNnOMK0tMFL6dhQs4OUnujq9uGroGXyw8XiBytaLdqZgZ5MlYHJdc3sByh8=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=alien8.de; s=alien8;
-	t=1413796634; bh=20aq1fKGQ/zgiC1OaNLBZ5sTVht6/oz5e/wxwxsh5LI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:In-Reply-To; b=n/BxjOhCFM5tQm8wSjMWbbXvk4ri/AJQ6EBDKT
-	Wnq0UgnvF7aY0b6BNbE6vgW+qfOxAlMejvz8fyA0cyZ67X6nZlRfKzuhmCRwS6O04Uk
-	G2nwqxxqNnOMK0tMFL6dhQs4OUnujq9uGroGXyw8XiBytaLdqZgZ5MlYHJdc3sByh8=
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdV5VPEqJ2WeZTc=Tg_vSRJPYgzQib9m-_fnqLzJ_vpDdA@mail.gmail.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:in-reply-to:references:date:message-id:subject:from:to
+         :cc:content-type;
+        bh=tQPiB2xuy+375yAp6bJ3l4DXXf7tsPSjNBphBWFoPRA=;
+        b=P8zjp0U6bhyFgz3xULVjE4rFulaVp71h+gvU9NDCQNTEIPN+qJXa1THBIAr6dFtBob
+         nsGftOWjv9W6jCEWrz82qS/A0RyaBZJLrPvkZhwR15Vbp7exhz69hvIU1nRmNEhUTOwP
+         tErKjtKf0XA+VzDyRwJhxm9WRPpEUz4aOCUKLr+B71369twZTPw5vwCxLi8UpC5mCA8H
+         adXLH94BU48pwL8aC+q/VO/6W22Mfcl8iyHkoBsR/GM67b/yFnsHo19VK3a38oAwlrW/
+         kSBIxhOXKHxdRkCPBZ2EomoV+/5y54f8cyJZYHR58FzTOQjdaw2KANOi9hCrDJiVpizA
+         U0rg==
+In-Reply-To: <alpine.DEB.2.02.1410201018230.24954@ayla.of.borg>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, Linux Kernel Development <linux-kernel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
+Cc: linux-embedded@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Linux Kernel Development <linux-kernel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
 
-On Mon, Oct 20, 2014 at 11:09:28AM +0200, Geert Uytterhoeven wrote:
-> Sure. Compile two kernel images, and run
-> 
->     scripts/bloat-o-meter <image1> <image2>
+On Mon, Oct 20, 2014 at 10:37 AM, Geert Uytterhoeven
+<geert@linux-m68k.org> wrote:
+>         Hi all,
+>
+> Below is the bloat-o-meter output when comparing an m68k/atari_defconfig
+> kernel for v3.17 and v3.18-rc1.
+>
+> Major culprit seems to be bpf. Can this become modular or optional?
+> Currently it's always included if CONFIG_NET=y.
 
-Ha, that's even upstream :-)
-
-Thanks Geert!
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+yes, the plan is to get it its own CONFIG_BPF so that tracing wouldn't
+need to depend on whole NET and so it can be stubbed out.
