@@ -1,86 +1,49 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: Why is the deferred initcall patch not mainline?
-Date: Fri, 24 Oct 2014 17:05:24 -0400 (EDT)
-Message-ID: <alpine.LFD.2.11.1410241624270.18007@knanqh.ubzr>
-References: <5441F592.6090807@gmail.com>
- <nngd3gtlr4ltyk2mo7p2sn30.1413619885726@email.android.com>
- <CACxGe6s7rdYn+7HgWC1SkZ26v97YhmO04pv3SZJk00BtehAPqQ@mail.gmail.com>
- <alpine.LFD.2.11.1410211230500.6969@knanqh.ubzr>
- <F5184659D418E34EA12B1903EE5EF5FD01BCD433E681@seldmbx02.corpusers.net>
- <alpine.LFD.2.11.1410211545330.6969@knanqh.ubzr> <5447C7BE.60506@landley.net>
- <alpine.LFD.2.11.1410221137000.6969@knanqh.ubzr>
- <F5184659D418E34EA12B1903EE5EF5FD01BCD433E688@seldmbx02.corpusers.net>
- <alpine.LFD.2.11.1410231334250.6969@knanqh.ubzr>
- <20141023181336.GC10477@piout.net>
- <alpine.LFD.2.11.1410231420080.6969@knanqh.ubzr>
- <F5184659D418E34EA12B1903EE5EF5FD01BCD433E68C@seldmbx02.corpusers.net>
- <alpine.LFD.2.11.1410231616570.6969@knanqh.ubzr>
- <54498344.8080507@landley.net>
- <alpine.LFD.2.11.1410231847400.6969@knanqh.ubzr> <544AAA9F.8060808@landley.net>
+From: Benedikt Kleinmeier <benedikt.kleinmeier@esk.fraunhofer.de>
+Subject: Create/Package kernel headers for self-compiled kernel
+Date: Mon, 27 Oct 2014 10:27:48 +0100
+Message-ID: <2F4CF2DB24861D49816948ECBDF0D4FB0103002E0F@zulu.esk.fraunhofer.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-embedded-owner@vger.kernel.org>
-In-reply-to: <544AAA9F.8060808@landley.net>
+Content-Language: de-DE
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: TEXT/PLAIN; charset="us-ascii"
-To: Rob Landley <rob@landley.net>
-Cc: "Bird, Tim" <Tim.Bird@sonymobile.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, Grant Likely <grant.likely@secretlab.ca>, Borislav Petkov <bp@alien8.de>, Geert Uytterhoeven <geert@linux-m68k.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Dirk Behme <dirk.behme@gmail.com>, "challinan@gmail.com" <challinan@gmail.com>
+Content-Type: text/plain; charset="iso-8859-1"
+To: "'linux-embedded@vger.kernel.org'" <linux-embedded@vger.kernel.org>
 
-On Fri, 24 Oct 2014, Rob Landley wrote:
+Hi,
 
-> On 10/23/14 19:36, Nicolas Pitre wrote:
-> 
-> > As you know already, you can do anything you want on your own.  That's 
-> > granted by the GPL.
-> 
-> I'm pretty sure I could have done anything I wanted on my own with
-> System 6 unix in the 1970's (modulo being 7 years old), since the BSD
-> guys _did_ and their stuff is still around (and is powering obscure
-> things like the iPhone).
+I run a host/target development environment. On a Debian host, I patch =
+the Linux kernel 3.2.60 with the RT patch and compile it. Afterwards, I=
+ move config, System.map, initrd and vmlinuz files to a Debian target.
 
-Incidentally there is this thing called Linux powering similarly obscur 
-curiosities such as Android, and outnumbering iPhones in terms of units 
-shipped.
+Now, I would like to compile a kernel module on the target, but the hea=
+der files are missing.
 
-So what's your point again?
+Linux' Makefile contains the target "headers_install" but this only ins=
+talls the headers for user space programs under "/usr/include/linux". I=
+ need the files referenced by "/lib/modules/<version>/build". Some of t=
+he referenced files are also created during Linux' "make" process, e.g.=
+ .config, include and Makefile. For pre-compiled kernels in Debian, the=
+ headers are combined to a package called "linux-headers-<version>". Se=
+e here https://packages.debian.org/wheezy/amd64/linux-headers-3.2.0-4-a=
+md64/filelist.
 
-> And I learned C in 1989 to apply "mod" files to the WWIV bulletin 
-> board system (an open source development community that didn't even 
-> have the "patch" program).
+Is there a distribution-independent way to create or package these file=
+s?
 
-You needed to pay a license to get the WWIV source code.  At least that 
-was the case when I was a sysop in 1993.
+Thank you very much.
 
-> But by all means, credit the GPL for the existence of open source.
+--=20
+Benedikt Kleinmeier
+=46raunhofer-Institut f=FCr Eingebettete Systeme und Kommunikationstech=
+nik ESK
 
-Oh my!  Obviously that's exactly what I did, right?
+Hansastra=DFe 32 | 80686 M=FCnchen=20
+Telefon, Fax: +49 89 547088-0 | +49 89 547088-220
+E-Mail: benedikt.kleinmeier@esk.fraunhofer.de
+Internet:
+http://www.esk.fraunhofer.de=20
+http://www.twitter.com/FraunhoferESK
+http://www.facebook.com/FraunhoferESK=20
 
-And now you want me to take what you say seriously?
-
-The impression I get from your diatribe is that you might be living in 
-the past.  I don't dispute the fact that You had issues with the Linux 
-community before, but one has to admit that a _lot_ of people don't. And 
-I'm lucky enough to be one of them, and in that context I was trying to 
-help.
-
-> Did you notice that there's no such thing as "the GPL" anymore? Linux
-> and Samba implement two ends of the same protocol, each one is GPL, and
-> they can't share code. Poor QEMU wants to suck GPL processor definitions
-> out of binutils/gdb to emulate processors and GPL driver code out of
-> Linux to emulate devices, and there _is_ no license that allows it to
-> combine code from both sources. (Making qemu "GPLv2 or later" means it
-> couldn't accept code from _either_ source.)
-
-And now we're far far away from $subject that started this thread.  
-This is going nowhere.
-
-> I'm going to recuse myself from the rest of this thread because I'm
-> clearly getting annoyed with us talking past each other. Somebody's got
-> an actual patch (which they still haven't linked to). I'll shut up and
-> let them show you the code.
-
-On that I agree with you.
-
-
-Nicolas
