@@ -1,76 +1,99 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: Why is the deferred initcall patch not mainline?
-Date: Sun, 2 Nov 2014 10:01:05 +0100
-Message-ID: <CAMuHMdXer+hbme6iOO9+7guXc500DdgcH82JfO8SomZ7EjegUA@mail.gmail.com>
-References: <5441F592.6090807@gmail.com>
-	<alpine.LFD.2.11.1410211230500.6969@knanqh.ubzr>
-	<F5184659D418E34EA12B1903EE5EF5FD01BCD433E681@seldmbx02.corpusers.net>
-	<alpine.LFD.2.11.1410211545330.6969@knanqh.ubzr>
-	<5447C7BE.60506@landley.net>
-	<alpine.LFD.2.11.1410221137000.6969@knanqh.ubzr>
-	<F5184659D418E34EA12B1903EE5EF5FD01BCD433E688@seldmbx02.corpusers.net>
-	<alpine.LFD.2.11.1410231334250.6969@knanqh.ubzr>
-	<20141023181336.GC10477@piout.net>
-	<alpine.LFD.2.11.1410231420080.6969@knanqh.ubzr>
-	<F5184659D418E34EA12B1903EE5EF5FD01BCD433E68C@seldmbx02.corpusers.net>
-	<alpine.LFD.2.11.1410231616570.6969@knanqh.ubzr>
-	<54498344.8080507@landley.net>
-	<alpine.LFD.2.11.1410231847400.6969@knanqh.ubzr>
-	<544AAA9F.8060808@landley.net>
-	<CAMuHMdVhfNAVdB3iHcyfXfjk1ES-bX9Xm5ySKND7qsHTFNL72Q@mail.gmail.com>
-	<alpine.LFD.2.11.1410271546010.18007@knanqh.ubzr>
-	<54517D1A.4030206@sonymobile.com>
-	<CAMuHMdWFMa2ZYCY53XdfDeyhPtYOmbEBvV1bXG5NuOZ3YAS2sg@mail.gmail.com>
-	<alpine.LFD.2.11.1411012233090.11690@knanqh.ubzr>
+Subject: [CFP] FOSDEM 2015 Embedded Devroom
+Date: Tue, 18 Nov 2014 10:40:45 +0100
+Message-ID: <CAMuHMdVuVm+R_zrh2kHwyPNCwk_oHr6s4ijhOzynXP566RvBwQ@mail.gmail.com>
 Mime-Version: 1.0
 Return-path: <linux-embedded-owner@vger.kernel.org>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20120113;
-        h=mime-version:sender:in-reply-to:references:date:message-id:subject
-         :from:to:cc:content-type;
-        bh=SgRfrHQ90fK51lAiD8n6REIlGcPzhWXRvYeiChQnngs=;
-        b=ngoO5+Xvr1+xnzH9I6s/Q65xi/kT4w88bnjLb0Pd4PVo77ei7rFhe26saztRK1WDBE
-         W2ssA1rSbEB28efWZV6xHrbe3eVgDTZeTVt7V/b28hcEZ6h/4QX9P8i+60eleYAKqiaN
-         kI2S/uIfi0vIgew20EscHE+Zjb2FM+fOmUOtueDiD0kC86vvejS1erXTDVsB8i1gAvtq
-         XgssQCp0EzwdOtvNw8aFxH9FFwjUlI6hLxZyDL4ioj3DGXhwfgdPpNe4Bty0xCicVIA9
-         2ej3KLS3itupv2ODWJqg7u7jPRB8T/ZLRNwKN3qY79KqGoYzhDF9n+mqwqHecRW21zc8
-         FZsA==
-In-Reply-To: <alpine.LFD.2.11.1411012233090.11690@knanqh.ubzr>
+        h=mime-version:sender:date:message-id:subject:from:to:content-type;
+        bh=Ej3NASaT2zIp5IST2PsPUPtjoWvBKsz+hSPJtE9Vvvs=;
+        b=PwTjlstiSOcn8e3uGwRgigwOf/ycoI6XHLAZxLLF6XP7kaSlLLUVQGTnYUYdICJ9XM
+         5cfy36P5n9djAfdqewDIudHY0sbJ4jN6P9yFhEAyvnYOi17dkDGvCoMDUBOWIrh9ZaM3
+         WHkjzq+Gw95Tp8G01eyEuv6J1PmZrbW3ZKOt/cQBeXkm2i+2PdyPS3bIhdFsVZrgCjy6
+         z8Cwz4j6ohR5ewXxvblH1rmjvMCXwPlo/QnxOS/3iFbMHFjNLjewvSYQMCSjLimczaA/
+         ZpfkYBAZ33rxryj7yOLAdZWtdsY4ZcNwCL7Erc4+VELPlmNItUpJX0rAvWvUbS1cVq5G
+         60Bw==
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: Tim Bird <tim.bird@sonymobile.com>, Rob Landley <rob@landley.net>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, Grant Likely <grant.likely@secretlab.ca>, Borislav Petkov <bp@alien8.de>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Dirk Behme <dirk.behme@gmail.com>, "challinan@gmail.com" <challinan@gmail.com>
+To: 
 
-On Sun, Nov 2, 2014 at 3:37 AM, Nicolas Pitre <nico@fluxnic.net> wrote:
-> On Thu, 30 Oct 2014, Geert Uytterhoeven wrote:
->> On Thu, Oct 30, 2014 at 12:49 AM, Tim Bird <tim.bird@sonymobile.com> wrote:
->> > The way the feature is expressed in the current code is that a
->> > set of drivers are marked for deferred initialization (I'll refer
->> > to this as issue 0).  Then, at boot: 1) most drivers are initialized
->> > normally, 2) user space is started, and then 3) user space indicates
->> > to the kernel that the deferred drivers should be initialized.
->>
->> One (IMHO important) point in the current implementation is that the call
->> to free_initmem() is also delayed until after initialization of the
->> deferred drivers.
->>
->> This is different from modular drivers, which are loaded after free_initmem().
->
-> This is because modules have their __initmem sections freed right after
-> each module is initialized.
+Devroom date: Saturday January 31st and February 1st 2015 in Brussels,
+Belgium
 
-I know.
+CFP deadline: Monday December 1st 2014
+Final notification two weeks later, December 15th 2014
 
-But it means _all_ init sections are kept until userspace kicks the deferred
-initcalls, and they have completed.
+CFP Introduction
+----------------------
+Embedded software is transforming the world, and FOSS embedded software is
+leading the way. From automotive to the Internet of Things, small devices,
+embedded systems, industrial process control and automatons are beginning
+their inevitable rise to the singularity. Join in! Or be assimilated. ;)
 
-> The deferred initcalls could also have a separate initmem section which
-> freeing is also deferred.  But I don't think it makes such a big
-> difference in the end.
+NB: This year FOSDEM plans to record all presentations, no exceptions.
+Please only propose a talk that you're really able and willing to share.
 
-Yes, it can be handled.
+Topics Sought
+------------------
+The embedded devroom seeks topics related to automotive, mobile,
+autonomous, and generally small systems. Related areas are of course of
+interest as well and our definition of "embedded" is elastic. Are you
+controlling and launching rockets, made your own set-top box, built some
+heating control for your house, hacked your mobile phone or just built a
+small gadget using FOSS software then you might have exactly what we're
+looking for. This year the automotive devroom has been merged into the
+embedded devroom so automotive projects are for sure on topic here too.
+
+CFP Schedule And Submission Details
+----------------------------------------------------
+Please submit proposals no later than the first of December.
+
+Please use the following URL to submit your talk to FOSDEM 2015:
+
+https://penta.fosdem.org/submission/FOSDEM15
+
+and follow the following rules:
+
+    * Select as the Track "embedded devroom".
+
+    * Include a title.  (Note that "Subtitle" entry doesn't appear on
+all conference documents, so make sure "Title" can stand on its own without
+"Subtitle" present.) Also try to make it catchy and descriptive of what you
+will talk about. For example "Launching rockets with an Arduino" and not
+"Programming a microcontroller for aerodynamic control"
+
+   * Include an Abstract of about 500 characters and a full description of
+any length you wish, but in both fields, please be concise, but clear and
+descriptive.
+
+   * Indicate whether you seek a 25 or 45 minute slot.
+
+   * Use the "Links" sub-area to your past work in the field you'd like to
+share.
+
+   * Affirmative confirmation that you agree to CC-By-SA-4.0 or Cc-By-4.0
+licensing of your talk, in the "Submission Notes" field. Add a statement
+such as this:  "Should my presentation be scheduled for FOSDEM 2015, I
+hereby agree to license all recordings, slides and any other materials
+presented under the Creative Commons Attribution Share-Alike 4.0
+International license.  Sincerely, s/YOUR_NAME/"
+
+   * Also in the notes field, note your affirmative confirmation of
+availability to speak on Saturday 31 January or 1 February 2015 in
+Brussels. Also mention if you plan to do a demo and if you have special
+requirements.
+
+   * Make sure you give a valid email so we can contact you easily in case
+we have more questions or want to make sure you received the confirmation.
+Should you have any questions we can send more information as needed.
+
+Thank you very much and we look forward to reviewing your proposals!
+
+-- Philippe and Jeremiah along with the other members of
+the FOSDEM embedded devroom team.
 
 Gr{oetje,eeting}s,
 
