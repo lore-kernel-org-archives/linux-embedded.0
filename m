@@ -1,107 +1,185 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: [CFP] FOSDEM 2015 Embedded Devroom
-Date: Tue, 18 Nov 2014 10:40:45 +0100
-Message-ID: <CAMuHMdVuVm+R_zrh2kHwyPNCwk_oHr6s4ijhOzynXP566RvBwQ@mail.gmail.com>
+From: Tim Bird <tim.bird@sonymobile.com>
+Subject: [PATCH] selftest: size: Add size test for Linux kernel
+Date: Wed, 19 Nov 2014 13:14:53 -0800
+Message-ID: <546D084D.20002@sonymobile.com>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=mime-version:sender:date:message-id:subject:from:to:content-type;
-        bh=Ej3NASaT2zIp5IST2PsPUPtjoWvBKsz+hSPJtE9Vvvs=;
-        b=PwTjlstiSOcn8e3uGwRgigwOf/ycoI6XHLAZxLLF6XP7kaSlLLUVQGTnYUYdICJ9XM
-         5cfy36P5n9djAfdqewDIudHY0sbJ4jN6P9yFhEAyvnYOi17dkDGvCoMDUBOWIrh9ZaM3
-         WHkjzq+Gw95Tp8G01eyEuv6J1PmZrbW3ZKOt/cQBeXkm2i+2PdyPS3bIhdFsVZrgCjy6
-         z8Cwz4j6ohR5ewXxvblH1rmjvMCXwPlo/QnxOS/3iFbMHFjNLjewvSYQMCSjLimczaA/
-         ZpfkYBAZ33rxryj7yOLAdZWtdsY4ZcNwCL7Erc4+VELPlmNItUpJX0rAvWvUbS1cVq5G
-         60Bw==
-Sender: linux-embedded-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: 
+To: Shuah Khan <shuahkh@osg.samsung.com>, linux-api@vger.kernel.org
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-Devroom date: Saturday January 31st and February 1st 2015 in Brussels,
-Belgium
 
-CFP deadline: Monday December 1st 2014
-Final notification two weeks later, December 15th 2014
+This test shows the amount of memory used by the system.
+Note that this is dependent on the user-space that is loaded
+when this program runs.  Optimally, this program would be
+run as the init program itself.
 
-CFP Introduction
-----------------------
-Embedded software is transforming the world, and FOSS embedded software is
-leading the way. From automotive to the Internet of Things, small devices,
-embedded systems, industrial process control and automatons are beginning
-their inevitable rise to the singularity. Join in! Or be assimilated. ;)
+The program is optimized for size itself, to avoid conflating
+its own execution with that of the system software.
+The code is compiled statically, with no stdlibs. On my x86_64 system,
+this results in a statically linked binary of less than 5K.
 
-NB: This year FOSDEM plans to record all presentations, no exceptions.
-Please only propose a talk that you're really able and willing to share.
+Signed-off-by: Tim Bird <tim.bird@sonymobile.com>
+---
+ tools/testing/selftests/Makefile        |   1 +
+ tools/testing/selftests/size/Makefile   |  21 +++++++
+ tools/testing/selftests/size/get_size.c | 105 ++++++++++++++++++++++++++++++++
+ 3 files changed, 127 insertions(+)
+ create mode 100644 tools/testing/selftests/size/Makefile
+ create mode 100644 tools/testing/selftests/size/get_size.c
 
-Topics Sought
-------------------
-The embedded devroom seeks topics related to automotive, mobile,
-autonomous, and generally small systems. Related areas are of course of
-interest as well and our definition of "embedded" is elastic. Are you
-controlling and launching rockets, made your own set-top box, built some
-heating control for your house, hacked your mobile phone or just built a
-small gadget using FOSS software then you might have exactly what we're
-looking for. This year the automotive devroom has been merged into the
-embedded devroom so automotive projects are for sure on topic here too.
-
-CFP Schedule And Submission Details
-----------------------------------------------------
-Please submit proposals no later than the first of December.
-
-Please use the following URL to submit your talk to FOSDEM 2015:
-
-https://penta.fosdem.org/submission/FOSDEM15
-
-and follow the following rules:
-
-    * Select as the Track "embedded devroom".
-
-    * Include a title.  (Note that "Subtitle" entry doesn't appear on
-all conference documents, so make sure "Title" can stand on its own without
-"Subtitle" present.) Also try to make it catchy and descriptive of what you
-will talk about. For example "Launching rockets with an Arduino" and not
-"Programming a microcontroller for aerodynamic control"
-
-   * Include an Abstract of about 500 characters and a full description of
-any length you wish, but in both fields, please be concise, but clear and
-descriptive.
-
-   * Indicate whether you seek a 25 or 45 minute slot.
-
-   * Use the "Links" sub-area to your past work in the field you'd like to
-share.
-
-   * Affirmative confirmation that you agree to CC-By-SA-4.0 or Cc-By-4.0
-licensing of your talk, in the "Submission Notes" field. Add a statement
-such as this:  "Should my presentation be scheduled for FOSDEM 2015, I
-hereby agree to license all recordings, slides and any other materials
-presented under the Creative Commons Attribution Share-Alike 4.0
-International license.  Sincerely, s/YOUR_NAME/"
-
-   * Also in the notes field, note your affirmative confirmation of
-availability to speak on Saturday 31 January or 1 February 2015 in
-Brussels. Also mention if you plan to do a demo and if you have special
-requirements.
-
-   * Make sure you give a valid email so we can contact you easily in case
-we have more questions or want to make sure you received the confirmation.
-Should you have any questions we can send more information as needed.
-
-Thank you very much and we look forward to reviewing your proposals!
-
--- Philippe and Jeremiah along with the other members of
-the FOSDEM embedded devroom team.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+diff --git a/tools/testing/selftests/Makefile b/tools/testing/selftests/Makefile
+index 45f145c..fa91aef 100644
+--- a/tools/testing/selftests/Makefile
++++ b/tools/testing/selftests/Makefile
+@@ -15,6 +15,7 @@ TARGETS += user
+ TARGETS += sysctl
+ TARGETS += firmware
+ TARGETS += ftrace
++TARGETS += size
+ 
+ TARGETS_HOTPLUG = cpu-hotplug
+ TARGETS_HOTPLUG += memory-hotplug
+diff --git a/tools/testing/selftests/size/Makefile b/tools/testing/selftests/size/Makefile
+new file mode 100644
+index 0000000..51e5fbd
+--- /dev/null
++++ b/tools/testing/selftests/size/Makefile
+@@ -0,0 +1,21 @@
++#ifndef CC
++	CC = $(CROSS_COMPILE)gcc
++#endif
++
++#ifndef STRIP
++	STRIP = $(CROSS_COMPILE)strip
++#endif
++
++all: get_size
++
++get_size: get_size.c
++	$(CC) --static -ffreestanding -nostartfiles \
++		-Wl,--entry=main get_size.c -o get_size \
++		`cc -print-libgcc-file-name`
++	$(STRIP) -s get_size
++
++run_tests: all
++	./get_size
++
++clean:
++	$(RM) get_size
+diff --git a/tools/testing/selftests/size/get_size.c b/tools/testing/selftests/size/get_size.c
+new file mode 100644
+index 0000000..f8ffc80
+--- /dev/null
++++ b/tools/testing/selftests/size/get_size.c
+@@ -0,0 +1,105 @@
++/*
++ * Copyright 2014 Sony
++ *
++ * Licensed under the terms of the GNU GPL License version 2
++ *
++ * Selftest for runtime system size
++ *
++ * Prints the amount of RAM that the currently running system is using.
++ *
++ * This program tries to be as small as possible itself, to
++ * avoid perturbing the system memory utilization with its
++ * own execution.  It also attempts to have as few dependencies
++ * on kernel features as possible.
++ *
++ * It should be statically linked, with startup libs avoided.
++ * It uses no library calls, and only the following 3 syscalls:
++ *   sysinfo(), write(), and _exit()
++ *
++ * For output, it avoids printf (which in some C libraries
++ * has large external dependencies) by implementing its own
++ * strlen(), number output and print() routines.
++ */
++
++#include <sys/sysinfo.h>
++#include <unistd.h>
++
++#define STDOUT_FILENO 1
++
++my_strlen(const char *s)
++{
++	int len = 0;
++
++	while (*s++)
++		len++;
++	return len;
++}
++
++/*
++ * num_to_str - put digits from num into *s, left to right
++ *   do this by dividing the number by powers of 10
++ *   the tricky part is to omit leading zeros
++ *   don't print zeros until we've started printing any numbers at all
++ */
++static void num_to_str(unsigned long num, char *s)
++{
++	unsigned long long temp, div;
++	int started;
++
++	temp = num;
++	div = 1000000000000000000LL;
++	started = 0;
++	while (div) {
++		if (temp/div || started) {
++			*s++ = (unsigned char)(temp/div + '0');
++			started = 1;
++		}
++		temp -= (temp/div)*div;
++		div /= 10;
++	}
++	*s = 0;
++}
++
++print_num(unsigned long num)
++{
++	char num_buf[30];
++
++	num_to_str(num, num_buf);
++	write(STDOUT_FILENO, num_buf, my_strlen(num_buf));
++}
++
++print(char *s)
++{
++	write(STDOUT_FILENO, s, my_strlen(s));
++}
++
++void main(int argc, char **argv)
++{
++	int ccode;
++	unsigned long used;
++	struct sysinfo info;
++	unsigned long long temp;
++
++	print("Testing system size.\n");
++	print("1..1\n");
++
++	ccode = sysinfo(&info);
++	if (ccode < 0) {
++		print("not ok 1 get size runtime size\n");
++		print("# could not get sysinfo\n");
++		_exit(ccode);
++	}
++
++	/* ignore cache complexities for now */
++	temp = info.totalram - info.freeram - info.bufferram;
++	temp = temp * info.mem_unit;
++	temp = temp / 1024;
++
++	used = temp;
++
++	print("ok 1 get runtime size # size = ");
++	print_num(used);
++	print(" K\n");
++
++	_exit(0);
++}
+-- 
+1.8.2.2
