@@ -1,15 +1,17 @@
-From: Tim Bird <tim.bird@sonymobile.com>
-Subject: [PATCH] selftest: size: Add size test for Linux kernel
-Date: Wed, 19 Nov 2014 13:14:53 -0800
-Message-ID: <546D084D.20002@sonymobile.com>
+From: Tim Bird <tim.bird-/MT0OVThwyLZJqsBc5GL+g@public.gmane.org>
+Subject: [PATCH v2] selftest: size: Add size test for Linux kernel
+Date: Wed, 19 Nov 2014 16:13:19 -0800
+Message-ID: <546D321F.2080405@sonymobile.com>
+References: <546D084D.20002@sonymobile.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <546D084D.20002-/MT0OVThwyLZJqsBc5GL+g@public.gmane.org>
+Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Shuah Khan <shuahkh@osg.samsung.com>, linux-api@vger.kernel.org
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+To: Shuah Khan <shuahkh-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 
 
 This test shows the amount of memory used by the system.
@@ -22,7 +24,10 @@ its own execution with that of the system software.
 The code is compiled statically, with no stdlibs. On my x86_64 system,
 this results in a statically linked binary of less than 5K.
 
-Signed-off-by: Tim Bird <tim.bird@sonymobile.com>
+Changes from v1:
+  - use more correct Copyright string in get_size.c
+
+Signed-off-by: Tim Bird <tim.bird-/MT0OVThwyLZJqsBc5GL+g@public.gmane.org>
 ---
  tools/testing/selftests/Makefile        |   1 +
  tools/testing/selftests/size/Makefile   |  21 +++++++
@@ -77,7 +82,7 @@ index 0000000..f8ffc80
 +++ b/tools/testing/selftests/size/get_size.c
 @@ -0,0 +1,105 @@
 +/*
-+ * Copyright 2014 Sony
++ * Copyright 2014 Sony Mobile Communications Inc.
 + *
 + * Licensed under the terms of the GNU GPL License version 2
 + *
