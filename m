@@ -1,99 +1,84 @@
-From: Tim Bird <tim.bird-/MT0OVThwyLZJqsBc5GL+g@public.gmane.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
 Subject: Re: [PATCH v5] selftest: size: Add size test for Linux kernel
-Date: Wed, 3 Dec 2014 08:29:11 -0800
-Message-ID: <547F3A57.7000106@sonymobile.com>
-References: <547E854E.5060101@sonymobile.com> <1417578191.16722.11.camel@concordia>
+Date: Wed, 3 Dec 2014 19:00:16 +0100
+Message-ID: <CAMuHMdVk9QLDRYDs3q7=51=qTMNRY+MQVhkqGE25XqYOkLbCxg@mail.gmail.com>
+References: <547E854E.5060101@sonymobile.com>
+	<1417578191.16722.11.camel@concordia>
+	<547F3A57.7000106@sonymobile.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1417578191.16722.11.camel@concordia>
-Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:sender:in-reply-to:references:date:message-id:subject
+         :from:to:cc:content-type;
+        bh=C/7OiQiXEzHFe1GQrX2d0RMp4U+h/gC0qE1A3kUbmKE=;
+        b=xr5PQpHy+whwvzV/OHtUapbTiSK2hzUGyZ8iIiBTWbDezZJOeQAtsWe5npSFfrCby/
+         qIp4v9JwltKouJ/QoFSokHcfpYITHdpaN0eeIUHWi4PHiLsK0tT5yXPkISfab+c5SXXA
+         TxelwFEqT0ls6pI7TbAJ4Vx/yuXULs+2O+eSLoyTq4u/xnyv+z6zNKS5kLu4ORIM86AR
+         7xCFHWjrcuqxApj6AJ6lg1owgboW5mPOVWcs0XrbusOqPp/8gX3ZC3YkxWcCLqok0ZL+
+         Bd3syKWcMrz92A9+nKqnK2QQl8WnP5m1XpHRelXn2rjl2BJZi5rbA2/pDnHA8Onl+ikW
+         SLNA==
+In-Reply-To: <547F3A57.7000106@sonymobile.com>
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>
-Cc: Shuah Khan <shuahkh-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, "linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+To: Tim Bird <tim.bird@sonymobile.com>
+Cc: Michael Ellerman <mpe@ellerman.id.au>, Shuah Khan <shuahkh@osg.samsung.com>, "linux-api@vger.kernel.org" <linux-api@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
+On Wed, Dec 3, 2014 at 5:29 PM, Tim Bird <tim.bird@sonymobile.com> wrote:
+>>> diff --git a/tools/testing/selftests/size/Makefile b/tools/testing/selftests/size/Makefile
+>>> new file mode 100644
+>>> index 0000000..47f8e9c
+>>> --- /dev/null
+>>> +++ b/tools/testing/selftests/size/Makefile
+>>> @@ -0,0 +1,15 @@
+>>> +#ifndef CC
+>>> +    CC = $(CROSS_COMPILE)gcc
+>>> +#endif
+>>
+>> I think the following is preferable:
+>>
+>>   CC := $(CROSS_COMPILE)$(CC)
+>>
+>>
+>> It allows optionally setting a custom CC, as well as optionally CROSS_COMPILE.
+>
+> I'm not sure I follow this.
+>
+> If CC is unset, you get only the CROSS_COMPILE prefix.
+> If CC is set to e.g. 'gcc', then you get a nicely formatted toolchain string.
+> But if CC already has the prefix applied, then this will result in
+>   having it duplicated, which surely won't work correctly.
+>
+> In the long run, I would hope that a higher level Makefile or environment setting
+> will be setting the toolchain string appropriately (as well as handling build flags)
+> which is why I wanted to use an ifndef (which Thomas correctly pointed out is just
+> wrong).
+>
+> Actually, after getting this tiny program accepted, my next task was working on a
+> proper fix for handling cross compilation in a more generic (not case-by-case) way.
+>
+> CROSS_COMPILE prefix usage looks a bit uncoordinated in the tools directory, but most
+> tests seem to be favoring $(CROSS_COMPILE)gcc.
+>
+>  $ cd tools ; mgrep CROSS
 
+[...]
 
-On 12/02/2014 07:43 PM, Michael Ellerman wrote:
-> On Tue, 2014-12-02 at 19:36 -0800, Tim Bird wrote:
->> This test shows the amount of memory used by the system.
->> Note that this is dependent on the user-space that is loaded
->> when this program runs.  Optimally, this program would be
->> run as the init program itself.
-> 
-> Sorry to only chime in at v5.
-> 
->> diff --git a/tools/testing/selftests/size/Makefile b/tools/testing/selftests/size/Makefile
->> new file mode 100644
->> index 0000000..47f8e9c
->> --- /dev/null
->> +++ b/tools/testing/selftests/size/Makefile
->> @@ -0,0 +1,15 @@
->> +#ifndef CC
->> +	CC = $(CROSS_COMPILE)gcc
->> +#endif
-> 
-> I think the following is preferable:
-> 
->   CC := $(CROSS_COMPILE)$(CC)
-> 
-> 
-> It allows optionally setting a custom CC, as well as optionally CROSS_COMPILE.
+> I agree it's desirable not to hardcode gcc, but we seem to be doing it all over
+> the place already.
 
-I'm not sure I follow this.
+Seems like it's time to start integrating the tests with the regular Kbuild
+system, which handles cross-compilation fine...
 
-If CC is unset, you get only the CROSS_COMPILE prefix.
-If CC is set to e.g. 'gcc', then you get a nicely formatted toolchain string.
-But if CC already has the prefix applied, then this will result in
-  having it duplicated, which surely won't work correctly.
+Gr{oetje,eeting}s,
 
-In the long run, I would hope that a higher level Makefile or environment setting
-will be setting the toolchain string appropriately (as well as handling build flags)
-which is why I wanted to use an ifndef (which Thomas correctly pointed out is just
-wrong).
+                        Geert
 
-Actually, after getting this tiny program accepted, my next task was working on a
-proper fix for handling cross compilation in a more generic (not case-by-case) way.
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-CROSS_COMPILE prefix usage looks a bit uncoordinated in the tools directory, but most
-tests seem to be favoring $(CROSS_COMPILE)gcc.
-
- $ cd tools ; mgrep CROSS
-./vm/Makefile:CC = $(CROSS_COMPILE)gcc
-./usb/Makefile:CC = $(CROSS_COMPILE)gcc
-./testing/selftests/net/Makefile:CC = $(CROSS_COMPILE)gcc
-./testing/selftests/vm/Makefile:CC = $(CROSS_COMPILE)gcc
-./testing/selftests/efivarfs/Makefile:CC = $(CROSS_COMPILE)gcc
-./testing/selftests/size/Makefile:	CC = $(CROSS_COMPILE)gcc
-./testing/selftests/powerpc/Makefile:CC := $(CROSS_COMPILE)$(CC)
-./hv/Makefile:CC = $(CROSS_COMPILE)gcc
-./perf/config/feature-checks/Makefile:CC := $(CROSS_COMPILE)gcc -MD
-./perf/config/feature-checks/Makefile:PKG_CONFIG := $(CROSS_COMPILE)pkg-config
-./lib/api/Makefile:CC = $(CROSS_COMPILE)gcc
-./lib/api/Makefile:AR = $(CROSS_COMPILE)ar
-./lib/lockdep/Makefile:# Allow setting CC and AR, or setting CROSS_COMPILE as a prefix.
-./lib/lockdep/Makefile:$(call allow-override,CC,$(CROSS_COMPILE)gcc)
-./lib/lockdep/Makefile:$(call allow-override,AR,$(CROSS_COMPILE)ar)
-./lib/lockdep/Makefile:TRACK_CFLAGS = $(subst ','\'',$(CFLAGS)):$(ARCH):$(CROSS_COMPILE)
-./lib/traceevent/Makefile:# Allow setting CC and AR, or setting CROSS_COMPILE as a prefix.
-./lib/traceevent/Makefile:$(call allow-override,CC,$(CROSS_COMPILE)gcc)
-./lib/traceevent/Makefile:$(call allow-override,AR,$(CROSS_COMPILE)ar)
-./lib/traceevent/Makefile:TRACK_CFLAGS = $(subst ','\'',$(CFLAGS)):$(ARCH):$(CROSS_COMPILE)
-./cgroup/Makefile:CC = $(CROSS_COMPILE)gcc
-./power/acpi/Makefile:CROSS = #/usr/i386-linux-uclibc/usr/bin/i386-uclibc-
-./power/acpi/Makefile:CC = $(CROSS)gcc
-./power/acpi/Makefile:LD = $(CROSS)gcc
-./power/acpi/Makefile:STRIP = $(CROSS)strip
-./power/cpupower/Makefile:CROSS = #/usr/i386-linux-uclibc/usr/bin/i386-uclibc-
-./power/cpupower/Makefile:CC = $(CROSS)gcc
-./power/cpupower/Makefile:LD = $(CROSS)gcc
-./power/cpupower/Makefile:AR = $(CROSS)ar
-./power/cpupower/Makefile:STRIP = $(CROSS)strip
-./power/cpupower/Makefile:RANLIB = $(CROSS)ranlib
-./power/cpupower/Makefile:export CROSS CC AR STRIP RANLIB CFLAGS LDFLAGS LIB_OBJS
-./power/x86/turbostat/Makefile:CC		= $(CROSS_COMPILE)gcc
-
-I agree it's desirable not to hardcode gcc, but we seem to be doing it all over
-the place already.
- -- Tim
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
