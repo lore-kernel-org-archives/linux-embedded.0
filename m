@@ -1,47 +1,45 @@
-From: Michael Ellerman <mpe@ellerman.id.au>
+From: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 Subject: Re: [PATCH v5] selftest: size: Add size test for Linux kernel
-Date: Wed, 03 Dec 2014 14:43:11 +1100
-Message-ID: <1417578191.16722.11.camel@concordia>
+Date: Wed, 3 Dec 2014 14:01:36 +0100
+Message-ID: <20141203140136.12997331@free-electrons.com>
 References: <547E854E.5060101@sonymobile.com>
+	<1417578191.16722.11.camel@concordia>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <547E854E.5060101@sonymobile.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1417578191.16722.11.camel@concordia>
+Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Tim Bird <tim.bird@sonymobile.com>
-Cc: Shuah Khan <shuahkh@osg.samsung.com>, "linux-api@vger.kernel.org" <linux-api@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+To: Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>
+Cc: Tim Bird <tim.bird-/MT0OVThwyLZJqsBc5GL+g@public.gmane.org>, Shuah Khan <shuahkh-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, "linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 
-On Tue, 2014-12-02 at 19:36 -0800, Tim Bird wrote:
-> This test shows the amount of memory used by the system.
-> Note that this is dependent on the user-space that is loaded
-> when this program runs.  Optimally, this program would be
-> run as the init program itself.
+Michael, Tim,
 
-Sorry to only chime in at v5.
+On Wed, 03 Dec 2014 14:43:11 +1100, Michael Ellerman wrote:
 
-> diff --git a/tools/testing/selftests/size/Makefile b/tools/testing/selftests/size/Makefile
-> new file mode 100644
-> index 0000000..47f8e9c
-> --- /dev/null
-> +++ b/tools/testing/selftests/size/Makefile
-> @@ -0,0 +1,15 @@
-> +#ifndef CC
-> +	CC = $(CROSS_COMPILE)gcc
-> +#endif
+> > diff --git a/tools/testing/selftests/size/Makefile b/tools/testing/selftests/size/Makefile
+> > new file mode 100644
+> > index 0000000..47f8e9c
+> > --- /dev/null
+> > +++ b/tools/testing/selftests/size/Makefile
+> > @@ -0,0 +1,15 @@
+> > +#ifndef CC
+> > +	CC = $(CROSS_COMPILE)gcc
+> > +#endif
+> 
+> I think the following is preferable:
+> 
+>   CC := $(CROSS_COMPILE)$(CC)
 
-I think the following is preferable:
+It is even more necessary that #ifndef and #endif don't exist in make.
+They are just comments, and therefore, ignored. Seems like Tim does too
+much C :-)
 
-  CC := $(CROSS_COMPILE)$(CC)
+Best regards,
 
-
-It allows optionally setting a custom CC, as well as optionally CROSS_COMPILE.
-
-The only thing it doesn't do is choose gcc explicitly, but you shouldn't really
-do that anyway - unless you absolutely require gcc. Let the user choose their
-compiler by choosing where cc points.
-
-cheers
-
-
+Thomas
+-- 
+Thomas Petazzoni, CTO, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
