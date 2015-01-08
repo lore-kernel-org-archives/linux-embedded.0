@@ -1,46 +1,26 @@
 From: Tim Bird <tim.bird@sonymobile.com>
-Subject: RFC: kselftest size roadmap
-Date: Thu, 4 Dec 2014 08:56:29 -0800
-Message-ID: <5480923D.5010503@sonymobile.com>
-References: <547F598D.7030205@sonymobile.com> <20141204003653.GA5004@thin>
+Subject: ELC CFP deadline is Jan 9
+Date: Thu, 8 Jan 2015 14:45:03 -0800
+Message-ID: <54AF086F.8040806@sonymobile.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20141204003653.GA5004@thin>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-embedded-owner@vger.kernel.org>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Shuah Khan <shuahkh@osg.samsung.com>, "linux-api@vger.kernel.org" <linux-api@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Michael Ellerman <mpe@ellerman.id.au>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
 
-Here's an RFC on my roadmap for the kselftest size test going forward...
+Hi embedded Linux developers,
 
-In the long term, I'd like to be able to use the test for bisecting
-size regressions, and to allow any kernel developer to use this even if they
-don't have hardware for a particular architecture.
+This is quick reminder that the deadline for the Call For Participation for
+Embedded Linux Conference 2015 is January 9 (this Friday).  The event
+is on March 23-25 in San Jose, California.
 
-What I'd like to add to this in the future:
- - cleaned up approach to cross-compilation
-   - put CROSS_COMPILE handling outside sub-directory Makefiles
-   - this should include support for KBUILD_OUTPUT
-   - handle CFLAGS for user-space programs (as opposed to
-     kernel CFLAGS), and in a unified way
+Please make sure to propose something if you are interested in coming.
 
- - ability to run on target or in emulator
-   - will involve adding an "install phase", and 
-   possibly a "collect results" phase.  These are needed
-   throughout kselftest to do any host/target 
-   testing.
+I'd write more, but I'm probably breaking list etiquette enough as it is... :-)
 
- - add a size threshold parameter to allow the
-  test to check for a regression
-   - test needs to return failure code that git
-    bisect can use (not sure about mechanism for this yet)
-   - regression test might utilize a feature to save off a
-   "baseline" size to measure against, for the ability 
-   to indicate a regression as "current size > baseline + 20k"
+Check out the CFP for details:
+http://events.linuxfoundation.org/events/embedded-linux-conference/program/cfp
 
-Any feedback on this?
-
-Thanks,
  -- Tim
