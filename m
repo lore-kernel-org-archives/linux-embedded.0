@@ -1,34 +1,37 @@
-From: "Mehaffey, John" <John_Mehaffey-nmGgyN9QBj3QT0dZR+AlfA@public.gmane.org>
-Subject: LPC 2015 Boot, Init,
-	and Config microconf RFC and Invitation
-Date: Wed, 6 May 2015 22:51:13 +0000
-Message-ID: <371E240E6FC1D44DA5E51EE9DCDCB784014A8E1DEE@NA-MBX-01.mgc.mentorg.com>
-Mime-Version: 1.0
+From: Jon Loeliger <jdl-CYoMK+44s/E@public.gmane.org>
+Subject: Re: Invitation and RFC: Linux Plumbers Device Tree track proposed
+Date: Tue, 26 May 2015 11:31:01 -0500
+Message-ID: <E1YxHkr-0002ah-Pz@mylo>
+References: <8251B150E4DF5041A62C3EA9F0AB2E0603A53FE1082E@SELDMBX99.corpusers.net> <CAL_JsqL0FdvKtGTxFNYxtrGWkm3z-1m0v9dHwYezCtkFOW6EgQ@mail.gmail.com> <10482596.MaespZJCtk@wuerfel>
+Return-path: <devicetree-compiler-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <10482596.MaespZJCtk@wuerfel>
+Sender: devicetree-compiler-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <celinux-dev-bounces-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org>
-Content-Language: en-US
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.celinuxforum.org/mailman/options/celinux-dev>, 
-	<mailto:celinux-dev-request-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.celinuxforum.org/pipermail/celinux-dev/>
-List-Post: <mailto:celinux-dev-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org>
-List-Help: <mailto:celinux-dev-request-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.celinuxforum.org/mailman/listinfo/celinux-dev>, 
-	<mailto:celinux-dev-request-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org?subject=subscribe>
-Sender: celinux-dev-bounces-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org
-Errors-To: celinux-dev-bounces-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org
-To: "celinux-dev-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org" <celinux-dev-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org>, "linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org" <systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org>, "u-boot-0aAXYlwwYIKGBzrmiIFOJg@public.gmane.org" <u-boot-0aAXYlwwYIKGBzrmiIFOJg@public.gmane.org>, "dbus-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org" <dbus-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org>, "lxc-devel-cunTk1MwBs9qMoObBWhMNEqPaTDuhLve2LY78lusg7I@public.gmane.org" <lxc-devel-cunTk1MwBs9qMoObBWhMNEqPaTDuhLve2LY78lusg7I@public.gmane.org>
-Cc: "kate.stewart-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <kate.stewart-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "mswilson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <mswilson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Rowand, Frank" <Frank.Rowand-/MT0OVThwyLZJqsBc5GL+g@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-compiler-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-compiler-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "celinux-dev-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org" <celinux-dev-idqoXFIVOFIh9xQPArXXUATG8MYbGj4l@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Porter <mporter-OWPKS81ov/FWk0Htik3J/w@public.gmane.org>, Gaurav Minocha <gaurav.minocha.os-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
-The Boot, Init, and Config microconference is inviting interested parties to comment on proposed topics and show their interest in attending.
+So, like, Arnd Bergmann said:
+> On Tuesday 14 April 2015 10:36:15 Rob Herring wrote:
+> > 
+> > >    4) Identifying additional people who should attend the device tree track.
+> > 
+> > Arnd Bergmann
+> > Matt Porter
+> > Jon Loeliger
+> > Gaurav Minocha
+> 
+> Sorry, I won't be there. I should have replied earlier, but I'll be on
+> parental leave at the time.
+> 
+> 	Arnd
 
-Proposed topics are at http://wiki.linuxplumbersconf.org/2015:boot_init_and_config, and include containers, tinification, systemd tuning, k/dbus, early kernel tracing, other embedded/fastboot improvements, and an alternative net boot protocol.
+Arnd,
 
-There are likely more proposed topics than will comfortably fit in a 3-hour microconf, please indicate your attendance and interest on the wiki page so that we can plan accordingly.
+OK.  Hard to believe, but it looks like I have enough
+ducks in a row to attend Plumber's this year!
 
-If you are interested in leading a topic, please let us know!
-
-
-Sincerely,
-John Mehaffey, Kate Stewart, Matthew Wilson
+Thanks,
+jdl
