@@ -1,8 +1,8 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: [PATCH v4.2-rc1] printk: make extended printk support conditional on
- netconsole
-Date: Mon, 29 Jun 2015 19:31:40 -0400
-Message-ID: <20150629233140.GA7711@mtj.duckdns.org>
+From: Petr Mladek <pmladek@suse.com>
+Subject: Re: [PATCH v4.2-rc1] printk: make extended printk support
+ conditional on netconsole
+Date: Wed, 1 Jul 2015 18:05:13 +0200
+Message-ID: <20150701160513.GC8099@pathway.suse.cz>
 References: <1430318704-32374-1-git-send-email-tj@kernel.org>
  <1430318704-32374-4-git-send-email-tj@kernel.org>
  <CAMuHMdWwH-3kx1ma5KE=fP94by8boxM_QYqPKpU=YJw8t3hYeg@mail.gmail.com>
@@ -11,146 +11,78 @@ References: <1430318704-32374-1-git-send-email-tj@kernel.org>
  <20150629154914.GQ15805@mtj.duckdns.org>
  <CAMuHMdX-cA3RccXF2kBifMEyT8e14rURp9Li_WFm7ODBOti=QQ@mail.gmail.com>
  <20150629161355.GS15805@mtj.duckdns.org>
+ <20150629233140.GA7711@mtj.duckdns.org>
 Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=sender:date:from:to:cc:subject:message-id:references:mime-version
-         :content-type:content-disposition:in-reply-to:user-agent;
-        bh=hsqaj7TLiduZ6MMh1+h2Mg4MR3G8dENNVnJqetRA8S4=;
-        b=NKKdj4xuNRM8pxYFfTHrPjOBvQHjDedf64WwUcTrY2Wpxe0p9P5v9SoaiVVLZUa81G
-         QBhMfpMvSWxKk6OsjsU07b/+rv9+/l6DUJ0VL6QqCjo2zEyK9AWQikAcBXF6La9JjBUl
-         cxDRZuJwrDgvmWX+J+rURHjSQUAUmQxEc0OOY/FVc1LRZQuayDbeX8DHO2GqCLoKY4BM
-         oMI0CBv72XnnaUoSuvlVDpnOT/pCVJrV15K//YC+PLN3pE5N7aMtXX8g9PJdom95NkPP
-         2kd69rWQO/roB8sqRMQv/mCIDmqtk4zy1yj5X6ean+AqbQrrv5o0c1W7bpm8KWPivDE2
-         S9pw==
+Return-path: <netdev-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150629161355.GS15805@mtj.duckdns.org>
-Sender: linux-embedded-owner@vger.kernel.org
+In-Reply-To: <20150629233140.GA7711@mtj.duckdns.org>
+Sender: netdev-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>
-Cc: pmladek@suse.cz, "David S. Miller" <davem@davemloft.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Kay Sievers <kay@vrfy.org>, Josh Triplett <josh@joshtriplett.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>
+To: Tejun Heo <tj@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, "David S. Miller" <davem@davemloft.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Kay Sievers <kay@vrfy.org>, Josh Triplett <josh@joshtriplett.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>
 
-6fe29354befe ("printk: implement support for extended console
-drivers") implemented extended printk support for extended netconsole.
-The code added was miniscule but it added static 8k buffer
-unconditionally unnecessarily bloating the kernel for cases where
-extended netconsole is not used.
+On Mon 2015-06-29 19:31:40, Tejun Heo wrote:
+> 6fe29354befe ("printk: implement support for extended console
+> drivers") implemented extended printk support for extended netconsole.
+> The code added was miniscule but it added static 8k buffer
+> unconditionally unnecessarily bloating the kernel for cases where
+> extended netconsole is not used.
+> 
+> This patch introduces CONFIG_PRINTK_CON_EXTENDED which is selected by
+> CONFIG_NETCONSOLE.  If the config option is not set, extended printk
+> support is compiled out along with the static buffer.
+> 
+> Verified 8k reduction in vmlinux bss when !CONFIG_NETCONSOLE.
+> 
+> Signed-off-by: Tejun Heo <tj@kernel.org>
+> Reported-and-suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
+> ---
+> Linus, Andrew.
+> 
+> This removes an unnecessary 8k bss bloat introduced during v4.2-rc1
+> merge window on certain configs.  The original patch was routed
+> through -mm.  How should this be routed?
+> 
+> Thanks.
+> 
+>  drivers/net/Kconfig    |    1 +
+>  init/Kconfig           |    3 +++
+>  kernel/printk/printk.c |   33 +++++++++++++++++++++++++++++----
+>  3 files changed, 33 insertions(+), 4 deletions(-)
 
-This patch introduces CONFIG_PRINTK_CON_EXTENDED which is selected by
-CONFIG_NETCONSOLE.  If the config option is not set, extended printk
-support is compiled out along with the static buffer.
+[...]
 
-Verified 8k reduction in vmlinux bss when !CONFIG_NETCONSOLE.
+> --- a/kernel/printk/printk.c
+> +++ b/kernel/printk/printk.c
+[...]
+> @@ -2561,9 +2584,11 @@ void register_console(struct console *ne
+>  		console_drivers->next = newcon;
+>  	}
+>  
+> -	if (newcon->flags & CON_EXTENDED)
+> -		if (!nr_ext_console_drivers++)
+> +	if (newcon->flags & CON_EXTENDED) {
+> +		if (!nr_ext_console_drivers)
+>  			pr_info("printk: continuation disabled due to ext consoles, expect more fragments in /dev/kmsg\n");
+> +		inc_nr_ext_console_drivers();
 
-Signed-off-by: Tejun Heo <tj@kernel.org>
-Reported-and-suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
----
-Linus, Andrew.
+We should handle also the situation when CON_EXTENDED is set
+and CONFIG_PRINTK_CON_EXTENDED is not set by mistake. Otherwise,
+we will not increment nr_ext_console_drivers here => ext_text will
+not be filled in console_unlock() => call_console_drivers()
+will print nothing for the CON_EXTENDED console.
 
-This removes an unnecessary 8k bss bloat introduced during v4.2-rc1
-merge window on certain configs.  The original patch was routed
-through -mm.  How should this be routed?
+At least, I would print an error here. Something like.
 
-Thanks.
+#ifndef CONFIG_PRINTK_CON_EXTENDED
+		pr_err("The registered extended console will print nothing because the kernel is not compiled with PRINTK_CON_EXTENDED\n");
+#endif
 
- drivers/net/Kconfig    |    1 +
- init/Kconfig           |    3 +++
- kernel/printk/printk.c |   33 +++++++++++++++++++++++++++++----
- 3 files changed, 33 insertions(+), 4 deletions(-)
+I wonder if there is a good identification of the console that can be printed.
 
---- a/drivers/net/Kconfig
-+++ b/drivers/net/Kconfig
-@@ -195,6 +195,7 @@ config GENEVE
- 
- config NETCONSOLE
- 	tristate "Network console logging support"
-+	select PRINTK_CON_EXTENDED
- 	---help---
- 	If you want to log kernel messages over the network, enable this.
- 	See <file:Documentation/networking/netconsole.txt> for details.
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -1438,6 +1438,9 @@ config PRINTK
- 	  very difficult to diagnose system problems, saying N here is
- 	  strongly discouraged.
- 
-+config PRINTK_CON_EXTENDED
-+	bool
-+
- config BUG
- 	bool "BUG() support" if EXPERT
- 	default y
---- a/kernel/printk/printk.c
-+++ b/kernel/printk/printk.c
-@@ -84,6 +84,10 @@ static struct lockdep_map console_lock_d
- };
- #endif
- 
-+#ifdef CONFIG_PRINTK_CON_EXTENDED
-+
-+#define CONSOLE_EXT_LOG_BUF_LEN		CONSOLE_EXT_LOG_MAX
-+
- /*
-  * Number of registered extended console drivers.
-  *
-@@ -96,6 +100,25 @@ static struct lockdep_map console_lock_d
-  */
- static int nr_ext_console_drivers;
- 
-+static void inc_nr_ext_console_drivers(void)
-+{
-+	nr_ext_console_drivers++;
-+}
-+
-+static void dec_nr_ext_console_drivers(void)
-+{
-+	nr_ext_console_drivers--;
-+}
-+
-+#else	/* CONFIG_PRINTK_CON_EXTENDED */
-+
-+#define CONSOLE_EXT_LOG_BUF_LEN		0
-+#define nr_ext_console_drivers		0
-+static void inc_nr_ext_console_drivers(void) { }
-+static void dec_nr_ext_console_drivers(void) { }
-+
-+#endif	/* CONFIG_PRINTK_CON_EXTENDED */
-+
- /*
-  * Helper macros to handle lockdep when locking/unlocking console_sem. We use
-  * macros instead of functions so that _RET_IP_ contains useful information.
-@@ -2224,7 +2247,7 @@ out:
-  */
- void console_unlock(void)
- {
--	static char ext_text[CONSOLE_EXT_LOG_MAX];
-+	static char ext_text[CONSOLE_EXT_LOG_BUF_LEN];
- 	static char text[LOG_LINE_MAX + PREFIX_MAX];
- 	static u64 seen_seq;
- 	unsigned long flags;
-@@ -2561,9 +2584,11 @@ void register_console(struct console *ne
- 		console_drivers->next = newcon;
- 	}
- 
--	if (newcon->flags & CON_EXTENDED)
--		if (!nr_ext_console_drivers++)
-+	if (newcon->flags & CON_EXTENDED) {
-+		if (!nr_ext_console_drivers)
- 			pr_info("printk: continuation disabled due to ext consoles, expect more fragments in /dev/kmsg\n");
-+		inc_nr_ext_console_drivers();
-+	}
- 
- 	if (newcon->flags & CON_PRINTBUFFER) {
- 		/*
-@@ -2638,7 +2663,7 @@ int unregister_console(struct console *c
- 	}
- 
- 	if (!res && (console->flags & CON_EXTENDED))
--		nr_ext_console_drivers--;
-+		dec_nr_ext_console_drivers();
- 
- 	/*
- 	 * If this isn't the last console and it has CON_CONSDEV set, we
+Otherwise, it looks fine to me.
+
+Best Regards,
+Petr
