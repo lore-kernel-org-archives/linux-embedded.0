@@ -1,166 +1,53 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: [PATCH v3 v4.2-rc1] printk: make extended printk support conditional
- on netconsole
-Date: Fri, 3 Jul 2015 12:22:51 -0400
-Message-ID: <20150703162251.GB5273@mtj.duckdns.org>
-References: <1430318704-32374-1-git-send-email-tj@kernel.org>
- <1430318704-32374-4-git-send-email-tj@kernel.org>
- <CAMuHMdWwH-3kx1ma5KE=fP94by8boxM_QYqPKpU=YJw8t3hYeg@mail.gmail.com>
- <20150629152805.GM15805@mtj.duckdns.org>
- <CAMuHMdXTn0+z4PV9UVZZmpMdk_-JUc4x-GqZweOhQyYMTzSOGQ@mail.gmail.com>
- <20150629154914.GQ15805@mtj.duckdns.org>
- <CAMuHMdX-cA3RccXF2kBifMEyT8e14rURp9Li_WFm7ODBOti=QQ@mail.gmail.com>
- <20150629161355.GS15805@mtj.duckdns.org>
- <20150629233140.GA7711@mtj.duckdns.org>
- <20150702162141.GC30677@mtj.duckdns.org>
+From: Rich Felker <dalias@libc.org>
+Subject: [PATCH] fs/binfmt_elf_fdpic.c: fix brk area overlap with stack on
+ NOMMU
+Date: Thu, 20 Aug 2015 15:11:06 -0400
+Message-ID: <20150820191106.GA9655@brightrain.aerifal.cx>
 Mime-Version: 1.0
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20120113;
-        h=sender:date:from:to:cc:subject:message-id:references:mime-version
-         :content-type:content-disposition:in-reply-to:user-agent;
-        bh=6NgurffQisKHdngwcPE2pmGVr2TXdrKvJ/djCgHSCHI=;
-        b=xhD10iC/2eVlWiV8RGfHUDl3+wTAS3XIOiYTiVaTHlHtSTFCc6Rzaw1CIS/iUZE+TC
-         B7k+PIiMbCv5p8O8vz2EL2bJCd2pTwmKPhtoe2S5c+6SdwcJPvCzL8sg1nVVIJHz6EGc
-         jT3DtvddaSnJyIUSC8zrnMfuQyYNUpDbeZFtVfUDLjtS3FZg2jMbmTVHm3QxozFyaKj4
-         TA6EvoFtFGQL9snkDe54txu8LCdILh/OqktD+ZaPWWybEPpx9Nbxh89RcAnxuZzJKxTN
-         qof/1epvyJpCjVmJSM2dxMaMVw50XIu2XULtj9rlAbXIGfv1kXOsj0XdLpyeV0SaWGWB
-         ujcQ==
 Content-Disposition: inline
-In-Reply-To: <20150702162141.GC30677@mtj.duckdns.org>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>
-Cc: pmladek@suse.cz, "David S. Miller" <davem@davemloft.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Kay Sievers <kay@vrfy.org>, Josh Triplett <josh@joshtriplett.org>, Linux Embedded <linux-embedded@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>
+To: linux-embedded@vger.kernel.org
+Cc: Greg Ungerer <gerg@uclinux.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Matt Mackall <mpm@selenic.com>, David Woodhouse <dwmw2@infradead.org>, Alexander Viro <viro@zeniv.linux.org.uk>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-6fe29354befe ("printk: implement support for extended console
-drivers") implemented extended printk support for extended netconsole.
-The code added was miniscule but it added static 8k buffer
-unconditionally unnecessarily bloating the kernel for cases where
-extended netconsole is not used.
+From: Rich Felker <dalias@libc.org>
 
-This patch introduces CONFIG_PRINTK_CON_EXTENDED which is selected by
-CONFIG_NETCONSOLE.  If the config option is not set, extended printk
-support is compiled out along with the static buffer.
+On NOMMU archs, the FDPIC ELF loader sets up the usable brk range to
+overlap with all but the last PAGE_SIZE bytes of the stack. This leads
+to catastrophic memory reuse/corruption if brk is used. Fix by setting
+the brk area to zero size to disable its use.
 
-Verified 8k reduction in vmlinux bss when !CONFIG_NETCONSOLE.
-
-v2: Added a warning for cases where CON_EXTENDED is requested while
-    CONFIG_PRINTK_CON_EXTENDED is disabled as suggested by Petr.
-
-v3: Moved ext console enable info messages into the inc function.
-
-Signed-off-by: Tejun Heo <tj@kernel.org>
-Reported-and-suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
-Reviewed-by: Petr Mladek <pmladek@suse.com>
+Signed-off-by: Rich Felker <dalias@libc.org>
 ---
- drivers/net/Kconfig    |    1 +
- init/Kconfig           |    3 +++
- kernel/printk/printk.c |   38 ++++++++++++++++++++++++++++++++++----
- 3 files changed, 38 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
-index 019fcef..39587f1 100644
---- a/drivers/net/Kconfig
-+++ b/drivers/net/Kconfig
-@@ -195,6 +195,7 @@ config GENEVE
+There is no reason for the kernel to be providing a brk area at all on
+NOMMU; the bFLT loader does not provide one, uClibc never uses brk on
+NOMMU targets, and musl libc goes out of its way to avoid using brk
+that might run into the stack.
+
+--- fs/binfmt_elf_fdpic.c.orig	2015-08-20 18:05:19.089888654 +0000
++++ fs/binfmt_elf_fdpic.c	2015-08-20 18:10:01.519871432 +0000
+@@ -374,10 +388,7 @@ static int load_elf_fdpic_binary(struct
+ 		PAGE_ALIGN(current->mm->start_brk);
  
- config NETCONSOLE
- 	tristate "Network console logging support"
-+	select PRINTK_CON_EXTENDED
- 	---help---
- 	If you want to log kernel messages over the network, enable this.
- 	See <file:Documentation/networking/netconsole.txt> for details.
-diff --git a/init/Kconfig b/init/Kconfig
-index bcc41bd..cd281ab 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -1438,6 +1438,9 @@ config PRINTK
- 	  very difficult to diagnose system problems, saying N here is
- 	  strongly discouraged.
+ #else
+-	/* create a stack and brk area big enough for everyone
+-	 * - the brk heap starts at the bottom and works up
+-	 * - the stack starts at the top and works down
+-	 */
++	/* create a stack area and zero-size brk area */
+ 	stack_size = (stack_size + PAGE_SIZE - 1) & PAGE_MASK;
+ 	if (stack_size < PAGE_SIZE * 2)
+ 		stack_size = PAGE_SIZE * 2;
+@@ -400,8 +411,6 @@ static int load_elf_fdpic_binary(struct
  
-+config PRINTK_CON_EXTENDED
-+	bool
-+
- config BUG
- 	bool "BUG() support" if EXPERT
- 	default y
-diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
-index cf8c242..841ea4d 100644
---- a/kernel/printk/printk.c
-+++ b/kernel/printk/printk.c
-@@ -84,6 +84,10 @@ static struct lockdep_map console_lock_dep_map = {
- };
+ 	current->mm->brk = current->mm->start_brk;
+ 	current->mm->context.end_brk = current->mm->start_brk;
+-	current->mm->context.end_brk +=
+-		(stack_size > PAGE_SIZE) ? (stack_size - PAGE_SIZE) : 0;
+ 	current->mm->start_stack = current->mm->start_brk + stack_size;
  #endif
  
-+#ifdef CONFIG_PRINTK_CON_EXTENDED
-+
-+#define CONSOLE_EXT_LOG_BUF_LEN		CONSOLE_EXT_LOG_MAX
-+
- /*
-  * Number of registered extended console drivers.
-  *
-@@ -96,6 +100,33 @@ static struct lockdep_map console_lock_dep_map = {
-  */
- static int nr_ext_console_drivers;
- 
-+static void inc_nr_ext_console_drivers(void)
-+{
-+	if (!nr_ext_console_drivers++)
-+		pr_info("printk: continuation disabled due to ext consoles, expect more fragments in /dev/kmsg\n");
-+}
-+
-+static void dec_nr_ext_console_drivers(void)
-+{
-+	nr_ext_console_drivers--;
-+}
-+
-+#else	/* CONFIG_PRINTK_CON_EXTENDED */
-+
-+#define CONSOLE_EXT_LOG_BUF_LEN		0
-+#define nr_ext_console_drivers		0
-+
-+static void inc_nr_ext_console_drivers(void)
-+{
-+	WARN_ONCE(true, "printk: CON_EXTENDED requested when !CONFIG_PRINTK_CON_EXTENDED\n");
-+}
-+
-+static void dec_nr_ext_console_drivers(void)
-+{
-+}
-+
-+#endif	/* CONFIG_PRINTK_CON_EXTENDED */
-+
- /*
-  * Helper macros to handle lockdep when locking/unlocking console_sem. We use
-  * macros instead of functions so that _RET_IP_ contains useful information.
-@@ -2224,7 +2255,7 @@ static void console_cont_flush(char *text, size_t size)
-  */
- void console_unlock(void)
- {
--	static char ext_text[CONSOLE_EXT_LOG_MAX];
-+	static char ext_text[CONSOLE_EXT_LOG_BUF_LEN];
- 	static char text[LOG_LINE_MAX + PREFIX_MAX];
- 	static u64 seen_seq;
- 	unsigned long flags;
-@@ -2562,8 +2593,7 @@ void register_console(struct console *newcon)
- 	}
- 
- 	if (newcon->flags & CON_EXTENDED)
--		if (!nr_ext_console_drivers++)
--			pr_info("printk: continuation disabled due to ext consoles, expect more fragments in /dev/kmsg\n");
-+		inc_nr_ext_console_drivers();
- 
- 	if (newcon->flags & CON_PRINTBUFFER) {
- 		/*
-@@ -2638,7 +2668,7 @@ int unregister_console(struct console *console)
- 	}
- 
- 	if (!res && (console->flags & CON_EXTENDED))
--		nr_ext_console_drivers--;
-+		dec_nr_ext_console_drivers();
- 
- 	/*
- 	 * If this isn't the last console and it has CON_CONSDEV set, we
