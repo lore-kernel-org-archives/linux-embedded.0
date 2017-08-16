@@ -1,65 +1,242 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH 0/5] cramfs refresh for embedded usage
-Date: Wed, 16 Aug 2017 15:12:09 +0000
-Message-ID: <SG2PR06MB116565941AF758C40E6145228A820@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20170811192252.19062-1-nicolas.pitre@linaro.org>
- <SG2PR06MB1165840F183EADFC3265D7D98A8C0@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <alpine.LFD.2.20.1708141322170.17016@knanqh.ubzr>
- <SG2PR06MB116563FCF10E2615C65080F28A8C0@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <alpine.LFD.2.20.1708141405390.17016@knanqh.ubzr>
- <SG2PR06MB1165D300028F81087B045C8A8A8C0@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <alpine.LFD.2.20.1708150001380.17016@knanqh.ubzr>
- <SG2PR06MB1165749BD3C8336AB0CD27618A8D0@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <alpine.LFD.2.20.1708160105470.17016@knanqh.ubzr>
- <SG2PR06MB1165E8DC60659449C24DD6B68A820@SG2PR06MB1165.apcprd06.prod.outlook.com>
- <alpine.LFD.2.20.1708161002500.17016@knanqh.ubzr>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: [PATCH v2 3/5] cramfs: implement uncompressed and arbitrary data block positioning
+Date: Wed, 16 Aug 2017 13:35:34 -0400
+Message-ID: <20170816173536.1879-4-nicolas.pitre@linaro.org>
+References: <20170816173536.1879-1-nicolas.pitre@linaro.org>
 Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector1-renesas-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version;
- bh=eHUGHZXHbd7dgJLEY0C3Oskb0KVJOsTbbfw5VUgpRcg=;
- b=ACWsk29q3vzLEpFVUhzVqoifsuyEmdOhR/jkhVguguTpZYxfHIkMowXg3fJTCijzbn9a/c/UIvk8OYqV4s52pFcPqdlADrvXKRq/lv5X5VhucjskDkJH3aUhKtcYiELi8/BcoN+iYdXE291NX0g+HcX7c5iLPeM3Fw5lcvP+0F4=
-In-Reply-To: <alpine.LFD.2.20.1708161002500.17016@knanqh.ubzr>
-Content-Language: en-US
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed; d=pobox.com; h=from:to:cc
+        :subject:date:message-id:in-reply-to:references; s=sasl; bh=uRTu
+        uyDY9YiIQ6Bo7Wu2XK7xfec=; b=UDD/uC4kEX/Z7+Wb1k+bRxuXCOSbKhMrvdmj
+        RLfu7VBt3sdZju0YbgU5TllKlEqhhevAvMqCoyO1PLDhVvPiaf/ZeQXy35p2CHKW
+        HMmeuupc+tEYffJ/9a/1q6OQrYl8I2BV3bGDpwwSAWU/GrB9o/avwyqe5QgSIeH6
+        KhESgx0=
+In-Reply-To: <20170816173536.1879-1-nicolas.pitre@linaro.org>
 Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Alexander Viro <viro@zeniv.linux.org.uk>
+Cc: linux-fsdevel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Brandt <Chris.Brandt@renesas.com>
 
-On Wednesday, August 16, 2017 1, Nicolas Pitre wrote:
-> > Just FYI,
-> > I'm running an xipImage with all the RZ/A1 upstream drivers enabled and
-> > only using about 4.5MB of total system RAM.
-> > That's pretty good. Of course for a real application, you would trim of=
-f
-> > the drivers and subsystems you don't plan on using, thus lowering your
-> > RAM usage.
->=20
-> On my MMU-less test target I'm going under the 1MB mark now.
+Two new capabilities are introduced here:
 
-Show off  ;)
+- The ability to store some blocks uncompressed.
 
+- The ability to locate blocks anywhere.
 
-> Given that I also applied the device table patch to mkcramfs (that
-> allows for the creation of device nodes and arbitrary
-> user/group/permission without being root) it would be possible to extend
-> this mechanism to implement other XIP patterns such as for
-> uncompressible media files for example.
+Those capabilities can be used independently, but the combination
+opens the possibility for execute-in-place (XIP) of program text segments
+that must remain uncompressed, and in the MMU case, must have a specific
+alignment.  It is even possible to still have the writable data segments
+from the same file compressed as they have to be copied into RAM anyway.
 
-Good, I was going to ask about that.
+This is achieved by giving special meanings to some unused block pointer
+bits while remaining compatible with legacy cramfs images.
 
-I made an example once were all the graphics were RAW and uncompressed=20
-and marked as XIP in AXFS. The result was a large saving of RAM because=20
-as the graphics framework (DirectFB) would copy directly from Flash=20
-whenever it needed to do a background erase or image re-draw (button press=
-=20
-animations).
+Signed-off-by: Nicolas Pitre <nico@linaro.org>
+---
+ fs/cramfs/README               | 31 ++++++++++++++-
+ fs/cramfs/inode.c              | 87 +++++++++++++++++++++++++++++++++---------
+ include/uapi/linux/cramfs_fs.h | 20 +++++++++-
+ 3 files changed, 118 insertions(+), 20 deletions(-)
 
-Same went for playing MP3 files. The MP3 files were XIP in flash, so=20
-mpg123 pulled from flash directly.
-
-
-Chris
+diff --git a/fs/cramfs/README b/fs/cramfs/README
+index 9d4e7ea311..d71b27e0ff 100644
+--- a/fs/cramfs/README
++++ b/fs/cramfs/README
+@@ -49,17 +49,46 @@ same as the start of the (i+1)'th <block> if there is one).  The first
+ <block> immediately follows the last <block_pointer> for the file.
+ <block_pointer>s are each 32 bits long.
+ 
++When the CRAMFS_FLAG_EXT_BLOCK_POINTERS capability bit is set, each
++<block_pointer>'s top bits may contain special flags as follows:
++
++CRAMFS_BLK_FLAG_UNCOMPRESSED (bit 31):
++	The block data is not compressed and should be copied verbatim.
++
++CRAMFS_BLK_FLAG_DIRECT_PTR (bit 30):
++	The <block_pointer> stores the actual block start offset and not
++	its end, shifted right by 2 bits. The block must therefore be
++	aligned to a 4-byte boundary. The block size is either blksize
++	if CRAMFS_BLK_FLAG_UNCOMPRESSED is also specified, otherwise
++	the compressed data length is included in the first 2 bytes of
++	the block data. This is used to allow discontiguous data layout
++	and specific data block alignments e.g. for XIP applications.
++
++
+ The order of <file_data>'s is a depth-first descent of the directory
+ tree, i.e. the same order as `find -size +0 \( -type f -o -type l \)
+ -print'.
+ 
+ 
+ <block>: The i'th <block> is the output of zlib's compress function
+-applied to the i'th blksize-sized chunk of the input data.
++applied to the i'th blksize-sized chunk of the input data if the
++corresponding CRAMFS_BLK_FLAG_UNCOMPRESSED <block_ptr> bit is not set,
++otherwise it is the input data directly.
+ (For the last <block> of the file, the input may of course be smaller.)
+ Each <block> may be a different size.  (See <block_pointer> above.)
++
+ <block>s are merely byte-aligned, not generally u32-aligned.
+ 
++When CRAMFS_BLK_FLAG_DIRECT_PTR is specified then the corresponding
++<block> may be located anywhere and not necessarily contiguous with
++the previous/next blocks. In that case it is minimally u32-aligned.
++If CRAMFS_BLK_FLAG_UNCOMPRESSED is also specified then the size is always
++blksize except for the last block which is limited by the file length.
++If CRAMFS_BLK_FLAG_DIRECT_PTR is set and CRAMFS_BLK_FLAG_UNCOMPRESSED
++is not set then the first 2 bytes of the block contains the size of the
++remaining block data as this cannot be determined from the placement of
++logically adjacent blocks.
++
+ 
+ Holes
+ -----
+diff --git a/fs/cramfs/inode.c b/fs/cramfs/inode.c
+index 393eb27ef4..b825ae162c 100644
+--- a/fs/cramfs/inode.c
++++ b/fs/cramfs/inode.c
+@@ -636,33 +636,84 @@ static int cramfs_readpage(struct file *file, struct page *page)
+ 	if (page->index < maxblock) {
+ 		struct super_block *sb = inode->i_sb;
+ 		u32 blkptr_offset = OFFSET(inode) + page->index*4;
+-		u32 start_offset, compr_len;
++		u32 block_ptr, block_start, block_len;
++		bool uncompressed, direct;
+ 
+-		start_offset = OFFSET(inode) + maxblock*4;
+ 		mutex_lock(&read_mutex);
+-		if (page->index)
+-			start_offset = *(u32 *) cramfs_read(sb, blkptr_offset-4,
+-				4);
+-		compr_len = (*(u32 *) cramfs_read(sb, blkptr_offset, 4) -
+-			start_offset);
+-		mutex_unlock(&read_mutex);
++		block_ptr = *(u32 *) cramfs_read(sb, blkptr_offset, 4);
++		uncompressed = (block_ptr & CRAMFS_BLK_FLAG_UNCOMPRESSED);
++		direct = (block_ptr & CRAMFS_BLK_FLAG_DIRECT_PTR);
++		block_ptr &= ~CRAMFS_BLK_FLAGS;
++
++		if (direct) {
++			/*
++			 * The block pointer is an absolute start pointer,
++			 * shifted by 2 bits. The size is included in the
++			 * first 2 bytes of the data block when compressed,
++			 * or PAGE_SIZE otherwise.
++			 */
++			block_start = block_ptr << 2;
++			if (uncompressed) {
++				block_len = PAGE_SIZE;
++				/* if last block: cap to file length */
++				if (page->index == maxblock - 1)
++					block_len = offset_in_page(inode->i_size);
++			} else {
++				block_len = *(u16 *)
++					cramfs_read(sb, block_start, 2);
++				block_start += 2;
++			}
++		} else {
++			/*
++			 * The block pointer indicates one past the end of
++			 * the current block (start of next block). If this
++			 * is the first block then it starts where the block
++			 * pointer table ends, otherwise its start comes
++			 * from the previous block's pointer.
++			 */
++			block_start = OFFSET(inode) + maxblock*4;
++			if (page->index)
++				block_start = *(u32 *)
++					cramfs_read(sb, blkptr_offset-4, 4);
++			/* Beware... previous ptr might be a direct ptr */
++			if (unlikely(block_start & CRAMFS_BLK_FLAG_DIRECT_PTR)) {
++				/* See comments on earlier code. */
++				u32 prev_start = block_start;
++			       block_start = prev_start & ~CRAMFS_BLK_FLAGS;
++			       block_start <<= 2;
++				if (prev_start & CRAMFS_BLK_FLAG_UNCOMPRESSED) {
++					block_start += PAGE_SIZE;
++				} else {
++					block_len = *(u16 *)
++						cramfs_read(sb, block_start, 2);
++					block_start += 2 + block_len;
++				}
++			}
++			block_start &= ~CRAMFS_BLK_FLAGS;
++			block_len = block_ptr - block_start;
++		}
+ 
+-		if (compr_len == 0)
++		if (block_len == 0)
+ 			; /* hole */
+-		else if (unlikely(compr_len > (PAGE_SIZE << 1))) {
+-			pr_err("bad compressed blocksize %u\n",
+-				compr_len);
++		else if (unlikely(block_len > 2*PAGE_SIZE ||
++				  (uncompressed && block_len > PAGE_SIZE))) {
++			mutex_unlock(&read_mutex);
++			pr_err("bad data blocksize %u\n", block_len);
+ 			goto err;
++		} else if (uncompressed) {
++			memcpy(pgdata,
++			       cramfs_read(sb, block_start, block_len),
++			       block_len);
++			bytes_filled = block_len;
+ 		} else {
+-			mutex_lock(&read_mutex);
+ 			bytes_filled = cramfs_uncompress_block(pgdata,
+ 				 PAGE_SIZE,
+-				 cramfs_read(sb, start_offset, compr_len),
+-				 compr_len);
+-			mutex_unlock(&read_mutex);
+-			if (unlikely(bytes_filled < 0))
+-				goto err;
++				 cramfs_read(sb, block_start, block_len),
++				 block_len);
+ 		}
++		mutex_unlock(&read_mutex);
++		if (unlikely(bytes_filled < 0))
++			goto err;
+ 	}
+ 
+ 	memset(pgdata + bytes_filled, 0, PAGE_SIZE - bytes_filled);
+diff --git a/include/uapi/linux/cramfs_fs.h b/include/uapi/linux/cramfs_fs.h
+index e4611a9b92..ed250aa372 100644
+--- a/include/uapi/linux/cramfs_fs.h
++++ b/include/uapi/linux/cramfs_fs.h
+@@ -73,6 +73,7 @@ struct cramfs_super {
+ #define CRAMFS_FLAG_HOLES		0x00000100	/* support for holes */
+ #define CRAMFS_FLAG_WRONG_SIGNATURE	0x00000200	/* reserved */
+ #define CRAMFS_FLAG_SHIFTED_ROOT_OFFSET	0x00000400	/* shifted root fs */
++#define CRAMFS_FLAG_EXT_BLOCK_POINTERS	0x00000800	/* block pointer extensions */
+ 
+ /*
+  * Valid values in super.flags.  Currently we refuse to mount
+@@ -82,7 +83,24 @@ struct cramfs_super {
+ #define CRAMFS_SUPPORTED_FLAGS	( 0x000000ff \
+ 				| CRAMFS_FLAG_HOLES \
+ 				| CRAMFS_FLAG_WRONG_SIGNATURE \
+-				| CRAMFS_FLAG_SHIFTED_ROOT_OFFSET )
++				| CRAMFS_FLAG_SHIFTED_ROOT_OFFSET \
++				| CRAMFS_FLAG_EXT_BLOCK_POINTERS )
+ 
++/*
++ * Block pointer flags
++ *
++ * The maximum block offset that needs to be represented is roughly:
++ * 
++ *   (1 << CRAMFS_OFFSET_WIDTH) * 4 +
++ *   (1 << CRAMFS_SIZE_WIDTH) / PAGE_SIZE * (4 + PAGE_SIZE)
++ *   = 0x11004000
++ *
++ * That leaves room for 3 flag bits in the block pointer table.
++ */
++#define CRAMFS_BLK_FLAG_UNCOMPRESSED	(1 << 31)
++#define CRAMFS_BLK_FLAG_DIRECT_PTR	(1 << 30)
++
++#define CRAMFS_BLK_FLAGS	( CRAMFS_BLK_FLAG_UNCOMPRESSED \
++				| CRAMFS_BLK_FLAG_DIRECT_PTR )
+ 
+ #endif /* _UAPI__CRAMFS_H */
+-- 
+2.9.5
