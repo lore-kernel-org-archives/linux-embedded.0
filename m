@@ -1,429 +1,64 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: [PATCH v2 4/5] cramfs: add mmap support
-Date: Mon, 28 Aug 2017 15:17:24 -0400 (EDT)
-Message-ID: <nycvar.YSQ.7.76.1708281058590.2606@knanqh.ubzr>
-References: <20170816173536.1879-1-nicolas.pitre@linaro.org> <20170816173536.1879-5-nicolas.pitre@linaro.org> <20170828064632.GA26136@ZenIV.linux.org.uk> <nycvar.YSQ.7.76.1708280914260.2606@knanqh.ubzr> <20170828142306.GJ5426@ZenIV.linux.org.uk>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v2 4/5] cramfs: add mmap support
+Date: Tue, 29 Aug 2017 19:38:03 +0000
+Message-ID: <SG2PR06MB1165FE414425AFD1C64E7CD78A9F0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+References: <20170816173536.1879-1-nicolas.pitre@linaro.org>
+ <20170816173536.1879-5-nicolas.pitre@linaro.org>
+ <20170828064632.GA26136@ZenIV.linux.org.uk>
+ <nycvar.YSQ.7.76.1708280914260.2606@knanqh.ubzr>
+ <20170828142306.GJ5426@ZenIV.linux.org.uk>
+ <nycvar.YSQ.7.76.1708281058590.2606@knanqh.ubzr>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:in-reply-to:message-id:references
-         :user-agent:mime-version;
-        bh=jiUa7kUQKwh8+5BQM3Ti3qYaRx36fEMREcy1f6gs3/g=;
-        b=AmoXfAxtAe9NWtWBBAogCMepTSjnGjXxWyD5Q0crGOt13PyVRoCttuIGWS5zjYM0MW
-         ydKnkZ1TpVlngFVcV71FazXsnGZG18OAGAkLNEV3wwWBzgZxYEpL0XMf//d7ydk+JLRq
-         VAxoZT6jLvx/qipShe9ujRoR6TID33jfYdwdI=
-In-Reply-To: <20170828142306.GJ5426@ZenIV.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: linux-fsdevel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Brandt <Chris.Brandt@renesas.com>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=renesasgroup.onmicrosoft.com; s=selector1-renesas-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version;
+ bh=0Ib8j/IvOc2ZlQV74P+RaHMe5PD+73zKA3oFcOPEmu8=;
+ b=Ea7Z4PehMja1zMIPlgYrr3TWTkneliNvk0lDJjQAu1DKA5iexQ92hlDTC93a4cnhs7eRlt/Geg1mthVU1DXFmquPuFhPokfFUnfzH4Sw8whVu/FmVc32eRftrweyBr2F8wW9QTsfHwT84zn05RP5shmndvpEFC39UvhNkgDlnR8=
+In-Reply-To: <nycvar.YSQ.7.76.1708281058590.2606@knanqh.ubzr>
+Content-Language: en-US
+Sender: linux-fsdevel-owner@vger.kernel.org
+List-ID: <linux-embedded.vger.kernel.org>
+To: Nicolas Pitre <nicolas.pitre@linaro.org>, Al Viro <viro@ZenIV.linux.org.uk>
+Cc: "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Mon, 28 Aug 2017, Al Viro wrote:
+On Monday, August 28, 2017, Nicolas Pitre wrote:
+> OK I moved the lock promotion right at the beginning _before_ validating
+> the split point. Also got a reference on the file to make sure that
+> hasn't changed too.
+>=20
+> > While we are at it, what happens if you mmap 120Kb, then munmap() the
+> middle
+> > 40Kb.  Leaving two 40Kb VMAs with 40Kb gap between them, that is.  Will
+> your
+> > ->vm_private_data be correct for both?
+>=20
+> It wouldn't, but I now changed it to contain absolute values so now it
+> will. And if the split point lands in the hole then the code just
+> readjusts the pgoff at the beginning of the remaining part.
+>=20
+> Here's the revised patch:
 
-> On Mon, Aug 28, 2017 at 09:29:58AM -0400, Nicolas Pitre wrote:
-> > > > +	/* Make sure the vma didn't change between the locks */
-> > > > +	vma = find_vma(mm, vmf->address);
-> > > > +	if (vma->vm_ops != &cramfs_vmasplit_ops) {
-> > > > +		/*
-> > > > +		 * Someone else raced with us and could have handled the fault.
-> > > > +		 * Let it go back to user space and fault again if necessary.
-> > > > +		 */
-> > > > +		downgrade_write(&mm->mmap_sem);
-> > > > +		return VM_FAULT_NOPAGE;
-> > > > +	}
-> > > > +
-> > > > +	/* Split the vma between the directly mapped area and the rest */
-> > > > +	ret = split_vma(mm, vma, split_addr, 0);
-> > > 
-> > > Egads...  Everything else aside, who said that your split_... will have
-> > > anything to do with the vma you get from find_vma()?
-> > 
-> > When vma->vm_ops == &cramfs_vmasplit_ops it is guaranteed that the vma 
-> > is not fully populated and that the unpopulated area starts at 
-> > split_addr. That split_addr was stored in vma->vm_private_data at the 
-> > same time as vma->vm_ops. Given that mm->mmap_sem is held all along 
-> > across find_vma(), split_vma() and the second find_vma() I hope that I 
-> > can trust that things will be related.
-> 
-> Huh?  You do realize that another thread might've been blocked on that ->mmap_sem
-> in mremap(), get it, have ours block on attempt to get ->mmap_sem exclusive,
-> exterminate the original vma and put there a vma that has also come from cramfs,
-> but other than that had not a damn thing in common with the original.  Different
-> memory area, etc.
-> 
-> Matching ->vm_ops is nowhere near enough.
 
-Right... good point.
+For whatever it's worth, as soon as I moved to 4.13-rc7,
+CONFIG_CRAMFS_PHYSMEM=3Dy crashes my XIP_KERNEL system before it can even=20
+get to any console output.
 
-OK I moved the lock promotion right at the beginning _before_ validating 
-the split point. Also got a reference on the file to make sure that 
-hasn't changed too.
+(both the old patch and the new patch)
 
-> While we are at it, what happens if you mmap 120Kb, then munmap() the middle
-> 40Kb.  Leaving two 40Kb VMAs with 40Kb gap between them, that is.  Will your
-> ->vm_private_data be correct for both?
+If CONFIG_CRAMFS_PHYSMEM is not set, my XIP system boots fine.
 
-It wouldn't, but I now changed it to contain absolute values so now it 
-will. And if the split point lands in the hole then the code just 
-readjusts the pgoff at the beginning of the remaining part.
+However, if I boot -rc7 as a uImage, the new patch works just as good as
+the old patch.
 
-Here's the revised patch:
+(mounting after boot, or booting with rootfstype=3Dcramfs_physmem)
 
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: [PATCH] cramfs: add mmap support
 
-When cramfs_physmem is used then we have the opportunity to map files
-directly from ROM, directly into user space, saving on RAM usage.
-This gives us Execute-In-Place (XIP) support.
+I guess I'll have to figure out what happened between -rc4 and -rc7.
+Damn!
 
-For a file to be mmap()-able, the map area has to correspond to a range
-of uncompressed and contiguous blocks, and in the MMU case it also has
-to be page aligned. A version of mkcramfs with appropriate support is
-necessary to create such a filesystem image.
 
-In the MMU case it may happen for a vma structure to extend beyond the
-actual file size. This is notably the case in binfmt_elf.c:elf_map().
-Or the file's last block is shared with other files and cannot be mapped
-as is. Rather than refusing to mmap it, we do a partial map and set up
-a special vm_ops fault handler that splits the vma in two: the direct
-mapping vma and the memory-backed vma populated by the readpage method.
-In practice the unmapped area is seldom accessed so the split might never
-occur before this area is discarded.
+Chris
 
-In the non-MMU case it is the get_unmapped_area method that is responsible
-for providing the address where the actual data can be found. No mapping
-is necessary of course.
-
-Signed-off-by: Nicolas Pitre <nico@linaro.org>
-
-diff --git a/fs/cramfs/inode.c b/fs/cramfs/inode.c
-index 2fc886092b..1d7d61354b 100644
---- a/fs/cramfs/inode.c
-+++ b/fs/cramfs/inode.c
-@@ -15,7 +15,9 @@
- 
- #include <linux/module.h>
- #include <linux/fs.h>
-+#include <linux/file.h>
- #include <linux/pagemap.h>
-+#include <linux/ramfs.h>
- #include <linux/init.h>
- #include <linux/string.h>
- #include <linux/blkdev.h>
-@@ -49,6 +51,7 @@ static inline struct cramfs_sb_info *CRAMFS_SB(struct super_block *sb)
- static const struct super_operations cramfs_ops;
- static const struct inode_operations cramfs_dir_inode_operations;
- static const struct file_operations cramfs_directory_operations;
-+static const struct file_operations cramfs_physmem_fops;
- static const struct address_space_operations cramfs_aops;
- 
- static DEFINE_MUTEX(read_mutex);
-@@ -96,6 +99,10 @@ static struct inode *get_cramfs_inode(struct super_block *sb,
- 	case S_IFREG:
- 		inode->i_fop = &generic_ro_fops;
- 		inode->i_data.a_ops = &cramfs_aops;
-+		if (IS_ENABLED(CONFIG_CRAMFS_PHYSMEM) &&
-+		    CRAMFS_SB(sb)->flags & CRAMFS_FLAG_EXT_BLOCK_POINTERS &&
-+		    CRAMFS_SB(sb)->linear_phys_addr)
-+			inode->i_fop = &cramfs_physmem_fops;
- 		break;
- 	case S_IFDIR:
- 		inode->i_op = &cramfs_dir_inode_operations;
-@@ -277,6 +284,294 @@ static void *cramfs_read(struct super_block *sb, unsigned int offset,
- 		return NULL;
- }
- 
-+/*
-+ * For a mapping to be possible, we need a range of uncompressed and
-+ * contiguous blocks. Return the offset for the first block and number of
-+ * valid blocks for which that is true, or zero otherwise.
-+ */
-+static u32 cramfs_get_block_range(struct inode *inode, u32 pgoff, u32 *pages)
-+{
-+	struct super_block *sb = inode->i_sb;
-+	struct cramfs_sb_info *sbi = CRAMFS_SB(sb);
-+	int i;
-+	u32 *blockptrs, blockaddr;
-+
-+	/*
-+	 * We can dereference memory directly here as this code may be
-+	 * reached only when there is a direct filesystem image mapping
-+	 * available in memory.
-+	 */
-+	blockptrs = (u32 *)(sbi->linear_virt_addr + OFFSET(inode) + pgoff*4);
-+	blockaddr = blockptrs[0] & ~CRAMFS_BLK_FLAGS;
-+	i = 0;
-+	do {
-+		u32 expect = blockaddr + i * (PAGE_SIZE >> 2);
-+		expect |= CRAMFS_BLK_FLAG_DIRECT_PTR|CRAMFS_BLK_FLAG_UNCOMPRESSED;
-+		if (blockptrs[i] != expect) {
-+			pr_debug("range: block %d/%d got %#x expects %#x\n",
-+				 pgoff+i, pgoff+*pages-1, blockptrs[i], expect);
-+			if (i == 0)
-+				return 0;
-+			break;
-+		}
-+	} while (++i < *pages);
-+
-+	*pages = i;
-+
-+	/* stored "direct" block ptrs are shifted down by 2 bits */
-+	return blockaddr << 2;
-+}
-+
-+/*
-+ * It is possible for cramfs_physmem_mmap() to partially populate the mapping
-+ * causing page faults in the unmapped area. When that happens, we need to
-+ * split the vma so that the unmapped area gets its own vma that can be backed
-+ * with actual memory pages and loaded normally. This is necessary because
-+ * remap_pfn_range() overwrites vma->vm_pgoff with the pfn and filemap_fault()
-+ * no longer works with it. Furthermore this makes /proc/x/maps right.
-+ * Q: is there a way to do split vma at mmap() time?
-+ */
-+static const struct vm_operations_struct cramfs_vmasplit_ops;
-+static int cramfs_vmasplit_fault(struct vm_fault *vmf)
-+{
-+	struct mm_struct *mm = vmf->vma->vm_mm;
-+	struct vm_area_struct *vma, *new_vma;
-+	struct file *vma_file = get_file(vmf->vma->vm_file);
-+	unsigned long split_val, split_addr;
-+	unsigned int split_pgoff;
-+	int ret;
-+
-+	/* We have some vma surgery to do and need the write lock. */
-+	up_read(&mm->mmap_sem);
-+	if (down_write_killable(&mm->mmap_sem)) {
-+		fput(vma_file);
-+		return VM_FAULT_RETRY;
-+	}
-+
-+	/* Make sure the vma didn't change between the locks */
-+	ret = VM_FAULT_SIGSEGV;
-+	vma = find_vma(mm, vmf->address);
-+	if (!vma)
-+		goto out_fput;
-+
-+	/*
-+	 * Someone else might have raced with us and handled the fault,
-+	 * changed the vma, etc. If so let it go back to user space and
-+	 * fault again if necessary.
-+	 */
-+	ret = VM_FAULT_NOPAGE;
-+	if (vma->vm_ops != &cramfs_vmasplit_ops || vma->vm_file != vma_file)
-+		goto out_fput;
-+	fput(vma_file);
-+
-+	/* Retrieve the vma split address and validate it */
-+	split_val = (unsigned long)vma->vm_private_data;
-+	split_pgoff = split_val & 0xfff;
-+	split_addr = (split_val >> 12) << PAGE_SHIFT;
-+	if (split_addr < vma->vm_start) {
-+		/* bottom of vma was unmapped */
-+		split_pgoff += (vma->vm_start - split_addr) >> PAGE_SHIFT;
-+		split_addr = vma->vm_start;
-+	}
-+	pr_debug("fault: addr=%#lx vma=%#lx-%#lx split=%#lx\n",
-+		 vmf->address, vma->vm_start, vma->vm_end, split_addr);
-+	ret = VM_FAULT_SIGSEGV;
-+	if (!split_val || split_addr > vmf->address || vma->vm_end <= vmf->address)
-+		goto out;
-+
-+	if (unlikely(vma->vm_start == split_addr)) {
-+		/* nothing to split */
-+		new_vma = vma;
-+	} else {
-+		/* Split away the directly mapped area */
-+		ret = VM_FAULT_OOM;
-+		if (split_vma(mm, vma, split_addr, 0) != 0)
-+			goto out;
-+
-+		/* The direct vma should no longer ever fault */
-+		vma->vm_ops = NULL;
-+
-+		/* Retrieve the new vma covering the unmapped area */
-+		new_vma = find_vma(mm, split_addr);
-+		BUG_ON(new_vma == vma);
-+		ret = VM_FAULT_SIGSEGV;
-+		if (!new_vma)
-+			goto out;
-+	}
-+
-+	/*
-+	 * Readjust the new vma with the actual file based pgoff and
-+	 * process the fault normally on it.
-+	 */
-+	new_vma->vm_pgoff = split_pgoff;
-+	new_vma->vm_ops = &generic_file_vm_ops;
-+	new_vma->vm_flags &= ~(VM_IO | VM_PFNMAP | VM_DONTEXPAND);
-+	vmf->vma = new_vma;
-+	vmf->pgoff = split_pgoff;
-+	vmf->pgoff += (vmf->address - new_vma->vm_start) >> PAGE_SHIFT;
-+	downgrade_write(&mm->mmap_sem);
-+	return filemap_fault(vmf);
-+
-+out_fput:
-+	fput(vma_file);
-+out:
-+	downgrade_write(&mm->mmap_sem);
-+	return ret;
-+}
-+
-+static const struct vm_operations_struct cramfs_vmasplit_ops = {
-+	.fault	= cramfs_vmasplit_fault,
-+};
-+
-+static int cramfs_physmem_mmap(struct file *file, struct vm_area_struct *vma)
-+{
-+	struct inode *inode = file_inode(file);
-+	struct super_block *sb = inode->i_sb;
-+	struct cramfs_sb_info *sbi = CRAMFS_SB(sb);
-+	unsigned int pages, vma_pages, max_pages, offset;
-+	unsigned long address;
-+	char *fail_reason;
-+	int ret;
-+
-+	if (!IS_ENABLED(CONFIG_MMU))
-+		return vma->vm_flags & (VM_SHARED | VM_MAYSHARE) ? 0 : -ENOSYS;
-+
-+	if ((vma->vm_flags & VM_SHARED) && (vma->vm_flags & VM_MAYWRITE))
-+		return -EINVAL;
-+
-+	/* Could COW work here? */
-+	fail_reason = "vma is writable";
-+	if (vma->vm_flags & VM_WRITE)
-+		goto fail;
-+
-+	vma_pages = (vma->vm_end - vma->vm_start + PAGE_SIZE - 1) >> PAGE_SHIFT;
-+	max_pages = (inode->i_size + PAGE_SIZE - 1) >> PAGE_SHIFT;
-+	fail_reason = "beyond file limit";
-+	if (vma->vm_pgoff >= max_pages)
-+		goto fail;
-+	pages = vma_pages;
-+	if (pages > max_pages - vma->vm_pgoff)
-+		pages = max_pages - vma->vm_pgoff;
-+
-+	offset = cramfs_get_block_range(inode, vma->vm_pgoff, &pages);
-+	fail_reason = "unsuitable block layout";
-+	if (!offset)
-+		goto fail;
-+	address = sbi->linear_phys_addr + offset;
-+	fail_reason = "data is not page aligned";
-+	if (!PAGE_ALIGNED(address))
-+		goto fail;
-+
-+	/* Don't map the last page if it contains some other data */
-+	if (unlikely(vma->vm_pgoff + pages == max_pages)) {
-+		unsigned int partial = offset_in_page(inode->i_size);
-+		if (partial) {
-+			char *data = sbi->linear_virt_addr + offset;
-+			data += (max_pages - 1) * PAGE_SIZE + partial;
-+			while ((unsigned long)data & 7)
-+				if (*data++ != 0)
-+					goto nonzero;
-+			while (offset_in_page(data)) {
-+				if (*(u64 *)data != 0) {
-+					nonzero:
-+					pr_debug("mmap: %s: last page is shared\n",
-+						 file_dentry(file)->d_name.name);
-+					pages--;
-+					break;
-+				}
-+				data += 8;
-+			}
-+		}
-+	}
-+
-+	if (pages) {
-+		/*
-+		 * If we can't map it all, page faults will occur if the
-+		 * unmapped area is accessed. Let's handle them to split the
-+		 * vma and let the normal paging machinery take care of the
-+		 * rest through cramfs_readpage(). Because remap_pfn_range()
-+		 * repurposes vma->vm_pgoff, we have to save it somewhere.
-+		 * Let's use vma->vm_private_data to hold both the pgoff and
-+		 * the actual address split point. Maximum file size is 16MB
-+		 * (12 bits pgoff) and max 20 bits pfn where a long is 32 bits
-+		 * so we can pack both together.
-+		 */
-+		if (pages != vma_pages) {
-+			unsigned int split_pgoff = vma->vm_pgoff + pages;
-+			unsigned long split_pfn = (vma->vm_start >> PAGE_SHIFT) + pages;
-+			unsigned long split_val = split_pgoff | (split_pfn << 12);
-+			vma->vm_private_data = (void *)split_val;
-+			vma->vm_ops = &cramfs_vmasplit_ops;
-+			/* to keep remap_pfn_range() happy */
-+			vma->vm_end = vma->vm_start + pages * PAGE_SIZE;
-+		}
-+
-+		ret = remap_pfn_range(vma, vma->vm_start, address >> PAGE_SHIFT,
-+				      pages * PAGE_SIZE, vma->vm_page_prot);
-+		/* restore vm_end in case we cheated it above */
-+		vma->vm_end = vma->vm_start + vma_pages * PAGE_SIZE;
-+		if (ret)
-+			return ret;
-+
-+		pr_debug("mapped %s at 0x%08lx (%u/%u pages) to vma 0x%08lx, "
-+			 "page_prot 0x%llx\n", file_dentry(file)->d_name.name,
-+			 address, pages, vma_pages, vma->vm_start,
-+			 (unsigned long long)pgprot_val(vma->vm_page_prot));
-+		return 0;
-+	}
-+	fail_reason = "no suitable block remaining";
-+
-+fail:
-+	pr_debug("%s: direct mmap failed: %s\n",
-+		 file_dentry(file)->d_name.name, fail_reason);
-+
-+	/* We failed to do a direct map, but normal paging will do it */
-+	vma->vm_ops = &generic_file_vm_ops;
-+	return 0;
-+}
-+
-+#ifndef CONFIG_MMU
-+
-+static unsigned long cramfs_physmem_get_unmapped_area(struct file *file,
-+			unsigned long addr, unsigned long len,
-+			unsigned long pgoff, unsigned long flags)
-+{
-+	struct inode *inode = file_inode(file);
-+	struct super_block *sb = inode->i_sb;
-+	struct cramfs_sb_info *sbi = CRAMFS_SB(sb);
-+	unsigned int pages, block_pages, max_pages, offset;
-+
-+	pages = (len + PAGE_SIZE - 1) >> PAGE_SHIFT;
-+	max_pages = (inode->i_size + PAGE_SIZE - 1) >> PAGE_SHIFT;
-+	if (pgoff >= max_pages || pages > max_pages - pgoff)
-+		return -EINVAL;
-+	block_pages = pages;
-+	offset = cramfs_get_block_range(inode, pgoff, &block_pages);
-+	if (!offset || block_pages != pages)
-+		return -ENOSYS;
-+	addr = sbi->linear_phys_addr + offset;
-+	pr_debug("get_unmapped for %s ofs %#lx siz %lu at 0x%08lx\n",
-+		 file_dentry(file)->d_name.name, pgoff*PAGE_SIZE, len, addr);
-+	return addr;
-+}
-+
-+static unsigned cramfs_physmem_mmap_capabilities(struct file *file)
-+{
-+	return NOMMU_MAP_COPY | NOMMU_MAP_DIRECT | NOMMU_MAP_READ | NOMMU_MAP_EXEC;
-+}
-+#endif
-+
-+static const struct file_operations cramfs_physmem_fops = {
-+	.llseek			= generic_file_llseek,
-+	.read_iter		= generic_file_read_iter,
-+	.splice_read		= generic_file_splice_read,
-+	.mmap			= cramfs_physmem_mmap,
-+#ifndef CONFIG_MMU
-+	.get_unmapped_area	= cramfs_physmem_get_unmapped_area,
-+	.mmap_capabilities	= cramfs_physmem_mmap_capabilities,
-+#endif
-+};
-+
- static void cramfs_blkdev_kill_sb(struct super_block *sb)
- {
- 	struct cramfs_sb_info *sbi = CRAMFS_SB(sb);
