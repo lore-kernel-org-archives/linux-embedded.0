@@ -1,7 +1,7 @@
-From: Rob Landley <rob@landley.net>
+From: Oleg Nesterov <oleg@redhat.com>
 Subject: Re: execve(NULL, argv, envp) for nommu?
-Date: Tue, 12 Sep 2017 08:45:48 -0500
-Message-ID: <bb73820f-745b-e55b-57f6-10b3de0f801b@landley.net>
+Date: Tue, 12 Sep 2017 17:45:49 +0200
+Message-ID: <20170912154549.GA31411@redhat.com>
 References: <324c00d9-06a6-1fc5-83fe-5bd36d874501@landley.net>
  <CAMuHMdUPUaLfbbFF1kZoEUy7or-9sVOt=ykAHT+S6NBvFy5V=g@mail.gmail.com>
  <20170905142436.262ed118@alans-desktop>
@@ -9,111 +9,150 @@ References: <324c00d9-06a6-1fc5-83fe-5bd36d874501@landley.net>
  <d2d1acae-b2a1-9f41-d3bf-9d3b35a62664@landley.net>
  <20170911151526.GA4126@redhat.com>
  <d3ae79b1-810d-8abc-3692-69cef4bd1a7a@landley.net>
- <CAMuHMdXQn47LK6RLtdgW3JJtL1VwqK7ZvUdmLgaZat8TA30KtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=landley-net.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=vxvGPgLon7PWvxk3TjQv74UeUVYWJOQtNveyW6rivQM=;
-        b=zR4gbPrAW84qRmJYryjPUloTGlOb4BG+zIzwzp8vpt/w91FaREg2okDY9fVwUqsHvf
-         r9o3XLkUe9lddUuz4IMmu++LAc9mmPWZiiWF3HUKfhlzUyUiQQvunCDhfdvwijdmjIeB
-         owiDkUcihT0hDnVjQ1Sb91qf88AO0Ff9tZkg+WSeOSIpvhBFEIE0NsoYdmdcEuo9KNMM
-         csKKKZv5D1bfdmrlewht0ueO3WNlKA+Yz2bE9i6D1u8ObzC/FYyrkSnEAroWa83QNVlR
-         GbeSg8KX215et5bTpmuJxYmUsYwsa72sURmPRhB5emqyl0VN/J+ATbSmA43nIQE1DtqS
-         5o1A==
-In-Reply-To: <CAMuHMdXQn47LK6RLtdgW3JJtL1VwqK7ZvUdmLgaZat8TA30KtQ@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <d3ae79b1-810d-8abc-3692-69cef4bd1a7a@landley.net>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Oleg Nesterov <oleg@redhat.com>, Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Linux Embedded <linux-embedded@vger.kernel.org>, Rich Felker <dalias@libc.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+To: Rob Landley <rob@landley.net>
+Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Geert Uytterhoeven <geert@linux-m68k.org>, Linux Embedded <linux-embedded@vger.kernel.org>, dalias@libc.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 09/12/2017 06:30 AM, Geert Uytterhoeven wrote:
-> Hi Rob,
-> 
-> On Tue, Sep 12, 2017 at 12:48 PM, Rob Landley <rob@landley.net> wrote:
->> Your stack has pointers. Your heap has pointers. Your data and bss (once
->> initialized) can have pointers. These pointers can be in the middle of
->> malloc()'ed structures so no ELF table anywhere knows anything about
->> them. A long variable containing a value that _could_ point into one of
->> these ranges isn't guaranteed to _be_ a pointer, in which case adjusting
->> it is breakage. Tracking them all down and fixing up just the right ones
->> without missing any or changing data you shouldn't is REALLY HARD.
-> 
-> Hence (make the compiler) never store pointers, only offsets relative to a
-> base register. So after making copies of stack, data/bss, and heap, all you
-> need to do is adjust these base registers for the child process.
-> Nothing in main memory needs to be modified.
+On 09/12, Rob Landley wrote:
+>
+> On 09/11/2017 10:15 AM, Oleg Nesterov wrote:
+> > On 09/08, Rob Landley wrote:
+> >>
+> >> So is exec(NULL, argv, envp) a reasonable thing to want?
+> >
+> > I think that something like prctl(PR_OPEN_EXE_FILE) which does
+> >
+> > 	dentry_open(current->mm->exe_file->path, O_PATH)
+> >
+> > and returns fd make more sense.
+> >
+> > Then you can do execveat(fd, "", ..., AT_EMPTY_PATH).
+> I'm all for it? That sounds like a cosmetic difference, a more verbose
+> way of achieving the same outcome.
 
-Ok, I'll bite. How do you set a signal handler under this regime, since
-that needs to pass a function pointer to the syscall? Have a different
-function pointer type for when you want a real pointer instead of an
-offset pointer? Perhaps label them "near" and "far" pointers, since
-there's precedent for that back under DOS?
+Simpler to implement. Something like the (untested) patch below. Not sure
+it is correct, not sure it is good idea, etc.
 
-When you call printf(), how does it accept both a "string constant"
-living in rodata and a char array on the stack? Two printf functions
-with different argument types? If it _does_ take an actual memory
-address rather than an offset that isn't always vs the same segment then
-you've written pointers to the stack...
+> (Of course now you've got a filehandle you can read xattrs and such
+> through from otherwise jailed contexts letting you do things you
+> couldn't necessarily do before,
 
-You're also requiring static linking: shared libraries work just fine
-with fdpic, but under your segment:offset addressing system all text has
-to be relative to the same code segment.
+I can be easily wrong, this is not my area, but afaics no. Note that
+you get the FMODE_PATH file (see O_PATH), you can do almost nothing
+with it.
 
-Plus there's still the "fork() off of mozilla" problem that you may copy
-lots of data just to immediately discard it as the common case (unless
-you'd still use vfork() for most things), and you still need contiguous
-blocks of memory for each segment (nommu is vulnerable to fragmentation,
-increasingly so as the system stays up longer) so your fork() will fail
-where vfork() succeeds. But that just makes it really slow and
-unreliable, rather than requiring a large rewrite of the C language.
+So. IIUC with this patch you can do
 
-> Text accesses can be PC-relative => nothing to adjust.
-> Local variable accesses are stack-relative => nothing to adjust.
-> Data/bss accesses can be relative to a reserved register that stores the
-> data base address => only adjust the base register, nothing in RAM to adjust.
+	fd = prctl(PR_OPEN_EXE_FILE);
 
-Does this compiler setup you're describing actually exist?
+	execveat(fd, "", NULL, NULL, AT_EMPTY_PATH);
 
-Instead of making a minor adjustment to one system call, it's better to
-extensively rewrite compilers and calling conventions, ignoring the way
-C traditionally treats strings and arrays as pointers where pointers
-into data, bss, heap, and stack are all used interchangeably...
+and execveat should succeed even if the binary was unlinked/renamed in
+between.
 
-> Heap accesses can be relative to a reserved register that stores the heap
-> base address => only adjust the base register, nothing in RAM to adjust.
+otoh it should fail if, say, you do "chmod a-x exename" in between.
 
-Query: if you implement a linked list ala:
+However. This won't work after chroot() so I am not sure this solves your
+problems.
 
-struct blah {
-  struct blah *next;
-  char *key, *value;
-};
+> but I assume you know the security
+> implications of that more than I do.
 
-If next points to a malloc(), key is a constant string in rodata, and
-value was strchr(getenv(key), '=')+1 (with appropriate error checking of
-course), how does your compiler know which segment each pointer in that
-structure is offset from? (What segment IS your environment space
-relative to, anyway? It's not the _current_ value of your stack pointer,
-that moves.)
+Unlikely ;)
 
-How does your proposed compiler rewrite handle mmap()? You can do
-MAP_SHARED just fine on nommu today, it's only MAP_PRIVATE that requires
-copy on write. (Yes MAP_SHARED can be read only.)
 
-You're aware that most heap implementations can have more than one
-underlying mmap(), right?
+> > But to be honest, I can't understand the problem, because I know nothing
+> > about nommu.
+> >
+> > You need to unblock parent sleeping in vfork(), and you can't do another
+> > fork (I don't undestand why).
+>
+> A nommu system doesn't have a memory management unit, so all addresses
+> are physical addresses. This means two processes can't see different
+> things at the same address: either they see the same thing or one of
+> them can't see that address (due to a range register making it).
 
-  http://git.musl-libc.org/cgit/musl/tree/src/malloc/malloc.c#n320
+Yes, yes, I understand, and thanks for your detailed explanation...
 
-https://github.com/kraj/uClibc/blob/master/libc/stdlib/malloc/malloc.c#L121
+> > Perhaps the child can create another thread? The main thread can exit
+> > after that and unblock the parent. Or perhaps even something like
+> > clone(CLONE_VM | CLONE_PARENT), I dunno...
+>
+> Launching a new thread doesn't unblock the parent.
 
-So when you say _the_ heap base address above, which chunk are you
-referring to?
+Well, this doesn't really matter, but see above, the main thread can exit
+after that. This should unblock the parent.
 
-Rob
+> And even without that, we're still in the "vfork but add concurrency"
+> territory. Your threads don't have their own independent mappings,
+
+Of course!
+
+Just I misinterpreted your initial email as if this is fine for your
+use-case, and all you need is unblock the parent and nothing else.
+
+Oleg.
+---
+
+
+--- x/kernel/sys.c
++++ x/kernel/sys.c
+@@ -2183,6 +2183,40 @@ static int propagate_has_child_subreaper(struct task_struct *p, void *data)
+ 	return 1;
+ }
+ 
++static int open_mm_exe_file(void)
++{
++	struct file *exe_file, *file;
++	struct path *path;
++	int fd = -ENOENT;
++
++	exe_file = get_mm_exe_file(current->mm);
++	if (!exe_file)
++		goto out;
++
++	path = &exe_file->f_path;
++	if (!path->dentry)
++		goto put_exe_file;
++
++	fd = get_unused_fd_flags(O_CLOEXEC); // flags?
++	if (fd < 0)
++		goto put_exe_file;
++
++	file = dentry_open(path, O_PATH, current_cred());
++	if (IS_ERR(file)) {
++		put_unused_fd(fd);
++		fd = PTR_ERR(file);
++		goto put_exe_file;
++	}
++
++	path_get(path);
++	fd_install(fd, file);
++
++put_exe_file:
++	fput(exe_file);
++out:
++	return fd;
++}
++
+ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
+ 		unsigned long, arg4, unsigned long, arg5)
+ {
+@@ -2196,6 +2230,9 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
+ 
+ 	error = 0;
+ 	switch (option) {
++	case PR_OPEN_EXE_FILE:
++		error = open_mm_exe_file();
++		break;
+ 	case PR_SET_PDEATHSIG:
+ 		if (!valid_signal(arg2)) {
+ 			error = -EINVAL;
+
