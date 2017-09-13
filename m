@@ -1,108 +1,70 @@
-From: Oleg Nesterov <oleg@redhat.com>
+From: Alan Cox <gnomes@lxorguk.ukuu.org.uk>
 Subject: Re: execve(NULL, argv, envp) for nommu?
-Date: Wed, 13 Sep 2017 16:20:11 +0200
-Message-ID: <20170913142011.GA9563@redhat.com>
+Date: Wed, 13 Sep 2017 20:33:10 +0100
+Message-ID: <20170913203310.42bbaf57@alans-desktop>
 References: <324c00d9-06a6-1fc5-83fe-5bd36d874501@landley.net>
- <CAMuHMdUPUaLfbbFF1kZoEUy7or-9sVOt=ykAHT+S6NBvFy5V=g@mail.gmail.com>
- <20170905142436.262ed118@alans-desktop>
- <ab6e6e8b-7040-a07d-5502-405701182568@landley.net>
- <d2d1acae-b2a1-9f41-d3bf-9d3b35a62664@landley.net>
- <20170911151526.GA4126@redhat.com>
- <d3ae79b1-810d-8abc-3692-69cef4bd1a7a@landley.net>
- <20170912154549.GA31411@redhat.com>
+        <CAMuHMdUPUaLfbbFF1kZoEUy7or-9sVOt=ykAHT+S6NBvFy5V=g@mail.gmail.com>
+        <20170905142436.262ed118@alans-desktop>
+        <ab6e6e8b-7040-a07d-5502-405701182568@landley.net>
+        <d2d1acae-b2a1-9f41-d3bf-9d3b35a62664@landley.net>
+        <20170911151526.GA4126@redhat.com>
+        <d3ae79b1-810d-8abc-3692-69cef4bd1a7a@landley.net>
+        <CAMuHMdXQn47LK6RLtdgW3JJtL1VwqK7ZvUdmLgaZat8TA30KtQ@mail.gmail.com>
+        <bb73820f-745b-e55b-57f6-10b3de0f801b@landley.net>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170912154549.GA31411@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-embedded-owner@vger.kernel.org>
+In-Reply-To: <bb73820f-745b-e55b-57f6-10b3de0f801b@landley.net>
+Sender: linux-embedded-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
 To: Rob Landley <rob@landley.net>
-Cc: Alan Cox <gnomes@lxorguk.ukuu.org.uk>, Geert Uytterhoeven <geert@linux-m68k.org>, Linux Embedded <linux-embedded@vger.kernel.org>, dalias@libc.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Oleg Nesterov <oleg@redhat.com>, Linux Embedded <linux-embedded@vger.kernel.org>, Rich Felker <dalias@libc.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 09/12, Oleg Nesterov wrote:
->
-> On 09/12, Rob Landley wrote:
-> >
-> > On 09/11/2017 10:15 AM, Oleg Nesterov wrote:
-> > > On 09/08, Rob Landley wrote:
-> > >>
-> > >> So is exec(NULL, argv, envp) a reasonable thing to want?
-> > >
-> > > I think that something like prctl(PR_OPEN_EXE_FILE) which does
-> > >
-> > > 	dentry_open(current->mm->exe_file->path, O_PATH)
-> > >
-> > > and returns fd make more sense.
-> > >
-> > > Then you can do execveat(fd, "", ..., AT_EMPTY_PATH).
-> > I'm all for it? That sounds like a cosmetic difference, a more verbose
-> > way of achieving the same outcome.
->
-> Simpler to implement. Something like the (untested) patch below. Not sure
-> it is correct, not sure it is good idea, etc.
+> Ok, I'll bite. How do you set a signal handler under this regime, since
+> that needs to pass a function pointer to the syscall? Have a different
+> function pointer type for when you want a real pointer instead of an
+> offset pointer? Perhaps label them "near" and "far" pointers, since
+> there's precedent for that back under DOS?
 
-OTOH... with the trivial patch below
+A function pointer is an offset relative to the base of the code (but the
+other comments are mostly valid)
 
-	execveat(AT_FDCWD, "", NULL, NULL, AT_EMPTY_PATH);
+For most hardware it's cheaper to just do it the way Minix did,
+especially as all the hard work in being able to share code and
+copy/migrate data happens to have been done in order to make XIP work. A
+modern CPU can copy memory at lot faster than an 8MHZ 68K which couldn't
+even manage to move 16bits/clock.
 
-should always work, even if the binary is not in scope after chroot, or if
-it is no longer executable, or unlinked. But I am not sure what else should
-we do to avoid the security problems.
+> You're also requiring static linking: shared libraries work just fine
+> with fdpic, but under your segment:offset addressing system all text has
+> to be relative to the same code segment.
 
-Oleg.
+No - see the Windows 16bit approach to this. Bring a bucket though 8)
 
+> Plus there's still the "fork() off of mozilla" problem that you may copy
+> lots of data just to immediately discard it as the common case (unless
+> you'd still use vfork() for most things), and you still need contiguous
+> blocks of memory for each segment (nommu is vulnerable to fragmentation,
+> increasingly so as the system stays up longer) so your fork() will fail
+> where vfork() succeeds. But that just makes it really slow and
 
---- x/fs/exec.c
-+++ x/fs/exec.c
-@@ -832,23 +832,32 @@ static struct file *do_open_execat(int fd, struct filename *name, int flags)
- {
- 	struct file *file;
- 	int err;
--	struct open_flags open_exec_flags = {
--		.open_flag = O_LARGEFILE | O_RDONLY | __FMODE_EXEC,
--		.acc_mode = MAY_EXEC,
--		.intent = LOOKUP_OPEN,
--		.lookup_flags = LOOKUP_FOLLOW,
--	};
--
--	if ((flags & ~(AT_SYMLINK_NOFOLLOW | AT_EMPTY_PATH)) != 0)
--		return ERR_PTR(-EINVAL);
--	if (flags & AT_SYMLINK_NOFOLLOW)
--		open_exec_flags.lookup_flags &= ~LOOKUP_FOLLOW;
--	if (flags & AT_EMPTY_PATH)
--		open_exec_flags.lookup_flags |= LOOKUP_EMPTY;
- 
--	file = do_filp_open(fd, name, &open_exec_flags);
--	if (IS_ERR(file))
--		goto out;
-+	if (fd == AT_FDCWD && name->name[0] == '\0' && flags == AT_EMPTY_PATH) {
-+		file = get_mm_exe_file(current->mm);
-+		if (!file) {
-+			file = ERR_PTR(-ENOENT);
-+			goto out;
-+		}
-+	} else {
-+		struct open_flags open_exec_flags = {
-+			.open_flag = O_LARGEFILE | O_RDONLY | __FMODE_EXEC,
-+			.acc_mode = MAY_EXEC,
-+			.intent = LOOKUP_OPEN,
-+			.lookup_flags = LOOKUP_FOLLOW,
-+		};
-+
-+		if ((flags & ~(AT_SYMLINK_NOFOLLOW | AT_EMPTY_PATH)) != 0)
-+			return ERR_PTR(-EINVAL);
-+		if (flags & AT_SYMLINK_NOFOLLOW)
-+			open_exec_flags.lookup_flags &= ~LOOKUP_FOLLOW;
-+		if (flags & AT_EMPTY_PATH)
-+			open_exec_flags.lookup_flags |= LOOKUP_EMPTY;
-+
-+		file = do_filp_open(fd, name, &open_exec_flags);
-+		if (IS_ERR(file))
-+			goto out;
-+	}
- 
- 	err = -EACCES;
- 	if (!S_ISREG(file_inode(file)->i_mode))
+If you just do copies and scheduling time swaps of memory blocks then
+fragmentation isn't a problem because you can fragment the copy not
+currently running. In fact you can (as MAPUX did) extend this to
+completely kill the fragmentation problem at the cost of turning
+sustained high memory usage with few process deaths into very poor
+performance. MAPUX algorithm works very hard to keep stuff unfragmented
+but is prepared to move chunks of other processes temporarily around in
+order to keep the running process where it should be. In effect it
+implements a software paged MMU with an allocator that tries to achieve a
+1:1 mapping of the virt/phys of the process.
 
+POSIX tries to side step all of this by providing a combined fork/mess
+with file handles of child etc/execve function (posix_spawn) that an
+MMUless system can implement to provide the usual functionalities of
+fork() / execve() like handle redirection. There are also other ways to
+implement that with threads not sharing file handles if you have enough
+thread capability (something posix spawn can't assume).
+
+Alan
