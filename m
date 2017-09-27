@@ -1,56 +1,124 @@
-From: Aravind Machiry <machiry@ucsb.edu>
-Subject: A Quick Survey on a Patch Propagation Tool
-Date: Tue, 19 Sep 2017 13:07:56 -0700
-Message-ID: <CANozA0iZcbf7h5GmJyccRV+7vdgvC+Hm2v-Gw8GZ+M79eCEDWw@mail.gmail.com>
-Mime-Version: 1.0
-Return-path: <linux-embedded-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ucsb.edu; s=google;
-        h=mime-version:from:date:message-id:subject:to;
-        bh=FV42scEpuO7YnLDmPz313uFF1RnMD2w8M8WZJi7yKkA=;
-        b=L9jDD33sUSDSeqWbs/AdwOyJN/G2VxUHbC0VbByR5WcLTi6fNoHIs7ZuebPjKUzIVo
-         HcHauhYeT/uTjCaLP4QONyLjuFOftG/pp9tLpo8XmgNz2puHW+pJbtCFDDVaKkp26kUt
-         mTAV6A6NUQwGRm7jYHLGCWMbiybtEFCHFbyH2kDSSH5iL532EQC1v0dP/QkXFbgTQam8
-         B9Kjf635GwtZZPFiwT5gXIW4P8XJ4ZD3RQlZKidnJ628e56y91SxhZMcRbfp42LTV0Cv
-         TbJZqzH4cFhQU8Cr07S/8P1NFdMBd0bUAdGvYVaK44nqzACSHG6W6BuLj+9pmx04J8vT
-         v26Q==
-Sender: linux-embedded-owner@vger.kernel.org
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: [PATCH v4 0/5] cramfs refresh for embedded usage
+Date: Wed, 27 Sep 2017 19:32:19 -0400
+Message-ID: <20170927233224.31676-1-nicolas.pitre@linaro.org>
+Return-path: <owner-linux-mm@kvack.org>
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed; d=pobox.com; h=from:to:cc
+	:subject:date:message-id; s=sasl; bh=Pz1AL0uWhn/dQkGSrv7kOkCDst8
+	=; b=HY6kwGyF4SLAmSfiYVvupd04FulXhXMd5z2ezJQdg7blfy7HoTktghbQsD5
+	4MBDH9LalOChroSKHqrbhUKGYdj+AYZ89aaDtCyDjG//YjwhcJ6yPZ9hhmnJcjd7
+	P2UgvHGIExiIJWHDNWwbJrXsQDBr9ez7U7CUXMcvC7vKgV3M=
+Sender: owner-linux-mm@kvack.org
 List-ID: <linux-embedded.vger.kernel.org>
+MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: linux-embedded@vger.kernel.org
+To: Alexander Viro <viro@zeniv.linux.org.uk>, linux-mm@kvack.org
+Cc: linux-fsdevel@vger.kernel.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Brandt <Chris.Brandt@renesas.com>
 
-Hi Developer and maintainers,
+To memory management people: please review patch #4 of this series.
 
-We (researchers for UC Santa Barbara) are developing a tool that will
-help in propagating patches.
+This series brings a nice refresh to the cramfs filesystem, adding the
+following capabilities:
 
-Please, It would be great if you can fill a 2-question  anonymous
-survey: https://goo.gl/forms/5cBSx4axKmc8BEtA3
+- Direct memory access, bypassing the block and/or MTD layers entirely.
+
+- Ability to store individual data blocks uncompressed.
+
+- Ability to locate individual data blocks anywhere in the filesystem.
+
+The end result is a very tight filesystem that can be accessed directly
+from ROM without any other subsystem underneath. This also allows for
+user space XIP which is a very important feature for tiny embedded
+systems.
+
+This series is also available based on v4.13 via git here:
+
+  http://git.linaro.org/people/nicolas.pitre/linux xipcramfs
+
+Why cramfs?
+
+  Because cramfs is very simple and small. With CONFIG_CRAMFS_BLOCK=n and
+  CONFIG_CRAMFS_PHYSMEM=y the cramfs driver may use as little as 3704 bytes
+  of code. That's many times smaller than squashfs. And the runtime memory
+  usage is also much less with cramfs than squashfs. It packs very tightly
+  already compared to romfs which has no compression support. And the cramfs
+  format was simple to extend, allowing for both compressed and uncompressed
+  blocks within the same file.
+
+Why not accessing ROM via MTD?
+
+  The MTD layer is nice and flexible. It also represents a huge overhead
+  considering its core with no other enabled options weights 19KB.
+  That's many times the size of the cramfs code for something that
+  essentially boils down to a glorified argument parser and a call to
+  memremap() in this case.  And if someone still wants to use cramfs via
+  MTD then it is already possible with mtdblock.
+
+Why not using DAX?
+
+  DAX stands for "Direct Access" and is a generic kernel layer helping
+  with the necessary tasks involved with XIP. It is tailored for large
+  writable filesystems and relies on the presence of an MMU. It also has
+  the following shortcoming: "The DAX code does not work correctly on
+  architectures which have virtually mapped caches such as ARM, MIPS and
+  SPARC." That makes it unsuitable for a large portion of the intended
+  targets for this series. And due to the read-only nature of cramfs, it is
+  possible to achieve the intended result with a much simpler approach making
+  DAX somewhat overkill in this context.
+
+The maximum size of a cramfs image can't exceed 272MB. In practice it is
+likely to be much much less. Given this series is concerned with small
+memory systems, even in the MMU case there is always plenty of vmalloc
+space left to map it all and even a 272MB memremap() wouldn't be a
+problem. If it is then maybe your system is big enough with large
+resources to manage already and you're pretty unlikely to be using cramfs
+in the first place.
+
+Of course, while this cramfs remains backward compatible with existing
+filesystem images, a newer mkcramfs version is necessary to take advantage
+of the extended data layout. I created a version of mkcramfs that
+detects ELF files and marks text+rodata segments for XIP and compresses the
+rest of those ELF files automatically.
+
+So here it is. I'm also willing to step up as cramfs maintainer given
+that no sign of any maintenance activities appeared for years.
 
 
-Would you be interested in a tool, which identifies patches that could
-be imported with a minimal or rather no testing?
-E.g. Security patches, you can import security patches as they usually
-do not affect the functionality.
+Changes from v3:
 
-This tool would use only old source file and the new source file!! No
-commit messages, no build setup, nothing!!
-Something like: git saferebase?
+- Rebased on v4.13.
+- Made direct access depend on cramfs not being modular due to unexported
+  vma handling functions.
+- Solicit comments from mm people explicitly.
 
-We actually used the tool on the Linux Main Line repository and it did
-identify several (60%) patches which are safe to port or do not affect
-the functionality.
+Changes from v2:
+
+- Plugged a few races in cramfs_vmasplit_fault(). Thanks to Al Viro for
+  highlighting them.
+- Fixed some checkpatch warnings
+
+Changes from v1:
+
+- Improved mmap() support by adding the ability to partially populate a
+  mapping and lazily split the non directly mapable pages to a separate
+  vma at fault time (thanks to Chris Brandt for testing).
+- Clarified the documentation some more.
 
 
-This tool could be used to import patches from the main source branch
-to your branch without worrying about testing them.
+diffstat:
 
-You can also use this tool as a patch monitor, which monitors all
-commits to a repository and inform you about patches that do not
-affect the functionality or otherwise safe patches.
+ Documentation/filesystems/cramfs.txt |  42 ++
+ MAINTAINERS                          |   4 +-
+ fs/cramfs/Kconfig                    |  38 +-
+ fs/cramfs/README                     |  31 +-
+ fs/cramfs/inode.c                    | 646 ++++++++++++++++++++++++++---
+ include/uapi/linux/cramfs_fs.h       |  20 +-
+ init/do_mounts.c                     |   8 +
+ 7 files changed, 712 insertions(+), 77 deletions(-)
 
-Note that: This tool is supposed to *help* an expert not to *replace*  one.
-
-Thank You,
-Aravind
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
