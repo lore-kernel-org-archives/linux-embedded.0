@@ -1,96 +1,69 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v5 4/5] cramfs: add mmap support
-Date: Fri, 6 Oct 2017 00:00:38 -0700
-Message-ID: <20171006070038.GA29142@infradead.org>
+From: Chris Brandt <Chris.Brandt@renesas.com>
+Subject: RE: [PATCH v5 0/5] cramfs refresh for embedded usage
+Date: Fri, 6 Oct 2017 16:07:45 +0000
+Message-ID: <SG2PR06MB11655E68C2F2BE55261F51238A710@SG2PR06MB1165.apcprd06.prod.outlook.com>
 References: <20171006024531.8885-1-nicolas.pitre@linaro.org>
- <20171006024531.8885-5-nicolas.pitre@linaro.org>
+ <20171006063919.GA16556@infradead.org>
 Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <owner-linux-mm@kvack.org>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-	Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-	List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-	 bh=uesLHuOQ6Z4kM4mZpNDjyOZZc3c1cINQ9tzhxVcel0s=; b=bhiK1h/mAqEsP2/SIvMYbgV8A
-	ER/O0SC1yr0xjf82MXKi6t9MP93LJaJS9WL9wrrCVy08dTMkbJtZBiUZQGlHiJHmGoMBabDT2muoU
-	UVdjmoEEzjUZWBCMf3Eqd6QaWEC0gic5vSn/owqWOVBwCjP2ulid42xyARnd4rN8ZzTFvLZw67BkU
-	QtMaV+V77fA0c9xDf/cfm14xX4SKzCgymHUm5yemXq/GsZQsVVfgFHfLdB62stl6Q3kTUHzoPotp6
-	t4mpSZMizcZvNDHr5jN4hZ82QwOG6S8lhDTBYZz7UoZKTAOPeASaRiPWFztVTDQVg/D1cbqKBMsVb
-	V/ciRU2og==;
-Content-Disposition: inline
-In-Reply-To: <20171006024531.8885-5-nicolas.pitre@linaro.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=renesasgroup.onmicrosoft.com; s=selector1-renesas-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version;
+ bh=K1Fzr2Oe/9MFdP/hc9xsqsjEL6U8hT4zg1hmzUD4Qbg=;
+ b=U/vHhTOtGEv96opNvq2sgklYj/IPuxwPAhrCnL0HyOqsrlHyR8LiaFXLYcpnjnXfIDyJiKEUx/UEayyouWTpciLl6F3xCxl3jfH/Ruhwtp5cHQMSrCG769Nezpv/GhmeTbzAqXDM8USoZnHtm30c/5M5+G4nZx/c848uMoDcDPU=
+In-Reply-To: <20171006063919.GA16556@infradead.org>
+Content-Language: en-US
 Sender: owner-linux-mm@kvack.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Brandt <Chris.Brandt@renesas.com>
+To: Christoph Hellwig <hch@infradead.org>, Nicolas Pitre <nicolas.pitre@linaro.org>
+Cc: Alexander Viro <viro@zeniv.linux.org.uk>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-> +	/* Don't map the last page if it contains some other data */
-> +	if (unlikely(pgoff + pages == max_pages)) {
-> +		unsigned int partial = offset_in_page(inode->i_size);
-> +		if (partial) {
-> +			char *data = sbi->linear_virt_addr + offset;
-> +			data += (max_pages - 1) * PAGE_SIZE + partial;
-> +			if (memchr_inv(data, 0, PAGE_SIZE - partial) != NULL) {
-> +				pr_debug("mmap: %s: last page is shared\n",
-> +					 file_dentry(file)->d_name.name);
-> +				pages--;
-> +			}
-> +		}
-> +	}
+On Friday, October 06, 2017, Christoph Hellwig wrote:
+> This is still missing a proper API for accessing the file system,
+> as said before specifying a physical address in the mount command
+> line is a an absolute non-no.
+>=20
+> Either work with the mtd folks to get the mtd core down to an absolute
+> minimum suitable for you, or figure out a way to specify fs nodes
+> through DT or similar.
 
-Why is pgoff + pages == max_pages marked unlikely?  Mapping the whole
-file seems like a perfectly normal and likely case to me..
+On my system, the QSPI Flash is memory mapped and set up by the boot=20
+loader. In order to test the upstream kernel, I use a squashfs image and=20
+mtd-rom.
 
-Also if this was my code I'd really prefer to move this into a helper:
+So, 0x18000000 is the physical address of flash as it is seen by the=20
+CPU.
 
-static bool cramfs_mmap_last_page_is_shared(struct inode *inode, int offset)
-{
-	unsigned int partial = offset_in_page(inode->i_size);
-	char *data = CRAMFS_SB(inode->i_sb)->linear_virt_addr + offset +
-			(inode->i_size & PAGE_MASK);
+Is there any benefit to doing something similar to this?
 
-	return memchr_inv(data + partial, 0, PAGE_SIZE - partial);
-}
+	/* File System */
+	/* Requires CONFIG_MTD_ROM=3Dy */
+	qspi@18000000 {
+		compatible =3D "mtd-rom";
+		probe-type =3D "map_rom";
+		reg =3D <0x18000000 0x4000000>;	/* 64 MB*/
+		bank-width =3D <4>;
+		device-width =3D <1>;
 
-	if (pgoff + pages == max_pages && offset_in_page(inode->i_size)	&&
-	    cramfs_mmap_last_page_is_shared(inode, offset))
-		pages--;
+		#address-cells =3D <1>;
+		#size-cells =3D <1>;
 
-as that's much more readable and the function name provides a good
-documentation of what is going on.
-
-> +	if (pages != vma_pages(vma)) {
-
-here is how I would turn this around:
-
-	if (!pages)
-		goto done;
-
-	if (pages == vma_pages(vma)) {
-		remap_pfn_range();
-		goto done;
-	}
-
-	...
-	for (i = 0; i < pages; i++) {
-		...
-		vm_insert_mixed();
-		nr_mapped++;
-	}
+		partition@800000 {
+			label =3D"user";
+			reg =3D <0x0800000 0x800000>; /* 8MB @ 0x18800000 */
+			read-only;
+		};
+	};
 
 
-done:
-	pr_debug("mapped %d out ouf %d\n", ..);
-	if (pages != vma_pages(vma))
-		vma->vm_ops = &generic_file_vm_ops;
-	return 0;
-}
+Of course this basically ioremaps the entire space on probe, but I think
+what you really want to do is just ioremap pages at a time (maybe..I=20
+might not be following your code correctly)
 
-In fact we probably could just set the vm_ops unconditionally, they
-just wouldn't be called, but that might be more confusing then helpful.
+
+Chris
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
