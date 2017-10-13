@@ -1,33 +1,61 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v6 3/4] cramfs: add mmap support
-Date: Fri, 13 Oct 2017 00:31:01 -0700
-Message-ID: <20171013073101.GJ9105@infradead.org>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: [PATCH v6 1/4] cramfs: direct memory access support
+Date: Fri, 13 Oct 2017 18:29:34 +0100
+Message-ID: <20171013172934.GG21978@ZenIV.linux.org.uk>
 References: <20171012061613.28705-1-nicolas.pitre@linaro.org>
- <20171012061613.28705-4-nicolas.pitre@linaro.org>
+ <20171012061613.28705-2-nicolas.pitre@linaro.org>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=JXg4sYdBmGPmsAkjNmGWx/z7BfxDXp3jrHsf74SdvaE=; b=gmz7Te/Mf02Y+yLEdYooJODl+
-        h51hB1KHrGVeB3WUGZS5t+oO+sjPlwZl3I0OuuXmFrEWhDeSeBqCSxY+cqLSARVGtjRf35yqvZOUV
-        oWpFgLxPKIe+ThqK6MNTwOXVw/6xb9qVj9TVdTnvqArfkBeOjQBnCkyKmkEwsnligegw1QcoTi3WP
-        oMrEagQcFhmhCD9YpAjw4tu5bi/Vb7svc3sI6agT19Ei/NyANC9L0aK0MH/SHr3s2fYTwnEr+dHTL
-        S6XQH8lOnySJaDv5rsuBeHv33G+cACpXkN1vO4W9seauKMgbVMe/CLhwvZ6Ecq52fZxMOaT/dafPW
-    
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20171012061613.28705-4-nicolas.pitre@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <20171012061613.28705-2-nicolas.pitre@linaro.org>
+Sender: owner-linux-mm@kvack.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: Alexander Viro <viro@zeniv.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Brandt <Chris.Brandt@renesas.com>
+Cc: Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Brandt <Chris.Brandt@renesas.com>
 
-As said before I'm no big fan of all the debug chatter, but the rest
-looks fine, so:
+On Thu, Oct 12, 2017 at 02:16:10AM -0400, Nicolas Pitre wrote:
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+>  static void cramfs_kill_sb(struct super_block *sb)
+>  {
+>  	struct cramfs_sb_info *sbi = CRAMFS_SB(sb);
+>  
+> -	kill_block_super(sb);
+> +	if (IS_ENABLED(CCONFIG_CRAMFS_MTD)) {
+> +		if (sbi->mtd_point_size)
+> +			mtd_unpoint(sb->s_mtd, 0, sbi->mtd_point_size);
+> +		if (sb->s_mtd)
+> +			kill_mtd_super(sb);
+
+...
+
+> +	mtd_unpoint(sb->s_mtd, 0, PAGE_SIZE);
+> +	err = mtd_point(sb->s_mtd, 0, sbi->size, &sbi->mtd_point_size,
+> +			&sbi->linear_virt_addr, &sbi->linear_phys_addr);
+> +	if (err || sbi->mtd_point_size != sbi->size) {
+
+What happens if that mtd_point() fails?  Note that ->kill_sb() will be
+called anyway and ->mtd_point_size is going to be non-zero here...  Do
+we get the second mtd_unpoint(), or am I misreading that code?
+
+This logics does look fishy, but I'm not familiar enough with mtd guts
+to tell if that's OK...
+
+Rules regarding ->kill_sb(): any struct super_block instance that
+got out of sget() and its ilk will have ->kill_sb() called.  In case of
+mtd, it's simply "if that thing got past setting ->s_mtd, it will be
+passed to ->kill_sb()".
+
+Note, BTW, that you *must* have generic_shutdown_super() called once on
+every reachable path in ->kill_sb().  AFAICS your patch is correct in
+that area (all instances with that ->s_type are created either in
+mount_bdev() or in mount_mtd(); the former will have non-NULL ->s_bdev,
+the latter - non-NULL ->s_mtd), but that's one thing to watch out when
+doing any modifications.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
