@@ -1,100 +1,74 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
 Subject: Re: [PATCH v6 1/4] cramfs: direct memory access support
-Date: Sat, 14 Oct 2017 01:31:51 +0100
-Message-ID: <20171014003151.GK21978@ZenIV.linux.org.uk>
-References: <20171012061613.28705-1-nicolas.pitre@linaro.org>
- <20171012061613.28705-2-nicolas.pitre@linaro.org>
- <20171013172934.GG21978@ZenIV.linux.org.uk>
- <nycvar.YSQ.7.76.1710131332360.1718@knanqh.ubzr>
- <20171013175208.GI21978@ZenIV.linux.org.uk>
- <nycvar.YSQ.7.76.1710131532291.1750@knanqh.ubzr>
+Date: Fri, 13 Oct 2017 22:25:18 -0400 (EDT)
+Message-ID: <nycvar.YSQ.7.76.1710132204420.1750@knanqh.ubzr>
+References: <20171012061613.28705-1-nicolas.pitre@linaro.org> <20171012061613.28705-2-nicolas.pitre@linaro.org> <20171013172934.GG21978@ZenIV.linux.org.uk> <nycvar.YSQ.7.76.1710131332360.1718@knanqh.ubzr> <20171013175208.GI21978@ZenIV.linux.org.uk>
+ <nycvar.YSQ.7.76.1710131532291.1750@knanqh.ubzr> <20171014003151.GK21978@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <nycvar.YSQ.7.76.1710131532291.1750@knanqh.ubzr>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <owner-linux-mm@kvack.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:in-reply-to:message-id:references
+         :user-agent:mime-version;
+        bh=HxAki9xSi7pAizrcb5e4a6M+7Vtjzo9wG7KZwJIUnlw=;
+        b=TbSUFjvl8MeXx+nj0mOFpmFSW0xmb+dr8Z2Hsljhrdl1ATamAa45z/Eeq9cJLH4ZUO
+         wFy/GTKPX2rN4clDoCehr9OW9FM/SjgbG06mIVflCaxJg9yARjPzpasHAX3yBwfWBVmK
+         7TF914rkIaNVWQZtWuMCfeXIqrs+iBR5hrRQI=
+In-Reply-To: <20171014003151.GK21978@ZenIV.linux.org.uk>
+Sender: owner-linux-mm@kvack.org
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
+To: Al Viro <viro@ZenIV.linux.org.uk>
 Cc: Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Brandt <Chris.Brandt@renesas.com>
 
-On Fri, Oct 13, 2017 at 04:09:23PM -0400, Nicolas Pitre wrote:
-> On Fri, 13 Oct 2017, Al Viro wrote:
+On Sat, 14 Oct 2017, Al Viro wrote:
+
+> On Fri, Oct 13, 2017 at 04:09:23PM -0400, Nicolas Pitre wrote:
+> > On Fri, 13 Oct 2017, Al Viro wrote:
+> > 
+> > > OK...  I wonder if it should simply define stubs for kill_mtd_super(),
+> > > mtd_unpoint() and kill_block_super() in !CONFIG_MTD and !CONFIG_BLOCK
+> > > cases.  mount_mtd() and mount_bdev() as well - e.g.  mount_bdev()
+> > > returning ERR_PTR(-ENODEV) and kill_block_super() being simply BUG()
+> > > in !CONFIG_BLOCK case.  Then cramfs_kill_sb() would be
+> > > 	if (sb->s_mtd) {
+> > > 		if (sbi->mtd_point_size)
+> > > 			mtd_unpoint(sb->s_mtd, 0, sbi->mtd_point_size);
+> > > 		kill_mtd_super(sb);
+> > > 	} else {
+> > > 		kill_block_super(sb);
+> > > 	}
+> > > 	kfree(sbi);
+> > 
+> > Well... Stubs have to be named differently or they conflict with 
+> > existing declarations. At that point that makes for more lines of code 
+> > compared to the current patch and the naming indirection makes it less 
+> > obvious when reading the code. Alternatively I could add those stubs in 
+> > the corresponding header files and #ifdef the existing declarations 
+> > away. That might look somewhat less cluttered in the main code but it 
+> > also hides what is actually going on and left me unconvinced. And I'm 
+> > not sure this is worth it in the end given this is not a common 
+> > occurrence in the kernel either.
 > 
-> > OK...  I wonder if it should simply define stubs for kill_mtd_super(),
-> > mtd_unpoint() and kill_block_super() in !CONFIG_MTD and !CONFIG_BLOCK
-> > cases.  mount_mtd() and mount_bdev() as well - e.g.  mount_bdev()
-> > returning ERR_PTR(-ENODEV) and kill_block_super() being simply BUG()
-> > in !CONFIG_BLOCK case.  Then cramfs_kill_sb() would be
-> > 	if (sb->s_mtd) {
-> > 		if (sbi->mtd_point_size)
-> > 			mtd_unpoint(sb->s_mtd, 0, sbi->mtd_point_size);
-> > 		kill_mtd_super(sb);
-> > 	} else {
-> > 		kill_block_super(sb);
-> > 	}
-> > 	kfree(sbi);
+> What I mean is this (completely untested) for CONFIG_BLOCK side of things,
+> with something similar for CONFIG_MTD one:
 > 
-> Well... Stubs have to be named differently or they conflict with 
-> existing declarations. At that point that makes for more lines of code 
-> compared to the current patch and the naming indirection makes it less 
-> obvious when reading the code. Alternatively I could add those stubs in 
-> the corresponding header files and #ifdef the existing declarations 
-> away. That might look somewhat less cluttered in the main code but it 
-> also hides what is actually going on and left me unconvinced. And I'm 
-> not sure this is worth it in the end given this is not a common 
-> occurrence in the kernel either.
+> Provide definitions of mount_bdev/kill_block_super() in case !CONFIG_BLOCK
 
-What I mean is this (completely untested) for CONFIG_BLOCK side of things,
-with something similar for CONFIG_MTD one:
+Yes, that's what I thought you meant, which corresponds to the second 
+part of my comment above. And as I said I'm not convinced this hiding of 
+kernel config effects is better for understanding what is actually going 
+on locally, and my own preference is how things are right now.
 
-Provide definitions of mount_bdev/kill_block_super() in case !CONFIG_BLOCK
+But if you confirm you really want things that other way then I'll 
+oblige and repost.
 
-mount_bdev() and kill_block_super() are defined only when CONFIG_BLOCK is
-defined; however, their declarations in fs.h are unconditional.  We could
-make these conditional upon CONFIG_BLOCK as well, but it's easy to provide
-inline definitions for !CONFIG_BLOCK case - mount_bdev() should fail with
-ENODEV, while kill_block_super() can be simply BUG(); there should be no
-superblock instances with non-NULL ->s_bdev on such configs.
 
-Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
----
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index 339e73742e73..e773c1c51aad 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -2094,9 +2094,18 @@ struct file_system_type {
- extern struct dentry *mount_ns(struct file_system_type *fs_type,
- 	int flags, void *data, void *ns, struct user_namespace *user_ns,
- 	int (*fill_super)(struct super_block *, void *, int));
-+#ifdef CONFIG_BLOCK
- extern struct dentry *mount_bdev(struct file_system_type *fs_type,
- 	int flags, const char *dev_name, void *data,
- 	int (*fill_super)(struct super_block *, void *, int));
-+#else
-+static inline struct dentry *mount_bdev(struct file_system_type *fs_type,
-+	int flags, const char *dev_name, void *data,
-+	int (*fill_super)(struct super_block *, void *, int))
-+{
-+	return ERR_PTR(-ENODEV);
-+}
-+#endif
- extern struct dentry *mount_single(struct file_system_type *fs_type,
- 	int flags, void *data,
- 	int (*fill_super)(struct super_block *, void *, int));
-@@ -2105,7 +2114,14 @@ extern struct dentry *mount_nodev(struct file_system_type *fs_type,
- 	int (*fill_super)(struct super_block *, void *, int));
- extern struct dentry *mount_subtree(struct vfsmount *mnt, const char *path);
- void generic_shutdown_super(struct super_block *sb);
-+#ifdef CONFIG_BLOCK
- void kill_block_super(struct super_block *sb);
-+#else
-+static inline void kill_block_super(struct super_block *sb)
-+{
-+	BUG();
-+}
-+#endif
- void kill_anon_super(struct super_block *sb);
- void kill_litter_super(struct super_block *sb);
- void deactivate_super(struct super_block *sb);
+Nicolas
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
