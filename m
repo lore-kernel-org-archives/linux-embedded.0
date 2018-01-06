@@ -1,60 +1,252 @@
-From: Jonathan Haws <jhaws@sdl.usu.edu>
-Subject: Re: POSIX Message Queue Priority Scheduling
-Date: Tue, 14 Nov 2017 23:29:05 +0000
-Message-ID: <1510702145.3005.41.camel@sdl.usu.edu>
-References: <1509463943.9813.2.camel@sdl.usu.edu>
-         <CAJUC52E3gsjSzdkvJD+gL8WSp93ZtabhShX_BHBZJRLDYWZbAg@mail.gmail.com>
-         <1510281273.2403.6.camel@sdl.usu.edu>
-         <5C01B066-EEC2-4D24-B9E6-D6E6AF8BF212@gmail.com>
-         <1510281787.2403.14.camel@sdl.usu.edu>
-         <E100FFF7-7D54-4296-83CF-0950BEE222DB@gmail.com>
-         <1510283635.2403.18.camel@sdl.usu.edu>
-         <CAJUC52HYx1pWt9iHFN6Lc0-SB6wA2zBxX9nQYxzPh+R7tqdVgw@mail.gmail.com>
-         <1510340694.15160.7.camel@sdl.usu.edu>
-Reply-To: Jonathan Haws <jhaws@sdl.usu.edu>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-embedded-owner@vger.kernel.org>
-In-Reply-To: <1510340694.15160.7.camel@sdl.usu.edu>
-Content-Language: en-US
-Content-ID: <F25B6DE1C7E691448D25E452B07F9001@sdl.usu.edu>
-Sender: linux-embedded-owner@vger.kernel.org
+From: Martin Kelly <martin@martingkelly.com>
+Subject: [PATCH] tools: fix cross-compile var export
+Date: Sat,  6 Jan 2018 12:16:01 -0800
+Message-ID: <20180106201601.11074-1-martin@martingkelly.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=martingkelly-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id;
+        bh=U+EWyVBKfve64i/xzhaBgzQEO68K2qlNhBNSumnbqCU=;
+        b=hBsUmpuLJEpDCMP1peKksNtkY+r5OD71S1S4hQkU/KKSWTrHzRfk5kcwtWuEmyQrwK
+         mlHCIBVLt6g6RoWsWHynXcY/0/tmqggallNbX7bHl0MSgXxiul3xkml2KsOGTac+aFte
+         +zcYcoNumJKIlyA8yh20fIfKg29J0h5W1qHwCsD9ADoJVE4cPlm0cqOaWRpRPkVJj4Yp
+         owio52G9c1rRWRV+XYDkaMKTcDQavmlRe2WrrAMcaborJBi96ajBxOuA3ScaaIXHFIg0
+         7o3aVNTIBQYg6KagNJfmmLGr10CgIGTidc99nsW8ax7WM3KurjeIGhpOYnXa6LIabblK
+         GqdQ==
+Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-To: "kevin.dankwardt@gmail.com" <kevin.dankwardt@gmail.com>
-Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: kernel-kbuild@vger.kernel.org, kernel-janitors@vger.kernel.org, linux-embedded@vger.kernel.org
+Cc: Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, Matt Mackall <mpm@selenic.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, linux-kernel@vger.kernel.org, Martin Kelly <martin@martingkelly.com>
 
-DQo+IFllYWggLSBJIHdhcyBsb29raW5nIGF0IHRoYXQgY29kZSBhbmQgd2FzIGhhdmluZyBhIGhh
-cmQgdGltZQ0KPiBmb2xsb3dpbmcNCj4gaXQuIMKgSXQgYXBwZWFycyB0byBtZSB0aGF0IGlmIHRo
-ZSBxdWV1ZSBpcyBmdWxsLCBpdCBnb2VzIGludG8gdGhpcw0KPiB3cV9zbGVlcCgpLCBidXQgdGhl
-biBuZXZlciBjb21lcyBiYWNrIHRvIHBvc3QgLSBob3dldmVyIGl0IGhhcyB0bw0KPiBjb21lDQo+
-IGJhY2sgYXQgc29tZSBwb2ludCB3aGVuIGl0IHdha2VzLiDCoFRoZSB3cV9zbGVlcCgpIGZ1bmN0
-aW9uIGNhbGxzDQo+IHdxX2FkZA0KPiB3aGljaCBhcHBlYXJzIHRvIGFkZCBpbiBwcmlvcml0eSBv
-cmRlciwgaG93ZXZlciBpdCB1c2VzIHN0YXRpY19wcmlvDQo+IG9mDQo+IHRoZSB0YXNrX3N0cnVj
-dC4NCj4gDQo+IExvb2tpbmcgYXQgdGFza19zdHJ1Y3QsIHRoZXJlIGFyZSBmb3VyIHByaW9yaXRp
-ZXMgZGVmaW5lZCAtLQ0KPiANCj4gCWludCBwcmlvLCBzdGF0aWNfcHJpbywgbm9ybWFsX3ByaW87
-DQo+IAl1bnNpZ25lZCBpbnQgcnRfcHJpb3JpdHk7DQo+IA0KPiBXaGF0IEknZCBsaWtlIHRvIGtu
-b3cgaXMgdGhlIGRldGFpbHMgb2Ygd2hhdCBlYWNoIG9mIHRob3NlIG1lYW4uIMKgSXQNCj4gc2Vl
-bXMgdGhhdCBpZiB0aGUgc3RhdGljX3ByaW8gb2YgZWFjaCB0aHJlYWQgaXMgdGhlIHNhbWUsIGV2
-ZW4gaWYgdGhlDQo+IHJ0X3ByaW9yaXR5IGlzIGRpZmZlcmVudCwgdGhleSB3b3VsZCB3YWtlIGlu
-IEZJRk8gb3JkZXIgKHNpbmNlIGFsbA0KPiBzdGF0aWNfcHJpb3MgYXJlIGVxdWFsKS4gwqBTb21l
-IHNlYXJjaGluZyBkb2Vzbid0IHF1aXRlIGFuc3dlciB0aGUNCj4gcXVlc3Rpb24gZnVsbHkuIMKg
-RG9lcyB0aGUgbWVzc2FnZSBxdWV1ZSBpbXBsZW1lbnRhdGlvbiBpZ25vcmUgdGhlDQo+IGZhY3QN
-Cj4gdGhhdCBzb21lIHRocmVhZHMgYXJlIFJUIHRocmVhZHM/IMKgSXQgc3VyZSBzZWVtcyB0by4u
-Lg0KDQpEaWQgYSBsb3QgbW9yZSBkaWdnaW5nIGFuZCBmb3VuZCB0aGUgZm9sbG93aW5nLCB3aGlj
-aCBJJ2xsIHBvc3QgaGVyZQ0KZm9yIHJlZmVyZW5jZS4NCg0KcHJpbyAtIGhvbGRzIHRoZSBhY3R1
-YWwgcHJpb3JpdHkgaW4gdXNlIChhZnRlciBwcmlvcml0eSBib29zdGluZy9SVA0KY29uc2lkZXJh
-dGlvbnMvZXRjLikgb2YgdGhlIHByb2Nlc3Mgb3IgdGhyZWFkDQoNCnN0YXRpY19wcmlvIC0gaG9s
-ZHMgdGhlIHN0YXRpYyBwcmlvcml0eSAoYmFzZWQgb24gbmljZW5lc3MpIG9mIHRoZQ0KcHJvY2Vz
-cyBvciB0aHJlYWQNCg0Kbm9ybWFsX3ByaW8gLSBob2xkcyB0aGUgZHluYW1pYyBwcmlvcml0eSBv
-ZiB0aGUgcHJvY2VzcyBvciB0aHJlYWQuIMKgSW4NCnRoZSB0ZXN0aW5nIEkgZGlkIHRoaXMgYWx3
-YXlzIGVxdWFsZWQgcHJpbywgYnV0IHRoaXMgaXNuJ3QgbmVjZXNzYXJpbHkNCmFsd2F5cyB0aGUg
-Y2FzZQ0KDQpydF9wcmlvcml0eSAtIGhvbGRzIHRoZSB1c2VyLXNwZWNpZmllZCBSVCBwcmlvcml0
-eSBvZiB0aGUgdGhyZWFkIGFuZA0KcGxheXMgaW50byB0aGUgcHJpbyB2YWx1ZSBpZiB1c2luZyBh
-IFJUIHNjaGVkdWxlciAoc3VjaCBhcyBTQ0hFRF9GSUZPDQpvciBTQ0hFRF9SUikuDQoNCg0KSSBt
-YWRlIGEgc2ltcGxlIGNoYW5nZSB0byB0aGUgaXBjL21xdWV1ZS5jOndxX2FkZCgpIHJvdXRpbmUu
-IMKgSSBjaGFuZ2VkDQpzdGF0aWNfcHJpbyB0byBwcmlvIGluIHRoZSBpZiBzdGF0ZW1lbnQgY29t
-cGFyaW5nIHByaW9yaXRpZXMuIMKgVGhpcyB3YXMNCmFsbCBpdCB0b29rLg0KDQpJJ20gd29ya2lu
-ZyBvbiBnZXR0aW5nIHRoYXQgY2hhbmdlIGludG8gbWFpbmxpbmUsIGJ1dCBob3BlZnVsbHkgdGhp
-cw0KdGhyZWFkIG9uIHRoaXMgbGlzdCB3aWxsIGJlIG9mIGhlbHAgdG8gc29tZW9uZSBlbHNlLg0K
-DQpUaGFua3MgYWxsIQ==
+From: Martin Kelly <martin@martingkelly.com>
+
+Currently in a number of Makefiles, we clobber the CC, LD, and/or STRIP env vars
+when cross-compiling, which breaks any additional flags that might be set (such
+as sysroot). This easily shows up by using, for instance, a Yocto SDK.
+
+Fix this by more carefully overriding the flags in the way that the perf
+Makefile does.
+
+This patch does not fix cross-compile for all the tools (some have other bugs),
+but it does appear to fix it for these:
+
+- cgroup
+- freefall
+- gpio
+- hv
+- iio
+- leds
+- spi
+- vm
+- wmi
+
+Signed-off-by: Martin Kelly <martin@martingkelly.com>
+---
+This patch touches multiple subsystems, and there doesn't appear to be a global
+tools maintainer, so I sent this to linux-embedded kernel-janitors, and
+linux-kbuild. Please let me know if there is a better place for it.
+
+ tools/cgroup/Makefile            |  1 -
+ tools/gpio/Makefile              |  2 --
+ tools/hv/Makefile                |  1 -
+ tools/iio/Makefile               |  2 --
+ tools/laptop/freefall/Makefile   |  1 -
+ tools/leds/Makefile              |  1 -
+ tools/perf/Makefile.perf         |  6 ------
+ tools/power/acpi/Makefile.config |  3 ---
+ tools/scripts/Makefile.include   | 18 ++++++++++++++++++
+ tools/spi/Makefile               |  2 --
+ tools/usb/Makefile               |  1 -
+ tools/vm/Makefile                |  1 -
+ tools/wmi/Makefile               |  1 -
+ 13 files changed, 18 insertions(+), 22 deletions(-)
+
+diff --git a/tools/cgroup/Makefile b/tools/cgroup/Makefile
+index 860fa151640a..ffca068e4a76 100644
+--- a/tools/cgroup/Makefile
++++ b/tools/cgroup/Makefile
+@@ -1,7 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Makefile for cgroup tools
+ 
+-CC = $(CROSS_COMPILE)gcc
+ CFLAGS = -Wall -Wextra
+ 
+ all: cgroup_event_listener
+diff --git a/tools/gpio/Makefile b/tools/gpio/Makefile
+index 805a2c0cf4cd..240eda014b37 100644
+--- a/tools/gpio/Makefile
++++ b/tools/gpio/Makefile
+@@ -12,8 +12,6 @@ endif
+ # (this improves performance and avoids hard-to-debug behaviour);
+ MAKEFLAGS += -r
+ 
+-CC = $(CROSS_COMPILE)gcc
+-LD = $(CROSS_COMPILE)ld
+ CFLAGS += -O2 -Wall -g -D_GNU_SOURCE -I$(OUTPUT)include
+ 
+ ALL_TARGETS := lsgpio gpio-hammer gpio-event-mon
+diff --git a/tools/hv/Makefile b/tools/hv/Makefile
+index 31503819454d..68c2d7b059b3 100644
+--- a/tools/hv/Makefile
++++ b/tools/hv/Makefile
+@@ -1,7 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Makefile for Hyper-V tools
+ 
+-CC = $(CROSS_COMPILE)gcc
+ WARNINGS = -Wall -Wextra
+ CFLAGS = $(WARNINGS) -g $(shell getconf LFS_CFLAGS)
+ 
+diff --git a/tools/iio/Makefile b/tools/iio/Makefile
+index a08e7a47d6a3..332ed2f6c2c2 100644
+--- a/tools/iio/Makefile
++++ b/tools/iio/Makefile
+@@ -12,8 +12,6 @@ endif
+ # (this improves performance and avoids hard-to-debug behaviour);
+ MAKEFLAGS += -r
+ 
+-CC = $(CROSS_COMPILE)gcc
+-LD = $(CROSS_COMPILE)ld
+ CFLAGS += -O2 -Wall -g -D_GNU_SOURCE -I$(OUTPUT)include
+ 
+ ALL_TARGETS := iio_event_monitor lsiio iio_generic_buffer
+diff --git a/tools/laptop/freefall/Makefile b/tools/laptop/freefall/Makefile
+index 5f758c489a20..b572d94255f6 100644
+--- a/tools/laptop/freefall/Makefile
++++ b/tools/laptop/freefall/Makefile
+@@ -2,7 +2,6 @@
+ PREFIX ?= /usr
+ SBINDIR ?= sbin
+ INSTALL ?= install
+-CC = $(CROSS_COMPILE)gcc
+ 
+ TARGET = freefall
+ 
+diff --git a/tools/leds/Makefile b/tools/leds/Makefile
+index c379af003807..7b6bed13daaa 100644
+--- a/tools/leds/Makefile
++++ b/tools/leds/Makefile
+@@ -1,7 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Makefile for LEDs tools
+ 
+-CC = $(CROSS_COMPILE)gcc
+ CFLAGS = -Wall -Wextra -g -I../../include/uapi
+ 
+ all: uledmon led_hw_brightness_mon
+diff --git a/tools/perf/Makefile.perf b/tools/perf/Makefile.perf
+index 68cf1360a3f3..3035ce5f6b36 100644
+--- a/tools/perf/Makefile.perf
++++ b/tools/perf/Makefile.perf
+@@ -144,12 +144,6 @@ define allow-override
+     $(eval $(1) = $(2)))
+ endef
+ 
+-# Allow setting CC and AR and LD, or setting CROSS_COMPILE as a prefix.
+-$(call allow-override,CC,$(CROSS_COMPILE)gcc)
+-$(call allow-override,AR,$(CROSS_COMPILE)ar)
+-$(call allow-override,LD,$(CROSS_COMPILE)ld)
+-$(call allow-override,CXX,$(CROSS_COMPILE)g++)
+-
+ LD += $(EXTRA_LDFLAGS)
+ 
+ HOSTCC  ?= gcc
+diff --git a/tools/power/acpi/Makefile.config b/tools/power/acpi/Makefile.config
+index a1883bbb0144..2cccbba64418 100644
+--- a/tools/power/acpi/Makefile.config
++++ b/tools/power/acpi/Makefile.config
+@@ -56,9 +56,6 @@ INSTALL_SCRIPT = ${INSTALL_PROGRAM}
+ # to compile vs uClibc, that can be done here as well.
+ CROSS = #/usr/i386-linux-uclibc/usr/bin/i386-uclibc-
+ CROSS_COMPILE ?= $(CROSS)
+-CC = $(CROSS_COMPILE)gcc
+-LD = $(CROSS_COMPILE)gcc
+-STRIP = $(CROSS_COMPILE)strip
+ HOSTCC = gcc
+ 
+ # check if compiler option is supported
+diff --git a/tools/scripts/Makefile.include b/tools/scripts/Makefile.include
+index 3fab179b1aba..09b2d0f07f66 100644
+--- a/tools/scripts/Makefile.include
++++ b/tools/scripts/Makefile.include
+@@ -42,6 +42,24 @@ EXTRA_WARNINGS += -Wformat
+ 
+ CC_NO_CLANG := $(shell $(CC) -dM -E -x c /dev/null | grep -Fq "__clang__"; echo $$?)
+ 
++# Makefiles suck: This macro sets a default value of $(2) for the
++# variable named by $(1), unless the variable has been set by
++# environment or command line. This is necessary for CC and AR
++# because make sets default values, so the simpler ?= approach
++# won't work as expected.
++define allow-override
++  $(if $(or $(findstring environment,$(origin $(1))),\
++            $(findstring command line,$(origin $(1)))),,\
++    $(eval $(1) = $(2)))
++endef
++
++# Allow setting various cross-compile vars or setting CROSS_COMPILE as a prefix.
++$(call allow-override,CC,$(CROSS_COMPILE)gcc)
++$(call allow-override,AR,$(CROSS_COMPILE)ar)
++$(call allow-override,LD,$(CROSS_COMPILE)ld)
++$(call allow-override,CXX,$(CROSS_COMPILE)g++)
++$(call allow-override,CXX,$(CROSS_COMPILE)strip)
++
+ ifeq ($(CC_NO_CLANG), 1)
+ EXTRA_WARNINGS += -Wstrict-aliasing=3
+ endif
+diff --git a/tools/spi/Makefile b/tools/spi/Makefile
+index 90615e10c79a..815d15589177 100644
+--- a/tools/spi/Makefile
++++ b/tools/spi/Makefile
+@@ -11,8 +11,6 @@ endif
+ # (this improves performance and avoids hard-to-debug behaviour);
+ MAKEFLAGS += -r
+ 
+-CC = $(CROSS_COMPILE)gcc
+-LD = $(CROSS_COMPILE)ld
+ CFLAGS += -O2 -Wall -g -D_GNU_SOURCE -I$(OUTPUT)include
+ 
+ ALL_TARGETS := spidev_test spidev_fdx
+diff --git a/tools/usb/Makefile b/tools/usb/Makefile
+index 4e6506078494..01d758d73b6d 100644
+--- a/tools/usb/Makefile
++++ b/tools/usb/Makefile
+@@ -1,7 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Makefile for USB tools
+ 
+-CC = $(CROSS_COMPILE)gcc
+ PTHREAD_LIBS = -lpthread
+ WARNINGS = -Wall -Wextra
+ CFLAGS = $(WARNINGS) -g -I../include
+diff --git a/tools/vm/Makefile b/tools/vm/Makefile
+index be320b905ea7..20f6cf04377f 100644
+--- a/tools/vm/Makefile
++++ b/tools/vm/Makefile
+@@ -6,7 +6,6 @@ TARGETS=page-types slabinfo page_owner_sort
+ LIB_DIR = ../lib/api
+ LIBS = $(LIB_DIR)/libapi.a
+ 
+-CC = $(CROSS_COMPILE)gcc
+ CFLAGS = -Wall -Wextra -I../lib/
+ LDFLAGS = $(LIBS)
+ 
+diff --git a/tools/wmi/Makefile b/tools/wmi/Makefile
+index e664f1167388..e0e87239126b 100644
+--- a/tools/wmi/Makefile
++++ b/tools/wmi/Makefile
+@@ -2,7 +2,6 @@ PREFIX ?= /usr
+ SBINDIR ?= sbin
+ INSTALL ?= install
+ CFLAGS += -D__EXPORTED_HEADERS__ -I../../include/uapi -I../../include
+-CC = $(CROSS_COMPILE)gcc
+ 
+ TARGET = dell-smbios-example
+ 
+-- 
+2.11.0
+
