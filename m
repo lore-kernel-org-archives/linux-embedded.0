@@ -1,53 +1,46 @@
-From: Martin Kelly <martin@martingkelly.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
 Subject: Re: [PATCH] tools: fix cross-compile var export
-Date: Sun, 7 Jan 2018 13:43:32 -0800
-Message-ID: <737bf492-63bc-0f97-9811-b0c90b5f60c6@martingkelly.com>
+Date: Mon, 8 Jan 2018 14:45:53 +0300
+Message-ID: <20180108114553.37buovfs7qimokzq@mwanda>
 References: <20180106201601.11074-1-martin@martingkelly.com>
  <20180107161140.GM6273@windriver.com>
  <549cf839-9ae7-78ce-58df-3d84fc7b3d05@martingkelly.com>
- <20180107190453.GN6273@windriver.com>
+ <c021c0f9-4504-6323-98ed-455a196463fc@martingkelly.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=martingkelly-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=BVf/wRt5O9Clb577UZSklRGNffncAhejxDtBDQplspc=;
-        b=VqeaYmwufbG3PRw/lmSsXefaZnjlAEpISeDkwgsfse4jgcW8vJBgppI6qujuvx2bxx
-         L4QsQOMRvUH5VSmlI9iwrStISRmGcZbnUvAus0aXEfxRSw/ejt9xXClQnpZ7ofzzHa42
-         0Ewp6aGtXYSA5k2XR6HBfnqJfcROPUo/69IAXjQx9iuSqcdsjRPckHRr7OKd/TjnVl9+
-         eUJsrRiGltx3TFCx5wfU5MqAt5zifQDCXlPcHtu0tJAfD9xk3uIAZtUvm9CrXwObOOAO
-         UQppbEOFZog1OWE1pG85z3Qv6+LUmg0KdOnTL6mD+O3gpWPn9xWWRQRL0neL0M5kbR74
-         KiSQ==
-In-Reply-To: <20180107190453.GN6273@windriver.com>
-Content-Language: en-US
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2017-10-26;
+ bh=973ml5aY0R/V1b4BD7ZBaak/DiAeYOnAOMQZphWqe7E=;
+ b=Nv0koNETbK/m3wI46SEk8CIvyZpt9MZlB7CmxwbCnL/6dBSusPCD0utIwlA1ShcRGPa6
+ ebsU0v2SoUeEmK+yxn68CZl+3XC0dCna88F7Sr4sSdQrxa8Ux4gPyw5lH9OBrsnd1rYs
+ U9PPUck4qYX+rr+fNdv/I97Y6p+TTJ5XZJ0PAJqd9VcZjreHA0rEyEYiskJsACHiDjew
+ dd47vOuL0wvv0OIeJMq3rPRwhw522TzGoQBHVXMn5pR0SaOcUIVHjSZPdgK/llcPdPWN
+ quzwiRnknJNT/zdCkZhTIQmrQFYJ5ton829QWPibKjcWhvXKY8v35qy9OZclhEO2MUh+ 7w== 
+Content-Disposition: inline
+In-Reply-To: <c021c0f9-4504-6323-98ed-455a196463fc@martingkelly.com>
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"; format="flowed"
-To: Paul Gortmaker <paul.gortmaker@windriver.com>
-Cc: linux-kbuild@vger.kernel.org, kernel-janitors@vger.kernel.org, linux-embedded@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, Matt Mackall <mpm@selenic.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Martin Kelly <martin@martingkelly.com>
+Cc: Paul Gortmaker <paul.gortmaker@windriver.com>, linux-kbuild@vger.kernel.org, kernel-janitors@vger.kernel.org, linux-embedded@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, Matt Mackall <mpm@selenic.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, linux-kernel@vger.kernel.org
 
-On 01/07/2018 11:04 AM, Paul Gortmaker wrote:
-> [Re: [PATCH] tools: fix cross-compile var export] On 07/01/2018 (Sun 10:31) Martin Kelly wrote:
+On Sun, Jan 07, 2018 at 10:51:21AM -0800, Martin Kelly wrote:
+> Urg, I accidentally sent to kernel-kbuild instead of linux-kbuild, changed
+> now. It appears that past changes to tools/scripts/Makefile.include have
+> been handled by linux-kbuild and often Masahiro Yamada.
 > 
-> [...]
+> Perhaps the best sequence here is to send a patch to kbuild adding the
+> call-override function and calls to it to the main common Makefile. Then I
+> can send individual subsystem patches dropping the individual CC = lines and
+> similar. It will be 13 patches instead of 1 but will eventually result in
+> the same thing.
 > 
->> With the change, we add do CC = $(CROSS_COMPILE)gcc if and only if CC is not
->> already set. I'm happy to add all these details to the commit description.
+> Paul, any thoughts?
 > 
-> That is probably a step in the right direction.  I contribute to yocto
-> on a regular basis and hence am sympathetic to these frustrating SDK
-> type issues.  But after a quick scan of this patch it wasn't obvious to
-> me that existing behaviour was preserved, or that it would be a pain to
-> separate it into chunks. (key word here being "quick")
-> 
-> So I'd recommend updating the commit log, and adding a Cc: line for the
-> maintainers of each subsystem below, and then if nobody complains you
-> might get akpm to pick it up as he does for other patches w/o a clear
-> maintainer or subsystem.
-> 
-> P
 
-Thanks, I have done so. I also contribute to Yocto and indeed, SDK 
-issues are all-to-common.
+That sounds good.
+
+regards,
+dan carpenter
