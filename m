@@ -1,46 +1,154 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH] tools: fix cross-compile var export
-Date: Mon, 8 Jan 2018 14:45:53 +0300
-Message-ID: <20180108114553.37buovfs7qimokzq@mwanda>
-References: <20180106201601.11074-1-martin@martingkelly.com>
- <20180107161140.GM6273@windriver.com>
- <549cf839-9ae7-78ce-58df-3d84fc7b3d05@martingkelly.com>
- <c021c0f9-4504-6323-98ed-455a196463fc@martingkelly.com>
+From: Phillip Lougher <phillip.lougher@gmail.com>
+Subject: Bug#921146: Program mksquashfs from squashfs-tools 1:4.3-11 does not
+ make use all CPU cores
+Date: Thu, 1 Aug 2019 16:23:33 +0100
+Message-ID: <CAB3wodfF=Gc3FbKedU4JBWi8hZLxcBPUtVPipsCVnaHdFXGk8Q@mail.gmail.com>
 Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2017-10-26;
- bh=973ml5aY0R/V1b4BD7ZBaak/DiAeYOnAOMQZphWqe7E=;
- b=Nv0koNETbK/m3wI46SEk8CIvyZpt9MZlB7CmxwbCnL/6dBSusPCD0utIwlA1ShcRGPa6
- ebsU0v2SoUeEmK+yxn68CZl+3XC0dCna88F7Sr4sSdQrxa8Ux4gPyw5lH9OBrsnd1rYs
- U9PPUck4qYX+rr+fNdv/I97Y6p+TTJ5XZJ0PAJqd9VcZjreHA0rEyEYiskJsACHiDjew
- dd47vOuL0wvv0OIeJMq3rPRwhw522TzGoQBHVXMn5pR0SaOcUIVHjSZPdgK/llcPdPWN
- quzwiRnknJNT/zdCkZhTIQmrQFYJ5ton829QWPibKjcWhvXKY8v35qy9OZclhEO2MUh+ 7w== 
-Content-Disposition: inline
-In-Reply-To: <c021c0f9-4504-6323-98ed-455a196463fc@martingkelly.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to:cc
+         :content-transfer-encoding;
+        bh=9ZCtRO1EfjMBdscr16tVWg4PD3vV4eXgXVgNm+QaIM8=;
+        b=Lifoc/9S+ScPBLNEdfgggcKBxgNayI/MmQY3QMeZ3YiCn51pH+DSbRjgFHbX3KXLuD
+         kT0ksoEbWbdJkTKbo96qtqrwYjua8wGANO8LPp6KW3cSwP5YcD8fChTQ5F48zsGGiLpw
+         zEToFI/V6Bd/EDqIePE6JgCy7GLwLRBMf4024LubyXZFVbcaSOpG6kpbGNksNUSXrdpZ
+         jd4MOZ9sVF9DKgN1Pd1x0cEfoPm20WG3AHu7k9ZyLTyHD0nGES3cHYVeJ65/eoOpkf2A
+         74tAZtou3FCvN4z+mRv3XeP/67Aw8uYFbgd/xEgWyGSZubZO64ch1Ahx8FHnyCTNJZg+
+         HaIg==
 Sender: linux-kernel-owner@vger.kernel.org
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Martin Kelly <martin@martingkelly.com>
-Cc: Paul Gortmaker <paul.gortmaker@windriver.com>, linux-kbuild@vger.kernel.org, kernel-janitors@vger.kernel.org, linux-embedded@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, Matt Mackall <mpm@selenic.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="johab"
+To: 921146@bugs.debian.org
+Cc: hartmans@debian.org, debian-ctte@lists.debian.org, =?UTF-8?B?TMOhc3psw7MgQsO2c3rDtnJtw6lueWkgKEdDUyk=?= <gcs@debian.org>, Alexander Couzens <lynxis@fe80.eu>, linux-fsdevel@vger.kernel.org, linux-embedded <linux-embedded@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-On Sun, Jan 07, 2018 at 10:51:21AM -0800, Martin Kelly wrote:
-> Urg, I accidentally sent to kernel-kbuild instead of linux-kbuild, changed
-> now. It appears that past changes to tools/scripts/Makefile.include have
-> been handled by linux-kbuild and often Masahiro Yamada.
-> 
-> Perhaps the best sequence here is to send a patch to kbuild adding the
-> call-override function and calls to it to the main common Makefile. Then I
-> can send individual subsystem patches dropping the individual CC = lines and
-> similar. It will be 13 patches instead of 1 but will eventually result in
-> the same thing.
-> 
-> Paul, any thoughts?
-> 
+On Wed, 31 Jul 2019 17:43:44 +0200 Alexander Couzens <lynxis@fe80.eu> wrote=
+:
+> Hi L=C3=A1szl=C3=B3,
+>
+> > On Wed, Jul 31, 2019 at 3:06 AM Steven Shiau <steven@nchc.org.tw>
+> > wrote: [...]
+> >  As mentioned in the past, it's the
+> > 0016-remove-frag_deflator_thread.patch that needs either reverted or
+> > fixed by it's original author, Alexander Couzens (added to this mail).
+>
+> Since I've full weeks ahead, I can not make any estimation when
+> I've time to look onto the performance issue.
+>
 
-That sounds good.
+That patch is a laughable piece of rubbish.  I believe both you
+people (the Debian maintainer and author) are in total denial
+about your incompetence in this matter.  This is obviously just my
+opinion I've formed over the last couple of months, in case you want to
+claim that it is libellous.
 
-regards,
-dan carpenter
+It is, obvious, from the patch where the problem lies.  You *remove*
+the parallel fragment compressor threads, and move the work onto the
+main thread.
+
+Now what do you think that does?  It completely removes a significant
+amount of the parallelism of Mksquashfs and makes the main thread
+a bottleneck.
+
+This is your fault and your problem, and it lies in your lack of
+understanding.
+
+Yet you continually blame your inability to make Mksquashfs work
+correctly on *my* code being old and unmaintained and badly written.
+
+This can be seen from the following excerpt from a post in this
+Debian bug thread made by the Debian maintainer.
+
+"> First of all, as squashfs-tools wasn't written in the last years, when
+> reproducible builds became more famous. So it's not written
+> with reproducible building in mind.
+> For me is reproducible builds more important than using all cpu cores.
+> But I don't use it with gigabytes images.
+ Yeah, it's quite an old software without real development in the recent ye=
+ars."
+
+and
+
+" This sounds more complex work than it can be achieved in this week.
+Maybe a complete rewrite would be better then on the long run."
+
+Constantly pointing the blame at my tools and my code.
+
+This is typical of the poor worker who chooses to blame everyone
+else but himself.
+
+None of that is the case.  50% of the code-base of Squashfs-tools
+was (re-)written in the last 9 years as part of on-going improvements.
+It has also been maintained across that period.
+
+As for your specific claim that Mksquashfs can't be made to produce
+reproducible builds because it is old and written before reproducible
+builds became popular.  That is abject nonsense.
+
+I added reproducible builds to Mksquashfs.  It took one weekend.
+
+https://github.com/plougher/squashfs-tools/commit/24da0c63c80be64e1adc3f24c=
+27459ebe18a19af
+
+> > > Or shall we gradually switch to squashfs-tools-ng is the upstream
+> > > is more active:
+> > > https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=3D931965
+> >  It's under investigation. I'm traveling and will only arrive back
+> > home on Sunday evening. Expect more details on this next week.
+>
+> I also seen the upcoming squashfs-tools-ng rising and quite interested
+> to test it and reading the code.
+> Depending on tests & the code, I could imagine I'll put my effort and
+> time towards squashfs-tools-ng.
+>
+> @L=C3=A1szl=C3=B3 It should be your call to revert or not. For sure there=
+ are
+> also downstream users who need reproducible builds (e.g. tails) who
+> may also change to squashfs-tools-ng if -ng is the only reproducible
+> squashfs generator in debian.
+>
+
+Upstream Squashfs-tools now produces reproducible builds.
+
+Squashfs-tools-ng, this is a rogue project masquerading as an
+official new upstream .  It is neither official nor a new upstream.  As
+Squashfs author and maintainer I completely disassociate that project
+with the Squashfs project.
+
+I also have publicly stated that this project is spreading falsehoods and
+that it is defamatory to me as the Squashfs author and maintainer.
+
+See:
+
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=3D931965#29
+
+and
+
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=3D931965#34
+
+I have lived for a couple of months with you two people bad-mouthing
+Squashfs tools, it's code-base and my maintenance.
+
+I have absolutely had enough.
+
+I have CC'd this to the Debian project leader and the Debian technical
+commitee, and also to linux-kernel, linux-fsdevel and linux-embedded
+for wider attention.
+
+What else do I have to do to make you stop bad-mouthing Squashfs?  Sue?
+
+Yours
+
+Dr. Phillip Lougher
+
+> Hopefully I'll find time to look into it.
+>
+> Best Regards,
+> lynxis
+> --
+> Alexander Couzens
+>
+> mail: lynxis@fe80.eu
+> jabber: lynxis@fe80.eu
+> gpg: 390D CF78 8BF9 AA50 4F8F  F1E2 C29E 9DA6 A0DF 8604
