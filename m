@@ -1,92 +1,65 @@
-From: Petr Mladek <pmladek@suse.com>
-Subject: Re: [PATCH v2 2/2] init/Kconfig: Increase default log buffer size
- from 128 KB to 512 KB
-Date: Fri, 30 Oct 2020 16:28:10 +0100
-Message-ID: <20201030152810.GA20201@alley>
-References: <20200811092924.6256-1-pmenzel@molgen.mpg.de>
- <20200811092924.6256-2-pmenzel@molgen.mpg.de>
- <20200811105352.GG6215@alley>
- <92a13465-d133-0b39-f64b-7074dbbb3fcc@molgen.mpg.de>
+From: "Trevor Woerner" <twoerner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Yocto Project Virtual Summit 2021
+Date: Tue, 30 Mar 2021 12:18:20 -0400
+Message-ID: <20210330161820.GA35681@localhost>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1604071690;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=zjFVfadmbfOYJYU6bWK4dj3vP5s6atsYIfJPOXVexSk=;
-        b=VNCF2HlnvxvXu6YGxVKdLYaiCA9EP8/jC5gY2SphIZJDNpfuexlyTlU6SVkeZ2MZZ3ke/J
-        3fVOhAdnOfAXFvSbCgKKlKZshsokCu6POHF2Bg2eVXgP7E7H/Wk5T/nE3hMWWRcacfL84L
-        WT3zXOgohdssKttb1tnz9rFwJfpklQI=
+Content-Type: multipart/mixed; boundary="vx5cbSVjuD2wFvyNSBbr"
+Return-path: <bounce+53643+52970+4382963+7901486-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
+List-Unsubscribe: <mailto:yocto+unsubscribe-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
+List-Subscribe: <mailto:yocto+subscribe-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
+List-Help: <mailto:yocto+help-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
+Sender: yocto-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org
+List-Id: <linux-embedded.vger.kernel.org>
+List-Post: <mailto:yocto-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+ d=lists.yoctoproject.org; q=dns/txt; s=20140610; t=1617121106;
+ bh=qXmJepWvflDOJArNbfcLcw/ihJ5P8F0igu9irDVDA0Q=;
+ h=Content-Type:Date:From:Subject:To;
+ b=My/MjHFtZ1R35Y+BhG1HOqY5tGT7cjAVCKB2Z1d6RcUJGvNVDzhdHka/hq1M2mxxxej
+ dFG8fiOXxouGAdrvKlWdvNvnNFJ5Qhwq8pix4wfVKm+sw5fh8/+TtZ3kgVlE26RZPAVaI
+ yKdmhZinJLmRy8ZtAohALNQclC3dhnTRWmc=
+To: yocto-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org, openembedded-architecture-ZwoEplunGu3dfDuKDZ/zN51Ccm5ICvs9@public.gmane.org, openembedded-core-ZwoEplunGu3dfDuKDZ/zN51Ccm5ICvs9@public.gmane.org, automated-testing-EtnWKYl6rD/WsZ/bQMPhNw@public.gmane.org, yocto-advocacy-EtnWKYl6rD/WsZ/bQMPhNw@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+
+--vx5cbSVjuD2wFvyNSBbr
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <92a13465-d133-0b39-f64b-7074dbbb3fcc@molgen.mpg.de>
-List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: Paul Menzel <pmenzel@molgen.mpg.de>
-Cc: Sergey Senozhatsky <sergey.senozhatsky@gmail.com>, linux-kernel@vger.kernel.org, John Ogness <john.ogness@linutronix.de>, Linus Torvalds <torvalds@linuxfoundation.org>, Steven Rostedt <rostedt@goodmis.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-embedded@vger.kernel.org
 
-On Thu 2020-10-29 23:16:01, Paul Menzel wrote:
-> Dear Petr,
-> 
-> 
-> Am 11.08.20 um 12:53 schrieb Petr Mladek:
-> > On Tue 2020-08-11 11:29:24, Paul Menzel wrote:
-> > > Commit f17a32e97e (let LOG_BUF_SHIFT default to 17) from 2008 was the
-> > > last time, the the default log buffer size bump was increased.
-> > > 
-> > > Machines have evolved, and on current hardware, enough memory is
-> > > present, and some devices have over 200 PCI devices, like a two socket
-> > > Skylake-E server, resulting a lot of lines.
-> > > 
-> > > Therefore, increase the default from 128 KB to 512 KB. Anyone, with
-> > > limited memory, can still lower it.
-> > > 
-> > > --- a/init/Kconfig
-> > > +++ b/init/Kconfig
-> > > @@ -681,9 +681,9 @@ config IKHEADERS
-> > >   	  kheaders.ko is built which can be loaded on-demand to get access to headers.
-> > >   config LOG_BUF_SHIFT
-> > > -	int "Kernel log buffer size (16 => 64KB, 17 => 128KB)"
-> > > +	int "Kernel log buffer size (17 => 128KB, 19 => 512KB)"
-> > >   	range 12 25
-> > > -	default 17
-> > > +	default 19
-> > >   	depends on PRINTK
-> > >   	help
-> > >   	  Select the minimal kernel log buffer size as a power of 2.
-> > 
-> > Honestly, I do not have experience with changing the defaults. People
-> > hacking small devices might complain. Well, this can be solved
-> > by increasing the default only when BASE_FULL is set.
-> > 
-> > I am personally fine with increasing the default when BASE_FULL
-> > is set. The amount of messages is growing over time because of
-> > increasing complexity of both the hardware and software.
-> > Fortunately also the amount of available memory is growing.
-> > 
-> > Well, this should get discussed in wider audience. Adding some
-> > people into CC.
-> > 
-> > JFYI, it started with report of lost messages, see
-> > https://lore.kernel.org/lkml/264bfbae-122d-9c41-59ea-6413f91bd866@molgen.mpg.de/
-> 
-> As there was no objection, is it possible to apply the two patches, and
-> maybe even get them into Linux 5.10?
+The Yocto Project Summit Planning Committee is happy to announce the
+upcoming 3rd Yocto Project Summit to take place Tuesday and Wednesday
+May 25-26 2021, virtually.
 
-Thanks for reminding me. I am sorry but it is too late for
-5.10. Such a change should be added during the merge window.
+The 2-day event will run in 2 tracks including a virtual developers meeting,
+beginner tutorial sessions, hands-on intermediate instruction, lightning
+talks, regular talks, and social events.
 
-Well, the size of the ring buffer has effectively increased in 5.10.
-The lockless implementation stores strings and metadata separately.
-It basically doubled the memory needs and people around embedded
-devices were not happy, see
-https://lore.kernel.org/r/CAMuHMdXHFFUrjRMEHnXXU8QQkgD9x_S6R3N0Q7Q4H2RSfy2GGw@mail.gmail.com
+The cost for all attendees will be $40USD. The event will run both days from
+noon until 8pm GMT. Registration is not yet open but will be shortly, please
+watch for further announcements.
 
-Please update the patch so that the default stays the same for
-BASE_SMALL. Please, add Rasmus Villemoes
-<linux@rasmusvillemoes.dk> and Geert Uytterhoeven
-<geert@linux-m68k.org> into CC when you send it.
+The call for papers is now open and will close at 11:59 PM PST on Sunday,
+April 25, 2021. To submit a proposal please visit:
+	https://pretalx.com/yocto-project-summit-2021/cfp
 
-Best Regards,
-Petr
+For more information please visit:
+	https://www.yoctoproject.org/yocto-project-virtual-summit-2021/
+
+We look forward to seeing you at the conference!
+
+--vx5cbSVjuD2wFvyNSBbr
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
+
+
+-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
+Links: You receive all messages sent to this group.
+View/Reply Online (#52970): https://lists.yoctoproject.org/g/yocto/message=
+/52970
+Mute This Topic: https://lists.yoctoproject.org/mt/81726304/4382963
+Group Owner: yocto+owner-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org
+Unsubscribe: https://lists.yoctoproject.org/g/yocto/unsub [gley-yocto@m.gm=
+ane-mx.org]
+-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
+
+
+--vx5cbSVjuD2wFvyNSBbr--
