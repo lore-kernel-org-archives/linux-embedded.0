@@ -1,7 +1,7 @@
 From: Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH 3/3] lib/vsprintf: Use pr_crit() instead of long fancy messages
-Date: Wed, 31 Mar 2021 11:31:04 +0200
-Message-ID: <20210331093104.383705-4-geert+renesas@glider.be>
+Subject: [PATCH 1/3] iommu: Use pr_crit() instead of long fancy messages
+Date: Wed, 31 Mar 2021 11:31:02 +0200
+Message-ID: <20210331093104.383705-2-geert+renesas@glider.be>
 References: <20210331093104.383705-1-geert+renesas@glider.be>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -28,40 +28,41 @@ KERN_CRIT, and removing irrelevant text and graphics.
 
 This reduces kernel size by ca. 0.5 KiB.
 
-Fixes: 5ead723a20e0447b ("lib/vsprintf: no_hash_pointers prints all addresses as unhashed")
+Fixes: bad614b24293ae46 ("iommu: Enable debugfs exposure of IOMMU driver internals")
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- lib/vsprintf.c | 17 +++--------------
- 1 file changed, 3 insertions(+), 14 deletions(-)
+ drivers/iommu/iommu-debugfs.c | 19 ++++---------------
+ 1 file changed, 4 insertions(+), 15 deletions(-)
 
-diff --git a/lib/vsprintf.c b/lib/vsprintf.c
-index 9b423359bb6433d3..0293f1b89064b287 100644
---- a/lib/vsprintf.c
-+++ b/lib/vsprintf.c
-@@ -2193,20 +2193,9 @@ static int __init no_hash_pointers_enable(char *str)
- 
- 	no_hash_pointers = true;
- 
--	pr_warn("**********************************************************\n");
--	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
--	pr_warn("**                                                      **\n");
--	pr_warn("** This system shows unhashed kernel memory addresses   **\n");
--	pr_warn("** via the console, logs, and other interfaces. This    **\n");
--	pr_warn("** might reduce the security of your system.            **\n");
--	pr_warn("**                                                      **\n");
--	pr_warn("** If you see this message and you are not debugging    **\n");
--	pr_warn("** the kernel, report this immediately to your system   **\n");
--	pr_warn("** administrator!                                       **\n");
--	pr_warn("**                                                      **\n");
--	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
--	pr_warn("**********************************************************\n");
--
-+	pr_crit("This system shows unhashed kernel memory addresses\n");
-+	pr_crit("via the console, logs, and other interfaces. This\n");
-+	pr_crit("might reduce the security of your system.\n");
- 	return 0;
+diff --git a/drivers/iommu/iommu-debugfs.c b/drivers/iommu/iommu-debugfs.c
+index f0354894209648fd..c3306998de0687bd 100644
+--- a/drivers/iommu/iommu-debugfs.c
++++ b/drivers/iommu/iommu-debugfs.c
+@@ -32,20 +32,9 @@ void iommu_debugfs_setup(void)
+ {
+ 	if (!iommu_debugfs_dir) {
+ 		iommu_debugfs_dir = debugfs_create_dir("iommu", NULL);
+-		pr_warn("\n");
+-		pr_warn("*************************************************************\n");
+-		pr_warn("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **\n");
+-		pr_warn("**                                                         **\n");
+-		pr_warn("**  IOMMU DebugFS SUPPORT HAS BEEN ENABLED IN THIS KERNEL  **\n");
+-		pr_warn("**                                                         **\n");
+-		pr_warn("** This means that this kernel is built to expose internal **\n");
+-		pr_warn("** IOMMU data structures, which may compromise security on **\n");
+-		pr_warn("** your system.                                            **\n");
+-		pr_warn("**                                                         **\n");
+-		pr_warn("** If you see this message and you are not debugging the   **\n");
+-		pr_warn("** kernel, report this immediately to your vendor!         **\n");
+-		pr_warn("**                                                         **\n");
+-		pr_warn("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **\n");
+-		pr_warn("*************************************************************\n");
++		pr_crit("IOMMU DebugFS SUPPORT HAS BEEN ENABLED IN THIS KERNEL\n");
++		pr_crit("This means that this kernel is built to expose internal\n");
++		pr_crit("IOMMU data structures, which may compromise security on\n");
++		pr_crit("your system.\n");
+ 	}
  }
- early_param("no_hash_pointers", no_hash_pointers_enable);
 -- 
 2.25.1
 
