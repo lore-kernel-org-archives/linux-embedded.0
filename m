@@ -1,65 +1,67 @@
-From: "Trevor Woerner" <twoerner-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Yocto Project Virtual Summit 2021
-Date: Tue, 30 Mar 2021 12:18:20 -0400
-Message-ID: <20210330161820.GA35681@localhost>
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH 3/3] lib/vsprintf: Use pr_crit() instead of long fancy messages
+Date: Wed, 31 Mar 2021 11:31:04 +0200
+Message-ID: <20210331093104.383705-4-geert+renesas@glider.be>
+References: <20210331093104.383705-1-geert+renesas@glider.be>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="vx5cbSVjuD2wFvyNSBbr"
-Return-path: <bounce+53643+52970+4382963+7901486-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
-List-Unsubscribe: <mailto:yocto+unsubscribe-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
-List-Subscribe: <mailto:yocto+subscribe-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
-List-Help: <mailto:yocto+help-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
-Sender: yocto-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org
-List-Id: <linux-embedded.vger.kernel.org>
-List-Post: <mailto:yocto-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
- d=lists.yoctoproject.org; q=dns/txt; s=20140610; t=1617121106;
- bh=qXmJepWvflDOJArNbfcLcw/ihJ5P8F0igu9irDVDA0Q=;
- h=Content-Type:Date:From:Subject:To;
- b=My/MjHFtZ1R35Y+BhG1HOqY5tGT7cjAVCKB2Z1d6RcUJGvNVDzhdHka/hq1M2mxxxej
- dFG8fiOXxouGAdrvKlWdvNvnNFJ5Qhwq8pix4wfVKm+sw5fh8/+TtZ3kgVlE26RZPAVaI
- yKdmhZinJLmRy8ZtAohALNQclC3dhnTRWmc=
-To: yocto-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org, openembedded-architecture-ZwoEplunGu3dfDuKDZ/zN51Ccm5ICvs9@public.gmane.org, openembedded-core-ZwoEplunGu3dfDuKDZ/zN51Ccm5ICvs9@public.gmane.org, automated-testing-EtnWKYl6rD/WsZ/bQMPhNw@public.gmane.org, yocto-advocacy-EtnWKYl6rD/WsZ/bQMPhNw@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20210331093104.383705-1-geert+renesas@glider.be>
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+To: Joerg Roedel <joro@8bytes.org>, Will Deacon <will@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, Ingo Molnar <mingo@redhat.com>, Petr Mladek <pmladek@suse.com>, Sergey Senozhatsky <sergey.senozhatsky@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, John Ogness <john.ogness@linutronix.de>, Gary R Hook <gary.hook@amd.com>, Marco Elver <elver@google.com>, Randy Dunlap <rdunlap@infradead.org>, Vlastimil Babka <vbabka@suse.cz>, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 
---vx5cbSVjuD2wFvyNSBbr
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+While long fancy messages have a higher probability of being seen than
+small messages, they may scroll of the screen fast, if visible at all,
+and may still be missed.  In addition, they increase boot time and
+kernel size.
 
-The Yocto Project Summit Planning Committee is happy to announce the
-upcoming 3rd Yocto Project Summit to take place Tuesday and Wednesday
-May 25-26 2021, virtually.
+The correct mechanism to increase importance of a kernel message is not
+to draw fancy boxes with more text, but to shout louder, i.e. increase
+the message's reporting level.  Making sure the administrator of the
+system is aware of such a message is a system policy, and is the
+responsability of a user-space log daemon.
 
-The 2-day event will run in 2 tracks including a virtual developers meeting,
-beginner tutorial sessions, hands-on intermediate instruction, lightning
-talks, regular talks, and social events.
+Fix this by increasing the reporting level from KERN_WARNING to
+KERN_CRIT, and removing irrelevant text and graphics.
 
-The cost for all attendees will be $40USD. The event will run both days from
-noon until 8pm GMT. Registration is not yet open but will be shortly, please
-watch for further announcements.
+This reduces kernel size by ca. 0.5 KiB.
 
-The call for papers is now open and will close at 11:59 PM PST on Sunday,
-April 25, 2021. To submit a proposal please visit:
-	https://pretalx.com/yocto-project-summit-2021/cfp
+Fixes: 5ead723a20e0447b ("lib/vsprintf: no_hash_pointers prints all addresses as unhashed")
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+---
+ lib/vsprintf.c | 17 +++--------------
+ 1 file changed, 3 insertions(+), 14 deletions(-)
 
-For more information please visit:
-	https://www.yoctoproject.org/yocto-project-virtual-summit-2021/
+diff --git a/lib/vsprintf.c b/lib/vsprintf.c
+index 9b423359bb6433d3..0293f1b89064b287 100644
+--- a/lib/vsprintf.c
++++ b/lib/vsprintf.c
+@@ -2193,20 +2193,9 @@ static int __init no_hash_pointers_enable(char *str)
+ 
+ 	no_hash_pointers = true;
+ 
+-	pr_warn("**********************************************************\n");
+-	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
+-	pr_warn("**                                                      **\n");
+-	pr_warn("** This system shows unhashed kernel memory addresses   **\n");
+-	pr_warn("** via the console, logs, and other interfaces. This    **\n");
+-	pr_warn("** might reduce the security of your system.            **\n");
+-	pr_warn("**                                                      **\n");
+-	pr_warn("** If you see this message and you are not debugging    **\n");
+-	pr_warn("** the kernel, report this immediately to your system   **\n");
+-	pr_warn("** administrator!                                       **\n");
+-	pr_warn("**                                                      **\n");
+-	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
+-	pr_warn("**********************************************************\n");
+-
++	pr_crit("This system shows unhashed kernel memory addresses\n");
++	pr_crit("via the console, logs, and other interfaces. This\n");
++	pr_crit("might reduce the security of your system.\n");
+ 	return 0;
+ }
+ early_param("no_hash_pointers", no_hash_pointers_enable);
+-- 
+2.25.1
 
-We look forward to seeing you at the conference!
-
---vx5cbSVjuD2wFvyNSBbr
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline
-
-
--=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
-Links: You receive all messages sent to this group.
-View/Reply Online (#52970): https://lists.yoctoproject.org/g/yocto/message=
-/52970
-Mute This Topic: https://lists.yoctoproject.org/mt/81726304/4382963
-Group Owner: yocto+owner-gJxINTE1zeQw8ufyyF7U+SST3g8Odh+X@public.gmane.org
-Unsubscribe: https://lists.yoctoproject.org/g/yocto/unsub [gley-yocto@m.gm=
-ane-mx.org]
--=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
-
-
---vx5cbSVjuD2wFvyNSBbr--
