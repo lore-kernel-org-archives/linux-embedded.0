@@ -1,67 +1,64 @@
 From: Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH 2/3] tracing: Use pr_crit() instead of long fancy messages
-Date: Wed, 31 Mar 2021 11:31:03 +0200
-Message-ID: <20210331093104.383705-3-geert+renesas@glider.be>
-References: <20210331093104.383705-1-geert+renesas@glider.be>
+Subject: [PATCH] clk: Align provider-specific CLK_* bit definitions
+Date: Wed, 31 Mar 2021 11:59:19 +0200
+Message-ID: <505e19bac2deb6015e76391ce7ad044c43499681.1617184676.git.geert+renesas@glider.be>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20210331093104.383705-1-geert+renesas@glider.be>
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
 To: Joerg Roedel <joro@8bytes.org>, Will Deacon <will@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, Ingo Molnar <mingo@redhat.com>, Petr Mladek <pmladek@suse.com>, Sergey Senozhatsky <sergey.senozhatsky@gmail.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, John Ogness <john.ogness@linutronix.de>, Gary R Hook <gary.hook@amd.com>, Marco Elver <elver@google.com>, Randy Dunlap <rdunlap@infradead.org>, Vlastimil Babka <vbabka@suse.cz>, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 
-While long fancy messages have a higher probability of being seen than
-small messages, they may scroll of the screen fast, if visible at all,
-and may still be missed.  In addition, they increase boot time and
-kernel size.
+The definition of CLK_MULTIPLIER_ROUND_CLOSEST is not aligned to the two
+bit definitions next to it.  A deeper inspection reveals that the
+alignment of CLK_MULTIPLIER_ROUND_CLOSEST does match the most common
+alignment.
 
-The correct mechanism to increase importance of a kernel message is not
-to draw fancy boxes with more text, but to shout louder, i.e. increase
-the message's reporting level.  Making sure the administrator of the
-system is aware of such a message is a system policy, and is the
-responsability of a user-space log daemon.
+Align the bit definitions for the various provider types throughout the
+file at 40 columns, to increase uniformity.
 
-Fix this by increasing the reporting level from KERN_WARNING to
-KERN_CRIT, and removing irrelevant text and graphics.
-
-This reduces kernel size by ca. 0.5 KiB.
-
-Fixes: 2184db46e425c2b8 ("tracing: Print nasty banner when trace_printk() is in use")
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- kernel/trace/trace.c | 17 +++--------------
- 1 file changed, 3 insertions(+), 14 deletions(-)
+ include/linux/clk-provider.h | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/kernel/trace/trace.c b/kernel/trace/trace.c
-index eccb4e1187cc788e..b3a93aff01045923 100644
---- a/kernel/trace/trace.c
-+++ b/kernel/trace/trace.c
-@@ -3175,20 +3175,9 @@ void trace_printk_init_buffers(void)
+diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
+index 58f6fe866ae9b797..8f37829565f9640e 100644
+--- a/include/linux/clk-provider.h
++++ b/include/linux/clk-provider.h
+@@ -342,7 +342,7 @@ struct clk_fixed_rate {
+ 	unsigned long	flags;
+ };
  
- 	/* trace_printk() is for debug use only. Don't use it in production. */
+-#define CLK_FIXED_RATE_PARENT_ACCURACY		BIT(0)
++#define CLK_FIXED_RATE_PARENT_ACCURACY	BIT(0)
  
--	pr_warn("\n");
--	pr_warn("**********************************************************\n");
--	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
--	pr_warn("**                                                      **\n");
--	pr_warn("** trace_printk() being used. Allocating extra memory.  **\n");
--	pr_warn("**                                                      **\n");
--	pr_warn("** This means that this is a DEBUG kernel and it is     **\n");
--	pr_warn("** unsafe for production use.                           **\n");
--	pr_warn("**                                                      **\n");
--	pr_warn("** If you see this message and you are not debugging    **\n");
--	pr_warn("** the kernel, report this immediately to your vendor!  **\n");
--	pr_warn("**                                                      **\n");
--	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
--	pr_warn("**********************************************************\n");
-+	pr_crit("trace_printk() being used. Allocating extra memory.\n");
-+	pr_crit("This means that this is a DEBUG kernel and it is\n");
-+	pr_crit("unsafe for production use.\n");
+ extern const struct clk_ops clk_fixed_rate_ops;
+ struct clk_hw *__clk_hw_register_fixed_rate(struct device *dev,
+@@ -984,8 +984,8 @@ struct clk_fractional_divider {
  
- 	/* Expand the buffers to set size */
- 	tracing_update_buffers();
+ #define to_clk_fd(_hw) container_of(_hw, struct clk_fractional_divider, hw)
+ 
+-#define CLK_FRAC_DIVIDER_ZERO_BASED		BIT(0)
+-#define CLK_FRAC_DIVIDER_BIG_ENDIAN		BIT(1)
++#define CLK_FRAC_DIVIDER_ZERO_BASED	BIT(0)
++#define CLK_FRAC_DIVIDER_BIG_ENDIAN	BIT(1)
+ 
+ extern const struct clk_ops clk_fractional_divider_ops;
+ struct clk *clk_register_fractional_divider(struct device *dev,
+@@ -1033,9 +1033,9 @@ struct clk_multiplier {
+ 
+ #define to_clk_multiplier(_hw) container_of(_hw, struct clk_multiplier, hw)
+ 
+-#define CLK_MULTIPLIER_ZERO_BYPASS		BIT(0)
++#define CLK_MULTIPLIER_ZERO_BYPASS	BIT(0)
+ #define CLK_MULTIPLIER_ROUND_CLOSEST	BIT(1)
+-#define CLK_MULTIPLIER_BIG_ENDIAN		BIT(2)
++#define CLK_MULTIPLIER_BIG_ENDIAN	BIT(2)
+ 
+ extern const struct clk_ops clk_multiplier_ops;
+ 
 -- 
 2.25.1
 
