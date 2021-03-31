@@ -1,64 +1,39 @@
-From: Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] clk: Align provider-specific CLK_* bit definitions
-Date: Wed, 31 Mar 2021 11:59:19 +0200
-Message-ID: <505e19bac2deb6015e76391ce7ad044c43499681.1617184676.git.geert+renesas@glider.be>
+From: Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>
+Subject: Re: [PATCH 2/3] tracing: Use pr_crit() instead of long fancy messages
+Date: Wed, 31 Mar 2021 09:40:07 -0400
+Message-ID: <20210331094007.77aa5194@gandalf.local.home>
+References: <20210331093104.383705-1-geert+renesas@glider.be>
+ <20210331093104.383705-3-geert+renesas@glider.be>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Joerg Roedel <joro@8bytes.org>, Will Deacon <will@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, Ingo Molnar <mingo@redhat.com>, Petr Mladek <pmladek@suse.com>, Sergey Senozhatsky <sergey.senozhatsky@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, John Ogness <john.ogness@linutronix.de>, Gary R Hook <gary.hook@amd.com>, Marco Elver <elver@google.com>, Randy Dunlap <rdunlap@infradead.org>, Vlastimil Babka <vbabka@suse.cz>, iommu@lists.linux-foundation.org, linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <20210331093104.383705-3-geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
+List-Id: <linux-embedded.vger.kernel.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+ <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+ <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Sender: "iommu" <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+To: Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
+Cc: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>, Marco Elver <elver-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, John Ogness <john.ogness-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sergey Senozhatsky <sergey.senozhatsky-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vlastimil Babka <vbabka-AlSwsSmVLrQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Will Deacon <will-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Gary R Hook <gary.hook-5C7GfCeVMHo@public.gmane.org>
 
-The definition of CLK_MULTIPLIER_ROUND_CLOSEST is not aligned to the two
-bit definitions next to it.  A deeper inspection reveals that the
-alignment of CLK_MULTIPLIER_ROUND_CLOSEST does match the most common
-alignment.
+On Wed, 31 Mar 2021 11:31:03 +0200
+Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org> wrote:
 
-Align the bit definitions for the various provider types throughout the
-file at 40 columns, to increase uniformity.
+> This reduces kernel size by ca. 0.5 KiB.
 
-Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
- include/linux/clk-provider.h | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+If you are worried about size, disable tracing and it will go away
+entirely. 0.5KiB is a drop in the bucket compared to what tracing adds in
+size overhead.
 
-diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
-index 58f6fe866ae9b797..8f37829565f9640e 100644
---- a/include/linux/clk-provider.h
-+++ b/include/linux/clk-provider.h
-@@ -342,7 +342,7 @@ struct clk_fixed_rate {
- 	unsigned long	flags;
- };
- 
--#define CLK_FIXED_RATE_PARENT_ACCURACY		BIT(0)
-+#define CLK_FIXED_RATE_PARENT_ACCURACY	BIT(0)
- 
- extern const struct clk_ops clk_fixed_rate_ops;
- struct clk_hw *__clk_hw_register_fixed_rate(struct device *dev,
-@@ -984,8 +984,8 @@ struct clk_fractional_divider {
- 
- #define to_clk_fd(_hw) container_of(_hw, struct clk_fractional_divider, hw)
- 
--#define CLK_FRAC_DIVIDER_ZERO_BASED		BIT(0)
--#define CLK_FRAC_DIVIDER_BIG_ENDIAN		BIT(1)
-+#define CLK_FRAC_DIVIDER_ZERO_BASED	BIT(0)
-+#define CLK_FRAC_DIVIDER_BIG_ENDIAN	BIT(1)
- 
- extern const struct clk_ops clk_fractional_divider_ops;
- struct clk *clk_register_fractional_divider(struct device *dev,
-@@ -1033,9 +1033,9 @@ struct clk_multiplier {
- 
- #define to_clk_multiplier(_hw) container_of(_hw, struct clk_multiplier, hw)
- 
--#define CLK_MULTIPLIER_ZERO_BYPASS		BIT(0)
-+#define CLK_MULTIPLIER_ZERO_BYPASS	BIT(0)
- #define CLK_MULTIPLIER_ROUND_CLOSEST	BIT(1)
--#define CLK_MULTIPLIER_BIG_ENDIAN		BIT(2)
-+#define CLK_MULTIPLIER_BIG_ENDIAN	BIT(2)
- 
- extern const struct clk_ops clk_multiplier_ops;
- 
--- 
-2.25.1
+Sorry, but NAK.
 
+This has been very successful in stopping people from adding trace_printk()
+to the kernel, and I like to keep it that way.
+
+-- Steve
