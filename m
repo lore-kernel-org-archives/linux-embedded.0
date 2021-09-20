@@ -1,73 +1,54 @@
-From: Petr Mladek via iommu <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Subject: Re: [PATCH 3/3] lib/vsprintf: Use pr_crit() instead of long fancy
- messages
-Date: Thu, 20 May 2021 14:51:50 +0200
-Message-ID: <YKZbZhACyIENhM8S@alley>
-References: <20210331093104.383705-1-geert+renesas@glider.be>
- <20210331093104.383705-4-geert+renesas@glider.be>
- <CAMuHMdXQArCn9BS_8p0iUAgomfEHWe8ypg=B_SGfvJu8c_L5vg@mail.gmail.com>
-Reply-To: Petr Mladek <pmladek-IBi9RG/b67k@public.gmane.org>
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>
+Subject: [PATCH] MAINTAINERS: Remove Matt Mackall as his identity is obsolete
+Date: Mon, 20 Sep 2021 10:06:35 +0200
+Message-ID: <20210920080635.253826-1-u.kleine-koenig@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
- t=1621515111; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
- mime-version:mime-version:content-type:content-type:
- in-reply-to:in-reply-to:references:references;
- bh=VbT6WFYy0bkSk8HAYhg7anUqtgOM3QEr3KjCoKwSfHQ=;
- b=gOKAeXWpE3pQwkKpXwPHYoc4ERb31lQ3gBN7nTVt1yldwdnn1/3/XyAFth9rfgDimJkoQH
- agqxk+9Aox0SUUfXdjH85VkMEQazH8fYJyaFRs2tPVAJC3VdcHlyCnVzQyWN5LMIv2YHXJ
- O5RoTQ3j+3gflRxjf1BSBzx8QDoYDOo=
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdXQArCn9BS_8p0iUAgomfEHWe8ypg=B_SGfvJu8c_L5vg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Id: <linux-embedded.vger.kernel.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
- <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
- <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Sender: "iommu" <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-To: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: Marco Elver <elver-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Linux Embedded <linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, John Ogness <john.ogness-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>, Sergey Senozhatsky <sergey.senozhatsky-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linux IOMMU <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Will Deacon <will-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Vlastimil Babka <vbabka-AlSwsSmVLrQ@public.gmane.org>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+List-ID: <linux-embedded.vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+To: linux-kernel@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, David Woodhouse <dwmw2@infradead.org>, linux-embedded@vger.kernel.org, Herbert Xu <herbert@gondor.apana.org.au>, linux-crypto@vger.kernel.org
+Cc: kernel@pengutronix.de
 
-On Mon 2021-05-17 08:21:12, Geert Uytterhoeven wrote:
-> On Wed, Mar 31, 2021 at 11:59 AM Geert Uytterhoeven
-> <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org> wrote:
-> > While long fancy messages have a higher probability of being seen than
-> > small messages, they may scroll of the screen fast, if visible at all,
-> > and may still be missed.  In addition, they increase boot time and
-> > kernel size.
-> >
-> > The correct mechanism to increase importance of a kernel message is not
-> > to draw fancy boxes with more text, but to shout louder, i.e. increase
-> > the message's reporting level.  Making sure the administrator of the
-> > system is aware of such a message is a system policy, and is the
-> > responsability of a user-space log daemon.
-> >
-> > Fix this by increasing the reporting level from KERN_WARNING to
-> > KERN_CRIT, and removing irrelevant text and graphics.
-> >
-> > This reduces kernel size by ca. 0.5 KiB.
-> >
-> > Fixes: 5ead723a20e0447b ("lib/vsprintf: no_hash_pointers prints all addresses as unhashed")
-> > Signed-off-by: Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>
-> 
-> No comments?
-> Unlike the cases handled by the other two patches in this series,
-> this one cannot be configured out.
+The mails I sent to Matt on September 14 and 20 both were refused by the
+MTA responsible for selenic.com (i.e. waste.org) with:
 
-IMHO, the best solution would be to create a generic API for
-eye-catching messages.
+	554 5.7.1 <mpm@selenic.com>: Recipient address rejected: This identity is =
+obsolete
 
-I am sure that WARN() is misused on many locations all over the kernel
-because people just wanted eye-catching message, for example, see
-https://lore.kernel.org/r/2149df3f542d25ce15d049e81d6188bb7198478c.camel-RPVEmwYF7IOGWTQfUlqXWgC/G2K4zDHf@public.gmane.org
+Also the most recent commit that involved him (ignoring "Cc: Matt
+Mackall <mpm@selenic.com>" footers) is commit 330e0a01d54c (MAINTAINERS:
+Theodore Ts'o is taking over the random driver) where he was removed
+from the entry for random number drivers in 2012.
 
-It might be a win-win solution.
+So drop him completely from the list of maintainers.
 
-Best Regards,
-Petr
+Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+---
+ MAINTAINERS | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index d7b4f32875a9..805630c67a1f 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -6812,7 +6812,6 @@ F:	drivers/media/usb/em28xx/
+=20
+ EMBEDDED LINUX
+ M:	Paul Gortmaker <paul.gortmaker@windriver.com>
+-M:	Matt Mackall <mpm@selenic.com>
+ M:	David Woodhouse <dwmw2@infradead.org>
+ L:	linux-embedded@vger.kernel.org
+ S:	Maintained
+@@ -8157,7 +8156,6 @@ F:	include/trace/events/hwmon*.h
+ K:	(devm_)?hwmon_device_(un)?register(|_with_groups|_with_info)
+=20
+ HARDWARE RANDOM NUMBER GENERATOR CORE
+-M:	Matt Mackall <mpm@selenic.com>
+ M:	Herbert Xu <herbert@gondor.apana.org.au>
+ L:	linux-crypto@vger.kernel.org
+ S:	Odd fixes
+--=20
+2.30.2
+
