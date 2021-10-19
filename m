@@ -1,83 +1,98 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH] MAINTAINERS: Remove Matt Mackall as his identity is
+From: <Tim.Bird@sony.com>
+Subject: RE: [PATCH] MAINTAINERS: Remove Matt Mackall as his identity is
  obsolete
-Date: Tue, 19 Oct 2021 15:24:08 -0700
-Message-ID: <7hlf2oejqv.fsf@baylibre.com>
+Date: Tue, 19 Oct 2021 22:54:01 +0000
+Message-ID: <BYAPR13MB250310153BF63EF3ED50F294FDBD9@BYAPR13MB2503.namprd13.prod.outlook.com>
 References: <20210920080635.253826-1-u.kleine-koenig@pengutronix.de>
  <CA+bK7J741D=DgZMNeEC5xg9kDDSaJu19QsRunVvXkBGx1mKGnQ@mail.gmail.com>
  <YW5r61ZQx+E9xfuH@pendragon.ideasonboard.com>
  <57122a67509bebdf0d1b9f5bc15db116e0124e5d.camel@infradead.org>
  <YW6UGP10hfGJ2kYy@pendragon.ideasonboard.com>
  <CAMuHMdVCrC5_AjNDJN+nwrnn=EVTfD-8ddG=FaFBBh_0UY5acQ@mail.gmail.com>
+ <7hlf2oejqv.fsf@baylibre.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-crypto-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:subject:in-reply-to:references:date:message-id
-         :mime-version:content-transfer-encoding;
-        bh=1HjkJ/s77qpPQedlx0RgSf6Pe/gtFpXgvkvC8dCGFU0=;
-        b=BxTLhk9+ebegQi7VeiuJ8gELz4u56+OXRjyqMZBoX0LqA7qfsOxJSz29PFrPQ2a5RY
-         LcxqHlpG5bSgJ3CFC57RhTH/R1HJkTDhjH7E7MLDPRTHfCwF3VUpggNElqDqkUS2LMrz
-         WrNip9ynF/P+x0QTDG0K5z9ZML7kLwU/Wcllgd4JYzKccvn0TPybqUlBx1mDIHh66jJF
-         cahqD9ok9M1Xuk1xeoHgN0qA9CMsGamHAulesB+mv/0r6Qwjtu5IdwmFHnOlMxAZ7Zge
-         8pj6oZJmyZ45JDp8Niu4HYLZB6PLDBK0UzjfbGSLG2hZeMLFKj0odEo1QVoz6EIjCDWe
-         OMuA==
-In-Reply-To: <CAMuHMdVCrC5_AjNDJN+nwrnn=EVTfD-8ddG=FaFBBh_0UY5acQ@mail.gmail.com>
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=S1;
+ bh=Kd9xClHh13aKpa4NoWFRdF7iA39wd2lz+Sbakwiumb8=;
+ b=Sd+6oa3x9hX62KbO8vE07hhtNuGRADbXPV1Fw3SGRA+fcnMZBIBUmktryqy4fnGtYNUB
+ U7mpeIuZktJGT+rUwlNXeU1JAGNtu5ATwvVChp4OERNk/YKipVlL7jk9AVx0N/o932Ne
+ 5/+jLx5K4fvrtcHEwcqWtLu6HAedjnBUgH/eIr2syHgAXgLNEm6ROzKDaCaVyq6ZDMpL
+ 2tJnqgUWlydFipdE2YGAlrWbcOVES9X0sWMJQmE0rcqA3FUiVWFjiJfpKDL2DahBstHt
+ iZXFsd/eFFFYndg6KqZX6gPDZj30qAk2k5HRbMgPBK37xVTc3Vv6iJ8tB2aRdjW4PZKx 2w== 
+In-Reply-To: <7hlf2oejqv.fsf@baylibre.com>
+Content-Language: en-US
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="iso-8859-1"
-To: Geert Uytterhoeven <geert@linux-m68k.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: David Woodhouse <dwmw2@infradead.org>, Tim Bird <tbird20d@gmail.com>, Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Linux Embedded <linux-embedded@vger.kernel.org>, Herbert Xu <herbert@gondor.apana.org.au>, Linux Crypto Mailing List <linux-crypto@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Matt Porter <mporter@konsulko.com>, Thomas Gleixner <tglx@linutronix.de>, Thomas Petazzoni <thomas.petazzoni@bootlin.com>, Tim Bird <tim.bird@sony.com>
+To: khilman@baylibre.com, geert@linux-m68k.org, laurent.pinchart@ideasonboard.com
+Cc: dwmw2@infradead.org, tbird20d@gmail.com, u.kleine-koenig@pengutronix.de, linux-kernel@vger.kernel.org, paul.gortmaker@windriver.com, linux-embedded@vger.kernel.org, herbert@gondor.apana.org.au, linux-crypto@vger.kernel.org, kernel@pengutronix.de, mporter@konsulko.com, tglx@linutronix.de, thomas.petazzoni@bootlin.com
 
-Geert Uytterhoeven <geert@linux-m68k.org> writes:
-
-> On Tue, Oct 19, 2021 at 11:48 AM Laurent Pinchart
-> <laurent.pinchart@ideasonboard.com> wrote:
->> On Tue, Oct 19, 2021 at 10:33:10AM +0100, David Woodhouse wrote:
->> > On Tue, 2021-10-19 at 09:55 +0300, Laurent Pinchart wrote:
->> > > On Mon, Oct 18, 2021 at 03:17:22PM -0600, Tim Bird wrote:
->> > > > I think an overhaul of the "EMBEDDED LINUX" MAINTAINERS entry
->> > > > is long-overdue.
->> > > >
->> > > > No offense to any of the 3 persons listed, but I think the kernel =
-developer
->> > > > community would be better served by a group of individuals with a =
-more
->> > > > current active role in embedded linux.  I have a few names I'll
->> > > > toss out for
->> > > > candidates: Matt Porter, Kevin Hilman, Thomas Gleixner,  Thomas
->> > > > Petazonni, Laurent Pinchart, and Uwe Kleine-K=C3=B6nig (and maybe =
-even
->> > > > myself).
->> > > >
->> > > > This entry in the MAINTAINERS file is somewhat special, in that it
->> > > > covers a "field of endeavor" rather than a specific set of files or
->> > > > directories.
->> > > >
->> > > > Thoughts?
->> > >
->> > > Thank you for volunteering me :-)
->> > >
->> > > I was indeed wondering about this particular MAINTAINERS entry. As it
->> > > doesn't cover any particular set of files, directories, drivers,
->> > > subsystems or architectures, what does being listed here endeavour ?
->> >
->> > Basically nothing; I was going to suggest removing it entirely. There's
->> > certainly no point listing me there any more.
->> >
->> > Once upon a time it involved a certain amount of heckling about memory
->> > usage and "your hash table doesn't need to be that large" but that ship
->> > sailed a long time ago :)
->>
->> Heckling is still an option without a MAINTAINERS entry I suppose :-)
->
-> Don't worry, I keep on sailing ;-)
->
->> I wouldn't object if we were to remove it.
->
-> +1
->
-
-Agreed.  Let's just drop this entry.
-
-Kevin
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBLZXZpbiBIaWxtYW4gPGtoaWxt
+YW5AYmF5bGlicmUuY29tPg0KPiANCj4gR2VlcnQgVXl0dGVyaG9ldmVuIDxnZWVydEBsaW51eC1t
+NjhrLm9yZz4gd3JpdGVzOg0KPiANCj4gPiBPbiBUdWUsIE9jdCAxOSwgMjAyMSBhdCAxMTo0OCBB
+TSBMYXVyZW50IFBpbmNoYXJ0DQo+ID4gPGxhdXJlbnQucGluY2hhcnRAaWRlYXNvbmJvYXJkLmNv
+bT4gd3JvdGU6DQo+ID4+IE9uIFR1ZSwgT2N0IDE5LCAyMDIxIGF0IDEwOjMzOjEwQU0gKzAxMDAs
+IERhdmlkIFdvb2Rob3VzZSB3cm90ZToNCj4gPj4gPiBPbiBUdWUsIDIwMjEtMTAtMTkgYXQgMDk6
+NTUgKzAzMDAsIExhdXJlbnQgUGluY2hhcnQgd3JvdGU6DQo+ID4+ID4gPiBPbiBNb24sIE9jdCAx
+OCwgMjAyMSBhdCAwMzoxNzoyMlBNIC0wNjAwLCBUaW0gQmlyZCB3cm90ZToNCj4gPj4gPiA+ID4g
+SSB0aGluayBhbiBvdmVyaGF1bCBvZiB0aGUgIkVNQkVEREVEIExJTlVYIiBNQUlOVEFJTkVSUyBl
+bnRyeQ0KPiA+PiA+ID4gPiBpcyBsb25nLW92ZXJkdWUuDQo+ID4+ID4gPiA+DQo+ID4+ID4gPiA+
+IE5vIG9mZmVuc2UgdG8gYW55IG9mIHRoZSAzIHBlcnNvbnMgbGlzdGVkLCBidXQgSSB0aGluayB0
+aGUga2VybmVsIGRldmVsb3Blcg0KPiA+PiA+ID4gPiBjb21tdW5pdHkgd291bGQgYmUgYmV0dGVy
+IHNlcnZlZCBieSBhIGdyb3VwIG9mIGluZGl2aWR1YWxzIHdpdGggYSBtb3JlDQo+ID4+ID4gPiA+
+IGN1cnJlbnQgYWN0aXZlIHJvbGUgaW4gZW1iZWRkZWQgbGludXguICBJIGhhdmUgYSBmZXcgbmFt
+ZXMgSSdsbA0KPiA+PiA+ID4gPiB0b3NzIG91dCBmb3INCj4gPj4gPiA+ID4gY2FuZGlkYXRlczog
+TWF0dCBQb3J0ZXIsIEtldmluIEhpbG1hbiwgVGhvbWFzIEdsZWl4bmVyLCAgVGhvbWFzDQo+ID4+
+ID4gPiA+IFBldGF6b25uaSwgTGF1cmVudCBQaW5jaGFydCwgYW5kIFV3ZSBLbGVpbmUtS8O2bmln
+IChhbmQgbWF5YmUgZXZlbg0KPiA+PiA+ID4gPiBteXNlbGYpLg0KPiA+PiA+ID4gPg0KPiA+PiA+
+ID4gPiBUaGlzIGVudHJ5IGluIHRoZSBNQUlOVEFJTkVSUyBmaWxlIGlzIHNvbWV3aGF0IHNwZWNp
+YWwsIGluIHRoYXQgaXQNCj4gPj4gPiA+ID4gY292ZXJzIGEgImZpZWxkIG9mIGVuZGVhdm9yIiBy
+YXRoZXIgdGhhbiBhIHNwZWNpZmljIHNldCBvZiBmaWxlcyBvcg0KPiA+PiA+ID4gPiBkaXJlY3Rv
+cmllcy4NCj4gPj4gPiA+ID4NCj4gPj4gPiA+ID4gVGhvdWdodHM/DQo+ID4+ID4gPg0KPiA+PiA+
+ID4gVGhhbmsgeW91IGZvciB2b2x1bnRlZXJpbmcgbWUgOi0pDQo+ID4+ID4gPg0KPiA+PiA+ID4g
+SSB3YXMgaW5kZWVkIHdvbmRlcmluZyBhYm91dCB0aGlzIHBhcnRpY3VsYXIgTUFJTlRBSU5FUlMg
+ZW50cnkuIEFzIGl0DQo+ID4+ID4gPiBkb2Vzbid0IGNvdmVyIGFueSBwYXJ0aWN1bGFyIHNldCBv
+ZiBmaWxlcywgZGlyZWN0b3JpZXMsIGRyaXZlcnMsDQo+ID4+ID4gPiBzdWJzeXN0ZW1zIG9yIGFy
+Y2hpdGVjdHVyZXMsIHdoYXQgZG9lcyBiZWluZyBsaXN0ZWQgaGVyZSBlbmRlYXZvdXIgPw0KPiA+
+PiA+DQo+ID4+ID4gQmFzaWNhbGx5IG5vdGhpbmc7IEkgd2FzIGdvaW5nIHRvIHN1Z2dlc3QgcmVt
+b3ZpbmcgaXQgZW50aXJlbHkuIFRoZXJlJ3MNCj4gPj4gPiBjZXJ0YWlubHkgbm8gcG9pbnQgbGlz
+dGluZyBtZSB0aGVyZSBhbnkgbW9yZS4NCj4gPj4gPg0KPiA+PiA+IE9uY2UgdXBvbiBhIHRpbWUg
+aXQgaW52b2x2ZWQgYSBjZXJ0YWluIGFtb3VudCBvZiBoZWNrbGluZyBhYm91dCBtZW1vcnkNCj4g
+Pj4gPiB1c2FnZSBhbmQgInlvdXIgaGFzaCB0YWJsZSBkb2Vzbid0IG5lZWQgdG8gYmUgdGhhdCBs
+YXJnZSIgYnV0IHRoYXQgc2hpcA0KPiA+PiA+IHNhaWxlZCBhIGxvbmcgdGltZSBhZ28gOikNCj4g
+Pj4NCj4gPj4gSGVja2xpbmcgaXMgc3RpbGwgYW4gb3B0aW9uIHdpdGhvdXQgYSBNQUlOVEFJTkVS
+UyBlbnRyeSBJIHN1cHBvc2UgOi0pDQo+ID4NCj4gPiBEb24ndCB3b3JyeSwgSSBrZWVwIG9uIHNh
+aWxpbmcgOy0pDQo+ID4NCj4gPj4gSSB3b3VsZG4ndCBvYmplY3QgaWYgd2Ugd2VyZSB0byByZW1v
+dmUgaXQuDQo+ID4NCj4gPiArMQ0KPiA+DQo+IA0KPiBBZ3JlZWQuICBMZXQncyBqdXN0IGRyb3Ag
+dGhpcyBlbnRyeS4NCg0KV2VsbC4uLiBMZXQgbWUgZ2l2ZSBzb21lIGhpc3RvcnksIGFuZCB0aGVu
+IHBvbnRpZmljYXRlIGEgbGl0dGxlIG9uIHRoZSBlbnRyeS4NCg0KT3JpZ2luYWxseSwgdGhpcyBl
+bnRyeSB3YXMgY3JlYXRlZCBhZnRlciBBbmRyZXcgTW9ydG9uIGdhdmUgYSB0YWxrIGF0DQphbiBl
+YXJseSBFbWJlZGRlZCBMaW51eCBDb25mZXJlbmNlLCBzYXlpbmcgdGhhdCB0aGVyZSBzaG91bGQg
+YmUgc29tZQ0KIm9tYnVkc21hbiIgZm9yIGVtYmVkZGVkIGlzc3VlcyBpbiB0aGUga2VybmVsLiAg
+VGhpcyB3YXMgaW4gMjAwOC4NCg0KVGhlIGxpbnV4LWVtYmVkZGVkIG1haWxpbmcgbGlzdCB3YXMg
+Y3JlYXRlZCBhYm91dCB0aGUgc2FtZSB0aW1lLg0KVGhlIHRoaW5raW5nIHdhcyB0aGF0IHRoZXJl
+IGFyZSBpc3N1ZXMgdGhhdCB0cmFuc2NlbmQgYW55IHBhcnRpY3VsYXINCnN1Yi1zeXN0ZW0sIGRp
+cmVjdG9yeSwgb3IgZmlsZSwgc3VjaCBhcyBib290IHRpbWUgb3Igc3lzdGVtIHNpemUgb3INCnJl
+YWwtdGltZS4gQ2hhbmdlcyB0byBrZWVwIHRoZXNlIHN5c3RlbS13aWRlIG1ldHJpY3MgaW4gY2hl
+Y2sgbWlnaHQNCm5lZWQgdGhlIGFzc2lzdGFuY2Ugb2YgYSByZXNwZWN0ZWQgdXBzdHJlYW0gbWFp
+bnRhaW5lciwgd2hvIGNvdWxkDQpndWlkZSBkZXZlbG9wZXJzIHdvcmtpbmcgaW4gdGhlc2UgYXJl
+YXMsIG9yIHdobyBjb3VsZCBoZWxwIGtlZXANCm90aGVyIGtlcm5lbCBtYWludGFpbmVycyBhcHBy
+aXNlZCBvZiByZXF1aXJlbWVudHMgaW4gdGhlc2UgYXJlYXMNCmZvciBlbWJlZGRlZCBwcm9kdWN0
+cy4NCg0KSSB3b3VsZCBzYXkgdGhhdCByZWFsdGltZSBoYXMgYmVlbiBzaGVwaGVyZGVkIHByZXR0
+eSB3ZWxsIGJ5IFRob21hcw0KR2xlaXhuZXIgKGFuZCBpdCdzIGFsbW9zdCBhbGwgdXBzdHJlYW0h
+KSwgaW5kZXBlbmRlbnQgb2YgdGhpcyBlbnRyeS4NClRoZSBvdGhlciBzeXN0ZW0td2lkZSBpc3N1
+ZXMgKGJvb3QgdGltZSBhbmQgc3lzdGVtIHNpemUpLCBwZW9wbGUNCmhhdmUgcHJldHR5IG11Y2gg
+Z2l2ZW4gdXAgb24sIGFsdGhvdWdoIHRoZXJlIGlzIHRoZSBvY2Nhc2lvbmFsDQpwYXRjaCB0byBh
+ZGRyZXNzIGEgbWljcm8tc3ltcHRvbSBvZiB0aGUgcHJvYmxlbS4gIEJ1dCBubyBvbmUNCmlzIHJp
+ZGluZyBoZXJkIG92ZXIgdGhlIGVudGlyZSBrZXJuZWwgdG8gbWFrZSBzdXJlIHRoYXQgaXQgZG9l
+c24ndA0KZ2V0IHRvbyBiaWcsIG9yIGJvb3QgdG9vIHNsb3cgKG9yIHVzZSB0b28gbXVjaCBwb3dl
+cikuDQoNClRoaXMgZW50cnksIGFuZCB0aGUgbGludXgtZW1iZWRkZWQgbWFpbGluZyBsaXN0IGl0
+c2VsZiwgaGF2ZSBub3QNCmZ1bmN0aW9uZWQgYXMgb3JpZ2luYWxseSBpbnRlbmRlZCBpbiB5ZWFy
+cywgYW5kIEkgZG91YnQgYW55b25lDQp1c2VzIHRoaXMgaW5mb3JtYXRpb24uICBUaGUgdG9vbHMg
+ZG9uJ3QgdXNlIGl0DQooZS5nLiBnZXRfbWFpbnRhaW5lcnMucGwgaXMgbmV2ZXIgZ29pbmcgdG8g
+dXNlIHRoaXMgZW50cnkgdG8NCnJlY29tbWVuZCBzb21lb25lIGJlIENDJ2VkIG9uIGFuICJlbWJl
+ZGRlZCIgcGF0Y2gpLg0KDQpTbywgSSBndWVzcyBJJ2Qgdm90ZSB0byBnZXQgcmlkIG9mIGl0IGFz
+IHdlbGwuDQoNCkJ1dCwgSSdtIGEgbGl0dGxlIHNhZCB0byBzZWUgaXQgZ28uLi4gOi0oDQpJJ2xs
+IHByb2JhYmx5IG5ldmVyIHNlZSBMaW51eCBvbiBhIGNlcmVhbCBib3guDQogLS0gVGltDQoNCg==
