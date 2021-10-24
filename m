@@ -1,8 +1,8 @@
-From: <Tim.Bird@sony.com>
-Subject: RE: [PATCH] MAINTAINERS: Remove Matt Mackall as his identity is
+From: Rob Landley <rob@landley.net>
+Subject: Re: [PATCH] MAINTAINERS: Remove Matt Mackall as his identity is
  obsolete
-Date: Tue, 19 Oct 2021 22:54:01 +0000
-Message-ID: <BYAPR13MB250310153BF63EF3ED50F294FDBD9@BYAPR13MB2503.namprd13.prod.outlook.com>
+Date: Sun, 24 Oct 2021 02:24:48 -0500
+Message-ID: <f7c3aabd-8916-a0d2-7859-7088fab3114e@landley.net>
 References: <20210920080635.253826-1-u.kleine-koenig@pengutronix.de>
  <CA+bK7J741D=DgZMNeEC5xg9kDDSaJu19QsRunVvXkBGx1mKGnQ@mail.gmail.com>
  <YW5r61ZQx+E9xfuH@pendragon.ideasonboard.com>
@@ -10,89 +10,151 @@ References: <20210920080635.253826-1-u.kleine-koenig@pengutronix.de>
  <YW6UGP10hfGJ2kYy@pendragon.ideasonboard.com>
  <CAMuHMdVCrC5_AjNDJN+nwrnn=EVTfD-8ddG=FaFBBh_0UY5acQ@mail.gmail.com>
  <7hlf2oejqv.fsf@baylibre.com>
+ <BYAPR13MB250310153BF63EF3ED50F294FDBD9@BYAPR13MB2503.namprd13.prod.outlook.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=from : to : cc :
- subject : date : message-id : references : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=S1;
- bh=Kd9xClHh13aKpa4NoWFRdF7iA39wd2lz+Sbakwiumb8=;
- b=Sd+6oa3x9hX62KbO8vE07hhtNuGRADbXPV1Fw3SGRA+fcnMZBIBUmktryqy4fnGtYNUB
- U7mpeIuZktJGT+rUwlNXeU1JAGNtu5ATwvVChp4OERNk/YKipVlL7jk9AVx0N/o932Ne
- 5/+jLx5K4fvrtcHEwcqWtLu6HAedjnBUgH/eIr2syHgAXgLNEm6ROzKDaCaVyq6ZDMpL
- 2tJnqgUWlydFipdE2YGAlrWbcOVES9X0sWMJQmE0rcqA3FUiVWFjiJfpKDL2DahBstHt
- iZXFsd/eFFFYndg6KqZX6gPDZj30qAk2k5HRbMgPBK37xVTc3Vv6iJ8tB2aRdjW4PZKx 2w== 
-In-Reply-To: <7hlf2oejqv.fsf@baylibre.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-crypto-owner@vger.kernel.org>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=landley-net.20210112.gappssmtp.com; s=20210112;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=x7OYQwoYkeRckzPRsgtpX50uWtmx0YcUa+5Fv90jHdA=;
+        b=k9Fenb2jDACs5xaVA0IoNAvx24b9tGvhpn3m6QA6xV5NDC3ucwjqxgTBPc09jH21BZ
+         W7GGfi71r1ILeZIF34CdsTx1vW1jGY+X3+DPzSZWMR3+Wiwjx3SfkeNAS0t2aWmKuoqB
+         r3HnjE830rKnSuG924s8YYUWGfHRh4U9FwHLfq7zVQEganzbUOc2P7jc2qD8fyU6A5eb
+         p0fvc2JClWzASt++PEGz1K3QvWkI3EdSfbrqzISP62VrmEg2wpMNF0iYApz+6w5DoAen
+         ZriJ3EZAUlyXkbVj3nskfRWICFRnyThSQoNKZOrBN/hxIGoQ4l9ePu3ME7/gEFnnMEhg
+         I7QQ==
+In-Reply-To: <BYAPR13MB250310153BF63EF3ED50F294FDBD9@BYAPR13MB2503.namprd13.prod.outlook.com>
 Content-Language: en-US
 List-ID: <linux-embedded.vger.kernel.org>
-Content-Type: text/plain; charset="iso-8859-1"
-To: khilman@baylibre.com, geert@linux-m68k.org, laurent.pinchart@ideasonboard.com
+Content-Type: text/plain; charset="us-ascii"
+To: Tim.Bird@sony.com, khilman@baylibre.com, geert@linux-m68k.org, laurent.pinchart@ideasonboard.com
 Cc: dwmw2@infradead.org, tbird20d@gmail.com, u.kleine-koenig@pengutronix.de, linux-kernel@vger.kernel.org, paul.gortmaker@windriver.com, linux-embedded@vger.kernel.org, herbert@gondor.apana.org.au, linux-crypto@vger.kernel.org, kernel@pengutronix.de, mporter@konsulko.com, tglx@linutronix.de, thomas.petazzoni@bootlin.com
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBLZXZpbiBIaWxtYW4gPGtoaWxt
-YW5AYmF5bGlicmUuY29tPg0KPiANCj4gR2VlcnQgVXl0dGVyaG9ldmVuIDxnZWVydEBsaW51eC1t
-NjhrLm9yZz4gd3JpdGVzOg0KPiANCj4gPiBPbiBUdWUsIE9jdCAxOSwgMjAyMSBhdCAxMTo0OCBB
-TSBMYXVyZW50IFBpbmNoYXJ0DQo+ID4gPGxhdXJlbnQucGluY2hhcnRAaWRlYXNvbmJvYXJkLmNv
-bT4gd3JvdGU6DQo+ID4+IE9uIFR1ZSwgT2N0IDE5LCAyMDIxIGF0IDEwOjMzOjEwQU0gKzAxMDAs
-IERhdmlkIFdvb2Rob3VzZSB3cm90ZToNCj4gPj4gPiBPbiBUdWUsIDIwMjEtMTAtMTkgYXQgMDk6
-NTUgKzAzMDAsIExhdXJlbnQgUGluY2hhcnQgd3JvdGU6DQo+ID4+ID4gPiBPbiBNb24sIE9jdCAx
-OCwgMjAyMSBhdCAwMzoxNzoyMlBNIC0wNjAwLCBUaW0gQmlyZCB3cm90ZToNCj4gPj4gPiA+ID4g
-SSB0aGluayBhbiBvdmVyaGF1bCBvZiB0aGUgIkVNQkVEREVEIExJTlVYIiBNQUlOVEFJTkVSUyBl
-bnRyeQ0KPiA+PiA+ID4gPiBpcyBsb25nLW92ZXJkdWUuDQo+ID4+ID4gPiA+DQo+ID4+ID4gPiA+
-IE5vIG9mZmVuc2UgdG8gYW55IG9mIHRoZSAzIHBlcnNvbnMgbGlzdGVkLCBidXQgSSB0aGluayB0
-aGUga2VybmVsIGRldmVsb3Blcg0KPiA+PiA+ID4gPiBjb21tdW5pdHkgd291bGQgYmUgYmV0dGVy
-IHNlcnZlZCBieSBhIGdyb3VwIG9mIGluZGl2aWR1YWxzIHdpdGggYSBtb3JlDQo+ID4+ID4gPiA+
-IGN1cnJlbnQgYWN0aXZlIHJvbGUgaW4gZW1iZWRkZWQgbGludXguICBJIGhhdmUgYSBmZXcgbmFt
-ZXMgSSdsbA0KPiA+PiA+ID4gPiB0b3NzIG91dCBmb3INCj4gPj4gPiA+ID4gY2FuZGlkYXRlczog
-TWF0dCBQb3J0ZXIsIEtldmluIEhpbG1hbiwgVGhvbWFzIEdsZWl4bmVyLCAgVGhvbWFzDQo+ID4+
-ID4gPiA+IFBldGF6b25uaSwgTGF1cmVudCBQaW5jaGFydCwgYW5kIFV3ZSBLbGVpbmUtS8O2bmln
-IChhbmQgbWF5YmUgZXZlbg0KPiA+PiA+ID4gPiBteXNlbGYpLg0KPiA+PiA+ID4gPg0KPiA+PiA+
-ID4gPiBUaGlzIGVudHJ5IGluIHRoZSBNQUlOVEFJTkVSUyBmaWxlIGlzIHNvbWV3aGF0IHNwZWNp
-YWwsIGluIHRoYXQgaXQNCj4gPj4gPiA+ID4gY292ZXJzIGEgImZpZWxkIG9mIGVuZGVhdm9yIiBy
-YXRoZXIgdGhhbiBhIHNwZWNpZmljIHNldCBvZiBmaWxlcyBvcg0KPiA+PiA+ID4gPiBkaXJlY3Rv
-cmllcy4NCj4gPj4gPiA+ID4NCj4gPj4gPiA+ID4gVGhvdWdodHM/DQo+ID4+ID4gPg0KPiA+PiA+
-ID4gVGhhbmsgeW91IGZvciB2b2x1bnRlZXJpbmcgbWUgOi0pDQo+ID4+ID4gPg0KPiA+PiA+ID4g
-SSB3YXMgaW5kZWVkIHdvbmRlcmluZyBhYm91dCB0aGlzIHBhcnRpY3VsYXIgTUFJTlRBSU5FUlMg
-ZW50cnkuIEFzIGl0DQo+ID4+ID4gPiBkb2Vzbid0IGNvdmVyIGFueSBwYXJ0aWN1bGFyIHNldCBv
-ZiBmaWxlcywgZGlyZWN0b3JpZXMsIGRyaXZlcnMsDQo+ID4+ID4gPiBzdWJzeXN0ZW1zIG9yIGFy
-Y2hpdGVjdHVyZXMsIHdoYXQgZG9lcyBiZWluZyBsaXN0ZWQgaGVyZSBlbmRlYXZvdXIgPw0KPiA+
-PiA+DQo+ID4+ID4gQmFzaWNhbGx5IG5vdGhpbmc7IEkgd2FzIGdvaW5nIHRvIHN1Z2dlc3QgcmVt
-b3ZpbmcgaXQgZW50aXJlbHkuIFRoZXJlJ3MNCj4gPj4gPiBjZXJ0YWlubHkgbm8gcG9pbnQgbGlz
-dGluZyBtZSB0aGVyZSBhbnkgbW9yZS4NCj4gPj4gPg0KPiA+PiA+IE9uY2UgdXBvbiBhIHRpbWUg
-aXQgaW52b2x2ZWQgYSBjZXJ0YWluIGFtb3VudCBvZiBoZWNrbGluZyBhYm91dCBtZW1vcnkNCj4g
-Pj4gPiB1c2FnZSBhbmQgInlvdXIgaGFzaCB0YWJsZSBkb2Vzbid0IG5lZWQgdG8gYmUgdGhhdCBs
-YXJnZSIgYnV0IHRoYXQgc2hpcA0KPiA+PiA+IHNhaWxlZCBhIGxvbmcgdGltZSBhZ28gOikNCj4g
-Pj4NCj4gPj4gSGVja2xpbmcgaXMgc3RpbGwgYW4gb3B0aW9uIHdpdGhvdXQgYSBNQUlOVEFJTkVS
-UyBlbnRyeSBJIHN1cHBvc2UgOi0pDQo+ID4NCj4gPiBEb24ndCB3b3JyeSwgSSBrZWVwIG9uIHNh
-aWxpbmcgOy0pDQo+ID4NCj4gPj4gSSB3b3VsZG4ndCBvYmplY3QgaWYgd2Ugd2VyZSB0byByZW1v
-dmUgaXQuDQo+ID4NCj4gPiArMQ0KPiA+DQo+IA0KPiBBZ3JlZWQuICBMZXQncyBqdXN0IGRyb3Ag
-dGhpcyBlbnRyeS4NCg0KV2VsbC4uLiBMZXQgbWUgZ2l2ZSBzb21lIGhpc3RvcnksIGFuZCB0aGVu
-IHBvbnRpZmljYXRlIGEgbGl0dGxlIG9uIHRoZSBlbnRyeS4NCg0KT3JpZ2luYWxseSwgdGhpcyBl
-bnRyeSB3YXMgY3JlYXRlZCBhZnRlciBBbmRyZXcgTW9ydG9uIGdhdmUgYSB0YWxrIGF0DQphbiBl
-YXJseSBFbWJlZGRlZCBMaW51eCBDb25mZXJlbmNlLCBzYXlpbmcgdGhhdCB0aGVyZSBzaG91bGQg
-YmUgc29tZQ0KIm9tYnVkc21hbiIgZm9yIGVtYmVkZGVkIGlzc3VlcyBpbiB0aGUga2VybmVsLiAg
-VGhpcyB3YXMgaW4gMjAwOC4NCg0KVGhlIGxpbnV4LWVtYmVkZGVkIG1haWxpbmcgbGlzdCB3YXMg
-Y3JlYXRlZCBhYm91dCB0aGUgc2FtZSB0aW1lLg0KVGhlIHRoaW5raW5nIHdhcyB0aGF0IHRoZXJl
-IGFyZSBpc3N1ZXMgdGhhdCB0cmFuc2NlbmQgYW55IHBhcnRpY3VsYXINCnN1Yi1zeXN0ZW0sIGRp
-cmVjdG9yeSwgb3IgZmlsZSwgc3VjaCBhcyBib290IHRpbWUgb3Igc3lzdGVtIHNpemUgb3INCnJl
-YWwtdGltZS4gQ2hhbmdlcyB0byBrZWVwIHRoZXNlIHN5c3RlbS13aWRlIG1ldHJpY3MgaW4gY2hl
-Y2sgbWlnaHQNCm5lZWQgdGhlIGFzc2lzdGFuY2Ugb2YgYSByZXNwZWN0ZWQgdXBzdHJlYW0gbWFp
-bnRhaW5lciwgd2hvIGNvdWxkDQpndWlkZSBkZXZlbG9wZXJzIHdvcmtpbmcgaW4gdGhlc2UgYXJl
-YXMsIG9yIHdobyBjb3VsZCBoZWxwIGtlZXANCm90aGVyIGtlcm5lbCBtYWludGFpbmVycyBhcHBy
-aXNlZCBvZiByZXF1aXJlbWVudHMgaW4gdGhlc2UgYXJlYXMNCmZvciBlbWJlZGRlZCBwcm9kdWN0
-cy4NCg0KSSB3b3VsZCBzYXkgdGhhdCByZWFsdGltZSBoYXMgYmVlbiBzaGVwaGVyZGVkIHByZXR0
-eSB3ZWxsIGJ5IFRob21hcw0KR2xlaXhuZXIgKGFuZCBpdCdzIGFsbW9zdCBhbGwgdXBzdHJlYW0h
-KSwgaW5kZXBlbmRlbnQgb2YgdGhpcyBlbnRyeS4NClRoZSBvdGhlciBzeXN0ZW0td2lkZSBpc3N1
-ZXMgKGJvb3QgdGltZSBhbmQgc3lzdGVtIHNpemUpLCBwZW9wbGUNCmhhdmUgcHJldHR5IG11Y2gg
-Z2l2ZW4gdXAgb24sIGFsdGhvdWdoIHRoZXJlIGlzIHRoZSBvY2Nhc2lvbmFsDQpwYXRjaCB0byBh
-ZGRyZXNzIGEgbWljcm8tc3ltcHRvbSBvZiB0aGUgcHJvYmxlbS4gIEJ1dCBubyBvbmUNCmlzIHJp
-ZGluZyBoZXJkIG92ZXIgdGhlIGVudGlyZSBrZXJuZWwgdG8gbWFrZSBzdXJlIHRoYXQgaXQgZG9l
-c24ndA0KZ2V0IHRvbyBiaWcsIG9yIGJvb3QgdG9vIHNsb3cgKG9yIHVzZSB0b28gbXVjaCBwb3dl
-cikuDQoNClRoaXMgZW50cnksIGFuZCB0aGUgbGludXgtZW1iZWRkZWQgbWFpbGluZyBsaXN0IGl0
-c2VsZiwgaGF2ZSBub3QNCmZ1bmN0aW9uZWQgYXMgb3JpZ2luYWxseSBpbnRlbmRlZCBpbiB5ZWFy
-cywgYW5kIEkgZG91YnQgYW55b25lDQp1c2VzIHRoaXMgaW5mb3JtYXRpb24uICBUaGUgdG9vbHMg
-ZG9uJ3QgdXNlIGl0DQooZS5nLiBnZXRfbWFpbnRhaW5lcnMucGwgaXMgbmV2ZXIgZ29pbmcgdG8g
-dXNlIHRoaXMgZW50cnkgdG8NCnJlY29tbWVuZCBzb21lb25lIGJlIENDJ2VkIG9uIGFuICJlbWJl
-ZGRlZCIgcGF0Y2gpLg0KDQpTbywgSSBndWVzcyBJJ2Qgdm90ZSB0byBnZXQgcmlkIG9mIGl0IGFz
-IHdlbGwuDQoNCkJ1dCwgSSdtIGEgbGl0dGxlIHNhZCB0byBzZWUgaXQgZ28uLi4gOi0oDQpJJ2xs
-IHByb2JhYmx5IG5ldmVyIHNlZSBMaW51eCBvbiBhIGNlcmVhbCBib3guDQogLS0gVGltDQoNCg==
+On 10/19/21 5:54 PM, Tim.Bird@sony.com wrote:
+> Well... Let me give some history, and then pontificate a little on the entry.
+> 
+> Originally, this entry was created after Andrew Morton gave a talk at
+> an early Embedded Linux Conference, saying that there should be some
+> "ombudsman" for embedded issues in the kernel.  This was in 2008.
+
+I've been doing this sort of thing on and off for a while, but I admit to
+gradually burning out over the years (sometime between
+https://www.spinics.net/lists/linux-embedded/msg00148.html and
+https://lkml.org/lkml/2017/9/13/651) as linux-kernel became actively hostile to
+hobbyists.
+
+> The linux-embedded mailing list was created about the same time.
+> The thinking was that there are issues that transcend any particular
+> sub-system, directory, or file, such as boot time or system size or
+> real-time. Changes to keep these system-wide metrics in check might
+> need the assistance of a respected upstream maintainer, who could
+> guide developers working in these areas, or who could help keep
+> other kernel maintainers apprised of requirements in these areas
+> for embedded products.
+
+Greg KH wouldn't listen to me when I was Documention maintainer. He wouldn't
+listen when I was busybox maintainer. Maintainer-without-portfolio ain't gonna
+get him to start.
+
+Keep in mind Greg and Kay Sievers were joined at the hip until Linus threw Kay
+out of Linux dev and he bogged off to systemd. If you point out things like
+"sysfs should to present a stable API to userspace" or "it's a bad idea to
+depend on magic packages like udev or systemd as things every Linux system must
+not only use verbatim from a single upstream supplier but must replace every
+time they upgrade the kernel", Greg is reliably against them.
+
+> I would say that realtime has been shepherded pretty well by Thomas
+> Gleixner (and it's almost all upstream!), independent of this entry.
+> The other system-wide issues (boot time and system size), people
+> have pretty much given up on,
+
+Nah, I've gotten them trimmed/working acceptably well in my systems. I just
+don't bother trying to poke linux-kernel about it anymore. Not since the Linux
+Foundation chased hobbyists out of Linux to the point where people literally
+started asking if hobbysts had ever really existed (circa
+https://lwn.net/Articles/563578/).
+
+Peter Anvin is actively hostile to the idea of reducing build-time dependencies
+(http://lkml.iu.edu/hypermail/linux/kernel/0802.1/4400.html) to the point that
+when my perl removal patches finally got traction in 2013 (after 5 years of
+follow-through), he switched one of his perl scripts to use bc instead so things
+like Gentoo and Linux From Scratch had to add a new build dependency for him
+(neither was installing bc before). This was after I'd convinced Denys to make
+ash do 64 bit math on 32 bit hosts so my shell translation ran under bash dash
+and ash, and then when that was rejected rewrote it in C, and when Andrew Morton
+went around him to take my patches THEN he piped up with a patch to keep the
+build complex. Circa 2018 or so when they made kconfig turing complete (so make
+oldconfig on a new kernel can "rm -rf ~" if it wants to) they added flex and
+bison as dependencies needed to run kconfig, when previously kconfig had
+.shipped versions of those files so as NOT to require that.
+
+I just bisected the v5.14 regression where building x86-64 breaks trying to
+#include "gelf.h" (from Jim Henson's Dark Crystal package), which I already
+personally fought off in 2018 for my own builds:
+
+  https://twitter.com/landley/status/1064994639487426560
+
+And the commit I just bisected it to
+(http://lkml.iu.edu/hypermail/linux/kernel/2110.3/00009.html) EXPLICITLY broke
+x86-64 (and only x86-64) to have a unique build-time dependency. In a patch that
+did NOTHING ELSE. Because why not?
+
+> although there is the occasional
+> patch to address a micro-symptom of the problem.  But no one
+> is riding herd over the entire kernel to make sure that it doesn't
+> get too big, or boot too slow (or use too much power).
+
+Because the lkml clique is circling the wagons tighter and tighter until they
+achieve a black hole via proctology? There doesn't seem to be any actual malice,
+just a whole lot of territoriality and disdain for outsiders.
+
+It's not a thing that somebody's gonna do for fun, a topic you and I emailed
+about earlier this year if I recall.
+
+> This entry, and the linux-embedded mailing list itself, have not
+> functioned as originally intended in years, and I doubt anyone
+> uses this information. The tools don't use it
+> (e.g. get_maintainers.pl is never going to use this entry to
+> recommend someone be CC'ed on an "embedded" patch).
+
+Because that perl script matches files and the maintainers entry has no files.
+(Not that cc-ing random patches to lists strikes me as particularly useful. It
+usually just drives down the signal to noise ratio of the list in my experience.
+Patch 22/47 applies to arch/sh and thus the whole series is cc'd there...)
+
+> So, I guess I'd vote to get rid of it as well.
+> 
+> But, I'm a little sad to see it go... :-(
+> I'll probably never see Linux on a cereal box.
+
+Oh there's plenty of people doing good work.
+
+I talk to Jeff Dionne daily, he's working on that sort of thing. I email Elliott
+Hughes (basically the android maintainer) multiple times per week. I talk to
+Rich Felker by voice every week (we're on the same wednesday call), and email or
+irc more often. (I feel guilty about dragging Elliott and Rich into
+https://www.mail-archive.com/austin-group-l@opengroup.org/msg08569.html because
+I underestimated the amount of bikeshedding on a list that's primarily posts
+from the bug tracker and meeting announcements/minutes.)
+
+None of them particularly participate in linux-kernel (despite Rich being
+arch/sh maintainer, and yes I poke him about that every wednesday) because that
+community comes across to us outsiders as a toxic insular clique that does not
+remotely understand any of our needs, and acts threatened if we try to explain
+them. Not because we CAN'T, but because it DOESN'T HELP WHEN WE TRY.
+
+I'm the one who's considered weird for still (occasionally) engaging. Mostly as
+bug reports like the above, or patches I post so when somebody sues I can go
+"here it is in the list archives, not my fault they didn't merge it", or
+one-offs I expect to be ignored (ala
+http://lkml.iu.edu/hypermail/linux/kernel/2110.1/03713.html) although sometimes
+there's a discussion that peters out without resolution instead (ala
+http://lkml.iu.edu/hypermail/linux/kernel/2110.1/09327.html).
+
+*shrug* Just stubborn I guess.
+
+>  -- Tim
+
+Rob
