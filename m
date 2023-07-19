@@ -1,101 +1,38 @@
-From: "Theodore Ts'o" <tytso@mit.edu>
+From: Martin Steigerwald <martin@lichtvoll.de>
 Subject: Re: File system robustness
-Date: Tue, 18 Jul 2023 17:32:12 -0400
-Message-ID: <20230718213212.GE3842864@mit.edu>
+Date: Wed, 19 Jul 2023 08:22:43 +0200
+Message-ID: <4835096.GXAFRqVoOG@lichtvoll.de>
 References: <20230717075035.GA9549@tomerius.de>
- <CAG4Y6eTU=WsTaSowjkKT-snuvZwqWqnH3cdgGoCkToH02qEkgg@mail.gmail.com>
- <20230718053017.GB6042@tomerius.de>
- <CAEYzJUGC8Yj1dQGsLADT+pB-mkac0TAC-typAORtX7SQ1kVt+g@mail.gmail.com>
  <CAG4Y6eTN1XbZ_jAdX+t2mkEN=KoNOqprrCqtX0BVfaH6AxkdtQ@mail.gmail.com>
+ <20230718213212.GE3842864@mit.edu>
 Mime-Version: 1.0
-Return-path: <linux-ext4-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1689715935; bh=60OkbbKeTbip62zLW81bcGNdcbyOjtefyk1+2g/3VaE=;
-        h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-        b=YHXOEGydXdG+I3F0VyUNF2MN5/PxUaZPy4Paf0QoCqgp76+4r2PMam19alPa0Yayu
-         cEe6xRFB1x/ZOYUzCDshBQMRt8KOeHb5gt7YXH3vJ54PPhpqotd6HQoTn+zIcSru13
-         qCoA+IMID7JVL2611GvDX4kuoaI/VcpHIVAIcATq7GpTE+laMHT+aescxDdpRWFAjq
-         DxU7ruFUnMi1iRGN9e4xTBtvPbPVMeoFvjuFMSlazdJj0rFLiukQpOT5Mj7qtHGM3b
-         60+kdhQpcH6iswdsxJ4Qx3zHCD5N4HHwcamnHhFgNU8bmgmJuldn2SAgEWCXlztYcY
-         poBQVBGfuK6vQ==
-Content-Disposition: inline
-In-Reply-To: <CAG4Y6eTN1XbZ_jAdX+t2mkEN=KoNOqprrCqtX0BVfaH6AxkdtQ@mail.gmail.com>
-List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-To: "Alan C. Assis" <acassis@gmail.com>
-Cc: =?iso-8859-1?Q?Bj=F8rn?= Forsman <bjorn.forsman@gmail.com>, Kai Tomerius <kai@tomerius.de>, linux-embedded@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, dm-devel@redhat.com
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <20230718213212.GE3842864@mit.edu>
+List-ID: <linux-embedded.vger.kernel.org>
+To: "Alan C. Assis" <acassis@gmail.com>, Theodore Ts'o <tytso@mit.edu>
+Cc: =?ISO-8859-1?Q?Bj=F8rn?= Forsman <bjorn.forsman@gmail.com>, Kai Tomerius <kai@tomerius.de>, linux-embedded@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, dm-devel@redhat.com
 
-On Tue, Jul 18, 2023 at 10:04:55AM -0300, Alan C. Assis wrote:
-> 
-> You are right, for NAND there is an old (but gold) presentation here:
-> 
-> https://elinux.org/images/7/7e/ELC2009-FlashFS-Toshiba.pdf
-> 
-> UBIFS and YAFFS2 are the way to go.
+Theodore Ts'o - 18.07.23, 23:32:12 CEST:
+> If you get it all right, you'll be fine.  On the other hand, if you
+> have crappy hardware (such as might be found for cheap in the checkout
+> counter of the local Micro Center, or in a back alley vendor in
+> Shenzhen, China), or if you do something like misconfigure the file
+> system such as using the "nobarrier" mount option "to speed things
+> up", or if you have applications that update files in an unsafe
+> manner, then you will have problems.
 
-This presentation is specifically talking about flash devices that do
-not have a flash translation layer (that is, they are using the MTD
-interface).
+Is "nobarrier" mount option still a thing? I thought those mount options 
+have been deprecated or even removed with the introduction of cache flush 
+handling in kernel 2.6.37?
 
-There are multiple kinds of flash devices, that can be exported via
-different interfaces: MTD, USB Storage, eMMC, UFS, SATA, SCSI, NVMe,
-etc.  There are also differences in terms of the sophistication of the
-Flash Translation Layer in terms of how powerful is the
-microcontroller, how much memory and persistant storage for flash
-metadata is available to the FTL, etc.
+Hmm, the mount option has been removed from XFS in in kernel 4.19 
+according to manpage, however no mention of any deprecation or removal 
+in ext4 manpage. It also does not seem to be removed in BTRFS at least 
+according to manpage btrfs(5).
 
-F2FS is a good choice for "low end flash", especially those flash
-devices that use a very simplistic mapping between LBA (block/sector
-numbers) and the physical flash to be used, and may have a very
-limited number of flash blocks that can be open for modification at a
-time.  For more sophiscated flash storage devices (e.g., SSD's and
-higher end flash devices), this consideration won't matter, and then
-the best file system to use will be very dependant on your workload.
+-- 
+Martin
 
-In answer to Kai's original question, the setup that was described
-should be fine --- assuming high quality hardware.  There are some
-flash devices that designed to handle power failures correctly; which
-is to say, if power is cut suddenly, the data used by the Flash
-Translation Layer can be corrupted, in which case data written months
-or years ago (not just recent data) could be lost.  There have been
-horror stories about wedding photographers who dropped their camera,
-and the SD Card came shooting out, and *all* of the data that was shot
-on some couple's special day was completely *gone*.
 
-Assuming that you have valid, power drop safe hardware, running fsck
-after a power cut is not necessary, at least as far as file system
-consistency is concerned.  If you have badly written userspace
-application code, then all bets can be off.  For example, consider the
-following sequence of events:
-
-1)  An application like Tuxracer truncates the top-ten score file
-2)  It then writes a new top-ten score file
-3)  <Fail to call fsync, or write the file to a foo.new and then
-       rename on top of the old version of the file>
-4)  Ut then closes the Open GL library, triggering a bug in the cruddy
-    proprietary binary-only kernel module video driver,
-    leading to an immediate system crash.
-5)  Complain to the file system developers that users' top-ten score
-    file was lost, and what are the file system developers going to
-    do about it?
-6)  File system developers start creating T-shirts saying that what userspace
-    applications really are asking for is a new open(2) flag, O_PONIES[1]
-
-[1] https://blahg.josefsipek.net/?p=364
-
-So when you talk about overall system robustness, you need robust
-hardware, you need a robust file aystem, you need to use the file
-system correctly, and you have robust userspace applications.
-
-If you get it all right, you'll be fine.  On the other hand, if you
-have crappy hardware (such as might be found for cheap in the checkout
-counter of the local Micro Center, or in a back alley vendor in
-Shenzhen, China), or if you do something like misconfigure the file
-system such as using the "nobarrier" mount option "to speed things
-up", or if you have applications that update files in an unsafe
-manner, then you will have problems.
-
-Welcome to systems engineering.  :-)
-
-						- Ted
