@@ -1,61 +1,63 @@
-From: Kai Tomerius <kai@tomerius.de>
+From: "Theodore Ts'o" <tytso@mit.edu>
 Subject: Re: File system robustness
-Date: Wed, 19 Jul 2023 12:51:39 +0200
-Message-ID: <20230719105138.GA19936@tomerius.de>
+Date: Thu, 20 Jul 2023 00:20:34 -0400
+Message-ID: <20230720042034.GA5764@mit.edu>
 References: <20230717075035.GA9549@tomerius.de>
- <CAG4Y6eTU=WsTaSowjkKT-snuvZwqWqnH3cdgGoCkToH02qEkgg@mail.gmail.com>
- <20230718053017.GB6042@tomerius.de>
- <CAEYzJUGC8Yj1dQGsLADT+pB-mkac0TAC-typAORtX7SQ1kVt+g@mail.gmail.com>
  <CAG4Y6eTN1XbZ_jAdX+t2mkEN=KoNOqprrCqtX0BVfaH6AxkdtQ@mail.gmail.com>
  <20230718213212.GE3842864@mit.edu>
+ <4835096.GXAFRqVoOG@lichtvoll.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-ext4-owner@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1689763901;
-    s=strato-dkim-0002; d=tomerius.de;
-    h=In-Reply-To:References:Message-ID:Subject:Cc:To:From:Date:Cc:Date:
-    From:Subject:Sender;
-    bh=lvLGZstJ8wKorYy8rcLHdorayXbsT3iQ7MhbnharKpE=;
-    b=M3N9Gj1Ihv8I9YUfstwtzWIFX3+X2U9J5CpGZ6oP7Di3hrzt3WsVVJv1AOAErs7Ove
-    CUu06Y8twnNwBNCHrSlB2nck7Vs5gxPbe0zltkHifMwKwABBUophuepqxMzpFUdWTCA3
-    Qap36HEHkzX9ZZ59g3CLLXZob5ZWjMinDx1ttADn2Ah8kn9kYVxYd6Lxygin2qWGA+MY
-    MruND7adGncDE2d/mlXQ2mp/HQtqB/n1A3qAQ11K0HNW7hKknR+WGr1NyByh5uKO+I5l
-    QtnBiarBhsYIBGx1XvhsYuZVbmKa+oCrmut3yi6UzUbQBfaIZEcBZGhDCEi1c+nXbBDa
-    +uiQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1689763901;
-    s=strato-dkim-0003; d=tomerius.de;
-    h=In-Reply-To:References:Message-ID:Subject:Cc:To:From:Date:Cc:Date:
-    From:Subject:Sender;
-    bh=lvLGZstJ8wKorYy8rcLHdorayXbsT3iQ7MhbnharKpE=;
-    b=izeiG+UjQBLTpfzhdAuho9H+oPiIG8m14QCvDr/1SnrXC/4LZIUG7e8H9/IuiaHNyB
-    l7nJ7yHBtDsAwrCpWADQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1689826838; bh=3XJCOb5v+cTa0HgiQv1Jsq9Fu13cCQuFEnmD+Q/7lWA=;
+        h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+        b=A9g+ho5jvo/zXkVA9BMs4PbJ7g86tVqZr6dtcpHRS2DUeJkGEsn3q+3F7HmujqSAY
+         DVK/oHf/oUarVIgbPh5Vsxvs62UJJu9kCACetLMOLnAdKcxtQ1wY4YlIZ+rA76lIkd
+         nN6MmX3BTuG7xWw6EFo8wBHmACJQEi0rlrFFZ21HpPV66dlp9gL3GrzQC+TDN368M5
+         1YEXv2OyTQuVt6a/tSI0rnARycn3eNd+YUs0CO3CevSN3qm7vFhNLMUu41IG7PmeXY
+         xSxuVTdM5NtIOoxcm5y+88XtGCi85pT9ePpdYHkp3upzuT5X+NDa7RRqbdYmRS71pt
+         Ycf675hnWvDzg==
 Content-Disposition: inline
-In-Reply-To: <20230718213212.GE3842864@mit.edu>
+In-Reply-To: <4835096.GXAFRqVoOG@lichtvoll.de>
 List-ID: <linux-embedded.vger.kernel.org>
 Content-Type: text/plain; charset="us-ascii"
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: "Alan C. Assis" <acassis@gmail.com>, =?iso-8859-1?Q?Bj=F8rn?= Forsman <bjorn.forsman@gmail.com>, linux-embedded@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, dm-devel@redhat.com
+Content-Transfer-Encoding: 7bit
+To: Martin Steigerwald <martin@lichtvoll.de>
+Cc: "Alan C. Assis" <acassis@gmail.com>, =?iso-8859-1?Q?Bj=F8rn?= Forsman <bjorn.forsman@gmail.com>, Kai Tomerius <kai@tomerius.de>, linux-embedded@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, dm-devel@redhat.com
 
-> In answer to Kai's original question, the setup that was described
-> should be fine --- assuming high quality hardware.
+On Wed, Jul 19, 2023 at 08:22:43AM +0200, Martin Steigerwald wrote:
+> 
+> Is "nobarrier" mount option still a thing? I thought those mount options 
+> have been deprecated or even removed with the introduction of cache flush 
+> handling in kernel 2.6.37?
 
-I wonder how to judge that ... it's an eMMC supposedly complying to
-some JEDEC standard, so it *should* be ok.
+Yes, it's a thing, and if your server has a UPS with a reliable power
+failure / low battery feedback, it's *possible* to engineer a reliable
+system.  Or, for example, if you have a phone with an integrated
+battery, so when you drop it the battery compartment won't open and
+the battery won't go flying out, *and* the baseboard management
+controller (BMC) will halt the CPU before the battery complete dies,
+and gives a chance for the flash storage device to commit everything
+before shutdown, *and* the BMC arranges to make sure the same thing
+happens when the user pushes and holds the power button for 30
+seconds, then it could be safe.
 
-> ... if power is cut suddenly, the data used by the Flash
-> Translation Layer can be corrupted, in which case data written months
-> or years ago (not just recent data) could be lost.
+We also use nobarrier for a scratch file systems which by definition
+go away when the borg/kubernetes job dies, and which will *never*
+survive a reboot, let alone a power failure.  In such a situation,
+there's no point sending the cache flush, because the partition will
+be mkfs'ed on reboot.  Or, in if the iSCSI or Cloud Persistent Disk
+will *always* go away when the VM dies, because any persistent state
+is saved to some cluster or distributed file store (e.g., to the MySQL
+server, or Big Table, or Spanner, etc.  In these cases, you don't
+*want* the Cache Flush operation, since skipping it reduce I/O
+overhead.
 
-At least I haven't observed anything like that up to now.
+So if you know what you are doing, in certain specialized use cases,
+nobarrier can make sense, and it is used today at my $WORK's data
+center for production jobs *all* the time.  So we won't be making
+ext4's nobarrier mount option go away; it has users.  :-)
 
-But on another aspect: how about the interaction between dm-integrity
-and ext4? Sure, they each have their own journal, and they're
-independent layers. Is there anything that could go wrong, say a block
-that can't be recovered in the dm-integrity layer, causing ext4 to run
-into trouble, e.g., an I/O error that prevents ext4 from mounting?
+Cheers,
 
-I assume tne answer is "No", but can I be sure?
-
-Thx
-regards
-Kai
+					- Ted
