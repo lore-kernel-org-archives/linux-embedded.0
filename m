@@ -1,84 +1,69 @@
-From: Martin Steigerwald <martin@lichtvoll.de>
-Subject: Nobarrier mount option (was: Re: File system robustness)
-Date: Thu, 20 Jul 2023 09:55:22 +0200
-Message-ID: <38426448.10thIPus4b@lichtvoll.de>
-References: <20230717075035.GA9549@tomerius.de> <4835096.GXAFRqVoOG@lichtvoll.de>
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: Nobarrier mount option (was: Re: File system robustness)
+Date: Fri, 21 Jul 2023 09:35:26 -0400
+Message-ID: <20230721133526.GF5764@mit.edu>
+References: <20230717075035.GA9549@tomerius.de>
+ <4835096.GXAFRqVoOG@lichtvoll.de>
  <20230720042034.GA5764@mit.edu>
+ <38426448.10thIPus4b@lichtvoll.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
 Return-path: <linux-ext4-owner@vger.kernel.org>
-In-Reply-To: <20230720042034.GA5764@mit.edu>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1689946529; bh=3EEcRPkd0RCJgKJqBYpNX5ax1tKBce8rGF0BzEn1KwQ=;
+        h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+        b=dSTyo3TGo/N35nO/x9E6UB7x3seRAOer+S+iTYCruoY06Gwmb8xfuZAzljAKh8iWN
+         lCDA6TM0fULhCMh+ORrUqmY5ZXZMK4hevVIFW3G/YE8en35h7kJIzNJwPGzjwQWMh9
+         ge6oUJvH9EWISfyVu95AFJns1BTTtLNjI7w135gZF/gd+P6bCyjyXhOgG+tU0Z+Ml8
+         7j2ZGT9SRLLHuNChYceW4S1LtU1hm2KcSQy4u/AJXyx1gtbInmUJgf05nGwgbBSMOr
+         BBVabsdgg3NY6L2QrsNiBTbkoNZjKVAyxxH7HTcAigCyWD7liEvB6Z3ik+JrOTV4TF
+         8CiRm6K3iw+zQ==
+Content-Disposition: inline
+In-Reply-To: <38426448.10thIPus4b@lichtvoll.de>
 List-ID: <linux-embedded.vger.kernel.org>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: "Alan C. Assis" <acassis@gmail.com>, =?ISO-8859-1?Q?Bj=F8rn?= Forsman <bjorn.forsman@gmail.com>, Kai Tomerius <kai@tomerius.de>, linux-embedded@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, dm-devel@redhat.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+To: Martin Steigerwald <martin@lichtvoll.de>
+Cc: "Alan C. Assis" <acassis@gmail.com>, =?iso-8859-1?Q?Bj=F8rn?= Forsman <bjorn.forsman@gmail.com>, Kai Tomerius <kai@tomerius.de>, linux-embedded@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>, dm-devel@redhat.com
 
-Theodore Ts'o - 20.07.23, 06:20:34 CEST:
-> On Wed, Jul 19, 2023 at 08:22:43AM +0200, Martin Steigerwald wrote:
-> > Is "nobarrier" mount option still a thing? I thought those mount
-> > options have been deprecated or even removed with the introduction
-> > of cache flush handling in kernel 2.6.37?
+On Thu, Jul 20, 2023 at 09:55:22AM +0200, Martin Steigerwald wrote:
 > 
-> Yes, it's a thing, and if your server has a UPS with a reliable power
-> failure / low battery feedback, it's *possible* to engineer a reliable
-> system.  Or, for example, if you have a phone with an integrated
-> battery, so when you drop it the battery compartment won't open and
-> the battery won't go flying out, *and* the baseboard management
-> controller (BMC) will halt the CPU before the battery complete dies,
-> and gives a chance for the flash storage device to commit everything
-> before shutdown, *and* the BMC arranges to make sure the same thing
-> happens when the user pushes and holds the power button for 30
-> seconds, then it could be safe.
+> I thought that nowadays a cache flush would be (almost) a no-op in the 
+> case the storage receiving it is backed by such reliability measures. 
+> I.e. that the hardware just says "I am ready" when having the I/O 
+> request in stable storage whatever that would be, even in case that 
+> would be battery backed NVRAM and/or temporary flash.
 
-Thanks for clarification. I am aware that something like this can be 
-done. But I did not think that is would be necessary to explicitly 
-disable barriers, or should I more accurately write cache flushes, in 
-such a case:
+That *can* be true if the storage subsystem has the reliability
+measures.  For example, if have a $$$ EMC storage array, then sure, it
+has an internal UPS backup and it will know that it can ignore that
+CACHE FLUSH request.
 
-I thought that nowadays a cache flush would be (almost) a no-op in the 
-case the storage receiving it is backed by such reliability measures. 
-I.e. that the hardware just says "I am ready" when having the I/O 
-request in stable storage whatever that would be, even in case that 
-would be battery backed NVRAM and/or temporary flash.
+However, if you have *building* a storage system, the storage device
+might be a HDD who has no idea that that it doesn't need to worry
+about power drops.  Consider if you will, a rack of servers, each with
+a dozen or more HDD's.  There is a rack-level battery backup, and the
+rack is located in a data center with diesel generators with enough
+fuel supply to keep the entire data center, plus cooling, going for
+days.  The rack of servers is part of a cluster file system.  So when
+a file write to a cluster file system is performed, the cluster file
+system will pick three servers, each in a different rack, and each
+rack is in a different power distribution domain.  That way, even the
+entry-level switch on the rack dies, or the Power Distribution Unit
+(PDU) servicing a group of racks blows up, the data will be available
+on the other two servers.
 
-At least that is what I thought was the background for not doing the 
-"nobarrier" thing anymore: Let the storage below decide whether it is 
-safe to basically ignore cache flushes by answering them (almost) 
-immediately.
+> At least that is what I thought was the background for not doing the 
+> "nobarrier" thing anymore: Let the storage below decide whether it is 
+> safe to basically ignore cache flushes by answering them (almost) 
+> immediately.
 
-However, not sending the cache flushes in the first place would likely 
-still be more efficient although as far as I am aware block layer does not 
-return back a success / failure information to the upper layers anymore 
-since kernel 2.6.37.
+The problem is that the storage below (e.g., the HDD) has no idea that
+all of this redundancy exists.  Only the system adminsitrator who is
+configuring the file sysetm will know.  And if you are runninig a
+hyper-scale cloud system, this kind of custom made system will be
+much, MUCH, cheaper than buying a huge number of $$$ EMC storage
+arrays.
 
-Seems I got to update my Linux Performance tuning slides about this once 
-again.
+Cheers,
 
-> We also use nobarrier for a scratch file systems which by definition
-> go away when the borg/kubernetes job dies, and which will *never*
-> survive a reboot, let alone a power failure.  In such a situation,
-> there's no point sending the cache flush, because the partition will
-> be mkfs'ed on reboot.  Or, in if the iSCSI or Cloud Persistent Disk
-> will *always* go away when the VM dies, because any persistent state
-> is saved to some cluster or distributed file store (e.g., to the MySQL
-> server, or Big Table, or Spanner, etc.  In these cases, you don't
-> *want* the Cache Flush operation, since skipping it reduce I/O
-> overhead.
-
-Hmm, right.
-
-> So if you know what you are doing, in certain specialized use cases,
-> nobarrier can make sense, and it is used today at my $WORK's data
-> center for production jobs *all* the time.  So we won't be making
-> ext4's nobarrier mount option go away; it has users.  :-)
-
-I now wonder why XFS people deprecated and even removed those mount 
-options. But maybe I better ask them separately instead of adding their 
-list in CC. Probably by forwarding this mail to the XFS mailing list 
-later on.
-
-Best,
--- 
-Martin
-
-
+					- Ted
