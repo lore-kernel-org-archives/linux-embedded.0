@@ -1,53 +1,68 @@
-Return-Path: <linux-embedded-owner@vger.kernel.org>
+Return-Path: <linux-embedded+bounces-1-linux-embedded=archiver.kernel.org@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F74BC0018A
-	for <linux-embedded@archiver.kernel.org>; Mon,  6 Nov 2023 13:12:07 +0000 (UTC)
-Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232027AbjKFNKZ (ORCPT
-        <rfc822;linux-embedded@archiver.kernel.org>);
-        Mon, 6 Nov 2023 08:10:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42478 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231865AbjKFNKX (ORCPT
-        <rfc822;linux-embedded@vger.kernel.org>);
-        Mon, 6 Nov 2023 08:10:23 -0500
+Received: from sy.mirrors.kernel.org (sy.mirrors.kernel.org [147.75.48.161])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.lore.kernel.org (Postfix) with ESMTPS id B381FC05021
+	for <linux-embedded@archiver.kernel.org>; Fri, 10 Nov 2023 18:52:03 +0000 (UTC)
+Received: from smtp.subspace.kernel.org (wormhole.subspace.kernel.org [52.25.139.140])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by sy.mirrors.kernel.org (Postfix) with ESMTPS id 377DDB20F41
+	for <linux-embedded@archiver.kernel.org>; Fri, 10 Nov 2023 18:52:02 +0000 (UTC)
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 061BF3AC1D;
+	Fri, 10 Nov 2023 18:51:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="Mq8O9/RS"
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96AC239878;
+	Fri, 10 Nov 2023 18:51:47 +0000 (UTC)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C2D1BD
-        for <linux-embedded@vger.kernel.org>; Mon,  6 Nov 2023 05:10:21 -0800 (PST)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 84F7CC433C7;
-        Mon,  6 Nov 2023 13:10:20 +0000 (UTC)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CF051199F;
+	Fri, 10 Nov 2023 10:51:46 -0800 (PST)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 70210C433C9;
+	Fri, 10 Nov 2023 18:51:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1699276220;
-        bh=Fp3jKmNqjf+DoLNCaJsNPhAt/c5ime8ePk1o28XWcbI=;
-        h=Date:From:To:Subject:From;
-        b=uMVfjvtWWE6sRwdvsOJ08qbIyuDYyJoghq54KBzGmK7XFFNv2DoHEYmzeRuuwOfW7
-         Jrzvjin4B+cgCZDiKVUYy1isIiChVkzpuRgn9s3aSIZs+Tvarb/YWWnoTUz3uPzI6q
-         4odWrYpkPJLVzAjb1qluyxcoHqwH8CaUna8e1j3g=
-Date:   Mon, 6 Nov 2023 08:10:19 -0500
-From:   Konstantin Ryabitsev <konstantin@linuxfoundation.org>
-To:     linux-embedded@vger.kernel.org
-Subject: PSA: migrating linux-embedded to new vger infrastructure
-Message-ID: <20231106-godlike-pink-griffin-912ae6@nitro>
+	s=korg; t=1699642305;
+	bh=5EsdFpo+n5trUWFX0VrZzBijTcaJAiV+yar8oOtb48I=;
+	h=Date:From:To:Subject:From;
+	b=Mq8O9/RS2b9oSO2hvUh7dQH1MEn7Wc4xSuWopL0Bpg7JIjs4oe3HCDBcDn6hOGfzk
+	 laEnQ92cnxQaPYuCgwG6EJLP2chjZodN/036lEwFAtclH+623CZzYNA8PH94yCR5Dn
+	 nRg0hH+cDfrSz9O9DgeYKIR7/4XCTMBCH8rAKWaI=
+Date: Fri, 10 Nov 2023 13:51:44 -0500
+From: Konstantin Ryabitsev <konstantin@linuxfoundation.org>
+To: linux-embedded@vger.kernel.org, linux-ext4@vger.kernel.org, 
+	linux-fbdev@vger.kernel.org, linux-fpga@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
+	linux-gcc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-hams@vger.kernel.org, 
+	linux-hexagon@vger.kernel.org, linux-hotplug@vger.kernel.org, linux-hwmon@vger.kernel.org, 
+	linux-i2c@vger.kernel.org, linux-ia64@vger.kernel.org, linux-ide@vger.kernel.org, 
+	linux-iio@vger.kernel.org, linux-input@vger.kernel.org, linux-integrity@vger.kernel.org, 
+	linux-kbuild@vger.kernel.org, linux-kselftest@vger.kernel.org, linux-leds@vger.kernel.org, 
+	linux-m68k@vger.kernel.org, linux-man@vger.kernel.org, linux-media@vger.kernel.org, 
+	linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-msdos@vger.kernel.org
+Subject: PSA: This list is being migrated (no action required)
+Message-ID: <cfriwrxovqzcrptf74ccq52lcqj2nsergucufsz6wlh45fdnz3@z5e5y2lowbq2>
+Precedence: bulk
+X-Mailing-List: linux-embedded@vger.kernel.org
+List-Id: <linux-embedded.vger.kernel.org>
+List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
+List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Precedence: bulk
-List-ID: <linux-embedded.vger.kernel.org>
-X-Mailing-List: linux-embedded@vger.kernel.org
 
-Good day!
+Hello, all:
 
-I plan to migrate the linux-embedded@vger.kernel.org list to the new
-infrastructure this week. We're still doing it list-by-list to make sure that
-we don't run into scaling issues with the new infra.
+This list is being migrated to new vger infrastructure. No action is required
+on your part and there will be no change in how you interact with this list
+after the migration is completed.
 
-The migration will be performed live and should not require any downtime.
-There will be no changes to how anyone interacts with the list after
-migration is completed, so no action is required on anyone's part.
+There will be a short 30-minute delay to the list archives on lore.kernel.org.
+Once the backend work is done, I will follow up with another message.
 
-Please let me know if you have any concerns.
-
-Best wishes,
 -K
+
