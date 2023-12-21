@@ -1,299 +1,328 @@
-Received: from mail-ed1-f48.google.com (mail-ed1-f48.google.com [209.85.208.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-vi1eur04on2058.outbound.protection.outlook.com [40.107.8.58])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 526F41643D
-	for <linux-embedded@vger.kernel.org>; Thu, 21 Dec 2023 08:29:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99AF851C20
+	for <linux-embedded@vger.kernel.org>; Thu, 21 Dec 2023 10:04:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pliops.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pliops.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="d8RoMZ5p"
-Received: by mail-ed1-f48.google.com with SMTP id 4fb4d7f45d1cf-552fba34d69so571121a12.3
-        for <linux-embedded@vger.kernel.org>; Thu, 21 Dec 2023 00:29:35 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=pliops.onmicrosoft.com header.i=@pliops.onmicrosoft.com header.b="HiAU76Sg"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=asaEZIRHDBsBUI57bbYhtGXfze5/ZzawVYu4VtdEwk7ei9de0c2aobdQBUgficE5RNHLvIQlIN83J7X8KG2VuaeeeQqljLM3URJwvewKSM0SUKeELh1FCexb8MMuE74JJiU24Kdz37/bbL9zn/AFssLiq2efxblc+nJnUNWDdwrGsyc2+p/HxlD9B+4TnBUqkKDQsczTAX3rIEDsfeCTJgCvs600y1naA4yAFoA8RNrpdJx+aa1HqxBUKg6mSGsmmDvmXuR7gJ1nTToc9ySkzmr9ssOBnTB4vFV9LjbAuXMchLuFRNB+e/QCDBoXfonIYzgdyU7US/lARMSADNNFfQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ZoKnG44nT1jpiukbQkxFjSLamKpIyW2Xot2wiC6Trfc=;
+ b=XuCNeRRHjHffBssUMaPRk5OxqrgYkx5tMdKEM40CsseCf/TtH8irvBVVa+cjIUHq9nIRU0nz4MLEO9wozfZD0QULGET42b0/YpoNyk+r+XKhcWmdi7MDqmFYb05Ui4y4f0i3/WznKkEep0uz8FDVeUE6KfBaEKnovK7UnJq5nxHoOM1mqcuKbzmRen10ldk7kn8XyLAh8c45Tu+nL+UOnEi8y31UpPi87t2uZhi9WMA1u+3E8oPNgaPCkFUvWsJmIqWGXLo/sdKduyuLHr9D7j8WchHu++ZQu1dmQtThToyCj2UzvttIEGL7GNaYHkq6UgLuvSmdqM9pFe4aGKYFLQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=pliops.com; dmarc=pass action=none header.from=pliops.com;
+ dkim=pass header.d=pliops.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1703147373; x=1703752173; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:to:subject:user-agent:mime-version:date:message-id:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=keox0DkM3CegP4QKaDEPTxgUp2Vc8ZV9cGudclqpnpY=;
-        b=d8RoMZ5p6tK+JzrhivrTmykoIKYk1sw+pe1aImun72h8k4WuszBL7DzWnSJSmJ0pl0
-         69d53MYp7Pvzavwez8XLSa/m22NyN+ua+JqjWUd3OVifIzTzCj9sWu5zOg9tpaDyTR/P
-         kV3VbaQlNWx/eAbKNaFrh1vEH/T1hUexJtn5VlSNLTCz/q6I3tvp0+2rA3NG/ECqfVBa
-         6Ohy+FNETww/9ycJk5EmgDytrrOyX2OMsWMDhVWXRdq+rrksfoLYLmZaRWy+hqs/NXoD
-         wk5n34gHgg7v0IyFcOX9uWWUNtrRMnfwXS6ICth5CODo+9D8bhWBAOPLUGjXc5bB0sQV
-         t1Jg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1703147373; x=1703752173;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=keox0DkM3CegP4QKaDEPTxgUp2Vc8ZV9cGudclqpnpY=;
-        b=HxqwWa4H1D8Y8kq6vL5+T5nknYuEWFM3zXScWACo+TdlN20ColuXSPIYx3QJUEuX4K
-         esTekaXkvEinBNLEJpkGQLpSaF2gYmCC14KxsKy2GZ0fwzwJJqdItddqe7pkYxSfdnDU
-         H6mrPugr3okema5Wq0QtkY5VtINwK+rhmJLwpYIM/udOjCB7xonLlpOmoJUPmAhsrnj8
-         v2oqtuugRKo2qWnW+J7VqKrlnVEMV3BG2uzfkII10SQR2sN+qDgURoJZ21VT/8CNQRUd
-         kWjPBg7Tt+UQeG9O8mj7YlSC9dOFjkGosgQ0WymBobe6Kve4tj2JwsBzvD7PKmwdMGO+
-         BGyQ==
-X-Gm-Message-State: AOJu0Yw3aHzMfZY6zx2gXOLNRTVCTDMIUht7UZ9mHbd68NvMoTulRmzk
-	NmDXWHLx3pOMTat6CXCBsOA=
-X-Google-Smtp-Source: AGHT+IHuKdbvNZthSY48KCerhN9ZRfC+NUtbA54DHUlTSjBf1QC+pIaMiQR/yJgf3fVO9L2qTOlrKw==
-X-Received: by 2002:a17:906:a3d8:b0:a26:98e6:74d8 with SMTP id ca24-20020a170906a3d800b00a2698e674d8mr1020022ejb.111.1703147373275;
-        Thu, 21 Dec 2023 00:29:33 -0800 (PST)
-Received: from ?IPV6:2003:df:bf1f:bd00:6b99:9f3f:d5fe:7a63? (p200300dfbf1fbd006b999f3fd5fe7a63.dip0.t-ipconnect.de. [2003:df:bf1f:bd00:6b99:9f3f:d5fe:7a63])
-        by smtp.gmail.com with ESMTPSA id h1-20020a17090791c100b00a235e5139d5sm687191ejz.110.2023.12.21.00.29.32
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 21 Dec 2023 00:29:32 -0800 (PST)
-Message-ID: <b139c136-0417-4ac5-b99a-ba999d7418a0@gmail.com>
-Date: Thu, 21 Dec 2023 09:29:31 +0100
+ d=pliops.onmicrosoft.com; s=selector2-pliops-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ZoKnG44nT1jpiukbQkxFjSLamKpIyW2Xot2wiC6Trfc=;
+ b=HiAU76SglZXkiwLEF/eB26cTvfwzSQpZ+7GyGzxKprzdBWLoqB4DqIkbKMrdB9bTGVHGEY2KBPUKZNtsIQrw5cWk2x8ThaDDtn9ek//21D0KAHYMXWAkaLzvGMDuv815CR46HhEb58LPoXVN49WjCXyjmyLORinV6cFPmHAz97A=
+Received: from PR3P195MB0555.EURP195.PROD.OUTLOOK.COM (2603:10a6:102:30::14)
+ by AS2P195MB2110.EURP195.PROD.OUTLOOK.COM (2603:10a6:20b:546::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7113.18; Thu, 21 Dec
+ 2023 10:04:41 +0000
+Received: from PR3P195MB0555.EURP195.PROD.OUTLOOK.COM
+ ([fe80::e7d5:dbc3:8189:4db]) by PR3P195MB0555.EURP195.PROD.OUTLOOK.COM
+ ([fe80::e7d5:dbc3:8189:4db%5]) with mapi id 15.20.7113.019; Thu, 21 Dec 2023
+ 10:04:41 +0000
+From: Lior Weintraub <liorw@pliops.com>
+To: Dirk Behme <dirk.behme@gmail.com>, "linux-embedded@vger.kernel.org"
+	<linux-embedded@vger.kernel.org>
+Subject: RE: Debugging early SError exception
+Thread-Topic: Debugging early SError exception
+Thread-Index:
+ AdowyEKblFg0JVI3SA+/EmbfJ29lCgBggDAAAAz/kZAAAI82AABX4rEgAAHyH4AAAN0OUA==
+Date: Thu, 21 Dec 2023 10:04:41 +0000
+Message-ID:
+ <PR3P195MB0555AA259A8E616B6C5BA823C395A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
+References:
+ <PR3P195MB05556D6B225E93A2B5BFFE88C391A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
+ <b17b9901-5007-4d12-99d9-be531360227e@gmail.com>
+ <PR3P195MB05550310B202221101564038C397A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
+ <375eeb75-dde5-4806-a2d7-7f4e97342ee8@gmail.com>
+ <PR3P195MB05553792B68C8A71BC08E4A5C395A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
+ <b139c136-0417-4ac5-b99a-ba999d7418a0@gmail.com>
+In-Reply-To: <b139c136-0417-4ac5-b99a-ba999d7418a0@gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=pliops.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: PR3P195MB0555:EE_|AS2P195MB2110:EE_
+x-ms-office365-filtering-correlation-id: 68e1e8d1-3a4e-484c-0061-08dc020c4008
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ tHcwRKf0BR44hLKTodoTAiEUpu+bO2frlwbkHdq+u1oiyyWPXwJNLWFog2E7TO4NeyixQzVrDv8yxw0SNbGYHmpbNGJ7duypj0ewn01SrklALlBr+0Kh6oQ/khqRzCJ3NgfhMSwhEb8YR/MeOk0QNQKxDOjffYEf7wq3ACyTmUczWjIDBWQmbfYtVXlzfat/caTisvidY+/GP8r30CeJmUkMcSHFRbLruow7xInUim7k52HFzaKhGvQZLsB14sQ9nhPltC+NBFRgXKd2mz7TUYFxjHBgeZggiiVU0mzkcGD9KpefC6TP9DmycXyiBGuvNMTmVVeB31vsldXeExVnSIQ6LzWKLEjccC0nPRxiyRFnA5I+Seds+gJj5JbvwzLVd5XSvO4QAX+pVye6uFltdtJ8FGxFv02owCSELxRh3hEUyLlrBO6bkLEkR0X93F6RJ87ONDdA2enLQSLa0yfgqdpKqM9F9D/8dzfP4eCZmepek2+/kgbXBlIk+fi8LFNlFpz+rpFBvR1Qs3sG2NdVKPzF4xKLsqnQi1etuULw+Wj/hqYFNYWEnKuZnctpxlBFu5iy7LozMjFu0VwEifKu73S6L9N5JWEWiprad8OTQM1SKB83eb2VWknOWzn+1YOIwXJpWgJqOuOOInyO4oLshk9sfghvfRmr6mHdU3N1jAgXIrOcil16XCIOO0sAIIzhEJIzuaqZjyIaLWKti/CaYw==
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PR3P195MB0555.EURP195.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230031)(366004)(39840400004)(376002)(346002)(396003)(136003)(230473577357003)(230273577357003)(230373577357003)(230173577357003)(230922051799003)(451199024)(64100799003)(1800799012)(186009)(71200400001)(6506007)(33656002)(478600001)(966005)(41300700001)(316002)(110136005)(55016003)(83380400001)(7696005)(9686003)(53546011)(86362001)(66556008)(66476007)(66446008)(64756008)(76116006)(66946007)(8676002)(66899024)(8936002)(52536014)(122000001)(38100700002)(2906002)(30864003)(5660300002)(38070700009)(3480700007);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?SDBWaVBiS01lbVRFRGZWV2NvMzcvOC9rTng3dHFpdHo5TFNlUFRNNGk0WTJZ?=
+ =?utf-8?B?a1R3TUpIekZDVFNKLzNZT2tYRWIyREdjVENIREdQY0lGYjdnY1lreXRMeXdw?=
+ =?utf-8?B?aVo3OEJYWm84YW9kbzJTZjVtdFlzT015LytQbWdmYUt1SVAyd0lldTZnK1Fo?=
+ =?utf-8?B?UXJWbDlTTFhLUW1CbGlXMHNjL0EybktaV3U2YWUraFJyZW1XVmZDbTRkcTdU?=
+ =?utf-8?B?dlFReUxQRXMxc1hib1RXSElxVytuRE53d3U2VFltZXl2dGlucFJnek51U2l2?=
+ =?utf-8?B?bnhhOEd2ZjNkdGZldSs0MkFTVDVkTkkweW5ub05HQzU5SXpIcEREbGZXSlRP?=
+ =?utf-8?B?WE90dHdMbHZUU01EMWR2SiswODVDSmYvR3g5SG1seFM2ZW5Tdll2U0ZyVHA5?=
+ =?utf-8?B?d1p4djZ0SFVFUG5Zdks2TlRFRHZMK2tjd1ZsSU1lanhXZXgwejJnK0VEdnFx?=
+ =?utf-8?B?VW1iSkhWZGJXOElDazlHM3lHTENBbnZ5cUhTSzFrWjZSK05sUFkzUXFteTlS?=
+ =?utf-8?B?bVc3bFlFYkNYL3VCVWRISGpiNDVURkRBYXpVYVdDT1VrQThZVFNsMlBzOGQ3?=
+ =?utf-8?B?NVZ6UE9jbnVYTE1wUVRjN2swdFlWRzA2Y1lkeC9jWGhseC9YZ05FSDcvTTRM?=
+ =?utf-8?B?ejhQcndlMVc4eFFqUXA3V2NKSTlJMkZtcmxIL1ltNGQ0RU1GMDRPbkNWaUVJ?=
+ =?utf-8?B?N2M5YmxycWY2blBoN1dWbTVEOTVqdCtGV1diQ3pnOUorMlNNcCtWbVVraVQx?=
+ =?utf-8?B?MnpVSzFnN3RPakE1cjVsTnVOa3gvY0puUkY2SG40NW1QcGhQcEdEWFBEU1Fl?=
+ =?utf-8?B?NS9xQ1BpRWtGaVBHTGdNR1FJZkk4UnQwRXJCL1dvZlVYb3BlTWo3cHZtcjVk?=
+ =?utf-8?B?WEc1RGRrZERROGcvZHZnYmhhSzZzajA1czZyWUN1ODV2aG9kRTJFYU5EV05i?=
+ =?utf-8?B?Nkx3c0ZEbmlTSks0dlZ5V2xtSngxd1JwWDVaTHU1c1F2RTArVi9QNmdiVERO?=
+ =?utf-8?B?MWdZazU1UmlMZ2ViUnpaK2dQaUdnZGNLY2FTN200VVg3VVZDRUdRbkNoRG5x?=
+ =?utf-8?B?UVZKdXpJdHFuOGVGK1RWS2VCMWtMaytMVnNROUNLVEd3aCtsZFB6ZmtMM2NG?=
+ =?utf-8?B?S3FJNFJ0RXVDRDZIMmZYaDFFdUthVDhsTXF5MFRia3VzVm1mR3RCVDZPakM3?=
+ =?utf-8?B?OGpONEJ4YVkxZ0dhVzJPVTh5bGV2L1NrVXU4bVpYZktVc2xFWlJIa0RxdXlI?=
+ =?utf-8?B?NzhJSi9mc2l3YmpKMTR6a1NxUW9leXZFb0tjVUZJdFFGKzVpaHlUT2liRkc0?=
+ =?utf-8?B?S29WMDBiZzVZRm9pRWd0ZmxRVHJoUjQzNjJTbTBRMnZJalA1OXJIQloxczB1?=
+ =?utf-8?B?OVg1d2xPNEIxRW45Rm5TQmtjc1RQUGE4M2Z4a1JUNWxqMEx6elJsQ3VGS25F?=
+ =?utf-8?B?enFRZ2tOaEppTnpETUJYSU5veXdEYUk1clNGeUNLTkZXTU5CdjNlaWt2OFFp?=
+ =?utf-8?B?WloyVmVRbENLRmN2L3Nya2x3cE9FbFpNWXp3R2tJOHJOL2RTNlhzZDlOMjMw?=
+ =?utf-8?B?eERaaGJaLzk3blpFNFYyK3psMWxRK0FBV0p0MDdQOUgyUnF5bVR2cjk2L3pQ?=
+ =?utf-8?B?TU5IMEw4VlBXZEFoTWUyMzBWV1Mzd1pmc2Z6ek5rQlpUNVFpN0EyL2Y0SSt1?=
+ =?utf-8?B?SWh0SXNyTUgvNE5PRjlHUGNJNEk4N2ZYTzZlV0NjeXErcHpnRVh5N01Cem9J?=
+ =?utf-8?B?M0xRWjUwWmJDai9NRUY5NEt3T1V3cGhvNnJWZFVBak1QbnA2cmVQUXBKVCsv?=
+ =?utf-8?B?WEtCalVkcStZR1JoT3BZRkRuaG91cEM3dDF5aXphbDczVGdsblVOQ014UVBW?=
+ =?utf-8?B?TjIvSjhmZ2NoWEx2MGJTbTIxQUZkQW5Pa0NkLzY4L3FTL2VWYmtINGpwNW5l?=
+ =?utf-8?B?N0FTZWt0WkpzU25MdWZTdUp4WE5xWDVhdEVERmVXZExMRlBnVFZYYklkYjVR?=
+ =?utf-8?B?ZmQ2NkE4d0pVWkluMVFsL2lnNUdESjhXSWNUZnNYdzN0VVYrajl5VkF3U2Vl?=
+ =?utf-8?B?ejdNaWU5Tm5RejcxR21mbU9mRkxmTWdBd29JL20xSXJrZFdJQlRMMVJoY1c0?=
+ =?utf-8?B?bDhwMlVkdi8rU1puV05TZHgrQXNFYjlJZGduQ0NlSzFXK3F3TXBXTDg4eERy?=
+ =?utf-8?Q?iTYXFuYvP/9sBmfss7pdVKQ=3D?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: Debugging early SError exception
-To: Lior Weintraub <liorw@pliops.com>,
- "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-References: <PR3P195MB05556D6B225E93A2B5BFFE88C391A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
- <b17b9901-5007-4d12-99d9-be531360227e@gmail.com>
- <PR3P195MB05550310B202221101564038C397A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
- <375eeb75-dde5-4806-a2d7-7f4e97342ee8@gmail.com>
- <PR3P195MB05553792B68C8A71BC08E4A5C395A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
-Content-Language: de-AT-frami
-From: Dirk Behme <dirk.behme@gmail.com>
-In-Reply-To: <PR3P195MB05553792B68C8A71BC08E4A5C395A@PR3P195MB0555.EURP195.PROD.OUTLOOK.COM>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-OriginatorOrg: pliops.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PR3P195MB0555.EURP195.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: 68e1e8d1-3a4e-484c-0061-08dc020c4008
+X-MS-Exchange-CrossTenant-originalarrivaltime: 21 Dec 2023 10:04:41.6338
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 40fe8f47-55ac-403a-a5ab-1be3dd209cf8
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: T29QE46VwhR6odGfzpKkVmDeH2t7nNURS7qFKWhQyZ5cgPBHRHchSIhhQYDHC2/K/iUxIFB7vejUNTRn9wUYSA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS2P195MB2110
 
-Am 21.12.23 um 08:43 schrieb Lior Weintraub:
-> Hi Dirk,
-> 
-> We found that the issue was at the early stages of Barebox (a.k.a U-BOOT v2).
-
-Glad to hear that! :)
-
-> Our implementation of putc_ll (on debug_ll) was writing into the UART Tx FIFO without checking if the FIFO is full.
-> Once the fifo got full it caused this SError probably because the UART IP generated an apberror signal.
-
-Thanks for the report!
-
-> Now the Linux is running and doesn't report the SError again but now we face another issue.
-> We see that the PC is getting into a "report_bug" function.
-> The Linux doesn't print anything to the UART (probably since it hasn't got to the point where the console is configured?).
-
-For cases like this using earlyprintk is usually a good option. Check 
-the Linux kernel serial console (UART) dirver of you SoC if it 
-supports it. In the end it should be "just" a function in the serial 
-console driver which outputs the console data via polling before 
-(later) the interrupt driven console part takes over.
-
-Best regards
-
-Dirk
-
-
-> Since our debug means are limited it can take some time to find the root cause.
-> 
-> I will keep you posted and update our findings.
-> Love to hear your thoughts,
-> 
-> Cheers,
-> Lior.
->   
-> 
->> -----Original Message-----
->> From: Dirk Behme <dirk.behme@gmail.com>
->> Sent: Tuesday, December 19, 2023 3:37 PM
->> To: Lior Weintraub <liorw@pliops.com>; linux-embedded@vger.kernel.org
->> Subject: Re: Debugging early SError exception
->>
->> [You don't often get email from dirk.behme@gmail.com. Learn why this is
->> important at https://aka.ms/LearnAboutSenderIdentification ]
->>
->> CAUTION: External Sender
->>
->> Am 19.12.23 um 14:23 schrieb Lior Weintraub:
->>> Thanks Dirk,
->>
->> Welcome :)
->>
->> In case you find the root cause it would be nice to get some generic
->> description of it so that we can learn something :)
->>
->> Best regards
->>
->> Dirk
->>
->>
->>>> -----Original Message-----
->>>> From: Dirk Behme <dirk.behme@gmail.com>
->>>> Sent: Tuesday, December 19, 2023 9:09 AM
->>>> To: Lior Weintraub <liorw@pliops.com>; linux-embedded@vger.kernel.org
->>>> Subject: Re: Debugging early SError exception
->>>>
->>>> [You don't often get email from dirk.behme@gmail.com. Learn why this is
->>>> important at https://aka.ms/LearnAboutSenderIdentification ]
->>>>
->>>> CAUTION: External Sender
->>>>
->>>> Am 17.12.23 um 22:32 schrieb Lior Weintraub:
->>>>> Hi,
->>>>>
->>>>> We have a new SoC with eLinux porting (kernel v6.5).
->>>>> This SoC is ARM64 (A53) single core based device.
->>>>> It runs correctly on QEMU but fails with SError on emulation platform
->>>> (Synopsys Zebu running our SoC model).
->>>>> There is no debugger connected to this emulation but there are several
->>>> debug capabilities we can use:
->>>>> 1. Generating wave dump of CPU signals
->>>>> 2. Generate a Tarmac log
->>>>> 3. UART
->>>>>
->>>>> Since the SError happens at early stages of Linux boot the UART is not
->>>> enabled yet.
->>>>>    From the Tarmac log we can see:
->>>>>     3824884521 ps  ES  (ffff800080760888:d65f03c0) O el1h_ns:   ret
->>>> (parse_early_param)
->>>>>     3824884522 ps  ES  (ffff800080763a60:d2801800) O el1h_ns:   mov
->> x0,
->>>> #0xc0   //      #192    (setup_arch)
->>>>>                        R X0 (AARCH64) 00000000 000000c0
->>>>>     3824884523 ps  ES  (ffff800080763a64:d51b4220) O el1h_ns:   msr
->>>> daif,   x0      (setup_arch)
->>>>>                        R CPSR 600000c5
->>>>>     3824884529 ps  ES  System Error (Abort)
->>>>>                        EXC [0x380] SError/vSError Current EL with SP_ELx
->>>>>                        R ESR_EL1 (AARCH64) bf000002
->>>>>                        R CPSR 600003c5
->>>>>                        R SPSR_EL1 (AARCH64) 600000c5
->>>>>                        R ELR_EL1 (AARCH64) ffff8000 80763a68
->>>>>     3824884925 ps  ES  (ffff800080010b80:d10543ff) O el1h_ns:   sub
->> sp,
->>>> sp,     #0x150  (vectors)
->>>>>                        R SP_EL1 (AARCH64) ffff8000 808f3c50
->>>>>     3824884925 ps  ES  (ffff800080010b84:8b2063ff) O el1h_ns:   add
->> sp,
->>>> sp,     x0      (vectors)
->>>>>                        R SP_EL1 (AARCH64) ffff8000 808f3d10
->>>>>     3824884926 ps  ES  (ffff800080010b88:cb2063e0) O el1h_ns:   sub
->> x0,
->>>> sp,     x0      (vectors)
->>>>>                        R X0 (AARCH64) ffff8000 808f3c50
->>>>>     3824884927 ps  ES  (ffff800080010b8c:37700080) O el1h_ns:   tbnz
->> w0,
->>>> #14,    ffff800080010b9c        <vectors+0x39c>         (vectors)
->>>>>     3824884935 ps  ES  (ffff800080010b90:cb2063e0) O el1h_ns:   sub
->> x0,
->>>> sp,     x0      (vectors)
->>>>>                        R X0 (AARCH64) 00000000 000000c0
->>>>>     3824884937 ps  ES  (ffff800080010b94:cb2063ff) O el1h_ns:   sub     sp,
->>>> sp,     x0      (vectors)
->>>>>                        R SP_EL1 (AARCH64) ffff8000 808f3c50
->>>>>     3824884938 ps  ES  (ffff800080010b98:140001ef) O el1h_ns:   b
->>>> ffff800080011354        <el1h_64_error>         (vectors)
->>>>>
->>>>> If I understand correctly, the exception happened sometime earlier and
->> only
->>>> now Linux boot code (setup_arch) opened the exception handling and as a
->>>> result we immediately jump to the SError exception handler.
->>>>
->>>>
->>>> Yes, that sounds reasonable. If I understood correctly, you are
->>>> running something "quite new" on some software (QEMU) and hardware
->>>> (Synopsis) simulators.
->>>>
->>>> That would mean that you have new hardware with e.g. new memory map
->>>> not used before. What you describe might sound like in the code before
->>>> Linux (boot loader) there is anything resulting in the SError. This
->>>> might be an access to non-existing or non-enabled hardware. I.e. it
->>>> might be that you try to access (read/write) an address what is not
->>>> available, yet (or just invalid). It's hard to debug that. In case you
->>>> are able to modify the code before Linux (the boot loader?) you might
->>>> try to enable SError exceptions, there, too. To get it earlier and
->>>> with that make the search window smaller. I'm not that familiar with
->>>> QEMU, but could you try to trace which (all?) hardware accesses your
->>>> code does. And with that analyse all accesses and with that check if
->>>> all these accesses are valid even on the hardware (Synopsis) emulation
->>>> system? That should be checked from valid address and from hardware
->>>> subsystem enablement point of view.
->>>>
->>>> Hth,
->>>>
->>>> Dirk
->>>>
->>>>
->>>>>    From the Linux source:
->>>>>         parse_early_param();
->>>>>
->>>>>         dynamic_scs_init();
->>>>>
->>>>>         /*
->>>>>          * Unmask asynchronous aborts and fiq after bringing up possible
->>>>>          * earlycon. (Report possible System Errors once we can report this
->>>>>          * occurred).
->>>>>          */
->>>>>         local_daif_restore(DAIF_PROCCTX_NOIRQ); <---- This is when we get
->> the
->>>> exception.
->>>>>
->>>>> After some kernel hacking (replacing printk) we could extract the logs:
->>>>> 6Booting Linux on physical CPU 0x0000000000 [0x410fd034]
->>>>> 5Linux version 6.5.0 (pliops@dev-liorw) (aarch64-buildroot-linux-gnu-
->>>> gcc.br_real (Buildroot 2023.02.1-95-g8391404e23) 11.3.0, GNU ld (GNU
->>>> Binutils) 2.38) #101 SMP Sun Dec 17 20:09:06 IST 2023
->>>>> 6Machine model: Pliops Spider MK-I EVK
->>>>> 2SError Interrupt on CPU0, code 0x00000000bf000002 -- SError
->>>>> CPU: 0 PID: 0 Comm: swapper Not tainted 6.5.0 #101
->>>>> Hardware name: Pliops Spider MK-I EVK (DT)
->>>>> pstate: 600000c5 (nZCv daIF -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
->>>>> pc : setup_arch+0x13c/0x5ac
->>>>> lr : setup_arch+0x134/0x5ac
->>>>> sp : ffff8000808f3da0
->>>>> x29: ffff8000808f3da0c x28: 0000000008758074c x27:
->>>> 0000000005e31b58c
->>>>> x26: 0000000000000001c x25: 0000000007e5f728c x24:
->>>> ffff8000808f8000c
->>>>> x23: ffff8000808f8600c x22: ffff8000807b6000c x21:
->> ffff800080010000c
->>>>> x20: ffff800080a1e000c x19: fffffbfffddfe190c x18: 000000002266684ac
->>>>> x17: 00000000fcad60bbc x16: 0000000000001800c x15:
->>>> 0000000000000008c
->>>>> x14: ffffffffffffffffc x13: 0000000000000000c x12: 0000000000000003c
->>>>> x11: 0101010101010101c x10: ffffffffffee87dfc x9 :
->> 0000000000000038c
->>>>> x8 : 0101010101010101c x7 : 7f7f7f7f7f7f7f7fc x6 :
->> 0000000000000001c
->>>>> x5 : 0000000000000000c x4 : 8000000000000000c x3 :
->>>> 0000000000000065c
->>>>> x2 : 0000000000000000c x1 : 0000000000000000c x0 :
->>>> 00000000000000c0c
->>>>> 0Kernel panic - not syncing: Asynchronous SError Interrupt
->>>>> CPU: 0 PID: 0 Comm: swapper Not tainted 6.5.0 #101
->>>>> Hardware name: Pliops Spider MK-I EVK (DT)
->>>>> Call trace:
->>>>>     dump_backtrace+0x9c/0xd0
->>>>>     show_stack+0x14/0x1c
->>>>>     dump_stack_lvl+0x44/0x58
->>>>>     dump_stack+0x14/0x1c
->>>>>     panic+0x2e0/0x33c
->>>>>     nmi_panic+0x68/0x6c
->>>>>     arm64_serror_panic+0x68/0x78
->>>>>     do_serror+0x24/0x54
->>>>>     el1h_64_error_handler+0x2c/0x40
->>>>>     el1h_64_error+0x64/0x68
->>>>>     setup_arch+0x13c/0x5ac
->>>>>     start_kernel+0x5c/0x5b8
->>>>>     __primary_switched+0xb4/0xbc
->>>>> 0---[ end Kernel panic - not syncing: Asynchronous SError Interrupt ]---
->>>>>
->>>>> Can you please advice how to proceed with debugging?
->>>>>
->>>>> Thanks in advanced,
->>>>> Cheers,
->>>>> Lior.
->>>>>
->>>>>
->>>>
->>>
-> 
-
+VGhhbmtzIERpcmssDQoNClJlZ2FyZGluZyB0aGUgZWFybHlwcmludGssIG5vdCBzdXJlIEkga25v
+dyBob3cgdG8gbWFrZSBpdCB3b3JrLg0KSSBoYXZlIGRlZmluZWQgQ09ORklHX0VBUkxZX1BSSU5U
+Sz15IGFuZCBDT05GSUdfREVCVUdfTEw9eSBvbiBteSBjb25maWcgYnV0IGl0IGRvZXNuJ3Qgc2Vl
+bSB0byB3b3JrLg0KRG8gSSBuZWVkIHRvIHBhc3Mgc29tZXRoaW5nIGluIHRoZSBib290YXJncyBm
+cm9tIHRoZSBVLUJPT1Q/DQpEbyBJIG5lZWQgdG8gYWRkIHRoYXQgaW50byBteSBkZXZpY2UgdHJl
+ZT8NCihUcmllZCB0byBzZXQgYm9vdGFyZ3MgPSAiY29uc29sZT10dHlTMCwxMTUyMDAgZWFybHlw
+cmludGsiOyB1bmRlciAiY2hvc2VuIiBvbiBteSBEVCBidXQgaXQgZGlkbid0IHdvcmspDQoNClRo
+ZSBVQVJUIEkgYW0gdXNpbmcgaXMgInNucHMsZHctYXBiLXVhcnQiLg0KDQpMYXN0IHdlZWssIHRv
+IG91dHB1dCB0aGUgZWFybHkgbG9ncyBJIGhhdmUgaW1wbGVtZW50ZWQgdGhpcyBoYWNrOg0KMS4g
+TW9kaWZ5IHByaW50ayBtYWNybyB0byBydW4gbXkgcHJpbnRfZnVuYw0KMi4gVGhpcyBwcmludF9m
+dW5jIHdyb3RlIHRoZSBjaGFyYWN0ZXJzIGludG8gYSBzaW5nbGUgZ2xvYmFsIHZhcmlhYmxlICh1
+MzIgc2ltdWxfdWFydDspDQozLiBHZXQgdGhlIGFkZHJlc3MgbG9jYXRpb24gb2YgdGhpcyBnbG9i
+YWwgdmFyaWFibGUgYW5kIGV4dHJhY3QgYWxsIHdyaXRlcyB0byBpdCBmcm9tIHRoZSBUYXJtYWMg
+bG9ncy4NCg0KVGhpcyBpcyBhIHZlcnkgc2xvdyBhbmQgdGVkaW91cyBwcm9jZXNzIGJ1dCBpdCBo
+ZWxwZWQgbWUgaWRlbnRpZnkgdGhlIGluaXRpYWwgU0Vycm9yLg0KSW5pdGlhbGx5IEkgdGhvdWdo
+dCBJIGNhbiB3cml0ZSBkaXJlY3RseSBpbnRvIHRoZSBVQVJUIEZJRk8gcmVnaXN0ZXIgKHdoaWNo
+IEkga25vdyB0aGUgYWRkcmVzcykgYnV0IHRoaXMgZGlkbid0IHdvcmsgYmVjYXVzZSBMaW51eCBh
+bHJlYWR5IHNldHVwIHRoZSBNTVUgc28gSSBndWVzcyBJIG5lZWQgdG8ga25vdyB0aGUgdmlydHVh
+bCBhZGRyZXNzIG9mIHRoaXMgRklGTy4NCkRvIEkgbmVlZCB0byB1c2UgX19waHlzX3RvX3ZpcnQg
+b2Ygc29tZSBzb3J0Pw0KDQpDaGVlcnMsDQpMaW9yLg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQo+IEZyb206IERpcmsgQmVobWUgPGRpcmsuYmVobWVAZ21haWwuY29tPg0KPiBTZW50
+OiBUaHVyc2RheSwgRGVjZW1iZXIgMjEsIDIwMjMgMTA6MzAgQU0NCj4gVG86IExpb3IgV2VpbnRy
+YXViIDxsaW9yd0BwbGlvcHMuY29tPjsgbGludXgtZW1iZWRkZWRAdmdlci5rZXJuZWwub3JnDQo+
+IFN1YmplY3Q6IFJlOiBEZWJ1Z2dpbmcgZWFybHkgU0Vycm9yIGV4Y2VwdGlvbg0KPiANCj4gW1lv
+dSBkb24ndCBvZnRlbiBnZXQgZW1haWwgZnJvbSBkaXJrLmJlaG1lQGdtYWlsLmNvbS4gTGVhcm4g
+d2h5IHRoaXMgaXMNCj4gaW1wb3J0YW50IGF0IGh0dHBzOi8vYWthLm1zL0xlYXJuQWJvdXRTZW5k
+ZXJJZGVudGlmaWNhdGlvbiBdDQo+IA0KPiBDQVVUSU9OOiBFeHRlcm5hbCBTZW5kZXINCj4gDQo+
+IEFtIDIxLjEyLjIzIHVtIDA4OjQzIHNjaHJpZWIgTGlvciBXZWludHJhdWI6DQo+ID4gSGkgRGly
+aywNCj4gPg0KPiA+IFdlIGZvdW5kIHRoYXQgdGhlIGlzc3VlIHdhcyBhdCB0aGUgZWFybHkgc3Rh
+Z2VzIG9mIEJhcmVib3ggKGEuay5hIFUtQk9PVA0KPiB2MikuDQo+IA0KPiBHbGFkIHRvIGhlYXIg
+dGhhdCEgOikNCj4gDQo+ID4gT3VyIGltcGxlbWVudGF0aW9uIG9mIHB1dGNfbGwgKG9uIGRlYnVn
+X2xsKSB3YXMgd3JpdGluZyBpbnRvIHRoZSBVQVJUIFR4DQo+IEZJRk8gd2l0aG91dCBjaGVja2lu
+ZyBpZiB0aGUgRklGTyBpcyBmdWxsLg0KPiA+IE9uY2UgdGhlIGZpZm8gZ290IGZ1bGwgaXQgY2F1
+c2VkIHRoaXMgU0Vycm9yIHByb2JhYmx5IGJlY2F1c2UgdGhlIFVBUlQgSVANCj4gZ2VuZXJhdGVk
+IGFuIGFwYmVycm9yIHNpZ25hbC4NCj4gDQo+IFRoYW5rcyBmb3IgdGhlIHJlcG9ydCENCj4gDQo+
+ID4gTm93IHRoZSBMaW51eCBpcyBydW5uaW5nIGFuZCBkb2Vzbid0IHJlcG9ydCB0aGUgU0Vycm9y
+IGFnYWluIGJ1dCBub3cgd2UNCj4gZmFjZSBhbm90aGVyIGlzc3VlLg0KPiA+IFdlIHNlZSB0aGF0
+IHRoZSBQQyBpcyBnZXR0aW5nIGludG8gYSAicmVwb3J0X2J1ZyIgZnVuY3Rpb24uDQo+ID4gVGhl
+IExpbnV4IGRvZXNuJ3QgcHJpbnQgYW55dGhpbmcgdG8gdGhlIFVBUlQgKHByb2JhYmx5IHNpbmNl
+IGl0IGhhc24ndCBnb3QgdG8NCj4gdGhlIHBvaW50IHdoZXJlIHRoZSBjb25zb2xlIGlzIGNvbmZp
+Z3VyZWQ/KS4NCj4gDQo+IEZvciBjYXNlcyBsaWtlIHRoaXMgdXNpbmcgZWFybHlwcmludGsgaXMg
+dXN1YWxseSBhIGdvb2Qgb3B0aW9uLiBDaGVjaw0KPiB0aGUgTGludXgga2VybmVsIHNlcmlhbCBj
+b25zb2xlIChVQVJUKSBkaXJ2ZXIgb2YgeW91IFNvQyBpZiBpdA0KPiBzdXBwb3J0cyBpdC4gSW4g
+dGhlIGVuZCBpdCBzaG91bGQgYmUgImp1c3QiIGEgZnVuY3Rpb24gaW4gdGhlIHNlcmlhbA0KPiBj
+b25zb2xlIGRyaXZlciB3aGljaCBvdXRwdXRzIHRoZSBjb25zb2xlIGRhdGEgdmlhIHBvbGxpbmcg
+YmVmb3JlDQo+IChsYXRlcikgdGhlIGludGVycnVwdCBkcml2ZW4gY29uc29sZSBwYXJ0IHRha2Vz
+IG92ZXIuDQo+IA0KPiBCZXN0IHJlZ2FyZHMNCj4gDQo+IERpcmsNCj4gDQo+IA0KPiA+IFNpbmNl
+IG91ciBkZWJ1ZyBtZWFucyBhcmUgbGltaXRlZCBpdCBjYW4gdGFrZSBzb21lIHRpbWUgdG8gZmlu
+ZCB0aGUgcm9vdA0KPiBjYXVzZS4NCj4gPg0KPiA+IEkgd2lsbCBrZWVwIHlvdSBwb3N0ZWQgYW5k
+IHVwZGF0ZSBvdXIgZmluZGluZ3MuDQo+ID4gTG92ZSB0byBoZWFyIHlvdXIgdGhvdWdodHMsDQo+
+ID4NCj4gPiBDaGVlcnMsDQo+ID4gTGlvci4NCj4gPg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IERpcmsgQmVobWUgPGRpcmsuYmVobWVAZ21haWwuY29t
+Pg0KPiA+PiBTZW50OiBUdWVzZGF5LCBEZWNlbWJlciAxOSwgMjAyMyAzOjM3IFBNDQo+ID4+IFRv
+OiBMaW9yIFdlaW50cmF1YiA8bGlvcndAcGxpb3BzLmNvbT47IGxpbnV4LWVtYmVkZGVkQHZnZXIu
+a2VybmVsLm9yZw0KPiA+PiBTdWJqZWN0OiBSZTogRGVidWdnaW5nIGVhcmx5IFNFcnJvciBleGNl
+cHRpb24NCj4gPj4NCj4gPj4gW1lvdSBkb24ndCBvZnRlbiBnZXQgZW1haWwgZnJvbSBkaXJrLmJl
+aG1lQGdtYWlsLmNvbS4gTGVhcm4gd2h5IHRoaXMgaXMNCj4gPj4gaW1wb3J0YW50IGF0IGh0dHBz
+Oi8vYWthLm1zL0xlYXJuQWJvdXRTZW5kZXJJZGVudGlmaWNhdGlvbiBdDQo+ID4+DQo+ID4+IENB
+VVRJT046IEV4dGVybmFsIFNlbmRlcg0KPiA+Pg0KPiA+PiBBbSAxOS4xMi4yMyB1bSAxNDoyMyBz
+Y2hyaWViIExpb3IgV2VpbnRyYXViOg0KPiA+Pj4gVGhhbmtzIERpcmssDQo+ID4+DQo+ID4+IFdl
+bGNvbWUgOikNCj4gPj4NCj4gPj4gSW4gY2FzZSB5b3UgZmluZCB0aGUgcm9vdCBjYXVzZSBpdCB3
+b3VsZCBiZSBuaWNlIHRvIGdldCBzb21lIGdlbmVyaWMNCj4gPj4gZGVzY3JpcHRpb24gb2YgaXQg
+c28gdGhhdCB3ZSBjYW4gbGVhcm4gc29tZXRoaW5nIDopDQo+ID4+DQo+ID4+IEJlc3QgcmVnYXJk
+cw0KPiA+Pg0KPiA+PiBEaXJrDQo+ID4+DQo+ID4+DQo+ID4+Pj4gLS0tLS1PcmlnaW5hbCBNZXNz
+YWdlLS0tLS0NCj4gPj4+PiBGcm9tOiBEaXJrIEJlaG1lIDxkaXJrLmJlaG1lQGdtYWlsLmNvbT4N
+Cj4gPj4+PiBTZW50OiBUdWVzZGF5LCBEZWNlbWJlciAxOSwgMjAyMyA5OjA5IEFNDQo+ID4+Pj4g
+VG86IExpb3IgV2VpbnRyYXViIDxsaW9yd0BwbGlvcHMuY29tPjsgbGludXgtDQo+IGVtYmVkZGVk
+QHZnZXIua2VybmVsLm9yZw0KPiA+Pj4+IFN1YmplY3Q6IFJlOiBEZWJ1Z2dpbmcgZWFybHkgU0Vy
+cm9yIGV4Y2VwdGlvbg0KPiA+Pj4+DQo+ID4+Pj4gW1lvdSBkb24ndCBvZnRlbiBnZXQgZW1haWwg
+ZnJvbSBkaXJrLmJlaG1lQGdtYWlsLmNvbS4gTGVhcm4gd2h5IHRoaXMNCj4gaXMNCj4gPj4+PiBp
+bXBvcnRhbnQgYXQgaHR0cHM6Ly9ha2EubXMvTGVhcm5BYm91dFNlbmRlcklkZW50aWZpY2F0aW9u
+IF0NCj4gPj4+Pg0KPiA+Pj4+IENBVVRJT046IEV4dGVybmFsIFNlbmRlcg0KPiA+Pj4+DQo+ID4+
+Pj4gQW0gMTcuMTIuMjMgdW0gMjI6MzIgc2NocmllYiBMaW9yIFdlaW50cmF1YjoNCj4gPj4+Pj4g
+SGksDQo+ID4+Pj4+DQo+ID4+Pj4+IFdlIGhhdmUgYSBuZXcgU29DIHdpdGggZUxpbnV4IHBvcnRp
+bmcgKGtlcm5lbCB2Ni41KS4NCj4gPj4+Pj4gVGhpcyBTb0MgaXMgQVJNNjQgKEE1Mykgc2luZ2xl
+IGNvcmUgYmFzZWQgZGV2aWNlLg0KPiA+Pj4+PiBJdCBydW5zIGNvcnJlY3RseSBvbiBRRU1VIGJ1
+dCBmYWlscyB3aXRoIFNFcnJvciBvbiBlbXVsYXRpb24gcGxhdGZvcm0NCj4gPj4+PiAoU3lub3Bz
+eXMgWmVidSBydW5uaW5nIG91ciBTb0MgbW9kZWwpLg0KPiA+Pj4+PiBUaGVyZSBpcyBubyBkZWJ1
+Z2dlciBjb25uZWN0ZWQgdG8gdGhpcyBlbXVsYXRpb24gYnV0IHRoZXJlIGFyZSBzZXZlcmFsDQo+
+ID4+Pj4gZGVidWcgY2FwYWJpbGl0aWVzIHdlIGNhbiB1c2U6DQo+ID4+Pj4+IDEuIEdlbmVyYXRp
+bmcgd2F2ZSBkdW1wIG9mIENQVSBzaWduYWxzDQo+ID4+Pj4+IDIuIEdlbmVyYXRlIGEgVGFybWFj
+IGxvZw0KPiA+Pj4+PiAzLiBVQVJUDQo+ID4+Pj4+DQo+ID4+Pj4+IFNpbmNlIHRoZSBTRXJyb3Ig
+aGFwcGVucyBhdCBlYXJseSBzdGFnZXMgb2YgTGludXggYm9vdCB0aGUgVUFSVCBpcyBub3QNCj4g
+Pj4+PiBlbmFibGVkIHlldC4NCj4gPj4+Pj4gICAgRnJvbSB0aGUgVGFybWFjIGxvZyB3ZSBjYW4g
+c2VlOg0KPiA+Pj4+PiAgICAgMzgyNDg4NDUyMSBwcyAgRVMgIChmZmZmODAwMDgwNzYwODg4OmQ2
+NWYwM2MwKSBPIGVsMWhfbnM6ICAgcmV0DQo+ID4+Pj4gKHBhcnNlX2Vhcmx5X3BhcmFtKQ0KPiA+
+Pj4+PiAgICAgMzgyNDg4NDUyMiBwcyAgRVMgIChmZmZmODAwMDgwNzYzYTYwOmQyODAxODAwKSBP
+IGVsMWhfbnM6ICAgbW92DQo+ID4+IHgwLA0KPiA+Pj4+ICMweGMwICAgLy8gICAgICAjMTkyICAg
+IChzZXR1cF9hcmNoKQ0KPiA+Pj4+PiAgICAgICAgICAgICAgICAgICAgICAgIFIgWDAgKEFBUkNI
+NjQpIDAwMDAwMDAwIDAwMDAwMGMwDQo+ID4+Pj4+ICAgICAzODI0ODg0NTIzIHBzICBFUyAgKGZm
+ZmY4MDAwODA3NjNhNjQ6ZDUxYjQyMjApIE8gZWwxaF9uczogICBtc3INCj4gPj4+PiBkYWlmLCAg
+IHgwICAgICAgKHNldHVwX2FyY2gpDQo+ID4+Pj4+ICAgICAgICAgICAgICAgICAgICAgICAgUiBD
+UFNSIDYwMDAwMGM1DQo+ID4+Pj4+ICAgICAzODI0ODg0NTI5IHBzICBFUyAgU3lzdGVtIEVycm9y
+IChBYm9ydCkNCj4gPj4+Pj4gICAgICAgICAgICAgICAgICAgICAgICBFWEMgWzB4MzgwXSBTRXJy
+b3IvdlNFcnJvciBDdXJyZW50IEVMIHdpdGggU1BfRUx4DQo+ID4+Pj4+ICAgICAgICAgICAgICAg
+ICAgICAgICAgUiBFU1JfRUwxIChBQVJDSDY0KSBiZjAwMDAwMg0KPiA+Pj4+PiAgICAgICAgICAg
+ICAgICAgICAgICAgIFIgQ1BTUiA2MDAwMDNjNQ0KPiA+Pj4+PiAgICAgICAgICAgICAgICAgICAg
+ICAgIFIgU1BTUl9FTDEgKEFBUkNINjQpIDYwMDAwMGM1DQo+ID4+Pj4+ICAgICAgICAgICAgICAg
+ICAgICAgICAgUiBFTFJfRUwxIChBQVJDSDY0KSBmZmZmODAwMCA4MDc2M2E2OA0KPiA+Pj4+PiAg
+ICAgMzgyNDg4NDkyNSBwcyAgRVMgIChmZmZmODAwMDgwMDEwYjgwOmQxMDU0M2ZmKSBPIGVsMWhf
+bnM6ICAgc3ViDQo+ID4+IHNwLA0KPiA+Pj4+IHNwLCAgICAgIzB4MTUwICAodmVjdG9ycykNCj4g
+Pj4+Pj4gICAgICAgICAgICAgICAgICAgICAgICBSIFNQX0VMMSAoQUFSQ0g2NCkgZmZmZjgwMDAg
+ODA4ZjNjNTANCj4gPj4+Pj4gICAgIDM4MjQ4ODQ5MjUgcHMgIEVTICAoZmZmZjgwMDA4MDAxMGI4
+NDo4YjIwNjNmZikgTyBlbDFoX25zOiAgIGFkZA0KPiA+PiBzcCwNCj4gPj4+PiBzcCwgICAgIHgw
+ICAgICAgKHZlY3RvcnMpDQo+ID4+Pj4+ICAgICAgICAgICAgICAgICAgICAgICAgUiBTUF9FTDEg
+KEFBUkNINjQpIGZmZmY4MDAwIDgwOGYzZDEwDQo+ID4+Pj4+ICAgICAzODI0ODg0OTI2IHBzICBF
+UyAgKGZmZmY4MDAwODAwMTBiODg6Y2IyMDYzZTApIE8gZWwxaF9uczogICBzdWINCj4gPj4geDAs
+DQo+ID4+Pj4gc3AsICAgICB4MCAgICAgICh2ZWN0b3JzKQ0KPiA+Pj4+PiAgICAgICAgICAgICAg
+ICAgICAgICAgIFIgWDAgKEFBUkNINjQpIGZmZmY4MDAwIDgwOGYzYzUwDQo+ID4+Pj4+ICAgICAz
+ODI0ODg0OTI3IHBzICBFUyAgKGZmZmY4MDAwODAwMTBiOGM6Mzc3MDAwODApIE8gZWwxaF9uczog
+ICB0Ym56DQo+ID4+IHcwLA0KPiA+Pj4+ICMxNCwgICAgZmZmZjgwMDA4MDAxMGI5YyAgICAgICAg
+PHZlY3RvcnMrMHgzOWM+ICAgICAgICAgKHZlY3RvcnMpDQo+ID4+Pj4+ICAgICAzODI0ODg0OTM1
+IHBzICBFUyAgKGZmZmY4MDAwODAwMTBiOTA6Y2IyMDYzZTApIE8gZWwxaF9uczogICBzdWINCj4g
+Pj4geDAsDQo+ID4+Pj4gc3AsICAgICB4MCAgICAgICh2ZWN0b3JzKQ0KPiA+Pj4+PiAgICAgICAg
+ICAgICAgICAgICAgICAgIFIgWDAgKEFBUkNINjQpIDAwMDAwMDAwIDAwMDAwMGMwDQo+ID4+Pj4+
+ICAgICAzODI0ODg0OTM3IHBzICBFUyAgKGZmZmY4MDAwODAwMTBiOTQ6Y2IyMDYzZmYpIE8gZWwx
+aF9uczogICBzdWINCj4gc3AsDQo+ID4+Pj4gc3AsICAgICB4MCAgICAgICh2ZWN0b3JzKQ0KPiA+
+Pj4+PiAgICAgICAgICAgICAgICAgICAgICAgIFIgU1BfRUwxIChBQVJDSDY0KSBmZmZmODAwMCA4
+MDhmM2M1MA0KPiA+Pj4+PiAgICAgMzgyNDg4NDkzOCBwcyAgRVMgIChmZmZmODAwMDgwMDEwYjk4
+OjE0MDAwMWVmKSBPIGVsMWhfbnM6ICAgYg0KPiA+Pj4+IGZmZmY4MDAwODAwMTEzNTQgICAgICAg
+IDxlbDFoXzY0X2Vycm9yPiAgICAgICAgICh2ZWN0b3JzKQ0KPiA+Pj4+Pg0KPiA+Pj4+PiBJZiBJ
+IHVuZGVyc3RhbmQgY29ycmVjdGx5LCB0aGUgZXhjZXB0aW9uIGhhcHBlbmVkIHNvbWV0aW1lIGVh
+cmxpZXIgYW5kDQo+ID4+IG9ubHkNCj4gPj4+PiBub3cgTGludXggYm9vdCBjb2RlIChzZXR1cF9h
+cmNoKSBvcGVuZWQgdGhlIGV4Y2VwdGlvbiBoYW5kbGluZyBhbmQgYXMNCj4gYQ0KPiA+Pj4+IHJl
+c3VsdCB3ZSBpbW1lZGlhdGVseSBqdW1wIHRvIHRoZSBTRXJyb3IgZXhjZXB0aW9uIGhhbmRsZXIu
+DQo+ID4+Pj4NCj4gPj4+Pg0KPiA+Pj4+IFllcywgdGhhdCBzb3VuZHMgcmVhc29uYWJsZS4gSWYg
+SSB1bmRlcnN0b29kIGNvcnJlY3RseSwgeW91IGFyZQ0KPiA+Pj4+IHJ1bm5pbmcgc29tZXRoaW5n
+ICJxdWl0ZSBuZXciIG9uIHNvbWUgc29mdHdhcmUgKFFFTVUpIGFuZA0KPiBoYXJkd2FyZQ0KPiA+
+Pj4+IChTeW5vcHNpcykgc2ltdWxhdG9ycy4NCj4gPj4+Pg0KPiA+Pj4+IFRoYXQgd291bGQgbWVh
+biB0aGF0IHlvdSBoYXZlIG5ldyBoYXJkd2FyZSB3aXRoIGUuZy4gbmV3IG1lbW9yeQ0KPiBtYXAN
+Cj4gPj4+PiBub3QgdXNlZCBiZWZvcmUuIFdoYXQgeW91IGRlc2NyaWJlIG1pZ2h0IHNvdW5kIGxp
+a2UgaW4gdGhlIGNvZGUgYmVmb3JlDQo+ID4+Pj4gTGludXggKGJvb3QgbG9hZGVyKSB0aGVyZSBp
+cyBhbnl0aGluZyByZXN1bHRpbmcgaW4gdGhlIFNFcnJvci4gVGhpcw0KPiA+Pj4+IG1pZ2h0IGJl
+IGFuIGFjY2VzcyB0byBub24tZXhpc3Rpbmcgb3Igbm9uLWVuYWJsZWQgaGFyZHdhcmUuIEkuZS4g
+aXQNCj4gPj4+PiBtaWdodCBiZSB0aGF0IHlvdSB0cnkgdG8gYWNjZXNzIChyZWFkL3dyaXRlKSBh
+biBhZGRyZXNzIHdoYXQgaXMgbm90DQo+ID4+Pj4gYXZhaWxhYmxlLCB5ZXQgKG9yIGp1c3QgaW52
+YWxpZCkuIEl0J3MgaGFyZCB0byBkZWJ1ZyB0aGF0LiBJbiBjYXNlIHlvdQ0KPiA+Pj4+IGFyZSBh
+YmxlIHRvIG1vZGlmeSB0aGUgY29kZSBiZWZvcmUgTGludXggKHRoZSBib290IGxvYWRlcj8pIHlv
+dSBtaWdodA0KPiA+Pj4+IHRyeSB0byBlbmFibGUgU0Vycm9yIGV4Y2VwdGlvbnMsIHRoZXJlLCB0
+b28uIFRvIGdldCBpdCBlYXJsaWVyIGFuZA0KPiA+Pj4+IHdpdGggdGhhdCBtYWtlIHRoZSBzZWFy
+Y2ggd2luZG93IHNtYWxsZXIuIEknbSBub3QgdGhhdCBmYW1pbGlhciB3aXRoDQo+ID4+Pj4gUUVN
+VSwgYnV0IGNvdWxkIHlvdSB0cnkgdG8gdHJhY2Ugd2hpY2ggKGFsbD8pIGhhcmR3YXJlIGFjY2Vz
+c2VzIHlvdXINCj4gPj4+PiBjb2RlIGRvZXMuIEFuZCB3aXRoIHRoYXQgYW5hbHlzZSBhbGwgYWNj
+ZXNzZXMgYW5kIHdpdGggdGhhdCBjaGVjayBpZg0KPiA+Pj4+IGFsbCB0aGVzZSBhY2Nlc3NlcyBh
+cmUgdmFsaWQgZXZlbiBvbiB0aGUgaGFyZHdhcmUgKFN5bm9wc2lzKSBlbXVsYXRpb24NCj4gPj4+
+PiBzeXN0ZW0/IFRoYXQgc2hvdWxkIGJlIGNoZWNrZWQgZnJvbSB2YWxpZCBhZGRyZXNzIGFuZCBm
+cm9tIGhhcmR3YXJlDQo+ID4+Pj4gc3Vic3lzdGVtIGVuYWJsZW1lbnQgcG9pbnQgb2Ygdmlldy4N
+Cj4gPj4+Pg0KPiA+Pj4+IEh0aCwNCj4gPj4+Pg0KPiA+Pj4+IERpcmsNCj4gPj4+Pg0KPiA+Pj4+
+DQo+ID4+Pj4+ICAgIEZyb20gdGhlIExpbnV4IHNvdXJjZToNCj4gPj4+Pj4gICAgICAgICBwYXJz
+ZV9lYXJseV9wYXJhbSgpOw0KPiA+Pj4+Pg0KPiA+Pj4+PiAgICAgICAgIGR5bmFtaWNfc2NzX2lu
+aXQoKTsNCj4gPj4+Pj4NCj4gPj4+Pj4gICAgICAgICAvKg0KPiA+Pj4+PiAgICAgICAgICAqIFVu
+bWFzayBhc3luY2hyb25vdXMgYWJvcnRzIGFuZCBmaXEgYWZ0ZXIgYnJpbmdpbmcgdXAgcG9zc2li
+bGUNCj4gPj4+Pj4gICAgICAgICAgKiBlYXJseWNvbi4gKFJlcG9ydCBwb3NzaWJsZSBTeXN0ZW0g
+RXJyb3JzIG9uY2Ugd2UgY2FuIHJlcG9ydCB0aGlzDQo+ID4+Pj4+ICAgICAgICAgICogb2NjdXJy
+ZWQpLg0KPiA+Pj4+PiAgICAgICAgICAqLw0KPiA+Pj4+PiAgICAgICAgIGxvY2FsX2RhaWZfcmVz
+dG9yZShEQUlGX1BST0NDVFhfTk9JUlEpOyA8LS0tLSBUaGlzIGlzIHdoZW4gd2UNCj4gZ2V0DQo+
+ID4+IHRoZQ0KPiA+Pj4+IGV4Y2VwdGlvbi4NCj4gPj4+Pj4NCj4gPj4+Pj4gQWZ0ZXIgc29tZSBr
+ZXJuZWwgaGFja2luZyAocmVwbGFjaW5nIHByaW50aykgd2UgY291bGQgZXh0cmFjdCB0aGUgbG9n
+czoNCj4gPj4+Pj4gNkJvb3RpbmcgTGludXggb24gcGh5c2ljYWwgQ1BVIDB4MDAwMDAwMDAwMCBb
+MHg0MTBmZDAzNF0NCj4gPj4+Pj4gNUxpbnV4IHZlcnNpb24gNi41LjAgKHBsaW9wc0BkZXYtbGlv
+cncpIChhYXJjaDY0LWJ1aWxkcm9vdC1saW51eC1nbnUtDQo+ID4+Pj4gZ2NjLmJyX3JlYWwgKEJ1
+aWxkcm9vdCAyMDIzLjAyLjEtOTUtZzgzOTE0MDRlMjMpIDExLjMuMCwgR05VIGxkDQo+IChHTlUN
+Cj4gPj4+PiBCaW51dGlscykgMi4zOCkgIzEwMSBTTVAgU3VuIERlYyAxNyAyMDowOTowNiBJU1Qg
+MjAyMw0KPiA+Pj4+PiA2TWFjaGluZSBtb2RlbDogUGxpb3BzIFNwaWRlciBNSy1JIEVWSw0KPiA+
+Pj4+PiAyU0Vycm9yIEludGVycnVwdCBvbiBDUFUwLCBjb2RlIDB4MDAwMDAwMDBiZjAwMDAwMiAt
+LSBTRXJyb3INCj4gPj4+Pj4gQ1BVOiAwIFBJRDogMCBDb21tOiBzd2FwcGVyIE5vdCB0YWludGVk
+IDYuNS4wICMxMDENCj4gPj4+Pj4gSGFyZHdhcmUgbmFtZTogUGxpb3BzIFNwaWRlciBNSy1JIEVW
+SyAoRFQpDQo+ID4+Pj4+IHBzdGF0ZTogNjAwMDAwYzUgKG5aQ3YgZGFJRiAtUEFOIC1VQU8gLVRD
+TyAtRElUIC1TU0JTIEJUWVBFPS0tKQ0KPiA+Pj4+PiBwYyA6IHNldHVwX2FyY2grMHgxM2MvMHg1
+YWMNCj4gPj4+Pj4gbHIgOiBzZXR1cF9hcmNoKzB4MTM0LzB4NWFjDQo+ID4+Pj4+IHNwIDogZmZm
+ZjgwMDA4MDhmM2RhMA0KPiA+Pj4+PiB4Mjk6IGZmZmY4MDAwODA4ZjNkYTBjIHgyODogMDAwMDAw
+MDAwODc1ODA3NGMgeDI3Og0KPiA+Pj4+IDAwMDAwMDAwMDVlMzFiNThjDQo+ID4+Pj4+IHgyNjog
+MDAwMDAwMDAwMDAwMDAwMWMgeDI1OiAwMDAwMDAwMDA3ZTVmNzI4YyB4MjQ6DQo+ID4+Pj4gZmZm
+ZjgwMDA4MDhmODAwMGMNCj4gPj4+Pj4geDIzOiBmZmZmODAwMDgwOGY4NjAwYyB4MjI6IGZmZmY4
+MDAwODA3YjYwMDBjIHgyMToNCj4gPj4gZmZmZjgwMDA4MDAxMDAwMGMNCj4gPj4+Pj4geDIwOiBm
+ZmZmODAwMDgwYTFlMDAwYyB4MTk6IGZmZmZmYmZmZmRkZmUxOTBjIHgxODoNCj4gMDAwMDAwMDAy
+MjY2Njg0YWMNCj4gPj4+Pj4geDE3OiAwMDAwMDAwMGZjYWQ2MGJiYyB4MTY6IDAwMDAwMDAwMDAw
+MDE4MDBjIHgxNToNCj4gPj4+PiAwMDAwMDAwMDAwMDAwMDA4Yw0KPiA+Pj4+PiB4MTQ6IGZmZmZm
+ZmZmZmZmZmZmZmZjIHgxMzogMDAwMDAwMDAwMDAwMDAwMGMgeDEyOg0KPiAwMDAwMDAwMDAwMDAw
+MDAzYw0KPiA+Pj4+PiB4MTE6IDAxMDEwMTAxMDEwMTAxMDFjIHgxMDogZmZmZmZmZmZmZmVlODdk
+ZmMgeDkgOg0KPiA+PiAwMDAwMDAwMDAwMDAwMDM4Yw0KPiA+Pj4+PiB4OCA6IDAxMDEwMTAxMDEw
+MTAxMDFjIHg3IDogN2Y3ZjdmN2Y3ZjdmN2Y3ZmMgeDYgOg0KPiA+PiAwMDAwMDAwMDAwMDAwMDAx
+Yw0KPiA+Pj4+PiB4NSA6IDAwMDAwMDAwMDAwMDAwMDBjIHg0IDogODAwMDAwMDAwMDAwMDAwMGMg
+eDMgOg0KPiA+Pj4+IDAwMDAwMDAwMDAwMDAwNjVjDQo+ID4+Pj4+IHgyIDogMDAwMDAwMDAwMDAw
+MDAwMGMgeDEgOiAwMDAwMDAwMDAwMDAwMDAwYyB4MCA6DQo+ID4+Pj4gMDAwMDAwMDAwMDAwMDBj
+MGMNCj4gPj4+Pj4gMEtlcm5lbCBwYW5pYyAtIG5vdCBzeW5jaW5nOiBBc3luY2hyb25vdXMgU0Vy
+cm9yIEludGVycnVwdA0KPiA+Pj4+PiBDUFU6IDAgUElEOiAwIENvbW06IHN3YXBwZXIgTm90IHRh
+aW50ZWQgNi41LjAgIzEwMQ0KPiA+Pj4+PiBIYXJkd2FyZSBuYW1lOiBQbGlvcHMgU3BpZGVyIE1L
+LUkgRVZLIChEVCkNCj4gPj4+Pj4gQ2FsbCB0cmFjZToNCj4gPj4+Pj4gICAgIGR1bXBfYmFja3Ry
+YWNlKzB4OWMvMHhkMA0KPiA+Pj4+PiAgICAgc2hvd19zdGFjaysweDE0LzB4MWMNCj4gPj4+Pj4g
+ICAgIGR1bXBfc3RhY2tfbHZsKzB4NDQvMHg1OA0KPiA+Pj4+PiAgICAgZHVtcF9zdGFjaysweDE0
+LzB4MWMNCj4gPj4+Pj4gICAgIHBhbmljKzB4MmUwLzB4MzNjDQo+ID4+Pj4+ICAgICBubWlfcGFu
+aWMrMHg2OC8weDZjDQo+ID4+Pj4+ICAgICBhcm02NF9zZXJyb3JfcGFuaWMrMHg2OC8weDc4DQo+
+ID4+Pj4+ICAgICBkb19zZXJyb3IrMHgyNC8weDU0DQo+ID4+Pj4+ICAgICBlbDFoXzY0X2Vycm9y
+X2hhbmRsZXIrMHgyYy8weDQwDQo+ID4+Pj4+ICAgICBlbDFoXzY0X2Vycm9yKzB4NjQvMHg2OA0K
+PiA+Pj4+PiAgICAgc2V0dXBfYXJjaCsweDEzYy8weDVhYw0KPiA+Pj4+PiAgICAgc3RhcnRfa2Vy
+bmVsKzB4NWMvMHg1YjgNCj4gPj4+Pj4gICAgIF9fcHJpbWFyeV9zd2l0Y2hlZCsweGI0LzB4YmMN
+Cj4gPj4+Pj4gMC0tLVsgZW5kIEtlcm5lbCBwYW5pYyAtIG5vdCBzeW5jaW5nOiBBc3luY2hyb25v
+dXMgU0Vycm9yIEludGVycnVwdCBdLS0tDQo+ID4+Pj4+DQo+ID4+Pj4+IENhbiB5b3UgcGxlYXNl
+IGFkdmljZSBob3cgdG8gcHJvY2VlZCB3aXRoIGRlYnVnZ2luZz8NCj4gPj4+Pj4NCj4gPj4+Pj4g
+VGhhbmtzIGluIGFkdmFuY2VkLA0KPiA+Pj4+PiBDaGVlcnMsDQo+ID4+Pj4+IExpb3IuDQo+ID4+
+Pj4+DQo+ID4+Pj4+DQo+ID4+Pj4NCj4gPj4+DQo+ID4NCg0K
