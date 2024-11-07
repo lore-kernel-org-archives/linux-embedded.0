@@ -1,96 +1,119 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0089D194C7A;
-	Thu,  7 Nov 2024 07:41:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B77720CCE7
+	for <linux-embedded@vger.kernel.org>; Thu,  7 Nov 2024 11:48:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730965286; cv=none; b=Jpji6qvt89aTgKFqfmnBfqFlqjoFSv/1O7yoShd3AZZItovkCgxJjOAPclbgRdijjt3HnHPdCaWAXkTXVnyNN8hkBH4EtSpmgSeTgs3RtprnvR/gnrElgqK+cG+IvnJS3E3D+8L/RWDBWWl61OdvEzcB6ReudR8pX4bwuHktRTI=
+	t=1730980135; cv=none; b=rSbIiQ3k7nFZpvRXucyVbsAUMourz3IApNrPUEoXDcLK9tqKovFUEeTuBxzlyJSsDXsj8QsarEFxUF2tenX2oF3Wo+99Xg/Z5nGVhf+pH2nIhcgOFYq1Aa1YsRZsBFzPFTYWEoYGT5KxS/27r8R1lcoXQr+4gS/uFvka0P1rn00=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730965286; c=relaxed/simple;
-	bh=XXL8Q7XOR5Z9axA5mRP86M9hsbR0wLMYpRTNBXhuPBI=;
+	s=arc-20240116; t=1730980135; c=relaxed/simple;
+	bh=QOvRcaa9ClCUbKw2iregEOY7x2b74a6qHIqj/U+U+m0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LaVK6/lHT5DtxHWH0xjCRg+b0wOW8D4Z82FaAKDgjwY/V8/UB5FF6EkTpk2C5vfzN8lmxz9ObmpMHWNfUYoUez4doDPptc1o7gUglf1noG6rXj4H2c1nld7CJFd5mKihdzFQqleYuw/RSkmoTCkPDl2omBBgxN3OokIOzMDd06I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.219.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e29047bec8fso1436257276.0;
-        Wed, 06 Nov 2024 23:41:24 -0800 (PST)
+	 To:Cc:Content-Type; b=MHs5Z0ohY3h2K+4N+5cbDl3AfkCu12WKmJwZVaZdGLvqhvpz1lMRa6QwwLvn13vyPmtqaxM95BOcCsCg7rg3XsEBlJLrVy/nPFFHguwgAZy3BvLFbsgDuTaQWFbWg1eTQzjtXq4swvdBOiORsm1miwEED1AQB0jCbo/zR1r98XY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Gul/TKvd; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Gul/TKvd"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1730980132;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=/L/1DDby9dldKVZdC6uWjrN54X6CTuprfUA1WAiNmRU=;
+	b=Gul/TKvdDEEd0Z2WpjXwnVOmYQFVeJKt8RgHNQivRMh8Uf4JQGCQRSXberNrJ/4zEJ+R1g
+	iuQQrLsDkdDUJQ0fZ/ePxKfE6QQ5Wbp+JdO4lTe2JbMF9gBaaKfGWIhcTYm/zxBuAzo0d2
+	GHKz5eLrm2CTjG674Rwley8rBsT4RWc=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-639-FJ90JmFGNCmsf71lN-KnRA-1; Thu, 07 Nov 2024 06:48:51 -0500
+X-MC-Unique: FJ90JmFGNCmsf71lN-KnRA-1
+X-Mimecast-MFC-AGG-ID: FJ90JmFGNCmsf71lN-KnRA
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2e2e8a71e3aso1040691a91.3
+        for <linux-embedded@vger.kernel.org>; Thu, 07 Nov 2024 03:48:50 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730965283; x=1731570083;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=VY2fnWRrBmWwfs0IL3d1VI8YUuUEtOl9zyg5K15/Tcw=;
-        b=ZAQF29qNA7iq9lv1xIE5VXcErTAj8hiweUUQyrblNYaA3LHsOudTh0o397Y5ugEe9l
-         IjHtHe1Pt5+rDe4vk4aF9DOkyf4xZ0TcdJEv94jredOsaiLTEmMAMDSqsRonvEib0EWV
-         xcOxifIr597fH/u+rAVxrnQFcXEg8in3AW3g6nDFgoIBB5XuCkUzKfmtnp1nCEhfjFhx
-         1+u4UlS1omhwIlgG94dw2G9wNvgiHaMBXRef9xQYOLXajJ/ID6y4/DNF83lcDVVCW9Q9
-         jCic7hEGXUMSCSMSeLDr3vtELVVcuca0qSEC7U4eohj8kHBTn49MKRUKh7Aw7d6bqiTS
-         9k5Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUjGl9KzMA5Tw6HcBg4wgoM+0Mkz2nhj0C7d8ELrDTl4hJkuqnaVOGnSLu5hwIreIwu5FdEg8HY1H1Jv8c=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzVSekz2gepz29b7jScjMAZB59h5aw5wylLk4pfdAc9Tx9uafyj
-	5ilpylJDhDDvcD31ZdHKoT0Pjvl5edO5gR24ZcPkPCpkgYw9xDtv/x7gLmJb
-X-Google-Smtp-Source: AGHT+IFLJFz0dU+NtpIdIU7mELbiJvNjqIi6Q1GdGdfDNJA4VU/VZGp0v71ml+t7B5yiuuolmlE29w==
-X-Received: by 2002:a05:6902:2891:b0:e28:690c:8cc2 with SMTP id 3f1490d57ef6-e3378827639mr57124276.21.1730965283022;
-        Wed, 06 Nov 2024 23:41:23 -0800 (PST)
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com. [209.85.219.180])
-        by smtp.gmail.com with ESMTPSA id 3f1490d57ef6-e336ee15913sm164609276.12.2024.11.06.23.41.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 06 Nov 2024 23:41:22 -0800 (PST)
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-e2e444e355fso1435849276.1;
-        Wed, 06 Nov 2024 23:41:22 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUcFy/JreV4haU7iWTZLAxK0R/A5TGiTZIPg13Ln1n56b6xeEGVJoF4gCZD432+VEkZnJellc5eRD1k/Kg=@vger.kernel.org
-X-Received: by 2002:a05:690c:6c86:b0:6e3:6a76:ce45 with SMTP id
- 00721157ae682-6eacbe85aefmr19850967b3.13.1730965282333; Wed, 06 Nov 2024
- 23:41:22 -0800 (PST)
+        d=1e100.net; s=20230601; t=1730980130; x=1731584930;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=/L/1DDby9dldKVZdC6uWjrN54X6CTuprfUA1WAiNmRU=;
+        b=KYk2HYvbuegmq5krTX8BqznJu+zOkLct/4pdRzm5jyX5Sxy0l6i3Vi92w6CHqiUlSH
+         j2Iey6AUZ8y0NRm6JSGcCoyUHuH1rpzDS/8ovylN7ns+nGMUIEw3TPJPDYXj15Kc4a7i
+         Dif44hdnVR8aChagnac7+RpTzDuf4HLv6nIohh/ZBE0TZaOblszKCoI4+MA56NkOoiBY
+         yzao1LAgLhxcC7u04ox2x01J9bCKvz/IZ5QP9m3MkSP4UA8V6TodmU6xNqJhNvyY+ipK
+         7XlraqvkK+UgFdPLRVyKkX+tzCuCnWxwdVBTCJrCDZ0BScN27a5r4JfRAKqP6ctWFSnl
+         +sbw==
+X-Gm-Message-State: AOJu0YwJSB2h92lyBIBXdSZAFi1+yAaae1oCDEQo7ODuKHHYOGvdWtJa
+	EWlv3XKNxwgrskNSX/kRWb9msmSCNfa/0Va0wCZ0CKXWELBspxY/sEeWia9r5elVVn8U6vyAsyG
+	vw1Ng/jWVeU8Jip9mO5MP3opiHcouEmDuashEpckxfKkesZj+Bk8kfzcOeLbylsQB2o+p7xKk3w
+	L/PId02iGl420188/JSx6nONiFNODPfJ1QwMUN6V8=
+X-Received: by 2002:a17:90b:1c85:b0:2e2:9e64:c481 with SMTP id 98e67ed59e1d1-2e94c2e2caamr33234828a91.22.1730980129952;
+        Thu, 07 Nov 2024 03:48:49 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFRZJ1bbLeJ/YMxkBDXvyJF0NxUiIHH8QEAOU7ZOunHR8MuquVbkEIP6Em0CoCefvLdX/NtA/ExyCwLPMRI2vc=
+X-Received: by 2002:a17:90b:1c85:b0:2e2:9e64:c481 with SMTP id
+ 98e67ed59e1d1-2e94c2e2caamr33234810a91.22.1730980129649; Thu, 07 Nov 2024
+ 03:48:49 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <MW5PR13MB5632F54DCBDA0C74370E531FFD5C2@MW5PR13MB5632.namprd13.prod.outlook.com>
-In-Reply-To: <MW5PR13MB5632F54DCBDA0C74370E531FFD5C2@MW5PR13MB5632.namprd13.prod.outlook.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 7 Nov 2024 08:41:10 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdWUMap1maZCmOqEqaxNWHKRiwg1QaN0W9j+8iPkPyHEMg@mail.gmail.com>
-Message-ID: <CAMuHMdWUMap1maZCmOqEqaxNWHKRiwg1QaN0W9j+8iPkPyHEMg@mail.gmail.com>
-Subject: Re: [boot-time] RFC grab-boot-data.sh - tool to grab boot time data
+References: <MW5PR13MB563287E9DCEF5F43C0B2BB0AFD5C2@MW5PR13MB5632.namprd13.prod.outlook.com>
+In-Reply-To: <MW5PR13MB563287E9DCEF5F43C0B2BB0AFD5C2@MW5PR13MB5632.namprd13.prod.outlook.com>
+From: Eric Curtin <ecurtin@redhat.com>
+Date: Thu, 7 Nov 2024 11:48:13 +0000
+Message-ID: <CAOgh=FyUkG8UZ9n8rme17ksRu2fhHcZnA3sCfcne3+j9zGW-kA@mail.gmail.com>
+Subject: Re: [boot-time] Please check this wiki page about RCU expedited mode
 To: "Bird, Tim" <Tim.Bird@sony.com>
 Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, 
+	"edchong@redhat.com" <edchong@redhat.com>, Brian Masney <bmasney@redhat.com>, 
 	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Hi Tim,
+It looks great to me, it's probably kinda self-explanatory but we
+could put that it's only relevant to RT-kernels here:
 
-On Thu, Nov 7, 2024 at 2:26=E2=80=AFAM Bird, Tim <Tim.Bird@sony.com> wrote:
-> I'm writing to introduce a tool that I'd like people to run, to gather bo=
-ot-time data on
-> their systems.  I'd like to collect boot-time data from a lot of differen=
-t systems.
+Kernel Version put kernel version here
+Configuration list relevant kernel config options here
 
-[...]
+Is mise le meas/Regards,
 
-Thank you!
+Eric Curtin
 
-> ---- script grab-boot-data.sh follows ----
-> #!/bin/sh
-> # grab-boot-data.sh
+On Thu, 7 Nov 2024 at 01:50, Bird, Tim <Tim.Bird@sony.com> wrote:
+>
+> Ed, Brian or Eric,
+>
+> Can you please take a look at this wiki page, and correct
+> mistakes or add any material you think would be valuable.
+>
+> https://elinux.org/RCU_expedited_mode
+>
+> If you have a specific example of a boot time reduction
+> from using this technique, can you add it to the case
+> study listed at the bottom of the page.
+>
+> I copied some material from your devconf.us presentation.
+>
+> If you don't have elinux wiki accounts, you can just reply
+> to this email with suggestions, and I'll change or add the material myself.
+> One specific question I have is whether  this technique only applies
+> to an RT kernel or not.
+>
+> IMHO we can collect information on various techniques on the wiki
+> (including data about their savings on different systems and in
+> different scenarios), and then migrate the material to an upstream
+> kernel tuning guide when we've establish the general utility
+> of the material.
+>
+> As an aside question - if it would be easier to just review the material
+> on-list, let me know and I'll send the raw page (in mediawiki markup)
+> to the list for email-style review.
+>
+> Thanks
+>  -- Tim
+>
 
-It's always a good idea to run shellcheck on any script you write.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
