@@ -1,190 +1,96 @@
-Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D6AE219E0;
-	Thu,  7 Nov 2024 01:50:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730944210; cv=fail; b=oT6VVp8iKjBGlcrMsAf08W3J7AfSnMJXaG+sDnL4AzOYX3yO6VGTvWB5ISw4hDAkqTWLUbk3DifY64hfq9hK597luT3etXmhWcuM0qhbWMPvDf0Gk1GuZynkFB7LFCK0C2otwcB3AL70C6bM5TA1GA/ZTzO+wj0QTJjykJRGe4Q=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730944210; c=relaxed/simple;
-	bh=zbeFZcoK3TPnIG9is6LywWNr3hhPKGsng4weed42Nq8=;
-	h=From:To:CC:Subject:Date:Message-ID:Content-Type:MIME-Version; b=lVCH4MIa0j6kLeSYzwkNt5xlGEUuT0HG0SdqYslfCpRPC4VGDGkdQLtRwe4Iucj3VaAkAadjmv5MpdVPrPXly+Z/ftEaaKNZ5dlrad4VcY/ueS7BPR2sG3Fh2me/3kiiDxOBjXH1SbbYmkLnJWs18k7IQu37NlcoAmleH1EnGy8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=loJeocic; arc=fail smtp.client-ip=185.183.30.70
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="loJeocic"
-Received: from pps.filterd (m0209321.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A702Bhl003297;
-	Thu, 7 Nov 2024 01:50:03 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=cc
-	:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=S1; bh=zR4Q5QL5WmImIY1jL8oDGN+dFQWJj
-	pli4gqF2qVgzss=; b=loJeocicSrybOJm2KfEmtiLdAWUMb2Pf0PzuYmRHM2Oz8
-	z6WnvblXiR/fla0siqLFVskCDSg5fiP7pK2klDMgU3MngHj5+6aW65vWzU7PvQ2I
-	Dz9Zxb8svMopHy4bMiI49okvVvhplcY/wZE63hbfbns/jhcTns9WX5Bfag983Pjo
-	XuAmZXsh+iSrlh0x4bjFEDvvdn1wpjx/eJRSYU958a6H5s5+xq3/wXcLU7BDsTyd
-	JgKlGQIovZg2mAKhzmHXZw650yRplEfraNS75rNwwazCxX1ZI5ycw6h4zKkehny3
-	TKwgsXFFdQxQkvcAx8v7k4k1IunA1w7IrNQCHWpHg==
-Received: from nam10-dm6-obe.outbound.protection.outlook.com (mail-dm6nam10lp2042.outbound.protection.outlook.com [104.47.58.42])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 42r7fyrhyg-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 07 Nov 2024 01:50:03 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=raAsjdFH07lA47Qg1Gqz3wDoX8uBiCnXOMfLS7Gp+J76gRFi95Q59Xs0a/54ycf4epSgUPYJZ+/R9A4vHSeNCXnOBwW4kZeUctU8CcGUPYS6b6Q0RreCB5iY5855RRE4AuC+YUoJhOxRL984GE41aynkMZ/D5LFdFIXzGpRhBgQlGi9HvhnGQpdQFaWIwML+TlI/7ocUbkSvUJwqwbIdoX/LC0T1kl5Yq9wpZ2KVE/udEUkOkcgg5S4Gyq+DFLvj1xvoSlabhPwU2E5s+cTFG2jKH8sQvVueAMSxKNzEIuR7wlgY+yWBQpX8artIEppVTBimSBdHYMA0pyk3A6Y9gw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=zR4Q5QL5WmImIY1jL8oDGN+dFQWJjpli4gqF2qVgzss=;
- b=JDQmIxvuC6MWnPSKOE6R+LTsumHoDLaVyK3lm86B+C5xtFfTN6imCLcVzg/ZgVBPr/89n3m0VBXLJeZrGFHlo4Pzk/uZonV/jJSykY53Ug1a6fvmRKPOH//3TRpyEk8fsvZNUkBbwyUSGVNW4ommU6TsrhecjvCeHZbUblRUTpjefqV+wO2cFkNy87+rQRAggP4RbdOcmsnzVs1hMSbnwKsuly9U5nS2+5nxnyrRc1xypyhKB6vPVN3JxHvrjIOqr/k7FkIYktvnZmVDCIlrYtcBoqkO9rwRZNTo6JJu4Dii9Wg0H0+p1Mugbg3/BHmf1w6Mu29iej2cZPpU5C2nQA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
- dkim=pass header.d=sony.com; arc=none
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by PH7PR13MB5478.namprd13.prod.outlook.com (2603:10b6:510:130::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8137.19; Thu, 7 Nov
- 2024 01:49:58 +0000
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%6]) with mapi id 15.20.8137.018; Thu, 7 Nov 2024
- 01:49:58 +0000
-From: "Bird, Tim" <Tim.Bird@sony.com>
-To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>,
-        "edchong@redhat.com" <edchong@redhat.com>,
-        Brian Masney <bmasney@redhat.com>, Eric Curtin <ecurtin@redhat.com>
-CC: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: [boot-time] Please check this wiki page about RCU expedited mode
-Thread-Topic: [boot-time] Please check this wiki page about RCU expedited mode
-Thread-Index: AdswtWFbGXP8/vd5RaqP/QfzD6mu0w==
-Date: Thu, 7 Nov 2024 01:49:57 +0000
-Message-ID:
- <MW5PR13MB563287E9DCEF5F43C0B2BB0AFD5C2@MW5PR13MB5632.namprd13.prod.outlook.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|PH7PR13MB5478:EE_
-x-ms-office365-filtering-correlation-id: dc267f40-3c48-450d-8206-08dcfece7c2d
-x-proofpoint-id: d8690225-876f-412f-87c6-a7cb45557a4c
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|376014|1800799024|366016|38070700018;
-x-microsoft-antispam-message-info:
- =?us-ascii?Q?12IZlo3LMp0GmBD3zMIAJmypCef+Jl9ie8lW8l/WLaqZyppefCi3GTouYZrb?=
- =?us-ascii?Q?Ri+icvtVnn/3rnq4Pw+IilCs2XLLrX8cSqsbutPIf/tsptN+PlcGSkwrAWlE?=
- =?us-ascii?Q?e4wMvZBJsZZHla7VU0bLE3QGRp7f9XIT1xEftDTSeUrbYk3IAnP/VdssAehG?=
- =?us-ascii?Q?OLfhxScusaUi6MTpAi1ou0XQLa7J5peJIxg9Hib0GQCgckNmsL1DfDcilRua?=
- =?us-ascii?Q?1Qs0FykUTzMbe5QNXqaLcA1Tc1G2U1HMxR8j0uTIGkYyLK/MqFTBfurJXx3P?=
- =?us-ascii?Q?nZBzM3M5dvvy3L4JENQtWnm7j9PzPpI3kfq+UY85OGlA4hHCnplnKpUAb3zg?=
- =?us-ascii?Q?WGlh2T4dRJcJOgQgNdbrL2S7mUFqmfb5w0GWavMsmdEtb2jGPAl0LrtTi4D7?=
- =?us-ascii?Q?oUONynv/gBC81vffUpMz/bsLQ7DrPVo6QqMXu1P4ndOzbKradCpnLY5P1JAH?=
- =?us-ascii?Q?uUS28loUlLKO4FqM1pZ3Fp0ei5rP6OaVDgr6Jxa8zqamxsCYA64mRa2hMopP?=
- =?us-ascii?Q?8PIijTgPVmHchkws+BZd5lB6I7HRtVPPmsXvkGoKvuHb9vWF4NhqjfyuQxN5?=
- =?us-ascii?Q?kV+giKVwdrzKdQDEMiKrKUBFnFeLII+Vgf1+dJFOO2SnuQ4XdbvgbMTkUMeR?=
- =?us-ascii?Q?Br5sqbWtQkog3HIs5nme+7XWWe9Kkq6OFwAMXxCCWf5wlrkcGtJACFfOAxs9?=
- =?us-ascii?Q?VsXtv0VXzOjBoB8SH1WeJdZ+LEuwNPCpMxYp0P0Dk57067XLmvh+snAj1NEY?=
- =?us-ascii?Q?TgLCkMcGYoU58gIpAXKtjqMhhvuZd+vc7iHVED1+f44OSHBwOMb91n2Om2zF?=
- =?us-ascii?Q?A0nnFQzeVCZKtfBm+B/KSnBuXIv6Z35BYdMCz4SrZtP85BmlDV1Wz2/cuc4k?=
- =?us-ascii?Q?TJ6z9W8ZJV0NZMnEnI52o8BHJbD5+NTf1fZ2Ug+HHDjdf0NqtEF0BAdJxTsJ?=
- =?us-ascii?Q?1gDrcAzWgPC/6FCCxsTBJskkTnRCSDi49j7oc+YFbEtnFca6FF0Xl0RakRwD?=
- =?us-ascii?Q?weqyOrC/Ter0osjs0DOnMGHICDPuW4w5mecHxx0Lz0KKbxeytvwWf5RSV6Qd?=
- =?us-ascii?Q?9jK/5xiMrKfnp7ECrGpYrg5ixpTbYYXBaSQWjGXOK0Qatw59nqLLcu1ScJzY?=
- =?us-ascii?Q?tXhrp5xxOgBDf+WARo+RE0spvcSdxk2iUIQr5ckIxzGhD8NzNr3yv0CWtMVl?=
- =?us-ascii?Q?JuvKL8Be4FpCMSLmwmhEWFSMHLXIJPxiFi5X8Twqi0fAkZokfa02gdEoGMWO?=
- =?us-ascii?Q?1GQYxEksdOXNB1oHNmFpS7uOLJKiKIuyLN8qktLmwF3ifGQzo2EIbKKRfbO3?=
- =?us-ascii?Q?sgxiK5DSsMfHDK4bNdFPBHWV9rQxpvkwiNmN7dP7UUyO63UfcJHnVSKR24A4?=
- =?us-ascii?Q?VDzMHiYURVjvY4jFq7LRBE4tiDfD?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?kRPd7UKnWsgm2hNaB9oEja22TArInYU+GI8K0jV/yOVEQiI13A7ahQYB9Vai?=
- =?us-ascii?Q?Q3ogGn/aMaQD14e5vVuockT/ClZEfFkvE0SQJ02OrTaop4SWfZAGTBq9PIED?=
- =?us-ascii?Q?uC0lFFP6xtBSU+otcBCrZn5v2f2hw6vGKNCWqxiyGrhPym0RfzhOqxlf0G5T?=
- =?us-ascii?Q?nW5igKgzgcQ4aBJkmFf5Orti4Zuz6xmbsk1R3nE8h4LlGuBtnrWhKd3i+FEq?=
- =?us-ascii?Q?z/qgy51EICeNjFEtlxl+cIn/Bw3FaFHaz+SJvcOmvDc8Pc/LVABUpcQ8ti4w?=
- =?us-ascii?Q?GuyzHbQcy/PfKn0EoA+WM0MKQaFYQsNO+kUUFMEobz8AdkGBTiDchOz8VtPB?=
- =?us-ascii?Q?6GZTeOEYeKIc4gnBpeb1rzMvuUvmjvDHIz+cTZCqUqzLHx2f7dz01EnysXOe?=
- =?us-ascii?Q?/xYseom9RQclnCPgUfSZYHBI6tW6sH61iff4B9/HO2O+uY8dfombhZrbdHfa?=
- =?us-ascii?Q?+62ZBltKNDHEtm1MmT5DwEv4e5LyGxmgZBgAlOhhuFIQJsRrnSiaFMnI1Hn5?=
- =?us-ascii?Q?bSkuNuHch1frV7/g4fTPQWqKjeMWRT2/a/mcTJZOI11b2MEsPlsfx39IX2Nm?=
- =?us-ascii?Q?8E0BWDRsSGQzGeOscBhxWxmblHdTOA/FrIvX85+hq966RbouC/Rvdem+DSSt?=
- =?us-ascii?Q?oxjvgfyqj3jFHkRh8ikhv5geAytohWdv1xaRIasMlMBOEyqKLa6kV5rWvCBj?=
- =?us-ascii?Q?TW9VAZK3DJbwQoZSlLA7FlrgA4aqbQw1bc4gda/9YFDSQUHy3LR5S/3KGHXp?=
- =?us-ascii?Q?3HxszOF7K5po3AQqSWoRSg4ppUvGRf0MIjfMNf/eOg8jfT+JC28L5n7P+TAO?=
- =?us-ascii?Q?n1gWzn1d3ufaa3hIKP4ZSJg1fkPGzMGknEfBYcWuDQdbKuEZi/W8AITlJGoD?=
- =?us-ascii?Q?FH0CWfcfh42b1HY9gRPbyooPD/A+q8uaYHHc75xJuFTiqdO9RUMu4WRbUlGn?=
- =?us-ascii?Q?wNUwjpvAZYEJvYfopsC853sVq16uPkshqC+Ccm1uVpNHApoRWVKtR7czi8t+?=
- =?us-ascii?Q?SV/8lGo295GlPEg7JEnEroS+bEDgO/TccBLctwRoIk5YSEw4s3tOKiRv0bNX?=
- =?us-ascii?Q?vjmHh3oqMGQXTxSmJLFMwS8Nt6PCNeP/Te/y/F+/1qeePlWmeVv13xEfhaZb?=
- =?us-ascii?Q?pZLZzc69L9XL1HHPbwYAEG9n6+olaoYJ94rdAHU5lZKaHkdijl2jsiJuyayZ?=
- =?us-ascii?Q?6U3yQrHjKVgOA3T7+0y56nFx4Q1Ncuy0QNrSD2gCRTVHscsF2AewofSaLLRf?=
- =?us-ascii?Q?LCs7Ca8k4tA7uOESq6LV2zaL+bjYkxWA7z+bOw/phWkK7Z6kinIXHr+yOB0l?=
- =?us-ascii?Q?0WpIJclIuy2cMo2GIzg2iFsNlwXH2MaPuSiTrpNrs92h+4UbEc6ikopjo/It?=
- =?us-ascii?Q?naW5y2JnDHeMmwB6xZT2DYlmpUydJbgW75cHMEaVLrtKVD40HjHhlDW86U5U?=
- =?us-ascii?Q?T+gOLeIimBLlMjKgyNgBmpr8eXmITtFuA73IWtL5taSV2slS4CdDSdKeTZYF?=
- =?us-ascii?Q?HBJ1YfZ6a6y0FaFzNUdfiNLX9nAYoEKe5xPdzzkn2pwBjSnq/9vR1oSVjKhI?=
- =?us-ascii?Q?NttC47nLWXdq1lmzZDY=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0089D194C7A;
+	Thu,  7 Nov 2024 07:41:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1730965286; cv=none; b=Jpji6qvt89aTgKFqfmnBfqFlqjoFSv/1O7yoShd3AZZItovkCgxJjOAPclbgRdijjt3HnHPdCaWAXkTXVnyNN8hkBH4EtSpmgSeTgs3RtprnvR/gnrElgqK+cG+IvnJS3E3D+8L/RWDBWWl61OdvEzcB6ReudR8pX4bwuHktRTI=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1730965286; c=relaxed/simple;
+	bh=XXL8Q7XOR5Z9axA5mRP86M9hsbR0wLMYpRTNBXhuPBI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=LaVK6/lHT5DtxHWH0xjCRg+b0wOW8D4Z82FaAKDgjwY/V8/UB5FF6EkTpk2C5vfzN8lmxz9ObmpMHWNfUYoUez4doDPptc1o7gUglf1noG6rXj4H2c1nld7CJFd5mKihdzFQqleYuw/RSkmoTCkPDl2omBBgxN3OokIOzMDd06I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.219.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e29047bec8fso1436257276.0;
+        Wed, 06 Nov 2024 23:41:24 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730965283; x=1731570083;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=VY2fnWRrBmWwfs0IL3d1VI8YUuUEtOl9zyg5K15/Tcw=;
+        b=ZAQF29qNA7iq9lv1xIE5VXcErTAj8hiweUUQyrblNYaA3LHsOudTh0o397Y5ugEe9l
+         IjHtHe1Pt5+rDe4vk4aF9DOkyf4xZ0TcdJEv94jredOsaiLTEmMAMDSqsRonvEib0EWV
+         xcOxifIr597fH/u+rAVxrnQFcXEg8in3AW3g6nDFgoIBB5XuCkUzKfmtnp1nCEhfjFhx
+         1+u4UlS1omhwIlgG94dw2G9wNvgiHaMBXRef9xQYOLXajJ/ID6y4/DNF83lcDVVCW9Q9
+         jCic7hEGXUMSCSMSeLDr3vtELVVcuca0qSEC7U4eohj8kHBTn49MKRUKh7Aw7d6bqiTS
+         9k5Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUjGl9KzMA5Tw6HcBg4wgoM+0Mkz2nhj0C7d8ELrDTl4hJkuqnaVOGnSLu5hwIreIwu5FdEg8HY1H1Jv8c=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzVSekz2gepz29b7jScjMAZB59h5aw5wylLk4pfdAc9Tx9uafyj
+	5ilpylJDhDDvcD31ZdHKoT0Pjvl5edO5gR24ZcPkPCpkgYw9xDtv/x7gLmJb
+X-Google-Smtp-Source: AGHT+IFLJFz0dU+NtpIdIU7mELbiJvNjqIi6Q1GdGdfDNJA4VU/VZGp0v71ml+t7B5yiuuolmlE29w==
+X-Received: by 2002:a05:6902:2891:b0:e28:690c:8cc2 with SMTP id 3f1490d57ef6-e3378827639mr57124276.21.1730965283022;
+        Wed, 06 Nov 2024 23:41:23 -0800 (PST)
+Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com. [209.85.219.180])
+        by smtp.gmail.com with ESMTPSA id 3f1490d57ef6-e336ee15913sm164609276.12.2024.11.06.23.41.22
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 06 Nov 2024 23:41:22 -0800 (PST)
+Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-e2e444e355fso1435849276.1;
+        Wed, 06 Nov 2024 23:41:22 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUcFy/JreV4haU7iWTZLAxK0R/A5TGiTZIPg13Ln1n56b6xeEGVJoF4gCZD432+VEkZnJellc5eRD1k/Kg=@vger.kernel.org
+X-Received: by 2002:a05:690c:6c86:b0:6e3:6a76:ce45 with SMTP id
+ 00721157ae682-6eacbe85aefmr19850967b3.13.1730965282333; Wed, 06 Nov 2024
+ 23:41:22 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	CwU2MAH47jc4cIDX2MGikn267FB/DTW9Mwk+tQKk9f9mO93/ORoQym/dH0jiUojHseusJKsRV47wfGz8jBnE9IlZkY/CXYUqd13XGDV7wibrpS8fG8XGTHbDd/+7/XtAQKHYw28owmqhCg8yRnb7ojs+ly9CBtyjNTdWILKlp9SWn8cMEit2hkn6JFCZHEePN8k9YmnA+fAQSKU4mx3m7MuL5NUxe4RxYOJJVTUFtDdCpkrUHe2GDt5evT/zFO/43/VGCydcIxLULo6nWYqkvjHCTcYBIUE5QfhKpklizq5Iin96vl1HOc/Hs8fntc2eWPNfAR2mhrf3xH9GsnHsNHGpFUNrzEKGKpWZkpaE2szoZ07+e5x1yjjISd6kmhMmaOE0OzFfZB2HMorAINMeh+MJFzDusNNEiLzzwpJc71RwP1HdDHxxr5UiQoePMxhQHZSE5Y6PHxFQ6vSykv7mCuF6Quz0O4dzI+xAla+6D5DZ0YqHh0HuNDJJDZdFT/cUrQ6L3NZCSkkRY+pNgbdld5XSy6hUUVj7asgIYgDMbfSYkwdrsTi/2/n4cW5QwY1evzQLmCTzNPPaPED+Vfqr8wfF20zK932+KW37sp5dvyABiyqmIbRGl1fTiShl0v59
-X-OriginatorOrg: sony.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: dc267f40-3c48-450d-8206-08dcfece7c2d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Nov 2024 01:49:57.9695
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: pG0fpfHpOk5UQ4f28j+k4DRRl9Vp/4bqJOGH9i888yoNIALSszEtfPZSGMYhVQhZvBX+14l+f+alNcMskV/kLA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR13MB5478
-X-Proofpoint-GUID: nKfRHb9z1q3U5pT25o7bRDIAU2ihsK-F
-X-Proofpoint-ORIG-GUID: nKfRHb9z1q3U5pT25o7bRDIAU2ihsK-F
-X-Sony-Outbound-GUID: nKfRHb9z1q3U5pT25o7bRDIAU2ihsK-F
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.62.30
- definitions=2024-11-06_20,2024-11-06_01,2024-09-30_01
+References: <MW5PR13MB5632F54DCBDA0C74370E531FFD5C2@MW5PR13MB5632.namprd13.prod.outlook.com>
+In-Reply-To: <MW5PR13MB5632F54DCBDA0C74370E531FFD5C2@MW5PR13MB5632.namprd13.prod.outlook.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Thu, 7 Nov 2024 08:41:10 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdWUMap1maZCmOqEqaxNWHKRiwg1QaN0W9j+8iPkPyHEMg@mail.gmail.com>
+Message-ID: <CAMuHMdWUMap1maZCmOqEqaxNWHKRiwg1QaN0W9j+8iPkPyHEMg@mail.gmail.com>
+Subject: Re: [boot-time] RFC grab-boot-data.sh - tool to grab boot time data
+To: "Bird, Tim" <Tim.Bird@sony.com>
+Cc: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Ed, Brian or Eric,
+Hi Tim,
 
-Can you please take a look at this wiki page, and correct=20
-mistakes or add any material you think would be valuable.
+On Thu, Nov 7, 2024 at 2:26=E2=80=AFAM Bird, Tim <Tim.Bird@sony.com> wrote:
+> I'm writing to introduce a tool that I'd like people to run, to gather bo=
+ot-time data on
+> their systems.  I'd like to collect boot-time data from a lot of differen=
+t systems.
 
-https://elinux.org/RCU_expedited_mode
+[...]
 
-If you have a specific example of a boot time reduction
-from using this technique, can you add it to the case
-study listed at the bottom of the page.
+Thank you!
 
-I copied some material from your devconf.us presentation.
+> ---- script grab-boot-data.sh follows ----
+> #!/bin/sh
+> # grab-boot-data.sh
 
-If you don't have elinux wiki accounts, you can just reply
-to this email with suggestions, and I'll change or add the material myself.
-One specific question I have is whether  this technique only applies
-to an RT kernel or not.
+It's always a good idea to run shellcheck on any script you write.
 
-IMHO we can collect information on various techniques on the wiki
-(including data about their savings on different systems and in
-different scenarios), and then migrate the material to an upstream
-kernel tuning guide when we've establish the general utility
-of the material.
+Gr{oetje,eeting}s,
 
-As an aside question - if it would be easier to just review the material
-on-list, let me know and I'll send the raw page (in mediawiki markup)
-to the list for email-style review.
+                        Geert
 
-Thanks
- -- Tim
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
