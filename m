@@ -1,69 +1,92 @@
-Received: from mail-oo1-f49.google.com (mail-oo1-f49.google.com [209.85.161.49])
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57FCC194A68
-	for <linux-embedded@vger.kernel.org>; Fri,  8 Nov 2024 14:35:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEE9F2003D5
+	for <linux-embedded@vger.kernel.org>; Fri,  8 Nov 2024 15:20:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731076523; cv=none; b=tfsGStcjDpyXP2yW5zWAOaKHqfwo9GwpvvNOBDcqc9diVBSgTSfIXHdTMl5re53N4Jnk+YnA3hg1RFzpxSmV8lV15WmTq+xYf2NaJ2R4yGArEt3gL7WO0M8wOfkAw93qRJNBQ1HzrzvwBvN/B8kdkHN5Z2Bv4eSF+z5Rw7AQnTk=
+	t=1731079262; cv=none; b=CCKc3Pix1fOCt2a5yuQivu3U+S+wm9PyM3RNV/bdND+GcWWvM0NRWUinaylS4XX5fFDMG70gIAh877KPE5armmudRyb/C5Mvc9tUya02tfjH/+MEZg382DUC2GrKae3sz2JB3RHQDVOyyWqKJtqczri5oLKIgjQpYlb2LS4uIyI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731076523; c=relaxed/simple;
-	bh=I+r86g98pPJERJjxcH2jyVqncM4oQzqHvlXPB8b0cXY=;
-	h=MIME-Version:From:Date:Message-ID:Subject:To:Content-Type; b=tGUqmp28NIvVBoqWSarnpblHO1JqBteYFff4uN9v4/7XMk2qLZ9nRl1dWI2+hwV7UuYopxvxWQnWfpukAuHbsem4w1XYwxRmf5M2HSumXO7zFlJPCTu1LmH9v0MrdYhvQ8VImWiZV9OeuUnDoRqGCbji1T1e/V5iYa1xLeOdi+Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SYWOwXZ7; arc=none smtp.client-ip=209.85.161.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1731079262; c=relaxed/simple;
+	bh=fo3uUxJNbrFRvLqB+ud6y0eMZHdeHFWS+wloP4ipuns=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=TlH+bBp/qd58X//iVr16i12cPuLDej6zBngunbcqHXgDpSgS9vEfIM/FFrVMDkEO9w9au5o/7TUnxO0FIDBo37rWjsdrJewDT7jlMe3sjyPedza1nB0nmDMp9EXNdl2L0ZBjXMPIttnV1JmqaYabeDo1d1WN2oSHkj52F0rU6v4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=easyb.ch; spf=none smtp.mailfrom=easyb.ch; dkim=pass (2048-bit key) header.d=easyb-ch.20230601.gappssmtp.com header.i=@easyb-ch.20230601.gappssmtp.com header.b=CwVARL5i; arc=none smtp.client-ip=209.85.167.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=easyb.ch
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=easyb.ch
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SYWOwXZ7"
-Received: by mail-oo1-f49.google.com with SMTP id 006d021491bc7-5ee1c3dbeb9so1148337eaf.1
-        for <linux-embedded@vger.kernel.org>; Fri, 08 Nov 2024 06:35:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=easyb-ch.20230601.gappssmtp.com header.i=@easyb-ch.20230601.gappssmtp.com header.b="CwVARL5i"
+Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-539fe02c386so3125757e87.0
+        for <linux-embedded@vger.kernel.org>; Fri, 08 Nov 2024 07:20:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1731076521; x=1731681321; darn=vger.kernel.org;
-        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=I+r86g98pPJERJjxcH2jyVqncM4oQzqHvlXPB8b0cXY=;
-        b=SYWOwXZ7VPVM5lYs7xA9l8F98sAgESuO1RKmbRE2YADuB1/DSGQziFEJBnvAEHab91
-         fsptuhqU0Ih+XqnYrRE0V6Tgxm7tACa3pnMLgUrov4FfaQgWU7X4OzYupvyR5EOXMqz/
-         gp3DA8DrcmvjpmQm2sECihqUWDOT0T4Ssns9NUkBAjh5b0Yz90z0qJlmsO08AT+MmAfe
-         sABxLoQ7SezMrk2luazyBz/A2fQYJbhfRkB4usmQs2kkrrARplZwI+qsF4OqpAyT1USU
-         mJQPlOr/ViUviggUH80LnwZ51c6BskqEiKDdkTWBWarA/jw9z8CNxFLP1AXA/ieYBxQc
-         Eetg==
+        d=easyb-ch.20230601.gappssmtp.com; s=20230601; t=1731079256; x=1731684056; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=fo3uUxJNbrFRvLqB+ud6y0eMZHdeHFWS+wloP4ipuns=;
+        b=CwVARL5i6OClIOQG4Nqcm9DadFuvmgWhqzGANjHtln8xvS/xOu7nL6w1Ba13r9JHHK
+         bCuRAz957rcrE6xjU1qei8I8w5YgLamaU3MLOQGRxKxf3aGhvB5j3sLC1u1HwMANhVsn
+         Vo1+lApGdmKq8zvrgGKk7j5lK28WShL+HV7Dv0Srf8Ds01LoFo6I5CPGmOjS3jwJpBzh
+         yvTj0IOaNKslojOw7WRt6xjJEETOe7ePIg1K6OaTkJAqfgUh4sxGPSfkzO89BLmwjsU5
+         tN/XlWXTlH/Jly2bcMJHl28T6hTpuh8/XR6JRh5cpIKuB80zDlcrApTEo4kRiPObhK42
+         BjwA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731076521; x=1731681321;
-        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=I+r86g98pPJERJjxcH2jyVqncM4oQzqHvlXPB8b0cXY=;
-        b=ll4ZYosHhmJxdwkE7YVXsye2oCWTjkDJSgILW1yIRBKIgYbh6zFEgSBb8J24Mcb1kt
-         hqdnEunt8jK8NnKpwvnMiOX31Z+/fLOcNuu9z6WyzsdYpI0UurpaPZcI2ZYcUt2NZ0VA
-         HAK0g7HN6YPyoOAvQ8epMAKvppVb6Do31fp9g+SkBhXSJXPHlR9fr0hP7zXW4ifjIJNx
-         3tz2mymf73fG38uN0nQlh0jEAgr+lW3CQysCeM+ulUo8XfkUgKqvUZEIBaidZB5RPzab
-         7UwKLFhd/XQCkZaoabue8RrzNtseoQjiU221aBJ3wlth2lKIrgC+pkFAX4jF4hLHcI5q
-         Vt7Q==
-X-Gm-Message-State: AOJu0Yzb18XiUaN79OkA7HUyKUqNJiyaV9NjsIYX5g3k0LUA70MMI4nT
-	S4OuHShtG5py2LVZkPyYkzg8ABssCtXq+iOzTEQ0r67YAHIDlwlmCJ4/TU6aOVcnQd5miRUGvbW
-	29kDPrV2rTeuy3kIWkfxbyGTbF90n5gES
-X-Google-Smtp-Source: AGHT+IGuHah7Rotp60bc9dMD0s9q4XcqhBYPhkKRF+qdaTGgq0zDnCEFhI4G8szzc53SSEMInmKAOXBur5q9oz8K16Q=
-X-Received: by 2002:a4a:b2c5:0:b0:5eb:cff9:d208 with SMTP id
- 006d021491bc7-5ee56987becmr2159852eaf.2.1731076521211; Fri, 08 Nov 2024
- 06:35:21 -0800 (PST)
+        d=1e100.net; s=20230601; t=1731079256; x=1731684056;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=fo3uUxJNbrFRvLqB+ud6y0eMZHdeHFWS+wloP4ipuns=;
+        b=p1IpIyHtguH9OP13yGChLJqbJBMKueXHJlq2ehBbH84tjqlzS/wP94PRW2fuI2DE+i
+         RsCZ/gmoAL696d0Y/q8l6vVvok5ilHEMSxPIO1hJkaOLVp2KoadTkvqBs8mWWyIiHciD
+         EPKD5N0CCA2kIq7/e0vnZPOc7UyS17vssIhkXEW1h41pTR7bBBDyfdXMpeGJgcTKrib2
+         NT6ZLE5+gMyD+jUs3ZFx0/9gcky9W212ODX2vjsKojEvbpPkD9mQUQF4A3GN9gSYkmbo
+         rEmTU97VnrbLg6mAvLZK4Pvnh0B7SB7f/2esGvwXAuQnD0TIwBcpx7A7Y80hKqC4Kg0g
+         z7RQ==
+X-Gm-Message-State: AOJu0YzdUIg0H+tMtxwQ8p37A1a64IwxLhGlcUlKouLv2TFJ4W1P7/r+
+	yzJuJEyN15j6gTAfzyRbFiYBdSM2CbN2j7JoBQzN8Z+TumFh5Z9IspINYUY51lSkttQcdIDMBVS
+	rDA7QZBgYG7+++kcK/+vOSmF/W2fQGKOMbY9ErA==
+X-Google-Smtp-Source: AGHT+IF2wBKW0bHIiYaSXJP97+8KLdiea1K7DPDb0TAZ6QoqIUNM0TNm6XuQP9ctK5b+YwDCnHdB/4H0zKJ4oU4euFM=
+X-Received: by 2002:a2e:a813:0:b0:2fb:569a:5543 with SMTP id
+ 38308e7fff4ca-2ff1f4d06ddmr14112321fa.19.1731079255629; Fri, 08 Nov 2024
+ 07:20:55 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Madeeha Javed <madeeha@gmail.com>
-Date: Fri, 8 Nov 2024 19:35:09 +0500
-Message-ID: <CAKH5gYwJL85NYma7YaiFwN8Bz-WngHa=arvR-SfKtr_FFD3pSw@mail.gmail.com>
-Subject: Request to join the mailing list
-To: linux-embedded@vger.kernel.org
+References: <CAKH5gYwJL85NYma7YaiFwN8Bz-WngHa=arvR-SfKtr_FFD3pSw@mail.gmail.com>
+In-Reply-To: <CAKH5gYwJL85NYma7YaiFwN8Bz-WngHa=arvR-SfKtr_FFD3pSw@mail.gmail.com>
+From: Ezra Buehler <ezra@easyb.ch>
+Date: Fri, 8 Nov 2024 16:20:45 +0100
+Message-ID: <CAM1KZSm=JtDzgpL-aE3RH8SfQU8sm_ReS75nNz6J=-NKXcPoiw@mail.gmail.com>
+Subject: Re: Request to join the mailing list
+To: Madeeha Javed <madeeha@gmail.com>
+Cc: linux-embedded@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-I work at Igalia but I am joining from my personal email account
-because I have personal interest in working on Linux boot time
-optimizations due to my prior experience with Automotive use-cases in
-my past job.
+Hi Madeeha,
 
-Thanks!
-Madeeha Javed
-https://www.linkedin.com/in/madeehajaved/
+On Fri, Nov 8, 2024 at 3:35=E2=80=AFPM Madeeha Javed <madeeha@gmail.com> wr=
+ote:
+> I work at Igalia but I am joining from my personal email account
+> because I have personal interest in working on Linux boot time
+> optimizations due to my prior experience with Automotive use-cases in
+> my past job.
+>
+> Thanks!
+> Madeeha Javed
+> https://www.linkedin.com/in/madeehajaved/
+>
+
+On how to subscribe, from https://elinux.org/Boot_Time#Mailing_list:
+
+To subscribe or unsubscribe, see this page:
+https://subspace.kernel.org/vger.kernel.org.html
+Note: don't send email to the list itself to subscribe or unsubscribe.
+Click on the 'sub' or 'unsub' buttons on the web page, or follow the
+instructions here: https://subspace.kernel.org/subscribing.html
+
+Cheers,
+Ezra.
