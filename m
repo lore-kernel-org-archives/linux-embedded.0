@@ -1,131 +1,136 @@
 Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BCAF2010E1;
-	Fri,  8 Nov 2024 23:48:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACEA9A59
+	for <linux-embedded@vger.kernel.org>; Sat, 23 Nov 2024 23:35:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731109685; cv=fail; b=SNitO2TN8JkywKDniPN3cotUef2+iN7RXc7dw0plAWbfOsv0NRgCqD3UnZ41UNQkFXsBAOUO6m6CCAvW9lq9ysQa7MJjEUaCscVSiD/lQTaJrjAz5Yt+Nsu0gAWnuWOJF472Nu1f2BzkbCmQ/NrzPhTtgEbj2L8vGYs3FAdlYPM=
+	t=1732404930; cv=fail; b=nn1vL8vkWvgaJQ3KXkyIrLxQGTMUvEZ4JFRmbanPpAhxAndzwbQJFl+qhmSGZivbl4tnoUwKCR77+j02podgmx6tgcOFdfxcBFErPSdbAdMlcAu/bl9E2/M4PQTZ0SvHciJiJ8ZCS92xsmDqFDY0dyN75IW756Iu14oUXUH3ac4=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731109685; c=relaxed/simple;
-	bh=xhjnLaqa9pOYZJRMbj1ObRNXthnEIa0iYtOPMaeCaLo=;
-	h=From:To:CC:Subject:Date:Message-ID:Content-Type:MIME-Version; b=tL31RhmqIhXLf6xSNCB8nrxfMbRRf34/SCoVlqx4MW/v/XrCVR7yeN1l8T+3ChpJkB28aY6s2E6o+PapA/icT1RhUKj6qz6ZZSHIMrputjD9aXBBjIT39sP7luUw2IrlJSsvq/jTGenovqq3/eMVd1VuZHGRKA6fgfo+ADMF3sg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=UURd6zxz; arc=fail smtp.client-ip=185.183.30.70
+	s=arc-20240116; t=1732404930; c=relaxed/simple;
+	bh=xlioyf7Y2/0CUHVESLylaRWZnp6A5NC0DwnegdCuwNI=;
+	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=TTZSQliBHXB8RRXTM/tyspnNxgd05mAsoWYcX4OSHCWtT7osfT93VWBvki/Fkvs5ho21EUvZVfBsWP0l06gT51mToe1w2fsMXwoUHEG3LFnEzUcTkkxhSXXG8QN/WQSVmnTB3G3uwl6oIDBr44wPjE0VkfUnr7ejGhnolV4Mafc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=fyidsUFi; arc=fail smtp.client-ip=185.183.30.70
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="UURd6zxz"
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="fyidsUFi"
 Received: from pps.filterd (m0209321.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A8Nm0Z9001551;
-	Fri, 8 Nov 2024 23:48:00 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=cc
-	:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=S1; bh=m703FlekVZtOtfVI7Hj01ky+0udNH
-	XAT47z4lufaX/Y=; b=UURd6zxz9UT6uXh7V02h2LFsxai2RaaW2btuQODv09RVr
-	kzW49L1r7O0L7Q05Es1+oyKmmUsp6nIUWrxAs6RrOsX1dSP9yuyLsrSkbcIcNmRE
-	TXKhrHNKPOqMXM9syL0SYtF5EfqxYkYutAQKOzASbkl9omp/PK1Ju8TmjGMxmRSp
-	C8YLa6DkZnN8SzZhJMisnLoDZ6HkjzpommBpEM9xtw/UT6S9Atupy/0rXBxwqtsB
-	GCJst4vIsHTzo+yMd5tLzNNC3pwN6RE1w6uX/ERraW02pSdzRdTYYKWvdnAM9PH/
-	nxo+KtXGyF8hKk19mZzHXZ63HHcjUulxBO7G9HoqQ==
-Received: from nam11-bn8-obe.outbound.protection.outlook.com (mail-bn8nam11lp2176.outbound.protection.outlook.com [104.47.58.176])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 42s6f7h17p-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 08 Nov 2024 23:47:59 +0000 (GMT)
+	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4ANNZKrB002280;
+	Sat, 23 Nov 2024 23:35:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=S1; bh=xlioyf7
+	Y2/0CUHVESLylaRWZnp6A5NC0DwnegdCuwNI=; b=fyidsUFiVP+e9aH8VgXjgG3
+	/ZowKGtj5sCdS4cRyZdKL7oMRfNYEdcfuuAsQ87dpDJ6hEzFLoJyELGoZQ4eYYgm
+	srw2rofmzbjMuClDV5LLr6FPbeRBePvhrVdoT8U9g59qi/ak6bbwrFIO5q7xWI5B
+	xfxMecBGbUxz43+hRXqLBYYkB0Uuxraca0JXeem3LDbuYJ4Z2ee23Z/Ci6GB34TI
+	CE7oDLCNaP6S4Lon+uC9vU7+Cz0/ReHxeailIYzBISOa2sNWDX21v4ONO77a44TW
+	lH+wvhTkbBpxHGlBB6PJvkwMpeJlIwlTrBOtFgbZyTEYj+QWl35IxDOsM6g7+dg=
+	=
+Received: from nam12-mw2-obe.outbound.protection.outlook.com (mail-mw2nam12lp2048.outbound.protection.outlook.com [104.47.66.48])
+	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 4334f10fkx-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+	for <linux-embedded@vger.kernel.org>; Sat, 23 Nov 2024 23:35:20 +0000 (GMT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=YBaw2Efgw1EvsxRm6odczu5Bc/IaasU0PJWnU+R0yWrxflS7psBlNfLBdnxr7MPHhj2mhuWQeErJxtchfdoPBp+MEEzHz9YOiDP55caF9vOCnN6V9lTNfuEAgR4Kf6dvKYlKdO5xR80OT8EI4mZuUIh0LQnyd0VrXzM/f2Iatngsjbj+gQc9kxqD9keihl9OvsC7i6MCIyCAdwLNzMqdOf0TV0ILjnEIFcHjl1R9otkF6gxcPlkIkbWf8hLH+NG990p6qWm4nqATEf6GO2FJyYJlawIMDTUOPIhOTSbLN0SzMYRDRgkt4Hf9JlHENwO2ImgV1hO7HqhZNfWMiaWpww==
+ b=hSLCLe+WcpCoN6FtzcCptCSCrJ+/ejDuabm1yu/ZkgTAg1X5CVEir0rtkJ4BCBQ1VCWF08kBbQQ/xcJgdV+UPfuCdE4GYzJMVI2Q8yFoPV6osGewc9BeLMFomjEjYZnsSaKaV8nuWa7jyOA0VlPREQ0NXbI44dwspXx/F1QGyvvwfWfXb6X7hp1IKTg6y7wMsGB/bfCqJd82DiUBKefQFbKV3ybq7Pw2pdnsYn9RQwqeFniF23V4uKdUkghBpZodN5QN0R1JqDuPQP2Ox2u1qFZVor0csvpoydvZHAm87qf9OLf+edSaAGIEVkqffeniTfvssAvvWzZxyvg23JkhyQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=m703FlekVZtOtfVI7Hj01ky+0udNHXAT47z4lufaX/Y=;
- b=trCQyZSXhiidSIR728XESAfmUHFmzcsglBXbTk2cCOzAMObpnjI2XPjmAwpyKQFsBzZgFRgikK3pAQ6eNfMk2KaOQGSltnxDMqa99pMgITOL4sY2EvSj8Yrz5cLSjet+Ouey+3+n6H4129AUvs6EpcvcCZ8qcwL26L/kNeIOBkm98YxOb43CZEuCMHGtA7mRGAIDAVdn93gCufef4it6W42MMa8EEqrsYK7KlvyDvRIVqA4H7EyQYm06DUIIikuZB1sN/O6qXOZ0yMiTqLQaZqZuRUWENzei53Qg5t7FDKevsXdoF2DMUDlGXb59nFHR/SL7zoPfp20Vok/7CyEgqA==
+ bh=xlioyf7Y2/0CUHVESLylaRWZnp6A5NC0DwnegdCuwNI=;
+ b=lxcScQfbbNn2Kbl+qNrLSfNNjbnp+gRB/0MeyRwimwAmrvPYd2TE2RV+gXvrY2wuryKanBUUJLYd2cIY3idL0asU0c1w41kS4i92qoPH8VSpv/vJ5TqaRVDYCnr8dF34fpnb+N7Jb5TfQvRfAf1Ni56ZLRDcQUwxzTJxTyxepELWKCzCQMWZqhMDTqkJbqDJXSHo0I8MmZG2hEklQpiSPBgNg4ykWGrdZX0yu37Su+/hS6ojot4EL7K9sPzR8SmkuHqqXh4PtZYd4bFBB34pAQDtXJbQi44jOrKtzu99+V5ZDplm60W8BMmvnz5Ff/xb8sPPCYW4zTgxYS5j7P4B7w==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
  dkim=pass header.d=sony.com; arc=none
 Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by MW5PR13MB5631.namprd13.prod.outlook.com (2603:10b6:303:196::15) with
+ by LV8PR13MB6744.namprd13.prod.outlook.com (2603:10b6:408:221::11) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8137.21; Fri, 8 Nov
- 2024 23:47:53 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8182.18; Sat, 23 Nov
+ 2024 23:35:11 +0000
 Received: from MW5PR13MB5632.namprd13.prod.outlook.com
  ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%6]) with mapi id 15.20.8137.021; Fri, 8 Nov 2024
- 23:47:53 +0000
+ ([fe80::df7c:a5b9:aa3e:9197%6]) with mapi id 15.20.8182.018; Sat, 23 Nov 2024
+ 23:35:10 +0000
 From: "Bird, Tim" <Tim.Bird@sony.com>
 To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-CC: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: [boot-time] SIG organizing meeting
+Subject: RE: [boot-time] SIG organizing meeting
 Thread-Topic: [boot-time] SIG organizing meeting
-Thread-Index: AdsyNUUDzZQ/3++gT1+/YcIfOX+G7Q==
-Date: Fri, 8 Nov 2024 23:47:53 +0000
+Thread-Index: AdsyNUUDzZQ/3++gT1+/YcIfOX+G7QLyQIqQ
+Date: Sat, 23 Nov 2024 23:35:10 +0000
 Message-ID:
+ <MW5PR13MB5632E7C5AEDF8AAC82EF8192FD2C2@MW5PR13MB5632.namprd13.prod.outlook.com>
+References:
+ <MW5PR13MB5632D59CC8D54682BE6EA092FD5D2@MW5PR13MB5632.namprd13.prod.outlook.com>
+In-Reply-To:
  <MW5PR13MB5632D59CC8D54682BE6EA092FD5D2@MW5PR13MB5632.namprd13.prod.outlook.com>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach:
 X-MS-TNEF-Correlator:
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|MW5PR13MB5631:EE_
-x-ms-office365-filtering-correlation-id: 623e6204-9f25-4d39-7cf5-08dd004fc32c
+x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|LV8PR13MB6744:EE_
+x-ms-office365-filtering-correlation-id: feee722e-60a4-4493-f703-08dd0c1778c6
 x-proofpoint-id: d8690225-876f-412f-87c6-a7cb45557a4c
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|366016|376014|38070700018;
 x-microsoft-antispam-message-info:
- =?us-ascii?Q?0Fts+WVNJ1b1zOkoMzvnyJBeakOsvflpdzyU0/hnHDK8u0XBCU00fk2FlX1f?=
- =?us-ascii?Q?DIyh+6kRNvMl4wIG9Vx11lDjlfoU9/pXG4AS0V3AyRq2msy7M5SOEgm8AKPC?=
- =?us-ascii?Q?amsN7MdFG5bEO2FKn1DhKxu+jUepLHg/12EY3ATOCdtnQjDaSYpYwXWLesJz?=
- =?us-ascii?Q?hIAN7af0V0qjPdQgVNOh37jwXeUL0uDV7Z4F8+nkQNag8JLW6KY106n0bvVD?=
- =?us-ascii?Q?iLOUO18PTQBcN70vrX2E3CorM0PsudRIcxD/y/YFM96Gbz9dr0MGAB5qgm+d?=
- =?us-ascii?Q?p9z4cEwX4u4rN2dQSsWMBWzD1EQTP+mHi4DYqqEsjtYqqtLdfgJblLblo6pZ?=
- =?us-ascii?Q?AmiLMCMC5sPr/EpVz9B3HjxDJy2Fyg7+WjJSKyFW0G2jsm+Yq6ggHZNYDX9e?=
- =?us-ascii?Q?l0CmLf9y+qIcypwJ6y7cXF/QPgmcgR7U7l8SFwi8uWD0PYU78gu2yVirGiQN?=
- =?us-ascii?Q?Sgi6P2RQIQ1oc9QJWmrK3g4atoa/mDrtM8gwAdCDYkXdQiBJtanBB/qVXBOV?=
- =?us-ascii?Q?cpWnWTjpzlgW61A1eBEJtFrcXun/s5984OYjb7Hd/lbc8cO9tk8XY8MCDdly?=
- =?us-ascii?Q?pA9fNOQCWetEwEr2829rXwodyT4y7wh6erv5sEVJkkE1rqjSgmX6d8TkPlkE?=
- =?us-ascii?Q?t5skmA+RBxzJWMZmEkQdexTFiXVWHFgXGRHFA2vWo2YrhqDDlWVzxh+uONMi?=
- =?us-ascii?Q?puo5fLl4Bacd7EkudLv3ynPRRdimt23JH2LGHWJZ1RGUhmUOHOX5KDYY8qrs?=
- =?us-ascii?Q?yQhWuLMcX30abi16C/GcDNwWcq2pavRFMHhQSVJMm9yl7uF1EQGhUBxlmfWD?=
- =?us-ascii?Q?TSwAUHyzz8lygxK2ggOSyJqkGSykmxoAY3ZNdQNWvLnMgJEQwEE5S4nw71qT?=
- =?us-ascii?Q?qGXLzw83Sgn7zAKrAIZwyWuCHGdDjcms9e6fq7sIC06iS0k0+rZulg0KUrIJ?=
- =?us-ascii?Q?9l5u48v++Gix/7HcK36acqjxUxDQ3dpFXee7LLPvratlQ7kUDIDb7DhI6DPG?=
- =?us-ascii?Q?Sx3eZI/jzyzt/VV1mbD34g8JA0bXY022iOnlqnPdDJQE+D8GgxkGnox1gWsm?=
- =?us-ascii?Q?ll/3Nib5CidT1IwlbhtRv2+8xvLKxjL+p4G/tXF4hyuTed3u5pzXgsSIUycP?=
- =?us-ascii?Q?e6qEsYOH9HID37h5xPfiY386bBrwwCW5NHQCE2JMQigALbTziOnFdyrQV/S+?=
- =?us-ascii?Q?2Rrnk2v/juchVxL0HcDnDZXi4ydrb1uRLH2RwFxcc5zXjPT5gz0ylo64cS3R?=
- =?us-ascii?Q?p7ZEuK8FQRhofpBnaM1hanuHv+dI4OYSXCDxLUN9haMGsCJ4WENsE/1q3ATB?=
- =?us-ascii?Q?CaihA8i5nsefS9JeufJh5gLcWlzN9vFQMqMxfr2qZD0SSK8bBDsqmzMO3XdL?=
- =?us-ascii?Q?zmP9mHQ=3D?=
+ =?us-ascii?Q?Mqvoljfk1HZql4hbCZAsoJT6rIswQ65LCAoQp5b662Ucqh32hebQ++ywOuTZ?=
+ =?us-ascii?Q?FZ4p0v4LXUwosMUDi1BJcCmWTvOTzRXkdirlvZfnduNXcXnOtqqMwVgB3nHf?=
+ =?us-ascii?Q?GkUITtn8bujvuGA15Jm/B5+7shPb0z/E1+Utt2BiD5tZrVeg/7BNBxp8bjVb?=
+ =?us-ascii?Q?ts1rGkKZE/BqdEKgngMf9+OIGfZi37+lQD6SDJfVI0C4+3IBvkwjL9B8eJtT?=
+ =?us-ascii?Q?czmW40BomWObinLHlGIw/P8qEPDkFAukYh5FCfidY1xchk6lQx0reMnWEttc?=
+ =?us-ascii?Q?OJWkhOj2cn0Ls+NVGhpgHMesVJcekLk/dbuDbw7xGRl+LrYQuFJWrE0ikAoT?=
+ =?us-ascii?Q?uMIW9azcxa2jAyASxXyF1Z8cnlMFatURlsMn+pqXL8Ey/8wVFWmUvEfhS8or?=
+ =?us-ascii?Q?ku4mgq8tAj9S/AtKGP6nTBpKeeSrj0exa1olmxAn2EkKIAQ66l9n8V5Xh+l6?=
+ =?us-ascii?Q?xTgHvxWutfSRrurfBNuOfcM4LBj/GEVCYhntkMVzMeXm7wKvLLzwnS64gvXI?=
+ =?us-ascii?Q?7ihqki0fwoarA2WvmYvLpJDohRPAWqRi1h9IvwRQYxIAVBbNl4YJc9jL5fbP?=
+ =?us-ascii?Q?51cg7Y6wTQtRi3v+GX5qJdWp7Z43k4cgwuGKHQyal4T5yqzgj82+ZjRCjESC?=
+ =?us-ascii?Q?aGfsJICd7SYRA27j4YNpI2iX/QTl55VG/nJnWL91sp1l0U0v+SliDzJeFRSe?=
+ =?us-ascii?Q?+HG2ubIHzgoJhSnPc/4Y1FVvq5qOHI/6D2B9ttbBbAlwrefq3ITn93R3xUKx?=
+ =?us-ascii?Q?3pMHCVtSJsrbCg+/hHykIZvzzwx63qFQLXn7dtJOfp47A+YilnQR3bsy9ti5?=
+ =?us-ascii?Q?FrJyxcafpBogBLRRDCv/CrfdjgoMsT1UeTOxHeA4VK+ItzEJPn0utKcRiifz?=
+ =?us-ascii?Q?rbgfok/sL27CL7a1oz9SJNxmMA99nx2O8dRQ5ahRLX1ojcVu9/dbQB2Zjo4/?=
+ =?us-ascii?Q?z1wvFVZfDGPry9ZjY1tcJV2jbxjkRRjIdLeFIIts73ecGfOu12PHMJxQNNm7?=
+ =?us-ascii?Q?yYn0kHQZNEsm0uFKBHBUvmLHSSMxKFK0XefKeVk8UL2nTzCV3MG/TqTfbUBh?=
+ =?us-ascii?Q?L0og8UnL+86AaIN4hEqKx+QVNakFgOqOsKRwt/4y4B7mdnOrggHNW5Me7WOR?=
+ =?us-ascii?Q?HT2xyN06Q2XWwp3iRG+un/m75Vaj8ycEWd57HikrkCfUb0b0khmhRDmlj943?=
+ =?us-ascii?Q?tPwPy8gmPaxMC282Ew/FEAhO2LuMm3he8MFq/85c6pmRsyXjgsS9y91WgUH0?=
+ =?us-ascii?Q?wj+8CWWsCwn9uV6f8uXNjFEaMVaDcpIrYIMBULGyH9TaP2WXtqR1tvpROqbt?=
+ =?us-ascii?Q?aRB2z7X6H1QfzCpYrHAAQa/B8Zu7jQJXgEYYK/hY8zKMy8t8zikyl6vq8Hp/?=
+ =?us-ascii?Q?klW4XcA=3D?=
 x-forefront-antispam-report:
  CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(38070700018);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
 x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?MMKlUHcY8FeS9D12tf1VZFOMqWGv1dZjCV20fN+TL7+X8LcDDQzi7N/MiN/E?=
- =?us-ascii?Q?vLQzS5MtN7Ezqm4f4TM4a0SK3rON/aklhPTrOERWvR8MJFa10T8TNSIhWf81?=
- =?us-ascii?Q?xQtLnYbLJh5JsFgJ/mKcOO4RDRpBtb2svOVps3PTJ8HdJvBM7O59HMLoYuV9?=
- =?us-ascii?Q?V6iFAiKdNanUTVr7GcbzvuIeXHwTWh5c8fVnDz04wsTJholeVHLztN1knvmF?=
- =?us-ascii?Q?7EgfMqNeZFvbngHAh4/kTHcvB9bDrW87ufJbouVgYEsbqPejfWtSI7U3JZrc?=
- =?us-ascii?Q?XCEYjYF1piRMNLqTZ4BAKNVysN0jKqpjAkWh3hmiwUNm8fDkZBxZmqZVRFl9?=
- =?us-ascii?Q?bEajJRfa4p4ZrUeuFGfMCXFB6zyHo5yD9PkQHwoBQIfRyC6/litLb5d5irtj?=
- =?us-ascii?Q?34TgLZW3OHHj5JgAuCPKORcXjj2mtq+2cK11vOMy3CrnAjfeGuR0zdmWKUNq?=
- =?us-ascii?Q?oa49HNwumxZo2j+kaa1uVSLTEMWEGNvCgNxUpYq7ZgSpKaewFukYzN6K9A26?=
- =?us-ascii?Q?cRNGC+hkLt3JUrshBw3jSXS0lsWmnWLgikj5p7yy2l7QUYBzMNiR99VYBc2O?=
- =?us-ascii?Q?wIzH97dI22Ct+4Tu6uyV70CPtJMjOxvTCZcDEMIyVtq3PDJg3vC4y4sec7dI?=
- =?us-ascii?Q?tcjK3cPHzO33n2MHKTtYNoFtqOQtkTy7QERvr5lyA4LeplPivb4dlVStxhAd?=
- =?us-ascii?Q?06Uh7FfRSfVTlXgcfbPjvcMc5X+kw+DgBy8SOLxLav09d7P91LspVG7d70Xs?=
- =?us-ascii?Q?PzVICazhjVTP8OXHfWaWdnwuTS+WFJxXfV3aiGmvc3jwA3edm2ZZs7CDqgvc?=
- =?us-ascii?Q?dsuzfwATyz6a9QApuEVjKonRbOmeh+rvGDUyhoRTBCa/0GB3s5k50F5LLM92?=
- =?us-ascii?Q?yOu+QFSMguCKx6pbaNEpx6Isg/P0jcjowheneNwhd7JZ4z7srTMghrwOIRZ7?=
- =?us-ascii?Q?pRYFA1KRDDZUZb9c9EGIHA2adVLfeH4ofpn++/pvG7+WQIIZdpDaz+gdWeng?=
- =?us-ascii?Q?89dkofb9aWVXD0iSIwdRCRbnAX6kNxZHJto45dDczhc6A7L+AyHibBwex1Ur?=
- =?us-ascii?Q?JXCa9RF9dor2TxRxsZCA/O6Ci1wzgT0HMxRtkPRTNw3l1f77XyLkR6669PVZ?=
- =?us-ascii?Q?1/CiNNBJQ9jOFoYQv6o9zOC64FPrWK+Pm5RupzPloraYLew/8y16qZTlG3H5?=
- =?us-ascii?Q?nYAQQIqd4+vYBy+orIQtbnnjhEOLU4wqipSLOpRlVxMoawX4bB17IR4vcDL9?=
- =?us-ascii?Q?CM627AyEhPjRJKhXiA5eCvkxnKZSW1c5/ZqeP3WccBQkn5fV+yTZlW+dO+kS?=
- =?us-ascii?Q?79HwMv9CWf5zkGH6rLq2oUcD+y+oDiCp/QXhzgmgwOyi4Hsyicfq0kFFvHeU?=
- =?us-ascii?Q?rNTJpZ/BT0vQ5OTD26wMZG4c+HE6Hvd36JdHainiQrV+nwoYFZ100uL5jocX?=
- =?us-ascii?Q?6+PHPSRgew0ywR3PQJmQZevEsyGn0r91bmaXPbTjiCV14IL7Mkmt8DJijq9B?=
- =?us-ascii?Q?FbXUsky14Fv80x5ue8PHwWnNgseoP7W2i+sMvon5gMfWf9ltB1pSYGuylPHm?=
- =?us-ascii?Q?d3aVVhbJ63Xo2Zp0WUQ=3D?=
+ =?us-ascii?Q?HIJHLXSmV88Kk2+aHVSObu0N+hvfeSMhwaF1QnpbAeinDUZPDGg83nkhOLbC?=
+ =?us-ascii?Q?c5B9rk5Qyle9oZksrT1sqjJ5v6UagC7MheSoTlYjqRiUynxtrpcXLq3Z9oh8?=
+ =?us-ascii?Q?Pu4ZBEjYFYSbpTADS6gSppoI2m/B9wlgFstwnWBlifDYme/Fgp0ckazW52eQ?=
+ =?us-ascii?Q?BA/nbBXBSyMwMg5sQePToZ4PCJqXaksW2Bwruj3GVgFjxYhYPiGN6oJvkU2J?=
+ =?us-ascii?Q?WP+aasAOJzBFcjfK7N/mEOOQ6Mr1uk0Gzw1VyFSYg2Fc0bLZXXbvGPhSluUR?=
+ =?us-ascii?Q?Kiu/WprfnYPB8Jf/dem9EQzMjdvuLzgMzqHe7M/eMcqyFNAmnJaFP+bkvcTm?=
+ =?us-ascii?Q?lByuJ0JwFTsdL2BJlGBagusdM2758vOd21S1U4OhIZKrt1dGAapD4QXjK1Tm?=
+ =?us-ascii?Q?bgXUlcd3zrMpLgPQyzZiQ0WroR8RUH0S19D59/ALeCecKIhCWOg1v1DTQqZd?=
+ =?us-ascii?Q?EKWNZlqqxXm8MnTh4GCxGvaxEdLgKetVvtrWpm6/XHCufcnUpcJ7o/nhnNSN?=
+ =?us-ascii?Q?QXZyeivr1UPEg8PUsgbw+3kHpgnTND3qw/97gxGDAxFAaN7PCjOROSrdjRU+?=
+ =?us-ascii?Q?q8BWvHEIuENjnuAIhYieWT/PiaBJ/ZT9LZ1EuBJvOJRvU2aBXoVBbTb8+Qgs?=
+ =?us-ascii?Q?kCcWbsPVPMxPXCsm+2JCA4X/AIFO6GYm4Uv3ZabqC8idu3GDmJ9fGBcSCABX?=
+ =?us-ascii?Q?UujB4E2v3p64bP4FWUiYAB+zAV2mDzLLXNY8gFFOsqrlzn9DGNAMcdgOYxVp?=
+ =?us-ascii?Q?6pA3YBnLOhZuNXn16qhXt0OFT7nKVGwCuzpAAAwGhwVYnrg+Zpbc0bn1aUrm?=
+ =?us-ascii?Q?6BXAA1V5TdO27p2w9W/jq3sVtNC6EmTTby57M0xZlRvJ2PQV+lvt/mQ5ZSvf?=
+ =?us-ascii?Q?IS7OaXL8sFx636lCS76Wu5v+t08MCLc27Upaw12hEwtQwPSRoWrpzGm/IqeE?=
+ =?us-ascii?Q?aamgMRDIoKQmGFT1gp4UORl98HcS+98SphmxYNw+gLCK6auCQ8pi38ZNqnGD?=
+ =?us-ascii?Q?FBKTx6605XLvCWWT3KooLZyvC9+zMyLLM4rH4Tq8iDHWIjUvsjAkduKTKQng?=
+ =?us-ascii?Q?3VeZgPECf2blMnKNA4aHmGx7VSayw0/Xhsd1LGSVwORnRJMmzh5omdM0PwA2?=
+ =?us-ascii?Q?EkAvNMz2wLQywEX2IFioJYtMK3SJmRk5FIudlMgPlEjeKo6C//6xaeRFQHXd?=
+ =?us-ascii?Q?sJaOTevTwhKoCbM6k/9etfrLWL6JcLkErDHMj7BcklD+2utiiHufSOl6j+kR?=
+ =?us-ascii?Q?wwvFpi2jJ47optofJ0gBymeJVVgQ34/M98v97whmuiKeHImyWA5jYokCe4eR?=
+ =?us-ascii?Q?jgbN+1jnL2xH5lGEh8iLCA8y2+69jIZR9mUhVJRN2qzVrApnssz4Bil4lZIA?=
+ =?us-ascii?Q?Dk1aXo9ttu6tmAaOgH7aNlj6FaguVM1RW3jZyOaAg57F9KB/CT8P0cNttyEY?=
+ =?us-ascii?Q?UqjIdQxILX7//m6/vGX9xNwyML0bh+Q5I/mTn43RqbqGcnT9dZvelkP3u3Tr?=
+ =?us-ascii?Q?ZNu3C73XGKeiMxi/1XBB5gbuERyamo0Op15O9YoF5//9xgkiQfEHIlN0HbFp?=
+ =?us-ascii?Q?/W2w8JQ8Tm1MTqNlXGA=3D?=
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
@@ -136,88 +141,72 @@ List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	YK/KVIHEDmXzgHta7EmLXVcC13NkynMAfYpTWGxU994nMpOm8ZCAZoGSQPVtgoXl4EtyHNRtXbmQXAMKym1a1MhPPB+7PvU8X7wKJAJKrMhrk2s8yy6up2DQIQgzc0TnzMKgAt92G8f6ki3k31vTnAEJSpE9YX3Ztc1l6cJxcdCF42Kkh1bFnLgpSsrtG/BBHIBRIveGZL59LfLYV1Xqr183e3j2F1gYTD0GtQr9Q2tqO6o39WZ+x9FQhVvCUDB2hI6lAaAjQ1cZYKlRvZ8YW7VR/x4b5Sb1ag95JrnUX6ng5PPJzs5qEv6kZirp+SQba5JmvE++w6/EvhB9zhh3TL1uPN6hV/XuGmwOAqGJwfL3rZnfb9efpau7V1WlisMyd36OE0oE57kevvzH3jYDO0IZNNLgwoiEQAwq0pDv5Ou5zud7KMmeu85efy/Zv+HRNaP4e4C3sKdr9ZCL/8tURY3lSzuuxSOTpT6i+mzDQRLJcyQcT5SdtEqmU4EIZ28ug5sJuCR9ufIaZ6J1Tl7a3Pu8oXSuYK+wzEllawBDmnBUtS9ZRx7Od8EzAqZqud9reS5oYUr/ng/YHKtPfbwQ+SnhO7Fm7zHMSotbxiNgKck11DUwA5DeTBdRNGhlciX6
+	D72wXzCl4mPMH9Cf1QC+XttMZP3UY5aOwwWqZMGm7gLZ7CMGRlSBKCUmwjSSpU9NLwLTGPUrCIqr3G5xEttWhRQG/fHGLMY1yNoulUCLztwI/1FD0uUjH9g/K9G+7F3AVp2AEu9Z3yj0Ngcn3gbHo7dbe6JEsYtW/VtIb7+rODjb5o4I0beGQ0cT7tlOqjNxmoxhOIn4MuppmSICBM1taFjgYBZO8hJewQXeMfQOB5tMZvWU8EOa+/sK17XNnoipdLuH4OvAOqxOrbJf7SAjTTDRwpW4U0LY4ZewgxrL/k3q3phycJHgPpLxh3e2Px/lDu70KjAiQqIls7T4axEvqVXMfWlbCJnqyRedVQBwvJ+kPFFTcIIVfDSexABl4mSq6kdmrbvC3JCeBtO2yWFyC7hvbqR0A6LPfW6y4wWEmPuUMLDfJONU2THo2Cd/igLo8jcIXIA3Zp5tW6pm4nSRTejKMTVyZN+w1rsBjYyOe0ucCdq0Pt6C4yX1M9iihBXT5CLBMSw6kLI2iDzRD+oRA0AIag5cFB3HD5MBUtzOM3ocC5lT9xpU1JjDHrVlaHc69UORhPrmM78WE7YVCBrPi3XU3YCYw3kHzqeKDbSRqI0We2QBYLpnqU6yVRt9Vem0
 X-OriginatorOrg: sony.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
 X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 623e6204-9f25-4d39-7cf5-08dd004fc32c
-X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Nov 2024 23:47:53.2904
+X-MS-Exchange-CrossTenant-Network-Message-Id: feee722e-60a4-4493-f703-08dd0c1778c6
+X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Nov 2024 23:35:10.6319
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: cDmGiMmdWT/eiOEl4/6ct4uQGPeaCABFx2gdQXIybicPsG3Wz3iiW7ywy/BtcPfNII9nto4NiB94vvGQBQfmjg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW5PR13MB5631
-X-Proofpoint-GUID: 60D0OcJyRdXAaYz_DLsnPTRQ3_6giMdX
-X-Proofpoint-ORIG-GUID: 60D0OcJyRdXAaYz_DLsnPTRQ3_6giMdX
-X-Sony-Outbound-GUID: 60D0OcJyRdXAaYz_DLsnPTRQ3_6giMdX
+X-MS-Exchange-CrossTenant-userprincipalname: RZ4PgZ7A/qpE6sStufP0JRp5dJMlsupInMqr9LFCKAD5G9nuVU4n6flvdc0TVbT+fzEeUZDlTs9h+oB2bbSVLw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV8PR13MB6744
+X-Proofpoint-GUID: dtyGmW-OGgLeJZpukgS9gJeCj66r6gk-
+X-Proofpoint-ORIG-GUID: dtyGmW-OGgLeJZpukgS9gJeCj66r6gk-
+X-Sony-Outbound-GUID: dtyGmW-OGgLeJZpukgS9gJeCj66r6gk-
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.62.30
- definitions=2024-11-08_20,2024-11-08_01,2024-09-30_01
+ definitions=2024-11-23_19,2024-11-21_01,2024-09-30_01
 
-Hello fellow embedded Linux developers,
+> -----Original Message-----
+> From: Bird, Tim
+> It's about time to plan our first meeting of the Linux boot-time SIG (Spe=
+cial Interest Group).
 
-It's about time to plan our first meeting of the Linux boot-time SIG (Speci=
-al Interest Group).
-Things have been very loosely organized as I've been trying to gauge intere=
-st
-in the SIG, and put forth some ideas around Linux boot-time to this list.
+Hey Linux Boot-Time SIG interested parties,
 
-Unfortunately, I'll be traveling the next few weeks, so the earliest I can =
-put something
-together is the week of November 25th.  I appears that people who have cont=
-acted
-me with interest in the SIG are primarily from the US and Europe, and maybe=
- India.
-(It's hard to tell just from e-mails).  Therefore I propose some kind of vi=
-deo-conference
-at 9:00 am Mountain Time (I'm in that time zone) on Tuesday, November 26th.
-That makes it 8:00 am Pacific, 5:00 pm CET, and 9:30 pm IST.  Not great, bu=
-t possibly OK.
+Here is the information for the first Linux Boot-Time SIG conference call.
 
-The agenda would include a number of things, including:
+The meeting will be held via the Jitsi online meeting platform.
+Here is the connection/call-in information:
+----
+To Join the meeting via web, click on:
+https://meet.jit.si/LinuxBootTimeSIG
+
+To join by phone instead (in the U.S.), tap this: +1.512.647.1431,,33375847=
+63#
+
+Looking for a different dial-in number?
+See meeting dial-in numbers: https://meet.jit.si/static/dialInInfo.html?roo=
+m=3DLinuxBootTimeSIG
+
+If also dialing-in through a room phone, join without connecting to audio: =
+https://meet.jit.si/LinuxBootTimeSIG#config.startSilent=3Dtrue
+----
+I will start the meeting at 9:00 am Mountain Time, see this link for other =
+time zones:
+https://www.timeanddate.com/worldclock/meetingdetails.html?year=3D2024&mont=
+h=3D11&day=3D26&hour=3D16&min=3D0&sec=3D0&p1=3D220&p2=3D137&p3=3D195&p4=3D7=
+71
+
+(That makes it 8:00 am Pacific, 16:00 UTC, 17:00 CET, and 21:30 IST)
+
+We'll plan for a 1-hour meeting.
+
+The initial agenda will be:
  - governance of the SIG
- - projects to pursue
- - frequency of meetings
- - what resources to use
- - where to put things (besides (obviously) upstream)
- - how to collaborate, etc.
+ - projects to pursue?
+ - frequency of meetings?
+ - what resources to use?
+ - where to put things (besides (obviously) upstream)?
+ - how to collaborate?
 
-This is not a traditional trade association or funded project startup, so t=
-here
-won't be any memberships (with fees, tiers, voting rights, etc.).  But I st=
-ill
-think there should be some designated leadership and resources that will
-be available for the SIG to use.
+The meeting is open to anyone.
 
-If I had my way, I'd use one of the Plumbers hack rooms for the meeting,
-but there are details for access to that, that I need to work out.  If anyo=
-ne
-can volunteer to provide the video conference hosting for the first SIG mee=
-ting,
-please contact me privately.  (Otherwise, it might be Teams, which is what =
-I have.)
-
-Please let me know any feedback you have on these plans.  If you have a str=
-ong
-idea that you would like to attend the meeting, you can ping me privately t=
-o
-let me know your interest.  (Fair warning - I'll be looking for volunteers =
-for some
-tasks, so if you are easily talked into Open Source work, consider your
-attendance carefully.  That said, lurkers are welcome also.)
-
-A few other thoughts...
-I've been a little wary about how much to copy LKML on these messages.
-Usually, most of the kernel mailing lists are highly focused on technical
-discussions and patch reviews.  This SIG management stuff is neither of
-those, and I don't want to unduly burden the kernel lists with this type
-of material.  To that end, I will probably stop CC-ing LKML on this type
-of administrative e-mail.  Also, it may be appropriate to get a separate
-email list or communication channel for SIG-related conversations (ie
-discussions unrelated to kernel features.)  Let me know what you think.
-
-Regards,
+I look forward to talking with you then.
  -- Tim
+
 
 
