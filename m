@@ -1,127 +1,155 @@
-Received: from mail-ua1-f49.google.com (mail-ua1-f49.google.com [209.85.222.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.10])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38F7B21C9E3
-	for <linux-embedded@vger.kernel.org>; Thu,  5 Dec 2024 14:58:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.49
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733410705; cv=none; b=UYpnu7/DSi6USDDUdpZpIShgKtgCyCQ62JnOoi847N2Q5B1vj76bYTgH1Khb9KE2KU1QmIEYtmT96EBzCnB9Fo0t2i181D4ph7jXwMVqporttb7WtIn3H7reo18QWuaAKM9gEbh7NpGfo/a1n/zRmc5DncWiViku7CeJNvfgzkc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733410705; c=relaxed/simple;
-	bh=ljV0Zr8u+MeNIDmin8UnBfk6m9mlB475IIm3Sc04VF0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Po+iGuTEABEj3WZLmNPwtGoLuC4hM2gSTubdSt0DdDROpFTF1C5HRAVOdkucW1ScMFcwdSw6bm4ZuRDTJNi8ryWoJcsXbR9kDsCctUY6ldx0NpmWszpGFvew5gBrbkhWKKPjVR2UUUGHK+IaUmam2sZ6EY2IJwfEOjNcsoQDQW4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ua1-f49.google.com with SMTP id a1e0cc1a2514c-85b9c456f46so224984241.3
-        for <linux-embedded@vger.kernel.org>; Thu, 05 Dec 2024 06:58:22 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733410701; x=1734015501;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=m0mMKmgDBfUHZMjg2Zhf2fJQMkIFrqiXMwTO4TFixVI=;
-        b=wp7RxhU9WmU7eupVOVDvo3rJzoRKUEU1UbH1sQqyTH8g9AYZQX+OtZu7iHtsNkxKdG
-         Jxlkt49WSAZE6hg2CnhSahgqmDCeCHwiDS0bslEW8PD2r7NJRblkYj7bpmUj/j+QttuJ
-         2gLeqTxMI0LyJEphRlyHYCK/TNI5JyuX2Q7EXz4jSAGNasrhbrfLx+FQNNA+Vmw8o6WJ
-         8q8BvjKcza0k3WLuf0WPngdJA1wSAEKmi2UlURvc7/LMa6cLOLZuKTDjwmjLB4zYu4zF
-         gyKeqs98/4CUbauuqCvMDBO1kP68FBhvteYxWBmDBZ6a1xgeR5euKAcfpHZPj+ubwqTo
-         os1w==
-X-Gm-Message-State: AOJu0YzCNh9931BhxWtS5dF0DkTCbd+cVQiFbPdspXLk3VH1rMzkcKwO
-	TAOYHndDldGtwRZQ9+tJz0XGIktI5+Yr1T/CM661g70tX5VAdB640BbNm4zv
-X-Gm-Gg: ASbGnctII7GiErK7vQy83Wh2G4SUnP2cmwEhmehOT0RdDzNJW+PTD0FH5Bjwrd/GzBy
-	WInaQ/VmUp3Xy9FU9fareTITOvhE2mtSlMUCKmpVoZ+15rMaTAOjonlZu5MTQYw2QMbMVr/7Efl
-	KSe8tNuN53iZGWnNc6BsqIPcponjrEoWJE1JlpXXdNRR0Q+nMEXtghT1gWGSkyr+B7pJfVtfYeA
-	WCZ5HC5OQTD5tztpH5qm5iHS0dx4tOj9AKuT0RvErov89DivKx4fnQ4mEU6SWxg6CTqON4fiWHQ
-	kuycab2rv3jO
-X-Google-Smtp-Source: AGHT+IEbNAyjzyZG8hzxK3Ueoj/5SueAR64K58t97YlvrIYKYquaCC8cuXcEjBr4vfBfRvYsy7pGaQ==
-X-Received: by 2002:a05:6102:548c:b0:4af:c519:4e85 with SMTP id ada2fe7eead31-4afc5194f7amr1469796137.0.1733410701588;
-        Thu, 05 Dec 2024 06:58:21 -0800 (PST)
-Received: from mail-vs1-f53.google.com (mail-vs1-f53.google.com. [209.85.217.53])
-        by smtp.gmail.com with ESMTPSA id a1e0cc1a2514c-85c2ba0340bsm203121241.14.2024.12.05.06.58.21
-        for <linux-embedded@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 05 Dec 2024 06:58:21 -0800 (PST)
-Received: by mail-vs1-f53.google.com with SMTP id ada2fe7eead31-4afc2f37936so137251137.2
-        for <linux-embedded@vger.kernel.org>; Thu, 05 Dec 2024 06:58:21 -0800 (PST)
-X-Received: by 2002:a05:6102:3046:b0:4af:bb2e:b4dc with SMTP id
- ada2fe7eead31-4afbb2eb4fcmr2639890137.4.1733410700997; Thu, 05 Dec 2024
- 06:58:20 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB4925028C
+	for <linux-embedded@vger.kernel.org>; Thu,  5 Dec 2024 22:19:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.10
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1733437188; cv=pass; b=qMx1qeVEaNF94rI1YjwK9FSCmG4EoqD/lxCpksjGfytT8Bm+OD6I9FUM1NYtEb7AnkrHsjzhoeMY/q63kI+RiQyjrcuamqj/7+5uJQTg/lOGWw/3tu2FJvoU605tjyyPcykLILWM8ynNBBXwSegdh3wIy8AHwsX4hpa+VRkaWuk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1733437188; c=relaxed/simple;
+	bh=3DPTTRpzy88aKIeE9S3E/WAIZSVyQj+RFmXBoqgwvNo=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=FLlWiKSIeHZMDFH2Zg+THnBfmfZNiS5VVPj3wQ2Tz/5Dh4uHXamHbYH7UK8/y7FyX56evp2jisWffg/W2/rc4mluACBsma8KUgRhOuZIqMvbEIUO7wRxs5QFd8XbRZ8994zu6k4Ct6lE72tvj87GrqAbKGdnGJe6bBhflxRB/vE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=Eq0h39W3; arc=pass smtp.client-ip=185.56.87.10
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="Eq0h39W3"
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-j25l.prod.antispam.mailspamprotection.com; s=arckey; t=1733437185;
+	 b=mU5QoAEdZ7oqbVaiZcq8/wH+owQe35BClbppYFrlRt3htkoKjuIKExdYMkulOVsFXmqyhV1al0
+	  gv1Z+YSy5dkNMwOVIbjzkiy6/tfkNflHNIbdmPNrSBO22p+0jgg9sDFyU8ZSPJaQFlT+8wj31o
+	  /De/f969TGbVhoL4Hl3W/Ggng/fShxmczeqSfOSqycxzEHcWpbki+MDiFKxnonvejZtNSwM7pR
+	  EjpQqiOZMBUdKuI98JU/pqKspsEjk1ckR7jkN51y2F+zUxk0ITLhPas9UI2zWGW/vZ/abZ7TFD
+	  UQqibG4FYpa2Mtyza2nXWeObS09v3v33PxxUNhN8UbOfYw==;
+ARC-Authentication-Results: i=1; instance-europe-west4-j25l.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-j25l.prod.antispam.mailspamprotection.com; s=arckey; t=1733437185;
+	bh=3DPTTRpzy88aKIeE9S3E/WAIZSVyQj+RFmXBoqgwvNo=;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
+	  Message-ID:Date:Subject:Cc:To:From:DKIM-Signature;
+	b=GdZtk7Q6dz8vNJUekBqTWcCkqmllc/FUI9jXZT7tWyXiU7vS/G2Um969eYKp2Oq5e3DdWdGmu3
+	  ujPYd1QWnS8T9JxGiW0R4gLIrV+YrsSCgM0sCUeXMifvjVNVV4cgcZJSaPfwHvtp+TFxu4/G19
+	  D4FN5ErnppANKlEOWk1yS6/maMRJ/ZfCSPV3g7agS2+nXsxg6zHWkZKnff+YItYw5DL//Ryvmo
+	  gaMzn/+2PQeMh6FcuOnugIFqWGPE3rrcbmDdabau/4M9vg/eNoc2iXabdt1PwcBvC+2R4JADlF
+	  r7rj2DdXeKOo5xMMtptqPF61WD4AWML2/XTT3o4sdITscQ==;
+Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
+	by instance-europe-west4-j25l.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98)
+	(envelope-from <francesco@valla.it>)
+	id 1tJJWl-00000008qZQ-2ien
+	for linux-embedded@vger.kernel.org;
+	Thu, 05 Dec 2024 21:36:53 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
+	s=default; h=Date:Subject:Cc:To:From:list-help:list-unsubscribe:
+	list-subscribe:list-post:list-owner:list-archive;
+	bh=he3neSg5w3OexyxdzotAgKdqCsyg0UoRKPrRtYqWwWA=; b=Eq0h39W3QaV9LMgQDl5wtXMQXl
+	2NoYsFR1Xx7CwWc4VH3cs91dxkk+tgoUmODph9UjAqKXfpODK7znbbVl6TW4YDZKI0ZIFDKZSHYb2
+	aZY2lB62yzyZE4dPKZMGQHA68KLmDN52XtB2SiexJvD5GG/PxBkjVtQus3BTgJV7KB0U=;
+Received: from [79.27.39.59] (port=65039 helo=fedora.fritz.box)
+	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98)
+	(envelope-from <francesco@valla.it>)
+	id 1tJJWf-000000005rI-2BiG;
+	Thu, 05 Dec 2024 21:36:45 +0000
+From: Francesco Valla <francesco@valla.it>
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>,
+ "Bird, Tim" <Tim.Bird@sony.com>
+Subject:
+ Re: [boot-time] [RFC] analyze-initcall-debug.py - a tool to analyze the
+ initcall debug output
+Date: Thu, 05 Dec 2024 22:36:42 +0100
+Message-ID: <26676974.1r3eYUQgxm@fedora.fritz.box>
+In-Reply-To:
+ <CAMuHMdUsLwvnZJ9i531coBkZpDzD_GuhODpHfqayrPAXT6PfOQ@mail.gmail.com>
+References:
+ <1964175.7Z3S40VBb9@fedora.fritz.box> <2281836.vFx2qVVIhK@fedora>
+ <CAMuHMdUsLwvnZJ9i531coBkZpDzD_GuhODpHfqayrPAXT6PfOQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1964175.7Z3S40VBb9@fedora.fritz.box> <MW5PR13MB563207AD3DB4415E5A1678A6FD362@MW5PR13MB5632.namprd13.prod.outlook.com>
- <2281836.vFx2qVVIhK@fedora>
-In-Reply-To: <2281836.vFx2qVVIhK@fedora>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 5 Dec 2024 15:58:09 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUsLwvnZJ9i531coBkZpDzD_GuhODpHfqayrPAXT6PfOQ@mail.gmail.com>
-Message-ID: <CAMuHMdUsLwvnZJ9i531coBkZpDzD_GuhODpHfqayrPAXT6PfOQ@mail.gmail.com>
-Subject: Re: [boot-time] [RFC] analyze-initcall-debug.py - a tool to analyze
- the initcall debug output
-To: Francesco Valla <francesco@valla.it>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>, "Bird, Tim" <Tim.Bird@sony.com>
-Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - esm19.siteground.biz
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - valla.it
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-SGantispam-id: 1f3b2651bc8a88d98548c0dd4ef8d831
+AntiSpam-DLS: false
+AntiSpam-DLSP: 
+AntiSpam-DLSRS: 
+AntiSpam-TS: 1.0
+Authentication-Results: instance-europe-west4-j25l.prod.antispam.mailspamprotection.com;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
 
-Hi Francesco,
+Hi Geert,
 
-On Thu, Dec 5, 2024 at 3:47=E2=80=AFPM Francesco Valla <francesco@valla.it>=
- wrote:
-> On Tuesday, 3 December 2024 at 21:33:06 Bird, Tim <Tim.Bird@sony.com> wro=
-te:
-> > > From: Francesco Valla <francesco@valla.it>
-> > > Top 10 init/probes durations:
-> > >  * 30200000.dss -> 523002us
+On Thursday, 5 December 2024 at 15:58:09 Geert Uytterhoeven <geert@linux-m6=
+8k.org> wrote:
+> Hi Francesco,
+>=20
+> On Thu, Dec 5, 2024 at 3:47=E2=80=AFPM Francesco Valla <francesco@valla.i=
+t> wrote:
+> > On Tuesday, 3 December 2024 at 21:33:06 Bird, Tim <Tim.Bird@sony.com> w=
+rote:
+> > > > From: Francesco Valla <francesco@valla.it>
+> > > > Top 10 init/probes durations:
+> > > >  * 30200000.dss -> 523002us
+> > >
+> > > This call, and a lot of the others are missing function names.  Did y=
+ou compile the kernel with
+> > > CONFIG_KALLSYMS=3Dy?
+> > >
+> > > If that's the case, is there a way to use the System.map file for the=
+ kernel (used on
+> > > the machine where the dmesg was obtained from) to map these addresses
+> > > to their respective  function names?
 > >
-> > This call, and a lot of the others are missing function names.  Did you=
- compile the kernel with
-> > CONFIG_KALLSYMS=3Dy?
-> >
-> > If that's the case, is there a way to use the System.map file for the k=
-ernel (used on
-> > the machine where the dmesg was obtained from) to map these addresses
-> > to their respective  function names?
->
-> These are not in fact addresses, but rather device names. In my understan=
-ding, they are printed
-> when a probe happens outside of the initialization function for their dri=
-ver. I still don't have an idea
-> on how to match probes with their original initcall, in order to present =
-the user the complete picture.
+> > These are not in fact addresses, but rather device names. In my underst=
+anding, they are printed
+> > when a probe happens outside of the initialization function for their d=
+river. I still don't have an idea
+> > on how to match probes with their original initcall, in order to presen=
+t the user the complete picture.
+>=20
+> 30200000.dss corresponds to dss@30200000 in the DTS.
+>=20
 
-30200000.dss corresponds to dss@30200000 in the DTS.
+This is a simple example, but what about e.g. an I2C device (say 2-004c)? S=
+ome heuristic
+would be needed to search for the correct I2C bus and then the 0x4c device;=
+ once found,
+the compatible would then need to be searched through the entire kernel sou=
+rces / git repo
+to match it to the correct driver.
 
-$ git grep -W dss@30200000 | grep compatible
-arch/arm64/boot/dts/ti/k3-am62-main.dtsi- compatible =3D "ti,am625-dss";
-arch/arm64/boot/dts/ti/k3-am62a-main.dtsi- compatible =3D "ti,am62a7-dss";
+At that point, the tool would probably be too complex to be maintainable, w=
+hile the added
+value very little IMO (in my experience, boot time optimization is done by =
+experienced
+developers, which can match a probe with its driver quite easily, even if m=
+anually).
 
-$ git grep -Ww ti,am625-dss -- drivers/ | grep of_device_id
-drivers/gpu/drm/tidss/tidss_drv.c=3Dstatic const struct of_device_id
-tidss_of_table[] =3D {
 
-$ git grep -Ww tidss_of_table | grep _driver
-drivers/gpu/drm/tidss/tidss_drv.c=3Dstatic struct platform_driver
-tidss_platform_driver =3D {
+Thank you!
 
-$ git grep -Ww tidss_platform_driver | grep module
-drivers/gpu/drm/tidss/tidss_drv.c:drm_module_platform_driver(tidss_platform=
-_driver);
 
-Gr{oetje,eeting}s,
+Regards,
 
-                        Geert
+=46rancesco
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
 
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
