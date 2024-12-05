@@ -1,197 +1,222 @@
-Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [85.215.255.23])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6144F20DD49;
-	Wed,  4 Dec 2024 17:17:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733332639; cv=none; b=cwTWI5ARGrzw3swa3+Qc1qKgD9PximAcv9tUKwIiWbV31fUMRYU0jc+q5tWAevpGKFhR3geaZ6/kBDxQjcylA2GdjP5Q2+nazT0OUu+3cyqyT6pt666C/0JgwLExwZdKjKZmt63wTMtzzjOpkh9BVjXmF1/WW9KdrtQZyn/6MhI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733332639; c=relaxed/simple;
-	bh=9/J1gfAIEWZdCSHyW3NuUHJbyQfNYoyuXJA8Vk0K6Rg=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=jbhnjG5eBCeyUfaqfdYmQNjSlO/f+sc4y3A5lqchGKkn0wfGJX/4EI+73VSh/QhaRpfYTB2ABOrYhb3mzwrFvI3i5fJrOpZUSFxRxl02kn8WWZKq7JGvJRx6KbfzOS7XTEHAt5agFocw2qNpgB/aYHtMPg8JGfaYaKRfram1Qbg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=ld6Td65x; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=ua3Ta0mj; arc=none smtp.client-ip=193.142.43.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46F922F56
+	for <linux-embedded@vger.kernel.org>; Thu,  5 Dec 2024 07:08:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.23
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1733382508; cv=pass; b=oCDlLIeF1Eh2kNP1Ib5d9pzIkmiyJxzY+k8GJ2SQizEQ2OTWVzPIXkA4+IhuEs3jGo6kBwrbIW5xRkdmQC64Jzyb3YxnqJOw4VrahrGn0xAdw3gNEcQ/PrFChNqy3b3Hp6J0n7IVp73FQ3coM6PJer7NAvflZn2M9x6xoDMUZQk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1733382508; c=relaxed/simple;
+	bh=7sPnPRpdOG/EOkMMJCOX6wwhmPR8XcveOMABz46o8Lk=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=Q9SP9tdILXHcS7aeW+7V+T4HYRbqb7GRwk7QrYxfSwrg+7iK4xfgERumSH8BWBCjaaIXHizV8O1pMYfKcdKiU7Xl/95hRxGmIdETETxd67c98TIepGvOL5CvVswC9hzQuE8pO6pcjCPXDXHbQP+clFDcG0/6ST/CQ+CCIU4hswE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=chronox.de; spf=none smtp.mailfrom=chronox.de; dkim=pass (2048-bit key) header.d=chronox.de header.i=@chronox.de header.b=cBnajHKF; dkim=permerror (0-bit key) header.d=chronox.de header.i=@chronox.de header.b=8mvCbNMu; arc=pass smtp.client-ip=85.215.255.23
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=chronox.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=chronox.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="ld6Td65x";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="ua3Ta0mj"
-From: John Ogness <john.ogness@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1733332634;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bR12mYTCVt9lsWKT3SDULoA7WMEUW8vFVe8mlZKDaeE=;
-	b=ld6Td65xLsEtdVlO3ZjpBtH/x22Dgk4clFXI8XVHu//dKt4BohTD35suF50hY/txb+Y7RT
-	H/QZ1mje3G4qZ7aahtKdrQK8HSfpeHICt0hvuP/tM0zo5Nr+qO46859YiFZ8H16ccY86GW
-	TsWrE+bhknYrWiZzqzYAAq++UdO8srpIEFzjH5WyeiISXpDsyPTw2SjewGDfsFCm/tDcs9
-	GT7L5vMtz9ShqslwWAItH3thHQvnC8xleAiQuoaTCdJcrroYWHoCVso17fwYm5KxOCCgRX
-	72Kvwvl0NRS9tDCMJ2XfUrgBUGwwOODQPVQP+4qR8325nXKX8/+BH7D71vz92Q==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1733332634;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bR12mYTCVt9lsWKT3SDULoA7WMEUW8vFVe8mlZKDaeE=;
-	b=ua3Ta0mj4fEKqHrgrvq3dJQRsTGMP0VJjxSJkkTYLMMmgahPHj0kizF9mj5bBTQ7+ZH2N4
-	F5thgyHJ+6x/7VBw==
-To: Petr Mladek <pmladek@suse.com>, Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: "Isaac J. Manjarres" <isaacmanjarres@google.com>, Steven Rostedt
- <rostedt@goodmis.org>, Sergey Senozhatsky <senozhatsky@chromium.org>,
- surenb@google.com, kernel-team@android.com, linux-kernel@vger.kernel.org,
- Linux Embedded <linux-embedded@vger.kernel.org>
-Subject: Re: [PATCH v2] printk: Improve memory usage logging during boot
-In-Reply-To: <Z07SnoKSwHQ_y2j2@pathway.suse.cz>
-References: <20240930184826.3595221-1-isaacmanjarres@google.com>
- <ZvwZV5MDlQYGJv9N@pathway.suse.cz>
- <CAMuHMdX_r05iUFw6-Jj8Utry5bHdE6=U46uB4Za1NTsdZOuOMw@mail.gmail.com>
- <Z07SnoKSwHQ_y2j2@pathway.suse.cz>
-Date: Wed, 04 Dec 2024 18:23:13 +0106
-Message-ID: <84y10vz7ty.fsf@jogness.linutronix.de>
+	dkim=pass (2048-bit key) header.d=chronox.de header.i=@chronox.de header.b="cBnajHKF";
+	dkim=permerror (0-bit key) header.d=chronox.de header.i=@chronox.de header.b="8mvCbNMu"
+ARC-Seal: i=1; a=rsa-sha256; t=1733382144; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=JC45Ehh3OGS7TXb7RWQ3j6KSnDpo362T6Q6Xu6QEcEtvMKH250pLv9OeSdiUN5z9un
+    lgVc84KNxnZ5NFkuKyEfn+6BAQ1KOc/hpsaTU5a0gpoMw4fQwDBpgNkd4CLI5huae/kD
+    0I3SSASckCVUf42z6UUKC2G52wg+j6Y4WeWkm9xFuK8gjpdWXitb9O0An+vgNQq2sYEX
+    u7QJ9ah8o5bwN3ZY3mvInWwsaHHAWW2CcrGbXnxViypPcCgB3tgfj+jXx5H3yQXx4nwQ
+    U1UPNYPAbzrRGWhK6gnY1mvwi+30vrhe7f4tmBG4yK3cuadV5B/nNmyT8n0k072ftHv3
+    ogDw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1733382144;
+    s=strato-dkim-0002; d=strato.com;
+    h=References:In-Reply-To:Message-ID:Date:Subject:To:From:Cc:Date:From:
+    Subject:Sender;
+    bh=vPR6EBI93SJOsGdq9T0YJbkkgAl5aeAOBmrzLvNonWs=;
+    b=tPiIBv3HUsNheZLcjjm0WX/GP9wh+/BGNVNDQjWz+g0sGhXOb2h3jBdVqCxGhzRu1Y
+    EQaFSso8tngSt59NuFC4Gl3KZ3kSepIIPSSZdqgkPP0bAvzPNf93R8C4Kw/LAD8DL1ZX
+    G1Dj+aluEwvU38rsxrHYkkeB02EqKohmtNhB2xRCeYA6f4ykmf4MK5yzPgntRQvYYpQI
+    g4NaiRjCMYEkPzlPzxNeKiVPl5ksLZhGboSLiJ4tRooHtjiUU0jUREeSRt9deaoviEoQ
+    cwfOHFiiWK+m6chsUA+j+YopwsVFPThQuzsTlCqNqztHASG3lqQvmoDZza82pZHaJTPH
+    eDSw==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo00
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1733382144;
+    s=strato-dkim-0002; d=chronox.de;
+    h=References:In-Reply-To:Message-ID:Date:Subject:To:From:Cc:Date:From:
+    Subject:Sender;
+    bh=vPR6EBI93SJOsGdq9T0YJbkkgAl5aeAOBmrzLvNonWs=;
+    b=cBnajHKFKDXUn0Dquhd4mTmCrSxClEBxHWFGbEz/G2w0IdsxjdlO/wN5E65ybSug95
+    gskOeEeeGghiXD6EWcf4jRsngdWUAPadO/ZTwMv/C/Vlpq1kJvTY8xUPnqgyqR4HUNQL
+    aGb4Xm9ti3nOOxCvBHoGOzVXu/GuVEYDWx2NCnGatFu8k1jqiEXue61dkvCipP33ojO/
+    DiDHkhz2opFp4doJ+f3CgU1XnkoSyr6bDWjLMQ9uNOvwOZdrpluxRkOjrp1BHPWgKqju
+    1RxPHpstUm3t2+8sRRkBGs+WWmjIX9NsV9iuoq5bb9zwAwiwuVt4QKceJ253eSblLDnn
+    WWTw==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1733382144;
+    s=strato-dkim-0003; d=chronox.de;
+    h=References:In-Reply-To:Message-ID:Date:Subject:To:From:Cc:Date:From:
+    Subject:Sender;
+    bh=vPR6EBI93SJOsGdq9T0YJbkkgAl5aeAOBmrzLvNonWs=;
+    b=8mvCbNMulvMrsel5TBu+bv61SaL52Ke9pXCT+al6Ur26ep6DfWqRYJhW/pyNl5lGMJ
+    90LeQEeLMrdCt9IDisBw==
+X-RZG-AUTH: ":P2ERcEykfu11Y98lp/T7+hdri+uKZK8TKWEqNyiHySGSa9k9zW4DNhHgExWlYfvTiILzU3H+E6rF6MBtE8BFxmvg/XQPF4tGa/5o"
+Received: from tauon.atsec.com
+    by smtp.strato.de (RZmta 51.2.11 AUTH)
+    with ESMTPSA id f9f4250B572ND95
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate);
+    Thu, 5 Dec 2024 08:02:23 +0100 (CET)
+From: Stephan Mueller <smueller@chronox.de>
+To: Francesco Valla <francesco@valla.it>,
+ Linux Embedded <linux-embedded@vger.kernel.org>,
+ "Bird, Tim" <Tim.Bird@sony.com>
+Subject:
+ Re: [boot-time] jent_mod_init on beagleplay (was RE: [boot-time] [RFC]
+ analyze-initcall-debug.py - a tool to analyze the initcall debug output
+Date: Thu, 05 Dec 2024 08:02:23 +0100
+Message-ID: <4095066.UUX0tPYDPe@tauon.atsec.com>
+In-Reply-To:
+ <MW5PR13MB5632D5A1AE2D16F53FA2391FFD362@MW5PR13MB5632.namprd13.prod.outlook.com>
+References:
+ <1964175.7Z3S40VBb9@fedora.fritz.box>
+ <MW5PR13MB5632D5A1AE2D16F53FA2391FFD362@MW5PR13MB5632.namprd13.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-On 2024-12-03, Petr Mladek <pmladek@suse.com> wrote:
-> On Sun 2024-12-01 12:40:13, Geert Uytterhoeven wrote:
->> Isn't this kernel log message bookkeeping becoming a bit too excessive?
->> E.g. on a small system:
->> 
->>     printk: log buffer data + meta data: 65536 + 204800 = 270336 bytes
->> 
->> Why is the meta data that big (> 3*log buffer)?
->> 
->>     #define PRB_AVGBITS 5    /* 32 character average length */
->> 
->>     unsigned int descs_count = log_buf_len >> PRB_AVGBITS;
->>     meta_data_size = descs_count * (sizeof(struct prb_desc) +
->> sizeof(struct printk_info));
->> 
->>     struct prb_data_blk_lpos {
->>             unsigned long   begin;
->>             unsigned long   next;
->>     };
->> 
->>     struct prb_desc {
->>             atomic_long_t                   state_var;
->>             struct prb_data_blk_lpos        text_blk_lpos;
->>     };
->>
->> i.e. 12 bytes on 32-bit, 24 bytes on 64-bit.
->
-> I am afraid that we could not do much about the size of this part.
-> All the variables are important parts of the lockless machinery.
+Am Dienstag, 3. Dezember 2024, 22:24:28 Mitteleurop=C3=A4ische Normalzeit s=
+chrieb=20
+Bird, Tim:
 
-The descriptor array is one source of wasted space. It ensures there are
-enough descriptors so that the text_ring can be fully maximized for an
-average record text length of 32. However, looking at
-/sys/kernel/debug/printk/index/vmlinux and running some basic tests, it
-seems the average text length is >=45 (usually around 55). That means at
-least 30% of the descriptor space is not in use, which is roughtly 5% of
-the total memory used by all ringbuffer components.
+Hi Tim,
 
-For example, for CONFIG_LOG_BUF_SHIFT=13, the amount of wasted desc_ring
-space is about 1.8KiB. (The total memory usage of the ringbuffer is
-36KiB.)
+> > -----Original Message-----
+> > From: Francesco Valla <francesco@valla.it>
+> > Dear fellow boot time optimizers,
+> >=20
+> > following the first boot time SIG meeting, which I lurked with much
+> > pleasure
+ (but didn't participate to, as I was a bit in awe among such
+> > authorities), I'd like to introduce myself with code rather than a
+> > presentation or resume.=20
+> > Here is a python script which can analyze a dmesg output with
+> > initcall_debug
+ option enabled and extract some useful information. It
+> > can for example be used to analyze the output of the grab-boot-data.sh
+> > tool that Tim presented on this list [1] just a few days ago.
+> >=20
+> > Usage is very simple, as the output of dmesg can be piped directly to i=
+t:
+> >=20
+> >=20
+> >     dmesg | analyze-initcall-debug.py
+> >=20
+> >=20
+> > If no option is specified, it outputs a brief summary, like the followi=
+ng
+> > one
+ (obtained on my Beagleplay):
+> >=20
+> > 1758 drivers has been initialized, of which 1758 before userspace
+> > 119 probes happened outside of the init of their driver
+> > 0 deferred probes pending
+> > ---
+> > Top 10 init/probes durations:
+> >=20
+> >  * 30200000.dss -> 523002us
+> >  * deferred_probe_initcall -> 487483us
+> >  * fd00000.gpu -> 162859us
+> >  * 8000f00.mdio -> 142521us
+> >  * 44043000.system-controller -> 71390us
+> >  * 2-004c -> 71178us
+> >  * 40900000.crypto -> 59350us
+> >  * 8000000.ethernet -> 58419us
+> >  * 44043000.system-controller:clock-controller -> 56599us
+> >  * jent_mod_init -> 52140us
+>=20
+>=20
+> This is odd.  On my beagleplay board, jent_mod_init only took 32326us.
+> (see
+> https://birdcloud.org/boot-time-files/boot-data-timslab-bp1-241203-134136=
+=2Et
+> xt)
+=20
+> I'm assuming that we have similar hardware, but possibly different config=
+s,
+> kernel cmdlines or kernel versions.  I'll take a look at this and see if I
+> can figure out what the difference is between our systems, that causes the
+> difference in the duration for this function.
+>=20
+> This initcall (jent_mod_init) is on my list of initcalls to research to s=
+ee
+> if they
+ can be improved or deferred.  I haven't seen any degradation in
+> system behavior by deferring this initcall on my system, but that could be
+> from lack of my system doing some related operation that needs the RNG
+> data, or my own ignorance of the effects of this call.
+>=20
+> Can someone comment on what items or operations might depend on
+> jent_mod_init
+ in early boot?  In particular, would we expect any
+> cryptographic problems if the initcall was deferred to a few seconds after
+> booting?
+>=20
+> It can be configured as a module, which makes me think that maybe loading
+> it sometime in very late boot (or even later) is OK.
+>=20
+> jent_mod_init is defined in crypto/jitterentropy-kcapi.c, and controlled =
+by
+>=20
+ CONFIG_CRYPTO_JITTERENTROPY (See crypto/Kconfig)
+>=20
+> It appears to do some random number generator seeding by measuring
+> the jitter of a compressiong operation in the kernel. I assume some of the
+> cryptography
+ configs affect the duration of the operations.  The initcall
+> duration results on my beagleplay seem to be relatively consistent (in the
+> 32ms range consistently), and from bobs_lab, on machine sam1, the duration
+> range is also consistent (at between 4800 and 5200 usecs).
+>=20
+> I'd be interested to see if the range is consistent between runs on other
+> machines
+=20
+> Francesco - Can you submit another boot-data file (or 2 or 3) for
+> francsecoslab-beagleplay, to
+ provide some data on this?
+>=20
+> Also, can anyone else who sees this initcall in their boot sequence run
+> grab-boot-data.sh
+ (from https://birdcloud.org/boot-time/Boot-time_Tools)
+> and submit the data for one or more of their machines?
+>=20
+> Stephan Mueller - what are you seeing for the cost of this operation on y=
+our
+> machines?
 
-However, if we bump the expected average size to 64, there will not be
-enough descriptors, leading to wasted text_ring buffer space. (The
-expected size must be a power of 2 due to the ID wrapping algorithm.)
+I have never done the measurements on my system, but with patch=20
+95a798d20060d2b648dd604321e347c85edfd783 the so-called oversampling rate wa=
+s=20
+changed which reduced the performance of the Jitter RNG (read: it takes a b=
+it=20
+more to gather all data).
 
->>     #define PRINTK_INFO_SUBSYSTEM_LEN       16
->>     #define PRINTK_INFO_DEVICE_LEN          48
->> 
->>     struct dev_printk_info {
->>             char subsystem[PRINTK_INFO_SUBSYSTEM_LEN];
->>             char device[PRINTK_INFO_DEVICE_LEN];
->>     };
->
-> This is probably the lowest hanging fruit.
+=20
+> This is one of the first initcalls I'm going to dive into to see if it can
+> be improved or deferred.
+ Maybe some of the RNG seeding can be held over
+> from a previous boot, in order to eliminate the overhead on the early
+> portion of a current boot.  Any feedback on that idea?
+>=20
+> Thanks.
+>    -- Tim
+>=20
 
-Yes, the info array is also a source of wasted space. This was known at
-the time when we discussed [0] introducing this array. Many records do
-not even use the dev_printk_info fields. (A running system seems to use
-them more often than a booting system.) However, the 64 bytes is
-currently quite large. During some testing I typically saw 70% of the
-dev_printk_info text space for valid descriptors unused.
 
-I typically saw dev_printk_info averages of:
+Ciao
+Stephan
 
-- 5 bytes for SUBSYSTEM
-- 12 bytes for DEVICE
 
-However, this problem is compounded by the descriptor array issue I
-mentioned at the beginning. The reason is that there is a 1:1
-relationship between descriptors and dev_printk_info structs. So if 30%
-of the descriptors are invalid, then that adds an additional waste of
-30% totally unused dev_printk_info structs.
-
-For example, for CONFIG_LOG_BUF_SHIFT=13, that represents a total of
-13KiB wasted space in the info array (36% of the total memory usage).
-
-> It should be possible to write these dev_printk-specific metadata into
-> the data buffer a more efficient way and only for records created by
-> dev_printk().
->
-> It would require adding "dict_len" into "struct printk_info"
-> and reserving space for both "text_len" and "dict_len".
->
-> We bundled it into the metadata because these are metadata.
-> We wanted to keep the design as clean as possible. We focused
-> mainly on the stability and maintainability of the code.
-> And it was really challenging to get it all working.
-
-I think keeping it bundled in the meta data is correct. But if those
-text arrays could be allocated from a text ring, then the space could be
-used efficiently.
-
-I am not recommending that we add the dict_ring back. It was
-considerably more complex. But perhaps we could use the text_ring for
-these allocations as well. It may even have the benefit that the
-"average text size" becomes >=64, which would also help with the first
-wasted item I mentioned.
-
->>     struct printk_info {
->>             u64     seq;            /* sequence number */
->
-> I do not recal the details. But I think that we need to
-> explicitely store the 64-bit "seq" number in the metadata
-> because of the lockless algoritm. It helps to solve
-> problems with wrapping of the counter in
-> "atomic_long_t state_var".
-
-Yes. I could not figure out a way to safely update a @log_first_seq to
-represent the first sequence available in the ringbuffer. (The
-complexity involves both writers and readers seeing appropriate sequence
-values.) If that could be done somehow, that would save another 2KiB
-(for CONFIG_LOG_BUF_SHIFT=13).
-
-In summary...
-
-I think the only quick fix we could do immediately is reduce
-PRINTK_INFO_DEVICE_LEN. On my various test machines, I never encountered
-anything above 25. Perhaps reducing it from 48 to 32? That would
-immediately reclaim 11% (4KiB for CONFIG_LOG_BUF_SHIFT=13) and it would
-not require any changes to the various crash/dump tools.
-
-In the longer term we may want to consider using the text ring for
-additional device/subsystem string allocation. This would only require
-changes to crash/dump tools that provide the device/subsystem
-information.
-
-In addition, if low-memory single CPU systems are am important target,
-we might be better off implementing a
-CONFIG_PRINTK_RINGBUFFER_TINY. Implementing a lockless ringbuffer for a
-single CPU is trivial (in comparison) and would not require all the
-management abstractions. If it used the same printk_ringbuffer API it
-could be a simple drop-in replacement.
-
-John Ogness
-
-[0] https://lore.kernel.org/lkml/20200904124530.GB20558@alley
