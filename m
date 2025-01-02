@@ -1,73 +1,83 @@
-Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.1])
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [85.215.255.22])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 801C8195F0D
-	for <linux-embedded@vger.kernel.org>; Thu,  2 Jan 2025 10:33:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29EFE197552
+	for <linux-embedded@vger.kernel.org>; Thu,  2 Jan 2025 12:57:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.22
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735814005; cv=pass; b=esnJW9lJJzrvwq50BGuNrS5xWBzJUr0uACznjO+waDkEEoESrh698tc8Zwv7rm43nYYcjCz8L+XFy77Bcot/MXClp4BJw8ZQ4kIwf+W6z4cnnTXTb+ueFRffTi+Q8+nBsYy4ILl0KnV5OjijjKdYMV5dqTj6biKFtejq3Um0Dqw=
+	t=1735822626; cv=pass; b=rsog9YLg2xFnT6pF1w9rI6AvbN/EThLsB76frrMmj7zJab60OLpNTEceMY/lOIeSRb6CA2e3rerHJGJmMagNkSUeYr2f3aYg7XdxCaZeXa/VmKpCOqXi5Yal2+yb0ucm+svyuqoEIBYZF0uNK91QS3hlIi8DUxnf6fPPlNc/9bk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735814005; c=relaxed/simple;
-	bh=RUttpl+5zH9ZmNfJRD392aKhb1X37k+pz+KCbrR9DtM=;
+	s=arc-20240116; t=1735822626; c=relaxed/simple;
+	bh=N0lQzaHU0zUFgLk1/KX1dn8PSM2jAuai9KzeLac86fY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Bw5MVlzUT+t4xh5/c+Sunbc/Dk8SpnZnsCo8l4N8a0DgsbVu6e82YSeeDrqabFUTnNfWQl/m3XIuzm5BRmJZLUxPRgVAMpI0Nk9vb2P4QG1zbhGgvedkznGqRXHZOq3rtG84m5fKrRaR5SCLZWoZdrb/PvY3Bo4zkEFmXPenMpw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=Day1tOd/; arc=pass smtp.client-ip=185.56.87.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+	 MIME-Version:Content-Type; b=JmPLyIqUWAQ+tsoYs9fvOu5tNcliIzuTKcw6tnBv4DqWwI5dJZF1FxfhzQXlvng0qFUDcAQ/WSWciUGMNFCH//f9Pjorp3LnK0PDBFe7Peoe7pNgOendBjeiMDg/5lkgwaGJ6c5gOlVYdLpJOZu22wzL7DGOszRFOQ4dQ7VZSuc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=chronox.de; spf=none smtp.mailfrom=chronox.de; dkim=pass (2048-bit key) header.d=chronox.de header.i=@chronox.de header.b=tFaQHigU; dkim=permerror (0-bit key) header.d=chronox.de header.i=@chronox.de header.b=c9EQHwql; arc=pass smtp.client-ip=85.215.255.22
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=chronox.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=chronox.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="Day1tOd/"
-ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-kq8l.prod.antispam.mailspamprotection.com; s=arckey; t=1735814003;
-	 b=FagQduah81A8mGt7cR6R+lvo7UYq2vw/2pKlWQ8W4+ye0GMt4JRXhpW+/zk/xGgsocHnoMKzk1
-	  LoF+MA21fSqBMcWmcEyargbF5T6p6EXwQv9Yw1UpqCXi5t99E8+zdZmoqZNQE+9/nwL2veq9jr
-	  G95nJWV6lEoZZA+xzaC1ldykIud0NqjKlOjcRto+DufwL+U9UOqytQrJ9L5XwgPTs5HL24foLZ
-	  Ts2hGO30/3o3h1X9NiLZ8zYJN4msmBkhvTgas3P+EVaW0Zp+wpaYjf8egKaf/MN9iAQEaNTzax
-	  KFXYhn+YDZlMBXyEvKd8YqMWuwJMGM+PB+Kv554JeiiKgQ==;
-ARC-Authentication-Results: i=1; instance-europe-west4-kq8l.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-kq8l.prod.antispam.mailspamprotection.com; s=arckey; t=1735814003;
-	bh=RUttpl+5zH9ZmNfJRD392aKhb1X37k+pz+KCbrR9DtM=;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
-	  Message-ID:Date:Subject:Cc:To:From:DKIM-Signature;
-	b=IDBP9V7YHAWa8mvR7+4gKmqTIQsqrd2kpVFQskN3WAZewX5F+ZjIO2yZ8PsteUYSNJzQrvX1Uq
-	  oLap3xEwgy00w7u7o3hnJ1DQoSCj0tEr5jXDUk2dB2b9r4QBA7eFJn8cjywGA4qt2ISY8QHoB3
-	  NojB0qljvQaAiGFm4maRKR59H2uXVGs9Y8tENj51VecKybXud21zUIVaLThgY6jpIa5rW+qQj5
-	  e83SZPipEGcnL96R0P10Ayhss270uAKTLuLTyIbYsPlQxtWqOkt20Wp2L1Z1905f6t2I5R32uw
-	  R51mZqy/2W3BFeHkllP5S6EAsHYDgvRGS2MjOgXLHxDKTg==;
-Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
-	by instance-europe-west4-kq8l.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98)
-	(envelope-from <francesco@valla.it>)
-	id 1tTIVt-00000000uUK-3irW
-	for linux-embedded@vger.kernel.org;
-	Thu, 02 Jan 2025 10:33:16 +0000
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
-	s=default; h=Date:Subject:Cc:To:From:list-help:list-unsubscribe:
-	list-subscribe:list-post:list-owner:list-archive;
-	bh=1MLKuHhU9Hlb+EGrSTABZRu6xswTzcrHiD5iul+J2ZM=; b=Day1tOd/n2HxChiNVBK8/RGfYm
-	7f5WAnzWSHaURXlA8bFWsnpij/tl8gEcnCvBzw1v5FZZLxsE/Mcui0A5yOlkLLXIlhV5KGatmYMIt
-	8/LCaKTfDt3G0MkjxBJKSSDIQr1Boynp2k0vKqemuOjcgd5WvY7tEyF2YbFpUAh1ccD8=;
-Received: from [87.11.41.26] (port=63449 helo=fedora.fritz.box)
-	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98)
-	(envelope-from <francesco@valla.it>)
-	id 1tTIVo-000000005HF-4BRM;
-	Thu, 02 Jan 2025 10:33:09 +0000
-From: Francesco Valla <francesco@valla.it>
-To: Shankari <beingcap11@gmail.com>, Stephan Mueller <smueller@chronox.de>
+	dkim=pass (2048-bit key) header.d=chronox.de header.i=@chronox.de header.b="tFaQHigU";
+	dkim=permerror (0-bit key) header.d=chronox.de header.i=@chronox.de header.b="c9EQHwql"
+ARC-Seal: i=1; a=rsa-sha256; t=1735822620; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=Vwej4D064yJsQR2mqRuD58f1fYWy6hkxskqF1XtM56EOI7T0KGR0dVTqD7j+Oc4vPA
+    ZMZRGqUeTeMO8jf+jxkeGllE75+J9qKWebAja94Mnciz++5LIGj1WdvfY3y2WBuvhVoF
+    W2+7r7Z1RcUzIGto9u7xWeb1f72Z+AOT0rCV6I14/857zeBlGlN0ONktmY4fxPSVJ8Gc
+    jvYQCU/3OnVmSYTlamkRlsEm6DCxyU+TJQdkJRzrWSP6oEpwCQ9kbybM3vnWHcToOA9X
+    N0z5KGdDE2ML4eY/KtPDTSU0Lub4qEoFkTo+y3gvGyY7RalXpcFdgfIWmV3+qHc1VSbt
+    b7rw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1735822620;
+    s=strato-dkim-0002; d=strato.com;
+    h=References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=QIxyNA/C4F4HiO9aMGXniejy777uK4EA8NsbG4v1ZEc=;
+    b=ed9WzEgEkAJwKOb97b/h2csG8NHPXAHHmvBeduT70mbAoArhAS5INOYi7c5orR5bj0
+    vsz85Uo4iTjsytNSBRJmBsPSC4UaPBYC26ROGEP7mBaeZBXgYDXOJBEDo+ccHQJ7ViWn
+    30QpO5XXYrtC7lcNnzbtdA7KBh9UzUNGv0kKl8uXjfSENhcUX1ZL6VsLQKlWigHVGAS2
+    c6fX4z541x3IYdlEBOXcc5pdF9ah0xEz7af7poeRiPlGbIbadcRNaDpUnkvKW1xwfuVd
+    VpWmRJC4leMfmyyvXnG7b14mozSmBeDTvvndHoq09uTpswLwIFZOAGQVIQrY9mtsBElk
+    oPvA==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo00
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1735822620;
+    s=strato-dkim-0002; d=chronox.de;
+    h=References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=QIxyNA/C4F4HiO9aMGXniejy777uK4EA8NsbG4v1ZEc=;
+    b=tFaQHigUb5kqok2ZmHyTDGViAmrHUGN+xYF0SeetdGZVnHN3qi9G79t5gB8GzBWQrr
+    ooI+AS/EuothVBJkjWxMZSwSoTqHhCbt50lqzBm2hZnYfGjsgzR9lYu9HczBVJwarXij
+    q4PeAQ055PYYj36m7Sc1hE6UYAeOBOc8W8kl589h0Bv9XLdbLkVjI7Or/HGO5usj06by
+    7M6XAdxQYVCHsk/EAPCbI8JgNOb+dNOa2Qj1/Xk7CFRtLjZ1j+PVXebKCbMTzR7DTVgS
+    1g4zKiy15uy6d9Xzio0GmPLscowQ9spHu0NurGr/nh+AqDv20EFyZyW3M9CWDQPk9DMg
+    ljPQ==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1735822620;
+    s=strato-dkim-0003; d=chronox.de;
+    h=References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=QIxyNA/C4F4HiO9aMGXniejy777uK4EA8NsbG4v1ZEc=;
+    b=c9EQHwqlM7LOoB2+ds6opTHKD93//fUEQGO874n6qZo1PecpvoCWqbnxQ4VydSltwi
+    64FrXoyawa7qS3yAwWAA==
+X-RZG-AUTH: ":P2ERcEykfu11Y98lp/T7+hdri+uKZK8TKWEqNyiHySGSa9k9xmwdNnzHHXDYJfSfteE3"
+Received: from tauon.localnet
+    by smtp.strato.de (RZmta 51.2.16 DYNA|AUTH)
+    with ESMTPSA id fbdb2a102Cv0ogZ
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate);
+    Thu, 2 Jan 2025 13:57:00 +0100 (CET)
+From: Stephan Mueller <smueller@chronox.de>
+To: Shankari <beingcap11@gmail.com>, Francesco Valla <francesco@valla.it>
 Cc: Linux Embedded <linux-embedded@vger.kernel.org>,
  "Bird, Tim" <Tim.Bird@sony.com>
 Subject:
  Re: [boot-time] jent_mod_init on beagleplay (was RE: [boot-time] [RFC]
  analyze-initcall-debug.py - a tool to analyze the initcall debug output
-Date: Thu, 02 Jan 2025 11:33:08 +0100
-Message-ID: <2736774.vuYhMxLoTh@fedora.fritz.box>
-In-Reply-To: <3346275.44csPzL39Z@tauon>
+Date: Thu, 02 Jan 2025 13:56:59 +0100
+Message-ID: <2972828.e9J7NaK4W3@tauon>
+In-Reply-To: <2736774.vuYhMxLoTh@fedora.fritz.box>
 References:
- <1964175.7Z3S40VBb9@fedora.fritz.box> <2285043.vFx2qVVIhK@fedora.fritz.box>
- <3346275.44csPzL39Z@tauon>
+ <1964175.7Z3S40VBb9@fedora.fritz.box> <3346275.44csPzL39Z@tauon>
+ <2736774.vuYhMxLoTh@fedora.fritz.box>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -75,64 +85,99 @@ List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - esm19.siteground.biz
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - valla.it
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-SGantispam-id: 4433921e0c2fbb0aa2018027de81fd13
-AntiSpam-DLS: false
-AntiSpam-DLSP: 
-AntiSpam-DLSRS: 
-AntiSpam-TS: 1.0
-Authentication-Results: instance-europe-west4-kq8l.prod.antispam.mailspamprotection.com;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
+Content-Type: text/plain; charset="us-ascii"
 
-Hi Stephan,
+Am Donnerstag, 2. Januar 2025, 11:33:08 CET schrieb Francesco Valla:
 
-On Thursday, 2 January 2025 at 10:06:25 Stephan Mueller <smueller@chronox.de> wrote:
-> Am Dienstag, 31. Dezember 2024, 15:42:16 CET schrieb Francesco Valla:
-> 
-> Hi Francesco,
-> 
-> > The ultimate goal here is reducing the boot time to the minimum possible
-> > without removing functionalities. The purpose is educational, but on the
-> > long term it will probably be beneficial to my work too (as I work in the
-> > automotive industry, where each millisecond counts).
-> > 
-> > There isn't anything inherently wrong, at the moment I am trying to
-> > determine what is real initialization time and what instead is an actual
-> > waste of time (e.g.: excessive probe deferral). The aforementioned
-> > jent_mod_init (on which Tim I think is working on some level) is one of the
-> > longest single inits, but to be honest I don't know much about all the
-> > entropy stuff.
-> > 
-> > Wishing you the best for the new year,
-> 
-> Same to you!
-> 
-> Thanks for your answer. With that, if you desire it, I can try to help you 
-> lowering the boot time at least in light of the Jitter RNG. This, however, 
-> requires a bit of analysis which you need to help me with as I do not have a 
-> board you discuss. But the Jitter RNG has some turning knobs that can be used.
-> 
-> Ciao
-> Stephan
+Hi Francesco,
+
+> That would be wonderful! Whenever you have the time, please let me know what
+> analysis you need.
 > 
 
-That would be wonderful! Whenever you have the time, please let me know what
-analysis you need.
+Ok, some background: the Jitter RNG technically has 2 noise sources which are 
+sampled concurrently:
 
-Regards,
-Francesco
+1. variations of the execution of CPU instructions
+
+2. variations of memory access times
+
+For (1) the Jitter RNG has a fixed set of instructions it performs the 
+execution time measurements for: the SHA-3 conditioning operation 
+(specifically the Keccak sponge function). For that, it performs a given set 
+of Keccak operations.
+
+For (2) the Jitter RNG allocates a fixed set of memory and simply reads / 
+writes data there and measures this timing.
 
 
+For (1), the more instructions are samples, the higher the entropy gathered. 
+This means more time is required to sample that entropy. I.e. when you 
+increase the number of measured Keccak operations, you get more entropy.
+
+For (2), when the memory is large enough to "spill over" into the next type of 
+memory (from L1 to L2 to L3 to RAM), the higher the entropy gathered.
+
+
+So, for (2), to get more entropy, is invariant from the execution time. But 
+for (1), the entropy rate depends on the execution time.
+
+
+Thus, what you want is to try to reduce the time spend for (1).
+
+
+The key now is that the overall entropy rate the Jitter RNG requires for 
+functioning must be such that when gathering 256 bits of data from it, it 
+contains 256 bits of entropy.
+
+
+Now, there are 2 "knobs" to turn via Kconfig:
+
+- the oversampling rate (OSR): given that the individual number of rounds for 
+(1) and the number of accesses for (2) are kept the same, the OSR causes the 
+Jitter RNG to multiply the round counts. For example, the baseline with OSR == 
+1 is that for gathering 256 bits of entropy, 256 times both noise sources are 
+sampled. For an OSR of, say, 3, to get 256 bits of entropy, 3 * 256 = 768 
+times both noise sources are sampled. This value was changed from 1 to 3 for 
+6.11 because there were reports on some CPUs that the Jitter RNG did not 
+produce sufficient entropy - most CPUs, however, can perfectly live with OSR 
+== 1.
+
+- the amount of memory for (2) can be increased. The default is 2kBytes which 
+usually means that the L1 can fully handle the accesses.
+
+
+======
+
+
+Now given the description, what can you do? I would apply the following steps:
+
+1. measure whether the timer your system has is really a high-res timer (the 
+higher the resolution, the higher the detected variations and thus the 
+entropy)
+
+2. assuming that test 1 shows a high res timer, reduce the OSR back to 1 
+(CRYPTO_JITTERENTROPY_OSR) and measure the entropy rate - 
+
+3. if test 2 shows insufficient entropy, increase the amount of memory 
+(CRYPTO_JITTERENTROPY_MEMSIZE_*) and measure the entropy rate
+
+
+
+The tool for measuring the entropy rate is given in [1] - check the README as 
+you need to enable a kernel config option to get an interface into the Jitter 
+RNG from user space. As you may not have the analysis tool, you may give the 
+data to me and I can analyze it.
+
+
+More details on tuning the Jitter RNG is given in [2] - it discusses to the 
+user space variant, but applies to kernel as well.
+
+[1] https://github.com/smuellerDD/jitterentropy-library/tree/master/tests/raw-entropy/recording_runtime_kernelspace
+
+[2] https://github.com/smuellerDD/jitterentropy-library/tree/master/tests/raw-entropy#approach-to-solve-insufficient-entropy
+
+Ciao
+Stephan
 
 
