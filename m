@@ -1,166 +1,208 @@
-Received: from tiger.tulip.relay.mailchannels.net (tiger.tulip.relay.mailchannels.net [23.83.218.248])
+Received: from mx07-001d1705.pphosted.com (mx07-001d1705.pphosted.com [185.132.183.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1113722611
-	for <linux-embedded@vger.kernel.org>; Wed,  8 Jan 2025 23:32:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=23.83.218.248
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F55A291E
+	for <linux-embedded@vger.kernel.org>; Thu,  9 Jan 2025 02:23:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.132.183.11
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736379129; cv=pass; b=lwIZZA52gQhwycoKGSUPse6Gr4XmZlaiYjGsXx1P73B6F42dCs21rxdfk9qKZpToFPHvdMgV9yk7MKa8crFPEYmlOeuZa+7i0Nfimryxow6QEDORywZkaseRwR+vJN/YZ2WoqcOARG0+QyTc4Ex6vIHEqu9JmxrIzP7C79YiwpE=
+	t=1736389423; cv=fail; b=KZG6bHwhdDH7GsNYpWCZJQEkjCc2kMAoP2NLXejrQFKfV2dtKOKWUaxaT1e/8lyckdOJpqVhlwUvAz91xJq0eC9IbJ6OsX94c3lMbYTDTDgxbK/+QNt83pNJe2A2EN8XPmn6lEMt/Cgi41OJcf/Thig16w2Tx2uRQCI7kk8j0Dg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736379129; c=relaxed/simple;
-	bh=PL0/+MI90vuQhayK4TWt4JaziInd1qTjR5E8Pf9ibHs=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=jO8lIPT6922LlfVnoEIHh4YQlJaxctKsaSBJC6XxKe2JODIQH2p3H48wUJWuT2WIPG3o4pADmXOMb7a7+SHnrQyO7/YM/s8Lar8PYHWCVsJxllVyH+NGfvYcTtJKmlxnzNgV4y+q/iBl2VykCNkPI/wRDvFSPei0ILg+KP5gI+8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net; spf=pass smtp.mailfrom=landley.net; dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b=hu5WfPAg; arc=pass smtp.client-ip=23.83.218.248
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=landley.net
+	s=arc-20240116; t=1736389423; c=relaxed/simple;
+	bh=2hPi0IB+cBKI6hqQCdWBASlpkWPiJDvjSeE7I8aoujs=;
+	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=pMz4NrpGYJ1Z5HlWpR1sXsXrxUq0/lz1CNeLNjrDYxZiXbvrLVjRepOyDVbf4fcmkcLPX+rIcqEBDPggYvV+hnW+66e1iI+3T8zxRUJbR2LRoz6qVTEq2pu+Cm+KyFFwqDOwabksBhvbOy5DQJrPT2z8YGMs5McidJcBJsM2Xp4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=mms+i+tO; arc=fail smtp.client-ip=185.132.183.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b="hu5WfPAg"
-X-Sender-Id: dreamhost|x-authsender|rob@landley.net
-Received: from relay.mailchannels.net (localhost [127.0.0.1])
-	by relay.mailchannels.net (Postfix) with ESMTP id D5F12783979;
-	Wed,  8 Jan 2025 23:26:27 +0000 (UTC)
-Received: from pdx1-sub0-mail-a296.dreamhost.com (100-109-30-103.trex-nlb.outbound.svc.cluster.local [100.109.30.103])
-	(Authenticated sender: dreamhost)
-	by relay.mailchannels.net (Postfix) with ESMTPA id 6F2EF784707;
-	Wed,  8 Jan 2025 23:26:27 +0000 (UTC)
-ARC-Seal: i=1; s=arc-2022; d=mailchannels.net; t=1736378787; a=rsa-sha256;
-	cv=none;
-	b=Ala9Tod1763tyRkAj+z7+ac2TC93JMNrcMBLAzNdlOEDUB1WS9AwAmX+X2xIcaUeylg06V
-	9uTN+nAeqGEgPwuZvSHQsq8RfRR2X+2P2EtTOfqOAVad5CSqhd0rJXt3UgI28SSOduBNix
-	luCGan0ux99WA0K+zSHjigaOg28hfFEnRDHayBjGgkQ+4tBiGuMO12+dDHvTm42prNqASR
-	HHKECSgjHeIt5qpZ4ALIoyXLHp+gxUTL+Yhoo6gZeNdLMZ+F1gUCoYozR6j1iID97V8SYk
-	bR4woDdecSoroRQ0t8MQaW+duBPMX/fxXgR3yYzlH+Sz2UaOSTwvX6B6P6T4GQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed;
- d=mailchannels.net;
-	s=arc-2022; t=1736378787;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:dkim-signature;
-	bh=cYTAue8yJn+5kCUPbB518FArNHYS0WX6lEUK22PZ5Nw=;
-	b=eVHgtLbJ5Cwlg7eSllHXbxuKZFo09Wd8dhWk8kAQ/+sN8Dj23tk6nvxviG80JNe7MEeiGL
-	xYsZJla5DVp5rChq6WK3pzRCDqJuc6fNR1M3+ZY5CI1/SW2YyAjm313318EmSMDa23U0J2
-	d7UgowSO47TY2RB40yCNNnTsa7IT875ZtE0eKOdFbR5jmoQhLY1h+p/MeM4p1Yb/OXqiHI
-	rnzzxlKoELIPk3IpcCgqQuP3/9kmx9SzZer82lGJPdXbJn2JBvGDW2S2as4hqT3l149XdN
-	k7fYveq3oqDqSf0lkIpxcitHNK+247qMachI2ThdKW85cGsaKGPAWRuM9Um/iQ==
-ARC-Authentication-Results: i=1;
-	rspamd-7df4dcbd86-c7g8z;
-	auth=pass smtp.auth=dreamhost smtp.mailfrom=rob@landley.net
-X-Sender-Id: dreamhost|x-authsender|rob@landley.net
-X-MC-Relay: Neutral
-X-MailChannels-SenderId: dreamhost|x-authsender|rob@landley.net
-X-MailChannels-Auth-Id: dreamhost
-X-White-Interest: 015da39f64af7400_1736378787695_3363432801
-X-MC-Loop-Signature: 1736378787695:3232842358
-X-MC-Ingress-Time: 1736378787695
-Received: from pdx1-sub0-mail-a296.dreamhost.com (pop.dreamhost.com
- [64.90.62.162])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384)
-	by 100.109.30.103 (trex/7.0.2);
-	Wed, 08 Jan 2025 23:26:27 +0000
-Received: from [172.16.32.88] (unknown [198.232.126.202])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: rob@landley.net)
-	by pdx1-sub0-mail-a296.dreamhost.com (Postfix) with ESMTPSA id 4YT3vk6Yrrz8l;
-	Wed,  8 Jan 2025 15:26:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=landley.net;
-	s=dreamhost; t=1736378787;
-	bh=cYTAue8yJn+5kCUPbB518FArNHYS0WX6lEUK22PZ5Nw=;
-	h=Date:Subject:To:From:Content-Type:Content-Transfer-Encoding;
-	b=hu5WfPAgwnhlUOir4jHvbYcDJZt4dHvmw6+Dizz/J8B0KoDnVKHF7LHxrPQJvtbpS
-	 9Ob5PAuDLVXb7VxYKm9AtahJN8yWp9o63DNkjkPTmY3pOdgcuffgqx5ip1QmMOagIs
-	 HGDrCY7fZRn7GN2j5u/PfwkcGY5ccvZs9I71C8ypgea8NiLrQl9ktS2eeiAFmofirw
-	 2Byyb31O6ZI1pkt0bYp0y9SaoUmuxu1pJwYkgvogtwJZDDi0TMpK3FH0RYAzZ+zOIn
-	 lP1zF+TERjtUuEXImVW4fyjkP+jY8030OLJdiiXlKOZZBQam8a2ZMWhbULrziFE8RW
-	 xivg1t3DTNCBQ==
-Message-ID: <ca1212ef-4d60-4947-9180-d2b3f127e0fb@landley.net>
-Date: Wed, 8 Jan 2025 17:26:25 -0600
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="mms+i+tO"
+Received: from pps.filterd (m0209324.ppops.net [127.0.0.1])
+	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5090UBdA025139;
+	Thu, 9 Jan 2025 02:23:30 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=S1; bh=2hPi0IB
+	+cBKI6hqQCdWBASlpkWPiJDvjSeE7I8aoujs=; b=mms+i+tO+WEUEFXgT4TntZP
+	pTr4pcy2fuaozy5HS/VNwOIkfBcmSmXvki6eOa14xSguyLFh6nRqTBe8lzbievJ1
+	bXYO1a9dj/TBKGuRXiDb8K9SyEEm2+3Gb5ThTJHmDvJ29W39AmrE4yzE6xbmmQpc
+	4JSDyishi62pcKPa1DK2gJam2NCXrLAXbTnsKzB4/S39PgKWbdWsztPmWfd6GW2U
+	sXqlbXkHXiXIhm+EYSzKeaQN9uQbAEzR3SxhE2BLVb8Fod6yehH1SAH5z8wzNBvp
+	pVzni7e1BtbbWspTVtO9gvc8pTezzuv/GETg+0aSMafI55sgc5anyMaFMS690JA=
+	=
+Received: from nam04-bn8-obe.outbound.protection.outlook.com (mail-bn8nam04lp2049.outbound.protection.outlook.com [104.47.74.49])
+	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 43xt534dg2-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 09 Jan 2025 02:23:29 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=N76uVV5IogGyJ9jRnjjN9EiUMNC6jTKA8jbXSAZJlEyreeBNvdWUbZvbidM7v7OAG0jGgMOuKII2O7FNN62V6mlBtchE9iYbQ7txjqJ7BeEJokgubbysZ9J9XzlJC+qgz4d9OBZeHfiGsPDmQaS8qDj+DDNVWJKm8ignpQUWh+QCPZBJ0u30IPA0FbcLksxKQ7YztivYhJ39VvIviPYTSqyQo3sINcu7wt5U4Cb7NmoBULFOqhSwPB67K+jvN0k3Stp2ssrKc7VFXfI2AIPX+UjHLFzxhJ1eTOmglLcCpQkKmvp8PZP9B/T/V76bmcTUnS47Kwa+RAqQ+kZ5rUSWVw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=2hPi0IB+cBKI6hqQCdWBASlpkWPiJDvjSeE7I8aoujs=;
+ b=Y3zRL2zzLz7ba2WT0Y4noFy87dQXFJxaWH2KyUjeAtva5JkAtpRyAioj1EU4225KW9odt5gFpokQttbs/ceZfB+ACAwkyStstOs/rb948suahOTvVw7ldJGRZpnEh/0VL84ps94ce2ks7rD/PWGcJ3HeGj8VC5/Rbk/FG4N5eiVHIeqq/KkNHxF8LU/rzpKiIP2pSESd3m5LwWUyC0wIRv0v5eY4W1mkywf3013cDIGNSH2vRI8idMZuAMKp0PbN+C2vfh45ugf7kSKnPnc8b9R3ZERpMXUNfOyfrw9zHG81f58xj7haLgnDTvjpKu/vWMG72LMB5HFFpMBYJwyy5g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
+ dkim=pass header.d=sony.com; arc=none
+Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
+ by PH8PR13MB6184.namprd13.prod.outlook.com (2603:10b6:510:25b::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8314.17; Thu, 9 Jan
+ 2025 02:23:22 +0000
+Received: from MW5PR13MB5632.namprd13.prod.outlook.com
+ ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
+ ([fe80::df7c:a5b9:aa3e:9197%4]) with mapi id 15.20.8314.015; Thu, 9 Jan 2025
+ 02:23:22 +0000
+From: "Bird, Tim" <Tim.Bird@sony.com>
+To: Rob Landley <rob@landley.net>, Shankari <beingcap11@gmail.com>,
+        "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+Subject: RE: [boot-time]
+Thread-Topic: [boot-time]
+Thread-Index: AQHbWiLTBybXJIS1AU23EMmh9EFgybMNPmaAgABPkoCAADb/sA==
+Date: Thu, 9 Jan 2025 02:23:22 +0000
+Message-ID:
+ <MW5PR13MB5632E3DF510914D3AFF5BF90FD132@MW5PR13MB5632.namprd13.prod.outlook.com>
+References:
+ <CAORPcfVRobA+u5q7aPboC=3iY8dibDUB0920Z=Z0VgpQEupKJw@mail.gmail.com>
+ <MW5PR13MB5632841906910ED152E7AE3CFD122@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <7c4d8fa2-9b12-465a-9c23-0503cb086365@landley.net>
+In-Reply-To: <7c4d8fa2-9b12-465a-9c23-0503cb086365@landley.net>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|PH8PR13MB6184:EE_
+x-ms-office365-filtering-correlation-id: 92c3771a-7fcb-4345-ecdf-08dd305496dd
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|366016|1800799024|376014|38070700018;
+x-microsoft-antispam-message-info:
+ =?utf-8?B?Uy8zNDJlck81bytYMHlrZmpXUXhwNlMyR25PQlZHYVhja0NubEVqVHZDWWt3?=
+ =?utf-8?B?RzhkZno4elhwTDNEeGFaRHVqZWVJc1hLWUhWYTlnOXdRTnFxdmhYQmI1UVpD?=
+ =?utf-8?B?SGFwNjdUcEdrOUloVUJCMTZxeUhrR0o4d2pCUVBwaVpjazNUWi9lSWZOWUtG?=
+ =?utf-8?B?UU1tNkczT2tJVTJxOUpqdmlCamRRVmlmUk10bkFrZ1A4MTg2UVJBWTdTZmJ0?=
+ =?utf-8?B?ejFtWWV0Z1BEcWNiQzRFTEhhdUo0dVRrQnA4bHNxVkRpRjFNbm40c1huNTY0?=
+ =?utf-8?B?YTRXdDN1L3I0dnplOFVoOWgyRk1Qd2l4WXFNaGpyenp2NHN3aWNXVnRiS0Ny?=
+ =?utf-8?B?M1poQStGbTZtMyt5dFB6L0ljOVNiQ3ovV1puYnVZbWtPRVZmeEdpZlVXeXgw?=
+ =?utf-8?B?MzNhV1YwME9RaERxZm1hTUVZalVxTDBSci9vbU51ZUlWYXpTQUQ3YmlBSzJM?=
+ =?utf-8?B?d0wwd1hPS2ZlRisrNzNUWXEyTmNqWXJTYlNtNnFUR0ZEQjB3b3RJeW4rQWg5?=
+ =?utf-8?B?YXpES1ZieGk2L0plODcrakhiem8xaVJQaE9LczZYdWhpSzdIK2V6MzBlWVBX?=
+ =?utf-8?B?ek9BcExiME9pcDIxU0VzdTVUemtnbTVnaGVSaTFKeEFNT1NZbHdOa09Ib1J5?=
+ =?utf-8?B?QmwvWTdWMWF6V0NjNFR0RXFrbHViZVh6MUhLYXhuM0xtMk11QkhGN3UxL3BI?=
+ =?utf-8?B?NkpORUY2QTI1WnFOeXZKNjlBYzBQZFpQL3NWRWJGdVRDL3F6TlpSRExOVmdC?=
+ =?utf-8?B?Wk04T21EU0F2ZFJrZEpSMHFudTBMaDBsZjhEZmd5eXZMUzcvSFRlUFJGSkhE?=
+ =?utf-8?B?S3FmQ1ZRcjFyK0Z6Z1Uwa1k1Yjd0NEo0UWtpdVJEU0VuZDNmQU1OQkV3Q3k3?=
+ =?utf-8?B?SXRaaTkvc1llNTA0ZCtuaVJTQWhTRWNFNTVvVEpVSERhbU1GbjlITTVQVm5Q?=
+ =?utf-8?B?dFdCaGNqSzFsSk12b2FremFYVnZoV1JTMnB1MEsvWExmOUdEK0FtdFZHZGlN?=
+ =?utf-8?B?WU91WUk4LzV3bUhlUDZVd1l5NW5DY0lZMllNZ25PT05jcHYxOWxwSXhvcFlL?=
+ =?utf-8?B?UXQ3WWkrbDRpNnk2L3crQ3NYQ3MxYXNvdTN2V1ZMamUxS29UTkpDQldXNGhO?=
+ =?utf-8?B?S0xkVzJPRmFyeDFKRkd5amlDeEZ0U3hJN2p5RmxGcTZ0Ty9DMjFLeVZraDRL?=
+ =?utf-8?B?SlhBQUdTVU9Tdm52eGd2SGRQRS85czFmbDJCcy8zMlo2bUlteEdWS1NmRGl3?=
+ =?utf-8?B?MzlDQkNkR0MybkoxeW1lM1lVd0xEMWFmVk1aeVNYQm1FT2dheVFrcXdjaWdR?=
+ =?utf-8?B?RlgvOU9DQS9FSmxWanVVMDVEOWk0TFo1d1Zvc2FPQ2FhNG9HRFVpeDN1aHZ3?=
+ =?utf-8?B?UklYMFBaU05SSlFOWlNXQUxOdldIdXR4VVozSnBhOVIxVFdFYXlIVVhZSUhv?=
+ =?utf-8?B?Vkp4bTRUN3YvbTMyYWN1Nm1aaTlKNkVUU0Z5T2xsWVJHblcxQWgxbS9uNTVo?=
+ =?utf-8?B?TkVwMDFnN05uQ3JWN2pNM2JaNFNFdHZZUXN5UlJFeWFMczh6SHBWUFNWaWgv?=
+ =?utf-8?B?ejRRMmJVRFJWenR2NlhkNDFKYUVCbkNKNHhPTkFReUVMVTAxSWhGczNQeVcy?=
+ =?utf-8?B?N2lpUDFINnZjbmtweHZGYWpya0FXVDdSdDhFN2Q5WlducStQeHJSZDNMNlYv?=
+ =?utf-8?B?c3IzQXpkN3FhR0FBTkJSTEVXckVpZ2djRERxUWxSTGVxVFoxUVQvZzFSSWNU?=
+ =?utf-8?B?YmlXR0cvZTFVZmt4azllWlRnb2pxeGdRMDl6dVl5d00xaUkxblF6N0tNRENU?=
+ =?utf-8?B?Z29JV2JuSWdFMjJINTZjQlBRWjVxMHV3bTRJVjNxODV1L3hmVHFMWHI2cTV4?=
+ =?utf-8?Q?WRwlh+J72hYrf?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?WnFiZlA1N08yNmJ3VzFaODRraHh1KzhiQ0g1WS9ZNWUxVWJTOElCdm1VcXQ2?=
+ =?utf-8?B?bDExcmRjSEh5eVI2Tit1a1V6SU5mZFNUajZMdEZ4NmprNmEzdlFVeDJPWWt3?=
+ =?utf-8?B?QmVSTFJ5Y3pieDM2anB1ZEJmZzF4T3hoYisvdzlheGhkaHNGWFR5ZFRiOWlp?=
+ =?utf-8?B?Um93c21DSzQwM0lUSWxFUlcxMVBZOStGTmlXRXRxRit2U1VCUmNHTWpSTkR1?=
+ =?utf-8?B?MUk3bUVMdEhTRlNQbFVSVk5NMHBSNEwxN2gzNmpWRXdDM2FjajJjMDE3c29D?=
+ =?utf-8?B?UitFQjdXSCsySWdNS0RCS1ZHS3BRQWlqNjdpY3VOTVdVaXpRYzUwR3VzS1Qw?=
+ =?utf-8?B?bmxuZVdNMWRsOG1iV0N6MElXTytESVBjeXFWWS9rV0xiQlRRS1h2REljZ2pX?=
+ =?utf-8?B?bUVPWE1kWVhFWGhTRENxZ3pkVm1RblI5RVUzaVdaYk45RDVXOUVVMXJqZmc3?=
+ =?utf-8?B?blJvbHZzRmhNcU02eE5nQ3FpSUE1ZVNGWGFQRTRrcjRWZGdxYnJkQklUUHVM?=
+ =?utf-8?B?S2J1TURIUm1YS0JKb0tibWNEWDhOdlBmaXRPUC9SbDVBc0dBcGJCaHgwWEd1?=
+ =?utf-8?B?R0p1eEVJdXBYRTNaQ2kzOWI3NlJMZitjY0grajFLcUcyK3IxR0I3RHdqdVFZ?=
+ =?utf-8?B?YTJXak9JSEFUK3JwcXBjMC9yTkZjbjlReHNQazNseEZia1FlTWU1cWhpcno0?=
+ =?utf-8?B?OS82K2JhdUs4Y0w4WTExLzViKzlPMURudENpV2hYRmpHdk0vTUcrd2hBNkxL?=
+ =?utf-8?B?dG91YkFxVWlxRmtJL05yYU9xdElBdFJCcFlsLzNvdHltRGNJRWExbVZuTU1q?=
+ =?utf-8?B?UDJsS3padXNTWkpYRWRlODFBYmtYSEhPaFVoNDQ3SzRxZ0YxaFJadnBhRDlz?=
+ =?utf-8?B?S0Vmb003S3c4aGVQclA5NHNDdlVpa2hTNi84TFNqL1R0WFJvSzlNNHpJTzBI?=
+ =?utf-8?B?bmo1cWZydFRHbFJobTBEdjQ1dTZQS2FUR2psa0s5SnlSemJhYUlZTmJlS0p4?=
+ =?utf-8?B?NmQ2MmI0aithZitjNm9zTUZuWTRkeGRTWmxIWmJtQnF5VTVDdjNhR1Y4clBH?=
+ =?utf-8?B?Y0FwU1JQeCtxTUxYeHhtanRFd3B0MUVPbk5PdjUyNXNJam9uWDFMRmlUdld1?=
+ =?utf-8?B?dTJLUENWQlRPMGErVkFCWkhBZHVtVWFzK2h3NW5ZcEE2S1ZzcjZkZmRVNEhp?=
+ =?utf-8?B?aTlGYktaNkxKOElxbytyMXZJcjZQYUQyQ0dTL2ttUFlKa3hjeTZ4eTZwQVJl?=
+ =?utf-8?B?d1VTcjJYMlRDOEZ1RkNMSmRCS0J1a1l0VGFyd1dqYTJqSFZKRVZQdFByUnpj?=
+ =?utf-8?B?cm5Belg4NUVwTTlQSm0wOCtYU3EvOW9qSnJEYnRJakk5TlJtd0RuamJVTzBS?=
+ =?utf-8?B?QXZFTGxoR3V0UkJvbWVzTkpzZmc4Sm1PVUNiNzhOWERSTW9wK3JhNWliWW5B?=
+ =?utf-8?B?a0hqb0JIQkxqYU1wSVRDY3FNQ2ZPaEliOG1lV2dnRUZENnBsdkszb0ZtS1JL?=
+ =?utf-8?B?SE91bDRUZ1NrY0xxVkJNWEhMWTNSQmNiSmRHYTgwZEJXZTA0SmVJRjB4bjdY?=
+ =?utf-8?B?a3RSSE1GNmdud3dsVXJObHVHVDA2Yi85Q0FkTkl6bFRQRHVOOXRhZjZLVDAv?=
+ =?utf-8?B?dzlaTzNuc29uaERsZGxNNzdRMWtXTjA4a3NSQWdvdll5YzFmVmVMUjBISDZv?=
+ =?utf-8?B?emZPVURSd0NJNUIxV2JuK3JvTmtqNTRmSjdiM0ZscDFmbVFNZzhEN2pvK2JW?=
+ =?utf-8?B?TXBlZEErY1hKd2FVSEoyUTlSM3VDdUY4QWJ4SVZKYWxGZkRsaXhFQzJRQy9V?=
+ =?utf-8?B?Yk5naytVL0RldGN1MEQrN1FPa0FJb0F4RzljaHpHUzVJUllTU2RoVG0xcG9Z?=
+ =?utf-8?B?ck9pNTZNWnJBMDZId3F5MXVQUHZUcXkvUTRRNUFIazMrb1J3alpoTzR0R0pS?=
+ =?utf-8?B?NDVqZjRRSWJVeWRaa1BoU2FJM1RQQTdoMjZjQjJmT3h6QWc0QkxmYjhHY1V0?=
+ =?utf-8?B?TDJvWURmdGZQU1dlN1dlb3lzcTh3ellXbVJRMjBWRnlQbkthZUQ2RW9ORTRj?=
+ =?utf-8?B?SHdZZE5ub2RUWXhGbWp2UElUV0tPZDhlNXhLZ3gvSkdFT2ZhT1AweXgrWkdJ?=
+ =?utf-8?Q?Ckk8=3D?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [boot-time]
-To: "Bird, Tim" <Tim.Bird@sony.com>, Marko Hoyer
- <mhoyer.oss-devel@freenet.de>, Shankari <beingcap11@gmail.com>,
- "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-References: <CAORPcfVRobA+u5q7aPboC=3iY8dibDUB0920Z=Z0VgpQEupKJw@mail.gmail.com>
- <MW5PR13MB5632841906910ED152E7AE3CFD122@MW5PR13MB5632.namprd13.prod.outlook.com>
- <b0dd83c8-eb23-494b-8f23-ea8c084405a6@freenet.de>
- <MW5PR13MB5632E7FD9A5E76949625BA54FD122@MW5PR13MB5632.namprd13.prod.outlook.com>
-Content-Language: en-US
-From: Rob Landley <rob@landley.net>
-In-Reply-To: <MW5PR13MB5632E7FD9A5E76949625BA54FD122@MW5PR13MB5632.namprd13.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	L0sfSyxnwppnb7H7dxJ4h8y8VRh0x89DkqGgClqjFMMcwB02u3WEveioro7Zff3vLx11uLMk3a7smsS6uJXOzpXulJc3C3WYZx4oELOKR7tCMBcT+t+upctCBlXBjKV00uVNXJtDrQkF0kfVe/AZc4m+iID1Pb2yanpq2PvhLqb741Kd9qlNRhNg05wScxvlpTyKCh5e+9MflOuroJVKeWGdyz4xbE6NYEz+vb2YlUMOYa6PqkcenEbXzp4kacIZl78Un3NSqJEMfAcQ0M5Q1VaiJ+MA+wcOgZslEItfmbyPu95V9URyxO02Tl42JAleM2SG6fK3ft0d6sku1VlxpcW42uEF3np9J4+ASODpCCvt5roRekKTNgNsdId75kYgychBVnnbR0fW5MsIxWKnQjgHNNH8uP60DGn6C1+TeoSJZN/guluTA+SH/gjYBEhQFThgDXTsmXoZNp1U8uXjv+5cS0rX/SLxy+7liK9SXQvYlNAPn/0mdf1//wkHRLaXDsCgqFPexlMxDsF6alQBroZ/vrCGDl5K95b4HKHRjjjcy8T+825fb1doXzkeepfs+GatHAai++RmRiRb9VqA5w8c1zACnzr1xfm15+OWCKbpF3xQZLQZAIc3aukKiJ3N
+X-OriginatorOrg: sony.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 92c3771a-7fcb-4345-ecdf-08dd305496dd
+X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Jan 2025 02:23:22.2566
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: ixqtZE1YUxNbIOQZiAW12ChT5jEy5pElnj1KscPahFBzCoZxzT0kUXdiyNVu9C5vR2Fey8oM6lN1/WPtJ5dCAg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH8PR13MB6184
+X-Proofpoint-ORIG-GUID: 4zSmVrkKD_LKFDd97ZbfjOD9imk2Dx0M
+X-Proofpoint-GUID: 4zSmVrkKD_LKFDd97ZbfjOD9imk2Dx0M
+X-Sony-Outbound-GUID: 4zSmVrkKD_LKFDd97ZbfjOD9imk2Dx0M
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-01-08_08,2025-01-08_01,2024-11-22_01
 
-On 1/8/25 15:19, Bird, Tim wrote:
->> Cases:
->>
->> - #1 quiet: cmdline w/ quiet, no kernel or userspace output up to the
->> serial login console
->>
->> - #2 normal: cmdline w/o quiet, serial console @115200 baud
->>
->> - #3 normal_baud9600: cmdline w/o quiet, serial console @9600 baud
->>
->>
->> Main outcomes:
->>
->> - kernel timestamps "Run /sbin/init as init process"
->>
->> #1: "1.714458", #2: "3.011701", #3: "16.108101"
-> 
-> Wow from 1.7 seconds to 16.1 seconds.  That's a pretty huge
-> difference.  I guess this particular technique is still
-> very relevant!
-
-CONFIG_EARLY_PRINTK output is emitted before interrupts are enabled 
-(last I checked they didn't kick in until RIGHT before PID 1 gets forked 
-off), so the early output drivers spin waiting for the next character to 
-go into the buffer (the memory mapped register ones look something like 
-"while (MASK&*status); *output = *data++;" in a for loop) and the 
-printk() call can't return until all the data has been queued to the 
-serial hardware, so you spend a lot of time blocked in printk().
-
-With 9600 baud 8n1 output, 9600/9 = 1066 characters per second, or 
-approximately a 1ms wait between each character, blocking in printk when 
-the hardware FIFO buffer fills up, so 16k of output data takes 16 
-seconds to write if the rest of the boot is doing NOTHING. Even a 1k 
-hardware FIFO is only 1 second of output, and that's assuming all 1k is 
-outgoing rather than split between in/out.
-
-Your options are:
-
-1) disable early printk so it all goes into a malloced buffer until 
-interrupts are enabled and it can be asynchronously flushed (meaning if 
-something DOES go wrong in early boot you can't see it)
-2) set your FIFO speed as fast as possible
-3) have your default boot use the "quiet" option (similar to disabling 
-EARLY_PRINTK but at least you have the option to yank quiet from your 
-bootloader args without rebuilding the kernel.)
-
-Faster UART speeds mean shorter serial cables (although there's also 3 
-volt vs 5 volt, wire thickness/capacitance, and some other stuff, Jeff 
-Dionne walked me through the math last year but I don't have my notes in 
-front of me). Modern hardware can do up to 4 megabits/second but outside 
-"this serial chip immediately talks to a USB chip and then it's 
-transported as USB with the funky noise-cancelling signaling over VERY 
-twisted pair to actually leave the board"), I wouldn't trust that over 
-any real length of cable.
-
-Alas 
-https://tldp.org/HOWTO/Remote-Serial-Console-HOWTO/serial-distance.html 
-is from the dawn of time and only goes up to 56k over wires made from 
-recycled drainpipes. 
-https://novatel.com/support/known-solutions/maximum-cable-length-vs-data-rate 
-says 115200 is 2.5 meters. It LOOKS like it scales linearly with twice 
-the speed being half the cable, so a megabit would be about 1 foot of 
-serial cable before the bits get all mushy.
-
-Rob
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogUm9iIExhbmRsZXkgPHJv
+YkBsYW5kbGV5Lm5ldD4NCj4gT24gMS84LzI1IDEyOjMzLCBCaXJkLCBUaW0gd3JvdGU6DQo+ID4g
+SW4gZ2VuZXJhbCwgdGhlcmUncyBhIGxvdCBvZiBpbmZvcm1hdGlvbiBvbiB0aGUgZWxpbnV4IHdp
+a2kgd2hpY2ggaXMgc3RhbGUsIHdoaWNoIG5lZWRzIHRvIGJlDQo+ID4gdXBkYXRlZCBvciBhcmNo
+aXZlZCwgb3IgbWF5YmUgZXZlbiBqdXN0IHJlbW92ZWQuDQo+ID4NCj4gPiBUaGlzIHNlY3Rpb24g
+b2YgdGhlIEJvb3QgVGltZSBwYWdlIGhhcyBhIGxvdCBvZiBtYXRlcmlhbCBpbiB0aGlzIGNhdGVn
+b3J5Og0KPiA+IGh0dHBzOi8vZWxpbnV4Lm9yZy9Cb290X1RpbWUja2VybmVsX3NwZWVkdXBzDQo+
+IA0KPiBUaGF0IHBhZ2Ugc2F5cyAiZ3JhYi1ib290LWRhdGEuc2ggLSBzZWUNCj4gaHR0cDovL2Jp
+cmRjbG91ZC5vcmcvYm9vdC10aW1lL0Jvb3QtdGltZV9Ub29scyIgYnV0IHRoZSBsaW5rIGlzIDQw
+NC4NCg0KSG1tbS4gIFRoYXQgc2hvdWxkIGJlICdodHRwcycsIG5vdCAnaHR0cCcuICBXaGVuIEkg
+Y2xpY2sgb24gaXQNCm15IENocm9tZSBicm93c2VyIHRha2VzIG1lIHRvIHRoZSBodHRwcyBzaXRl
+IChzaWxlbnRseSBhdXRvY29ycmVjdGluZyBpdD8pDQpJJ3ZlIGZpeGVkIHRoZSBsaW5rIG9uIHRo
+ZSBlbGludXggc2l0ZS4gICBTb3JyeSBhYm91dCB0aGF0Lg0KDQpIZXJlIGlzIGEgZGlyZWN0IGxp
+bmsgdG8gdGhlIHRvb2wsIGJ1dCBpdCdzIHdvcnRoIGdldHRpbmcgdG8gdGhlIHBhZ2UgdG8gcmVh
+ZA0Kd2hhdCBrZXJuZWwgY29tbWFuZCBsaW5lIG9wdGlvbnMgaXQgbmVlZHMuDQpodHRwczovL2Jp
+cmRjbG91ZC5vcmcvYm9vdC10aW1lL0Jvb3QtdGltZV9Ub29scw0KDQpodHRwczovL2JpcmRjbG91
+ZC5vcmcvYm9vdC10aW1lLWZpbGVzL2dyYWItYm9vdC1kYXRhLnNoDQoNCj4gDQo+ID4gQW55b25l
+IGVsc2UgcmVhZGluZyB0aGlzIHdobyB3YW50cyB0byBhbHNvIHBhcnRpY2lwYXRlIGluIHRoaXMg
+cHJvamVjdCB0bw0KPiA+IHVwZGF0ZSB0aGUgZWxpbnV4IHdpa2kgYm9vdCB0aW1lIGluZm9ybWF0
+aW9uLCBwbGVhc2UgY29udGFjdCBtZS4NCj4gDQo+IE1heWJlPyBXaGF0IGRvIHlvdSBuZWVkPw0K
+DQpJIGFtIGFsd2F5cyBsb29raW5nIGZvciBtb3JlIGRhdGEuICBJZiB5b3UgaGF2ZSBhIHN5c3Rl
+bSB5b3UgYXJlIHJ1bm5pbmcNCkxpbnV4IG9uLCBhbmQgY2FuIGVkaXQgdGhlIGtlcm5lbCBjb21t
+YW5kLCBJJ2QgYmUgdmVyeSBoYXBweSB0byBoYXZlDQp5b3UgcnVuIGdyYWItYm9vdC1kYXRhLnNo
+LiAgSXQgd2lsbCBjb2xsZWN0IGEgYnVuY2ggb2YgYm9vdCBkYXRhIGFuZCBzeXN0ZW0NCmRhdGEs
+IGFuZCBzZW5kIGl0IHRvIHRoZSBiaXJkY2xvdWQub3JnIHdpa2ksIHdoZXJlIEknbSBkb2luZyBk
+YXRhIGFuYWx5c2lzLg0KDQpZb3UgY2FuIHJ1biB0aGUgdG9vbCBpbiBhICJkb24ndCBzZW5kIiBt
+b2RlIGFuZCBsb29rIGF0IHdoYXQgaXQncyBhYm91dA0KdG8gc2VuZCwgaWYgeW91IGFyZSBjb25j
+ZXJuZWQgYWJvdXQgcHJpdmFjeS4NCg0KVGhhbmtzIQ0KIC0tIFRpbQ0KDQoNCg0K
