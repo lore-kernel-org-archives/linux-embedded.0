@@ -1,208 +1,256 @@
-Received: from mx07-001d1705.pphosted.com (mx07-001d1705.pphosted.com [185.132.183.11])
+Received: from mout1.freenet.de (mout1.freenet.de [195.4.92.91])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F55A291E
-	for <linux-embedded@vger.kernel.org>; Thu,  9 Jan 2025 02:23:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.132.183.11
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736389423; cv=fail; b=KZG6bHwhdDH7GsNYpWCZJQEkjCc2kMAoP2NLXejrQFKfV2dtKOKWUaxaT1e/8lyckdOJpqVhlwUvAz91xJq0eC9IbJ6OsX94c3lMbYTDTDgxbK/+QNt83pNJe2A2EN8XPmn6lEMt/Cgi41OJcf/Thig16w2Tx2uRQCI7kk8j0Dg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736389423; c=relaxed/simple;
-	bh=2hPi0IB+cBKI6hqQCdWBASlpkWPiJDvjSeE7I8aoujs=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=pMz4NrpGYJ1Z5HlWpR1sXsXrxUq0/lz1CNeLNjrDYxZiXbvrLVjRepOyDVbf4fcmkcLPX+rIcqEBDPggYvV+hnW+66e1iI+3T8zxRUJbR2LRoz6qVTEq2pu+Cm+KyFFwqDOwabksBhvbOy5DQJrPT2z8YGMs5McidJcBJsM2Xp4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=mms+i+tO; arc=fail smtp.client-ip=185.132.183.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4816D216E37
+	for <linux-embedded@vger.kernel.org>; Thu,  9 Jan 2025 12:49:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.4.92.91
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1736426953; cv=none; b=CD4uQoVG6gHa6kHY2X6zrgPDKdg0nbfKR9uGdx53PyjCOGvjvd+oGQh6tmAUsNieMMYdBuCxVHVcS8ZFVxOQT72kjCK5rG1xplGC0Tr2Vx7TgJJ00Tt7QfHtd7wMV1ZYsokMRxF0JfL2TGZxLiBEzSRpNSoqnPz7uKqRkNenwYk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1736426953; c=relaxed/simple;
+	bh=F8FCeL3q0zrv3n5N6ty65OUstyY0FzCHEKtb9/48ii8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=c+dRfMUVfoOC+Y8ASP2kfOdEBR2vkxCB8fiu2ET86f6natLD3SGY/ezK5kGpVwRWRMrAdEK9Pik506IzxeA9aPcNepSbfKdAHxHh3kGlWEEkQl6uUmGw9P2zgHTEmHtq98pvaH9RkRkxt6Ha0Rm7u7PRZ4uBUrsI11ta2vqxxXM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=freenet.de; spf=pass smtp.mailfrom=freenet.de; dkim=pass (2048-bit key) header.d=freenet.de header.i=@freenet.de header.b=iIfSSqnZ; arc=none smtp.client-ip=195.4.92.91
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=freenet.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=freenet.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="mms+i+tO"
-Received: from pps.filterd (m0209324.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5090UBdA025139;
-	Thu, 9 Jan 2025 02:23:30 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=
-	content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=S1; bh=2hPi0IB
-	+cBKI6hqQCdWBASlpkWPiJDvjSeE7I8aoujs=; b=mms+i+tO+WEUEFXgT4TntZP
-	pTr4pcy2fuaozy5HS/VNwOIkfBcmSmXvki6eOa14xSguyLFh6nRqTBe8lzbievJ1
-	bXYO1a9dj/TBKGuRXiDb8K9SyEEm2+3Gb5ThTJHmDvJ29W39AmrE4yzE6xbmmQpc
-	4JSDyishi62pcKPa1DK2gJam2NCXrLAXbTnsKzB4/S39PgKWbdWsztPmWfd6GW2U
-	sXqlbXkHXiXIhm+EYSzKeaQN9uQbAEzR3SxhE2BLVb8Fod6yehH1SAH5z8wzNBvp
-	pVzni7e1BtbbWspTVtO9gvc8pTezzuv/GETg+0aSMafI55sgc5anyMaFMS690JA=
-	=
-Received: from nam04-bn8-obe.outbound.protection.outlook.com (mail-bn8nam04lp2049.outbound.protection.outlook.com [104.47.74.49])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 43xt534dg2-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 09 Jan 2025 02:23:29 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=N76uVV5IogGyJ9jRnjjN9EiUMNC6jTKA8jbXSAZJlEyreeBNvdWUbZvbidM7v7OAG0jGgMOuKII2O7FNN62V6mlBtchE9iYbQ7txjqJ7BeEJokgubbysZ9J9XzlJC+qgz4d9OBZeHfiGsPDmQaS8qDj+DDNVWJKm8ignpQUWh+QCPZBJ0u30IPA0FbcLksxKQ7YztivYhJ39VvIviPYTSqyQo3sINcu7wt5U4Cb7NmoBULFOqhSwPB67K+jvN0k3Stp2ssrKc7VFXfI2AIPX+UjHLFzxhJ1eTOmglLcCpQkKmvp8PZP9B/T/V76bmcTUnS47Kwa+RAqQ+kZ5rUSWVw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=2hPi0IB+cBKI6hqQCdWBASlpkWPiJDvjSeE7I8aoujs=;
- b=Y3zRL2zzLz7ba2WT0Y4noFy87dQXFJxaWH2KyUjeAtva5JkAtpRyAioj1EU4225KW9odt5gFpokQttbs/ceZfB+ACAwkyStstOs/rb948suahOTvVw7ldJGRZpnEh/0VL84ps94ce2ks7rD/PWGcJ3HeGj8VC5/Rbk/FG4N5eiVHIeqq/KkNHxF8LU/rzpKiIP2pSESd3m5LwWUyC0wIRv0v5eY4W1mkywf3013cDIGNSH2vRI8idMZuAMKp0PbN+C2vfh45ugf7kSKnPnc8b9R3ZERpMXUNfOyfrw9zHG81f58xj7haLgnDTvjpKu/vWMG72LMB5HFFpMBYJwyy5g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
- dkim=pass header.d=sony.com; arc=none
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by PH8PR13MB6184.namprd13.prod.outlook.com (2603:10b6:510:25b::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8314.17; Thu, 9 Jan
- 2025 02:23:22 +0000
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%4]) with mapi id 15.20.8314.015; Thu, 9 Jan 2025
- 02:23:22 +0000
-From: "Bird, Tim" <Tim.Bird@sony.com>
-To: Rob Landley <rob@landley.net>, Shankari <beingcap11@gmail.com>,
-        "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-Subject: RE: [boot-time]
-Thread-Topic: [boot-time]
-Thread-Index: AQHbWiLTBybXJIS1AU23EMmh9EFgybMNPmaAgABPkoCAADb/sA==
-Date: Thu, 9 Jan 2025 02:23:22 +0000
-Message-ID:
- <MW5PR13MB5632E3DF510914D3AFF5BF90FD132@MW5PR13MB5632.namprd13.prod.outlook.com>
-References:
- <CAORPcfVRobA+u5q7aPboC=3iY8dibDUB0920Z=Z0VgpQEupKJw@mail.gmail.com>
- <MW5PR13MB5632841906910ED152E7AE3CFD122@MW5PR13MB5632.namprd13.prod.outlook.com>
- <7c4d8fa2-9b12-465a-9c23-0503cb086365@landley.net>
-In-Reply-To: <7c4d8fa2-9b12-465a-9c23-0503cb086365@landley.net>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|PH8PR13MB6184:EE_
-x-ms-office365-filtering-correlation-id: 92c3771a-7fcb-4345-ecdf-08dd305496dd
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|366016|1800799024|376014|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?Uy8zNDJlck81bytYMHlrZmpXUXhwNlMyR25PQlZHYVhja0NubEVqVHZDWWt3?=
- =?utf-8?B?RzhkZno4elhwTDNEeGFaRHVqZWVJc1hLWUhWYTlnOXdRTnFxdmhYQmI1UVpD?=
- =?utf-8?B?SGFwNjdUcEdrOUloVUJCMTZxeUhrR0o4d2pCUVBwaVpjazNUWi9lSWZOWUtG?=
- =?utf-8?B?UU1tNkczT2tJVTJxOUpqdmlCamRRVmlmUk10bkFrZ1A4MTg2UVJBWTdTZmJ0?=
- =?utf-8?B?ejFtWWV0Z1BEcWNiQzRFTEhhdUo0dVRrQnA4bHNxVkRpRjFNbm40c1huNTY0?=
- =?utf-8?B?YTRXdDN1L3I0dnplOFVoOWgyRk1Qd2l4WXFNaGpyenp2NHN3aWNXVnRiS0Ny?=
- =?utf-8?B?M1poQStGbTZtMyt5dFB6L0ljOVNiQ3ovV1puYnVZbWtPRVZmeEdpZlVXeXgw?=
- =?utf-8?B?MzNhV1YwME9RaERxZm1hTUVZalVxTDBSci9vbU51ZUlWYXpTQUQ3YmlBSzJM?=
- =?utf-8?B?d0wwd1hPS2ZlRisrNzNUWXEyTmNqWXJTYlNtNnFUR0ZEQjB3b3RJeW4rQWg5?=
- =?utf-8?B?YXpES1ZieGk2L0plODcrakhiem8xaVJQaE9LczZYdWhpSzdIK2V6MzBlWVBX?=
- =?utf-8?B?ek9BcExiME9pcDIxU0VzdTVUemtnbTVnaGVSaTFKeEFNT1NZbHdOa09Ib1J5?=
- =?utf-8?B?QmwvWTdWMWF6V0NjNFR0RXFrbHViZVh6MUhLYXhuM0xtMk11QkhGN3UxL3BI?=
- =?utf-8?B?NkpORUY2QTI1WnFOeXZKNjlBYzBQZFpQL3NWRWJGdVRDL3F6TlpSRExOVmdC?=
- =?utf-8?B?Wk04T21EU0F2ZFJrZEpSMHFudTBMaDBsZjhEZmd5eXZMUzcvSFRlUFJGSkhE?=
- =?utf-8?B?S3FmQ1ZRcjFyK0Z6Z1Uwa1k1Yjd0NEo0UWtpdVJEU0VuZDNmQU1OQkV3Q3k3?=
- =?utf-8?B?SXRaaTkvc1llNTA0ZCtuaVJTQWhTRWNFNTVvVEpVSERhbU1GbjlITTVQVm5Q?=
- =?utf-8?B?dFdCaGNqSzFsSk12b2FremFYVnZoV1JTMnB1MEsvWExmOUdEK0FtdFZHZGlN?=
- =?utf-8?B?WU91WUk4LzV3bUhlUDZVd1l5NW5DY0lZMllNZ25PT05jcHYxOWxwSXhvcFlL?=
- =?utf-8?B?UXQ3WWkrbDRpNnk2L3crQ3NYQ3MxYXNvdTN2V1ZMamUxS29UTkpDQldXNGhO?=
- =?utf-8?B?S0xkVzJPRmFyeDFKRkd5amlDeEZ0U3hJN2p5RmxGcTZ0Ty9DMjFLeVZraDRL?=
- =?utf-8?B?SlhBQUdTVU9Tdm52eGd2SGRQRS85czFmbDJCcy8zMlo2bUlteEdWS1NmRGl3?=
- =?utf-8?B?MzlDQkNkR0MybkoxeW1lM1lVd0xEMWFmVk1aeVNYQm1FT2dheVFrcXdjaWdR?=
- =?utf-8?B?RlgvOU9DQS9FSmxWanVVMDVEOWk0TFo1d1Zvc2FPQ2FhNG9HRFVpeDN1aHZ3?=
- =?utf-8?B?UklYMFBaU05SSlFOWlNXQUxOdldIdXR4VVozSnBhOVIxVFdFYXlIVVhZSUhv?=
- =?utf-8?B?Vkp4bTRUN3YvbTMyYWN1Nm1aaTlKNkVUU0Z5T2xsWVJHblcxQWgxbS9uNTVo?=
- =?utf-8?B?TkVwMDFnN05uQ3JWN2pNM2JaNFNFdHZZUXN5UlJFeWFMczh6SHBWUFNWaWgv?=
- =?utf-8?B?ejRRMmJVRFJWenR2NlhkNDFKYUVCbkNKNHhPTkFReUVMVTAxSWhGczNQeVcy?=
- =?utf-8?B?N2lpUDFINnZjbmtweHZGYWpya0FXVDdSdDhFN2Q5WlducStQeHJSZDNMNlYv?=
- =?utf-8?B?c3IzQXpkN3FhR0FBTkJSTEVXckVpZ2djRERxUWxSTGVxVFoxUVQvZzFSSWNU?=
- =?utf-8?B?YmlXR0cvZTFVZmt4azllWlRnb2pxeGdRMDl6dVl5d00xaUkxblF6N0tNRENU?=
- =?utf-8?B?Z29JV2JuSWdFMjJINTZjQlBRWjVxMHV3bTRJVjNxODV1L3hmVHFMWHI2cTV4?=
- =?utf-8?Q?WRwlh+J72hYrf?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?WnFiZlA1N08yNmJ3VzFaODRraHh1KzhiQ0g1WS9ZNWUxVWJTOElCdm1VcXQ2?=
- =?utf-8?B?bDExcmRjSEh5eVI2Tit1a1V6SU5mZFNUajZMdEZ4NmprNmEzdlFVeDJPWWt3?=
- =?utf-8?B?QmVSTFJ5Y3pieDM2anB1ZEJmZzF4T3hoYisvdzlheGhkaHNGWFR5ZFRiOWlp?=
- =?utf-8?B?Um93c21DSzQwM0lUSWxFUlcxMVBZOStGTmlXRXRxRit2U1VCUmNHTWpSTkR1?=
- =?utf-8?B?MUk3bUVMdEhTRlNQbFVSVk5NMHBSNEwxN2gzNmpWRXdDM2FjajJjMDE3c29D?=
- =?utf-8?B?UitFQjdXSCsySWdNS0RCS1ZHS3BRQWlqNjdpY3VOTVdVaXpRYzUwR3VzS1Qw?=
- =?utf-8?B?bmxuZVdNMWRsOG1iV0N6MElXTytESVBjeXFWWS9rV0xiQlRRS1h2REljZ2pX?=
- =?utf-8?B?bUVPWE1kWVhFWGhTRENxZ3pkVm1RblI5RVUzaVdaYk45RDVXOUVVMXJqZmc3?=
- =?utf-8?B?blJvbHZzRmhNcU02eE5nQ3FpSUE1ZVNGWGFQRTRrcjRWZGdxYnJkQklUUHVM?=
- =?utf-8?B?S2J1TURIUm1YS0JKb0tibWNEWDhOdlBmaXRPUC9SbDVBc0dBcGJCaHgwWEd1?=
- =?utf-8?B?R0p1eEVJdXBYRTNaQ2kzOWI3NlJMZitjY0grajFLcUcyK3IxR0I3RHdqdVFZ?=
- =?utf-8?B?YTJXak9JSEFUK3JwcXBjMC9yTkZjbjlReHNQazNseEZia1FlTWU1cWhpcno0?=
- =?utf-8?B?OS82K2JhdUs4Y0w4WTExLzViKzlPMURudENpV2hYRmpHdk0vTUcrd2hBNkxL?=
- =?utf-8?B?dG91YkFxVWlxRmtJL05yYU9xdElBdFJCcFlsLzNvdHltRGNJRWExbVZuTU1q?=
- =?utf-8?B?UDJsS3padXNTWkpYRWRlODFBYmtYSEhPaFVoNDQ3SzRxZ0YxaFJadnBhRDlz?=
- =?utf-8?B?S0Vmb003S3c4aGVQclA5NHNDdlVpa2hTNi84TFNqL1R0WFJvSzlNNHpJTzBI?=
- =?utf-8?B?bmo1cWZydFRHbFJobTBEdjQ1dTZQS2FUR2psa0s5SnlSemJhYUlZTmJlS0p4?=
- =?utf-8?B?NmQ2MmI0aithZitjNm9zTUZuWTRkeGRTWmxIWmJtQnF5VTVDdjNhR1Y4clBH?=
- =?utf-8?B?Y0FwU1JQeCtxTUxYeHhtanRFd3B0MUVPbk5PdjUyNXNJam9uWDFMRmlUdld1?=
- =?utf-8?B?dTJLUENWQlRPMGErVkFCWkhBZHVtVWFzK2h3NW5ZcEE2S1ZzcjZkZmRVNEhp?=
- =?utf-8?B?aTlGYktaNkxKOElxbytyMXZJcjZQYUQyQ0dTL2ttUFlKa3hjeTZ4eTZwQVJl?=
- =?utf-8?B?d1VTcjJYMlRDOEZ1RkNMSmRCS0J1a1l0VGFyd1dqYTJqSFZKRVZQdFByUnpj?=
- =?utf-8?B?cm5Belg4NUVwTTlQSm0wOCtYU3EvOW9qSnJEYnRJakk5TlJtd0RuamJVTzBS?=
- =?utf-8?B?QXZFTGxoR3V0UkJvbWVzTkpzZmc4Sm1PVUNiNzhOWERSTW9wK3JhNWliWW5B?=
- =?utf-8?B?a0hqb0JIQkxqYU1wSVRDY3FNQ2ZPaEliOG1lV2dnRUZENnBsdkszb0ZtS1JL?=
- =?utf-8?B?SE91bDRUZ1NrY0xxVkJNWEhMWTNSQmNiSmRHYTgwZEJXZTA0SmVJRjB4bjdY?=
- =?utf-8?B?a3RSSE1GNmdud3dsVXJObHVHVDA2Yi85Q0FkTkl6bFRQRHVOOXRhZjZLVDAv?=
- =?utf-8?B?dzlaTzNuc29uaERsZGxNNzdRMWtXTjA4a3NSQWdvdll5YzFmVmVMUjBISDZv?=
- =?utf-8?B?emZPVURSd0NJNUIxV2JuK3JvTmtqNTRmSjdiM0ZscDFmbVFNZzhEN2pvK2JW?=
- =?utf-8?B?TXBlZEErY1hKd2FVSEoyUTlSM3VDdUY4QWJ4SVZKYWxGZkRsaXhFQzJRQy9V?=
- =?utf-8?B?Yk5naytVL0RldGN1MEQrN1FPa0FJb0F4RzljaHpHUzVJUllTU2RoVG0xcG9Z?=
- =?utf-8?B?ck9pNTZNWnJBMDZId3F5MXVQUHZUcXkvUTRRNUFIazMrb1J3alpoTzR0R0pS?=
- =?utf-8?B?NDVqZjRRSWJVeWRaa1BoU2FJM1RQQTdoMjZjQjJmT3h6QWc0QkxmYjhHY1V0?=
- =?utf-8?B?TDJvWURmdGZQU1dlN1dlb3lzcTh3ellXbVJRMjBWRnlQbkthZUQ2RW9ORTRj?=
- =?utf-8?B?SHdZZE5ub2RUWXhGbWp2UElUV0tPZDhlNXhLZ3gvSkdFT2ZhT1AweXgrWkdJ?=
- =?utf-8?Q?Ckk8=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=freenet.de header.i=@freenet.de header.b="iIfSSqnZ"
+Received: from [195.4.92.119] (helo=sub0.freenet.de)
+	by mout1.freenet.de with esmtpa (ID MarkoHoyer@freenet.de) (port 25) (Exim 4.94.2 #2)
+	id 1tVrtE-00CuSt-Lh; Thu, 09 Jan 2025 13:43:56 +0100
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=freenet.de;
+	s=mjaymdexmjqk; h=Content-Transfer-Encoding:Content-Type:In-Reply-To:From:
+	References:To:Subject:MIME-Version:Date:Message-ID:Sender:Reply-To:Cc:
+	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
+	List-Subscribe:List-Post:List-Owner:List-Archive;
+	bh=0L00pX8aSDb7y3GpBA7ye3Lsvu4eLMtyByD0Bs7I3Do=; b=iIfSSqnZ9P6ptesa2UmAw5kVJa
+	D+TQu5NNTgXH/6lElhb4KYwWGTh7jxPH9m7r6uqkQSqY32C9FfT2ohGQEBfLLiGj2Yg0Pqt9R+5AS
+	yBiffhUZ/aOAkjKTAcbLpJpz8sR5GhPgMX+EbCYBrH4eAJG5KD0c/+5A7ZOn0GAGcWw1uUd/5qaBa
+	kaiCK6DJRy/xrpOV9Br6JjB8dZGV2MONgKlaOLRt6xWKBeRuebIshU4h9Ti/XKVJrKJ8aSeS4CH15
+	n05E0PrVI/rVQDXnWRqc0KpvNo2Zv6aGnCCfmB0bg9GiqU/qycuTixO3H5g8v4aAQklifv6TU14NH
+	yI+83l8w==;
+Received: from [2a02:8071:7010:720:58dd:8299:920a:a0a] (port=37350)
+	by sub0.freenet.de with esmtpsa (ID MarkoHoyer@freenet.de) (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_128_GCM:128) (port 587) (Exim 4.94.2 #2)
+	id 1tVrtE-00C6TP-B7; Thu, 09 Jan 2025 13:43:56 +0100
+Message-ID: <7f8a09dd-3d99-4028-bb70-77464eb0cf77@freenet.de>
+Date: Thu, 9 Jan 2025 13:43:54 +0100
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	L0sfSyxnwppnb7H7dxJ4h8y8VRh0x89DkqGgClqjFMMcwB02u3WEveioro7Zff3vLx11uLMk3a7smsS6uJXOzpXulJc3C3WYZx4oELOKR7tCMBcT+t+upctCBlXBjKV00uVNXJtDrQkF0kfVe/AZc4m+iID1Pb2yanpq2PvhLqb741Kd9qlNRhNg05wScxvlpTyKCh5e+9MflOuroJVKeWGdyz4xbE6NYEz+vb2YlUMOYa6PqkcenEbXzp4kacIZl78Un3NSqJEMfAcQ0M5Q1VaiJ+MA+wcOgZslEItfmbyPu95V9URyxO02Tl42JAleM2SG6fK3ft0d6sku1VlxpcW42uEF3np9J4+ASODpCCvt5roRekKTNgNsdId75kYgychBVnnbR0fW5MsIxWKnQjgHNNH8uP60DGn6C1+TeoSJZN/guluTA+SH/gjYBEhQFThgDXTsmXoZNp1U8uXjv+5cS0rX/SLxy+7liK9SXQvYlNAPn/0mdf1//wkHRLaXDsCgqFPexlMxDsF6alQBroZ/vrCGDl5K95b4HKHRjjjcy8T+825fb1doXzkeepfs+GatHAai++RmRiRb9VqA5w8c1zACnzr1xfm15+OWCKbpF3xQZLQZAIc3aukKiJ3N
-X-OriginatorOrg: sony.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 92c3771a-7fcb-4345-ecdf-08dd305496dd
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Jan 2025 02:23:22.2566
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: ixqtZE1YUxNbIOQZiAW12ChT5jEy5pElnj1KscPahFBzCoZxzT0kUXdiyNVu9C5vR2Fey8oM6lN1/WPtJ5dCAg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH8PR13MB6184
-X-Proofpoint-ORIG-GUID: 4zSmVrkKD_LKFDd97ZbfjOD9imk2Dx0M
-X-Proofpoint-GUID: 4zSmVrkKD_LKFDd97ZbfjOD9imk2Dx0M
-X-Sony-Outbound-GUID: 4zSmVrkKD_LKFDd97ZbfjOD9imk2Dx0M
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-01-08_08,2025-01-08_01,2024-11-22_01
+User-Agent: Mozilla Thunderbird
+Subject: Re: [boot-time]
+To: "Bird, Tim" <Tim.Bird@sony.com>, Marko Hoyer
+ <mhoyer.oss-devel@freenet.de>, Shankari <beingcap11@gmail.com>,
+ "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
+References: <CAORPcfVRobA+u5q7aPboC=3iY8dibDUB0920Z=Z0VgpQEupKJw@mail.gmail.com>
+ <MW5PR13MB5632841906910ED152E7AE3CFD122@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <b0dd83c8-eb23-494b-8f23-ea8c084405a6@freenet.de>
+ <MW5PR13MB5632E7FD9A5E76949625BA54FD122@MW5PR13MB5632.namprd13.prod.outlook.com>
+Content-Language: en-US
+From: Marko Hoyer <Marko.Hoyer@freenet.de>
+In-Reply-To: <MW5PR13MB5632E7FD9A5E76949625BA54FD122@MW5PR13MB5632.namprd13.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-FN-MUUID: 173642663695EB36AA5EAFO
+X-Originated-At: 2a02:8071:7010:720:58dd:8299:920a:a0a!37350
+X-Scan-TS: Thu, 09 Jan 2025 13:43:56 +0100
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogUm9iIExhbmRsZXkgPHJv
-YkBsYW5kbGV5Lm5ldD4NCj4gT24gMS84LzI1IDEyOjMzLCBCaXJkLCBUaW0gd3JvdGU6DQo+ID4g
-SW4gZ2VuZXJhbCwgdGhlcmUncyBhIGxvdCBvZiBpbmZvcm1hdGlvbiBvbiB0aGUgZWxpbnV4IHdp
-a2kgd2hpY2ggaXMgc3RhbGUsIHdoaWNoIG5lZWRzIHRvIGJlDQo+ID4gdXBkYXRlZCBvciBhcmNo
-aXZlZCwgb3IgbWF5YmUgZXZlbiBqdXN0IHJlbW92ZWQuDQo+ID4NCj4gPiBUaGlzIHNlY3Rpb24g
-b2YgdGhlIEJvb3QgVGltZSBwYWdlIGhhcyBhIGxvdCBvZiBtYXRlcmlhbCBpbiB0aGlzIGNhdGVn
-b3J5Og0KPiA+IGh0dHBzOi8vZWxpbnV4Lm9yZy9Cb290X1RpbWUja2VybmVsX3NwZWVkdXBzDQo+
-IA0KPiBUaGF0IHBhZ2Ugc2F5cyAiZ3JhYi1ib290LWRhdGEuc2ggLSBzZWUNCj4gaHR0cDovL2Jp
-cmRjbG91ZC5vcmcvYm9vdC10aW1lL0Jvb3QtdGltZV9Ub29scyIgYnV0IHRoZSBsaW5rIGlzIDQw
-NC4NCg0KSG1tbS4gIFRoYXQgc2hvdWxkIGJlICdodHRwcycsIG5vdCAnaHR0cCcuICBXaGVuIEkg
-Y2xpY2sgb24gaXQNCm15IENocm9tZSBicm93c2VyIHRha2VzIG1lIHRvIHRoZSBodHRwcyBzaXRl
-IChzaWxlbnRseSBhdXRvY29ycmVjdGluZyBpdD8pDQpJJ3ZlIGZpeGVkIHRoZSBsaW5rIG9uIHRo
-ZSBlbGludXggc2l0ZS4gICBTb3JyeSBhYm91dCB0aGF0Lg0KDQpIZXJlIGlzIGEgZGlyZWN0IGxp
-bmsgdG8gdGhlIHRvb2wsIGJ1dCBpdCdzIHdvcnRoIGdldHRpbmcgdG8gdGhlIHBhZ2UgdG8gcmVh
-ZA0Kd2hhdCBrZXJuZWwgY29tbWFuZCBsaW5lIG9wdGlvbnMgaXQgbmVlZHMuDQpodHRwczovL2Jp
-cmRjbG91ZC5vcmcvYm9vdC10aW1lL0Jvb3QtdGltZV9Ub29scw0KDQpodHRwczovL2JpcmRjbG91
-ZC5vcmcvYm9vdC10aW1lLWZpbGVzL2dyYWItYm9vdC1kYXRhLnNoDQoNCj4gDQo+ID4gQW55b25l
-IGVsc2UgcmVhZGluZyB0aGlzIHdobyB3YW50cyB0byBhbHNvIHBhcnRpY2lwYXRlIGluIHRoaXMg
-cHJvamVjdCB0bw0KPiA+IHVwZGF0ZSB0aGUgZWxpbnV4IHdpa2kgYm9vdCB0aW1lIGluZm9ybWF0
-aW9uLCBwbGVhc2UgY29udGFjdCBtZS4NCj4gDQo+IE1heWJlPyBXaGF0IGRvIHlvdSBuZWVkPw0K
-DQpJIGFtIGFsd2F5cyBsb29raW5nIGZvciBtb3JlIGRhdGEuICBJZiB5b3UgaGF2ZSBhIHN5c3Rl
-bSB5b3UgYXJlIHJ1bm5pbmcNCkxpbnV4IG9uLCBhbmQgY2FuIGVkaXQgdGhlIGtlcm5lbCBjb21t
-YW5kLCBJJ2QgYmUgdmVyeSBoYXBweSB0byBoYXZlDQp5b3UgcnVuIGdyYWItYm9vdC1kYXRhLnNo
-LiAgSXQgd2lsbCBjb2xsZWN0IGEgYnVuY2ggb2YgYm9vdCBkYXRhIGFuZCBzeXN0ZW0NCmRhdGEs
-IGFuZCBzZW5kIGl0IHRvIHRoZSBiaXJkY2xvdWQub3JnIHdpa2ksIHdoZXJlIEknbSBkb2luZyBk
-YXRhIGFuYWx5c2lzLg0KDQpZb3UgY2FuIHJ1biB0aGUgdG9vbCBpbiBhICJkb24ndCBzZW5kIiBt
-b2RlIGFuZCBsb29rIGF0IHdoYXQgaXQncyBhYm91dA0KdG8gc2VuZCwgaWYgeW91IGFyZSBjb25j
-ZXJuZWQgYWJvdXQgcHJpdmFjeS4NCg0KVGhhbmtzIQ0KIC0tIFRpbQ0KDQoNCg0K
+Am 08.01.25 um 22:19 schrieb Bird, Tim:
+>
+>> -----Original Message-----
+>> From: Marko Hoyer <mhoyer.oss-devel@freenet.de>
+>> Am 08.01.25 um 19:33 schrieb Bird, Tim:
+>>>> -----Original Message-----
+>>>> From: Shankari <beingcap11@gmail.com>
+>>>> Hi
+>>>>
+>>>> I wanted to provide an update on my recent contributions to the boot-time reduction project. I have recently started contributing
+>> and
+>>>> am working with the beagleplay. I have been analyzing the boot time of the init process. Below is the output from the system log:
+>>>>
+>>>> debian@BeaglePlay:~$ dmesg | grep "init process"
+>>>> [    1.480490] Run /init as init process
+>>>>
+>>>> Moving forward, I plan to explore ways to modify the command line and further investigate the data used for SIG analysis. This will
+>>>> help me gain a deeper understanding of the boot process and its performance characteristics.
+>>>>
+>>>> Please let me know if you have any suggestions or areas where I could focus my efforts.
+>>> Hi Shankari,
+>>>
+>>> It sounds like you are off to a good start.  I have something that needs to be done, that I think
+>>> you can help with, and that matches where I believe you are in your status with being able
+>>> to evaluate the kernel.
+>>>
+>>> In general, there's a lot of information on the elinux wiki which is stale, which needs to be
+>>> updated or archived, or maybe even just removed.
+>>>
+>>> This section of the Boot Time page has a lot of material in this category:
+>>> https://elinux.org/Boot_Time#kernel_speedups
+>>>
+>>> Can you validate the information on these 2 pages:
+>>>    * https://elinux.org/Disable_Console
+>>>    * https://elinux.org/Preset_LPJ
+>>>
+>>> This would consist of reading through the material, and testing the
+>>> described techniques on your machine.  This will involve booting the
+>>> machine 2 ways, with a particular kernel command line option and without
+>>> it, and then reporting back the final boot time for both.  You can use
+>>> the timestamp for the "init process" string as your final boot time, for the
+>>> purposes of this exercise.
+>>>
+>>> Helping me to update the elinux wiki material on boot time would be
+>>> an immense help, and is one of my main goals for the boot time SIG in 2025.
+>>>
+>>> Don't hesitate to ask questions if you have any.
+>>>
+>>> BTW - you can just report your findings to me and linux-embedded list, but
+>>> alternatively (and even better) would be if you could also update the wiki
+>>> pages themselves with your information based on recent kernels and hardware.
+>>> To do this, you will need an elinux wiki account, which you can make online on
+>>> elinux wiki.org by going to this page: https://elinux.org/Special:CreateAccount
+>>>
+>>> Anyone else reading this who wants to also participate in this project to
+>>> update the elinux wiki boot time information, please contact me.
+>>> Thanks.
+>>>     -- Tim
+>>>
+>> Hi Tim, all,
+>>
+>> first time I'm posting here so hopefully everything is fine w/ my mail
+>> format / attachment and so on ... If not, please give me some feedback
+>> and guidance.
+> Marko,
+>
+> Thanks for this great data!
+>
+> In general, I don't see a lot of attachments on kernel mailing lists.
+> They don't bother me, and we aren't CC'ing LKML (that's a separate
+> issue we should discuss - developers outside of embedded might
+> want to see this data).  I'll check later and see what lore does with this,
+> but if no one complains, I don't see a problem with it.  If someone
+> does complain, I can provide file hosting either on the elinux wiki
+> or the boot-time wiki, and we can link attachments like you've
+> provided on this message from one of those places (to avoid
+> putting attachments on kernel mailing lists).
+Ok sounds good. I  don't have really a place to publish data, so would 
+be good if you can find a way ...
+>   
+>> To the "disable console" topic: I have some numbers in place for an RPI
+>> Zero W, find dmesg dumps and systemd-analyze plots attached.
+>>
+>>
+>> Environment:
+>>
+>> - RPi Zero W, kernel 5.15.24, systemd 247.3, customized debian
+>>
+>> - onboard UART used
+>>
+>>
+>> Cases:
+>>
+>> - #1 quiet: cmdline w/ quiet, no kernel or userspace output up to the
+>> serial login console
+>>
+>> - #2 normal: cmdline w/o quiet, serial console @115200 baud
+>>
+>> - #3 normal_baud9600: cmdline w/o quiet, serial console @9600 baud
+>>
+>>
+>> Main outcomes:
+>>
+>> - kernel timestamps "Run /sbin/init as init process"
+>>
+>> #1: "1.714458", #2: "3.011701", #3: "16.108101"
+> Wow from 1.7 seconds to 16.1 seconds.  That's a pretty huge
+> difference.  I guess this particular technique is still
+> very relevant!
+>
+>> Interpretation:
+>>
+>> * enabled serial console has significant impact in kernel boot time
+>>
+>> * reducing baud to 9600 induced some side effect, not sure what it is ...
+> Did you see any other weird behavior besides the huge slowdown?
+> I'll take a look at the amount of characters in your dmesg output and
+> see if it can be linearly correlated to the baud rate, or if it seems something
+> else is going on.
+
+Take a look into the kmesg logs. Looks like there is a 8s delay at a 
+certain point:
+
+[    5.897018] input: C-Media Electronics Inc. USB Audio Device as 
+/devices/platform/soc/20980000.usb/usb1/1-1/1-1:1.3/0003:0D8C:0014.0001/input/input1
+[    6.016086] hid-generic 0003:0D8C:0014.0001: input,hidraw0: USB HID 
+v1.00 Device [C-Media Electronics Inc. USB Audio Device] on 
+usb-20980000.usb-1/input3[   14.012174] printk: console [ttyS0] enabled
+[   14.064965] bcm2835-wdt bcm2835-wdt: Broadcom BCM2835 watchdog timer
+[   14.142795] bcm2835-power bcm2835-power: Broadcom BCM2835 power 
+domains driver
+[   14.232013] mmc-bcm2835 20300000.mmcnr: mmc_debug:0 mmc_debug2:0
+
+Not sure if it really makes sense to dig further into this issue. Might 
+be something in the serial driver of the RPI. I don't see really a valid 
+use case, 9600 baud is nothing you really need and in anyway pushing 
+serial logs out via serial is nothing really needed in productive use 
+cases, just for development (correct me if I'm wrong).
+
+>
+>> -  systemd startup
+>>
+>> * systemd drops 2 log lines per started unit to the console
+>>
+>> * seems serial output is not implemented asynchronously (see steps of
+>> units in sd plot, ~10ms per unit w/ baud 115200, ~80ms per unit w/ baud9600
+> I'm not sure what you're referring to here.  Is the 'unit' you are talking about
+> the graphing grid size, or are you referring to systemd units?  The grid size
+> seems to be 10ms per minor grid line in each plot.
+
+unit -> systemd unit
+
+* grid size per minor grid line is 100ms to me (1s per main grid line -> 
+see top of plot)
+
+* take two units "user.slice" and "remote-fs.target"
+
+* they should have basically no delay between each other -> you can see 
+it in quiet case
+
+* w/ serial on, you see delays (10ms, 80ms) which in fact are caused 
+just by dropping the log lines to serial kernel log
+
+* overall delay in user space startup sums up significantly
+
+>
+>> Side notes:
+>>
+>> * I remember similar behavior w/ imx.6 SoCs
+>>
+>> * Maybe this issues is not seen on other SoCs (maybe w/ another hw
+>> implementation of the UART)
+>>
+>> * Maybe this issues is only seen in single core machines (I can double
+>> check w/ a PI3 or orange pi zero once)
+>>
+>> Hope this helps.
+> It helps a lot.  Thanks for this data!
+>
+> I think the 'Disable Console' technique will continue to stay as one of the first
+> things we recommend for developers working on their board's boot time.
+Yes I agree. Let me check out other boards and especially multi-core 
+systems if the issues is happening there as well ...
+>
+> To others developers - I'd like to see more data like this on other systems
+> as well.  So please keep submitting your data to this list.
+>
+> Thanks,
+>   -- Tim
+>
+Regards,
+
+Marko
+
