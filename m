@@ -1,125 +1,127 @@
-Received: from mail-ua1-f49.google.com (mail-ua1-f49.google.com [209.85.222.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.9])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 938341853
-	for <linux-embedded@vger.kernel.org>; Thu,  9 Jan 2025 13:27:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.49
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736429244; cv=none; b=ejgixHDj67QPfKxFUZ9HqArOdvw3sm36OcercBWuH3a+Weei6BabVduZWIK1KKI901ByRNJ7jyzUFkebbhM5GUxM50DGlovAfmkcd2waQqwdYRPypwiN1Cs0LrxFZpBn+IqamvxYmLKHpicTtLxCzkEuXcVnpl2rLpwEAy04mGU=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736429244; c=relaxed/simple;
-	bh=NVUnrX0SeyyiovZNL50HUSIYWg8VNr0AF2PnnNYGswU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bj4NpTzx6Dkv94WuIZqj0HJJUcWJFRMqai3+6bnDKVrO4Li0kyEXWzVhtAYUzaELpAFzShZHOfvsfSA9LguoprjYowdDYmzzZ/TOuGslOOiKAdMmp+0NI5aDbDewApTjLcJhndmJ8bTIf8MbAoGK24RO7eClC3mwRFJSTYd/dxw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ua1-f49.google.com with SMTP id a1e0cc1a2514c-85ba8b1c7b9so553661241.1
-        for <linux-embedded@vger.kernel.org>; Thu, 09 Jan 2025 05:27:21 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736429239; x=1737034039;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=DktX7SY6Iny5OtE0IHmxp+KLeWeCobXfCk5l8Pm7/WA=;
-        b=nrQpo9s61LwkQc0YytB3UrecNfl9s+TMAwMWxP9a2PzROJEf4+MPOimRFODnEGxrop
-         3A0jbq/4FWaP6iV3GlBt1PPWUd/ZG8bteGzhqxYwM9b38P7rDHui+dhkw1cY7+ubetq6
-         EzThPV0j9GWAaZGZkH/plva//LTmXdNZ0TUIGy4RfArWhhbTx1Z9yupNQkmIFIuasmcq
-         iVd299YLwGYKFl0/lKer0eY3AVOr5GsKk02mF6jyrCkQ06BCVHGcGg0P8vU8cATImL+T
-         gl1UTd2C1lnS+Iw9GcnvKTC6+szv3Y5pOZtFUz1iVPJxK295BF//UYutqsuyFdhsDv2H
-         c3HA==
-X-Forwarded-Encrypted: i=1; AJvYcCWLD5BQ3Y6pq19tK0xWsP6Eo399AsIFoOWd0lc36sks6jVCgw8emK67aE0ZtzVUlicGqZPhhB1XA8XnI4Q02g==@vger.kernel.org
-X-Gm-Message-State: AOJu0YycWfJ8rdQiNOc7kFaJ3C5dFaVFeKNgfGqrs32+3y3H3rEtsaRm
-	nWwYk0SMOQSXtMvR4TnQ/IIO83n4gBjy8GLwAfeP1J4tRMhvYsYSFU9R0r75
-X-Gm-Gg: ASbGncufAEp619c/xeBp+6y4lT8D7SNQiknRCDnJFrkONbHFYu/R1Wt61PaQOwhE82K
-	FdkeinPHX9lVhRJxaiJBkHs3L1mC35kl6tNzPc/kXACOdR9EH+DPayOWdtv8bEkowDvhYezL11N
-	J6LsE7C/gye/KxwU9suhfEHAmEMTZl2knGjwKshac+xLhdlQUGhikLPtiXdiSYukuBzBXbcdCYA
-	ucue9BVs5BiLPygs+g9goeU/4CuNevWcOaAG9sAN0ieICKimfJE6XR3bFmMOUTMfFPbV3R+6Gn1
-	VaDAH7Oym2CLNnvMOlwIMWo=
-X-Google-Smtp-Source: AGHT+IFmKR+5IwEuT4tZdfH9hTVp29hgTPwwqad+NJriFlGnAuRdbYDxNcKHgUrqUT8D6cqZk8oYQQ==
-X-Received: by 2002:a05:6122:2388:b0:516:1ab3:700e with SMTP id 71dfb90a1353d-51c7c780ddbmr2227702e0c.3.1736429239420;
-        Thu, 09 Jan 2025 05:27:19 -0800 (PST)
-Received: from mail-vk1-f170.google.com (mail-vk1-f170.google.com. [209.85.221.170])
-        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-51c7fbd3095sm712118e0c.17.2025.01.09.05.27.18
-        for <linux-embedded@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Jan 2025 05:27:19 -0800 (PST)
-Received: by mail-vk1-f170.google.com with SMTP id 71dfb90a1353d-5174db4e34eso1263932e0c.0
-        for <linux-embedded@vger.kernel.org>; Thu, 09 Jan 2025 05:27:18 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCV+xrVKfkHFrPHxUq7cXb5My3qrCCACtSx0iMwJQAXtBtDoJncGW+U/PYFWcYO6YSEpOZle/MuXp3BXgUSRAg==@vger.kernel.org
-X-Received: by 2002:a05:6122:a0e:b0:515:d230:f2c6 with SMTP id
- 71dfb90a1353d-51c7c872ae5mr2590565e0c.7.1736429238678; Thu, 09 Jan 2025
- 05:27:18 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DA9718A6A6
+	for <linux-embedded@vger.kernel.org>; Thu,  9 Jan 2025 17:13:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.9
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1736442843; cv=pass; b=TRfzezQWIkryljwXPJQt/aNGyridBAnK9PwZDHdUe5sWfUygX/2yt1r/qV4Df4mO64JjQV75E/vN5VUdL+suuOufAgQA2049D75X4m5e8fdUZdc7OQyu0kDqm5IEp+nHpIUavHxC7IB5C9VpBYIlLzyUA3RxJnYfjMqkdXCE69A=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1736442843; c=relaxed/simple;
+	bh=OSAlksV4h1CmHYqrYGM5M2yb+xaHA+El7x3Bq0os+Pw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=ImGReQ1Itp6r/TQz6YIbTJG9cGZDW0KHMPjqIrK7uv9kGimLCOsFYNDn/XDkncK9LmyAAOFwaV6n9OIzS9gKAWRjP/PetIMXA14/30hj58Di60Wk4tJ2AynFBp2cFmndtnt8CfEdSXygMsMtdiYOLbasuwllaaDdRz1v7aGz7/w=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=QZ0H6ieB; arc=pass smtp.client-ip=185.56.87.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="QZ0H6ieB"
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-75c7.prod.antispam.mailspamprotection.com; s=arckey; t=1736442839;
+	 b=iRZSllYYrXIZ12nxpaqW5JPDxC2zIcLuIJq/ls0izl8yQCqaw8/pnTjpf1IoXbPkxtMU42yAvX
+	  VWCkJSvz8767tDsIv5KPzTK0Hv3I/OwTHW5/up61+0d2VCTIG4kCcw0KLlJWyUQ8RqN2BQQeIx
+	  l8thOhB2cPxQ5NWDmlwzbStTym30MQYJQw6pBR3017HMdTEXKEUAY0HBjVeeyB4P0TO891sucU
+	  EAYL6eT1Uq2eXHVk+VChUqksDue/4ttGj4OxVrC3trC/G3zy8XojKVBfMK6ayPagfJwARJApQY
+	  KQw2Io9E8WwF9Y5vzbrs2XzFSre2/qHCkfSyKQ3qhESDWw==;
+ARC-Authentication-Results: i=1; instance-europe-west4-75c7.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-75c7.prod.antispam.mailspamprotection.com; s=arckey; t=1736442839;
+	bh=OSAlksV4h1CmHYqrYGM5M2yb+xaHA+El7x3Bq0os+Pw=;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
+	  Message-ID:Date:Subject:Cc:To:From:DKIM-Signature;
+	b=HD87UCDimYYpieZqxcY4dkl1W5hLs+CSeQ2wOwQfagXDxyuPfTJW+LgRST2BbHUIBEldQ07jiW
+	  p1QtakfNWKg4ANvw2Cvk1CYl1GcbN69KAuO3Rnb7NaPZJRJYubVpN/Ea6LkSutRTF0CXHl7GQE
+	  VojlyvSMzbJJulGHf6DKozLAQrXPuBfPYA/IjTfp6jbMeQ5XthJYIAIyIrrHd42ft5YN0YG44P
+	  fw9O4Ah5XFmakNV8zgjQ1mcA/3EUANEWdMp2BpDDX9eio86FSryiWLH4dg5pAecmZqO6A1/iGq
+	  DQn04/qqBpS1l0rXUxokl2WFZVeDKB3Tg4qRdCFosJpgDA==;
+Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
+	by instance-europe-west4-75c7.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98)
+	(envelope-from <francesco@valla.it>)
+	id 1tVvJV-00000001dcB-2D2K
+	for linux-embedded@vger.kernel.org;
+	Thu, 09 Jan 2025 16:23:20 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
+	s=default; h=Date:Subject:Cc:To:From:list-help:list-unsubscribe:
+	list-subscribe:list-post:list-owner:list-archive;
+	bh=AvKhatYY9dET2IR65DmiCdLY4O0R0RhzugX90U3eYe4=; b=QZ0H6ieBmQYSV2QKgmHvJz0q7t
+	g4zuLEQOKwmEBhGBS9e4i07vyYMdVQ1sTBzfqi+lEB1M+04kHAar+G9DJ5U8aisF3L12olC2Tyk2h
+	qduVrYBIT1mpaStVea1dpPW5Dg6F9JqhWns7TbPhwDItqrfwJsCzB/J1DZORraDcfHXY=;
+Received: from [87.11.41.26] (port=63930 helo=fedora.fritz.box)
+	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98)
+	(envelope-from <francesco@valla.it>)
+	id 1tVvJJ-00000000I5F-0Gur;
+	Thu, 09 Jan 2025 16:23:05 +0000
+From: Francesco Valla <francesco@valla.it>
+To: "Bird, Tim" <Tim.Bird@sony.com>, Stephan Mueller <smueller@chronox.de>,
+ Shankari <beingcap11@gmail.com>, Rob Landley <rob@landley.net>
+Cc: Linux Embedded <linux-embedded@vger.kernel.org>
+Subject:
+ Re: boot markers ideas (was RE: [boot-time] jent_mod_init on beagleplay)
+Date: Thu, 09 Jan 2025 17:23:04 +0100
+Message-ID: <2161392.9o76ZdvQCi@fedora.fritz.box>
+In-Reply-To: <211b015d-44e5-4e64-9e44-5968d86dfac4@landley.net>
+References:
+ <1964175.7Z3S40VBb9@fedora.fritz.box>
+ <MW5PR13MB5632780514DC36D18EE9AC33FD112@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <211b015d-44e5-4e64-9e44-5968d86dfac4@landley.net>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAORPcfVRobA+u5q7aPboC=3iY8dibDUB0920Z=Z0VgpQEupKJw@mail.gmail.com>
- <MW5PR13MB5632841906910ED152E7AE3CFD122@MW5PR13MB5632.namprd13.prod.outlook.com>
- <b0dd83c8-eb23-494b-8f23-ea8c084405a6@freenet.de> <MW5PR13MB5632E7FD9A5E76949625BA54FD122@MW5PR13MB5632.namprd13.prod.outlook.com>
- <7f8a09dd-3d99-4028-bb70-77464eb0cf77@freenet.de>
-In-Reply-To: <7f8a09dd-3d99-4028-bb70-77464eb0cf77@freenet.de>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 9 Jan 2025 14:27:07 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdXChDD5BQXFQGZ8fWKZ9QQaYKEisaHdMrxWZUn=p7CDfg@mail.gmail.com>
-X-Gm-Features: AbW1kvZVnRTN5a01-Zi9sOhRIiUAjix7nUobgnqCRQki8sKTF6aUmgx35pmaHuA
-Message-ID: <CAMuHMdXChDD5BQXFQGZ8fWKZ9QQaYKEisaHdMrxWZUn=p7CDfg@mail.gmail.com>
-Subject: Re: [boot-time]
-To: Marko Hoyer <Marko.Hoyer@freenet.de>
-Cc: "Bird, Tim" <Tim.Bird@sony.com>, Marko Hoyer <mhoyer.oss-devel@freenet.de>, 
-	Shankari <beingcap11@gmail.com>, 
-	"linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - esm19.siteground.biz
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - valla.it
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-SGantispam-id: fde8f76a3034241c2aced4f60dbcf6bf
+AntiSpam-DLS: false
+AntiSpam-DLSP: 
+AntiSpam-DLSRS: 
+AntiSpam-TS: 1.0
+Authentication-Results: instance-europe-west4-75c7.prod.antispam.mailspamprotection.com;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
 
-Hi Marko,
+Hello Rob,
 
-On Thu, Jan 9, 2025 at 1:49=E2=80=AFPM Marko Hoyer <Marko.Hoyer@freenet.de>=
- wrote:
-> Take a look into the kmesg logs. Looks like there is a 8s delay at a
-> certain point:
->
-> [    5.897018] input: C-Media Electronics Inc. USB Audio Device as
-> /devices/platform/soc/20980000.usb/usb1/1-1/1-1:1.3/0003:0D8C:0014.0001/i=
-nput/input1
-> [    6.016086] hid-generic 0003:0D8C:0014.0001: input,hidraw0: USB HID
-> v1.00 Device [C-Media Electronics Inc. USB Audio Device] on
-> usb-20980000.usb-1/input3[   14.012174] printk: console [ttyS0] enabled
-> [   14.064965] bcm2835-wdt bcm2835-wdt: Broadcom BCM2835 watchdog timer
-> [   14.142795] bcm2835-power bcm2835-power: Broadcom BCM2835 power
-> domains driver
-> [   14.232013] mmc-bcm2835 20300000.mmcnr: mmc_debug:0 mmc_debug2:0
+On Wednesday, 8 January 2025 at 00:40:13 Rob Landley <rob@landley.net> wrote:
+> Is there a place to get this measuring script other than fishing it out 
+> of a webmail archive?
+> 
+> https://www.spinics.net/lists/linux-embedded/msg04363.html
 
-Those eight seconds are the time needed for printing all
-previously-collected and time-stamped kernel log lines to the serial
-console.
+No, at the moment the mailing list is the only place I posted it. I am still
+unsure if it should live on its own somewhere or it's better to try to augment
+the bootchart.py script that lives inside the kernel sources [1].
 
-BTW, only slightly related, but I have no better place to vent ;-)
-On OrangeCrab running a 64 MHz VexRiscv softcore, I noticed another
-big delay. With initcall_debug:
+> The most recent wiki mention in the archive subject lines was 
+> https://www.spinics.net/lists/linux-embedded/msg04336.html and trying to 
+> find this effort in elinux.org's top right search bar found 
+> https://elinux.org/Boot-up_Time_Reduction_Howto which "view history" 
+> says was last touched in 2010...
+> 
+> Rob
+> 
 
-    initcall pty_init+0x0/0x3c8 returned 0 after 185427581 usecs
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/tools/power/pm-graph/bootgraph.py
 
-Apparently this is due to:
+Regards,
 
-    CONFIG_LEGACY_PTYS=3Dy
-    CONFIG_LEGACY_PTY_COUNT=3D256
+Francesco
 
-So yes, almost one one second to set up one legacy pty, ugh...
-Disabling CONFIG_LEGACY_PTYS fixed the issue.
 
-Gr{oetje,eeting}s,
 
-                        Geert
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
