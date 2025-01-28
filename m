@@ -1,209 +1,856 @@
-Received: from mx07-001d1705.pphosted.com (mx07-001d1705.pphosted.com [185.132.183.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f53.google.com (mail-ed1-f53.google.com [209.85.208.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3939F42AA3
-	for <linux-embedded@vger.kernel.org>; Tue, 28 Jan 2025 15:13:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.132.183.11
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738077218; cv=fail; b=uck8nJA4EQM0CpiVgG3s4YURYEB8+Bo3BWhRUmxkebT/QJRlNfttOXzySsasZjjwnEHME5hRMhbD+SNt5+t9sGM5sy6n0gPNsljzTB7ZBMmR394x2g+v8d7ELL/o9+p12stYQP9sidsPU/QTkea2I6135bRuPEGXQaZqXOvC75o=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738077218; c=relaxed/simple;
-	bh=I0S7XiBh8fgaEPyhAIZQFv9GrGqXc+rPSVcu4c7+Z3U=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=iySOri+IJtTuWSSonHy5PsbsJ/yd0KfrQbwacFHkU8LeXCXNQEMnMkTxI7fRf/iavs97g7cmUmo+p3DEuBnTi7I6OMiY6OzyQoO6vJBgyx6PEbo+wikWnW3O2Upy2rr3E5bKfLyhHf28QtVLw67tOCTN1UpuOpqFbixMmkNDC+M=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=WdZJLc4y; arc=fail smtp.client-ip=185.132.183.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F5EC1448E0
+	for <linux-embedded@vger.kernel.org>; Tue, 28 Jan 2025 17:15:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.53
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1738084559; cv=none; b=CLkYoOiWjaCiTWfUJ4FEo2miSrEbqM9oKf0vyuZzxg8qqdarNQLXJQPbeW/wfPsaI2vD138CwbSguYZhIcCglHQGvmSPCzDkvgvLxKVQml6inxzgd4dszWPDIFAXb04AiiYb6Bm4Xumd9UDkLWbSHhFYvRRC5m2voChDzwSg6CQ=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1738084559; c=relaxed/simple;
+	bh=UatDVC8qxiymldHZ3Fu/dTSnqEayvzGAhZIiCmcY8Wg=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=j9lvZrA/mp4A2WY03gLdPDbfYMMBo5qACEB/1dlSfcMOntIhwPbcAHLXgpbYpiuNHNFQSuKMGIuN4FoRgjlianvbZB0uOy8hypwP2jZSJp6CswbA003Kk37L4OdNrOmuciHY9ZNAkEt7JRtIbxRcD6ReBSpGV1CFqLlHjpQtIgU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=K9Di0kDx; arc=none smtp.client-ip=209.85.208.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="WdZJLc4y"
-Received: from pps.filterd (m0209328.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 50SEWQH1025413
-	for <linux-embedded@vger.kernel.org>; Tue, 28 Jan 2025 15:13:27 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=
-	content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=S1; bh=I0S7XiB
-	h8fgaEPyhAIZQFv9GrGqXc+rPSVcu4c7+Z3U=; b=WdZJLc4yWd9hvgNBOWYnN8P
-	SpEqc1+NXnff7uGhy7pSUUobHIoDnjp6/SUl54j/GmEaW8LUh+WopMP+DpaXgQ0J
-	dQm36uf4/k7DEoiz1htvKNy9uSy6nHJiEqN16b7iHg7mUmWAVDIeUWfWSPucZk6W
-	AbFxX6eWXmq/f3u4VFAibmexkLwSHYfD+yO1PJp/k5S+oAs3K0VfNWin5fEl1/9Y
-	hGE9sK7kMfZzXZDE5jXMjrNyBxazwmfZf67HbNB+B2zrkdEbvudLDUF2oDBrOHwZ
-	hvERQ2AsmizpDF1ACKGI9TjD8LFIyVivKd3gFimEfO3FrtmG7hfBai3PoJWM/Tg=
-	=
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2176.outbound.protection.outlook.com [104.47.59.176])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 44cs4hjptx-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-	for <linux-embedded@vger.kernel.org>; Tue, 28 Jan 2025 15:13:27 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=omjw7FY0Zz33k0ChspxpEee+z/dDVL3436D9hUxS98DB28obvFq9Jq/P+yzFkGOq+Q0jUXCaAaAKjB9pdgYnhlSWyqbFlx6A5rOiTb6TrewywQ9H/V6cKfNo61tZov8BvOllodxmkGJOW8Gkvd3XtQQxxjrehGe0MTADDkVNeah/hzqKcpxlJxhcD0UOk1JhrzLOpEkZ9yr/Gt/g8Ze1Avt6OEjCr0Rbbw2gaPRtOG4pOuQqH7ZuTELixb5rK6VUzN2ao3dO3bHhZbKnF2idD8xw10n0TlrUlFAKl+ayfNh5Mpqvs86i1GGtKKi4nCK9OJZJ9l24odZfN0DwX9wxjw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=I0S7XiBh8fgaEPyhAIZQFv9GrGqXc+rPSVcu4c7+Z3U=;
- b=T5KKpNSZGrnEimHJdTWkujDkN3rj2EWjmMfBu8BoEP9UaWe2kF7SsChNl1O3G9ChfeXJ/V66ph/yO8eXYqsb0ajyFZcubdsc5LSI9BGbaA2V7XaW+M5aB12vf6ppS+oWBrPVK+FWSZCF0gPtA/Q5s+yfx51r2tS5mlrXYoFGLPedzxu7INRcuk4TNHSL7RwT5PPrdiqMaU1iDAbe7/TRvEaJtxoQ9MLjqU1gA5N4b0Msf7o63TsSMu2oPRzHbaMJxZefTbiZFHmowHpzTxFkARyVgcATX2Z13wAjZmmI8aJI1qat4ZLPV63sXtHQxWGgKQFmFaCzuBzjxM9G3E1leA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
- dkim=pass header.d=sony.com; arc=none
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by BY5PR13MB3681.namprd13.prod.outlook.com (2603:10b6:a03:22d::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8398.17; Tue, 28 Jan
- 2025 15:13:20 +0000
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%4]) with mapi id 15.20.8377.021; Tue, 28 Jan 2025
- 15:13:20 +0000
-From: "Bird, Tim" <Tim.Bird@sony.com>
-To: "Bird, Tim" <Tim.Bird@sony.com>,
-        "linux-embedded@vger.kernel.org"
-	<linux-embedded@vger.kernel.org>
-Subject: RE: Reminder for January 28 Boot-time SIG meeting
-Thread-Topic: Reminder for January 28 Boot-time SIG meeting
-Thread-Index: AdtxB9M4qvBaThm1QKeqFqylUGHTYwAjm9qA
-Date: Tue, 28 Jan 2025 15:13:20 +0000
-Message-ID:
- <MW5PR13MB5632F9F341D323163FA5E443FDEF2@MW5PR13MB5632.namprd13.prod.outlook.com>
-References:
- <MW5PR13MB5632661DFB3A7CCEF3D20AB0FDEC2@MW5PR13MB5632.namprd13.prod.outlook.com>
-In-Reply-To:
- <MW5PR13MB5632661DFB3A7CCEF3D20AB0FDEC2@MW5PR13MB5632.namprd13.prod.outlook.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|BY5PR13MB3681:EE_
-x-ms-office365-filtering-correlation-id: 22638c79-42c8-45b0-6dff-08dd3fae4ce5
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|366016|376014|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?citYY0ROOHJJZHpCaThGYkd6OHdHa2FrMFI1VGh6bmxZc093bmxMeXVFVmpQ?=
- =?utf-8?B?YmQrUUhMV3ZWSHlrMXBGQkFOSnlJTlVvN2FuMnI4ZEoxMkFOSkljelNWYjBn?=
- =?utf-8?B?Y1NaMUdsN1JMYjh0Q0o2WExWV0djNzdQckM4WXkydlFjTVVMbU40YzZlekZS?=
- =?utf-8?B?Y3BvbDJ0azZoUXhwNmIveTNENkc0SHVvZVZ4T2l5RjhpSWlDOU1vY3ZUbzNH?=
- =?utf-8?B?Qi96Tk1IYkdWS2ZjU0FJandUMDhhSmtUbjZzbXJqcC9CUGtTYys1VTVndW5x?=
- =?utf-8?B?NnFaaUFla3YyUHJpeXZVRllIRGdaOVE1aG5ScFNEWFhDV0tmQnVGREsvaVMy?=
- =?utf-8?B?dTYyZ1huOFVwekVjSTBpRHIyWjF5ZkpiNG9jMThEMyt0ZlpMOHhaSHJCazBF?=
- =?utf-8?B?aWRua1U4R0x1MUNZMTF0STZjOXBidGZwd1BpRXFURURrRTJoN21NREJGdm04?=
- =?utf-8?B?R1d3amJiVFV5dFJZeHdxazJqcFRXWWhiTW5GQkF6T3BjK3luYW5QQTBDYXlq?=
- =?utf-8?B?Y3ZVdDhXQ05rMi81MXVJSWVpZnlxNVp4Uk14eFFQT0ZTSTFOTHN4U2Zmb2pB?=
- =?utf-8?B?ME5NS0FlUHM5endBWHpqajBlU0lqdGtuR1l2UUtOWC9wWkloWWp1RFhCYzNP?=
- =?utf-8?B?dEEvV3NJcEtYZVovQWFON0srRWtwL1prNVZVVlU4aEFpQmJrN2d0bTFhSWs5?=
- =?utf-8?B?SHdYaExGWlRRNUlsNFd2aEdpcHRsd2VJTFB1YlhtQXltOXBWSXRhdGFZQ0g1?=
- =?utf-8?B?cEhsUGF4TWlWcDRPN0hJZWQ4T0tOVGttemJxTG8vd0Q2WGttQmZudFY1WHh3?=
- =?utf-8?B?MlJIcnA4RkpiV01SYmNmVFl5YmdidEt6OC9pSlFxWFoxTDBCTU1uNE5kWlhx?=
- =?utf-8?B?Y0JpMjdNWmo1eW9KVjQrV1NxeS9UTzJQNVJUNjNHV3JjTllZdnRqWHhoeG1l?=
- =?utf-8?B?cHFPVXUzNTNXdHQrNjFKcUtObmdzdThMMkZxUWpUN01YZUd3ZEd3U1I0ZlVs?=
- =?utf-8?B?L2tZeVp5bFg2V3dETEZpU2lkNXloSnhxS2xDZ2Qwc1BaSXhjZ204Z29kWHMw?=
- =?utf-8?B?NnZhamtnam5Kd1JDSTVXd3pPVFFxZjJLaEd0bjJ0Q3R4OGxiM1BLdFN3ZUVt?=
- =?utf-8?B?U2J1RVkwR3M2NlBYbm5nak5Ed2ppb0MxSnVRa2RKYi84NnhmZTZtK2RXRjk2?=
- =?utf-8?B?dE1tS2tVR0JuYUpYbDUya3FLQjR2ZEpvRmU3eTl5ZFVGV1VUT1dISm16VEla?=
- =?utf-8?B?bUttN1R6QmpscXRqMUdQM2N6eXJUaGhUa3UvVm5yWlhuSkRPUU9UZWplQTJr?=
- =?utf-8?B?dmFDcFZDWE81UEhndmlUNjRjN2R1bmZodjlabE1RR2RhS0FSazNlWW1HZytx?=
- =?utf-8?B?QVA0R0l4Z0FHdGNyVWpnc0VrWEpJSUdnWFR5MWlRcTlsdzRDZ3lmNFdUcmpw?=
- =?utf-8?B?WmxaZ0JWaDhQY0hYRlhZaThidlVDZjVMbXZZY0xiTXNaREtHTnk4NFh5eXJX?=
- =?utf-8?B?eDV6Zm13UEFIMDhXMHkwT2lpUitEWmdyT0tNTTRROGcxV1JYVDFkam4zREV5?=
- =?utf-8?B?L00xcFpFUTJoK2RaQU1nVXJDeXJJRVhuS25nZEprOXFvZ3Y4TTg3U1NnN3k2?=
- =?utf-8?B?ZXVkdkg4cFM0Wmw4OWRtbXdpc2dnNWNXVjh3SUxTd29NeDFoYUVNOWhYUXRP?=
- =?utf-8?B?eGtGK2tHWmRCN0Jremg4YnJ1UllTb3ZuTkJMQW0xdHB4YzVxb1NPNnN3UVRz?=
- =?utf-8?B?WFZSek9mYWdiSGZBZm8xNnpHSEtkNkVVQ0k0aHp5cTI4NXE3NEUvOXlBNU5V?=
- =?utf-8?B?Wmo4TlphRDRrUnE0STU0K2JsMkw4d2dtNkFHb01sY29aR0ovMWF6UTJlV3A5?=
- =?utf-8?B?OStTVGw0ZWZXRzU4MSs4UUoxRG5DU0drRXhUUW9XYkZVQ2c9PQ==?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?RXJUM2VCUFFMTDNsek4zSVhVTEFUOUtJNlhrWjBlVWVmdnNqdEFveElsYUlX?=
- =?utf-8?B?M3Q3WnJFZVh4VnhPY3k2MmdFcDM2NFVyZktkMzA2MWFTSll4QnlqMkFMeTBw?=
- =?utf-8?B?cTQ1VWEyQjh1bzdqQ3ltZFBXa0JaM1U5RS92UXdBUU5mcTJYL0lPSWg5aGJ3?=
- =?utf-8?B?SWVaOU4yMmJiNHVocGV5RlJZNm1NU3RJTDFhN2I2LzRnbE1ZaFNua2hUeDJL?=
- =?utf-8?B?QVZzQW9oTkl6ZkoxVzY1YUE4aGlEaE8vcXVqai9ZYlBTMUZrN1ozbHREOGov?=
- =?utf-8?B?cHdKVXZ6MWUxMWJWUFZaUnlmSExRLzhpdXozcndkVFFvdXZkSjNVUGNLZzJM?=
- =?utf-8?B?WTFGcWFHNTFQQ0pIM0IyZTVhZU9hRlJrYmVta0dCd29pRFJOZ1NLc2lCeC94?=
- =?utf-8?B?UlhuMFhPL1Jqd281bEM3SU1vNlJ5SkNURm43akRDVXplcVFUZWNTSE1CaXY0?=
- =?utf-8?B?LzZKWGZJRGcvcGQ5b01aU2xxWGZNWU5EZll5d09MV1RBTUdtMWh2SmJBVjBJ?=
- =?utf-8?B?cDY2Y3ZRTEtuMVo0QjM4a0RkS0E0M1ZtSURWWFpRWThOSkwwcTEwVEJrODVI?=
- =?utf-8?B?NktKSHo3aU1aWnNlaU8vcjQ1aWpXTUIwM1htZ2h4dHlMSkVlNGFpSGRiK1JK?=
- =?utf-8?B?Z3RtTVgzZThUbUtXVDVIanlzU3F1TGZmMzNWL05YS0JqcGo3d2Q1RFNEZWty?=
- =?utf-8?B?YUI2cU9oOHNTQ2ZZR1ZXUGVDSmlKcWYySXZyYm9xWGJQMDQ3aXBJR2sxWFZt?=
- =?utf-8?B?eUd6ZHFSUUhNeEh5TDBPbVhYVkR5dmFxZXVoUW5kazM5bGpRTk9SSXJhMEJt?=
- =?utf-8?B?aGxJdVNuY25RM2ZEeXFNNlAzOU5hMWhvVGNtaTE5SSs2TUhVN2Y0QlMyRlV3?=
- =?utf-8?B?alpwUVAyVUNWZzhkZ1pQQVRjYXlwU2NOYmFua3RFemhUeW5Kb09RM0lQbXYw?=
- =?utf-8?B?RCt1eFdmWnNyWE9iTGUyaEdtVGFGUUhCdzhheXlrWFJoMllFUG9GOEJ5WDBY?=
- =?utf-8?B?b2Nya1BtRjNWb2FyWlM4WkxNRC85dzhnZlY4Nk5zWGtuYmMxUEZFSmpZMlYw?=
- =?utf-8?B?cHQ4WDNNZlVlSG9kejRpR2F1dzB3bUZRYlRYbCtJNDBOVUdPa1ErcGszYTlv?=
- =?utf-8?B?bk10M3k0empZTmdWbXFSanUzclhiTW5NUTNHZlFMZmd1cWJHclVMSWtIOHlH?=
- =?utf-8?B?TDdVdDVMNXVxRm5xYXNoaHZCNFJla2UzWkR0RDRDVjJ6YmF4N3N6M21RRncw?=
- =?utf-8?B?VEEvcWVyMXhRa3BKUEcyM21PMDRtRTF2RlZKVDlxQ3Q2WXBtMWJpVzlYNGpX?=
- =?utf-8?B?ejdhd3hGNmVGM1JYK2hvWmtmSWdGV0VMejgrdnQ5SFF3VFdyeVpOUFFPMisz?=
- =?utf-8?B?RVBkMllHamFGdGNlV0Fja1NPS0VQaGM4YzNvUXJRc2RRdzlFK1QxQXhZT0E3?=
- =?utf-8?B?amh1QjhSMGpUOG5PcTAwdUVzSzRoVlVaQzFKd3piaVV4clpKNVpTb1FXTnFU?=
- =?utf-8?B?SE94VEJoWEc4RDdDMHhnYnVhSEdYTldSQ2RlQUQrWk11eGxxb0R5dGxIbHk1?=
- =?utf-8?B?UUZiOEM2Q3lwNGU5WGI1a2F0ZFpDZjZ4cmRmUFNTUzJLK21tREZhcXBOYmZa?=
- =?utf-8?B?bkIwOGVuRUxZMnhWV2tMSERWWG5WMWhIS3NSY1BhK1VBTUlkbUR1MnR1QmhT?=
- =?utf-8?B?Nk53VnlFejFrVW9qT25ScXZyM3FpWHlsTGhaMHJxd0lEellMSjBMQUQxNStl?=
- =?utf-8?B?RXBvV3pNam5EZS9OenpTeWNYL2IwYWM0ZENuUlp6OEQ2WVJPdUN2K2V3UTRt?=
- =?utf-8?B?K0h3YzRkQ3RjRHRYZW1DZEFsd2NabnZIR3RvR2ZUSktWU3NTSEIrYnM2a0ov?=
- =?utf-8?B?SGdOQktVTlZueFg4T2FUa3RReDVWTDZVUU1Bbm1OTjVTQ01mNmxMSm14cElz?=
- =?utf-8?B?ZXRnWHQ4YWtEVUFDUkljRGZoaDYrenJ5dDJ4MDdPOTgwR1pDNzRvMGlVenZZ?=
- =?utf-8?B?SENzczlCdFRDWk5YUTFDTWIvQUVUNGkvclBKRWZ2UG91OFZldHZYSm1OVVh0?=
- =?utf-8?B?dUFxSHNIUEdYT1dRSHVNSGpTL3I3NHRGV0NmVUFqa3FBUUhDRkR0aEkzWDZ2?=
- =?utf-8?Q?izD0=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K9Di0kDx"
+Received: by mail-ed1-f53.google.com with SMTP id 4fb4d7f45d1cf-5dbf5fb2c39so765758a12.2
+        for <linux-embedded@vger.kernel.org>; Tue, 28 Jan 2025 09:15:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1738084555; x=1738689355; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=SQPhP2hZz5SWOAWquLJf9SIHaF5ztySZiDB2gaN0Wpg=;
+        b=K9Di0kDxaNSSj3H0cxCDudqgDNSzuD4hbzqrSTFNIcqU+wVPGjEGHZZIFLrgKHGzjn
+         6Pnmd7Y0iyypu68FViS68C3rYbffVzWJqEZpnyHJ/5l1C+W47eahKaz9DBf1JvkrX3/s
+         +2mkOUgNF4gUKiDOBboKR7uEcybkv0uDdLbm/sw3ugWZSH6YvKkHyqBW/S4yn96rx8Vx
+         SWiRdMXXjFliYJFjvNJ7B7+PgEw/uh4C6r9c6/gZPpNiJZKqtIyRztT7cozPWvSRVdK5
+         vX3qnll1n6p4NPzinDa0OkD2Ku67aWUTT9BmyOH5o2QUeK8N4jVXNx7nz0X/dDjdkusm
+         kHaw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738084555; x=1738689355;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=SQPhP2hZz5SWOAWquLJf9SIHaF5ztySZiDB2gaN0Wpg=;
+        b=QVzxEWSdbeeu5sIQdXOZmRY46Wl1wBuV/pnBJ7IBuIPn1DU2D2jJGSk9g7ty6Qaw1q
+         4mTTpykDi6IgqboQj1hQOqDF+vP/X4sPh62JmC3zEQvzYM/2Iqj10DYYaV55KjGJSyXG
+         Op40E0thT5aobE4E5sp7TRByMvQkhBDwPwwt0mmtslH45zyD8MXwe1sl+fLzMQf2zlna
+         RO/tGiWF6t1/wC6MYvP0yStCZarN4RkfD0c5XE+e0vwdDo04U9u8rDn28pYsKCIvWs/L
+         64dujaFgbLnwbRhI/JTIS39f4DoGJIeaLez2tEdvBbBP6EHN3Y5nO1vo1M1rWvjxTIJg
+         JOxQ==
+X-Gm-Message-State: AOJu0YxqNJ903BVnKiuW7gwQjlG6lLvgQ1Erlc3DuNilqojPIFifvP+h
+	eYTQW+i4ldBSyTJAR3vpN0piUKub5J7KABiXh1Qz1HzIH8ak9Ph+N1sotA==
+X-Gm-Gg: ASbGncsU261Okw3wSswlZTaq2IULMXF/B3bFwvsO8oAVgtYPGXOuo5B/c+LfIxXXTDu
+	H6G3gZ8N3p6pQwEb7gsl1HnmXKpg5nt7xo697j+hCmWrTtCI/1nROXY2YajBveQCL5TthqWc/2N
+	k4V2UisZR8mkhbzoiRZlfhlgH2NhuqBCXfEwW9vA4HIIIwwMQg9VdXeC2/OEMmVYRgH6HjJgjWY
+	PAb8kt7wEnlmMhlNvwQsmwaQZM8icg3KmXeJo3Q8Fz+cFfAGngN9bKj5+gs7QYuh0UJumQeFfEZ
+	9Mn4J6zJlPxy4j1w/hP8YKfmsa6jjmbzkoCaWNlOyufaQkxFdzdvmYH05bPYYXrt1x9wN1M=
+X-Google-Smtp-Source: AGHT+IFVOMxIRYKAHJdwkI2yglYn/3oPt4OmzA860JwFfJAOaHTJMLd8cISiATAQMHNQoDhhFZm3Ng==
+X-Received: by 2002:a05:6402:1ec7:b0:5d0:8e70:cf86 with SMTP id 4fb4d7f45d1cf-5db7db19c6amr15993644a12.7.1738084554725;
+        Tue, 28 Jan 2025 09:15:54 -0800 (PST)
+Received: from fedora.fritz.box (host-87-11-41-26.retail.telecomitalia.it. [87.11.41.26])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5dc186b37fesm7220317a12.61.2025.01.28.09.15.54
+        for <linux-embedded@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 Jan 2025 09:15:54 -0800 (PST)
+From: Francesco Valla <valla.francesco@gmail.com>
+To: Linux Embedded <linux-embedded@vger.kernel.org>
+Subject: [boot-time] [SCRIPT v4] analyze-initcall-debug.py
+Date: Tue, 28 Jan 2025 18:15:53 +0100
+Message-ID: <4927911.OV4Wx5bFTl@fedora.fritz.box>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	EgVFJDdniegr5WEBm6aGRpxVbrTH141j4T6YbSHdNvlTPyDyJMmY4xuYXCt9VsjmterCeNWWrxE2S3qCR1TxhMY7eodf0fsv9g914k9gj8+pWkQbUkVXpHDSn9YVqbvbVrL/uEMw9h231g/06mg1fc9MTJBQOC69+fK8+/m3mKMVqyMQ7E3WXwZ2IvJ6ShoaBzNyg1FGtRnP4VJ6vq1wJuWIMZ9xYei+ZrDvzyX/kCkZVUBen3FknsX5J9vb4pf9qViK752CQkD+2jNgj4+I/Qg5DjiqzZkr40KIdjfFbUPhud30UGBBV8ejphOYqXMYzoXNWTc1vRr6kEngwzKrMYyv/doTi/XlR2aKmcoJsMrdISzD2/44pL7wd1QalTzo4j5dLeo9TT15kaWD40PhwhYQZWk1+7DE8qP/lohtjl2akfn6aaBfZzDiUmBV3bgxC7dx6wbBNfSQvAHXzhH49LIorIXdXKP9RGeKsEBh02c4bXUaVGxhKxHog0WykxyLoY+UgCOMpzlBHXEP1T9pAA5ReDcsX4EV0kZcwr3qaIPHwOgIicG/nmG4suCaf+NuJOhrSzW3KH3/JVkYw698tKbPm7SmEoOIkSzIOzSNGHyF7uyJC4g15uA1/OF1YM/P
-X-OriginatorOrg: sony.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 22638c79-42c8-45b0-6dff-08dd3fae4ce5
-X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Jan 2025 15:13:20.3243
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 5+kmb0b0wCthVdqua/Z3cZZfOhKgyCt1cpwCzwlTrqWgLgL8FkYBRbR76v/QtXbKPOJiShd09I8dVPtBVl1mIg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR13MB3681
-X-Proofpoint-GUID: QUan_8D5NGam5PIVehMRj-rZwFa0TrFS
-X-Proofpoint-ORIG-GUID: QUan_8D5NGam5PIVehMRj-rZwFa0TrFS
-X-Sony-Outbound-GUID: QUan_8D5NGam5PIVehMRj-rZwFa0TrFS
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-01-28_04,2025-01-27_01,2024-11-22_01
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQmlyZCwgVGltIDxUaW0u
-QmlyZEBzb255LmNvbT4NCj4gSGV5IExpbnV4IEJvb3QtVGltZSBTSUcgaW50ZXJlc3RlZCBwYXJ0
-aWVzIChhbmQgb3RoZXIgaW50ZXJlc3RlZCBMaW51eCBrZXJuZWwgZGV2ZWxvcGVycyksDQo+IA0K
-PiBIZXJlIGlzIHRoZSBpbmZvcm1hdGlvbiBmb3IgdGhlIG5leHQgTGludXggQm9vdC1UaW1lIFNJ
-RyBjb25mZXJlbmNlIGNhbGwuDQo+IChJJ20gdmVyeSBzb3JyeSB0byBvbmx5IGdldCB0aGlzIHJl
-bWluZGVyIG91dCB0aGUgZGF5IGJlZm9yZSB0aGUgY2FsbC4pDQo+IA0KPiBUaGUgbWVldGluZyB3
-aWxsIGJlIGhlbGQgdmlhIHRoZSBKaXRzaSBvbmxpbmUgbWVldGluZyBwbGF0Zm9ybS4NCj4gVG8g
-Sm9pbiB0aGUgbWVldGluZyB2aWEgd2ViLCBjbGljayBvbjoNCj4gaHR0cHM6Ly9tZWV0LmppdC5z
-aS9MaW51eEJvb3RUaW1lU0lHDQo+IA0KPiAtLS0tDQo+IE91ciBuZXh0IG1lZXRpbmcgaXMgVHVl
-c2RheSwgSmFudWFyeSAyOCwgYXQgOTowMCBhbSBNb3VudGFpbiBUaW1lLg0KLi4uDQoNCj4gDQo+
-IFRoZSBtZWV0aW5nIGlzIG9wZW4gdG8gYW55b25lLg0KPiANCj4gUGxlYXNlIHByZXBhcmUgZm9y
-IHRoZSBtZWV0aW5nIGJ5IHJlYWRpbmcgdGhlICdCb290LXRpbWUgU0lHJyBwYWdlIGFuZCB0aGUg
-J0Jvb3QgVGltZSBQcm9qZWN0IGlkZWFzJw0KPiBwYWdlIChtZW50aW9uZWQgYWJvdmUpLCBhbmQg
-YmVpbmcgcmVhZHkgdG8gY29tbWVudCBvbiB0aGVtLiAgQWxzbywgaWYgeW91IGhhdmUgZG9uZSBh
-bnkgd29yayBvbg0KPiBib290IHRpbWUgaW4gdGhlIGxhc3QgeWVhciwgb3IgYXJlIGFjdGl2ZWx5
-IHdvcmtpbmcgb24gaXQsIHBsZWFzZSBiZSBwcmVwYXJlZCB0byBjb21tZW50IG9uIGl0IGR1cmlu
-ZyB0aGUgbWVldGluZy4NCj4gDQoNCk9uZSBtb3JlIHRoaW5nLi4uICBJJ2QgbGlrZSB0byBzdGFy
-dCBrZWVwaW5nIHRyYWNrIG9mIGFjdGl2ZSBtZW1iZXJzIG9mIHRoZSBCb290LXRpbWUgU0lHLCBp
-bmNsdWRpbmcNCndoYXQgaGFyZHdhcmUgZWFjaCBtZW1iZXIgaXMgd29ya2luZyBvbiwgd2hhdCBi
-b290LXRpbWUgcmVkdWN0aW9uIHRlY2huaXF1ZSBvciB0ZWNobm9sb2d5DQp0aGV5IHBsYW4gdG8g
-aW52ZXN0aWdhdGUgb3IgdXNlLCBhbmQgd2hhdCAoaWYgYW55KSBsZWFkZXJzaGlwIG9yIHN1cHBv
-cnRpbmcgcm9sZSB0aGV5IHdvdWxkIGxpa2UgdG8NCnBsYXkgaW4gdGhlIFNJRy4NCg0KVGhpcyB3
-aWxsIGhlbHAgbWUgdG8ga2VlcCB0cmFjayBvZiB3aG8gaXMgd29ya2luZyBvbiB3aGF0LiAgVGhl
-cmUgYXJlIGxpdGVyYWxseSBodW5kcmVkcyBvZiBpZGVhcyB0byByZXNlYXJjaCwNCndvcmsgb24s
-IHVwc3RyZWFtLCBkb2N1bWVudCwgdGVhY2ggdG8gb3RoZXJzLCBvciBhdXRvbWF0ZS4gIElmIHlv
-dSBhcmUgc3R1Y2sgYW5kIGRvbid0IGtub3cgd2hhdCB5b3UNCnRvIGRvLCBwbGVhc2UgbGV0IG1l
-IGtub3cuICBJIGhhdmUgYSBsaXN0IGEgbWlsZSBsb25nIHdoZXJlIHlvdSBjb3VsZCBoZWxwIG91
-dC4gIFdlIGNhbiBkaXNjdXNzIHRoaXMgb24gdGhlDQpjYWxsIHRvZGF5LCBvbiB0aGUgbGlzdCwg
-b3IgcHJpdmF0ZWx5IGJ5IGVtYWlsLg0KIC0tIFRpbQ0KDQo=
+Hello,
+
+this is the fourth version of the analyze-initcall-debug.py script, which can
+be used to analyze the kernel output when booting with initcall_debug
+to extract some human-readable data from it.
+
+This version brings a complete bootchart of the kernel-side portion of the
+boot sequence, showing both the initcalls and the probes.
+
+Regards,
+
+Francesco
+
+---
+
+v3: https://lore.kernel.org/linux-embedded/5640944.lGaqSPkdTl@fedora.fritz.box/
+v2: https://lore.kernel.org/linux-embedded/1955396.7Z3S40VBb9@fedora/
+v1: https://lore.kernel.org/linux-embedded/1964175.7Z3S40VBb9@fedora.fritz.box/
+
+Differences v3 -> v4:
+
+- added a SVG bootchart that includes probes and initcalls
+- cosmetic fixes
+
+Differences v2 -> v3:
+
+- initcalls and probes have been split in different tables
+- added identification section (kernel version, machine, cmdline)
+- added SVG pie charts for initcalls and probes times to the HTML output
+- CSS styling added to HTML output
+- added the --before-init option to restrict analysis to the events that
+  happen before the init is started
+- Markdown output has been dropped
+
+Differences v1 -> v2:
+
+- added a list of failed driver probes in the plain text output
+- added a preliminary comparison on read lines to avoid false negatives in
+  regex-based matches
+- added the --body-only option to output only the raw HTML body
+- use of dictionaries instead of filter() constructs
+
+------ the analyze-initcall-debug.py script follows ------
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+This script can be used to analyze a Linux kernel dmesg output when the
+initcall_debug command line output is used. It extracts various information,
+such as initcall durations, impact of probe deferrals and so on.
+"""
+
+import argparse
+import random
+import re
+import sys
+
+ERRCODE_PROBE_DEFER = 517
+
+parser = argparse.ArgumentParser(description='Analyze a Linux kernel dmesg with the initcall_debug option enabled')
+
+parser.add_argument('--dmesg', nargs='?', type=argparse.FileType('r'),
+                    default=sys.stdin, help='The dmesg file to analyze (default: stdin)')
+format_group = parser.add_mutually_exclusive_group()
+format_group.add_argument('--html', action='store_true',
+                          help='Output analysis result as HTML table')
+parser.add_argument('--body-only', action='store_true',
+                    help='Do not add header and footer to HTML output')
+parser.add_argument('--before-init', action='store_true',
+                    help='Add to analysis only initcalls/probes happening before init')
+args = parser.parse_args()
+
+class Run:
+    def __init__(self, start_time:int, end_time:int = -1, duration:int = 0, retval:int = 0):
+        self._start_time = start_time
+        self._end_time = end_time
+        self._duration = duration
+        self._retval = retval
+        self._ended = (end_time >= 0)
+
+    @property
+    def start_time(self) -> int:
+        return self._start_time
+
+    @property
+    def end_time(self) -> int:
+        return self._end_time
+
+    @end_time.setter
+    def end_time(self, time:int):
+        self._end_time = time
+        self._ended = True
+
+    @property
+    def duration(self) -> int:
+        return self._duration
+
+    @duration.setter
+    def duration(self, time:int):
+        self._duration = time
+
+    @property
+    def retval(self) -> int:
+        return self._retval
+
+    @retval.setter
+    def retval(self, val:int):
+        self._retval = val
+
+    @property
+    def running(self) -> bool:
+        return (not self._ended or abs(self.retval) == ERRCODE_PROBE_DEFER)
+
+    @property
+    def failed(self) -> bool:
+        return ((self.retval != 0) and not self.running)
+
+
+class Entity:
+    def __init__(self, name:str, start_time:int = 0, end_time:int = 0, duration:int = 0, retval:int = 0):
+        self._name = name
+        self._color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        self._runs = [ Run(start_time, end_time, duration, retval) ]
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def color(self) -> tuple[int, int, int]:
+        return self._color
+
+    @property
+    def first_start_time(self) -> int:
+        return self._runs[0].start_time
+
+    @property
+    def last_start_time(self) -> int:
+        return self._runs[-1].start_time
+
+    @property
+    def first_end_time(self) -> int:
+        return self._runs[0].end_time
+
+    @property
+    def last_end_time(self) -> int:
+        return self._runs[-1].end_time
+
+    @property
+    def duration(self) -> int:
+        return sum([ r.duration for r in self._runs ])
+
+    @property
+    def wasted_time(self) -> int:
+        return sum([ r.duration for r in filter(lambda x: x.failed or abs(x.retval) == ERRCODE_PROBE_DEFER, self._runs) ])
+
+    @property
+    def retval(self) -> int:
+        return self._runs[-1].retval
+
+    @property
+    def failed(self) -> bool:
+        return self._runs[-1].failed
+
+    @property
+    def running(self) -> bool:
+        return self._runs[-1].running
+
+    def running_at(self, time: int):
+        for r in self.runs:
+            if r.start_time < time and r.end_time > time:
+                return True
+        return False
+
+    @property
+    def runs(self):
+        return self._runs
+
+    def addStart(self, start_time: int):
+        self._runs.append( Run(start_time) )
+
+    def addEnd(self, end_time:int = 0, duration:int = 0, retval:int = 0):
+        if self._runs[-1].end_time >= 0:
+            self._runs.append( Run(-1, end_time, duration, retval) )
+        else:
+            self._runs[-1].end_time = end_time
+            self._runs[-1].duration = duration
+            self._runs[-1].retval = retval
+
+    def addRun(self, start_time: int, end_time:int = 0, duration:int = 0, retval:int = 0):
+        self._runs.append( Run(start_time, end_time, duration, retval) )
+
+
+class Initcall (Entity):
+    def __init__(self, name: str, start_time: int, module: str = None):
+        super().__init__(name, start_time)
+        self._module = module
+
+    @property
+    def module(self) -> str:
+        return self._module
+
+
+class Probe (Entity):
+    def __init__(self, name: str, start_time: int, duration: int = 0, retval: int = 0):
+        super().__init__(name, start_time, start_time + duration, duration, retval)
+
+    @property
+    def deferred_probe_pending(self) -> bool:
+        return (abs(self._runs[-1].retval) == ERRCODE_PROBE_DEFER)
+
+    @property
+    def num_deferred_probes(self) -> int:
+        return len(list(filter(lambda r: abs(r.retval) == ERRCODE_PROBE_DEFER, self._runs)))
+
+
+class Init (Entity):
+    def __init__(self, name: str, start_time: int):
+        super().__init__(name, start_time)
+
+# Regex for Linux version
+# "[    0.000000] Linux version 6.12.0 (oe-user@oe-host) (aarch64-poky-linux-gcc (GCC) 13.3.0, GNU ld (GNU Binutils) 2.42.0.20240723) #1 SMP PREEMPT Sun Nov 17 22:15:08 UTC 2024"
+version_sentinel = 'Linux version '
+version_prog = re.compile(r'\[([0-9\s]+\.[0-9]+)\] Linux version (.+)')
+
+# Regex for machine model
+# "[    0.000000] Machine model: BeagleBoard.org BeaglePlay"
+machine_sentinel = 'Machine model: '
+machine_prog = re.compile(r'\[([0-9\s]+\.[0-9]+)\](?: OF: fdt:)? Machine model: (.+)')
+
+# Regex for cmdline
+# "[    0.000000] Kernel command line: LABEL=Boot root=PARTUUID=076c4a2a-02 rootfstype=ext4 rootwait log_buf_len=10M initcall_debug quiet"
+cmdline_sentinel = 'Kernel command line: '
+cmdline_prog = re.compile(r'\[([0-9\s]+\.[0-9]+)\] Kernel command line: (.+)')
+
+# Regex for 'calling' messages
+# "[    0.466115] calling  pci_sysfs_init+0x0/0xa8 @ 1"
+calling_sentinel = 'calling  '
+calling_prog = re.compile(r'\[([0-9\s]+\.[0-9]+)\] calling  ([0-9a-zA-Z_]+)\+(0x[0-9a-fA-F]+\/0x[0-9a-fA-F]+)( \[[a-zA-Z0-9\-_]+\])? @ ([0-9]+)')
+
+# Regex for 'initcall ... returned' messages
+# "[    0.466115] initcall pci_sysfs_init+0x0/0xa8 returned 0 after 5 usecs"
+returned_sentinel = 'initcall '
+returned_prog = re.compile(r'\[([0-9\s]+\.[0-9]+)\] initcall ([0-9a-zA-Z_]+)\+(0x[0-9a-fA-F]+\/0x[0-9a-fA-F]+)( \[[a-zA-Z0-9\-_]+\])? returned ([\-0-9]+) after ([0-9]+) usecs')
+
+# Regex for 'probe ... returned' messages
+# "[    0.466115] probe of cpufreq-dt returned 517 after 140 usec"
+probe_sentinel = 'probe of '
+probe_prog = re.compile(r'\[([0-9\s]+\.[0-9]+)\] probe of ([0-9a-zA-Z_\-\.\:@]+) returned ([\-0-9]+) after ([0-9]+) usecs')
+
+# Regex for
+# "[    1.060329] Run /sbin/init as init process"
+init_sentinel = 'as init process'
+init_prog = re.compile(r'\[([0-9\s]+\.[0-9]+)\] Run ([/0-9a-zA-Z_]+) as init process')
+
+initcalls = {}
+probes = {}
+init = None
+version = 'Unknown'
+machine = 'Unknown'
+cmdline = 'Unknown'
+
+# Extract data from dmesg
+lineno = 0
+for line in args.dmesg:
+    lineno += 1
+
+    if version_sentinel in line:
+        match = version_prog.match(line)
+        if match:
+            version = str(match.group(2))
+        else:
+            print(f'Failed matching line {lineno}:"{line.rstrip()}" as version', file=sys.stderr)
+
+    if machine_sentinel in line:
+        match = machine_prog.match(line)
+        if match:
+            machine = str(match.group(2))
+        else:
+            print(f'Failed matching line {lineno}:"{line.rstrip()}" as machine', file=sys.stderr)
+
+    if cmdline_sentinel in line:
+        match = cmdline_prog.match(line)
+        if match:
+            cmdline = str(match.group(2))
+        else:
+            print(f'Failed matching line {lineno}:"{line.rstrip()}" as cmdline', file=sys.stderr)
+
+    if calling_sentinel in line:
+        match = calling_prog.match(line)
+        if match:
+            try:
+                time = int(float(match.group(1)) * 1000000.0)
+                name = str(match.group(2))
+                module = str(match.group(4) or '').replace('[', '').replace(']', '')
+            except Exception as e:
+                print(f'Failed parsing line {lineno}:"{line.rstrip()}" as call', file=sys.stderr)
+                raise e
+            else:
+                if name not in initcalls.keys():
+                    initcalls[name] = Initcall(name, time, module)
+                else:
+                    initcalls[name].addStart(time)
+            finally:
+                continue
+        else:
+            print(f'Failed matching line {lineno}:"{line.rstrip()}" as call', file=sys.stderr)
+
+    if returned_sentinel in line:
+        match = returned_prog.match(line)
+        if match:
+            try:
+                time = int(float(match.group(1)) * 1000000.0)
+                name = str(match.group(2))
+                retval = int(match.group(5))
+                duration = int(match.group(6))
+            except:
+                print(f'Failed parsing line {lineno}:"{line.rstrip()}" as call return', file=sys.stderr)
+            else:
+                if name not in initcalls.keys():
+                    print(f'Detected return for initcall {name}, for which a call was never recorded', file=sys.stderr)
+                else:
+                    initcalls[name].addEnd(time, duration, retval)
+            finally:
+                continue
+        else:
+            print(f'Failed matching line {lineno}:"{line.rstrip()}" as call return', file=sys.stderr)
+
+    if probe_sentinel in line:
+        match = probe_prog.match(line)
+        if match:
+            try:
+                time = int(float(match.group(1)) * 1000000.0)
+                name = str(match.group(2))
+                retval = int(match.group(3))
+                duration = int(match.group(4))
+            except:
+                print(f'Failed parsing line {lineno}:"{line.rstrip()}" as probe return', file=sys.stderr)
+            else:
+                if name not in probes.keys():
+                    probes[name] = Probe(name, time - duration, duration, retval)
+                else:
+                    probes[name].addRun(time - duration, time, duration, retval)
+            finally:
+                continue
+        else:
+            print(f'Failed matching line {lineno}:"{line.rstrip()}" as probe return', file=sys.stderr)
+
+    if not init and init_sentinel in line:
+        match = init_prog.match(line)
+        if match:
+            try:
+                time = int(float(match.group(1)) * 1000000.0)
+                name = str(match.group(2))
+            except:
+                print(f'Failed parsing line {lineno}:"{line.rstrip()}" as init', file=sys.stderr)
+            else:
+                init = Init(name, time)
+            finally:
+                if args.before_init:
+                    break
+                else:
+                    continue
+        else:
+            print(f'Failed matching line {lineno}:"{line.rstrip()}" as init', file=sys.stderr)
+
+if len(initcalls) == 0:
+    print(f'No initcalls parsed - check your kernel configuration and command line', file=sys.stderr)
+    sys.exit(1)
+
+# Print HTML format
+if args.html:
+    if not args.body_only:
+        print(
+'''
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Boot time analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        .aid-title {
+            font-weight: bold;
+            font-size: 2em;
+            text-align: center;
+            padding: 0.5em;
+        }
+
+        .aid-bootchart-container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: auto;
+        }
+
+        .aid-bootchart-element:hover {
+            stroke: red;
+        }
+
+        .aid-piechart-container {
+            width: 30%;
+            height: 30%;
+            margin: 0 auto;
+            padding: 1em;
+        }
+
+        table, th, td {
+            border: 1px solid;
+            border-collapse: collapse;
+        }
+
+        table {
+            text-align: left;
+            overflow: hidden;
+            width: 80%;
+            margin: 0 auto;
+            display: table;
+        }
+
+        table th {
+            font-weight: bold;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        table td, table th {
+            padding: 0.4%;
+        }
+
+        .aid-status-ok {
+            background-color: #77FF77;
+        }
+
+        .aid-status-failed {
+            background-color: #FF7777;
+        }
+
+        .aid-status-deferred {
+            background-color: #FFCC77;
+        }
+
+        .aid-status-deferred {
+            background-color: #CCCCCC;
+        }
+    </style>
+</head>
+<body>''')
+
+    # Identification
+    print(
+f'''
+    <div class="aid-title">Identification &amp; Summary </div>
+    <table>
+        <tr>
+            <td>Linux version</td>
+            <td>{version}</td>
+        </tr>
+        <tr>
+            <td>Machine</td>
+            <td>{machine}</td>
+        </tr>
+        <tr>
+            <td>Command line</td>
+            <td>{cmdline}</td>
+        </tr>
+        <tr>
+            <td>Total boot time</td>
+            <td>{max([k.last_end_time for k in initcalls.values()] + [k.last_end_time for k in probes.values()]) // 1000}ms</td>
+        </tr>
+        <tr>
+            <td>Init start time</td>
+            <td>{init.last_start_time // 1000}ms</td>
+        </tr>
+    </table>
+''')
+
+    # Boot chart
+    SCALE_SIZE = 25
+    MARGIN_SIZE = 5
+    INITCALL_SIZE = 100
+    PROBE_SIZE = 50
+
+    SCALING_US_DIV = 100
+
+    ## Determine the peak number of probes running in parallel
+    max_par_probes = 0
+    for p in probes.values():
+        max_par_probes = max(max_par_probes, max([len(list(filter(lambda k: k.running_at(r.start_time), probes.values()))) for r in p.runs]))
+
+    bootchart_height = SCALE_SIZE + MARGIN_SIZE + INITCALL_SIZE + MARGIN_SIZE + (PROBE_SIZE + MARGIN_SIZE) * max_par_probes
+    bootchart_length = max([k.last_end_time for k in initcalls.values()] + [k.last_end_time for k in probes.values()])
+
+    print(
+f'''
+    <div class="aid-title">Bootchart</div>
+    <div class="aid-bootchart-container" style="height: {min(480, bootchart_height + SCALE_SIZE)}px">
+        <svg width="{bootchart_length // SCALING_US_DIV}" height="{bootchart_height}">
+            <style>
+                .small {{
+                  font: bold {SCALE_SIZE / 2}px sans-serif;
+                }}
+            </style>
+''')
+
+    ## Plot scale
+    for n in range(int(bootchart_length / (1000 * 50)) + 1):
+        x = n * (1000 * 50) // SCALING_US_DIV
+        print(
+f'''
+            <text x="{x}" y="{SCALE_SIZE / 2}" fill="#999999" class="small">{n * 50}ms</text>
+            <line x1="{x}" x2="{x}" y1="{SCALE_SIZE}" y2="{bootchart_height}" stroke="#999999"/>
+''')
+        for m in range(1,5):
+            x += (1000 * 10) // SCALING_US_DIV
+            print(
+f'''
+            <line x1="{x}" x2="{x}" y1="{SCALE_SIZE}" y2="{bootchart_height}" stroke="#CCCCCC" stroke-dasharray="10,15" />
+''')
+
+    y_offset = SCALE_SIZE + MARGIN_SIZE
+
+    ## Plot initcalls (ignore those with duration equal to 0)
+    for d in sorted(list(filter(lambda i: i.duration > 0, initcalls.values())), key=lambda k: k.first_start_time):
+        print(
+f'''
+            <a href="#aid-initcall-{d.name}">
+                <rect class="aid-bootchart-element" width="{max(d.duration // SCALING_US_DIV, 1)}" height="{INITCALL_SIZE}" \
+                 x="{d.first_start_time // SCALING_US_DIV}" y="{y_offset}" fill="#{d.color[0]:02X}{d.color[1]:02X}{d.color[2]:02X}">
+                    <title>Initcall: {d.name}</title>
+                </rect>
+            </a>
+''')
+
+    ## Plot initcalls container and label
+    print(
+f'''
+            <text x="{MARGIN_SIZE}" y="{y_offset + SCALE_SIZE / 2}" fill="#999999" class="small">INITCALLS</text>
+            <line x1="0" y1="{y_offset}" x2="{bootchart_length // SCALING_US_DIV}" y2="{y_offset}" stroke="#555555" />
+            <line x1="0" y1="{y_offset + INITCALL_SIZE}" x2="{bootchart_length // SCALING_US_DIV}" y2="{y_offset + INITCALL_SIZE}" stroke="#555555" />
+''')
+
+    ## Plot probes
+    if len(probes) > 0:
+        y_offset = SCALE_SIZE + MARGIN_SIZE + INITCALL_SIZE + MARGIN_SIZE
+
+        slots = {}
+        for d in sorted(list(probes.values()), key=lambda k: k.first_start_time):
+            for i,r in enumerate(d.runs):
+                ypos = 0
+                while len(list(filter(lambda j: j.running_at(r.start_time) and slots.get(j.name, -1) == ypos, probes.values()))) != 0:
+                    ypos = ypos + 1
+                slots[d.name] = ypos
+
+                print(
+f'''
+            <a href="#aid-probe-{d.name}">
+                <rect class="aid-bootchart-element" width="{max(r.duration // SCALING_US_DIV, 1)}" height="{PROBE_SIZE}" \
+                 x="{r.start_time // SCALING_US_DIV}" y="{y_offset + (PROBE_SIZE + MARGIN_SIZE) * ypos}" fill="#{d.color[0]:02X}{d.color[1]:02X}{d.color[2]:02X}">
+                    <title>Probe: {d.name}</title>
+                </rect>
+            </a>
+''')
+
+        ## Plot probes label
+        print(
+f'''
+            <text x="{MARGIN_SIZE}" y="{y_offset + SCALE_SIZE / 2}" fill="#999999" class="small">PROBES</text>
+''')
+
+    ## Plot init startup marker and label
+    if not args.before_init:
+        x = init.last_start_time // SCALING_US_DIV
+        print(
+f'''
+            <text x="{x}" y="{SCALE_SIZE / 2}" fill="#FF0000" class="small">Init start</text>
+            <line x1="{x}" x2="{x}" y1="{SCALE_SIZE}" y2="{bootchart_height}" stroke="#FF0000" />
+''')
+
+    print(
+f'''
+        </svg>
+    </div>
+''')
+
+    # Initcalls
+    initcalls_total_time = sum( [ k.duration for k in initcalls.values() ] )
+
+    print(
+'''
+    <div class="aid-title">Initcalls</div>
+''')
+
+
+    ## Print initcalls pie chart
+    print(
+'''
+    <div class="aid-piechart-container"><svg viewBox="0 0 100 100">
+''')
+
+    start_point = 0
+    visible_limit = max([k.duration for k in list(initcalls.values())]) / 100
+    for d in sorted(initcalls.values(), key=lambda k: k.duration, reverse=True):
+        if d.duration < visible_limit:
+            title = "ALL OTHER INITCALLS"
+            length = initcalls_total_time - start_point
+        else:
+            title = d.name
+            length = d.duration
+
+        start_point = start_point + length
+        print(
+f'''
+        <a href="#aid-initcall-{d.name}">
+            <circle r="25" cx="50" cy="50" fill="none" stroke="#{d.color[0]:02X}{d.color[1]:02X}{d.color[2]:02X}"
+                    stroke-width="50" stroke-dasharray="{length} {initcalls_total_time - length}"
+                    stroke-dashoffset="{start_point}" pathLength="{initcalls_total_time}">
+                <title>{title}</title>
+            </circle>
+        </a>
+''')
+        if d.duration < visible_limit:
+            break
+
+    print(
+'''
+    </svg></div>
+''')
+
+    print(
+'''
+    <table>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Duration (us)</th>
+            <th>Time in failed calls (us)</th>
+            <th>Fraction of total time (%)</th>
+            <th>Module</th>
+        </tr>''')
+
+    for d in sorted(initcalls.values(), key=lambda k: k.duration, reverse=True):
+        run_status = 'RUNNING' if d.running else 'FAILED' if d.failed else 'OK'
+        print(
+f'''
+        <tr id="aid-initcall-{d.name}">
+            <td style="background-color: #{d.color[0]:02X}{d.color[1]:02X}{d.color[2]:02X};"></td>
+            <td>{d.name}</td>
+            <td class="aid-status-{run_status.lower()}">{run_status}{f' ({abs(d.retval)})' if d.failed else ''}</td>
+            <td>{d.duration}</td>
+            <td>{d.wasted_time}</td>
+            <td>{(d.duration * 100 / initcalls_total_time):0.3f}</td>
+            <td>{d.module}</td>
+        </tr>''')
+
+    print(
+'''
+    </table>
+''')
+
+    if len(probes) > 0:
+        # Probes
+        probes_total_time = sum([k.duration for k in probes.values()])
+
+        print(
+'''
+    <div class="aid-title">Probes</div>
+''')
+
+        ## Print probes pie chart
+        print(
+'''
+    <div class="aid-piechart-container"><svg viewBox="0 0 100 100">
+''')
+
+        start_point = 0
+        visible_limit = max([k.duration for k in list(initcalls.values())]) / 100
+        for d in sorted(probes.values(), key=lambda k: k.duration, reverse=True):
+            if d.duration < visible_limit:
+                title = "ALL OTHER PROBES"
+                length = probes_total_time - start_point
+            else:
+                title = d.name
+                length = d.duration
+
+            start_point = start_point + length
+            print(
+f'''
+        <a href="#aid-initcall-{d.name}">
+            <circle r="25" cx="50" cy="50" fill="none" stroke="#{d.color[0]:02X}{d.color[1]:02X}{d.color[2]:02X}"
+                    stroke-width="50" stroke-dasharray="{length} {probes_total_time - length}"
+                    stroke-dashoffset="{start_point}" pathLength="{initcalls_total_time}">
+                <title>{title}</title>
+            </circle>
+        </a>
+''')
+            if d.duration < visible_limit:
+                break
+
+        print(
+'''
+    </svg></div>
+''')
+
+        ## Print probes table
+        print(
+'''
+    <table>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Duration (us)</th>
+            <th>Num deferred probes</th>
+            <th>Time in failed probes (us)</th>
+            <th>Fraction of total time (%)</th>
+            <th>After init</th>
+        </tr>
+''')
+
+        for d in sorted(probes.values(), key=lambda k: k.duration, reverse=True):
+            run_status = 'DEFERRED' if d.deferred_probe_pending else 'RUNNING' if d.running else 'FAILED' if d.failed else 'OK'
+            after_init = 'YES' if d.last_start_time > init.last_start_time else 'NO'
+            print(
+f'''
+        <tr id="aid-probe-{d.name}">
+            <td style="background-color: #{d.color[0]:02X}{d.color[1]:02X}{d.color[2]:02X};"></td>
+            <td>{d.name}</td>
+            <td class="aid-status-{run_status.lower()}">{run_status}{f' ({abs(d.retval)})' if d.failed else ''}</td>
+            <td>{d.duration}</td>
+            <td>{d.num_deferred_probes}</td>
+            <td>{d.wasted_time}</td>
+            <td>{(d.duration * 100 / probes_total_time):0.3f}</td>
+            <td>{after_init}</td>
+        </tr>''')
+
+        print(
+'''
+    </table>
+''')
+
+    if not args.body_only:
+        print(
+'''
+</body>
+</html>
+''')
+
+# Print plain text
+else:
+    num_before_userspace = len(list(filter(lambda d: d.last_start_time <= init.last_start_time, initcalls.values())))
+    num_after_userspace = len(list(filter(lambda d: d.last_start_time > init.last_start_time, initcalls.values())))
+    num_deferred_probe_pending = len(list(filter(lambda d: d.deferred_probe_pending, list(probes.values()))))
+    num_failed = len(list(filter(lambda d: d.failed, list(initcalls.values()) + list(probes.values()))))
+
+    print(f'Linux version: {version}')
+    print(f'Machine: {machine}')
+    print(f'Command line: {cmdline}')
+    print('Summary:')
+    print(f'  {len(initcalls)} initcalls have been executed, of which {num_before_userspace} before userspace and {num_after_userspace} after')
+    print(f'  {num_deferred_probe_pending} deferred probes are pending')
+    print(f'  {num_failed} initcalls/probes failed')
+    print(f'  Total boot time: {max([k.last_end_time for k in initcalls.values()] + [k.last_end_time for k in probes.values()]) // 1000}ms')
+    print(f'  Init start time: {init.last_start_time // 1000}ms')
+
+    print('\n---\n')
+
+    print('Top 10 initcall durations:')
+    for d in sorted(initcalls.values(), key=lambda k: k.duration, reverse=True)[0:10]:
+        print(f' * {d.name} -> {d.duration}us')
+
+    print('\n---\n')
+
+    print('Top 10 probe durations:')
+    for d in sorted(probes.values(), key=lambda k: k.duration, reverse=True)[0:10]:
+        print(f' * {d.name} -> {d.duration}us')
+
+    print('\n---\n')
+
+    print('Failed initcalls/probes:')
+    for d in filter(lambda k: k.failed, list(initcalls.values()) + list(probes.values())):
+        print(f' * {d.name} -> ret = -{abs(d.retval)}')
+
+
+
