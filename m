@@ -1,202 +1,224 @@
-Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.10])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51E02238D3E
-	for <linux-embedded@vger.kernel.org>; Fri,  7 Feb 2025 14:46:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.10
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738939603; cv=pass; b=RtCRURSnNeg+/X5yBtgllDtssIVu0fT3LCXKFr6qQNhTHOJrBd5L+y9TQNcXMNzvny31rnXjZii1riOZwdG75GQ/KGyWMYPXIrCcOGoMZwiHBxVvWxln00vWGXese0OYyq9B76lbrGtZJIW68qLygTOL8yJ+xTnDpwjbYLETjrE=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738939603; c=relaxed/simple;
-	bh=9tOO1N09pvh7o6mzjgUITmbG1RglmWJVJWV2Aq3bork=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Lh4pPmhyKm14BBN9yXKW0aWTSNjweriFY0iHbo61S0vX5I07Z2WUlRVA1fuZY+xdmh/bdderjsrLUp72hoNsBFyzV9Te8MwumCd9z+17/43MtDb5AuXNNBL8Taonblmnvm9oH3eUP/dYi7JX1LYNDIvtL+9FIW4BVlmRMLPjTCg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=U0qxPeKT; arc=pass smtp.client-ip=185.56.87.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D831207E07;
+	Thu, 13 Feb 2025 06:42:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1739428958; cv=none; b=u8r1k8zsi+erM/7w2jYUIKa/lnTCY2iwmDrP43No15bMLbbhVWPALKLlaSFP0i7LqkpwrRec+QIbtxEogve9mUfSCDW8MvAUvJsnO2+rGu1mNxK8sc1CtkUAoKp/oIsmOw7sfVoODt19QO0EYPaCnYVo191HoBzy8ihcGtPAA90=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1739428958; c=relaxed/simple;
+	bh=wSfzicfqZaGMaX/zy9i0qtnv9BY7+9lOnhH4GUr4yd0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=COYL+hCFPZfAiGlan3dur8s41FAh5aqAfzBYPNhidiHF0jtZPcJ9fvdeqzDNUUhncUhyjpX9aZI68daGzLfaZ4iS9OPo+8cGWf9Pb39OlG68h+4Ix+z36BVMFNSZITlK0C/+Gkrkl2fzN11CCk0y/Jk3AuLGG3yOKgKRpxChyBw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BVo+psVl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="U0qxPeKT"
-ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-kd4z.prod.antispam.mailspamprotection.com; s=arckey; t=1738939601;
-	 b=ncSMZ+zJ2nNNNydrHDvz4CJlta0IWfS0Ol5AIM/X4cMrrXsIRB6iFB/0rLegVPx7OP5x08Ggr7
-	  3HEolKdXblbhtwYfZXFtZ+jhbnlKqC4h4WNnKtvT0JE+cORJSF/zrob1NTZBLikX8yaNCfUerS
-	  M6nQjyA5ulLDBKhSt5XRLhF0uQGSEFG/OtURHkpLw9nV7KGtMsJi4fMccxXT6DAxea8n4Ply8j
-	  JKrSiULl/NUOcPwo2oSWIP3+KyL5X8D1UI+9B6QcDbhROphKwHB5xKAc5fiwNIjzef/izKOAPg
-	  PArpuc0hpMd+oZKDsVs5adNqeQK6dNLT36lZ0B3svDaLzg==;
-ARC-Authentication-Results: i=1; instance-europe-west4-kd4z.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-kd4z.prod.antispam.mailspamprotection.com; s=arckey; t=1738939601;
-	bh=9tOO1N09pvh7o6mzjgUITmbG1RglmWJVJWV2Aq3bork=;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
-	  Message-ID:Date:Subject:Cc:To:From:DKIM-Signature;
-	b=mbPNAcMPd1aX907eeIgcCepQt1g1p1GQvP+cRimXfPrXQCifTGosVfDKWv2y6CrtRpVeLjLDeu
-	  /1Fs2spWIHb9ir2YOFDZdYLN8SNp4U9YwAX49pU58GifvyaI2Ip9g1ccjEhCzHeoDQYbeF6uWv
-	  dTnOPFKLfUEFlTDdYEsXKpliYeNlNPJ6XLlPGv5lBDVKaGLxqSkX/83ow+fw/kj5rxTohFss0P
-	  XZMXYINltfTJMGCvUxeaBJj1BK87D3QcmIZWzL7kS8toRyew7DnD8kbMtnc7OjCoclNjh6e28O
-	  K9JaU8bty99i5svFcq1SvEYgRu+NsL6MKuS0T/B90u9yiA==;
-Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
-	by instance-europe-west4-kd4z.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98)
-	(envelope-from <francesco@valla.it>)
-	id 1tgIsk-00000000vrJ-3ldg
-	for linux-embedded@vger.kernel.org;
-	Fri, 07 Feb 2025 07:34:37 +0000
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
-	s=default; h=Date:Subject:Cc:To:From:list-help:list-unsubscribe:
-	list-subscribe:list-post:list-owner:list-archive;
-	bh=HthEv3z8obA6AyKJ7sli8wyc0KbAd6jqo4vsM7LVqAM=; b=U0qxPeKTurg5cOMyPt7OnVlkdU
-	XG5HgNWvLqj1BwohHxu5tLgPmiigosl6wJl1IDTOc893slW3qHzM9pr2fc6LIkkAZ5EuHA8c9ia2Y
-	eCs+34tvyZZuKJNmFzbUT9ajhRyO5zGFhKhokTtIvcW085IQJRCzt1Fw8ey3O+NBzACg=;
-Received: from [87.11.41.26] (port=60513 helo=fedora.fritz.box)
-	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98)
-	(envelope-from <francesco@valla.it>)
-	id 1tgIsf-000000000D5-1cSE;
-	Fri, 07 Feb 2025 07:34:29 +0000
-From: Francesco Valla <francesco@valla.it>
-To: Brian Masney <bmasney@redhat.com>
-Cc: Linux Embedded <linux-embedded@vger.kernel.org>,
- Saravana Kannan <saravanak@google.com>
-Subject: Re: [boot-time] [SCRIPT v4] analyze-initcall-debug.py
-Date: Fri, 07 Feb 2025 08:34:28 +0100
-Message-ID: <2289257.vFx2qVVIhK@fedora.fritz.box>
-In-Reply-To: <Z6J3WpeJKIKENC81@x13s>
-References: <4927911.OV4Wx5bFTl@fedora.fritz.box> <Z6J3WpeJKIKENC81@x13s>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BVo+psVl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 25C83C4CED1;
+	Thu, 13 Feb 2025 06:42:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1739428957;
+	bh=wSfzicfqZaGMaX/zy9i0qtnv9BY7+9lOnhH4GUr4yd0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=BVo+psVlvUiOKBdW+Xk5NAoqefLAKu66zX8SaYpPRQh3zYFySTDP7EZ2VClOWYjC/
+	 l1HURmC/RB4sV2xe5GNZ7blayI+eV61hKG3RVR1LbxOqL9xNZwCG7UinYY00V+fGdt
+	 Qf37RwM651Va+5kdCOHt3SjFLyWYYSDLL8b1nWkaMkf6tnn/0vUo27iCiyJYg5XuU4
+	 gg86fy7Oay9QR2RHT14pMoJYq7bESMGtvWeVQTPkI+Xt55FiB/WcztsOfRMnRi1WCv
+	 X9fX0J8NKvCO6SfKuLxV2X8WKxUNcrrOBlcHr2KyEs9RCUHAZDUnI7aK+OEnvm/zDX
+	 ClJQYN1dp396A==
+Date: Thu, 13 Feb 2025 14:42:28 +0800
+From: Peter Chen <peter.chen@kernel.org>
+To: Hector Martin <marcan@marcan.st>
+Cc: devicetree@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
+	linux-usb@vger.kernel.org, linux-embedded@vger.kernel.org,
+	Asahi Linux <asahi@lists.linux.dev>,
+	linux-arm-kernel@lists.infradead.org,
+	dri-devel@lists.freedesktop.org
+Subject: Re: Unified Type C PHYs and top-level port management
+Message-ID: <20250213064228.GA181829@nchen-desktop>
+References: <fda8b831-1ffc-4087-8e7b-d97779b3ecc5@marcan.st>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - esm19.siteground.biz
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - valla.it
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-SGantispam-id: 39fd37267876ae237b4484b728325264
-AntiSpam-DLS: false
-AntiSpam-DLSP: 
-AntiSpam-DLSRS: 
-AntiSpam-TS: 1.0
-Authentication-Results: instance-europe-west4-kd4z.prod.antispam.mailspamprotection.com;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <fda8b831-1ffc-4087-8e7b-d97779b3ecc5@marcan.st>
 
-Hi Brian,
+On 25-01-14 21:32:11, Hector Martin wrote:
+> Hi all,
+> 
+> We're implementing Type C port support for Apple systems and we're
+> running into impedance mismatches with the existing Linux subsystems. I
+> want to throw a quick overview of the problem here and see if we can
+> come up with solutions.
+> 
+> The short version is that Linux has a pile of (sub)subsystems that deal
+> with multiple aspects of coordinating Type C port behavior:
+> 
+> - USB role switch
+> - USB host
+> - USB gadget
+> - Type C mux
+> - Type C PD
+> - DRM/etc for DisplayPort
+> - USB4/Thunderbolt (not even going there yet)
+> - Individual PHYs for everything
+> 
+> This evolved from, and is largely designed for, systems built from
+> discrete components (separate USB3 controller, DP controller, external
+> mux, PD stuff, etc.)
+> 
+> What we actually on Apple systems is:
+> 
+> - An external I2C USB-PD controller that handles the entire PD protocol
+> and negotiation autonomously. We don't even get to pick the altmode, it
+> does all the policy on its own and there is no override (we looked).
+> - USB3/4/DP retimer and eUSB2 level shifter chips (not muxes) that are
+> managed by the external USB-PD controller over I2C, invisible to Linux.
+> - A single, unified, shared PHY (atcphy) that handles *everything*:
+> USB2, USB3, DP, USB4/TBT, depending on configuration. It presents
+> discrete interfaces to the DP, TBT, and USB controllers behind it.
+> - A dwc3 controller per unified PHY, with host and device modes. Its
+> USB3 PIPE interface can be switched (via registers in the PHY side, not
+> the dwc3 side) between a dummy PHY, the USB3 PHY, or a virtual PHY that
+> does USB4 tunneling.
+> - A set of display controllers that are separate from the ports/PHYs
+> - A DisplayPort router that can pair a display controller with a given
+> unified PHY's physical DisplayPort interface, or one of two tunnels over
+> TBT/USB4. The display controllers are n:m matched to the ports, they are
+> not 1:1 (there may be fewer display controllers than ports).
+> - The whole TBT/USB4 PCIe stuff which winds up in a PCIe root port
+> controller per port/PHY (not going to consider this for now, leaving
+> that for later).
+> 
+> The current approach we have is a mess. The tipd driver (which manages
+> the PD controller) directly does the role switching and mux calls. The
+> role switching triggers dwc3 to asynchronously switch modes. Meanwhile
+> the mux calls end up at our PHY driver which tries to reconfigure
+> everything for the given lane mode. But since PHY configuration also has
+> to negotiate with dwc3, it also acts as a PHY for that (two, actually,
+> USB2 and USB3). However, the callbacks from dwc3 are all over the place,
+> and we end up having to do things like handle USB3 configuration from
+> the USB2 PHY callbacks because that happens to be the correct timing to
+> make it work. Meanwhile DRM/DisplayPort is its own thing that is mostly
+> asynchronous to everything else, only reacting to HPD, and we haven't
+> even gotten to the dynamic assignment of display controllers to ports
+> yet (that's a story for another day).
+> 
+> To give an example of one of the quirks: Thanks to the USB-IF's
+> amazingly braindead stateful and non-self-synchronizing eUSB2 protocol,
+> we need to fully reset the dwc3 controller every time there is a hotplug
+> event on the port from the PD controller. Otherwise USB2 breaks, since
+> the PD controller will reset the eUSB2 level shifter on unplug and dwc3
+> and the paired eUSB2 PHY can't recover from that without a full reset.
+> 
+> A further complication is we do not have documentation for any of this.
+> The PHY setup is all reverse engineered. That means all we can do is
+> replicate the same register operations that macOS does, and then we have
+> to *guess* how to fit it into Linux, and what can be moved around or
+> reordered or not. There is no way to know if any given Linux
+> implementation is correct and reliably configures the PHY, other than
+> trial and error, unless we can exactly replicate what macOS does (which
+> is infeasible in Linux today because the cross-driver sync points aren't
+> in the same places, e.g. dwc3 and its phy callbacks do not match the
+> interleaving of PHY register writes and dwc3 register writes in macOS).
+> 
+> This is never going to be reliable, robust, or maintainable with the
+> current approach. Even just getting it to work at all is a frustrating
+> mess, where fixing one thing breaks another (e.g. if the dwc3 role
+> switch happens first, that runs in a workqueue, and ends up racing with
+> phy reconfig. We found out our current code was working by accident due
+> to some msleep() calls in dwc3. And of course, hotplug is all kinds of
+> racy and broken.). The sequencing requirements make this whole approach
+> using different subsystems for different things without central
+> coordination a nightmare, especially with hotplug involved and devices
+> that like to switch their altmode negotiation rapidly on connect cycles.
+> It all ends up depending of subtle implementation details of each part,
+> and if anything changes, everything breaks.
+> 
+> What we really want is a top-level, vendor-specific coordinator that
+> *synchronously* (in a single logical thread) handles all
+> hotplug/modeswitch operations for a single port, driving state
+> transitions for all the other drivers. I.e. something that can:
+> 
+> - Receive a data role/status change from tipd (this includes *all* port
+> mode including data role, altmode config, etc.). This can be
+> asynchronous/queued relative to tipd, but all config changes must be
+> processed in sequence as a single queue.
 
-On Tuesday, 4 February 2025 at 21:23:54 Brian Masney <bmasney@redhat.com> wrote:
-> On Tue, Jan 28, 2025 at 06:15:53PM +0100, Francesco Valla wrote:
-> > Hello,
-> > 
-> > this is the fourth version of the analyze-initcall-debug.py script, which can
-> > be used to analyze the kernel output when booting with initcall_debug
-> > to extract some human-readable data from it.
-> > 
-> > This version brings a complete bootchart of the kernel-side portion of the
-> > boot sequence, showing both the initcalls and the probes.
-> 
-> Hi Francesco,
-> 
-> This is a useful script and I have a few suggestions:
-> 
-> - Report on the probe deferrals, and group them by name. For example,
->   this is one of the probe deferrals on my Thinkpad x13s laptop
->   with a Qualcomm SoC:
-> 
->     probe of 3210000.soundwire returned -517 after 3 usecs
-> 
->   As a hack, I can group them together with this one liner:
-> 
->     x13s:~$ grep 517 dmesg.txt  | grep returned | \
->               awk -F"probe of " '{print $2}' | awk '{print $1" "$5}' | sort \
->               awk '{a[$1]+=$2} END {for (i in a) print i, a[i]}' | sort
->     15000000.iommu 750
->     18200000.rsc:regulators-2 61
->     1c00000.pcie 13458
->     1c10000.pcie 18266
->     1c20000.pcie 250
->     3200000.rxmacro 51
->     3210000.soundwire 18
->     3220000.txmacro 105
->     ...
-> 
->   and add the following to the end to get the overall time:
-> 
->     | awk '{sum += $2} END {print sum}'
-> 
->   493,730 usec in this example.
-> 
+Just some ideas and see if it could improve things for you.
 
-This is certainly useful and will be added to the next version. It's
-partially there for the HTML output, but can be added to the textual one
-with virtually no effort.
+If your PD driver reports some intermediate states, try not to handle
+them all, it could avoid de-init some operations which has done at the
+previous states. And for all PD events, queued them at ordered work
+queue with some delay.
 
->   Note I attached the dmesg for my system since it's a pretty extreme
->   example since we have pinctrl drivers set to modules instead of built
->   in on Fedora.
+> - Deconfigure the previous mode for consumers, e.g. shutting
+> down/resetting dwc3 if required, unsetting HPD for the DisplayPort side
+> so it knows to shut that side down, etc.
+> - Change the unified PHY configuration for the new mode (this may
+> require knowledge of everything about the port state including data
+> role, not just altmode/mux state)
+> - Start up the consumers again
+> - React to PHY callbacks from the consumers to further drive PHY state
+> changes (some things need to happen in a specific sequence or at request
+> from dwc3 or the display controller firmware, and we may have to add
+> extra callbacks for some points somehow, which doesn't fit well with the
+> current PHY subsystem which is more rigid about operations...)
 > 
->   I CCed Saravana since he mentioned at the boot SIG meeting last week
->   that this may not be an accurate way to measure probe deferrals. Take
->   a look at the output of 'grep 33c0000.pinctrl' against the
->   dmesg I attached, and see the timestamps are the range
->   2.190008 - 13.358063.
+> Right now, I don't see any way this would fit into the existing
+> subsystems well. The closest thing I can come up with, and what I will
+> do to get by at least for the time being, is to:
 > 
+> - Get rid of the asynchronous dwc3 role switching, making it synchronous
+> (optionally if needed to not break other users)
 
-As far as I understood, this is not accurate since also the "forced"
-deferrals caused by devlink are accounted for. But that would be fine,
-since it's time spent for the given driver nonetheless. I'll let Saravana
-comment more, though. 
+It is a good try, it could let the PHY lane switch later than controller role
+switch, besides, you need to let your DP HPD handling after PHY switch
+to DP mode.
 
-> - Run pylint against the code and fix up some of the warnings that are
->   reported.
+Peter
 
-Noted.
-
+> - Add a queue to tipd so it can handle state changes asynchronously from
+> the actual PD protocol (and without blocking i2c bus interrupt handling
+> so other ports can operate in parallel), but all state changes are
+> handled sequentially without any overlap, and the ordering is carefully
+> controlled (Connect: mux call first, then USB role switch, then
+> DisplayPort HPD. Disconnect: DisplayPort HPD, then USB role switch, then
+> mux call. There may be other complex cases for mode changes while
+> already connected, this won't be fun.).
+> - Put most of the PHY policy in the atcphy driver (which is all of a
+> reset driver for dwc3, mux driver, and all the phys). This includes ugly
+> things like deferring state changes while dwc3 is active in some cases.
+> - On the DP/display side, we haven't implemented this yet, but in the
+> future the single "apple,display-subsystem" driver (which actually
+> provides the top-level DRM device for all the underlying discrete
+> display controllers, and is already its own virtual device in the DT)
+> will present virtual ports for the different PHYs, and handle the
+> muxing/assignment between them and the display controllers on its side
+> (there is potentially complex policy here too, since not all display
+> controllers are equal and there may be a need to reassign a display for
+> a lower-spec screen to a lower-spec display controller to free up a
+> higher-spec controller for a higher-spec screen, but we need a
+> controller assigned to a port to even read EDID to figure that out, so
+> it's going to be messy).
 > 
-> - Add commas to some of the output. For example, change:
+> But I'm not happy at all with the weird, load-bearing intermingling of
+> tipd/atcphy/dwc3 there. There's bound to be places where the
+> abstractions leak and we end up with more and more horrible workarounds,
+> or layering violations.
 > 
->     Top 10 initcall durations:
->      * apm_driver_init -> 804412us
->      * panel_edp_init -> 205809us
+> A further question is how all this should be represented in the device
+> tree. That might drive the software architecture to a point, or vice versa.
 > 
->   to:
+> Any ideas?
 > 
->     Top 10 probe durations:
->      * gprsvc:service:2:1 -> 5288,273us
->      * 1c10000.pcie -> 1,091,920us
+> Some further reading here:
+> https://social.treehouse.systems/@marcan/113821266231103150
 > 
-
-Not a big fan of commas as separators, but I'll give it a thought.
-
-> - Map the return values to their pretty name. For example, change:
+> - Hector
 > 
->     Failed initcalls/probes:
->      * kvm_arm_init -> ret = -19
->      * test_kstrtox_init -> ret = -22
 > 
->   to:
-> 
->      * kvm_arm_init -> ret = -ENODEV (-19)
->      * test_kstrtox_init -> ret = -EINVAL (-22)
-> 
-
-Will do for sure.
-
-> Brian
-> 
-
-Thank you for the feedback!
-
-
-Francesco
-
-
