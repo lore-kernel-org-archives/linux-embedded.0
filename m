@@ -1,138 +1,143 @@
 Received: from mx07-001d1705.pphosted.com (mx07-001d1705.pphosted.com [185.132.183.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC1D3229B0D
-	for <linux-embedded@vger.kernel.org>; Thu, 20 Mar 2025 20:56:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B294E1D7E31;
+	Tue,  1 Apr 2025 17:57:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.132.183.11
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742504217; cv=fail; b=a044wZdIQo47vg5CecqSLhuXGz68dekq1CvEL/iPfagieuUsXPMa3TlIUZRzgwAMvxKd+nKen7FI46Dv2Zo1iZ1aSByWTv+AMm2Blrmk7wKq58gLM7VaDK+fVcgsf3LStJBZ6IAKdxHKe7e4B/f4eKa30EERrBfNbeZCBfVg5zg=
+	t=1743530275; cv=fail; b=jW38yFFS/Zqrbv1JOOxwpyHkgPyE788tSlePGovbJZwjsGTapdq0Amor20M9LVj8NTaR0/cGHxe2eK5UZIsGoi9r0lHfbVF/MaiBwMLbPju2KuuSjSnkVs7yyiY58CgGVz8hWnfKtP9J9aZMkWdTRJ0g64cPv1QZJBl45lCx4qM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742504217; c=relaxed/simple;
-	bh=FayWvEnnqLpKk47Wdk18Myc8aRB0vVYcpCdbOYKGncE=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=K6arO5JJ/UJ7AuJktW/i3okJnMkhmZnBkwI/PutvaNF3n2/ylNA/XsnZLys+jOnvTPx/GJGmngkiSea2VYGfYtHNtqfz8aLAsieSi/C4NlkwkLcDjiEox6btu+2ithdCyDT55o0T1/SSRQE8iOl3kW4hIE5ajBvZb6vrxgV6RDw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=X7/TnEM6; arc=fail smtp.client-ip=185.132.183.11
+	s=arc-20240116; t=1743530275; c=relaxed/simple;
+	bh=QHtYW9Kld5FN0ynXHekM6UuopXK0XTLv4/vVQEkNVaM=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=QEWQdGinPTDS05WP7Ju46OcMON7/kZ5vnExelCfTsHUgW/IJHrHZy6A5aeCv7U7XMmZh4GMhxXv88WgNMiFLjyci/5Qqt3Frk3FhEDeABZ8Tjla49ihEGHk00Zqy2yvZqwBnAF2gsXeYEshZjAH2pDvIrb3D2gnpzj3StY1pH5w=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=A0Dl6Xtu; arc=fail smtp.client-ip=185.132.183.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="X7/TnEM6"
-Received: from pps.filterd (m0209328.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 52KKnRKk012010
-	for <linux-embedded@vger.kernel.org>; Thu, 20 Mar 2025 20:56:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=
-	content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=S1; bh=FayWvEn
-	nqLpKk47Wdk18Myc8aRB0vVYcpCdbOYKGncE=; b=X7/TnEM6n5ScAAZk7vB8HgV
-	LGhRmoDvGBEi1Q0ED0R7tuhUOAPMrbhncCRg2kMB1AWet3DjhFPaBcy4/6+O4NdK
-	t5tKiHCWx6GfNfCUSidE9cq83lkieIocGuC80wNziJ11Za7CGG0eZpfN2zuF5sWc
-	Iy5pOvdKoTKJ5cFd+WlqRxd+Yc2Inea0hmLSyeWm1W+F5h0EcPPDNUhdo4sH6N2P
-	clCZJ2z6tHf26bnOnO/7t/fwsOcAtFINQrucanB9Uwti7WpyGQ72LoYga1zm2rZx
-	iCtIPhCOA1US3OgtManz3DJbVM9DU8CSySPcTuHUfdih29rIq6QXyoirAQYJKDQ=
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="A0Dl6Xtu"
+Received: from pps.filterd (m0209327.ppops.net [127.0.0.1])
+	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 531HXl0F009633;
+	Tue, 1 Apr 2025 17:57:29 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=S1; bh=0TDuDah
+	qvEXeK6TZ+//WVzHOnW81E8V7Z9eLU4yX1lA=; b=A0Dl6Xtup9UYe1rKUdC3PX8
+	SW0LgrAVcoNlcwX54IYEw1maPYnJGJ1MtcxgwIcExEJuMjsa5tVgSqIYZeD4VXuQ
+	wYfrj9UDyPmAh+nhRME9GofQdc1dMvY3V4AavveiFQjeK/3vjSuUyBmQTfyG1+DY
+	Qe/lqYCZoolySdKCEhV6KP/ADrubnJgEGAtBg5HUfdFKkLIeRpFXmEtMEfMymz0E
+	C+ECEoEDjT0RnXyyS9xcqZ3APg9v1qkPzaF6pRbtpQ/atPeGJzuR0oHYYqJ2Nws9
+	UALbxRGDVYU362Kz+w3k/7dEnjkXiKMBeCHu01HbwifW7pa8gNb/hutJzqql87g=
 	=
-Received: from nam10-mw2-obe.outbound.protection.outlook.com (mail-mw2nam10lp2044.outbound.protection.outlook.com [104.47.55.44])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 45gtcrg050-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-	for <linux-embedded@vger.kernel.org>; Thu, 20 Mar 2025 20:56:52 +0000 (GMT)
+Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2175.outbound.protection.outlook.com [104.47.56.175])
+	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 45p7qxk6ck-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 01 Apr 2025 17:57:29 +0000 (GMT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=a689B+Nqviutw0fxU9zAqssXt3PKPs4NY6cWSxc0k6m3T8q4+BQk9NUtA3eAJVvNxKfMzaOaPtANkDqC46nN+UNdSjUiv2j0qrdPYLmYod+gQUsTglfoDLexK07H3JKmkzLsGjfl8NS94MKvl3emutIoSnNYtIW5jlztn6SvS27KrGl/W6It783TkA5hSLCCWqWpz7+sOLpfZv1eaBbRhfkYp83Xa+QVVLBVM8ueln0Rk/b0sSmbn9OdMSuWCowTdS0/ZSkFIcrZoxC4RqdjJ8U5Q7VH2150/TDNMv2ObwjhKq76umM+aLG0DjfZgabRQQj6K8yXdSRmPRzNhiOtyw==
+ b=jGtuEZQFAeJ9HHy8ghy4IG6xNhaz6oEb/OShSKYTkOZNr1oplyR+0CkMvdHmOxEgePTOYVb+XMBNlMtZ0R19ivyQUAuAGiq2uL+z0y00DdEvYRuKOImUjJA5DxlcwpyTVKz2uCw3YwZYdyRD07h0U2YdOBqGm6zLNKTfmpkhuBotscQ+bY9SpWeYJl9vnGMx140j32wd02C+8p23E4zwPMiVZkCI+2cNLGwiO5u4GZyRhqQC5Tswz0sdg+DnQo2KgrfnNQsIa1NojLjhnFzn7aqAWIdex+QeKeyOzu3PXWP7wCnbvU20Jh+oNVsHA8Etc/e0zTImNVj6vls+9+H4xA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=FayWvEnnqLpKk47Wdk18Myc8aRB0vVYcpCdbOYKGncE=;
- b=UG28D6dU84RoWdmvDbX+xeVGaTWvP2shnT9uRKNazrfG4QvMk40kpmFR8gW2LZLTdeh39/nfPymuKt0vwn9brtDB+VPYqi56r/7M5+v0NOnJR/xgPelt/y/QZm8z9iLhBbadNYbstbhG7AVqDNh5YU9aWbctI+H48EhGX/yiLiZOtpKjFPG7ldBtcxdQ5Jc7ytW93n08mhrsHvpsOPTbD8yLPmSHAJsBU9RBwbJ2SqlP9vQcotcKEs+M3ykrcJJPc8rSoBqKtowDTvfspfURMbbcgoyEVnI4AOr1BcMg3znRw5QTRyUC6+M711iGnXBCL3VEGYGIp84BKqmeAHsv4g==
+ bh=0TDuDahqvEXeK6TZ+//WVzHOnW81E8V7Z9eLU4yX1lA=;
+ b=HZHXcisFXDYJYjprqYyNhH8Pd5g1NWIF6kK+PpuoAh92lGSJW7a7BPgsctXMo3GJZq82en6v8F5mYh1toraUDGhWPA85a4pcGXVuKQVGpJFR1BgO2tDbXdtnxfeDRqE3nshWP5WK8sV5KOHpaPCaYZlf249q4194zuwlRWRO+NYBHsJQ12T2rPw78Bb5sWHt4rxdPcEhzVXN3QROh/+5+jq03iP113rrBnybJmsgYH3noXOBfqib3YjLNrX0M6x9rQgtzh2fOAxa4cnW+z5MuwMb/zG2kA+SrSe/vNevncJ98YVQuCIYa5N3IyJgiNxqmmpr0dQtaufbMzUVP6LscQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
  dkim=pass header.d=sony.com; arc=none
 Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by SA1PR13MB6595.namprd13.prod.outlook.com (2603:10b6:806:3ee::12) with
+ by BL3PR13MB5241.namprd13.prod.outlook.com (2603:10b6:208:344::13) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8534.35; Thu, 20 Mar
- 2025 20:56:45 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8583.39; Tue, 1 Apr
+ 2025 17:57:22 +0000
 Received: from MW5PR13MB5632.namprd13.prod.outlook.com
  ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%4]) with mapi id 15.20.8534.031; Thu, 20 Mar 2025
- 20:56:45 +0000
+ ([fe80::df7c:a5b9:aa3e:9197%4]) with mapi id 15.20.8583.041; Tue, 1 Apr 2025
+ 17:57:22 +0000
 From: "Bird, Tim" <Tim.Bird@sony.com>
-To: "Bird, Tim" <Tim.Bird@sony.com>,
+To: Francesco Valla <francesco@valla.it>,
+        "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>,
         "linux-embedded@vger.kernel.org"
 	<linux-embedded@vger.kernel.org>
-Subject: RE: [boot-time] Reminder of boot-time SIG meeting (March 26)
-Thread-Topic: [boot-time] Reminder of boot-time SIG meeting (March 26)
-Thread-Index: AduZDufzIHXZnBuUQfeJJiOL+2oYHwAy1r4g
-Date: Thu, 20 Mar 2025 20:56:45 +0000
+CC: Steven Rostedt <rostedt@goodmis.org>,
+        Andrew Morton
+	<akpm@linux-foundation.org>
+Subject: RE: [PATCH] init/main.c: log initcall level when initcall_debug is
+ used
+Thread-Topic: [PATCH] init/main.c: log initcall level when initcall_debug is
+ used
+Thread-Index: AQHblrUa+g81JSpRmkWD0ynSE1//mLOPLrMw
+Date: Tue, 1 Apr 2025 17:57:22 +0000
 Message-ID:
- <MW5PR13MB563255C6504BB3972D6881A0FDD82@MW5PR13MB5632.namprd13.prod.outlook.com>
-References:
- <MW5PR13MB563271D351A97BDD0170B833FDD92@MW5PR13MB5632.namprd13.prod.outlook.com>
-In-Reply-To:
- <MW5PR13MB563271D351A97BDD0170B833FDD92@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <MW5PR13MB563289C2D6F95091501E017AFDAC2@MW5PR13MB5632.namprd13.prod.outlook.com>
+References: <20250316205014.2830071-2-francesco@valla.it>
+In-Reply-To: <20250316205014.2830071-2-francesco@valla.it>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach:
 X-MS-TNEF-Correlator:
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|SA1PR13MB6595:EE_
-x-ms-office365-filtering-correlation-id: 10ed7ba5-0b6a-4272-1add-08dd67f1b98b
+x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|BL3PR13MB5241:EE_
+x-ms-office365-filtering-correlation-id: 49254564-eaaa-4a25-6caf-08dd7146a76a
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|366016|1800799024|376014|38070700018;
+x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|366016|376014|38070700018;
 x-microsoft-antispam-message-info:
- =?us-ascii?Q?/ibd1QCpnDH0J9XJsheRprtAc8PY+a7uUXM4Ffo9JqjOkOW2DAs+ixCbmFmx?=
- =?us-ascii?Q?cR48OyOJOgs73dMyvUT5LedWe/t/kPrt+J3hYTxfGy2tSxNYV84p0fm4ISb1?=
- =?us-ascii?Q?kJdiQfje/KbIQ0niiNmmo+14VS3PpZRBxAjjiCY/uTsO9CP1exxf0xhZjauj?=
- =?us-ascii?Q?iI9yCk3iNPO8TtZiCl2R0tSoJpvB8oo769zS/wF3unhOe0qUnO2rkQEVqYjH?=
- =?us-ascii?Q?KkYE/9crqeMZrPW65BwSUHq+SPPcYMNeJfW1l1FKjyMJSYPE/tH7kpy1cVfB?=
- =?us-ascii?Q?HuQYMfdrOPRDoxWfC6HR5BYdFOd6Ho7n0aor4zJkqukVq70IlmkaCX6uy8gR?=
- =?us-ascii?Q?pqtC1gquB+dLtVCodgtN4H9scQkK34nvN5cDME5A6Bwnouodsf1bUH859VQn?=
- =?us-ascii?Q?dvG7yrm1FP80Ell/5GyJeO5lP474lbriJxOkey9yqLr9P1UF5EqcXPORzByy?=
- =?us-ascii?Q?aRzEwAeBzxmI/1emeb+iUebuKygFN/ehi6vqVM2uImdxlhYYi0aeb4OBFwte?=
- =?us-ascii?Q?p88y7FWULVYlJZy4blf9gwK/1eYL3wuaNZk8HHQKsFv28ZAOxSfZA6Ruyd0l?=
- =?us-ascii?Q?lNmHUhvjAMBgAmYuuwybZ58uPERFw4Ipvr817UjujWpvB/h3uohElD5Pd8RF?=
- =?us-ascii?Q?m4bm6ZJTV+GXpvOBApMDwx4uClX7rd4CZr3RbyPxokjxoA7vcJvmNpJFfW3O?=
- =?us-ascii?Q?I87O3jpAI0xcu/VFNhKS7tawkWvq7M5SVUviEdqzjoWzH1MtdX5+kO4ErPNJ?=
- =?us-ascii?Q?KCEZuHf4YNZpNa630w3i1Z0cLag4bk+7+8yk0jPVm1TAYiYSn47Ug0MpFkYz?=
- =?us-ascii?Q?l1cgON1PuW0LNHKL75ZJc0Ptvf10W4CGUO4UXO+lt6GZXjKgYpFFYmM2j/SM?=
- =?us-ascii?Q?9XxZKZEsRSnIsyDLqMqzc3FcLMzHgnHYpzaRFeMqKNElNdsPgR8PN4yYnX7C?=
- =?us-ascii?Q?GBu8hO+1VB4Fyvi8O3RauNhJ8VVPSVFToIAPGiRsu+GKSrfSUiY7S486MXFw?=
- =?us-ascii?Q?lixP+RL3KPhXnfxbVCzN5+8m5raWj666BXktiUBoSNzf09ep83VjYIajL+5s?=
- =?us-ascii?Q?hUSjw20EiGQ+VFLLrZMIfx25rq78lFVMndipT62vPIM8/+E2najfZM34vn2h?=
- =?us-ascii?Q?/jkBxxyo7Q88z5uJfyW9MdWp0ouzpgzlWhZUVc6HNtcMjQjFZR/DYG60yfL2?=
- =?us-ascii?Q?uRdxZBxx1pbpvF0WsS2aNP3ABLIC0rKI8C54E/5gi8hUtHO5BRe+snhlSmTf?=
- =?us-ascii?Q?qnBkcFjb1IS5sLGdTuOZAdQfB6edTLmwFO29gU/R4qMPcn6N8QoKElCz4E/w?=
- =?us-ascii?Q?8qceGeB25YtIgPgeZ6n6YOvo4EuY473nEMJvEReW3YO4uRdsv9NespeBiNmu?=
- =?us-ascii?Q?qCRgMoDStgi84seIjr0EKZp3fzk3xt27UtYAyCnPOGPMFHYdPAgajZypGq0V?=
- =?us-ascii?Q?dLyQmXt4TlfoQlDPtYHfZXMXiWXd6H4D?=
+ =?us-ascii?Q?u4LewErTg/4yvvpZ1zjLWy808knyc6Mm1xFX8sLqYRVwcC+92QXQE0ibpMUw?=
+ =?us-ascii?Q?VJ4ZQiOB4UajdRtImiLewQoXXaDK/9hVRAztyo+wDWRNtE3rreAORBDn/YdR?=
+ =?us-ascii?Q?1ccrCsXkswpfnPmeFHXqCe/BYdowJO/uc/0vFxWu1DKeeZJIlZMP6NoUzYnq?=
+ =?us-ascii?Q?SzOYAx6A5YFQDG/OhMVrDlWWUfKJhIiDCqi317xYZ6jStGNUzHPj42yG/sUS?=
+ =?us-ascii?Q?QiGUYxElkcrH4AMpnKaFDMl0Y6yGulHl0bnAryhXK+L/PhxkQ0JDsHFtsacJ?=
+ =?us-ascii?Q?pDpsfNGqjOXR2f1XUVTHpe54fqY58GukDhGzmBAGOf2IKtbddTEfK/5RNLhL?=
+ =?us-ascii?Q?ZD5z52DXEqMnIB+R8gydP4lUCTeFeOYUiOuVFHngrgqZTNkHSkJ5HC1Mavum?=
+ =?us-ascii?Q?QgvPmSoidoMAH0TV07ctVP8Bhc8YdVJ1ANtJ2rXvKGTSly4Q465P3iLKlo+b?=
+ =?us-ascii?Q?7Mo1GWQNJ3ulck322QP5oT3bZ/kn5nFa/FlpHr/8E9CnGc1rYWVu/lq6gRFs?=
+ =?us-ascii?Q?a9P3m8CU+VDlMbnvU37qjUTL5NOCenNuPGKJO5Bg2pum5gYXVUPtdibuMsV2?=
+ =?us-ascii?Q?hcNboGpSjvhC6lqNBxPwtbtDoKDqx05snrKHjNN07TaNGK7VqWUnFsA2ngLe?=
+ =?us-ascii?Q?Pl1OKcpcKsnQI2PSwqQMRka+BiX3x5TVj5Ufg+6Pg/qLUsTEpfyNDZPVO91B?=
+ =?us-ascii?Q?qPyvviHZ4GPpPjW0OSk63Sqajz/u4AdW23/9beXsFYfaBVX4CimdUXYSzM6T?=
+ =?us-ascii?Q?u7mtWVItPSk5CCA/yiWqEgqU4YzsBa+CXu/1KsjXETcrEMdeSWKlghhfzjAb?=
+ =?us-ascii?Q?TbIfwR2DO39K+rwaMBgkA/vOUS/qBGMPic6fgKsUOVKdCyMScPjW/SVsq1yy?=
+ =?us-ascii?Q?z9G9NfJJaUwb8lvLU+I3VgmAAlMVMskZWiQ2j2T6LKObsjqQiD4Q/ayiyajA?=
+ =?us-ascii?Q?uZw61IHhouMMFS9+HSwHcVusOp8dbrI3IKSuQEKMQEdoQWqKoTnhZgb7WBhU?=
+ =?us-ascii?Q?Fp73tTy4fxsne4uj+K3C2GqKqzyIEKIHn6BDS3xw6Uq9PpR37pNQcL2INwCq?=
+ =?us-ascii?Q?dZSbkIx2MJ+awYljlPqEIr/+cED5JjKF8kN2NvySCBhczMWXo+qlBm48M2qw?=
+ =?us-ascii?Q?xLn0KKiN617jb77mhiU3wgwGunOusUoRg7L9V+qPiA65XtZLulMB3+WNqVHT?=
+ =?us-ascii?Q?n38M4rpeY10Azo2+JSS0mdTegopfD2eZwwtbmcQ+0q0L45xCMal4Q5NtB4Cv?=
+ =?us-ascii?Q?udYndZR/I/j8B7J0FJBtFokXFKN6Oeao2pEroOJgIUNRyfrFxRfhUzg/MSOa?=
+ =?us-ascii?Q?2LzY0qDNvU8pZFumeFvJ3XoH3cKGzCotcFB0ofkDJc8ELi8d3jjrNfEMS7mj?=
+ =?us-ascii?Q?nB51dhuwWhbi4sQxlv4DJP8L7K8bVjYwi9FAelb54CR1+e3wywMRzv5hFTMq?=
+ =?us-ascii?Q?a8OKcGx8pfo9jVkPIlji7Sb6YQvJQUTx0Yp6RtIcAv6Y3bDkCfWh+w=3D=3D?=
 x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1101;
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(38070700018);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
 x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?M6+L/apu5B67DSBN7luaD/fzZLhBsW966f8VNZNU9hMHwG2bFbOqwP2N2hnL?=
- =?us-ascii?Q?1R1QHO1ils8euJC9YrW5iAY4Dao375SA8PxUrPEfw7Bx41uE29VtTJoCgiXz?=
- =?us-ascii?Q?naib55DFT+qU/gFf86cLMQMn1Q/VkMCbJL7w6IRY+OA9YideZkVRsgxZguy6?=
- =?us-ascii?Q?2Oy4fR9BlqOhFJPsLDzbpdekLukTK+TqetCHNAkgry1UxeyyQ6YUOrYciUQp?=
- =?us-ascii?Q?X97VbnDN2feJqVa5OGc99oIEIvfAep5k+fJsDhvhThVjJitHfkzi5JVOmAIy?=
- =?us-ascii?Q?bGjiBwX1+C4DM96WpvMjJNllbIyYDg9PmY9w7LraoasSa0x4DuC8xJU1yfo8?=
- =?us-ascii?Q?qPIT5/mHKQzIf8cC2+0HM1q0RXdm3FfECxbsKFZzGFZJoByuRShdpNAnq9Jp?=
- =?us-ascii?Q?COIlP4DUJg7J0K5nI6bPJyhc10aOJ2fiaaU6EENU3FeHmTIQdK7IuO53cqgo?=
- =?us-ascii?Q?/PT4eJivatgj4ybZ705qUjxTFhyM21sIeDMn0Z0P8aF5EOnNVndnaD2K9pNd?=
- =?us-ascii?Q?DnuLdEOej0Lkf6QQskcGnLV7yQWPykJTQdMGO5GvSkyXQyxhFpFDiIiVzMcw?=
- =?us-ascii?Q?RoyQtzT8kTRcdf28MYRONi5kBEYE5PJVuQKmW7/LNzPNjQQVfKEuxMKKKY/X?=
- =?us-ascii?Q?IjGv22BAu+84lWZfi8iiGfXaotfd0/iaNAGqafbHgeh88sxjTssJGhu3cWDY?=
- =?us-ascii?Q?jIotBIDjhdkhBydGsIiWDHKOFJpZ0r10qPyZR8YTyBiehYpuIhxOgaXX9OoL?=
- =?us-ascii?Q?RZA/wBweYmI+kcu6j/kBsRt7xy5lrYyorrYV+jAq1lW3GfMRJZTviZzUyuGV?=
- =?us-ascii?Q?sZGq7kQdgzQUAMNDCU6FdJeRHQ8+ko7Vt1KPar/qbb0ENXT2G5NPDZA+qUNZ?=
- =?us-ascii?Q?5vETth68nH+9IUAx4mfE37yVmx2b4RxMmOBxAsGIjuogZdfCG4lBS98WBFNh?=
- =?us-ascii?Q?SwTJNUsmJ5A7qhQMPhg1uy/UwhKm2vUakBwsaum8+iLb2+H3zAIOZ/Zxrlsq?=
- =?us-ascii?Q?HtgS3T8xlNUa1owk47Q3VWuP1Tk//xFKHQKMsTmQWQxcKuvBrTy5VZc7AoFY?=
- =?us-ascii?Q?DUkqrxP/kSQmwClLBSdX4QvGiYdadRPoXOxIs4KUVfqkFUttLXScdSLFTFIX?=
- =?us-ascii?Q?8auuFWZv45+ZTl7nF8x5YVlWAc5+chx534bfhgmsM7sGX/XYn1bBb24VeAOl?=
- =?us-ascii?Q?37NrvD6GE/xHAwlui9rGYhIagcCVODkkgwt21BBgDEzGreOYE1wEtsKRhuw1?=
- =?us-ascii?Q?YOAyYi32cQkclXYA9MQbTNvMe94TMOotKssmN+aULR2yTizT1Vg0Eu+nBNQB?=
- =?us-ascii?Q?ENd5n9w65ojWCmQ3TB7q5m9FAXO+HHNl32oOqdbXupYh+EpulmTHYjxGHMfB?=
- =?us-ascii?Q?D7GAtJgcKJ0uAcrtjoULzwZRUJncs7o/07iubiVr/JBgk2BLQMAnNTAgiMVh?=
- =?us-ascii?Q?Xkzf/3BETtRltmzsUBqogIi7+X5WNLxd5jaim0TqSl5ljTa1merr/pI1NMGT?=
- =?us-ascii?Q?6UgnRJHCTCKFQ/T6+6IMcSla7GA60zKpQyaMw02VuPmYbDRYcYvHQRGzZoOP?=
- =?us-ascii?Q?I7pUgU68PmB5kWC9rJM=3D?=
+ =?us-ascii?Q?rqTrqsfRNMG5YG1m/zrVNv+fxdk+epLzLTe783Ik0zE5q9j/4tjvkU5JhUNz?=
+ =?us-ascii?Q?rVvVdhokWSJd9frcVnUca+y3pNuMGbOys1vDN+3cJWGUiq3yXxbAY2VKEd2z?=
+ =?us-ascii?Q?e/l9kCtdiah/CsZ0GbXDthvS2FTdmmGG/9+6QnfuXXdR2kEraL8LKZwnKQlc?=
+ =?us-ascii?Q?T8xMpf3zbWCMy+r94F1cpvnJm5xtgDSdJw/RVmZKnYceE4psnvUVw6KY3WEe?=
+ =?us-ascii?Q?oVT8xqRBy20PfVLqtaGcDJWgVNhOMpdUNQV2+4HQ/4J8AtKy0SWkIMPRD1xx?=
+ =?us-ascii?Q?yeKqLg4itcJO3o9IgjKdaeADcv4Yt/BiJpyA+31KfxmEQzMDLpciGbfhW1ns?=
+ =?us-ascii?Q?7eammPcp2tn7PZJIVCkw9P/2HGcMEQHGqnoOKgs3JrmKuDKMPeeRqR2s2pQ5?=
+ =?us-ascii?Q?YWCnBsGuC9lpUguzbEspB1XiI1sOFrtGiBufw9l34wkDafKHm0PAsZR3Myk8?=
+ =?us-ascii?Q?zcl0l4eYyZyrFY6lXAVbAkpIV7M0UAXSfYRSiSGjsRWOfou6wlLPJjK9+nsp?=
+ =?us-ascii?Q?N7eeEhSCni7tkt1Qo0ZBDQQcAg7GZJ4VW/HHSBwSTRulangG4r5of67xTf8I?=
+ =?us-ascii?Q?B80C+dVCRcmN/qItF/krFveW/ZHZxVolf7iGZMiIqDTU8irPFThE/hFCe73x?=
+ =?us-ascii?Q?5rOoYUxr/jiawe3ZEue4g04vFMbY14KC3z8gnAHZTZO8LduTjjW2FpnMLFaH?=
+ =?us-ascii?Q?Ng5nJhdeYgZmQpFxbUe2CSCGvdnNwmI2vApaQyBAZLGgVFzQTPr4LtzdLOGQ?=
+ =?us-ascii?Q?0mY11vtwR2YHqe2u8xYx04Uea+s0OnWmzgtcCk9p95ri2zgq7beHYULui141?=
+ =?us-ascii?Q?UzWfSkDuWTf4zqbW/j5Ib4PTLyxucW8vxXB9ksxsfDoUIOUdBQGcIVat8/sL?=
+ =?us-ascii?Q?sCwz2DJ7FBYpP19yEy4Rm8SANbFdZ5WjaCSBNPNcehuajEA5jNgb5TN0sbnP?=
+ =?us-ascii?Q?MRvsAdt+DW1vWFElPb8nKbHeA/Z3jBeMHuNt9xhgfsG7n6l/OAgjwnXJFzau?=
+ =?us-ascii?Q?rV6GNvWcsy6tE1grufDezhda08AWBrpEjWxyKPw+KcOMq/U1V4ld3Bm1mryq?=
+ =?us-ascii?Q?Eufz6Xa8aeKFWVdmk9cmOWyeKQiynoC6OG/EHvQSdG8NUjhtEJfTYZjXWz+O?=
+ =?us-ascii?Q?YR4JArXW1rF58N8SqTJMNnQdAA+DXM14L84iiatpomUF5cwY2eYkFVQKZK0B?=
+ =?us-ascii?Q?dzchwVaEnGk4SF3jNhcFe1RToiimXHC0knAjuIqEuQdbqNhgw4wG0niUP1X4?=
+ =?us-ascii?Q?HsxzEUnGef4/JNSIuwIwGvjP5LjpOQJ+z56LMBzugToQGCdh3MSRlfBKhN5g?=
+ =?us-ascii?Q?YA/MuzmFOeOtDAJNQ2XBAuBsXedCgQ9gseyuMjYPiH/AWGj5qMSjIt+Bs23p?=
+ =?us-ascii?Q?bRbb0nzk6TlfWECPykv7bOBUJ0QFs3ISbTXdROqpHunseLhapX5LN6eqTwbX?=
+ =?us-ascii?Q?dn7KXxy9wJ073uzy/F5/HQydGPLAnkk1lVgSdC0RIWlDuT+ERCXE6e7hDprW?=
+ =?us-ascii?Q?uLE+VF/x2+URPu4EdAt2/yEbLA5TslMHvLTaBGXBduOwQqOmfLk4bQaU2mf1?=
+ =?us-ascii?Q?NLdl5MRUxmDl68uMNfY=3D?=
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
@@ -143,33 +148,134 @@ List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	1E2buf7i1KQLf4tVovThTWwTlbVViQk+T+Z097kx+QwWiNtsGn0eBLcKSYRHVRIDMCZ/aU9GurtF4KrUxkZGfWv8NsLrvDcMbtzcZKITLj9KlIW3JXI8Jc/H2fbnvr85LBsAw/1wgFXAbCQ92nr9Tj++PF8Muus7gco1hXMYXGZWYSJFLksvfEOWOqVfA+khhLpkJuAjgqGgSocX2Cd3nZp05HbmuhsF96J7jRjB0UScsJ3/D7liIMeJp1phYSpoArKh1NtIYICJ8QoDG6D2rNzv1Kz+gsdJcXG21hs7hTueptkJqUyLz2Bhz2B+clVAwG+t9KZNFfuAyyAVYTi3zEIlgMZ6caF+Hu0JE3oTxmWHxr7WFQoBOGek+1w4qMN7bEj/0M4WN5AohM60bWaikkmUT4QVH2ZjCcxEgEH61FxmUuAxZcL2ORJoyeO0SnEwHn23u1UziX0TU2loWtyPsnYr45ynKw5Y1C02cZ5BP+2M9g01S/sEeu2KRIkKXIJ+jrTzm3SGUd17J9jmK24hCpXtum9MSX+4KGyUVNzHccUPjPEU4yJhCi7wEkLq4hluW454Rh/0ee+A/wQJBFiJbO7hNqpHpzqGwBu3ded3j9JfrjU+pkdMXiraWiXCtuBt
+	I9T/2nQXN2WCtOKDInbhpQfAKu28G7FoQfPmFqY61t+/Hm2AsG1Ss7t9zsKQOm2mIUDP09eK5PKoyktOG71KOXKdLKLXcPEVnF5dNXBXqHMGpJ69GajW36/9nny+BTyUgmHmL3uQhnd59/w5YU8mJjeuxCIzZS3Dbd68NVPhd/d7glbAJGgn0G1xwo/97A2+EqHM8rNEsiAnpThQHi1NNTtZ5ehuAvfFQW9yQ2kCVXUIkyvVd02BBwiL9vrr86vjcy8YeEZ3nYKlsn2MsTKqI9qYVpWDfe5rSR9rTsJXd3JkChKJx0uFlT+xfMSNsQ3+lqu/1N0pXYd2s04UbXM0EcJ1hxGsna9srz2HNMM6/q4/vsMl52ZUJoy+idlc8X94+PwerJQthsbI9DJHQhWgaIbMTpQmwcRMyI0bNKZ/FmbksIpR8Po3yCRzrI6Kv+th1PdC4TB4aR+As1GP9yQPrVHa0SZ2kraTkDPMe38ccRl1ppehvcYOm4tQl/0IpXINCTCafcHUqNNj64TBO5eyGMZvesKtCZmaIvjv+Gky8LWJwun/lVG2Vn3d8G+cSqIFQk6dywWarbUI1SwSytiqJYorWiuD/u2lR4iZn/ZSXcB3p4yDLqQzcTfXQ2YQ+twp
 X-OriginatorOrg: sony.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
 X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 10ed7ba5-0b6a-4272-1add-08dd67f1b98b
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Mar 2025 20:56:45.3873
+X-MS-Exchange-CrossTenant-Network-Message-Id: 49254564-eaaa-4a25-6caf-08dd7146a76a
+X-MS-Exchange-CrossTenant-originalarrivaltime: 01 Apr 2025 17:57:22.6737
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: ECAhfIdNn22/ksOeMFUXjS8vv3rWTBO4nELq0yvwagjEq9FdM2xCeXdyrSL9aBalLHmoG7OzuahFY7oN484JrQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR13MB6595
-X-Proofpoint-ORIG-GUID: BGcuM1rObHlOsFvJH9FwWXNU98aUQX8s
-X-Proofpoint-GUID: BGcuM1rObHlOsFvJH9FwWXNU98aUQX8s
-X-Sony-Outbound-GUID: BGcuM1rObHlOsFvJH9FwWXNU98aUQX8s
+X-MS-Exchange-CrossTenant-userprincipalname: AxGDNqs1aW3/7JD3y0yddV9i8KEE5GsadcQMO+JVLSHQa5mqRFwn3QLbMQ2Q6E8OpJHnInOET0HAJljlgDrTVg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL3PR13MB5241
+X-Proofpoint-GUID: YsZyBqO_e8hLannXPTOHozVN1OAbpaK4
+X-Proofpoint-ORIG-GUID: YsZyBqO_e8hLannXPTOHozVN1OAbpaK4
+X-Sony-Outbound-GUID: YsZyBqO_e8hLannXPTOHozVN1OAbpaK4
 X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1093,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-03-20_07,2025-03-20_01,2024-11-22_01
+ engine=ICAP:2.0.293,Aquarius:18.0.1095,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-04-01_07,2025-04-01_01,2024-11-22_01
 
 > -----Original Message-----
-> From: Bird, Tim <Tim.Bird@sony.com>
-> Our next meeting is Wednesday 26, March 25, at 9:00 am Mountain Daylight =
-Time.
+> From: Francesco Valla <francesco@valla.it>
+> When initcall_debug is specified on the command line, the start and
+> return point for each initcall is printed. However, no information on
+> the initcall level is reported.
+>=20
+> Add to the initcall_debug infrastructure an additional print that
+> informs when a new initcall level is entered. This is particularly
+> useful when debugging dependency chains and/or working on boot time
+> reduction.
+>=20
+> Signed-off-by: Francesco Valla <francesco@valla.it>
+> ---
+>  init/main.c | 18 ++++++++++++++++--
+>  1 file changed, 16 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/init/main.c b/init/main.c
+> index 2a1757826397..80a07563036d 100644
+> --- a/init/main.c
+> +++ b/init/main.c
+> @@ -1214,6 +1214,12 @@ trace_initcall_finish_cb(void *data, initcall_t fn=
+, int ret)
+>  		 fn, ret, (unsigned long long)ktime_us_delta(rettime, *calltime));
+>  }
+>=20
+> +static __init_or_module void
+> +trace_initcall_level_cb(void *data, const char *level)
+> +{
+> +	printk(KERN_DEBUG "entering initcall level: %s\n", level);
+> +}
+> +
+>  static ktime_t initcall_calltime;
+>=20
+>  #ifdef TRACEPOINTS_ENABLED
+> @@ -1225,10 +1231,12 @@ static void __init initcall_debug_enable(void)
+>  					    &initcall_calltime);
+>  	ret |=3D register_trace_initcall_finish(trace_initcall_finish_cb,
+>  					      &initcall_calltime);
+> +	ret |=3D register_trace_initcall_level(trace_initcall_level_cb, NULL);
+>  	WARN(ret, "Failed to register initcall tracepoints\n");
+>  }
+>  # define do_trace_initcall_start	trace_initcall_start
+>  # define do_trace_initcall_finish	trace_initcall_finish
+> +# define do_trace_initcall_level	trace_initcall_level
+>  #else
+>  static inline void do_trace_initcall_start(initcall_t fn)
+>  {
+> @@ -1242,6 +1250,12 @@ static inline void do_trace_initcall_finish(initca=
+ll_t fn, int ret)
+>  		return;
+>  	trace_initcall_finish_cb(&initcall_calltime, fn, ret);
+>  }
+> +static inline void do_trace_initcall_level(const char *level)
+> +{
+> +	if (!initcall_debug)
+> +		return;
+> +	trace_initcall_level_cb(NULL, level);
+> +}
+>  #endif /* !TRACEPOINTS_ENABLED */
+>=20
+>  int __init_or_module do_one_initcall(initcall_t fn)
+> @@ -1314,7 +1328,7 @@ static void __init do_initcall_level(int level, cha=
+r *command_line)
+>  		   level, level,
+>  		   NULL, ignore_unknown_bootoption);
+>=20
+> -	trace_initcall_level(initcall_level_names[level]);
+> +	do_trace_initcall_level(initcall_level_names[level]);
+>  	for (fn =3D initcall_levels[level]; fn < initcall_levels[level+1]; fn++=
+)
+>  		do_one_initcall(initcall_from_entry(fn));
+>  }
+> @@ -1358,7 +1372,7 @@ static void __init do_pre_smp_initcalls(void)
+>  {
+>  	initcall_entry_t *fn;
+>=20
+> -	trace_initcall_level("early");
+> +	do_trace_initcall_level("early");
+>  	for (fn =3D __initcall_start; fn < __initcall0_start; fn++)
+>  		do_one_initcall(initcall_from_entry(fn));
+>  }
+> --
+> 2.48.1
 
-Well, you think you proofread your stuff enough, and then have mistakes rep=
-orted.
+This all looks good to me.  Just to clarify, does tracing have to be enable=
+d to get an
+the 'entering initcall level...' printk message?  Or will you get a printk =
+message with
+tracing disabled, but initcall_debug specified on the command line?
 
-Just to clarify, the meeting is Wednesday, March 26, at 9:00 am MDT.
+What do we need to do to push this into mainline?  Based on our discussion =
+in the SIG
+meeting, there's no official maintainer for init/main.c.  I recommend pushi=
+ng this
+through Andrew Morton's tree, unless we can think of a better tree to push =
+it through.
+Since it does affect a tracer, maybe through Steve's tree?
+
+Another option is for you, Francesco, to become the maintainer of init/main=
+.c (!)
+Let me know if you're interested in that.  We'll likely have some more boot=
+-time
+things to work on in init/main.c, and it would be nice to have someone mana=
+ging
+this stuff as it comes in.
+
+Thanks, Francesco, for proposing this patch.  I think it will obviate the n=
+eed for a portion of
+my Boot Markers patch, that I suggested at Plumbers last year.
  -- Tim
+
 
