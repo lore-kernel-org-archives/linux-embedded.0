@@ -1,131 +1,117 @@
-Received: from mail-ua1-f42.google.com (mail-ua1-f42.google.com [209.85.222.42])
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEBC3242912;
-	Thu,  3 Apr 2025 08:27:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7FED1F4CA4
+	for <linux-embedded@vger.kernel.org>; Thu,  3 Apr 2025 09:49:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743668853; cv=none; b=ZnNBDZBG2wtYqMnRYHGwutdOjF1KmcoF+NFEEoaYpp4ySpm4Qm0J2y97DK4dBVprUu25dTjlc+dtaQefpKBeOFX+/wVSDQHKBw6Z6y1m6Z2RVrNPgXWCnhmohZRS05SXBJ5vlqYwvafCTuZSmHNUTQuIeGxXp0i9z8le+e59HHo=
+	t=1743673789; cv=none; b=Iy38rc6TdYt93gLFSfTL/6JPaebkVig56Hy19RcVo7wRcPyjji/0BTDCqXqgYgVHElkOu8EHVPWsR2SuOvAhRqKNji8Od8Q7gxViqTRVK8yCtYL2N/06aBqGZOnmYRiDrhtr/7b3UCIUc5o0bfvrq6EemfOx55dYB8SAv9Kd85c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743668853; c=relaxed/simple;
-	bh=Vz6GIr/E+HyhRa8juz1lK0WAiGpsW4bhQw0NC7FM1Tw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BmaHcVHRGWLPwWp6es0i8HFX9uhi4YhVP7E2c12Y9xMnu/eEi/Z+MTpQpUp00k38rn1Q3hrriHIwCwLLa35CciBTFLsQu5KXwUuxa4iGhe5RSeLZ7VjxjY30lsG1L436e5FzbAwS3wtInfAXqBsb/YwBsqNqLG4sV0XORUIE8BU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ua1-f42.google.com with SMTP id a1e0cc1a2514c-86fea8329cdso665130241.1;
-        Thu, 03 Apr 2025 01:27:30 -0700 (PDT)
+	s=arc-20240116; t=1743673789; c=relaxed/simple;
+	bh=G6oYfeUR4bfwJrN0/bHQWLiRKz/K/9hB+KcRBhGFV/0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EwQaZPvk8FEkgO0BzEbrmsrmEv5hVYDorEKaZHBH4xjQy94ktmbTFgNXSByja4byFBl4HTdVAgsvPyG7N3ye4gWSp4c6S/I3MI2F/wFII/iNiy+eP5iScDJllbABgplKIJFdC3b1tEUAwvLZN94yaK5uUp1GsD0xrfI9OXm4QII=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=J8C/BhEX; arc=none smtp.client-ip=209.85.221.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="J8C/BhEX"
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-3914aba1ce4so608103f8f.2
+        for <linux-embedded@vger.kernel.org>; Thu, 03 Apr 2025 02:49:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1743673785; x=1744278585; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=F/KrIHQ1MmyGFD2BIEbCGLM6y6y1lEI7pIwtYyMlkpk=;
+        b=J8C/BhEXQC2q+acTD9VIS7s9T1psG9EhyN7HaniuFcGNOj40/rW2qaHy1itVaduaR2
+         QbxwMrIrNBC5bzfOBOEoRtirtFoyWisX03X/x4dfxBJObN1TyMhzyPbpez/ewmw6o7W5
+         oMOO5UE5JtUUGZ2hsNWXYjsHRc9Kd2sWwHTjwyQv3jejYPW9h6lBXRRtpU0BoQiL4hMS
+         xi+xretE5XYBsRkeeF6xmH1O+13lNALtnzIYUZkB9HZ0gPOPOhv7Y084/EvwPLSv6Aew
+         5/Zwf4sB6bm4JKLCeK1MmEyi2ypzcBfxUfBdo/97FU7O0MBgRAUYOowSO3VF3yn0CYQM
+         ndGg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743668849; x=1744273649;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=NDQ3RN8JV95PVAHRBeuOQcK7voG1aybW51cXyB4UMTg=;
-        b=DFrL0rz8Sl3/dQXhJmBTNOg0vM9DSqBB4gHLWEr7lqSAZSqouG3CCd+iN1hYqhrte7
-         e2vpCQb4zVd19XqOVX3ryTeKC/d2oBbQZaWNTeNdmUF0nIcU1Bgb7U0IPNVsJMQlh4Hy
-         tocadMpvb5sgQ0RQXZEAOwtRYQ5q+Czv6SUrvv+PDVAhoIx/cFfLLrXxeNNAncHVZuQ3
-         Out7dDthRKgIqpZjGacc6zBU1QjVSmxRtLk1f40y4DR9JXQBhjshmTI69oVFyY4HWjiL
-         MgpzkYg9AAxJjl4R7I5XgRvw83zA2P4Kbsy1Eld9yZHDJJ3uiVQrhcu3sL+AX7CTknnS
-         OPtA==
-X-Forwarded-Encrypted: i=1; AJvYcCU0EvRk0A2f8iODevCVaVn7bDga6diMDWC7cYIinYSdTmptoYxRWLqmuwMy/EnXJtBtXpLkz+uRypPYhbeNyQ==@vger.kernel.org, AJvYcCUHP9EESZni3lxprPyFXhWPJhvj4ofJNR7Yz/4JPL3BQOBZgyTYTCw7d4eFefJFO5fRQvAx/ZgWBrCPrQ59@vger.kernel.org
-X-Gm-Message-State: AOJu0YyyUVn3UZ7NMo+MFVoymGXm/8vB2NP+ITZdc03ssQSYMaIehNas
-	5SxK/gWprX/Rn2zRa+ZXQMRz6xc8Csf9FXZhU7bxwKPtuJOeqbVHbySpojhp
-X-Gm-Gg: ASbGncshO3LeRtPHJ9BqO5D69cv7RZ8we90CRoocAH+zQz0/Wqq14pBzY3IlrR301vg
-	T5tJoxUqcOmta0NHOMr53G3MRTGGA64Fck5MtFysvE9Js97pO16oRdfSB6HhWkehVO0oD2k35pn
-	Ax4ksCJSwhz+wL1Jasv4/CRUT2hMCJKkfni2BR5VHImnCw2waq2Alkz/iuSSh2z44DaAqaAnIMz
-	QX7h9wAGhz9IoKgYZDKu8NX7Ef+O5UBGcf4cIilSpekqsqSWh7SgdH+0CAlj0rCxU7SKm8crGSH
-	19S+LWLDYvhuefgYmC/TLMIAOnMzkqzDWvnJtYWiji+fPVv3oeATdofgx4hmMw/h9cbyNZ/gwWP
-	Q/IxinTI=
-X-Google-Smtp-Source: AGHT+IEutDeMFsiUq/RPKlbos/TDqsYkCrY36gEB42dpRmL11u3VZBZnbjwQkWFuD8x+1oVEb+lbuw==
-X-Received: by 2002:a05:6102:3ece:b0:4c1:b2c2:61a with SMTP id ada2fe7eead31-4c839f13e9emr4881295137.25.1743668848733;
-        Thu, 03 Apr 2025 01:27:28 -0700 (PDT)
-Received: from mail-ua1-f52.google.com (mail-ua1-f52.google.com. [209.85.222.52])
-        by smtp.gmail.com with ESMTPSA id a1e0cc1a2514c-8738b181d17sm157349241.4.2025.04.03.01.27.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 03 Apr 2025 01:27:28 -0700 (PDT)
-Received: by mail-ua1-f52.google.com with SMTP id a1e0cc1a2514c-86b9b1def28so677460241.3;
-        Thu, 03 Apr 2025 01:27:28 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUSJ7ZODI1PebEOTtG/7ATumSi34g3yKnCQ8NGeX93TSF+bT8qgGgayxxnEL7FPmP8AfhIkQ2U5Y1TjQedt@vger.kernel.org, AJvYcCX/WX+bjuihU5hQHoFV2IUxZflT8QHjnBdipBvJdZ17UNrfWvGvsFkh8Clt2AUPmnJYxy1vsx3GfGLq8z3VhA==@vger.kernel.org
-X-Received: by 2002:a05:6102:f8f:b0:4c1:9bdb:6188 with SMTP id
- ada2fe7eead31-4c839e38348mr4640098137.13.1743668847497; Thu, 03 Apr 2025
- 01:27:27 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1743673785; x=1744278585;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=F/KrIHQ1MmyGFD2BIEbCGLM6y6y1lEI7pIwtYyMlkpk=;
+        b=ectk1Mflscv5Ju+G8At5kiO+0k1FtqqLTmmHfScUjRxsseQLnyfTbqeGzDBShmXvUs
+         GnRZpsCvEs8Hno/h7Nsqcpn08fxsJ9IOkRTAA5dAjaFv27H1bwlllQDmfAziCM57iw4O
+         4FJi5ZAruAHhHhapBjHD4N0l6m8vF1OOzbl5n7RVFy1kQ3urb7UHa50WdKoGQrW4h0oi
+         XstiNZ5pf319saAtAlJFNj2j1NOyUL2nXqIFOhtGnOXBY2JmO5e7AIxMMQnuptQxyh9N
+         MggyDE2VVtaB1hG/+jgao3oezyBXnrfxRsigKDHY4jTYMZrxVaxrOTZnaXIpuCkVR7sk
+         nYPA==
+X-Forwarded-Encrypted: i=1; AJvYcCUs6sYeGG8Kd47BpVOvxO6rrQPohPF/3lL1so/yXKCJFTGrYDxS/tIFiYT0jzjhraxLlpkeZJD2hDdkQviZwg==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwUVmvJsDRkB06lSfSeZUrJauvT9OuTXX5Uzo4MSRThmzSEV4Qb
+	nraITOuaWSekUm1ctyU6yDeaHl66DIa5eIwXGePtobOrp7h1y/I1dPJxwKuLwa8=
+X-Gm-Gg: ASbGncvLBM6QPyk3N5yJm91wyRQLnxZo4Y61gfB1iui6XH6U+iOhFZKDAATHGCyy7o6
+	CRM6WF8wNY0ZGMdxVgdHvLyWLPagX0C8LTM7qjWPTotrnklGObEnlIAJjKIYpZUIHCB6cPXcJv+
+	cjoZxopYvX2y42mrvLGsTBlYxcbFNsfIMUCDhb+LRxhh+4CvebVVEZD6M/mnog41fbH8GnW6qKV
+	DOqey2QgkB/sR+mv7oRZ7Ugj+ogzANxpyPPm+CrFpJ9EV33PP9zDdAM4x9y/Er5eJtPyWzaYMe4
+	ymeZnIAz9Ll3CMTmX0jev2fn/NiUapXi4EuEmKHCQZ1LfaRB3HT2MXo=
+X-Google-Smtp-Source: AGHT+IHokS94ZG2sHfhbFW8KtTRbP+tGalXra8CX5+Pf2qvikuoN0QrEFR16oqoRrZ2quQdk7Z4z2g==
+X-Received: by 2002:a5d:648c:0:b0:39c:310f:f70a with SMTP id ffacd0b85a97d-39c310ff73cmr1175939f8f.7.1743673785175;
+        Thu, 03 Apr 2025 02:49:45 -0700 (PDT)
+Received: from pathway.suse.cz ([193.86.92.181])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43ec366aa29sm13174115e9.39.2025.04.03.02.49.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 03 Apr 2025 02:49:44 -0700 (PDT)
+Date: Thu, 3 Apr 2025 11:49:43 +0200
+From: Petr Mladek <pmladek@suse.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Rob Landley <rob@landley.net>, Francesco Valla <francesco@valla.it>,
+	linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org,
+	Steven Rostedt <rostedt@goodmis.org>, Tim Bird <Tim.Bird@sony.com>
+Subject: Re: [PATCH] init/main.c: log initcall level when initcall_debug is
+ used
+Message-ID: <Z-5Zt66D3xm6bHOY@pathway.suse.cz>
+References: <20250316205014.2830071-2-francesco@valla.it>
+ <20250402195544.4897a774456eba75915cded7@linux-foundation.org>
+ <5b8eea42-76cd-414d-b2f8-416336a9ae27@landley.net>
+ <20250403000935.e48f8552231a28d06765b777@linux-foundation.org>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250316205014.2830071-2-francesco@valla.it> <20250402195544.4897a774456eba75915cded7@linux-foundation.org>
-In-Reply-To: <20250402195544.4897a774456eba75915cded7@linux-foundation.org>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 3 Apr 2025 10:27:14 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXSLhypYULqfCm55MQxZCwLzxBBc7mnr6OBcPaHFwh2Lw@mail.gmail.com>
-X-Gm-Features: ATxdqUFMgJ2ngjVa7g_RiKANOLqcud94QjdJ6r_f7S0meU1B7dnAX72IN_0JCPo
-Message-ID: <CAMuHMdXSLhypYULqfCm55MQxZCwLzxBBc7mnr6OBcPaHFwh2Lw@mail.gmail.com>
-Subject: Re: [PATCH] init/main.c: log initcall level when initcall_debug is used
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Francesco Valla <francesco@valla.it>, linux-kernel@vger.kernel.org, 
-	linux-embedded@vger.kernel.org, Steven Rostedt <rostedt@goodmis.org>, 
-	Tim Bird <Tim.Bird@sony.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250403000935.e48f8552231a28d06765b777@linux-foundation.org>
 
-Hi Andrew,
+On Thu 2025-04-03 00:09:35, Andrew Morton wrote:
+> On Thu, 3 Apr 2025 01:42:46 -0500 Rob Landley <rob@landley.net> wrote:
+> 
+> > On 4/2/25 21:55, Andrew Morton wrote:
+> > > Please review and test this fixlet:
+> > > 
+> > > --- a/init/main.c~init-mainc-log-initcall-level-when-initcall_debug-is-used-fix
+> > > +++ a/init/main.c
+> > > @@ -1217,7 +1217,7 @@ trace_initcall_finish_cb(void *data, ini
+> > >   static __init_or_module void
+> > >   trace_initcall_level_cb(void *data, const char *level)
+> > >   {
+> > > -	printk(KERN_DEBUG "entering initcall level: %s\n", level);
+> > > +	pr_debug("entering initcall level: %s\n", level);
+> > >   }
+> > 
+> > How do I tell kconfig to remove all pr_blah() below loglevel X so they 
+> > aren't compiled into the kernel taking up space? I thought that was the 
+> > reason for switching to the pr_thingy() macros (it was in the old -tiny 
+> > tree Mackall walked away from) but last time I tried to do it in vanilla 
+> > I couldn't find the knob or trace the relevant plumbing...
+> 
+> Ask the maintainer :)
+> 
+> I can't see a way.  Maybe it was never merged.
 
-On Thu, 3 Apr 2025 at 04:56, Andrew Morton <akpm@linux-foundation.org> wrote:
-> On Sun, 16 Mar 2025 21:50:15 +0100 Francesco Valla <francesco@valla.it> wrote:
-> > When initcall_debug is specified on the command line, the start and
-> > return point for each initcall is printed. However, no information on
-> > the initcall level is reported.
-> >
-> > Add to the initcall_debug infrastructure an additional print that
-> > informs when a new initcall level is entered. This is particularly
-> > useful when debugging dependency chains and/or working on boot time
-> > reduction.
-> >
-> > ...
-> >
-> > --- a/init/main.c
-> > +++ b/init/main.c
-> > @@ -1214,6 +1214,12 @@ trace_initcall_finish_cb(void *data, initcall_t fn, int ret)
-> >                fn, ret, (unsigned long long)ktime_us_delta(rettime, *calltime));
-> >  }
-> >
-> > +static __init_or_module void
-> > +trace_initcall_level_cb(void *data, const char *level)
-> > +{
-> > +     printk(KERN_DEBUG "entering initcall level: %s\n", level);
-> > +}
->
-> Please review and test this fixlet:
->
-> --- a/init/main.c~init-mainc-log-initcall-level-when-initcall_debug-is-used-fix
-> +++ a/init/main.c
-> @@ -1217,7 +1217,7 @@ trace_initcall_finish_cb(void *data, ini
->  static __init_or_module void
->  trace_initcall_level_cb(void *data, const char *level)
->  {
-> -       printk(KERN_DEBUG "entering initcall level: %s\n", level);
-> +       pr_debug("entering initcall level: %s\n", level);
->  }
->
->  static ktime_t initcall_calltime;
+If I read the definition of pr_debug() correctly then it should
+become nop when CONFIG_DYNAMIC_DEBUG is not defined, look
+for "pr_debug" and "no_printk" in include/linux/printk.h.
 
-I think the "printk(KERN_DEBUG ...)" construct is intentional.
-The message should be logged when "initcall_debug" is passed on
-the kernel command line, while pr_debug() is a no-op unless DEBUG is
-defined inside the source file.
+That said, I have never checked this. Another condition is
+that DEBUG must not be defined. But I guess that it is
+the default.
 
-See also the two existing users in init/main.c near
-https://elixir.bootlin.com/linux/v6.13.7/source/init/main.c#L1207.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Best Regards,
+Petr
