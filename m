@@ -1,117 +1,164 @@
-Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7FED1F4CA4
-	for <linux-embedded@vger.kernel.org>; Thu,  3 Apr 2025 09:49:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743673789; cv=none; b=Iy38rc6TdYt93gLFSfTL/6JPaebkVig56Hy19RcVo7wRcPyjji/0BTDCqXqgYgVHElkOu8EHVPWsR2SuOvAhRqKNji8Od8Q7gxViqTRVK8yCtYL2N/06aBqGZOnmYRiDrhtr/7b3UCIUc5o0bfvrq6EemfOx55dYB8SAv9Kd85c=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743673789; c=relaxed/simple;
-	bh=G6oYfeUR4bfwJrN0/bHQWLiRKz/K/9hB+KcRBhGFV/0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EwQaZPvk8FEkgO0BzEbrmsrmEv5hVYDorEKaZHBH4xjQy94ktmbTFgNXSByja4byFBl4HTdVAgsvPyG7N3ye4gWSp4c6S/I3MI2F/wFII/iNiy+eP5iScDJllbABgplKIJFdC3b1tEUAwvLZN94yaK5uUp1GsD0xrfI9OXm4QII=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=J8C/BhEX; arc=none smtp.client-ip=209.85.221.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7E5F25D54A;
+	Thu,  3 Apr 2025 20:11:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.11
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1743711112; cv=pass; b=BaNh2ojYC03RGyI0pyn1Mc3TYJsb3MgDR+uns+WKN85twOxQfZENW6aUceWWzzRmMlNeOB/xhoW8+UI60ySiCRmgsOlbU0DTiUBHK2MIC8dCH0Xif+LAe1JEW+Lc34LrbR9p5bHnXxWExoY8TxO10tITB5tUIkQNZw/NbkBvWNo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1743711112; c=relaxed/simple;
+	bh=jQoz+tQZkLPybdKrkSzG3w6yMYfT7OB1XZQDVSSKoIc=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=MkWp2PhVyQez2uV/w84y9caaD5/CiAQEd/C+ZB+hJtdTmZ28AaFEo8Df0ZZxCjQlSpmlPOb4PjfWb7zLHHHIUuqBiWf9LD5/PFa3sqFvvgZmA0Qwf9xLntKgUxabHW8XJRlNj7bxNb2SJuZbHbnLYmU7VbwFK/pdDNiU1R37URk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=tv9UTXcR; arc=pass smtp.client-ip=185.56.87.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="J8C/BhEX"
-Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-3914aba1ce4so608103f8f.2
-        for <linux-embedded@vger.kernel.org>; Thu, 03 Apr 2025 02:49:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1743673785; x=1744278585; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=F/KrIHQ1MmyGFD2BIEbCGLM6y6y1lEI7pIwtYyMlkpk=;
-        b=J8C/BhEXQC2q+acTD9VIS7s9T1psG9EhyN7HaniuFcGNOj40/rW2qaHy1itVaduaR2
-         QbxwMrIrNBC5bzfOBOEoRtirtFoyWisX03X/x4dfxBJObN1TyMhzyPbpez/ewmw6o7W5
-         oMOO5UE5JtUUGZ2hsNWXYjsHRc9Kd2sWwHTjwyQv3jejYPW9h6lBXRRtpU0BoQiL4hMS
-         xi+xretE5XYBsRkeeF6xmH1O+13lNALtnzIYUZkB9HZ0gPOPOhv7Y084/EvwPLSv6Aew
-         5/Zwf4sB6bm4JKLCeK1MmEyi2ypzcBfxUfBdo/97FU7O0MBgRAUYOowSO3VF3yn0CYQM
-         ndGg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743673785; x=1744278585;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=F/KrIHQ1MmyGFD2BIEbCGLM6y6y1lEI7pIwtYyMlkpk=;
-        b=ectk1Mflscv5Ju+G8At5kiO+0k1FtqqLTmmHfScUjRxsseQLnyfTbqeGzDBShmXvUs
-         GnRZpsCvEs8Hno/h7Nsqcpn08fxsJ9IOkRTAA5dAjaFv27H1bwlllQDmfAziCM57iw4O
-         4FJi5ZAruAHhHhapBjHD4N0l6m8vF1OOzbl5n7RVFy1kQ3urb7UHa50WdKoGQrW4h0oi
-         XstiNZ5pf319saAtAlJFNj2j1NOyUL2nXqIFOhtGnOXBY2JmO5e7AIxMMQnuptQxyh9N
-         MggyDE2VVtaB1hG/+jgao3oezyBXnrfxRsigKDHY4jTYMZrxVaxrOTZnaXIpuCkVR7sk
-         nYPA==
-X-Forwarded-Encrypted: i=1; AJvYcCUs6sYeGG8Kd47BpVOvxO6rrQPohPF/3lL1so/yXKCJFTGrYDxS/tIFiYT0jzjhraxLlpkeZJD2hDdkQviZwg==@vger.kernel.org
-X-Gm-Message-State: AOJu0YwUVmvJsDRkB06lSfSeZUrJauvT9OuTXX5Uzo4MSRThmzSEV4Qb
-	nraITOuaWSekUm1ctyU6yDeaHl66DIa5eIwXGePtobOrp7h1y/I1dPJxwKuLwa8=
-X-Gm-Gg: ASbGncvLBM6QPyk3N5yJm91wyRQLnxZo4Y61gfB1iui6XH6U+iOhFZKDAATHGCyy7o6
-	CRM6WF8wNY0ZGMdxVgdHvLyWLPagX0C8LTM7qjWPTotrnklGObEnlIAJjKIYpZUIHCB6cPXcJv+
-	cjoZxopYvX2y42mrvLGsTBlYxcbFNsfIMUCDhb+LRxhh+4CvebVVEZD6M/mnog41fbH8GnW6qKV
-	DOqey2QgkB/sR+mv7oRZ7Ugj+ogzANxpyPPm+CrFpJ9EV33PP9zDdAM4x9y/Er5eJtPyWzaYMe4
-	ymeZnIAz9Ll3CMTmX0jev2fn/NiUapXi4EuEmKHCQZ1LfaRB3HT2MXo=
-X-Google-Smtp-Source: AGHT+IHokS94ZG2sHfhbFW8KtTRbP+tGalXra8CX5+Pf2qvikuoN0QrEFR16oqoRrZ2quQdk7Z4z2g==
-X-Received: by 2002:a5d:648c:0:b0:39c:310f:f70a with SMTP id ffacd0b85a97d-39c310ff73cmr1175939f8f.7.1743673785175;
-        Thu, 03 Apr 2025 02:49:45 -0700 (PDT)
-Received: from pathway.suse.cz ([193.86.92.181])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43ec366aa29sm13174115e9.39.2025.04.03.02.49.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 03 Apr 2025 02:49:44 -0700 (PDT)
-Date: Thu, 3 Apr 2025 11:49:43 +0200
-From: Petr Mladek <pmladek@suse.com>
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Rob Landley <rob@landley.net>, Francesco Valla <francesco@valla.it>,
-	linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org,
-	Steven Rostedt <rostedt@goodmis.org>, Tim Bird <Tim.Bird@sony.com>
-Subject: Re: [PATCH] init/main.c: log initcall level when initcall_debug is
- used
-Message-ID: <Z-5Zt66D3xm6bHOY@pathway.suse.cz>
-References: <20250316205014.2830071-2-francesco@valla.it>
+	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="tv9UTXcR"
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-lzvc.prod.antispam.mailspamprotection.com; s=arckey; t=1743711109;
+	 b=Ojrwbx+yesMwQUEr3W2IYWDjrizDXaU3WGivJeNLAxZqxa9/iFFtHqDPjVavdwIoRs7DpPPmne
+	  EgPCTwXIAPa9/8HvdJykwLNylzPkqik8Mjm1GIWMlkSIlQ5PTtwoygJGHn9cESd1ouTJm/b+LP
+	  dl0GUITaCG1etjMzExRl6EUPARrwZ0YRWKpS7Y6wwKgQsUbEUK1suWfrCBwUHXogB4kZPUSqNe
+	  HKl2cNQpdWHgXEDms0yOuNrsRwgHtpnkMxW86++TSm+kHZxA8GKLwS23Q8psM04s6O6BWlpvbd
+	  m6Es2/TXqGAdrcvyDdIBEdLp0f43j3MHSp/OR7izx0YgKA==;
+ARC-Authentication-Results: i=1; instance-europe-west4-lzvc.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-lzvc.prod.antispam.mailspamprotection.com; s=arckey; t=1743711109;
+	bh=jQoz+tQZkLPybdKrkSzG3w6yMYfT7OB1XZQDVSSKoIc=;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
+	  Message-ID:Date:Subject:Cc:To:From:DKIM-Signature;
+	b=Fo6iNg8iC8nU3VSNgYFxqx7lDq5nl411oGOdubWPmrdi8FWfzdYmuhoV/sJM0IsbOda6U+eGuB
+	  5cOjK7d1R8D8jvNWmKqVMx6SSGtnkipxWY+6jowClPgJmTSB9Q7VzoEVm+qJ8OqDhw9aEUBYiy
+	  KCCua/2VOvJQrcRklx9GNm5K6s33h/vf5FWw8WYIuZhsAcDc1jt4TGa3UUM3JwUPxn8WVz2mG0
+	  koMUwPB45DjsfRF0E7+VVDOG61ZRVZ0F3K7m3MSQNHOMwuoROU+Vqrm6bv4Or0zK/X27GCgIiY
+	  vxm8z69mvCcuayTu6hUYFpiSflf7na3ih4SlcVvWo0ip+w==;
+Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
+	by instance-europe-west4-lzvc.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1u0Qug-000000058mt-04P3;
+	Thu, 03 Apr 2025 20:11:48 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
+	s=default; h=Date:Subject:Cc:To:From:list-help:list-unsubscribe:
+	list-subscribe:list-post:list-owner:list-archive;
+	bh=YP+cQPeZQHOdjJeiOSr8kkC4ZJizjCvN4YH/EUF7J6g=; b=tv9UTXcRSsWeJ879+jW6SBSLIt
+	v9YU/IYKUdyMyoBfH0Efy+WW+Fww2AVcW025Ofrc3s3NV+EloFkfq+kWP2jw3LWo8QBBbaox3Ycvb
+	lOs6JCCccQEahfATxNbAR8ZqE4vf4MqL99q4I8tkau0V7fSNVJXHupYimkco7xeVtfac=;
+Received: from [95.233.219.167] (port=60871 helo=fedora.fritz.box)
+	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1u0QuW-00000000Jio-1AZU;
+	Thu, 03 Apr 2025 20:11:36 +0000
+From: Francesco Valla <francesco@valla.it>
+To: Andrew Morton <akpm@linux-foundation.org>,
+ Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: linux-kernel@vger.kernel.org, linux-embedded@vger.kernel.org,
+ Steven Rostedt <rostedt@goodmis.org>, Tim Bird <Tim.Bird@sony.com>
+Subject:
+ Re: [PATCH] init/main.c: log initcall level when initcall_debug is used
+Date: Thu, 03 Apr 2025 22:11:35 +0200
+Message-ID: <3690359.dWV9SEqChM@fedora.fritz.box>
+In-Reply-To:
+ <CAMuHMdXSLhypYULqfCm55MQxZCwLzxBBc7mnr6OBcPaHFwh2Lw@mail.gmail.com>
+References:
+ <20250316205014.2830071-2-francesco@valla.it>
  <20250402195544.4897a774456eba75915cded7@linux-foundation.org>
- <5b8eea42-76cd-414d-b2f8-416336a9ae27@landley.net>
- <20250403000935.e48f8552231a28d06765b777@linux-foundation.org>
+ <CAMuHMdXSLhypYULqfCm55MQxZCwLzxBBc7mnr6OBcPaHFwh2Lw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250403000935.e48f8552231a28d06765b777@linux-foundation.org>
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - esm19.siteground.biz
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - valla.it
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-SGantispam-id: 4eacd65d3cfd868b8d0e1a1dad7544d6
+AntiSpam-DLS: false
+AntiSpam-DLSP: 
+AntiSpam-DLSRS: 
+AntiSpam-TS: 1.0
+Authentication-Results: instance-europe-west4-lzvc.prod.antispam.mailspamprotection.com;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
 
-On Thu 2025-04-03 00:09:35, Andrew Morton wrote:
-> On Thu, 3 Apr 2025 01:42:46 -0500 Rob Landley <rob@landley.net> wrote:
+On Thursday, 3 April 2025 at 10:27:14 Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> Hi Andrew,
 > 
-> > On 4/2/25 21:55, Andrew Morton wrote:
-> > > Please review and test this fixlet:
-> > > 
-> > > --- a/init/main.c~init-mainc-log-initcall-level-when-initcall_debug-is-used-fix
-> > > +++ a/init/main.c
-> > > @@ -1217,7 +1217,7 @@ trace_initcall_finish_cb(void *data, ini
-> > >   static __init_or_module void
-> > >   trace_initcall_level_cb(void *data, const char *level)
-> > >   {
-> > > -	printk(KERN_DEBUG "entering initcall level: %s\n", level);
-> > > +	pr_debug("entering initcall level: %s\n", level);
-> > >   }
-> > 
-> > How do I tell kconfig to remove all pr_blah() below loglevel X so they 
-> > aren't compiled into the kernel taking up space? I thought that was the 
-> > reason for switching to the pr_thingy() macros (it was in the old -tiny 
-> > tree Mackall walked away from) but last time I tried to do it in vanilla 
-> > I couldn't find the knob or trace the relevant plumbing...
+> On Thu, 3 Apr 2025 at 04:56, Andrew Morton <akpm@linux-foundation.org> wrote:
+> > On Sun, 16 Mar 2025 21:50:15 +0100 Francesco Valla <francesco@valla.it> wrote:
+> > > When initcall_debug is specified on the command line, the start and
+> > > return point for each initcall is printed. However, no information on
+> > > the initcall level is reported.
+> > >
+> > > Add to the initcall_debug infrastructure an additional print that
+> > > informs when a new initcall level is entered. This is particularly
+> > > useful when debugging dependency chains and/or working on boot time
+> > > reduction.
+> > >
+> > > ...
+> > >
+> > > --- a/init/main.c
+> > > +++ b/init/main.c
+> > > @@ -1214,6 +1214,12 @@ trace_initcall_finish_cb(void *data, initcall_t fn, int ret)
+> > >                fn, ret, (unsigned long long)ktime_us_delta(rettime, *calltime));
+> > >  }
+> > >
+> > > +static __init_or_module void
+> > > +trace_initcall_level_cb(void *data, const char *level)
+> > > +{
+> > > +     printk(KERN_DEBUG "entering initcall level: %s\n", level);
+> > > +}
+> >
+> > Please review and test this fixlet:
+> >
+> > --- a/init/main.c~init-mainc-log-initcall-level-when-initcall_debug-is-used-fix
+> > +++ a/init/main.c
+> > @@ -1217,7 +1217,7 @@ trace_initcall_finish_cb(void *data, ini
+> >  static __init_or_module void
+> >  trace_initcall_level_cb(void *data, const char *level)
+> >  {
+> > -       printk(KERN_DEBUG "entering initcall level: %s\n", level);
+> > +       pr_debug("entering initcall level: %s\n", level);
+> >  }
+> >
+> >  static ktime_t initcall_calltime;
 > 
-> Ask the maintainer :)
+> I think the "printk(KERN_DEBUG ...)" construct is intentional.
+> The message should be logged when "initcall_debug" is passed on
+> the kernel command line, while pr_debug() is a no-op unless DEBUG is
+> defined inside the source file.
 > 
-> I can't see a way.  Maybe it was never merged.
+> See also the two existing users in init/main.c near
+> https://elixir.bootlin.com/linux/v6.13.7/source/init/main.c#L1207.
+> 
 
-If I read the definition of pr_debug() correctly then it should
-become nop when CONFIG_DYNAMIC_DEBUG is not defined, look
-for "pr_debug" and "no_printk" in include/linux/printk.h.
+Yes, printk(KERN_DEBUG ...) here is intentional, or it would be removed,
+as Geert is correctly saying.
 
-That said, I have never checked this. Another condition is
-that DEBUG must not be defined. But I guess that it is
-the default.
+We have another occurrence of this for the "probe" messages also related
+to initcall_debug, with a nice explanatory comment:
 
-Best Regards,
-Petr
+https://elixir.bootlin.com/linux/v6.14-rc6/source/drivers/base/dd.c#L741
+
+
+Thank you!
+
+Francesco
+
+
+
