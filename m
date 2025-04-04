@@ -1,216 +1,96 @@
-Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f196.google.com (mail-pl1-f196.google.com [209.85.214.196])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AC2A2E62B6;
-	Fri,  4 Apr 2025 01:58:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.11
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743731883; cv=pass; b=OVnR44+qUAOF6xjv7f3dIuNii8k4i+zlU6hFXVzZDz2kuajcRYUFc7tje66PMIwJtV8eaw9nBZSNYGg99/+Koz9HlbnQtlnl8WmYibmQt8mmeMRHJdrM+8pYGxsP+B/oJjrKiwP8QwEykeF3WzaJscnopvmKX7OAtyuPzh8Wizg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743731883; c=relaxed/simple;
-	bh=qK1b/D9GamIRdiKwehxnGVZCqNxjeeqSm0yjODF61FI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=rTvPAALW6bkYYWuAgB9LeQOSnL5DEeaL9+L3Zu6sK3vw7PzWZqw4iWfxTP1VCVbCO3eNq1KBy38zh+4t0L6BGYU+NKZ9rf4ZcSjlxR/DaErXHQwuA6ZS/sUJMgsBlqsdJJOwPVc8g/PvuY0BMdYpyuXbEw4PlqER2fC2RXAeUgU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=gW7wSypt; arc=pass smtp.client-ip=185.56.87.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23F27E567
+	for <linux-embedded@vger.kernel.org>; Fri,  4 Apr 2025 20:14:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.196
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1743797699; cv=none; b=PKhtF2FSx/zpDstdZvZdcDd35rpzhKTIgThqUbv//gEQMbLjHk3E8pn8bQeDor7JdgKb1yu+eBBikYw5IFh+s7Kcp7A8T1cfc7A31CXpuakGTG7mCpRfGvHwY1+lH4CsDVoW7uAuxvjXV1/EUVCMZzhWsZho43FPoJHUGU8qjRg=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1743797699; c=relaxed/simple;
+	bh=V5m9fSkc1kiynvrvuBLYgb6fQ4DQ6fsXJBRBsZ4ixTk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=DZ6SdTyD7ZcRgKpzsRd0o7aPJRMvfzLTD3DcfBe5qzN6GFLZ9lpnQTGM5sithVyscs9GSEQ4GMyjOdhHro3/NbZuheWD4D6HD4oi95vShhxfHAN2ydOi2L9RjirqVGSkBVBI4l8wBl+oA/zRG/KBDFmtVUgQFyLOZqqOePq79YU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=CrfK/DUb; arc=none smtp.client-ip=209.85.214.196
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="gW7wSypt"
-ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-khgm.prod.antispam.mailspamprotection.com; s=arckey; t=1743731881;
-	 b=W6aX/03te7d8frMTzJ5IEbe1ffKT7SRyidJKHnyk4eTdkj9zN5AwPY5h7FVS8lBzJ9xrdlCRrM
-	  h8JC0QBGq4fUMEKIEVVF34TZ/VGgl5dhnuyA56jCRh6xEgPdruS6eO1fYe4Cl2pRfCB1fTj/KS
-	  42H4r1ajgDitAIM5Zm1KAnk/xmwMCxIDv+rsuhzWuAuARSdyxedVhIqbw2iGkxXun67Kuk1BHi
-	  I0G4R/4ZwHa+qry2Gj9VgSGg7Qjn+Cwr865SPVG6elG9cUsCWA0b+QgeiMyOf1MCWqKPDvOsJY
-	  yA/vC4lD0U02rT/eBtu17/BsT0Tvh9FI1svNtxF6Bc3gDg==;
-ARC-Authentication-Results: i=1; instance-europe-west4-khgm.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-khgm.prod.antispam.mailspamprotection.com; s=arckey; t=1743731881;
-	bh=qK1b/D9GamIRdiKwehxnGVZCqNxjeeqSm0yjODF61FI=;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:
-	  Message-ID:Date:Subject:Cc:To:From:DKIM-Signature;
-	b=er5OmngzxkMHO4W5AdgJ6SbhYa1QYp+dbFthh0cYc/JyTNcauvy9wxZb3Enl6h0mJtyyACkzRs
-	  BTWrmhG8NZThA36ihRmCU/T2b9Foc+vvqsHYa40xrfMfDgUAc/jbSDgJamaWzZBOzXeWG6QIuo
-	  qXoAUesKlFPfcw/tAncBclatGZeIdZwJOCBR5rhpsyM8DR9vO9pq2o29lt+/9KiVD7GJ9mh8BE
-	  SfiKcpFzY8wk39zhV777BUsJwdSKJaa9YPOdKM3uoBPoVtOoenV+Salo6nP9jeS7Kw9kCgYW5J
-	  DfZke1qbSP4wmQMqp0LGJz/EJKlL4TY7sCGigXJzsK3jfQ==;
-Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
-	by instance-europe-west4-khgm.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98.1)
-	(envelope-from <francesco@valla.it>)
-	id 1u0Qo6-0000000HTae-0sZj;
-	Thu, 03 Apr 2025 20:05:00 +0000
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
-	s=default; h=Date:Subject:Cc:To:From:list-help:list-unsubscribe:
-	list-subscribe:list-post:list-owner:list-archive;
-	bh=eOvnVqHCZxQXSHBdVHQpNxyk7h7kpGc+R93ywiMTMuU=; b=gW7wSyptGPLBBHTUvVqePHx0S3
-	IyaiNot80C8z2/xK/4HdX6ffKBlEQXLsxFmHSNAap8IwL2Mb0YTR9o9xsAmTUaAywwJZgcMA7aOPX
-	8UfWT3lToYdE0TVMIwiQUJHhkk1lVMYN8+GDmlmQ1b7Hdl1jQHetHTTQP2WTSREjGOMg=;
-Received: from [95.233.219.167] (port=64633 helo=fedora.fritz.box)
-	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98.1)
-	(envelope-from <francesco@valla.it>)
-	id 1u0Qnw-00000000FfH-3sVu;
-	Thu, 03 Apr 2025 20:04:48 +0000
-From: Francesco Valla <francesco@valla.it>
-To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>,
- "Bird, Tim" <Tim.Bird@sony.com>
-Cc: Steven Rostedt <rostedt@goodmis.org>,
- Andrew Morton <akpm@linux-foundation.org>
-Subject:
- Re: [PATCH] init/main.c: log initcall level when initcall_debug is used
-Date: Thu, 03 Apr 2025 22:04:48 +0200
-Message-ID: <5019882.OV4Wx5bFTl@fedora.fritz.box>
-In-Reply-To:
- <MW5PR13MB563289C2D6F95091501E017AFDAC2@MW5PR13MB5632.namprd13.prod.outlook.com>
-References:
- <20250316205014.2830071-2-francesco@valla.it>
- <MW5PR13MB563289C2D6F95091501E017AFDAC2@MW5PR13MB5632.namprd13.prod.outlook.com>
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="CrfK/DUb"
+Received: by mail-pl1-f196.google.com with SMTP id d9443c01a7336-227cf12df27so18923725ad.0
+        for <linux-embedded@vger.kernel.org>; Fri, 04 Apr 2025 13:14:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1743797696; x=1744402496; darn=vger.kernel.org;
+        h=mime-version:message-id:date:subject:cc:to:from:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=/FBk6NdvKrMWCu3tKHxufhADR2ZSaIO/oZLOZ9EnxBc=;
+        b=CrfK/DUbCiz/+nVD77uX8h2LWpxncov88glHg3H1/azNxvjCA5GpnpmFyHVX7AP4dt
+         DCR9jRcdqVtuifJdgHJDd8edXw6iBMWepr6AG3cAWxcSl6Ul7H0HfptKQNOvH3wudqUQ
+         J4ej8ScIsvHvM97rpdMA7CnzGzT0OfkzHF4KRlu9LxAtKEpDWs5k/3xhT+0/yiv8tEoG
+         CiwMxZQHn5R9hUEsGFRZonzAFHAKZiFBOjSrtnjOyuFD0XzTKjS8As117CITEmnNuVfN
+         cNMM/vbFbj4Eg05tW+1Srt77BMVybg00UxOb+aew2jSaPP3kfxKk+hmi/Tt5eLaoFfmU
+         qSVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1743797696; x=1744402496;
+        h=mime-version:message-id:date:subject:cc:to:from:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=/FBk6NdvKrMWCu3tKHxufhADR2ZSaIO/oZLOZ9EnxBc=;
+        b=j0yrjCIYWDU7HglUYg13nNlqP+iVH+frBHfT8KoX2hUr9QL/wGx9cwmojCuDNym27B
+         DkIwm9yVNW8exMTQTk/K/UwbDy6j9CKX2VuWR+8u0JLANX7Q6N/PotNIMBt/2a6yxUgu
+         9nLHjkKIUxRCwEm2djiDpSYHVjgl6wKsxf02MM87hvAhbK/4QhWwNbot4TKDZXhMKy8t
+         Aim80XnnbvRjWL5sVQIPJ5DMIDFa+7BjeIwHTYWSRFIL/9EhGc6q5JirSe0s22PPbb2t
+         7m1OYD0vT71XqXNSkuiDiPXtzZb0arMHxJCKLSdpEEQWDEXNXy+wzM68CSfkwAuL5dD3
+         ydFQ==
+X-Gm-Message-State: AOJu0YytSz4tyG62aGkjC3AMqfA3RnX0Qr6e/XQGACcJ/Q1On6jwWvJ1
+	tjtrNF9am2680KocPgn2hJsXAvSpcVlUVfZmJ3u/TWndTgXIrikXEzMTCgPDyrk7wX8c9iug1T6
+	UA+I32PV+
+X-Gm-Gg: ASbGncu95G/2HYUl9xobjtmrhIdd69vu7SAve6DJ1k+Cy2c+A9bmhz/Nwy+GiiWOjDd
+	R0mzCOha98GiLtuXKOPn1kYLk6fFU/LkeALqctRblAC2fRJ2cIOhIP0cdO4b0I8snZk66hNsUSg
+	3h6cOawuf4547GFpD0G4kO1nkfB3iYfH7XZnikHtycpB2R47KXaXUN98uO1EQkK61eT5PE2iHuA
+	6z5tjUH8yrCyX2JfbzMnA79ZKUPdcuDvfTS9DFzVe2UASjKF0V0TZLxw5PElZTZDWK18UMSptMr
+	4oqbrXyEQRm2RnVeZLcp1HrWdmBLeBfql/l1Yl0potgzw9aOASOk/A==
+X-Google-Smtp-Source: AGHT+IFpY9obGLrPSf90qFUUIy/i88BUoaxsGk56sC6A1IFiBRGRyXqtZEhSta9iE3ZF6j26evkz0g==
+X-Received: by 2002:a17:903:3c6c:b0:220:fe36:650c with SMTP id d9443c01a7336-22a89bac53emr69618525ad.23.1743797696161;
+        Fri, 04 Apr 2025 13:14:56 -0700 (PDT)
+Received: from localhost ([97.126.182.119])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2297866e61dsm36705135ad.190.2025.04.04.13.14.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 04 Apr 2025 13:14:55 -0700 (PDT)
+From: Kevin Hilman <khilman@baylibre.com>
+To: linux-embedded@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [ANNOUNCE] Embedded Recipes conference: May 14-16, Nice, France
+Date: Fri, 04 Apr 2025 13:14:55 -0700
+Message-ID: <7hbjtblm4g.fsf@baylibre.com>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - esm19.siteground.biz
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - valla.it
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-SGantispam-id: a1dec6df4ab765fe84caf01cdecf410e
-AntiSpam-DLS: false
-AntiSpam-DLSP: 
-AntiSpam-DLSRS: 
-AntiSpam-TS: 1.0
-Authentication-Results: instance-europe-west4-khgm.prod.antispam.mailspamprotection.com;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
+Content-Type: text/plain
 
-Hi Tim,
+Hello,
 
-On Tuesday, 1 April 2025 at 19:57:22 Bird, Tim <Tim.Bird@sony.com> wrote:
-> > -----Original Message-----
-> > From: Francesco Valla <francesco@valla.it>
-> > When initcall_debug is specified on the command line, the start and
-> > return point for each initcall is printed. However, no information on
-> > the initcall level is reported.
-> > 
-> > Add to the initcall_debug infrastructure an additional print that
-> > informs when a new initcall level is entered. This is particularly
-> > useful when debugging dependency chains and/or working on boot time
-> > reduction.
-> > 
-> > Signed-off-by: Francesco Valla <francesco@valla.it>
-> > ---
-> >  init/main.c | 18 ++++++++++++++++--
-> >  1 file changed, 16 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/init/main.c b/init/main.c
-> > index 2a1757826397..80a07563036d 100644
-> > --- a/init/main.c
-> > +++ b/init/main.c
-> > @@ -1214,6 +1214,12 @@ trace_initcall_finish_cb(void *data, initcall_t fn, int ret)
-> >  		 fn, ret, (unsigned long long)ktime_us_delta(rettime, *calltime));
-> >  }
-> > 
-> > +static __init_or_module void
-> > +trace_initcall_level_cb(void *data, const char *level)
-> > +{
-> > +	printk(KERN_DEBUG "entering initcall level: %s\n", level);
-> > +}
-> > +
-> >  static ktime_t initcall_calltime;
-> > 
-> >  #ifdef TRACEPOINTS_ENABLED
-> > @@ -1225,10 +1231,12 @@ static void __init initcall_debug_enable(void)
-> >  					    &initcall_calltime);
-> >  	ret |= register_trace_initcall_finish(trace_initcall_finish_cb,
-> >  					      &initcall_calltime);
-> > +	ret |= register_trace_initcall_level(trace_initcall_level_cb, NULL);
-> >  	WARN(ret, "Failed to register initcall tracepoints\n");
-> >  }
-> >  # define do_trace_initcall_start	trace_initcall_start
-> >  # define do_trace_initcall_finish	trace_initcall_finish
-> > +# define do_trace_initcall_level	trace_initcall_level
-> >  #else
-> >  static inline void do_trace_initcall_start(initcall_t fn)
-> >  {
-> > @@ -1242,6 +1250,12 @@ static inline void do_trace_initcall_finish(initcall_t fn, int ret)
-> >  		return;
-> >  	trace_initcall_finish_cb(&initcall_calltime, fn, ret);
-> >  }
-> > +static inline void do_trace_initcall_level(const char *level)
-> > +{
-> > +	if (!initcall_debug)
-> > +		return;
-> > +	trace_initcall_level_cb(NULL, level);
-> > +}
-> >  #endif /* !TRACEPOINTS_ENABLED */
-> > 
-> >  int __init_or_module do_one_initcall(initcall_t fn)
-> > @@ -1314,7 +1328,7 @@ static void __init do_initcall_level(int level, char *command_line)
-> >  		   level, level,
-> >  		   NULL, ignore_unknown_bootoption);
-> > 
-> > -	trace_initcall_level(initcall_level_names[level]);
-> > +	do_trace_initcall_level(initcall_level_names[level]);
-> >  	for (fn = initcall_levels[level]; fn < initcall_levels[level+1]; fn++)
-> >  		do_one_initcall(initcall_from_entry(fn));
-> >  }
-> > @@ -1358,7 +1372,7 @@ static void __init do_pre_smp_initcalls(void)
-> >  {
-> >  	initcall_entry_t *fn;
-> > 
-> > -	trace_initcall_level("early");
-> > +	do_trace_initcall_level("early");
-> >  	for (fn = __initcall_start; fn < __initcall0_start; fn++)
-> >  		do_one_initcall(initcall_from_entry(fn));
-> >  }
-> > --
-> > 2.48.1
-> 
-> This all looks good to me.  Just to clarify, does tracing have to be enabled to get an
-> the 'entering initcall level...' printk message?  Or will you get a printk message with
-> tracing disabled, but initcall_debug specified on the command line?
-> 
+Join us May 14-16 in Nice, France for a small conference focused on
+embedded Linux (and more!): 
 
-No, tracing doesn't have to be enabled. We are just attaching to the tracing subsystem
-if it's there, just like it is done for the "calling" / "initcall returned" messages.
+  https://embedded-recipes.org/2025/
 
-> What do we need to do to push this into mainline?  Based on our discussion in the SIG
-> meeting, there's no official maintainer for init/main.c.  I recommend pushing this
-> through Andrew Morton's tree, unless we can think of a better tree to push it through.
-> Since it does affect a tracer, maybe through Steve's tree?
-> 
-> Another option is for you, Francesco, to become the maintainer of init/main.c (!)
-> Let me know if you're interested in that.  We'll likely have some more boot-time
-> things to work on in init/main.c, and it would be nice to have someone managing
-> this stuff as it comes in.
-> 
+Embedded Recipes (ER) is a small, open source conference (~150 people),
+with 2 days of technical talks[1] in a single track, followed by an
+optional day of technical workshops/hacking days etc.[2]
 
-I fear I don't have the knowledge to maintain init/main.c, unfortunately. I can
-for sure take a look at other MRs related to it, but that's it - I don't wan't to
-take a commitment I cannot / am not able to honor.
+Also, that same week other events such as the media summit[3] and the
+GStreamer hackfset[4] will also be held nearby in Nice.
 
-> Thanks, Francesco, for proposing this patch.  I think it will obviate the need for a portion of
-> my Boot Markers patch, that I suggested at Plumbers last year.
->  -- Tim
-> 
+So if you're in Europe (or want to be) in May, join other embedded
+developers in the sun of the French Riviera for a great technical
+conference.
 
-Thank you for the review!
+See you in Nice!
 
-Francesco
+Kevin
 
-
-
-
+[1] https://embedded-recipes.org/2025/speakers/
+[2] https://embedded-recipes.org/2025/workshops/
+[3] https://lore.kernel.org/linux-media/18ac3f06-58c2-4121-86a5-f8a2b5d1e47c@xs4all.nl/T/#m0ec5a88d4b24dc3bd3db6e0c6309031de1afc216
+[4] https://discourse.gstreamer.org/t/gstreamer-spring-hackfest-2025-on-16-18-may-2025-in-nice-france/4366/
