@@ -1,130 +1,130 @@
 Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2AD09645
-	for <linux-embedded@vger.kernel.org>; Tue, 22 Apr 2025 02:51:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23E2F253F35
+	for <linux-embedded@vger.kernel.org>; Wed, 23 Apr 2025 00:51:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745290270; cv=fail; b=jTqHUvP45gjObkMkmSr09NdXGV0P4RmwC5CUNSycfC4Ktae8KL3UmosnHvxhXAwa9FfFfhjzR/xOzF7W/i35dg0pj5JDnBc01c4vkvIdXFWJo6H6zgliBzf8XzuQfHvMlRFxvyK1MUBNOr97JiwzOdseZTpV4OTLKf1990RKS4w=
+	t=1745369510; cv=fail; b=XA8lbV6okSysCcUu+P5kZaQ+6E1nD6nySDv4Ha3kMf0JjycBvz9a3OdNUHOptJESF06yM5jgoNB2PkR6LD2qXc+pUa+JVhGk4XO+PYyfsCz7H0kV1eerY7ZQuedXLTbd7vjy0iEJtIrl6ahgmi+g6Cqcg99RGI+evL5HI47HRu0=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745290270; c=relaxed/simple;
-	bh=+wmcAeNOtWFsufa/fp/ig2hWVG12IVmy+kXEaja2n1g=;
-	h=From:To:Subject:Date:Message-ID:Content-Type:MIME-Version; b=ImQpbI4jAruCzJAjXp+NsUAkvxOS0GwKqCSiWqHtnRRKMF+rEaG/B1wPmpBsNFJjI1MdaeN2d5xoLO/kgYfvd90A0n2I9fRnYhDOcg3p/V9PEtM/iQbIisQl2u3A2xg9NBJcTQ2iE1PqFtTIDDU7SL5/nDzCHJU84RI/h1SfEAA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=MobeWlBM; arc=fail smtp.client-ip=185.183.30.70
+	s=arc-20240116; t=1745369510; c=relaxed/simple;
+	bh=HgxRuBAw1r9TdyU5AUrPUprbqQNRbZlxPUZ8+OQQdos=;
+	h=From:To:Subject:Date:Message-ID:Content-Type:MIME-Version; b=WDULw6YFD1GE1hI5VlZ4x1dsjdHIRHYROJVqjO6h+bN9DpipBXaYtdnyFP5vMo6WGu82Ja9a44etscl+yT/zrQ78bk10YqIh02o7PxBGANcpVfGtMjitP+FBu3YogAO+3vVlOyKruAsxtiHkoyRRiKkzLBPYPEX8Df6TXJQNQq4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=VFZZATVW; arc=fail smtp.client-ip=185.183.30.70
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="MobeWlBM"
-Received: from pps.filterd (m0209318.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 53LMw7vA026687
-	for <linux-embedded@vger.kernel.org>; Tue, 22 Apr 2025 01:54:45 GMT
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="VFZZATVW"
+Received: from pps.filterd (m0209319.ppops.net [127.0.0.1])
+	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 53MNL9kT014113
+	for <linux-embedded@vger.kernel.org>; Wed, 23 Apr 2025 00:51:45 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=
 	content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=S1; bh=fJndmi6Qaj3L1HEQbElEY1ycgRgDF
-	GreUnGfjxxy3oE=; b=MobeWlBMeB3AQt5O5vS45RvE364NMAizngUF+aa4e8v8/
-	rAxJw0gV4KR/TDRzGzZGXXi8xdJHN/0JlkpPBJe/QLYNvHdNDEcoBWQEafooruPx
-	IWrzHijKRLKxfLNwqninQs/t6QALvTlukm4I4YizXdSCMIlNxPj9ruLAjksawCfy
-	kBp7jxlW0fhuKcPhySVG1wr+OBPcLMpr1dPhrIBHuwxtM1GZ331z8zcqzNDPwkB4
-	sBnG4XUzLnX2youVZe6+0JpBY/U59wACt1CUBiD22zkWojUZ1a5KXYLxrGZxjkjA
-	jtVdHzbFGzNFZ9YWdvOPxsgw5QSPd1rLBWeHIIeSw==
-Received: from nam12-bn8-obe.outbound.protection.outlook.com (mail-bn8nam12lp2169.outbound.protection.outlook.com [104.47.55.169])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 4642d2svw9-1
+	:mime-version:subject:to; s=S1; bh=HgxRuBAw1r9TdyU5AUrPUprbqQNRb
+	ZlxPUZ8+OQQdos=; b=VFZZATVWsPOKt8WifQm2Fpa2fHyUZwe/x/D52+g/McwLp
+	6IopS8ZKzJLD0Wp6aVySFbRK/8rxVA900ErZaMdT5yiEcZWy/qz37JMUPZsKOLEu
+	yDx8HLlf4fmDwzpNZTUzBFiDfjbLWNJEzTXSE2Hm7BjpMYJlg8RZx3+5kwHzDK47
+	Mb0SEU/fDjllaWMw0+IqY1gvZbyv24ujT0vPEwpmhcnRCPIjvo6iSnKde6i4bRS+
+	SeW0XwuJbSDvTzthwcYhpe+Bps+W3R48ap3xq0yvmrtAeFnnvnvdXYE8Czckzbwb
+	JWg0B0xlY7BAiEUW+XxRO+YygSkRwezgy+KK0IlcA==
+Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2175.outbound.protection.outlook.com [104.47.59.175])
+	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 466jj5g4h4-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-	for <linux-embedded@vger.kernel.org>; Tue, 22 Apr 2025 01:54:45 +0000 (GMT)
+	for <linux-embedded@vger.kernel.org>; Wed, 23 Apr 2025 00:51:45 +0000 (GMT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Dc4ZmdZSCspj0Ix/q1Yl8HOfEaeb2PnGWKz9ORLID7SbuVLGO1uLG1Ksln+4WvjnaOxlQouNmcF9PKmepryt+eANS2/H8i55XOs3alSdrAc8feRy0egK7A1lKN9w2ikyhc++CahTS9Ps63oo/nlopMUW3UGCuEuDWoXZBR3W0olwbXOPrw6Fqc/QpF811PVYG/t3F9eGbDCVEYgP4Y6HRygwp9RPJntpDnYZBKr8WpXznD+TUAfoSEr48Tf9qKKIfhbioIJ+v9tglG3CtYdpbnUe8rHd6QiP6Jaf5FXDYfxFR6lwYuOdUUaYnDXyNwU4w7KkoRWsoeY9F7Q1V0aHqQ==
+ b=UTzApY3zp/zu1K2JIaU8rmrC8sa/QtvI4+g6KJBsP8xEIERzmIuR4I1wn4tCDpICI1iePyoHW/YGbLSxqjxQP0w1f18OcEZln3qXeDULLezOrsxxVWql94v5pxwBEawBJZrzZKSsXyLE4bo67Q3iNP3MnbZ6xkNgxsGE1wTZe6tyh0ofytZkA3IUw6JPq69puGDjOOnXIlXwLPBNa7ogu23S4erC/jxKg45f7GZR6IFQjo9t7vDCQ2gqsZqa4MvTRR5oaMH/z6rnxpAIwhL/J50nldiJms38+okIsKKOKtPh7+9TJ0xM0NeFT1b7VSb9aZe5rXHHW2RSM9z9u9C5Tg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=fJndmi6Qaj3L1HEQbElEY1ycgRgDFGreUnGfjxxy3oE=;
- b=KXcZlfg8g8bliogyNLVENRhPSL0Sba63nmtdbbRKjsISLYtqb0lAvAfgPujPr+XYITNvGmS+5jhUranm1w0F65A9ZRdwlKZaBbFEUXkNUjgUD/OLf/HskCMDE1tW335HN7KnBX8I55AUCmJsffaw6kkgyEH9YuzCyUUsIm4bOlKdSP5bJ/a5vDLeZbQHDS2Zm/vhy2KhXbqDlgmHeMfGMh4aNkhjAuTk5AmutF5dmxabzMx9ThOCvblApe+f91UYl3MnCWW+u2qp4insNztBYxSyVU9XUIK/CxWO/y4ManpiQyK7WkUuil5yJIq705JWyUU9A2Fo2QASFdc/1Jhyow==
+ bh=HgxRuBAw1r9TdyU5AUrPUprbqQNRbZlxPUZ8+OQQdos=;
+ b=TGLN/SyBncTEGenkSY2c/coGKSOwkhxmYud+bSU1obnzrnSBSliXK/+r9g4DImram2ijazncuYWVLru4myM2m9q54sEtaMrqGasSpRMGGgHwnFGKSHnajzMILZ8RYm7C+9k6bDSDnbR170okLrnW7o2otUOUN1yA950ZgMbvP4GUb7ghcVv5du2/WB/Vb0zWlAUYu2gvIlvrNXWk8uTVY0vfRtdch968YxDVQfyG+CIJtdCs1huA8brZom6JK8iyPp5qBdZtT0uTYCCkM6/3JbBAX3CVu/D9xWADVYrzI8tTFBB7yVHGNa7biaNfXgvdU86lI1VYvJhb07prg7IHyg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
  dkim=pass header.d=sony.com; arc=none
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by IA2PR13MB6677.namprd13.prod.outlook.com (2603:10b6:208:4ba::20) with
+Received: from PH0PR13MB5639.namprd13.prod.outlook.com (2603:10b6:510:12a::14)
+ by MN2PR13MB3976.namprd13.prod.outlook.com (2603:10b6:208:269::15) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8655.35; Tue, 22 Apr
- 2025 01:54:41 +0000
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%4]) with mapi id 15.20.8655.031; Tue, 22 Apr 2025
- 01:54:41 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8678.23; Wed, 23 Apr
+ 2025 00:51:39 +0000
+Received: from PH0PR13MB5639.namprd13.prod.outlook.com
+ ([fe80::4213:f165:7017:52a7]) by PH0PR13MB5639.namprd13.prod.outlook.com
+ ([fe80::4213:f165:7017:52a7%3]) with mapi id 15.20.8678.021; Wed, 23 Apr 2025
+ 00:51:39 +0000
 From: "Bird, Tim" <Tim.Bird@sony.com>
 To: "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-Subject: Reminder of boot-time SIG meeting for April
-Thread-Topic: Reminder of boot-time SIG meeting for April
-Thread-Index: AduzKXUB2ibCmIAfQgWBJcLadJthXw==
-Date: Tue, 22 Apr 2025 01:54:41 +0000
+Subject: [boot time] elinux wiki page for Unified Boot Log was created
+Thread-Topic: [boot time] elinux wiki page for Unified Boot Log was created
+Thread-Index: Aduz6UemdK6H6n5HRG2gZawPEiNgug==
+Date: Wed, 23 Apr 2025 00:51:39 +0000
 Message-ID:
- <MW5PR13MB5632DF2E1FE70ACD08E1586CFDBB2@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <PH0PR13MB56391BDBEF39974F69992CC7FDBA2@PH0PR13MB5639.namprd13.prod.outlook.com>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach:
 X-MS-TNEF-Correlator:
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|IA2PR13MB6677:EE_
-x-ms-office365-filtering-correlation-id: 6d4454e7-aa8f-4597-088c-08dd8140a581
+x-ms-traffictypediagnostic: PH0PR13MB5639:EE_|MN2PR13MB3976:EE_
+x-ms-office365-filtering-correlation-id: b10fd7f6-0635-4191-01b6-08dd820101e6
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|376014|366016|1800799024|38070700018;
+x-microsoft-antispam: BCL:0;ARA:13230040|376014|1800799024|366016|38070700018;
 x-microsoft-antispam-message-info:
- =?us-ascii?Q?ULqmVopGmPftU65qWWRL4U+fYJulFcdfP9EyDGpwEY3RUWJ3ubj75VjivHHt?=
- =?us-ascii?Q?YQzzE2HnB806v3CIyRcx4PhT0fcllgjgz0aS8tnupq/ZRhKI7cgqLnJuMNPt?=
- =?us-ascii?Q?50BuJUP+M540t8hH5TRXBsA64Q5NAp4Flmm/wPcL4yiOd8aE1xWxMzR6zOYV?=
- =?us-ascii?Q?D9OQzqlCAqiBjV86uj3rN3AAZeoHiqQDAN/G+N8ERGTht+2jgtBq+yaMgQj+?=
- =?us-ascii?Q?4JPr2jpHJ6w4Koa5cOqtFCEw8FOKM6EDB1/rhMoaRfzGmgzmJn/JdmiFlZvB?=
- =?us-ascii?Q?xK+69QdKR8hAmHqrJDHsfIn0tpDulTnqVPu3WXZaE/NXQR2WrBssLos6/ALa?=
- =?us-ascii?Q?8BqtXE7vi/ozm6fcnTQRJzmyMnum8Nnq24ZJh0kZuPuFdOn1IV9iDh/t3ZIy?=
- =?us-ascii?Q?FFfSQQwMnNPeCTNwQJ7or036pQGB9kIqc1ytxi+eNnEjDe97RQGkbM6XcnSo?=
- =?us-ascii?Q?1P+gyvbsUi3ODjEBoP/pHiMV5FZsVdqExVIY9EXhW1ATgTsjQO5MfygcgZAB?=
- =?us-ascii?Q?F4fshMnRPcwYiPWw6okT76zsSQqObqyqkf+nSX2Ro7Nu+HNMEYUzDFhR33tQ?=
- =?us-ascii?Q?gSBiJ4K/ZQTdobQzfegwdH+9KMK258yhc2aM3O9LNAP/v1GBZ4I+Ebl5v7bz?=
- =?us-ascii?Q?Ne1OiHV1uVLXhv8T/85dpmWMXsu92ryUURZms9A2yjXwe33bbO9Jyh1C1s8q?=
- =?us-ascii?Q?4B/us7XevXUsm9wKI6W/p9PZ+2KVLbyQCPAEFqBN+J3P3IOhJrwdhRtUjWD1?=
- =?us-ascii?Q?GRXlcM7X8owFk9W03gwPer/d7tBLBP0B0WAQTN+nF0WCosfXWsrMjAKqZtzs?=
- =?us-ascii?Q?3swqK0UkRGAPvJvRWg7JoibXFAHknnErOZp64HVSBPF3MsY7zkPuwW5vS0gH?=
- =?us-ascii?Q?XWyPphIwHhxk6jopz5BbqF9JaKtj+0dJOR7AIVrlFfJT2cJOkrD4HJWrRVcF?=
- =?us-ascii?Q?A2l/f/3OCf3USAJL2FmNDYNoUDY6U46uqRoyj/QsIw74C0ULs61mKBCazpYY?=
- =?us-ascii?Q?3xb3prIfhc58UrK0XWAcFkW6nmvts/+9tjonH0o9MPlR6fX2zIG9JhS8yN2c?=
- =?us-ascii?Q?T11k4h/S7bn4PoYansMhV5cRj407Ui99HUgozodMrNIOfNCMcVow29qT9+Xl?=
- =?us-ascii?Q?Um+mINhCKbd4ijVx99nyV74dUBOVLYnlPW2OASrwuaAFPautXMIpT2k5Uj5T?=
- =?us-ascii?Q?gy6cGHaRNm8VEH/Rrem1ZHSmQYbQwD9tjzvX2fUWChqKhUlje1Tno9BHI/R0?=
- =?us-ascii?Q?cjZlfv0nidEY1slAVPNJaJciXW4+eCN0CkuM0DsjHvVX3nJNrSNTn1goN5m0?=
- =?us-ascii?Q?fR2H4uF8rjQF+cHovFhHI3PjvklzFI9BJjBSM62NfTgL0ohnzw2v6mE6B8ud?=
- =?us-ascii?Q?b0JHTOORfpIyh3WQl67HltAc7oioxfE2w52oEzdJ2zWoDo9tlP5SuWVelbxh?=
- =?us-ascii?Q?a9cpjMNPogo=3D?=
+ =?us-ascii?Q?/pbgOU+LkWCKH739gGW4lxyHyXfoO+zt1yQVava8THkqe615U30AuZi2RY48?=
+ =?us-ascii?Q?npvICPS5FLdoXsqXd9H/FLPW/Jb2SHtTegowSSsWN1LoVUt1ND6dCvF/aAid?=
+ =?us-ascii?Q?VynNKZFmcKDrzpyYDzB+F7ktkqcEoy8S7sydafFh0bN/qvnRcjvF9+0hGL6p?=
+ =?us-ascii?Q?qNO7hn7PVGMgphXa/kACaRms13LOlNTAdrdq1VU2tJgvzeZlZImq8T3m7PlU?=
+ =?us-ascii?Q?3kXvSiyK8Go/uXyvepfaQvPw4fyZK4g96jQ82FZbPwQ/LXE3N84SeqJKACHb?=
+ =?us-ascii?Q?pm+JOmVJn8ME7lz0YiywOOA9KSs/0P1jf5j9+PPVKSQiPGy96CiAEDh+WP+s?=
+ =?us-ascii?Q?997KsZgLUIimIvpTHCto6UfASGO0FhsWPldv5oGBuoGRcNZK6jbdMIiOuZCy?=
+ =?us-ascii?Q?fCDFY4jEpD86sGtrdziWTy+9i08T0Nu4WQtWRac4+8q6d03XSYnfsYM+DMwl?=
+ =?us-ascii?Q?mRmB78+nDuWKrELeiW1q0pA29dxBixT4IMyHRmtaVmzHxxCwlQ59XMRhFvR4?=
+ =?us-ascii?Q?v47avHb/SaK+T13AY1CS0yg495i2PdNEETvTgZlzNPq6Gcc4b0pdAdV4fbLe?=
+ =?us-ascii?Q?O0L2pz097Q+sVfFBTUuSmpd6s10uBIfAOeyPui3NXKRZsz05sVBKJ2TvX8B8?=
+ =?us-ascii?Q?fHPTcvpkW3iWUq2auWAbw/ZPCQFQ/7lOKPWXpXbjkMgwxTGMnFXM7g9f5qcJ?=
+ =?us-ascii?Q?4AB5uZ7HP8vKI1eco7qgLhy5psh+L4DC11EjN7G3AuqmzDm60xQAo6nqQgM0?=
+ =?us-ascii?Q?3uBD6p05IKs65tfPZ39/KJ3goa4r5tqhXYYAhDQRSX25hAyZY+RCXPwVbYSv?=
+ =?us-ascii?Q?yAfrCfNbsQkusrATfEKgwVFz1+U3R6TBT2uI9I83SqLLInfgRte2M6mj/pWI?=
+ =?us-ascii?Q?wjoYbWb1Mzr2C8S0Rc0jlr0+JpGv0sndd2qfDhR1XYqekBkN9P/3+yjyrOlf?=
+ =?us-ascii?Q?x1nOw3AESBH/Cf8PnSVu6p8aOgayrRs1p3TVrLXnMa8X38LgHNW+s7Pe+5DC?=
+ =?us-ascii?Q?pMa8R6ALK8CGHgA4vevvSoLMUArl5u3tYPfZe81Qtas2ko3lI9SPaOGMot/j?=
+ =?us-ascii?Q?iD0U6qxD+3qybPSdZ2B6lSQC3IlNGWlNCM6eSIR1sTDFWgqoJ6GlsfWyl5wI?=
+ =?us-ascii?Q?sD2vJd6IKxMPntfNvfq2XxJlh7Io4QdMQeaP4/dq3VfdOGSsX5ohSLPA0Orv?=
+ =?us-ascii?Q?4NG1b+BCg7vM3cGNaOjLssH4axLVUbnnDxvcb9eXN7ZNFUZ6K6GBAAhd5XaW?=
+ =?us-ascii?Q?phaFma6uG0FPtLKWqgM9Rup7HA9INtmLpguU5Iw2ceTBYmTQBpTPB8v2Z+Td?=
+ =?us-ascii?Q?PmdVZ9PB2pxNOI35ouYSS2ImwGADVLHYzIXOEZyGLbECRUJdks3bojOZsdAn?=
+ =?us-ascii?Q?ErB5WkOdFarPXo/fMpYamUIFXflpfFJMxTWJ4eVKhxjMVyRIPrwcChdfJ7Oh?=
+ =?us-ascii?Q?J1mx/5yzkGI=3D?=
 x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024)(38070700018);DIR:OUT;SFP:1101;
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR13MB5639.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(38070700018);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
 x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?zEEXNxvpJNS663QXVZKSpsmBe9DBruTARtuSD40rZizaY0d5oPIOfr6TZb1N?=
- =?us-ascii?Q?608NitAepr1ZBTPhGcsxyOx5hLsfbjxSx5En7OZ47dA0yeLGH+PeSTJLRW+D?=
- =?us-ascii?Q?RJQ8oELstsV6isTDvBMthm8FuOAO2j1UIQEgFVzJChZtELwAPSnUez6OEfRg?=
- =?us-ascii?Q?A0fgPCeWrwlOMnD/GBG6G8R7a9oxA4Sl4bZm3LK5L5W/tucs9cruiWUuDUct?=
- =?us-ascii?Q?to/bjGxomo7WnqLdtTxMLDUltkbxRyTSZZF15LFBSN3PSMAPSB832hMhQEv5?=
- =?us-ascii?Q?bXkHLIsqI17cNTHwcNB55zdkIcnKV0qcl+SuBuJ2cnU1laCZHdchjmLYNlyF?=
- =?us-ascii?Q?NnNvwoJ9ENvuK+XwNWvK+Oo8zGr7X8KsLqAtBC7vMgjNvOb9sq+WJCnb75Ar?=
- =?us-ascii?Q?d9CYmByr4zezT2qQ3VttF72AhF18WthB6KSkgsWDPCG1UvuLYBTl9/hDTwAV?=
- =?us-ascii?Q?8EM8i0FpIQ6mtW9PL47XYVmpXS9lIitqotNz85tBr8jeL4YtEJtAwjvgD/dq?=
- =?us-ascii?Q?HqZOU5pr8ucskUOdLo5BhHV7OL/3dNxVPmAXAxdqf4Bh+3JnOKKahsXlCWXP?=
- =?us-ascii?Q?bLlw8OzpLd49q9ilLUvU9duVQs4l81T0L4PbZmoOWWvsrzgAmNqGO8fUur5w?=
- =?us-ascii?Q?8aUdXwVTruuBr1mVM5HthOWMhik2KZ7j0Pnf8vcPEeJHsTwnTuuqxLvC04lD?=
- =?us-ascii?Q?Lpxhhz3xlUUZu8yBblzcK9TFK3oxVRgj66nNdvP9Ng7Tvn4CDmg09U7PgfNO?=
- =?us-ascii?Q?qHjypTOzYD8YGlUvNo90ugGdSAixk2o45cfn79LjaTIfJdhU7vkQhAoYTzzx?=
- =?us-ascii?Q?ZyxNdiUXx3zSgjrP66pzXsyktI3+pc6V5YmJNgTq7jk7e3xJW2vblcsxesw3?=
- =?us-ascii?Q?0AXcmueMQR52SKuV7+eUg5sDLSHhPzu9kWr+D1I2TU92r48rn1+Ilae+CLMV?=
- =?us-ascii?Q?S/oLJ+FJdFjWo1vubZniKOuP35OcZOOfnD2410gqEhCb5cWkfu7vPGjVLpIT?=
- =?us-ascii?Q?A1jFgU74uPbrsB2KS/niTFV1yGO6GzrJe1AQ+cgpfoT0zF+or+Lhn4bLml0K?=
- =?us-ascii?Q?knXwDDNO+OSp+Ud1fQXO2syr21CGgzUBTX6Okf5UrQxy9lMYjG1d15iYYs1p?=
- =?us-ascii?Q?Y3s8crEEu+UGkeC5dSjiOz+J04xFjagoRYlAE32sN4bixh2o/7DyyplvoT/O?=
- =?us-ascii?Q?LDlMJWTFMv0wkH2xFI7x9g2EKhIZshMDFxB0FPoxPtNwaumUoO2X7YUfPUqj?=
- =?us-ascii?Q?Gfol4IdAHFpEe1vHrgXWstwgm1I9jDxRx3Ia0os03toE8C8fXmOc6FoPPXUd?=
- =?us-ascii?Q?c6hdLsWF3pGiGxUsErHLmKZXIf1p+aBYLlHD/wEQfIBrjUy8FYufMLr1p0VP?=
- =?us-ascii?Q?o150gQ6aGovD2RecrL2hGeSIdYrv9OL7nLaW/SZdJabcLoqOtb/HVqnhNYpy?=
- =?us-ascii?Q?R5bgVi1DzUAPEUWqJ5J+uJQiwWu6AARNDDssX+GbxsP8vQ0ZIwscaMIzVqvQ?=
- =?us-ascii?Q?dlAdAx5d7djIZ9lTle1cA+0Sphg5UhD9dF0pBH4WTMW9Ku8LuLMMgmbiLL2Q?=
- =?us-ascii?Q?lS6SiC/NQBuC2UnS+AQ=3D?=
+ =?us-ascii?Q?uSb6s5J7y72gJ+CM+WrrXIjgtqYrutBvrl2mhFyMsC6KpQPMq2vOAH+hJVD7?=
+ =?us-ascii?Q?XapGkbXJ3TIH8qlm/ayCqp3L/Qp680eW6EXMxOMtOM9ygAnojKLxZCcoakiH?=
+ =?us-ascii?Q?/XJrn+L5TP6AycjcBI9Beqt3H+MeRjNyZXSO1qkkrbjti0RlhZZDzWajqUBY?=
+ =?us-ascii?Q?lNxpR/wJ2dwyc7G/FTmKY0Gh/jFsA5y2NUR4e6C951KdkHX4Rr9bLP8wTAUQ?=
+ =?us-ascii?Q?tw0BzH0L9RvM2dWuOsWpJWTVm0srrBIMyOHObIrPdmfnSseauiepnjasB72Q?=
+ =?us-ascii?Q?4KX3o7+O+d8XQKFcFK+X/h3vxFI10ixMBrXnLGYPwzYLh/QF4o+8/J7s1sQO?=
+ =?us-ascii?Q?ajPFhHdP4pWBJFhzl9TDRzIuRvZW8ky3HWDerRtL8lKHxm2RYt1jl30I24ys?=
+ =?us-ascii?Q?lNbtAcT00iRExUcB3Kr+vZju1Yg/UnnMv+R2+LIP6hn/BpBnrGM8+199BryD?=
+ =?us-ascii?Q?IfIL33Hlo1hOHOTT7MLRsNXDrbbUf8ZVKEopibv3fcIItwYXn1vGcUZyK8ly?=
+ =?us-ascii?Q?gGLt48BKVLpM0XA2BDK+2bA+AdpDedq3KXwxWD34DEOeIGLwXQXSSaeNleir?=
+ =?us-ascii?Q?3KdkeQirVhnk4w/j5nSTc3BLtAzn16xuQV0w9xMlKamc8onwdNNl7s7gqsl5?=
+ =?us-ascii?Q?k9nWuHDbnjOtVvrGHVbO8UOo7LxOUUMpUJwFgJSotMULnwS+81Q1cdRQM9nQ?=
+ =?us-ascii?Q?LQaW63PZPdSfCY+NKVxfyL5KU/t7YwlsC9zJQoM7vkKuaPKU06baviZdDwmP?=
+ =?us-ascii?Q?Ty72fxVVySMYkx8nyB/SnM2IAbXQLmmVZfpzngLPOJSScGwOPGKE/tCzaWE3?=
+ =?us-ascii?Q?vjwmzCe794vgTPxU3RjVyqI+a1BTW5y5iQq94MI6KMOTtrI7rlek8yViaZVz?=
+ =?us-ascii?Q?IwtejArjriNuVYq3sABVVMRKUAOLzfwJX4rz665Oju9wvjs78BD7Qz82+uBM?=
+ =?us-ascii?Q?ISdV46pPN5z6BV5KlWD4hUUHuUjU86kG+aRtHVifEyUMGHV8KoSHoBLEf4pF?=
+ =?us-ascii?Q?e+6CMAFV2Ido8tY2dDIhi6HgWGvDq8BriKbVx3tcYNUpoh/fyyE7vGy0EQzB?=
+ =?us-ascii?Q?mZhe6ZYvJgbfuglaYxwUsjy+U4qPazIc6G9uKNUyoWniWgmfwO0ghrUi+xx5?=
+ =?us-ascii?Q?bJsyb5I5M7MDoqZFVeI5RtgKZubG8L9xdLauIhiEQxvLkIRIE0G11fCQ1FtS?=
+ =?us-ascii?Q?HsJHbsVBeV5vR+2ysvkiOroMVNvuwJCJyluJx3LjEKyiO8KGH0A5QeF03Yoz?=
+ =?us-ascii?Q?GfWF+HP3zxKXJLbezo/IptoFt6hJ8lQQrvxByGPbBajQCw2M/ArTB23cxH3R?=
+ =?us-ascii?Q?M7s6X3kHwGVyqyoSs+P/WoH27JWU2kWZCSbk2WGwbD1OxpO0mxJaqGsLy2JS?=
+ =?us-ascii?Q?AokpO1eP4SiVN4GFIfRvtzTI5hhOSPa0s+p4J1PnGgtT9UVHxhdHFUR3bmvw?=
+ =?us-ascii?Q?59Bi/SBc7Q9qX5IyvtpOTHOwb1j4l5yqHZ4JAORCf8MT3Esya+5BqbR9qG5+?=
+ =?us-ascii?Q?v0oy8Q10U/hXsjSlK9ZlVFXLc9AokENafN3b/sUIN5Pks0EXMpsHi9cRZSSy?=
+ =?us-ascii?Q?Ck4kT1vkygC9rJ4ZNtM=3D?=
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
@@ -135,97 +135,42 @@ List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	th3N/dwwTojVRhnLKMimmvXJt/bBdHG7DsiCZrURX4CjwpCO1Exju1cTnOETwr9sc8vgj7j7JdvhCuNCK9tGE9GhxAGt1EWPChMqDZvS4onpie8gBwMvNpKk2qVtW9VnSQrs79pcOYiKgpG2lNFn3crP4oEmkfbGsyWXTundXSsH36t7W+yiO9jGbODE4y/XembfeuuiCkCsKyFYHvgegmd2lX5QWzpivAcwKwm+k8jQoMs0pUGtoKFiR2i6/hmuIkkLW5IL7nYDfXnL2VpikQpAJnzBHlysU7PZKh6FDXQOLFunVuEnAP3wpIHKXAcQYKRyrPFa1amC1WaRoYN9WhFj2sFa0ynwWPb5Lb/CgaFao9yI39jkwCL1xGFnCS+LhML8/SvRN7DqiC9eLPKD8lmleQwtZGOMn2cEhVVN2iRjLPoF4S/4D1sthLfyg3jAnM5XYeR2FtVgQkqP7JCNs66e9iCWb68gsFp1QgZzfyq+ncrkbNpIRYWYW7IjtuMpwj13gx92EVxXoLVlPGIjqEBvF+poWEJTFcum8qpnVZjASBuB09EPCzqWn3CF2NDo0ZmU0ldp9wEscXFIk5xIWJ1aMV92YSnR1r5QBuAbEnQkgz1jxo7nbfwcHfLRSSZb
+	kLuEjNHGUZ2pZ0jQ6jmFPqRvcNRc6gh2zbAkNuZ/ycN0j5EYc/R2ioiqL0HygTmIkHHnhig+a0aKa5P9XzO4RW9xn/H6ATse4VhzoblXBtYELBbdFTf/TskRaQbaYxl8fzD3ONyBXIdcvDppUwQtmNyHoK1iL/9ObNykVFVuziF2nV3c8tcGbB5xkbL/+zhMCjSECiVby8fQp01sQoVtbZnjemoseneop1G8Ei1i6WINCNUPlcDS0n7BhBUlrXPhsmxAgnbZBRQf7n3VQkd1jZlNbYmwffwFAZrMGzTCx2LaT34WAzLLUbPWMihVKykly1K5LtF4qZk6hrb8zvN5mnjYUSUn1L0ZHQ/NkcDuhkDrIhhmS/uwNMm4qu40AwiWC3QLPURQF0nZr6GXZOWyhRaQJDd/7zSAHpmBdiRcJYHHzv4mYLTLTtupo/IFpnTGUpNuesR0ULPPnifq4cM0rKvRfP79zyz+3Plh1LSnfLWDDOSINhumcQ+tv0749bn6v5buVx9tAaqnmU7IRhzKOhYvjhKXA/KN+PVx1yDsHGOi4Ly7hPGkh8w3n9UUfIP9Q8cllBqONcz5nR83fqjw5pkl7Oh1q58qlgM9H4BVhfnzkHMXExkrtGwSDROvbdFf
 X-OriginatorOrg: sony.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6d4454e7-aa8f-4597-088c-08dd8140a581
-X-MS-Exchange-CrossTenant-originalarrivaltime: 22 Apr 2025 01:54:41.0601
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR13MB5639.namprd13.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b10fd7f6-0635-4191-01b6-08dd820101e6
+X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Apr 2025 00:51:39.4700
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Rb/gOME0EbB6fuTVZQvEq+VgHv3V3V0DCz/o04mW0L+ZUGGzFQ4iRQrkvWC4BbFec+HWdR61D5aEw4a9XmxVqA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA2PR13MB6677
-X-Proofpoint-GUID: mTr_1xk5KWwSD-RKBDgnAtioeP64cCE4
-X-Proofpoint-ORIG-GUID: mTr_1xk5KWwSD-RKBDgnAtioeP64cCE4
-X-Sony-Outbound-GUID: mTr_1xk5KWwSD-RKBDgnAtioeP64cCE4
+X-MS-Exchange-CrossTenant-userprincipalname: Qf9eXPlwFlI8g/BCvnSaVXI8/ojXWn4esHPO6Yb2qeN5ewRGCgjJ+QFt6NUJxlZshJ/Ywh7jGhm2F+UsFC8ZSA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR13MB3976
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNDIzMDAwMiBTYWx0ZWRfX4xpg8y0yNiZE HfYxbCuJRJjosocFKxAfgThPJ2V7+rIG6AMAhlBee9yV/+7KU+pIBjGGQcj3/MMqik/lBv1OHzf STjUVXwACOyAcOJ2qqDSY0XxPHDqRi4FzdccV/g3RB5d6qxVTTkaBjZDU0XOAqgDrBSQw4lR9Hy
+ n8LL7FsaDpLf9P7OREUq4SAU8fdKE2WqiDbFGThSmPj/X2xnSWMEoaRbKCaxKHrULTzMFtcJuUq 2TnPgJkVZFeRxfufBlrPdpA8+yMITmZcuPiE6x/w1NYYaQFyRehsm2Ke8CQ2fkx1DOQAmRqszi1 uRcltvlSpVs2t1+kSO7GZIJx7LeACBQZwq0I/+MhUpBBNbCr7WmTNmeQ0P9LCuiEhLniisrAv6U iSMXWbrf
+X-Proofpoint-ORIG-GUID: 6DNYFIOIMSWetVsFp1uXYrh3MsmcBDwS
+X-Proofpoint-GUID: 6DNYFIOIMSWetVsFp1uXYrh3MsmcBDwS
+X-Sony-Outbound-GUID: 6DNYFIOIMSWetVsFp1uXYrh3MsmcBDwS
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1095,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-04-22_01,2025-04-21_02,2024-11-22_01
+ definitions=2025-04-22_11,2025-04-22_01,2024-11-22_01
 
-Hey Linux Boot-Time SIG interested parties (and other interested Linux kern=
-el developers),
+Hey everyone,
 
-Here is the information for the next Linux Boot-Time SIG conference call.
+I've created a page on the elinux wiki for information, discussion, and dat=
+a
+dumping about the "Unified Boot Log" we discussed in our meeting today.
 
-The meeting will be held via the Jitsi online meeting platform.
-To Join the meeting via web, click on:
-https://meet.jit.si/LinuxBootTimeSIG
+Here is the page:
+https://elinux.org/Unified_Boot_Log
 
-----
-Our next meeting is Tuesday, April 22, at 9:00 am Mountain Daylight Time.
-See this link for other time zones:
-https://www.timeanddate.com/worldclock/meetingdetails.html?year=3D2025&mont=
-h=3D04&day=3D22&hour=3D15&min=3D0&sec=3D0&p1=3D220&p2=3D137&p3=3D195&p4=3D7=
-71
-(That makes it 8:00 am Pacific, 15:00 UTC, 17:00 CET, and 20:30 IST)
+Right now, it's just my own mind dump of what I think we're referring to,
+and some of the requirements and design elements that I think are
+worth discussing.
 
-I'm planning on 1 hour for this meeting.
-
-The agenda for the meeting (and where we'll keep the minutes) is here:
-https://docs.google.com/document/d/1XAufoTT6VVJOTMzKMoz8SyOss-JA9H4J1_yVXQq=
-5mN0/edit?usp=3Dsharing
-
-The agenda for the April 22 meeting is:
- - Round-table of on-going work
-    - Work on the Boot Time wiki (section of elinux wiki) https://elinux.or=
-g/Boot_Time
-    - Status of the Boot Time Data wiki (on birdcloud.org) https://birdclou=
-d.org/boot-time/Boot_Data
-    - patches in flight:
-       - init/main.c: print initcall level when initcall_debug is used (Fra=
-ncesco Valla)
-       - analyze-initcall-debug.py (Francesco Valla)
-    - work pending submission upstream:
-       - show_delta version 2.0 (Tim Bird)
-       - deferred initcalls (Tim Bird)
-    - Are there any other patches in flight?
-       - What are people working on?
-          - deferred memory init (Qualcomm?)
-          - boot caching (the Good Penguin?)
-          - unified boot log (TI)
-             - CPU cycle counter logging (for firmware, kernel, user-space)
-       - Status of Sony boot-time work:
-          - boot time wiki (grab-boot-data.sh, boot-data repository, and Bo=
-otRegion wiki processor)
-          - boot markers -> boot regions -> common printks (nothing publish=
-ed yet)
-       - Status of RedHat boot time work?
-           - [Eric] - patches submitted a couple of years ago - mounting vo=
-lumes - might trigger errors
-           - Are currently tracking boot-time variances
-       - Status of Texas Instruments boot time work?
-          - [Vishnu] - update on work on boot markers (passing cycle-count =
-timestamps between firmware and kernel)
-          - During startup, firmware runs on different processors, with dif=
-ferent cycle-counters.
-            - Need generic mechanisms for handling tagging of timestamps, p=
-assing data between systems
-       - Status of Qualcomm deferred memory init patch?
-         - Qualcomm not on call, but TI is interested in seeing this, and o=
-ther deferred init work, mainlined
-  - Review of project ideas
-     - See https://elinux.org/Boot_Time_Project_Ideas
-       - TGP (The Good Penguin) has some stuff they did with boot caching -=
- see the page for details
-  - Review of action items
-       =20
-  - Engaging more developers
-    - Next meeting - Tuesday, May 27, 9:00 am Mountain Daylight Time
-    - current periodicity =3D 1 month (the 4th Tuesday of every month
-----
-
-I look forward to talking with you in the meeting.
+Feel free to raise questions about the content now, or we can discuss it
+in our (special) Boot-time SIG call on May 20th on this topic.
  -- Tim
+
 
