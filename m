@@ -1,236 +1,591 @@
-Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
+Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABF0B1DE8B6
-	for <linux-embedded@vger.kernel.org>; Wed, 21 May 2025 20:47:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69E871FE478
+	for <linux-embedded@vger.kernel.org>; Thu, 22 May 2025 23:15:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.13
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747860444; cv=fail; b=LB4fuPR9PGxtzVtAJGYMgUULdr/YA5o5JBK9a3zSUkFy5TULcIhGseMVQc7/qB9IeXQvVY3IY0A7ZF51MPFERnK66tJBlxcibQg+cW8SNJBAnsbNzunRdZQG6dKdI0kT+edIN9fUcNuhVzpxAcrhRG23Z/wGqjUc8SFTwxVMa1s=
+	t=1747955749; cv=pass; b=GJ4e9Vv2mnfWT0LUO8CsGn3FUUGLkSfu3Mchp3pZwS0w1fXyhY6U8ZPLX3NnierD47FZPzakorcwc/kbAfmuLkevr8nT1IXhqIIhlYhiD2qybGblKbNxWAYKC3sdYjW7RokbZB8hZnASy1LMABYaCz9LBn1OsEWecJd5wZk+U7Y=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747860444; c=relaxed/simple;
-	bh=mCorhza+yDQ9iYNWlDRcm9kc381peilTKyaWaR3b4u8=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=nTz5YcNOClUUKDWxEJST93L6UxlnTcZu6+UtJSu7W43oEC+olTR6kOsUkoZvl+1UZ2toN7pOb9kBVajXVTDSJIuDvgXedtgDMc+Bpz8wTGImJ/3yXSi/XoJVs2Xo/fA02cedkl7ZGCiUMeVM2y4JETZ9pUIwdVavu3Ap2wr3RYs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=kGq5ANjm; arc=fail smtp.client-ip=185.183.30.70
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
+	s=arc-20240116; t=1747955749; c=relaxed/simple;
+	bh=BYgcdT9DQdXXJJpy4GlII3uliRwUxaBiK4gBQBXYwCo=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=O3rcIZPLorvzcyqu5GEd5rhXf6pSOeEFsiTHlrUVY9EXmh4tOQNoRIrdqa8Mx72hGWRsmT6yH4LLEIYAUSqCGl9QjBhNNgt0YvBoaTh3X41Hgj8aRHrB/mpq1wPu82+EwQiDD5FeBQ7/vcAmCn6VhYpS9cYBAg0l36LcETeV90U=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=tfMzIm8q; arc=pass smtp.client-ip=185.56.87.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="kGq5ANjm"
-Received: from pps.filterd (m0209322.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 54LKIGA6001102;
-	Wed, 21 May 2025 20:47:11 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=S1; bh=mCorhza
-	+yDQ9iYNWlDRcm9kc381peilTKyaWaR3b4u8=; b=kGq5ANjmIBcGivFsim+U3+2
-	LXt/2dAnMJC3F9j2jkmz6iklb9YLjCpW2If0aw79QYK23l2MuPiRYvmNv6nbvMn5
-	NIc8RldrKXi0NNhQ3/Fze3UtLr8U3PymkIxYNjgaukpGMMNjcCj/PjNMlDzp3yk9
-	lcdDDflsC9sTdzggqtB7HX0DccXTSSmfUtnlsdV+fvCHfIrvSWY/yE75xn5n+P/D
-	UICgSWzYRyiGHmlTVxtrwDnAgkjN2GX09KzDOo8O6Lvk93fHEgE/evLgOdL3MCic
-	uYEGl0//xaVZQqaIr2UUJ4S9f0F6GW1ykVgwfyp8vOtJaYsyJo2d9TywCc/tfFA=
-	=
-Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11on2084.outbound.protection.outlook.com [40.107.223.84])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 46rwgx14bv-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 21 May 2025 20:47:11 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=m58dQ4WxJN/Logj56ynxFmS+LCyRpoti2zWRoNlAHp8T4nlB23YO2FKKsse7wKIhqbQrbEC7kcMlojguymHWxTXc+m4FDN/7r6tp5ZxvEshQzM8E6N/5BCDIPErqfNs2031EiV8Hgh+r2BD7eikC3d2YNMDPvmyli1iiChFd9sueJekdUMNukLpDqwzBuhyWXP6FjgHNXu6mX9YfSP1O25QBbjB6t338fhCg/lHbrO/h1GFH5D+nqOkq+QSiNNm4pFn4m1vzqqZEiVlS7Q6PSgcZs+gQ5kD8fuLLmsU7YW9Hir2HH1e4t4xCf4/w7Y/gl3D54XlDDvmvvMU35VWjWA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=mCorhza+yDQ9iYNWlDRcm9kc381peilTKyaWaR3b4u8=;
- b=WAddrNXpRGsoIbIsQibO/HCvWR/jnOGeCJlpMJM+IYj7jMrPm5BpyaolK0pU1vFtpwNlArE7eT2qSN93uZ5EynI/nYXJRQ/s9HEM3IJ/OR6FDfYXCnqdWGBqxE5v87PcIuHg8j5oiM4B01b6641YPUlvV8rYxKcOkrIG2TtD+K1G+LDPVaeNz23HPRHzHrfcypXINh/ZlZyRlUIHEp+P2hFAFY9rMcnWv2P5J0o5bPXqGaTu2vWF1HBflE0tXP72vm15zmbsgttgx/RdNtOvxeg6bznmNxwivlAEOs6KZ2djaPlNYYjJclOBsyL3hGRStqUsCJUlaTRB5WBxf4LRjQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
- dkim=pass header.d=sony.com; arc=none
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by CO6PR13MB6048.namprd13.prod.outlook.com (2603:10b6:303:14f::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8722.32; Wed, 21 May
- 2025 20:47:07 +0000
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%5]) with mapi id 15.20.8746.030; Wed, 21 May 2025
- 20:47:06 +0000
-From: "Bird, Tim" <Tim.Bird@sony.com>
-To: Saravana Kannan <saravanak@google.com>
-CC: Linux Embedded <linux-embedded@vger.kernel.org>
-Subject: RE: [boot-time] Unified Boot Log - special topic call for Boot-Time
- SIG (meeting announcement)
-Thread-Topic: [boot-time] Unified Boot Log - special topic call for Boot-Time
- SIG (meeting announcement)
-Thread-Index: AdvI1ps725/tFCwOTFW4FBYefrI1AgBEYusAACpEKgA=
-Date: Wed, 21 May 2025 20:47:06 +0000
-Message-ID:
- <MW5PR13MB56320C5883FEC27C49C7F296FD9EA@MW5PR13MB5632.namprd13.prod.outlook.com>
-References:
- <MW5PR13MB5632B8FA3279D77F2F9217BBFD9CA@MW5PR13MB5632.namprd13.prod.outlook.com>
- <CAGETcx9S2nyz00G3fq1taz9QEshpTPmaUX_+=FyHzzj--ELEXg@mail.gmail.com>
-In-Reply-To:
- <CAGETcx9S2nyz00G3fq1taz9QEshpTPmaUX_+=FyHzzj--ELEXg@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|CO6PR13MB6048:EE_
-x-ms-office365-filtering-correlation-id: 9a76140f-002c-49e9-9eee-08dd98a8a63f
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|376014|1800799024|13003099007|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?RXZYRWRVNnVrdXRRTG9pRjJIYmRkZHhPOGJYQkpJV0dwNFVSWWgzeEk0RzBo?=
- =?utf-8?B?aW1MU0xQMnBWS2F5MGhzbWs3S0FnWTVWNmN1QmVIZ1pBd3hJcUVQS1hxbzhS?=
- =?utf-8?B?TG1WbTVlOXBUTGl4YURJMmtkMWtnNzZGWThYcjRBVXhUbFpENDNIcnFKb0hV?=
- =?utf-8?B?cE1nODdyQU9PZG1CaVVsUHBFVE9TUW5iaDJoa0t1T0IzaEt1SnhlazViWURl?=
- =?utf-8?B?YWM5MGJLWlpLQ1VUUkk2U0h2SDZiMkdBTVZKUDhPNkN1SUNhSlViR2dVeVpp?=
- =?utf-8?B?VTJRTTl1ajNDQURLVzBhZ0JvV1J3U2g5ekNibnNIMWxDd08wdWE4eW9oWk83?=
- =?utf-8?B?QUM2aVRpZGlxcE9DUnc1SzkvN0U5c09UZyt0aTFDWHZkYWFsUlJyekRmOWov?=
- =?utf-8?B?SCtxWk5mUURFYS9IbkZqRUFlOEEybFFKVkk5Smo3ODZkV0dmZE5BbFpsSXE1?=
- =?utf-8?B?dWhWRjZ6dkwwYTZmVzVIZ2VqMGFoZUFDQTFBM1N5U1UrRFRkQXlablpWOEtp?=
- =?utf-8?B?OFdpNzNTQnUxYThzNm5BUldhNjJVN0EzdHFXMEJheGxEK3ViVEkyVmpjeU1x?=
- =?utf-8?B?U0pzS0IvL0Q5cVJrTVd4SVlVS1BuYWI0QjFXUFJheUhrcHR3dENTUWExSXd5?=
- =?utf-8?B?c2czZHpiMWoxMTFyRVd6bFM3NzdvTFJEM25OU2JDc3ZpeXRxS1lFWWpiYnlB?=
- =?utf-8?B?aTBaNTRJSHlzdWhxSGsxRUNzUXpBYmx4cHhuRU9OM3NIU2w3T3dhc2RtTS95?=
- =?utf-8?B?dUhmSTg0MXJ0VkExQVFaVWNoSTRRUmRjNVZ6cW9lOVNtRDNiY0lqVWZHY1FL?=
- =?utf-8?B?Z1BYZC94K0xpVU5lblVacU1ZQzYra0VLejdRTVRRYlo3OUdPcUMrV3doZGFh?=
- =?utf-8?B?eTZVNjJFNkFJbkNKQmswbi9wU0dYWlNUeDJyVm55R1R6eUlwZ1lFK0tzMEcx?=
- =?utf-8?B?YTBOclBtZldHem5xNEZJdkNSRVYwQWc5N1lFcU1OekV1ZncxNUpCMGVGMmp2?=
- =?utf-8?B?MDg5MTRXa0NsaVYra3J1MDdEbytjeWpjN0p0QzdhMEhaazJWMGtjSlFqcjhs?=
- =?utf-8?B?RFZ1bkxjeFkyWGQ4RHdjV3ErQ21aUXd2NlcvVWU2L1BvSDVBWnczMDBKeFhq?=
- =?utf-8?B?Z3N4TnRnSktEZWZKeTcrYVNoZGYrWmVIVFRYS284V3Q3RkVIVFZQL25TN1hQ?=
- =?utf-8?B?ZW5ONjRDczVwU0dJSkZFRnNzeVZ1aFZ3djZOUWxsSUxWWGZzN2FaQnA4bEVh?=
- =?utf-8?B?cjh6eldnNVQ2NjJQNG5TcmdlQkdXcndyclp0bzZNK1VLSzNJbDdiQ0VTMnVi?=
- =?utf-8?B?SWlDNDZBRjhlNXVLSmt0UnJJYXJIV3hmRlhvRjZKZEhCNVhXd3NZd3BRMWVy?=
- =?utf-8?B?eWJXcWxGZ2hLL3RJSDJtc29UWStsVHdaMEZXWGw0SmhIV2IwV3ZMZnBVMnhI?=
- =?utf-8?B?UjNRakk5RVRiSXhDWCtKTHRBQW9JeVVlUmF6MVJVc3BudVJXRFVPTmQ5a3hX?=
- =?utf-8?B?Qy9GdGFJZW0wR0ZTanp3YzNCdXlBdms1ME55Z0ZMMHlmR0w4eHIzMlhPSFpx?=
- =?utf-8?B?ZERlaHVNYk44OHFJRHQ0UmpGUmdZVGtvc2lqRStudnJuYU9JUVJCV0tyYk1t?=
- =?utf-8?B?Y3MwMnZuVVJENGRvRmtUWTVTNUpwNFMwY0trdyt1ZlU4dWpMeEFvYnRQbVhP?=
- =?utf-8?B?ZXJQdkNrN3lobmlKek9TWGtXVHJqbFBrS0V1c0xsN203OHIwTjZuUEp2anFh?=
- =?utf-8?B?b0YvVFUzc0dHV1p6eVpEb0RLR25IZGNYOXNzMWthNHM4N1ZwaGM1SE5QM3NU?=
- =?utf-8?B?clZNSFhadzA3aFNUamQ5S2hIVktDK1FxaG9STmdvdWRsTldsOEh2WTM4ZTBr?=
- =?utf-8?B?eS8vMnZuRVA2V25GdFUrbjRPZlAvNVFZcVptSkJkaGFJUVQyUXpoRlUwVXNy?=
- =?utf-8?Q?s7hBgLkffYeFeRRSYZOuGecEPoGfIrRm?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(13003099007)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?K3E1bGQ2ZmVETHN3QUpFZ2tyOThTNU5MQU9SWEUvMFFEV3htQlF4ZnlKT2lo?=
- =?utf-8?B?bkVaaXhNRlVSdGFZbUEzbGJRZ21rbTZneTV1OGtDMXFqV2lVRUFpNW42ZWRy?=
- =?utf-8?B?dVZSQWJXa011YlVaeDhGM1R1SGltSTErUG9VMlpKOXF4d0F6RDFzUmJzbGRo?=
- =?utf-8?B?VkcvcDZ0UGxUQnNXNWpKQml5cGNGWXpMVGl5VVlxSzlEVWlkZ2VnM3c5djJC?=
- =?utf-8?B?TG1KNWhLV1p6MHB1TjFYMmVjQ0RzczdPN3BoMmZUMDBuc0pKRDU1ZzJCOTIy?=
- =?utf-8?B?ditCVGhvL2xLU2ZyQTdEbUVxdGJzYjRYQUpBT1ltdDFia1JCVmI0em9QUTNB?=
- =?utf-8?B?bi9VMzllbFVEUU1RQW8wb29MM29uMmt1THR5bndod3JyWDlPbDNOL1VYQUx3?=
- =?utf-8?B?VDI1dm4vaEhmSVZrWEVNMFZ6cDVjb1dIdVlVSkFUTUdERjVaa045bTBqTkth?=
- =?utf-8?B?UXg3dkY3cDNOWEM5Q2N3YzZ3M3R0WnBZQkNmOXlOM1gyQWRoN3A2VWtFWkEz?=
- =?utf-8?B?cysrWWREcUR2YWw2MmlKbFpwcW10dC9FWk9UdVRiem8xTkRWTk0xNTQ2OUNB?=
- =?utf-8?B?dmtEQVNLNUF5MlFnMkVtbFhNNVVjY1dxejZUNTFmN2Rnelpvc0tNRWpIVGRD?=
- =?utf-8?B?TkpWWXRncHQzU0pMRlM3S2ovOGlZUS9wODVwdEtRK1RKbkdDeFZTMkhqODgz?=
- =?utf-8?B?M0pEQ2hNWmorQVB4MWE0UXk5bUxORWZEeEcrWGhmRG1oaG5iZEhjS3NCVktt?=
- =?utf-8?B?VXVQVWk5TnJ4ZVJkMEVnZitUb3BFRnlYeXQ2QzlZZXN0bWM5MFhJRFc2UmV1?=
- =?utf-8?B?WWJ1VkJNQjROWnBLT0liaWt6TXNmb3pFTWMyTXhRaThIRVVEN0w0VUNnMUo4?=
- =?utf-8?B?YVZXM0Rmcm8xVUFORW9HRTNpVlFVakhQZm1EVU1yYk1oR0tJeEh1U1Rsd3dv?=
- =?utf-8?B?Q2VtZmg3NlVrZ1lWWXpCU3dGZ0tsSEVSNEthR2cxYkkvbjRSQlpIRFdVbzVp?=
- =?utf-8?B?UTJlemN4em5JcVFkNU5obkphT3Vsajl0RzViNnR1cGJaK3ZuTjliK3BTMGdD?=
- =?utf-8?B?WnVsOEpsYnlFSWRXY3MybVdyOG1scktHbVVSY0gweEJtMnRhNmlPSGo4TVRa?=
- =?utf-8?B?Q0JqQ09oQ1VYU1dlSWhaYThDOFNIMXZsRzg4OVhLNDNBbXVzbkdGSEpRNU0z?=
- =?utf-8?B?ZWxVWFBBdVZocG1pdDBOZU9lYTN2K0lNZGFlenFkRjc5VnVld0U0cEdkU0d4?=
- =?utf-8?B?Snh2elkxREc4MGV5QmE4bHRJMnVYV1JDSDU4U2I1R3BLb2tIS3FXYU1sb2o0?=
- =?utf-8?B?RE12YUs4TXo2NW5ydUZSczcyYko0c3JWd1JXTWZzOFBlUEZ4MG9LSjNpT25s?=
- =?utf-8?B?NHdGZjVnekJsRmhWb3ZZaEY4L2Y1M1I1Rk0rR2xtWHBTYjFHeVFNWHFLN3Vw?=
- =?utf-8?B?VzJxS2tDNFg3T2o2MHh3dXVZeDVCeW5jNXNoUzQ0TE5ucWxkZ0RiRkJGYnJI?=
- =?utf-8?B?Y01SQmU0TXkwaGgvN3Q4emlSdHo1bG0xeGFEb1dENHJBMkYrVkhORkpZdFA2?=
- =?utf-8?B?Wlg2ZFFtcUV3MTZKdHhBV3RYSFAvSGxFdEtVbFU0QW9LQTdEaWNQeGlNUU52?=
- =?utf-8?B?ZVA4eVZGbERCZmgxTktFMWhIRW84NFFjK1QvdGYwRW5zQUdpSk1PYzlzR2Ro?=
- =?utf-8?B?TjgxWFNGQUZCNW9mWlUzRzZiTFpQMmJ0V2dFenJmTVhSbGZkeVVsTktpWjNi?=
- =?utf-8?B?V3ZWWlowb01vaTNGL0Jpc0FvTEd2MUJjcnR0aVE4ZlJlOVJ0TDVvQmt5WXor?=
- =?utf-8?B?OEZvODhpNGFJdzQ1NTYwNy8rSkRNWHNYenNDbTh2Vy9ibG5RU3pxeUo2R1Ry?=
- =?utf-8?B?dUZEd2RBM0oyWWN1WHVtMVgrNVdIUFdDVWMySjhXcFRESER2UEh3QnhnOUdU?=
- =?utf-8?B?d0JnRVVwWFZ3UWdDQUYrVm1hcXZqT2phd0dVaDVnYis1eHVwbjVyclAvajFT?=
- =?utf-8?B?aDM5WnZ1T0owOHB5SnRVREZmMStwK0U2bXY0UVVkVlpHN2VJUmVzZ3BQeU1t?=
- =?utf-8?B?NC9VWW53RFU0dlJIeUNSd1Y4K0V3RUwzbkxqMzlwZWNVUFB4VitpVUdhamlk?=
- =?utf-8?Q?OoNs=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="tfMzIm8q"
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-q4b3.prod.antispam.mailspamprotection.com; s=arckey; t=1747955746;
+	 b=fScArjpx3n+34SSFdZIplZa8kls+nToKH+C8tIjKVV7hsVoJNX/l/jxVAFj5InWsppET0Jz6ST
+	  4m156+2jLR8SemYEmYPchW54TrYd+c5GRPNjEEiuI/wrCrjmbTS1MYosvw32tFMiDBMChLwvmH
+	  Xc0CVaBHe4X/CsR6GBk/9fO398at2YT06q7qipfhyelAVNuBad+H3ptg+xGnGj0cJc9VJ2eD01
+	  us2X25LjRUcuN3tNKZ4glnFaMGZMD/CUslC8SRi4k+XetFdoaWKVucN2NxYUidB674QtlYmqa0
+	  peEa7ecTddB6lpGqxSpM2PeJ84SLS8IPNiEwrc5UhLwMLQ==;
+ARC-Authentication-Results: i=1; instance-europe-west4-q4b3.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-q4b3.prod.antispam.mailspamprotection.com; s=arckey; t=1747955746;
+	bh=BYgcdT9DQdXXJJpy4GlII3uliRwUxaBiK4gBQBXYwCo=;
+	h=Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:Message-ID:
+	  Date:Subject:To:From:DKIM-Signature;
+	b=KBlCzDBgD+PXUFDhMjSEp5IYjVkW3CTWHfE+QeKbDahqyKfE+zyRssOXyJL1I8x0npWxn2D0UB
+	  Rp/PnRzW9PvK5fqGYSXBM7yIOC3DT46M4g21RONLEh4aVqV8e0+JhX+fSrOWxFLBtD6X9r6ESn
+	  9kxAHRLUyBhGB3Ob9nt1XOUA+pypqhpE6mMJQezKe0ONg1AyRU83X0DpDVyIMJtkTRvYjGJdM4
+	  Mmpzncf0QgGilC0XGXY2pYsz/k5bu6wQhD7YGQTK8uMzJvAqD6naZmj1d/HZF9j3ys7QW2yDN+
+	  1fQGxh27WThB7GSfvscg7/U2RcF7p61njsfG441GE9c7vg==;
+Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
+	by instance-europe-west4-q4b3.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1uIEdC-00000004XVk-1cmw
+	for linux-embedded@vger.kernel.org;
+	Thu, 22 May 2025 22:43:20 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
+	s=default; h=Date:Subject:To:From:cc:list-help:list-unsubscribe:
+	list-subscribe:list-post:list-owner:list-archive;
+	bh=0qM7g1nZFT1pULQwKXQOFTMakNkre2aphglvcKMLtKI=; b=tfMzIm8qVzTU24+z/Eev7xofy5
+	/T4MwGQfVgRtVqJS0eoqGyMvCNd9GXUz4sY6SocoNqvOpufihzUCDBY3jpJjM2RemiZAaGVdNcvlp
+	WYoy+eumbs2XeotrFr7jvD6xFIMb7CxIY8Sip1GMcvlJUGtpNf0r3fmhU9ZNKokdLfBc=;
+Received: from [80.182.118.140] (port=63630 helo=fedora.fritz.box)
+	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1uIEd7-000000000KG-1tZ2
+	for linux-embedded@vger.kernel.org;
+	Thu, 22 May 2025 22:43:13 +0000
+From: Francesco Valla <francesco@valla.it>
+To: linux-embedded@vger.kernel.org
+Subject: [PATCH 1/1] drivers: misc: add driver for bootstage stash
+Date: Fri, 23 May 2025 00:42:24 +0200
+Message-ID: <20250522224223.358881-3-francesco@valla.it>
+X-Mailer: git-send-email 2.49.0
+In-Reply-To: <20250522224223.358881-2-francesco@valla.it>
+References: <20250522224223.358881-2-francesco@valla.it>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	KWV24/MV1GqR/gEkmOeceDVxp4tehVM6d52I9J1d+yWbL4/LYA1HPkWGOf/fQViWJ778+gu3WK7MZSGi2X8uW/aNCBvd3o0/jSA7ahY02Le5h/9jkotWzawPP5hGRZCGy/5Cb6ZZXDlOEGbrm8MN63nwmBS5/nvrX3smRhw407NgU7LKXI+LgbFHNR1wqbBagViq43njzzT2RZo+6gqpJnPLlKFLri/R2pIpgcho+Ahuk8lnZmt2jPp2yKl0lDco/OJoeId8dAUSPNanZwXCcZ9qA7UYH+qy/rRTpMoAxsuVlZuCm2QeuTa8pOgzrsFVEKuu3btFwsX+6iBq0QySXzTsMX75mruWq9WjszB2CW5qL+AY3CgI37A+PzOBz1Ju2d1qXMkeuNWxmEJs1qvk8PfavexIdFTvwGnZmxLAddykByNvmIJm0DiyP0IitntXrd4zCICi9VuadpMzYSokLBCC6Bw16FjAj6I2cSP3WroSzDUDo3SuLQB0w1JgHRoxHfALj5KIoP0NjBC+jYt8JuQ9QE4xgb00u4LUTRieGFy74rMfLuiNV1palMtEfJVeGQgLuUlj8XlwlpFneWpayAiN5M3NsaG4Hlfys5USvfJnMd/6rxOp5Yw1nG5vxSlj
-X-OriginatorOrg: sony.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9a76140f-002c-49e9-9eee-08dd98a8a63f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 21 May 2025 20:47:06.6875
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: EqhRL3I+FxoVHfA0MU5KPb5ZENvmuLPzZJa7LA9YayTjt1k3fTlffkK1EcFgSL3dyAW4/o898JDzGDGjulwhDw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO6PR13MB6048
-X-Proofpoint-GUID: TQh3b66DfXTRgpN8X1tu34T6zrAy15Sf
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTIxMDIwNSBTYWx0ZWRfX9H2Q/9LSfckb RGAfaYKFXyraQd4I2Af3hTbGOsJMnxDGH4WEZGcVPrlBUVSrpYLNe0WypekRHEd9ZI6snLmgJRA 5bc2qpWDkcYrb2FoXdKLZZW2Q0hqsOTlP1asce76HfnUZspS2k/vMK0gsEariGFsPUG3p0YSvdh
- 4vxSbxY2XYP80wYaDbkyhIt1Fg7JynbSyUSFVeNmDmkC0bVnsgUnxwoxXYE9UcXM4wP+yYoEq4y QAoq5K0Pnby/S2/2sOduAWoFvoCYmn8kWyzp9fD39sc2RXrKf7nRvpJWjAi4Eavzbmvw4wkPxr4 TcQqxaM2kENXZERTRdiHMC3BiFkbpHyD+ZWPY4JNcxrfT2/Uoo58fTl6cGSTWNyUgffWbQjvfsK
- qjmcYWG+44D6LIH1e1U1CpuI/OTa1uakRd7cw0u8AWoPmHEq+MsPgRviCp/dta55NIu71IZo
-X-Authority-Analysis: v=2.4 cv=JbG8rVKV c=1 sm=1 tr=0 ts=682e3bcf cx=c_pps a=4IGGKwhCMA6ph+0beaNuyw==:117 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=wKuvFiaSGQ0qltdbU6+NXLB8nM8=:19 a=Ol13hO9ccFRV9qXi2t6ftBPywas=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=dt9VzEwgFbYA:10 a=xR56lInIT_wA:10 a=Xu_aML22AAAA:8 a=nXA5WNwiAAAA:8 a=NiL0GWOVAAAA:8 a=2iSxh-PlAAAA:20 a=NEAV23lmAAAA:8 a=p0WdMEafAAAA:8 a=1XWaLZrsAAAA:8 a=z6gsHLkEAAAA:8 a=8z-HEmAbjOmwBJK3VHQA:9 a=QEXdDO2ut3YA:10 a=-wH59cBETLoA:10 a=U_XVwcaHIQkA:10
- a=o_LaMfWX3WolavuFUIfu:22 a=fGr-7aqQv4RST94IA8XU:22
-X-Proofpoint-ORIG-GUID: TQh3b66DfXTRgpN8X1tu34T6zrAy15Sf
-X-Sony-Outbound-GUID: TQh3b66DfXTRgpN8X1tu34T6zrAy15Sf
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-05-21_07,2025-05-20_03,2025-03-28_01
+Content-Transfer-Encoding: 8bit
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - esm19.siteground.biz
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - valla.it
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-SGantispam-id: 8c18644ce9f05cbbdea4d7159ef30321
+AntiSpam-DLS: false
+AntiSpam-DLSP: 
+AntiSpam-DLSRS: 
+AntiSpam-TS: 1.0
+Authentication-Results: instance-europe-west4-q4b3.prod.antispam.mailspamprotection.com;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogU2FyYXZhbmEgS2FubmFu
-IDxzYXJhdmFuYWtAZ29vZ2xlLmNvbT4NCj4gSGkgVGltLA0KPiANCj4gQ291bGQgeW91IHNlbmQg
-b3V0IHRoZXNlIHJlbWluZGVycyAyIGRheXMgZWFybGllcj8gSSBhbHdheXMgbWlzcyB0aGVtIGFu
-ZCBzZWUgdGhlbSBsYXRlciBpbiB0aGUgZGF5IG9uIFR1ZXNkYXlzIGFuZCByZWdyZXQgbm90IGJl
-aW5nIGFibGUgdG8NCj4gYXR0ZW5kIGl0LiBJdCBoYXMgaGFwcGVuZWQgYXQgbGVhc3QgMyB0aW1l
-cyBzbyBmYXIuDQoNClllcy4gIEknbGwgdHJ5IHRvIGdldCB0aGVzZSByZW1pbmRlcnMgb3V0IGVh
-cmxpZXIuICBJIGFwb2xvZ2l6ZSB0aGVzZSBoYXZlIGJlZW4gc28gbGF0ZS4NCk15IGdvYWwgaXMg
-dG8gc2VuZCB0aGUgcmVtaW5kZXIgdGhlIHdlZWsgYmVmb3JlIChsaWtlIFdlZG5lc2RheSBvciBU
-aHVyc2RheSksIGJ1dA0KSSB3YXMgdHJhdmVsaW5nIGxhc3Qgd2VlayBhbmQgZ290IGJlaGluZC4N
-Cg0KPiANCj4gQW5vdGhlciBvcHRpb24gaXMgdG8gaGF2ZSBzb21lIGNhbGVuZGFyIHRoYXQgcGVv
-cGxlIGNvdWxkIHN1YnNjcmliZSB0by4NCkkgc2hvdWxkIGxvb2sgaW50byB0aGF0LiAgTXkgcHJv
-Y2VzcyBsZWF2ZXMgc29tZXRoaW5nIHRvIGJlIGRlc2lyZWQuDQoNCkkgYXBwcmVjaWF0ZSB5b3Ug
-cmVtaW5kaW5nIG1lIHRvIGltcHJvdmUgbXkgcHJvY2VzcyBoZXJlIQ0KDQpSZWdhcmRzLA0KIC0t
-IFRpbQ0KDQoNCj4gT24gTW9uLCBNYXkgMTksIDIwMjUgYXQgOToyM+KAr0FNIEJpcmQsIFRpbSA8
-VGltLkJpcmRAc29ueS5jb20gPG1haWx0bzpUaW0uQmlyZEBzb255LmNvbT4gPiB3cm90ZToNCj4g
-DQo+IA0KPiAJSGV5IExpbnV4IEJvb3QtVGltZSBTSUcgaW50ZXJlc3RlZCBwYXJ0aWVzIChhbmQg
-b3RoZXIgaW50ZXJlc3RlZCBMaW51eCBrZXJuZWwgZGV2ZWxvcGVycyksDQo+IA0KPiAJSGVyZSBp
-cyB0aGUgaW5mb3JtYXRpb24gZm9yIHRoZSBuZXh0IExpbnV4IEJvb3QtVGltZSBTSUcgY29uZmVy
-ZW5jZSBjYWxsLg0KPiANCj4gCVRoaXMgY2FsbCBpcyBhICJzcGVjaWFsIHRvcGljIiBjYWxsLCBv
-biB0aGUgc3ViamVjdCBvZiBVbmlmaWVkIEJvb3QgTG9nLg0KPiAJU2VlIGh0dHBzOi8vZWxpbnV4
-Lm9yZy9VbmlmaWVkX0Jvb3RfTG9nDQo+IA0KPiAJVGhlIG1lZXRpbmcgd2lsbCBiZSBoZWxkIHZp
-YSB0aGUgSml0c2kgb25saW5lIG1lZXRpbmcgcGxhdGZvcm0uDQo+IAlUbyBKb2luIHRoZSBtZWV0
-aW5nIHZpYSB3ZWIsIGNsaWNrIG9uOg0KPiAJaHR0cHM6Ly9tZWV0LmppdC5zaS9MaW51eEJvb3RU
-aW1lU0lHDQo+IA0KPiAJLS0tLQ0KPiAJVGhlIG1lZXRpbmcgaXMgVHVlc2RheSwgTWF5IDIwLCBh
-dCA5OjAwIGFtIE1vdW50YWluIERheWxpZ2h0IFRpbWUuDQo+IAlTZWUgdGhpcyBsaW5rIGZvciBv
-dGhlciB0aW1lIHpvbmVzOg0KPiAJaHR0cHM6Ly93d3cudGltZWFuZGRhdGUuY29tL3dvcmxkY2xv
-Y2svbWVldGluZ2RldGFpbHMuaHRtbD95ZWFyPTIwMjUmbW9udGg9MDUmZGF5PTIwJmhvdXI9MTUm
-bWluPTAmc2VjPTAmcDE9MjIwJg0KPiBwMj0xMzcmcDM9MTk1JnA0PTc3MQ0KPiAJKFRoYXQgbWFr
-ZXMgaXQgODowMCBhbSBQYWNpZmljLCAxNTowMCBVVEMsIDE3OjAwIENFU1QsIGFuZCAyMDozMCBJ
-U1QpDQo+IA0KPiAJUGxlYXNlIG5vdGUgdGhhdCB0aGlzIGlzIE5PVCBvdXIgcmVndWxhcmx5IHNj
-aGVkdWxlZCBtb250aGx5IFNJRyBjYWxsLCB3aGljaCBpcyBuZXh0IHdlZWsuDQo+IA0KPiAJSSdt
-IHBsYW5uaW5nIG9uIDMwIG1pbnV0ZXMgZm9yIHRoaXMgbWVldGluZywgYnV0IEkgY2FuIGdvIGxv
-bmdlciBpZiB0aGUgZGlzY3Vzc2lvbiB3YXJyYW50cy4NCj4gDQo+IAlUaGUgYWdlbmRhIGZvciB0
-aGUgbWVldGluZyAoYW5kIHdoZXJlIHdlJ2xsIGtlZXAgdGhlIG1pbnV0ZXMpIGlzIGhlcmU6DQo+
-IAlodHRwczovL2RvY3MuZ29vZ2xlLmNvbS9kb2N1bWVudC9kLzFYQXVmb1RUNlZWSk9UTXpLTW96
-OFN5T3NzLUpBOUg0SjFfeVZYUXE1bU4wL2VkaXQ/dXNwPXNoYXJpbmcNCj4gDQo+IAlUaGUgYWdl
-bmRhIGZvciB0aGlzIG1lZXRpbmcgaXM6DQo+IAkgLSBEaXNjdXNzIGlzc3VlcyB3aXRoIHRoZSBV
-bmlmaWVkIEJvb3QgTG9nDQo+IAkgICAgLSByZXZpZXcgZWxpbnV4IHBhZ2U6IGh0dHBzOi8vZWxp
-bnV4Lm9yZy9VbmlmaWVkX0Jvb3RfTG9nDQo+IAkgICAgLSBkaXNjdXNzIGV4aXN0aW5nL3JlbGF0
-ZWQgZWZmb3J0czoNCj4gCSAgICAgICAtIFUtQm9vdCdzIGJvb3Qtc3RhZ2U6IGh0dHBzOi8vZ2l0
-aHViLmNvbS91LWJvb3QvdS1ib290L2Jsb2IvbWFzdGVyL2luY2x1ZGUvYm9vdHN0YWdlLmgNCj4g
-CSAgICAgICAtIFJlZEhhdCdzIGJvb3QtdGltZS1hbmFseXNpcyB0b29sczogKGNudHZjdCBhbmQg
-Ym9vdC10aW1lKQ0KPiAJICAgICAgICAgIC0gaHR0cHM6Ly9naXRsYWIuY29tL0NlbnRPUy9hdXRv
-bW90aXZlL3NyYy9ib290LXRpbWUtYW5hbHlzaXMtdG9vbHMNCj4gDQo+IAlJIGxvb2sgZm9yd2Fy
-ZCB0byB0YWxraW5nIHdpdGggeW91IGluIHRoZSBtZWV0aW5nLg0KPiAJIC0tIFRpbQ0KPiANCj4g
-DQoNCg==
+Add support for bootstage stash areas containing boot time data
+created by some bootloader (e.g. U-Boot). The driver provides generic
+time information through sysfs and platform-specific one through
+debugfs.
+
+Signed-off-by: Francesco Valla <francesco@valla.it>
+---
+ .../bindings/reserved-memory/bootstage.yaml   |  44 +++
+ Documentation/misc-devices/bootstage.rst      |  53 ++++
+ Documentation/misc-devices/index.rst          |   1 +
+ MAINTAINERS                                   |   7 +
+ drivers/misc/Kconfig                          |  10 +
+ drivers/misc/Makefile                         |   1 +
+ drivers/misc/bootstage.c                      | 292 ++++++++++++++++++
+ drivers/of/platform.c                         |   1 +
+ 8 files changed, 409 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/reserved-memory/bootstage.yaml
+ create mode 100644 Documentation/misc-devices/bootstage.rst
+ create mode 100644 drivers/misc/bootstage.c
+
+diff --git a/Documentation/devicetree/bindings/reserved-memory/bootstage.yaml b/Documentation/devicetree/bindings/reserved-memory/bootstage.yaml
+new file mode 100644
+index 000000000000..e71d85c5c2ce
+--- /dev/null
++++ b/Documentation/devicetree/bindings/reserved-memory/bootstage.yaml
+@@ -0,0 +1,44 @@
++# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/reserved-memory/bootstage.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Bootstage stash
++
++description: |
++  This binding represents a reserved memory region containing bootstage stash
++  data generated by a previous bootloader stage.
++
++maintainers:
++  - Francesco Valla <francesco@valla.it>
++
++allOf:
++  - $ref: reserved-memory.yaml
++
++properties:
++  compatible:
++    const: bootstage
++
++  reg:
++    description: page-aligned region of memory containing bootstage stash data
++
++required:
++  - compatible
++  - reg
++  - no-map
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    reserved-memory {
++        #address-cells = <2>;
++        #size-cells = <1>;
++
++        bootstage: bootstage@12340000 {
++            compatible = "bootstage";
++            reg = <0x00 0x12340000 0x2000>;
++            no-map;
++        };
++    };
+diff --git a/Documentation/misc-devices/bootstage.rst b/Documentation/misc-devices/bootstage.rst
+new file mode 100644
+index 000000000000..2e1bbd31aab8
+--- /dev/null
++++ b/Documentation/misc-devices/bootstage.rst
+@@ -0,0 +1,53 @@
++.. SPDX-License-Identifier: GPL-2.0
++
++================
++Bootstage driver
++================
++
++The bootstage driver exports interfaces to read from a bootstage stash area
++saved by a bootloader (e.g.: U-Boot) that ran before the Linux kernel.
++
++Two kind of interfaces are exported:
++
++- a sysfs interface for bootloader- and platform-agnostic data
++- a debugfs interface for bootloader- and platform-specific data
++
++
++The sysfs interface
++-------------------
++
++Following sysfs attributes can be found at /sys/devices/platform/<device-name>/:
++
++- start_time_us: bootloader start time in microseconds
++- end_time_us: bootloader end time in microseconds
++
++
++The debugfs interface
++---------------------
++
++Following debugfs interfaces can be found at
++/sys/kernel/debug/bootstage/<device-name>/:
++
++- stages: details on staged bootloader stages, with start time and duration.
++  Example output::
++
++    Mark (us)  Elapsed (us)  Stage
++            0             0  reset
++       183689        183689  SPL
++       489247        305558  end phase
++       506987         17740  board_init_f
++      1257880        750893  board_init_r
++      1622303        364423  eth_common_init
++      1888033        265730  eth_initialize
++      1893077          5044  main_loop
++      4204282       2311205  cli_loop
++
++- accumulated_time: time accumulated during certain bootloader stages.
++  Example output::
++
++    Time (us)  Stage
++         4902  dm_spl
++       322719  dm_f
++         9527  dm_r
++
++The number and type of staged stages are bootloader- and platform-specific.
+diff --git a/Documentation/misc-devices/index.rst b/Documentation/misc-devices/index.rst
+index 8c5b226d8313..c5ebb3d44505 100644
+--- a/Documentation/misc-devices/index.rst
++++ b/Documentation/misc-devices/index.rst
+@@ -28,3 +28,4 @@ fit into other categories.
+    tps6594-pfsm
+    uacce
+    xilinx_sdfec
++   bootstage
+diff --git a/MAINTAINERS b/MAINTAINERS
+index f21f1dabb5fe..0bdecd07023a 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4203,6 +4203,13 @@ F:	Documentation/ABI/stable/sysfs-class-bluetooth
+ F:	include/net/bluetooth/
+ F:	net/bluetooth/
+ 
++BOOTSTAGE DRIVER
++M:	Francesco Valla <francesco@valla.it>
++L:	linux-embedded@vger.kernel.org
++S:	Maintained
++F:	Documentation/devicetree/bindings/reserved-memory/bootstage.yaml
++F:	drivers/misc/bootstage.c
++
+ BONDING DRIVER
+ M:	Jay Vosburgh <jv@jvosburgh.net>
+ L:	netdev@vger.kernel.org
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 6b37d61150ee..97cdfa241c0c 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -632,6 +632,16 @@ config MCHP_LAN966X_PCI
+ 	    - lan966x-miim (MDIO_MSCC_MIIM)
+ 	    - lan966x-switch (LAN966X_SWITCH)
+ 
++config BOOTSTAGE
++	tristate "Bootstage stash support"
++	depends on OF_RESERVED_MEM
++	help
++	  This enables the support for a bootstage stash.
++
++	  A bootstage stash can be created by some bootloaders (e.g.: U-Boot) to
++	  store information on its boot timings. This driver provides access to
++	  these information through sysfs and debugsfs interfaces.
++
+ source "drivers/misc/c2port/Kconfig"
+ source "drivers/misc/eeprom/Kconfig"
+ source "drivers/misc/cb710/Kconfig"
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index d6c917229c45..3562c1bf701f 100644
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -74,3 +74,4 @@ lan966x-pci-objs		:= lan966x_pci.o
+ lan966x-pci-objs		+= lan966x_pci.dtbo.o
+ obj-$(CONFIG_MCHP_LAN966X_PCI)	+= lan966x-pci.o
+ obj-y				+= keba/
++obj-$(CONFIG_BOOTSTAGE)		+= bootstage.o
+diff --git a/drivers/misc/bootstage.c b/drivers/misc/bootstage.c
+new file mode 100644
+index 000000000000..a106410a56ee
+--- /dev/null
++++ b/drivers/misc/bootstage.c
+@@ -0,0 +1,292 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Copyright (C) 2025 - Francesco Valla <francesco@valla.it>
++ *
++ * Driver for bootstage stash.
++ *
++ * This driver exposes bootstage stash generated by bootloader and/or firmware
++ * stages that run before the Linux kernel.
++ *
++ */
++
++#include <linux/debugfs.h>
++#include <linux/io.h>
++#include <linux/mm.h>
++#include <linux/module.h>
++#include <linux/of_reserved_mem.h>
++#include <linux/platform_device.h>
++#include <linux/seq_file.h>
++
++#define BOOTSTAGE_MAGIC		0xb00757a3
++#define BOOTSTAGE_MAX_VERSION	0
++
++enum bootstage_id {
++	BOOTSTAGE_ID_START = 0,
++};
++
++enum bootstage_flags {
++	BOOTSTAGEF_ERROR	= 1 << 0,	/* Error record */
++	BOOTSTAGEF_ALLOC	= 1 << 1,	/* Allocate an id */
++};
++
++struct bootstage_record {
++	ulong time_us;
++	u32 start_us;
++	const char *name;
++	int flags;
++	enum bootstage_id id;
++};
++
++struct bootstage_hdr {
++	u32 version;		/* Boostage stash version */
++	u32 count;		/* Number of records */
++	u32 size;		/* Total data size (non-zero if valid) */
++	u32 magic;		/* Magic number */
++	u32 next_id;		/* Next ID to use for bootstage */
++};
++
++struct bootstage_drvdata {
++	struct bootstage_hdr *hdr;
++	struct bootstage_record *records;
++
++	u32 start_time_us;
++	u32 end_time_us;
++
++	struct dentry *debugfs_dir;
++};
++
++static struct dentry *bootstage_debugfs_dir;
++
++static int stages_show(struct seq_file *m, void *d)
++{
++	struct bootstage_drvdata *drvdata = m->private;
++	struct bootstage_hdr *hdr = drvdata->hdr;
++	struct bootstage_record *rec;
++	u32 prev = 0;
++	int i;
++
++	seq_printf(m, "%13s %13s  %s\n", "Mark (us)", "Elapsed (us)", "Stage");
++
++	for (i = 0, rec = drvdata->records; i < hdr->count; i++, rec++) {
++		if ((rec->id && !rec->start_us) || (i == 0)) {
++			if (prev > rec->time_us)
++				prev = 0;
++			seq_printf(m, "%13lu %13lu  %s\n", rec->time_us,
++				   rec->time_us - prev, rec->name);
++			prev = rec->time_us;
++		}
++	}
++
++	return 0;
++}
++DEFINE_SHOW_ATTRIBUTE(stages);
++
++static int accumulated_time_show(struct seq_file *m, void *d)
++{
++	struct bootstage_drvdata *drvdata = m->private;
++	struct bootstage_hdr *hdr = drvdata->hdr;
++	struct bootstage_record *rec;
++	int i;
++
++	seq_printf(m, "%13s  %s\n", "Time (us)", "Stage");
++
++	for (i = 0, rec = drvdata->records; i < hdr->count; i++, rec++) {
++		if (rec->start_us)
++			seq_printf(m, "%13lu  %s\n", rec->time_us, rec->name);
++	}
++
++	return 0;
++}
++DEFINE_SHOW_ATTRIBUTE(accumulated_time);
++
++static void bootstage_debugfs_init(struct device *dev, struct bootstage_drvdata *drvdata)
++{
++	drvdata->debugfs_dir = debugfs_create_dir(dev_name(dev), bootstage_debugfs_dir);
++	if (IS_ERR(drvdata->debugfs_dir))
++		return;
++
++	debugfs_create_file("stages", 0444, drvdata->debugfs_dir, drvdata, &stages_fops);
++	debugfs_create_file("accumulated_time", 0444, drvdata->debugfs_dir, drvdata,
++			    &accumulated_time_fops);
++}
++
++static void bootstage_debugfs_exit(struct device *dev, struct bootstage_drvdata *drvdata)
++{
++	debugfs_remove_recursive(drvdata->debugfs_dir);
++}
++
++static ssize_t start_time_us_show(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	struct bootstage_drvdata *drvdata = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%u\n", drvdata->start_time_us);
++}
++static DEVICE_ATTR_RO(start_time_us);
++
++static ssize_t end_time_us_show(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	struct bootstage_drvdata *drvdata = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%u\n", drvdata->end_time_us);
++}
++static DEVICE_ATTR_RO(end_time_us);
++
++static struct attribute *bootstage_attrs[] = {
++	&dev_attr_start_time_us.attr,
++	&dev_attr_end_time_us.attr,
++	NULL,
++};
++
++static const struct attribute_group bootstage_attr_group = {
++	.attrs = bootstage_attrs,
++};
++
++static int bootstage_parse(struct device *dev, struct bootstage_drvdata *drvdata,
++			   resource_size_t size)
++{
++	const char *str_ptr = (const char *)(drvdata->records + drvdata->hdr->count);
++	const resource_size_t calc_size = (resource_size_t)((void *)str_ptr - (void *)drvdata->hdr);
++	struct bootstage_record *rec;
++	u32 r;
++
++	// Sanity checks on bootstage header
++	if (drvdata->hdr->magic != BOOTSTAGE_MAGIC) {
++		dev_err(dev, "wrong bootstage magic number %08Xh\n", drvdata->hdr->magic);
++		return -EINVAL;
++	} else if (drvdata->hdr->version > BOOTSTAGE_MAX_VERSION) {
++		dev_err(dev, "bootstage version %u not supported\n", drvdata->hdr->version);
++		return -EOPNOTSUPP;
++	} else if (drvdata->hdr->size == 0) {
++		dev_err(dev, "invalid bootstage stash (declared size is zero)\n");
++		return -EINVAL;
++	} else if (drvdata->hdr->size > size) {
++		dev_err(dev, "invalid declared stash size %u (expected: <= %llu)\n",
++			drvdata->hdr->size, size);
++		return -EINVAL;
++	} else if (calc_size > size) {
++		dev_err(dev, "invalid calculated stash size %llu (expected: <= %llu)\n",
++			calc_size, size);
++		return -EINVAL;
++	} else if (drvdata->hdr->count == 0) {
++		dev_info(dev, "bootstage stash has no records\n");
++		return 0;
++	}
++
++	// Set start time to invalid
++	drvdata->start_time_us = 0xFFFFFFFF;
++
++	// Associate names to records, which are placed at the end of the record area
++	for (r = 0, rec = drvdata->records; r < drvdata->hdr->count; r++, rec++) {
++		// Save minimum time, will be used as bootloader enter time
++		if (rec->start_us < drvdata->start_time_us)
++			drvdata->start_time_us = rec->time_us;
++
++		// Save maximum time, will be used as bootloader exit time
++		if (rec->time_us > drvdata->end_time_us)
++			drvdata->end_time_us = rec->time_us;
++
++		if (str_ptr > ((const char *)drvdata->hdr + size)) {
++			dev_err(dev, "name for record %u is corrupted\n", r);
++			return -ENODATA;
++		}
++
++		rec->name = str_ptr;
++		str_ptr += strlen(rec->name) + 1;
++	}
++
++	return 0;
++}
++
++static int bootstage_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct reserved_mem *rmem;
++	struct bootstage_drvdata *drvdata;
++	int ret;
++
++	rmem = of_reserved_mem_lookup(dev->of_node);
++	if (!rmem) {
++		dev_err(dev, "failed to lookup reserved memory\n");
++		return -EINVAL;
++	}
++
++	if (!rmem->size || (rmem->size > ULONG_MAX) ||
++	    (rmem->size < sizeof(struct bootstage_hdr))) {
++		dev_err(dev, "invalid memory region size\n");
++		return -EINVAL;
++	}
++
++	if (!PAGE_ALIGNED(rmem->base) || !PAGE_ALIGNED(rmem->size)) {
++		dev_err(dev, "memory region must be page-aligned\n");
++		return -EINVAL;
++	}
++
++	drvdata = devm_kmalloc(dev, sizeof(*drvdata), GFP_KERNEL);
++	if (!drvdata)
++		return -ENOMEM;
++
++	platform_set_drvdata(pdev, drvdata);
++
++	drvdata->hdr = devm_memremap(dev, rmem->base, rmem->size, MEMREMAP_WB);
++	if (IS_ERR(drvdata->hdr)) {
++		dev_err(dev, "failed to remap bootstage region\n");
++		return PTR_ERR(drvdata->hdr);
++	}
++
++	drvdata->records =
++		(struct bootstage_record *)((void *)drvdata->hdr + sizeof(struct bootstage_hdr));
++
++	ret = bootstage_parse(dev, drvdata, rmem->size);
++	if (ret)
++		return ret;
++
++	ret = sysfs_create_group(&pdev->dev.kobj, &bootstage_attr_group);
++	if (ret) {
++		dev_err(dev, "failed to create sysfs group\n");
++		return ret;
++	}
++
++	bootstage_debugfs_init(dev, drvdata);
++
++	return 0;
++}
++
++static void bootstage_remove(struct platform_device *pdev)
++{
++	struct bootstage_drvdata *drvdata = platform_get_drvdata(pdev);
++
++	bootstage_debugfs_exit(&pdev->dev, drvdata);
++	sysfs_remove_group(&pdev->dev.kobj, &bootstage_attr_group);
++}
++
++static const struct of_device_id bootstage_of_match[] = {
++	{ .compatible = "bootstage" },
++	{},
++};
++
++static struct platform_driver bootstage_driver = {
++	.probe = bootstage_probe,
++	.remove = bootstage_remove,
++	.driver = {
++		.name = "bootstage",
++		.of_match_table = bootstage_of_match,
++	},
++};
++
++static int __init bootstage_init(void)
++{
++	bootstage_debugfs_dir = debugfs_create_dir(bootstage_driver.driver.name, NULL);
++	return platform_driver_register(&bootstage_driver);
++}
++arch_initcall(bootstage_init);
++
++static void __exit bootstage_exit(void)
++{
++	debugfs_remove_recursive(bootstage_debugfs_dir);
++	platform_driver_unregister(&bootstage_driver);
++}
++module_exit(bootstage_exit)
++
++MODULE_DESCRIPTION("Driver for Bootstage stash.");
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Francesco Valla <francesco@valla.it>");
+diff --git a/drivers/of/platform.c b/drivers/of/platform.c
+index f77cb19973a5..e19b04733584 100644
+--- a/drivers/of/platform.c
++++ b/drivers/of/platform.c
+@@ -496,6 +496,7 @@ static const struct of_device_id reserved_mem_matches[] = {
+ 	{ .compatible = "ramoops" },
+ 	{ .compatible = "nvmem-rmem" },
+ 	{ .compatible = "google,open-dice" },
++	{ .compatible = "bootstage" },
+ 	{}
+ };
+ 
+-- 
+2.49.0
+
