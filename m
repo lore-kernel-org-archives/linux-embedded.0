@@ -1,111 +1,120 @@
-Received: from mail-108-mta71.mxroute.com (mail-108-mta71.mxroute.com [136.175.108.71])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from silver.cherry.relay.mailchannels.net (silver.cherry.relay.mailchannels.net [23.83.223.166])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E755A213236
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 08:01:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=136.175.108.71
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747987277; cv=none; b=XAanXBftiX27MHLmeZyyL+Jiw6sfyejqn/JEZNuhYfmT8VIi4WE/36tlOtW4Uk+hFvG7pyvkFkzctkRzKvApq4GUa+c5U2b/46Og0mAdMRI8xqTghcM3MBleSrYExRdX9rAoiqHLzFkr5l1VV6YoSRN7K0Ggepakp5ZddNxE/u0=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747987277; c=relaxed/simple;
-	bh=rtbPZZkH220dhqQsj9lM86gJdl0x5lG/pVCPsxwUID0=;
-	h=MIME-Version:Date:From:To:Subject:Message-ID:Content-Type; b=Rga7WNfpJYFmbhMe7XcEN1hZNVGuwV32VYhLFqXn/UcgihLjx9oREutasrvDCcJXSgC+rnByC1Ml+idZulrREGvrkJentu/IKIvwaUkhNj95KMNc5CLa6V5CuyMK5upsKNqICZ0IG9glSGHqj1SIZCKElJtrgD6w1Y7iGvmkHpE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=giovanardi.dev; spf=pass smtp.mailfrom=giovanardi.dev; dkim=fail (0-bit key) header.d=anymxrelay.com header.i=@anymxrelay.com header.b=c9CPjCN2 reason="key not found in DNS"; dkim=pass (2048-bit key) header.d=giovanardi.dev header.i=@giovanardi.dev header.b=I8dbTq6O; arc=none smtp.client-ip=136.175.108.71
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=giovanardi.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=giovanardi.dev
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7008D299952
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 19:34:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=23.83.223.166
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1748028886; cv=pass; b=kjXTFpgGBQbIU22Cqq5P+QtuXFturIrNYJCrTNIBuoIBEqrzR99QD+QsK+1QOjfuIPEyEtFU2mTqkaF9BFlLXv0C/JU6hkWTrhbOEcQFjoTxV4R7rXaiuGLx26lkaw+R5hsWtvD5BATBil/OIUsh1CztKCgfVtB4rn6Fchd9Dts=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1748028886; c=relaxed/simple;
+	bh=ZymaNPzjZ8aAgDPlRmXjUElM34PxTb5HQOhImHt/zw0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=DSECC35OZr0v0CTSV2YSvL9H2e/bpN13XhlZHFBrWM7kL/G6VrhT350W6eOL7oe5CzKBp7k5Fhn4ZrNpyOKNOv3VOkW/ESy1I51yNfLROEGUoSRZapc30mEEKATTbP/EmF3TJDMAzItzWPphnnnR+26Z2mH3PcH3MEOGfjk47CU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net; spf=pass smtp.mailfrom=landley.net; dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b=kU4/YgXK; arc=pass smtp.client-ip=23.83.223.166
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=landley.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=anymxrelay.com header.i=@anymxrelay.com header.b="c9CPjCN2";
-	dkim=pass (2048-bit key) header.d=giovanardi.dev header.i=@giovanardi.dev header.b="I8dbTq6O"
-Received: from filter006.mxroute.com ([136.175.111.3] filter006.mxroute.com)
- (Authenticated sender: mN4UYu2MZsgR)
- by mail-108-mta71.mxroute.com (ZoneMTA) with ESMTPSA id 196fc245cee0008631.001
- for <linux-embedded@vger.kernel.org>
- (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384);
- Fri, 23 May 2025 07:56:03 +0000
-X-Zone-Loop: 92f51844c9c615481ee8f6a28a084d452e1e7716b93e
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=anymxrelay.com; s=x; h=Content-Type:Subject:To:From:Date:MIME-Version:
-	Sender:Reply-To:Cc:Content-Transfer-Encoding:Content-ID:Content-Description:
-	Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:
-	In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=+d5HzBvN/9rycOzTUv/PGbjLPvIsJx20jrbWwPh+lTw=; b=c9CPjCN2slhnfqoHtqRWNTFodf
-	jGcqiqwvC7yB44RLQUzJGZaf0ku67J03GWiv5e7j4T2rxyWbkAVlMkElXQ9pSSGwghnwMw3j6ETkX
-	sIX5smnhcQKdq9mv/21DPZejib+3RoJN6DEZqLwltGAzzToWtQh2G8mVHA2h1ps1VghLoI8BPjNNU
-	3d0egglTC6EgeMZ4qUS6lUq4YovIexZjNUD2wYIp0dTdRMAhOlaTjvHG27E2wY9IdabBa8jAYtiFS
-	L54Vn8PP2zYvwaeEGDyz0F66CaFkJXZ85Dhh3x/BQW52IzMc6AJfoKn3wsNmiv76EYCb5FPTNU7rM
-	1brBPBnw==;
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=giovanardi.dev;
-	s=mail; t=1747986960;
-	bh=rtbPZZkH220dhqQsj9lM86gJdl0x5lG/pVCPsxwUID0=;
-	h=Date:From:To:Subject:From;
-	b=I8dbTq6OSL+tebXAMt5KFL7LtDl5BLqC9r+jaZsyG+UMF1cduTl/PI9lFs7Nd5yGV
-	 ouqYs41Tmp0gqoK7A+ciIaSt/eSvxFDxCfnGEpRqKE/njOM/zXptndCvfOGETne918
-	 bsHSKrNI8hKve55bsTbjYYckHjSJftAggzwfQkgCHzQn5BhSXzrWAjrq/6ONaGoq0l
-	 +CEQ4aYvievW23maW7xMkfZSNsUdHvENsrxmIlXtFG4fQ8rd4bbsn91OBnEU8Lgbor
-	 bAvoL8NCL+StSy3m106vf36iOASFCCwaGLcMgNZEAOWPwFZDcADF6Q6cobpYBlDMfk
-	 TDm0lp2f50WOA==
+	dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b="kU4/YgXK"
+X-Sender-Id: dreamhost|x-authsender|rob@landley.net
+Received: from relay.mailchannels.net (localhost [127.0.0.1])
+	by relay.mailchannels.net (Postfix) with ESMTP id 2D0438A5461;
+	Fri, 23 May 2025 19:34:43 +0000 (UTC)
+Received: from pdx1-sub0-mail-a206.dreamhost.com (trex-green-9.trex.outbound.svc.cluster.local [100.120.70.190])
+	(Authenticated sender: dreamhost)
+	by relay.mailchannels.net (Postfix) with ESMTPA id A11EF8A50EF;
+	Fri, 23 May 2025 19:34:42 +0000 (UTC)
+ARC-Seal: i=1; s=arc-2022; d=mailchannels.net; t=1748028882; a=rsa-sha256;
+	cv=none;
+	b=NEFcKdjgrFYmO9e+vUIcZfh3CfNDXUYJKTc5/7lJY8HTbDH10Vpgr4DIit00PkHsQjkroL
+	t4tODRodGRAeSxp6oAdF9t1d67KfKz1kxYN2PRhPT7qIDvfVpd/Zmoxyy4wUzLvjymgYQ2
+	b8ST+MACjbv5xJExsBalMEKDh9/Wxa0TvIKTyAhrmV/S/JGsHBuzGF1EFa6m0094/QdYar
+	ISvBq43aEFBtGOT2EyW+y73v45+J7Z8wHz4GR3fx1GaCM4ZCuOsZwBLwJc/HFfV23mIdhB
+	uKEhFam0iLvovYUa9Ehr93TVdCaFWd9k5X5ykCcZSZZ5vIf0NyUH0hrfhpujZw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=mailchannels.net;
+	s=arc-2022; t=1748028882;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:dkim-signature;
+	bh=6CxVWUagOmD4uO3grxyeaqjZ8bQ9qdUCbIr8g3+SiWY=;
+	b=qS+v0ppKQsX0UfUXkN09csujweWf1bUH12ikcJAgEb/2HSmBZcomEiSKcsw0zBc4hHor9u
+	VRIjQbN33UPBi4IxlmrOUzeRLOGpZFfHV62G57njMk3H/UtktU5pZCzB16qlplK2CtnMv1
+	EY/7sN6W13CmwsAenl6XJTCNFbfENtffKw5w0n1ggUlg686rdbA4cqKFZpfCYCennw5IL+
+	draTP3UqYgaWqYQjiLvpoTk4ypZ7OgnpbrFKx4c5CW0y296VK2realpiztdg/sNSR4kMMq
+	pVdsOcPRhNAljlbb21EuyUT6xHcAx2eWMHgoLK/Vqxx6/cXErlZipPENo1T3kQ==
+ARC-Authentication-Results: i=1;
+	rspamd-766f9cfddb-dqk96;
+	auth=pass smtp.auth=dreamhost smtp.mailfrom=rob@landley.net
+X-Sender-Id: dreamhost|x-authsender|rob@landley.net
+X-MC-Relay: Neutral
+X-MailChannels-SenderId: dreamhost|x-authsender|rob@landley.net
+X-MailChannels-Auth-Id: dreamhost
+X-Absorbed-Spot: 0677f2982f26f06c_1748028882907_3024690519
+X-MC-Loop-Signature: 1748028882907:3116410234
+X-MC-Ingress-Time: 1748028882907
+Received: from pdx1-sub0-mail-a206.dreamhost.com (pop.dreamhost.com
+ [64.90.62.162])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384)
+	by 100.120.70.190 (trex/7.0.3);
+	Fri, 23 May 2025 19:34:42 +0000
+Received: from [172.22.7.54] (unknown [198.232.126.195])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	(No client certificate requested)
+	(Authenticated sender: rob@landley.net)
+	by pdx1-sub0-mail-a206.dreamhost.com (Postfix) with ESMTPSA id 4b3wN212Hqz28;
+	Fri, 23 May 2025 12:34:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=landley.net;
+	s=dreamhost; t=1748028882;
+	bh=6CxVWUagOmD4uO3grxyeaqjZ8bQ9qdUCbIr8g3+SiWY=;
+	h=Date:Subject:To:From:Content-Type:Content-Transfer-Encoding;
+	b=kU4/YgXKJnnweqVDcPqBtgaCNcnZzoAx6jZcbUSWJI6mOtoFY689hHBPcCLnfYzrs
+	 YOpH9K8g3Cc6cGLsBA2DJrA659sC/He0354rlaZNme36SQvAJMyQOlpz5GnZW0Jp/A
+	 zQ9TtxSvAlePLXUJefIXJrWt2woHNrcqPE5WJnQ3Si7XOd5dQKvdE7TLORh3HjNwrt
+	 LWH96CjX32ile1Hy5VoGLKwRGZ79eM3oOORk4eOWsjFR0ZFOh1Q97sSW80NQ6s7dMK
+	 OhQ3QuUCjFkk86yAFNdNaeS7RXuu7o/Qxpyzvjx/4P7Obwajn8cXMjSRlJ3gskmLX6
+	 bjJhF3cPAzvLg==
+Message-ID: <ad98c8d5-dc2e-4f52-9835-e15d9f3a94fd@landley.net>
+Date: Fri, 23 May 2025 14:34:41 -0500
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Fri, 23 May 2025 09:56:00 +0200
-From: Federico Giovanardi <federico@giovanardi.dev>
-To: Linux Embedded <linux-embedded@vger.kernel.org>
-Subject: Deferred probe times
-Message-ID: <cd10fd7ee9a3b0ce61cf3c1ea3805fbd@giovanardi.dev>
-X-Sender: federico@giovanardi.dev
-Content-Type: multipart/mixed;
- boundary="=_23c8a8271c49eb4b905d30421fdc3b71"
-X-DKIM: signer='giovanardi.dev' status='pass' reason=''
-DKIMCheck: Server passes DKIM test, 0 Spam score
-X-Authenticated-Id: giovanardi@anymxrelay.com
-
---=_23c8a8271c49eb4b905d30421fdc3b71
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/1] drivers: misc: add driver for bootstage stash
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+ Francesco Valla <francesco@valla.it>, linux-embedded@vger.kernel.org
+References: <20250522224223.358881-2-francesco@valla.it>
+ <20250522224223.358881-3-francesco@valla.it>
+ <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
+Content-Language: en-US
+From: Rob Landley <rob@landley.net>
+In-Reply-To: <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
 
-Hello,
+On 5/23/25 01:29, Krzysztof Kozlowski wrote:
+> On 23/05/2025 00:42, Francesco Valla wrote:
+>> Add support for bootstage stash areas containing boot time data
+>> created by some bootloader (e.g. U-Boot). The driver provides generic
+>> time information through sysfs and platform-specific one through
+>> debugfs.
+>>
+>> Signed-off-by: Francesco Valla <francesco@valla.it>
+> 
+> Your Cc list is so incomplete I really do not understand which project
+> you target and this popped up in my lei filters. If this is not for
+> Linux kernel, please ignore the rest.
 
-I was poking around the boot data database while I noticed that the 
-deferred_probe initicalls are considered as a giant block;
+The discussion is happening on the linux-embedded list you cc'd in your 
+reply.
 
-There is a patch that looks never went upstream to measure them:  
-https://lkml.iu.edu/1707.3/02349.html
+https://www.spinics.net/lists/linux-embedded/msg04429.html
 
-And another one from me to print the result in the .svg.
+https://www.spinics.net/lists/linux-embedded/msg04435.html
 
-
-Have a nice day
-Federico
-
-
---=_23c8a8271c49eb4b905d30421fdc3b71
-Content-Transfer-Encoding: base64
-Content-Type: text/x-diff;
- name=update_bootgraph_deferred_init.patch
-Content-Disposition: attachment;
- filename=update_bootgraph_deferred_init.patch;
- size=961
-
-Y29tbWl0IGM4ZDk3YmFkMjk4N2IzM2IyY2U4MDQ4MDUwNzEyMThmZDdmNjhiYmQKQXV0aG9yOiBG
-ZWRlcmljbyBHaW92YW5hcmRpIDxmZWRlcmljby5naW92YW5hcmRpQGNuaGluZC5jb20+CkRhdGU6
-ICAgRnJpIE9jdCA0IDE0OjEzOjMwIDIwMjQgKzAyMDAKCiAgICBVcGRhdGUgYm9vdGdyYXBoIHRv
-IGhhbmRsZSBkZWZlcnJlZCBpbml0Y2FsbHMKCmRpZmYgLS1naXQgYS9zY3JpcHRzL2Jvb3RncmFw
-aC5wbCBiL3NjcmlwdHMvYm9vdGdyYXBoLnBsCmluZGV4IDc5YzkwMzI5MmFlOC4uODA1N2Q5ZjQ3
-NGRmIDEwMDc1NQotLS0gYS9zY3JpcHRzL2Jvb3RncmFwaC5wbAorKysgYi9zY3JpcHRzL2Jvb3Rn
-cmFwaC5wbApAQCAtNjcsNyArNjcsOCBAQCBteSAkY3loZWFkZXIgPSAwOwogCiB3aGlsZSAoPD4p
-IHsKIAlteSAkbGluZSA9ICRfOwotCWlmICgkbGluZSA9fiAvKFswLTlcLl0rKVxdIGNhbGxpbmcg
-IChbYS16QS1aMC05XF9cLl0rKVwrLykgeworCWlmICgkbGluZSA9fiAvKFswLTlcLl0rKVxdIGNh
-bGxpbmcgIChbYS16QS1aMC05XF9cLl0rKVwrLyBvcgorCQkkbGluZSA9fiAvKFswLTlcLl0rKVxd
-IGRlZmVycmVkIHByb2JlIChbYS16QS1aMC05XF9cLl0rKSBALykgewogCQlteSAkZnVuYyA9ICQy
-OwogCQlpZiAoJGRvbmUgPT0gMCkgewogCQkJJHN0YXJ0eyRmdW5jfSA9ICQxOwpAQCAtMTA5LDYg
-KzExMCwxMiBAQCB3aGlsZSAoPD4pIHsKIAkJCSRtYXh0aW1lID0gJDE7CiAJCX0KIAl9CisJaWYg
-KCRsaW5lID1+IC8oWzAtOVwuXSspXF0gZGVmZXJyZWQgcHJvYmUgKFthLXpBLVowLTlcX1wuXSsp
-LipyZXR1cm5lZC8pIHsKKwkJaWYgKCRkb25lID09IDApIHsKKwkJCSRlbmR7JDJ9ID0gJDE7CisJ
-CQkkbWF4dGltZSA9ICQxOworCQl9CisJfQogCiAJaWYgKCRsaW5lID1+IC8oWzAtOVwuXSspXF0g
-YXN5bmNfY29udGludWluZyBAIChbMC05XSspLykgewogCQlteSAkcGlkID0gJDI7Cg==
---=_23c8a8271c49eb4b905d30421fdc3b71--
+Rob
