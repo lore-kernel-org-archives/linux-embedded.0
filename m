@@ -1,132 +1,116 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vk1-f182.google.com (mail-vk1-f182.google.com [209.85.221.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F1492236EE
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 06:29:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A12F19C554
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 07:05:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747981771; cv=none; b=bBaClC6lcmvXunbay3DvUUGOtraZzzX4LBmUOw8tfIYJw3R9J+zb+S/005OYsj+1YkF1bHyxzj7ynVD3Tatrgmq15wWjKwXtNbaGNml5r9JYdPvsBxaTfIMhFQzFJkQEfKiVVEXO5yYO7OgDMgQ+VwDiMgTtI7lf0jSst6tbXdo=
+	t=1747983904; cv=none; b=n4QwCRFJtYDvZ07cy8AUlrD/bphMqaJTBU4YxguY4Ac1D1IwPEUfNsphvgZXs+6nK4HMeFzEbvbFco/icdBEs1dZuJDCCViuhfG8F7AoQ8bMODJ8O0DlbcR0bW3shC//ouClY4VXiv6lQ3M9Z8VmkIQmwIXrCim/VQbzZCkMvjQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747981771; c=relaxed/simple;
-	bh=jYFaNV6UA2yhFGJ3UMFPDPMTlUb58StNEzYX/qkoVpg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=t+P9hjlGSsjfCR3B7J00OYsxSdwKzpE+idhx4+Z9HV6pjbNKHyVEur3gt2EfHwHOZQ9cN9CVkuxp9pDet/2K3NivyWEN/dEFlNrzeT6gwSDlbU2IMsdRPpZo7wxf3FzbSHcD0Ao06gprTnp4CVl3U4HheKEcB2vwC0lfO87OjHs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ojH9iRPc; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ojH9iRPc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0780C4CEE9;
-	Fri, 23 May 2025 06:29:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1747981770;
-	bh=jYFaNV6UA2yhFGJ3UMFPDPMTlUb58StNEzYX/qkoVpg=;
-	h=Date:Subject:To:References:From:In-Reply-To:From;
-	b=ojH9iRPch+KUfgksZZQ9zseTUNDMa2KZFTIhpifS6S81eQ4JeRKKkB9XxCWdtVPWx
-	 I5UCoeed8ZW9qOPitFULuhJbsMUr/dmNiJ5upfgD6VoMio8TY/7boezmZl3Fn2zddb
-	 BBQF2VMA4U+236GyeVns67AdF6v92oIV8KV//RPXxSJ2ph3BmyEltoqNf0RNH5YgIO
-	 4Hysov69Nv6DVrEZfpnBABWWb93BJrOcaX24cVdkhlPEwwxdfcSgaXVqwxgIJa+h1I
-	 /daFJxZof+FaxtWSGVL4I2j36wkBVOrCk0rxHzm9+tMEDWhO2bWBG5p7fVBzK1fsj/
-	 1ItpNo3/6YpRw==
-Message-ID: <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
-Date: Fri, 23 May 2025 08:29:28 +0200
+	s=arc-20240116; t=1747983904; c=relaxed/simple;
+	bh=yi6lMCX7wo4/F9aQy9Z8vbd0MZCsULoh96ceZikTZIc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=DB50JqQsbHAroPwBgxCZPVeXLXan99kqjSxpzKuERWYM57PR8pK3cm2fEIUggw4o77mVR1lqMX1Kce7/ltNThMLh1HYkfFG4WqzHTc2DIfUA+UOstPgGw/ENtoK/1AA6HfUw7QN2gpR1lAzhYNpZ6Co/QNoS9HfgAKqVRGF+u5o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vk1-f182.google.com with SMTP id 71dfb90a1353d-527b70bd90dso3229453e0c.3
+        for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 00:05:01 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747983901; x=1748588701;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=CDCWfMLwckXFjFrQ4F8ePVJ2jSzV+BF9Aq3XlfVQcyQ=;
+        b=Zs4hQ2C9j5n1S/paXJJ08SvX/WmXh4F4LZbiofycpP/F/3cPdGXrwSzE26neXRA/Hu
+         4eoBDTQxh0hujp4CW0ZAemrkogBWf0r7lZuzV1qA/xKcPLXaOigvU8XUgFGVB4dhhN/B
+         jSy1WKX17K0kznY80SHmZER2KWICFu5kdbPyP4qMgMGn2MKPinr6JocOM8DthxLr8Nrt
+         Wjf8+gOPXW9WdQyqPtgeLRfT6enkVwDZXJuefuVi6hLFLE2GExstxmwF9nYPg24Hd7ZS
+         Njro8/AXfbUAL7jJQ/NDDw5trAU8PBxv8GK0EKqHrKBgI8U90pM8UZn0ATFMFa2pBvHq
+         f5PA==
+X-Gm-Message-State: AOJu0YyM4o0ofOhUTZGR9Qvih5LaVQu6HpcwYQwlwhmSsx/Txg/NnFxO
+	hdmaTxDAfhcN67xxVvcbVcGlMnqFj6QffeuWTa0WKMCqyOCqN2YSzCHY7s0H5sNg
+X-Gm-Gg: ASbGncvBYl3vQST1fi3G5xeud2zhXweYCHpWXezVLhr0zHSdqHq4stOOaJ3YpR71GSH
+	A3df2rRRNwKNnA5LkBMeLTpGgAk9y4CSOhBQmkqcpOiQxy/v3UeRHBrsx+p8nfyBBPHck2HaVy1
+	SbEz6+5TDegFam5WpGTg2cTragxMVuK/VdkXe6AzYtkZHtm1XpB85OPWqcN3N3G3Mmdd7wU03GU
+	bQiGFv6PHQ6OBsKU31AWHFh8ljXWnAy+3OPq0jrKp1OSKTyqI2oNdIoLnTa9+NYPbGUni6LlCO4
+	RuSy7kjVNCFJuNuJrMWpJTSdIv4DetPDbW5FfDCP2OLLrKn88d6ameLvRVHdmLhAFgafxvikzVk
+	K8VdXqe3Jz5sN43RQ9QJ+PX8Y
+X-Google-Smtp-Source: AGHT+IFN/0HacVtF/utd0Jcc09gN7KcjzFc3dTDTy7zCyDROd6YB1m6miAUrqua3nV/39fBr/Zs1TA==
+X-Received: by 2002:a05:6122:4b86:b0:529:373:fcb7 with SMTP id 71dfb90a1353d-52f1fed20c9mr1336754e0c.10.1747983900781;
+        Fri, 23 May 2025 00:05:00 -0700 (PDT)
+Received: from mail-vs1-f51.google.com (mail-vs1-f51.google.com. [209.85.217.51])
+        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-52dbab6c0f1sm13013590e0c.41.2025.05.23.00.05.00
+        for <linux-embedded@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 23 May 2025 00:05:00 -0700 (PDT)
+Received: by mail-vs1-f51.google.com with SMTP id ada2fe7eead31-4e2b21d1b46so1430423137.3
+        for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 00:05:00 -0700 (PDT)
+X-Received: by 2002:a05:6102:8014:b0:4c2:20d6:c6c3 with SMTP id
+ ada2fe7eead31-4e2f1983b8cmr1335416137.10.1747983900408; Fri, 23 May 2025
+ 00:05:00 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/1] drivers: misc: add driver for bootstage stash
-To: Francesco Valla <francesco@valla.it>, linux-embedded@vger.kernel.org
 References: <20250522224223.358881-2-francesco@valla.it>
- <20250522224223.358881-3-francesco@valla.it>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250522224223.358881-3-francesco@valla.it>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <20250522224223.358881-2-francesco@valla.it>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Fri, 23 May 2025 09:04:48 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXqw9igYU-iPFbA-uP8-LrmZocUKT4k9cb8+py1gFp8tA@mail.gmail.com>
+X-Gm-Features: AX0GCFtf3b8aa6og2wwX1AlyzeYhUfHM_X9f54_8mBeX5gG-B57QPwdy7aGjrn8
+Message-ID: <CAMuHMdXqw9igYU-iPFbA-uP8-LrmZocUKT4k9cb8+py1gFp8tA@mail.gmail.com>
+Subject: Re: [RFC PATCH 0/1] Add driver for bootstage stash
+To: Francesco Valla <francesco@valla.it>
+Cc: linux-embedded@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 23/05/2025 00:42, Francesco Valla wrote:
-> Add support for bootstage stash areas containing boot time data
-> created by some bootloader (e.g. U-Boot). The driver provides generic
-> time information through sysfs and platform-specific one through
-> debugfs.
-> 
-> Signed-off-by: Francesco Valla <francesco@valla.it>
+Hi Francesco,
 
-Your Cc list is so incomplete I really do not understand which project
-you target and this popped up in my lei filters. If this is not for
-Linux kernel, please ignore the rest.
+On Fri, 23 May 2025 at 02:25, Francesco Valla <francesco@valla.it> wrote:
+> after the discussion on the "Unified Boot Log" topic during the latest
+> Boot Time SIG special meeting [1], I tried to mock up a driver that
+> reads a bootstage stash saved by the U-Boot bootloader in a given memory
+> area and exposes the data in a user- and machine- friendly through both
+> sysfs and debugfs attributes. Details on the interfaces, as well as
+> example output for the debugfs interfaces, can be found on the
+> documentation that is part of the patchset.
 
-If this is for Linux kernel then:
+Thanks for your work!
 
-Please run scripts/checkpatch.pl on the patches and fix reported
-warnings. After that, run also 'scripts/checkpatch.pl --strict' on the
-patches and (probably) fix more warnings. Some warnings can be ignored,
-especially from --strict run, but the code here looks like it needs a
-fix. Feel free to get in touch if the warning is not clear.
+> To use this driver, a memory area shall be reserved inside the Linux
+> kernel devicetree as follows (possibly changing the address and the size
+> of the memory area):
+>
+>     bootstage@a4300000 {
+>         compatible = "bootstage";
+>         reg = <0 0xa4300000 0 0x1000>;
+>         no-map;
+>     };
+>
+> At U-Boot side, following configuration shall then be set:
+>
+>     CONFIG_BOOTSTAGE=y
+>     CONFIG_BOOTSTAGE_STASH_ADDR=0xa4300000
+>     CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
 
+I think this can be simplified further, using either of these two options:
+  1. If the bootstage@a4300000 node would already be present in the
+     DTB used by U-Boot, the two CONFIG_BOOTSTAGE_STASH_*
+     options would no longer be needed.
+  2. U-Boot could add the bootstage@a4300000 to the DTB that is
+     passed to the kernel, just like it already adds/updates the memory
+     nodes.
 
-Please use scripts/get_maintainers.pl to get a list of necessary people
-and lists to CC. It might happen, that command when run on an older
-kernel, gives you outdated entries. Therefore please be sure you base
-your patches on recent Linux kernel.
+Gr{oetje,eeting}s,
 
-Tools like b4 or scripts/get_maintainer.pl provide you proper list of
-people, so fix your workflow. Tools might also fail if you work on some
-ancient tree (don't, instead use mainline) or work on fork of kernel
-(don't, instead use mainline). Just use b4 and everything should be
-fine, although remember about `b4 prep --auto-to-cc` if you added new
-patches to the patchset.
+                        Geert
 
-You missed at least devicetree list (maybe more), so this won't be
-tested by automated tooling. Performing review on untested code might be
-a waste of time.
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-Please kindly resend and include all necessary To/Cc entries.
-
-
-Best regards,
-Krzysztof
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
