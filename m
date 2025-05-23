@@ -1,116 +1,208 @@
-Received: from mail-vk1-f182.google.com (mail-vk1-f182.google.com [209.85.221.182])
+Received: from mail-108-mta231.mxroute.com (mail-108-mta231.mxroute.com [136.175.108.231])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A12F19C554
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 07:05:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 079171A76BB
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 07:39:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=136.175.108.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747983904; cv=none; b=n4QwCRFJtYDvZ07cy8AUlrD/bphMqaJTBU4YxguY4Ac1D1IwPEUfNsphvgZXs+6nK4HMeFzEbvbFco/icdBEs1dZuJDCCViuhfG8F7AoQ8bMODJ8O0DlbcR0bW3shC//ouClY4VXiv6lQ3M9Z8VmkIQmwIXrCim/VQbzZCkMvjQ=
+	t=1747985969; cv=none; b=iEux6RVXckq7gluGqjArD2nVXL//BpA62ONOFCGoA3g1yhdKwZJaQRkRZ3bzNTq0m+X4xmJoB522dHUnEM4UYXnA/PiWMqCLF47yU4Uk1gzhAGK0x9XvbfoFCswYAzBNBBBY7rAK7+HYar6Ve93LhjCq2SQZ/VcfBDMUIonkEhs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747983904; c=relaxed/simple;
-	bh=yi6lMCX7wo4/F9aQy9Z8vbd0MZCsULoh96ceZikTZIc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DB50JqQsbHAroPwBgxCZPVeXLXan99kqjSxpzKuERWYM57PR8pK3cm2fEIUggw4o77mVR1lqMX1Kce7/ltNThMLh1HYkfFG4WqzHTc2DIfUA+UOstPgGw/ENtoK/1AA6HfUw7QN2gpR1lAzhYNpZ6Co/QNoS9HfgAKqVRGF+u5o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-vk1-f182.google.com with SMTP id 71dfb90a1353d-527b70bd90dso3229453e0c.3
-        for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 00:05:01 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747983901; x=1748588701;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=CDCWfMLwckXFjFrQ4F8ePVJ2jSzV+BF9Aq3XlfVQcyQ=;
-        b=Zs4hQ2C9j5n1S/paXJJ08SvX/WmXh4F4LZbiofycpP/F/3cPdGXrwSzE26neXRA/Hu
-         4eoBDTQxh0hujp4CW0ZAemrkogBWf0r7lZuzV1qA/xKcPLXaOigvU8XUgFGVB4dhhN/B
-         jSy1WKX17K0kznY80SHmZER2KWICFu5kdbPyP4qMgMGn2MKPinr6JocOM8DthxLr8Nrt
-         Wjf8+gOPXW9WdQyqPtgeLRfT6enkVwDZXJuefuVi6hLFLE2GExstxmwF9nYPg24Hd7ZS
-         Njro8/AXfbUAL7jJQ/NDDw5trAU8PBxv8GK0EKqHrKBgI8U90pM8UZn0ATFMFa2pBvHq
-         f5PA==
-X-Gm-Message-State: AOJu0YyM4o0ofOhUTZGR9Qvih5LaVQu6HpcwYQwlwhmSsx/Txg/NnFxO
-	hdmaTxDAfhcN67xxVvcbVcGlMnqFj6QffeuWTa0WKMCqyOCqN2YSzCHY7s0H5sNg
-X-Gm-Gg: ASbGncvBYl3vQST1fi3G5xeud2zhXweYCHpWXezVLhr0zHSdqHq4stOOaJ3YpR71GSH
-	A3df2rRRNwKNnA5LkBMeLTpGgAk9y4CSOhBQmkqcpOiQxy/v3UeRHBrsx+p8nfyBBPHck2HaVy1
-	SbEz6+5TDegFam5WpGTg2cTragxMVuK/VdkXe6AzYtkZHtm1XpB85OPWqcN3N3G3Mmdd7wU03GU
-	bQiGFv6PHQ6OBsKU31AWHFh8ljXWnAy+3OPq0jrKp1OSKTyqI2oNdIoLnTa9+NYPbGUni6LlCO4
-	RuSy7kjVNCFJuNuJrMWpJTSdIv4DetPDbW5FfDCP2OLLrKn88d6ameLvRVHdmLhAFgafxvikzVk
-	K8VdXqe3Jz5sN43RQ9QJ+PX8Y
-X-Google-Smtp-Source: AGHT+IFN/0HacVtF/utd0Jcc09gN7KcjzFc3dTDTy7zCyDROd6YB1m6miAUrqua3nV/39fBr/Zs1TA==
-X-Received: by 2002:a05:6122:4b86:b0:529:373:fcb7 with SMTP id 71dfb90a1353d-52f1fed20c9mr1336754e0c.10.1747983900781;
-        Fri, 23 May 2025 00:05:00 -0700 (PDT)
-Received: from mail-vs1-f51.google.com (mail-vs1-f51.google.com. [209.85.217.51])
-        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-52dbab6c0f1sm13013590e0c.41.2025.05.23.00.05.00
-        for <linux-embedded@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 23 May 2025 00:05:00 -0700 (PDT)
-Received: by mail-vs1-f51.google.com with SMTP id ada2fe7eead31-4e2b21d1b46so1430423137.3
-        for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 00:05:00 -0700 (PDT)
-X-Received: by 2002:a05:6102:8014:b0:4c2:20d6:c6c3 with SMTP id
- ada2fe7eead31-4e2f1983b8cmr1335416137.10.1747983900408; Fri, 23 May 2025
- 00:05:00 -0700 (PDT)
+	s=arc-20240116; t=1747985969; c=relaxed/simple;
+	bh=97FKYRdejTFbXtj1KzYTwZLrQtCY29hmxg5uJoOl/Q0=;
+	h=MIME-Version:Date:From:To:Subject:In-Reply-To:References:
+	 Message-ID:Content-Type; b=ZMct7s40eFkAOpuncV71R/qpeTd8j49R/M7ZNaN8X3+E/RgwpPAxeR+QCHifsH2ydmLt+nhXkOAXQWA31w1AhC+GajKB6sB2QL4SNleutcHLUni691/y82ob/m9Es/B0eCdx3SKS0fiu1qYpQLyk+GH0l33HtfJ7VSnROTTho0E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=giovanardi.dev; spf=pass smtp.mailfrom=giovanardi.dev; dkim=fail (0-bit key) header.d=anymxrelay.com header.i=@anymxrelay.com header.b=SjKzrQ2m reason="key not found in DNS"; dkim=pass (2048-bit key) header.d=giovanardi.dev header.i=@giovanardi.dev header.b=QWYUaTPD; arc=none smtp.client-ip=136.175.108.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=giovanardi.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=giovanardi.dev
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=anymxrelay.com header.i=@anymxrelay.com header.b="SjKzrQ2m";
+	dkim=pass (2048-bit key) header.d=giovanardi.dev header.i=@giovanardi.dev header.b="QWYUaTPD"
+Received: from filter006.mxroute.com ([136.175.111.3] filter006.mxroute.com)
+ (Authenticated sender: mN4UYu2MZsgR)
+ by mail-108-mta231.mxroute.com (ZoneMTA) with ESMTPSA id 196fc105c420008631.001
+ for <linux-embedded@vger.kernel.org>
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384);
+ Fri, 23 May 2025 07:34:12 +0000
+X-Zone-Loop: 290d9483c655cfac20e14a6983023261beb0cd8c6478
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=anymxrelay.com; s=x; h=Content-Transfer-Encoding:Content-Type:References:
+	In-Reply-To:Subject:To:From:Date:MIME-Version:Sender:Reply-To:Cc:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=1/GfOl3SuKkjWs0JLX5XxrbCSgYoB7R+Y4C0ppeyTSA=; b=SjKzrQ2mMXVvWKBdfxlnSJU2Ze
+	rgAhAmg7ly1eKESYb1Kzmu4YbxYhx1mUnyqiy3pQuu0QIXeY56dNv5GAygdBZC5eP8ZYmFr21Bxhe
+	RVK+clUdS+zSZDiLtk/u/KwC5BqPd2Zmfr52TVE2otX4YKV9JCKL15wk/iej2Xo0WVC7cSI2NoFj+
+	/QWsptWNV/2KY2336cVjI5M5Jv931nWSJism2qv/H5IWNADefbRqzbsrbqdFx6c3R622dxhPBwXd2
+	Q02KYkoyLD0qFok8eqFtdC7Po7QJ/K7BbwCQX0XU/vqrHBOem5ndzvK0uzrS8z2T8hDdj0zDOffAY
+	0IouQOtg==;
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=giovanardi.dev;
+	s=mail; t=1747985649;
+	bh=97FKYRdejTFbXtj1KzYTwZLrQtCY29hmxg5uJoOl/Q0=;
+	h=Date:From:To:Subject:In-Reply-To:References:From;
+	b=QWYUaTPDA/BoLnan3UdUsp6+SIoN3nPRNoF+0FnrdH/VmKWGQWSIe8g6LXLjTAa2o
+	 UHULUY2mdvB9fvjrnPG0mh0EQNQG5DRqFJbCU5RsqiN6c+ovb1LU7j9f2lvdTxtwUp
+	 dJrQ/FA20jCXIFK7J+B1s8An7I2nocIiLe5t3cdW2og+2eiJlf5ywgLBKWnxz37BIl
+	 ShS0qkknL+FJcIlNWJy/TozDidxtL4P3qR++wHvnjWWyt2S6vLIptJGmYwp7dglmbL
+	 Pq7tdqStXVoL4sIYovf9hlNALQNjGpJ/JeHcNttwNK0e5Bthyd0phiv2WLRgvFHRtQ
+	 IytR+RdFHjqTQ==
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250522224223.358881-2-francesco@valla.it>
-In-Reply-To: <20250522224223.358881-2-francesco@valla.it>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Fri, 23 May 2025 09:04:48 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXqw9igYU-iPFbA-uP8-LrmZocUKT4k9cb8+py1gFp8tA@mail.gmail.com>
-X-Gm-Features: AX0GCFtf3b8aa6og2wwX1AlyzeYhUfHM_X9f54_8mBeX5gG-B57QPwdy7aGjrn8
-Message-ID: <CAMuHMdXqw9igYU-iPFbA-uP8-LrmZocUKT4k9cb8+py1gFp8tA@mail.gmail.com>
+Date: Fri, 23 May 2025 09:34:09 +0200
+From: Federico Giovanardi <fede.dev@giovanardi.dev>
+To: linux-embedded@vger.kernel.org
 Subject: Re: [RFC PATCH 0/1] Add driver for bootstage stash
-To: Francesco Valla <francesco@valla.it>
-Cc: linux-embedded@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <PA4PR08MB604681FF6392B25A19926A11ED98A@PA4PR08MB6046.eurprd08.prod.outlook.com>
+References: <20250522224223.358881-2-francesco@valla.it>
+ <PA4PR08MB604681FF6392B25A19926A11ED98A@PA4PR08MB6046.eurprd08.prod.outlook.com>
+Message-ID: <473a062e4f939bc58a5c0e636569b826@giovanardi.dev>
+X-Sender: fede.dev@giovanardi.dev
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
+X-DKIM: signer='giovanardi.dev' status='pass' reason=''
+DKIMCheck: Server passes DKIM test, 0 Spam score
+X-Authenticated-Id: giovanardi@anymxrelay.com
 
-Hi Francesco,
+Hello,
 
-On Fri, 23 May 2025 at 02:25, Francesco Valla <francesco@valla.it> wrote:
+The note about the data format also was my initial thought, by just 
+copying a C structure we might have issues as soon one party changes it, 
+and they might not be perfectly aligned.
+
+To avoid inventing yet-another-data-format I've used msgpack in the past 
+for that (the format 
+https://github.com/msgpack/msgpack/blob/master/spec.md, not the library  
+); because the specs are so simple they can be implemented in a few 
+lines, and it's something with a reference. But I don't have a lot of 
+experience in upstreaming stuff on the kernel, so I don't know if it 
+might cause someone to don't be happy. Anyway, I can contribute the 
+implementation if needed.
+
+Something as simple as an array of fixarray will give extensibility with 
+only a few bytes of overhead.
+
+Which gets encoded as:
+
+0xdc # lenght 16 bit << array header
+      # 0xB << 4 | ( array_size & 0xF) << fixarray header ( 3 elements, 
+simplest case)
+            # 0xce # time_us
+            # 0xce # start_us
+            # 0xc << 4 | strlen(name) # name
+            /*no flags, no id*/
+      # 0xB << 4 | ( array_size & 0xF) << fixarray header ( 5 elements 
+bigger case)
+            # 0xce # time_us
+            # 0xce # start_us
+            # 0xc << 4 | strlen(name) # name
+            # 0xcc # flags
+            # 0xcc # id
+      .. repeat ...
+
+
+Since the goal is to use that in many different contexts, defining the 
+fields that we need early is important.
+
+Bye
+Federico
+
+> -------------------------
+> 
+> Da: Francesco Valla <francesco@valla.it>
+> Inviato: venerdì 23 maggio 2025 00:42
+> A: linux-embedded@vger.kernel.org <linux-embedded@vger.kernel.org>
+> Oggetto: [RFC PATCH 0/1] Add driver for bootstage stash
+> 
+> Questo messaggio proviene da un mittente esterno: fai attenzione ad
+> allegati e link.
+> 
+> Hello,
+> 
 > after the discussion on the "Unified Boot Log" topic during the latest
 > Boot Time SIG special meeting [1], I tried to mock up a driver that
-> reads a bootstage stash saved by the U-Boot bootloader in a given memory
-> area and exposes the data in a user- and machine- friendly through both
+> reads a bootstage stash saved by the U-Boot bootloader in a given
+> memory
+> area and exposes the data in a user- and machine- friendly through
+> both
 > sysfs and debugfs attributes. Details on the interfaces, as well as
 > example output for the debugfs interfaces, can be found on the
 > documentation that is part of the patchset.
-
-Thanks for your work!
-
+> 
 > To use this driver, a memory area shall be reserved inside the Linux
-> kernel devicetree as follows (possibly changing the address and the size
+> kernel devicetree as follows (possibly changing the address and the
+> size
 > of the memory area):
->
+> 
 >     bootstage@a4300000 {
 >         compatible = "bootstage";
 >         reg = <0 0xa4300000 0 0x1000>;
 >         no-map;
 >     };
->
+> 
 > At U-Boot side, following configuration shall then be set:
->
+> 
 >     CONFIG_BOOTSTAGE=y
 >     CONFIG_BOOTSTAGE_STASH_ADDR=0xa4300000
 >     CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
-
-I think this can be simplified further, using either of these two options:
-  1. If the bootstage@a4300000 node would already be present in the
-     DTB used by U-Boot, the two CONFIG_BOOTSTAGE_STASH_*
-     options would no longer be needed.
-  2. U-Boot could add the bootstage@a4300000 to the DTB that is
-     passed to the kernel, just like it already adds/updates the memory
-     nodes.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> 
+> Once booted, the bootstage data can will be found at:
+> 
+>     - /sys/devices/platform/a4300000.bootstage/
+>     - /sys/kernel/debug/bootstage/a4300000.bootstage/
+> 
+> The device name is purposely part of the sysfs and debugfs paths to
+> support multiple bootstage areas, as this _might_ then be used for
+> multiple bootstage sources, e.g. bootloaders running on different
+> cores inside a SoC with different architectures.
+> 
+> Note that this is not really meant to be integrated as-is, not only
+> because it's a single patch including code, documentation and
+> devicetree
+> bindings, but also because the bootstage stash format itself may need
+> to
+> be touched up a bit. In particular, fixed data type should probably be
+> evaluated for the bootstage record, in order to increase compatibility
+> with different data sources.
+> 
+> Comments are of course welcome.
+> 
+> Regards,
+> 
+> Francesco
+> 
+> [1]
+> https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Flore.kernel.org%2Flinux-embedded%2FMW5PR13MB5632B8FA3279D77F2F9217BBFD9CA%40MW5PR13MB5632.namprd13.prod.outlook.com%2F&data=05%7C02%7Cfederico.giovanardi%40cnh.com%7C68aacb29d80340fc5d3208dd99904415%7C79310fb0d39b486bb77b25f3e0c82a0e%7C0%7C0%7C638835567100175385%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=Hrd3rjtJ7sLciUzkFymL7y2agCAMZSAKKF7evt20LQU%3D&reserved=0
+> [1]
+> 
+> Francesco Valla (1):
+>   drivers: misc: add driver for bootstage stash
+> 
+>  .../bindings/reserved-memory/bootstage.yaml   |  44 +++
+>  Documentation/misc-devices/bootstage.rst      |  53 ++++
+>  Documentation/misc-devices/index.rst          |   1 +
+>  MAINTAINERS                                   |   7 +
+>  drivers/misc/Kconfig                          |  10 +
+>  drivers/misc/Makefile                         |   1 +
+>  drivers/misc/bootstage.c                      | 292
+> ++++++++++++++++++
+>  drivers/of/platform.c                         |   1 +
+>  8 files changed, 409 insertions(+)
+>  create mode 100644
+> Documentation/devicetree/bindings/reserved-memory/bootstage.yaml
+>  create mode 100644 Documentation/misc-devices/bootstage.rst
+>  create mode 100644 drivers/misc/bootstage.c
+> 
+> --
+> 2.49.0
+> 
+> 
+> 
+> Links:
+> ------
+> [1] 
+> https://lore.kernel.org/linux-embedded/MW5PR13MB5632B8FA3279D77F2F9217BBFD9CA@MW5PR13MB5632.namprd13.prod.outlook.com/
