@@ -1,160 +1,132 @@
-Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.13])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCBDE13AD1C
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 00:24:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.13
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747959898; cv=pass; b=tiDIa2suWKT+GahotTa/Ju4izi9QA6S76JDaD7s9FBxCq9BXnBMoiOYkhfm0WCmBk42X0uiKpHX7rGXO0vaBntUv4fYuF8xw5irAfdm4ukmdhjZiU4LK9QsC1Tz5kiAZN2/6CRXNpMbSlqnDc01nHOnm0fRl/DDtc0Et3E8BFu8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747959898; c=relaxed/simple;
-	bh=HDsvgCAL9L30ksM/v8bCRw2EvJoow8FwWLkGGJdCbbs=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=cLviWhYVRpjtsHVZ2WpCIwRaHCs6WExSQh4MCzhr75BT7e/iLe3bByuw1mqRVIrb+UZTyJyE/vP4ZPQLPNmVJArVAB9/29ZbEQ6cwBe2EsKCz01JDwQGb47RJesDkPKYKOv9XY6qdp4UJnbcX5zRzu95zqDoBIAlBQX2ScuaTMs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=ljFZjGlB; arc=pass smtp.client-ip=185.56.87.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F1492236EE
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 06:29:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747981771; cv=none; b=bBaClC6lcmvXunbay3DvUUGOtraZzzX4LBmUOw8tfIYJw3R9J+zb+S/005OYsj+1YkF1bHyxzj7ynVD3Tatrgmq15wWjKwXtNbaGNml5r9JYdPvsBxaTfIMhFQzFJkQEfKiVVEXO5yYO7OgDMgQ+VwDiMgTtI7lf0jSst6tbXdo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747981771; c=relaxed/simple;
+	bh=jYFaNV6UA2yhFGJ3UMFPDPMTlUb58StNEzYX/qkoVpg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=t+P9hjlGSsjfCR3B7J00OYsxSdwKzpE+idhx4+Z9HV6pjbNKHyVEur3gt2EfHwHOZQ9cN9CVkuxp9pDet/2K3NivyWEN/dEFlNrzeT6gwSDlbU2IMsdRPpZo7wxf3FzbSHcD0Ao06gprTnp4CVl3U4HheKEcB2vwC0lfO87OjHs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ojH9iRPc; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="ljFZjGlB"
-ARC-Seal: i=1; cv=none; a=rsa-sha256; d=instance-europe-west4-bq1l.prod.antispam.mailspamprotection.com; s=arckey; t=1747959895;
-	 b=mYUMZvepSHKs9VmIIUaXJUrPi3uWCjWFudHmlp0pTmHXR362zGQ7cPm4E/Scaa4a7/HpjsIc1O
-	  MJsb+Ko1MWYCpNM6UdnQC44EH/Cu4fUNbdNyHyAXIrth5xjHwwqaBJiJCe593so34TOydY/Grp
-	  oKX/40ho8V8P1rNSjenf+9pvOP6b+A4sXgyFFxKWT3fB+pkK2dm7JNboSaYfmBkOL0oAEjMu7T
-	  mqb9CPqy020wRJkzp1d849hz+v97YXZxUSgbCIS5+Du6+MEZ/nRYjXfhSsx3Oe5B6B0jqub/IC
-	  kHTiZFqwUf3iuH1wE/PJ4EvU9FvH60pTQeXFrfS4nVXuiw==;
-ARC-Authentication-Results: i=1; instance-europe-west4-bq1l.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=instance-europe-west4-bq1l.prod.antispam.mailspamprotection.com; s=arckey; t=1747959895;
-	bh=HDsvgCAL9L30ksM/v8bCRw2EvJoow8FwWLkGGJdCbbs=;
-	h=Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:To:From:
-	  DKIM-Signature;
-	b=cM2DB8/wJLKWdPyAb3C+yudDAu/BPzvqf/a4vmLulmo1J0++/5pFa0YKP8IjccMRkO8k1w15jo
-	  T3hq+adVjf8rHRiP3wodlf8BI16YMWxqwqC4ThUB0aPQTqUPqL6rHDvv3waKZ+SE+mO2wxXFDm
-	  f00Kq31JoiTQeE5A5lP8aYxK7nLqOla6uSLcI8Jp6cCG0eKvxdqRCfj8ObdLYYSRqSrUFSF9yF
-	  +EyVAaLPzasXA+japveeND5qhYflVlnxU+jlFDhKazcaUZ4XTQyKpwE75g3FohbjPFpZjGEd6t
-	  ybCXu7Y1GNXSgkXEoq1azh3eHbF66iIc9mZQ/5abXesgAw==;
-Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
-	by instance-europe-west4-bq1l.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98.1)
-	(envelope-from <francesco@valla.it>)
-	id 1uIEdD-00000002kFj-1xBy
-	for linux-embedded@vger.kernel.org;
-	Thu, 22 May 2025 22:43:21 +0000
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
-	s=default; h=Date:Subject:To:From:cc:list-help:list-unsubscribe:
-	list-subscribe:list-post:list-owner:list-archive;
-	bh=jhIt3L/nHG92nir7SomFcH4h9DFyVlqJE99GxjYFmhI=; b=ljFZjGlB9/iWH1kPQk2jA9yz2B
-	6nzwnAUWggjXvLeoFEzaVj4ynitB8fUeJzOAUfXchX7usZni8c97bH8IX41BkK3cTTsZ8ZwFJBHOU
-	s4grSM/5cIwJuFTjuyGOtfJk+wVBz8A3FRWE4Snf1coLFdPuPTrJ7EhUVnU9oUENYkXw=;
-Received: from [80.182.118.140] (port=63630 helo=fedora.fritz.box)
-	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98.1)
-	(envelope-from <francesco@valla.it>)
-	id 1uIEd7-000000000KG-15kN
-	for linux-embedded@vger.kernel.org;
-	Thu, 22 May 2025 22:43:13 +0000
-From: Francesco Valla <francesco@valla.it>
-To: linux-embedded@vger.kernel.org
-Subject: [RFC PATCH 0/1] Add driver for bootstage stash
-Date: Fri, 23 May 2025 00:42:23 +0200
-Message-ID: <20250522224223.358881-2-francesco@valla.it>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ojH9iRPc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0780C4CEE9;
+	Fri, 23 May 2025 06:29:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1747981770;
+	bh=jYFaNV6UA2yhFGJ3UMFPDPMTlUb58StNEzYX/qkoVpg=;
+	h=Date:Subject:To:References:From:In-Reply-To:From;
+	b=ojH9iRPch+KUfgksZZQ9zseTUNDMa2KZFTIhpifS6S81eQ4JeRKKkB9XxCWdtVPWx
+	 I5UCoeed8ZW9qOPitFULuhJbsMUr/dmNiJ5upfgD6VoMio8TY/7boezmZl3Fn2zddb
+	 BBQF2VMA4U+236GyeVns67AdF6v92oIV8KV//RPXxSJ2ph3BmyEltoqNf0RNH5YgIO
+	 4Hysov69Nv6DVrEZfpnBABWWb93BJrOcaX24cVdkhlPEwwxdfcSgaXVqwxgIJa+h1I
+	 /daFJxZof+FaxtWSGVL4I2j36wkBVOrCk0rxHzm9+tMEDWhO2bWBG5p7fVBzK1fsj/
+	 1ItpNo3/6YpRw==
+Message-ID: <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
+Date: Fri, 23 May 2025 08:29:28 +0200
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - esm19.siteground.biz
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - valla.it
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-SGantispam-id: faf4e3c967e6b45557e18d3eb2ddb5db
-AntiSpam-DLS: false
-AntiSpam-DLSP: 
-AntiSpam-DLSRS: 
-AntiSpam-TS: 1.0
-Authentication-Results: instance-europe-west4-bq1l.prod.antispam.mailspamprotection.com;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/1] drivers: misc: add driver for bootstage stash
+To: Francesco Valla <francesco@valla.it>, linux-embedded@vger.kernel.org
+References: <20250522224223.358881-2-francesco@valla.it>
+ <20250522224223.358881-3-francesco@valla.it>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
+ cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
+ JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
+ gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
+ J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
+ NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
+ BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
+ vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
+ Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
+ TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
+ S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
+ FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJoF1BKBQkWlnSaAAoJEBuTQ307
+ QWKbHukP/3t4tRp/bvDnxJfmNdNVn0gv9ep3L39IntPalBFwRKytqeQkzAju0whYWg+R/rwp
+ +r2I1Fzwt7+PTjsnMFlh1AZxGDmP5MFkzVsMnfX1lGiXhYSOMP97XL6R1QSXxaWOpGNCDaUl
+ ajorB0lJDcC0q3xAdwzRConxYVhlgmTrRiD8oLlSCD5baEAt5Zw17UTNDnDGmZQKR0fqLpWy
+ 786Lm5OScb7DjEgcA2PRm17st4UQ1kF0rQHokVaotxRM74PPDB8bCsunlghJl1DRK9s1aSuN
+ hL1Pv9VD8b4dFNvCo7b4hfAANPU67W40AaaGZ3UAfmw+1MYyo4QuAZGKzaP2ukbdCD/DYnqi
+ tJy88XqWtyb4UQWKNoQqGKzlYXdKsldYqrLHGoMvj1UN9XcRtXHST/IaLn72o7j7/h/Ac5EL
+ 8lSUVIG4TYn59NyxxAXa07Wi6zjVL1U11fTnFmE29ALYQEXKBI3KUO1A3p4sQWzU7uRmbuxn
+ naUmm8RbpMcOfa9JjlXCLmQ5IP7Rr5tYZUCkZz08LIfF8UMXwH7OOEX87Y++EkAB+pzKZNNd
+ hwoXulTAgjSy+OiaLtuCys9VdXLZ3Zy314azaCU3BoWgaMV0eAW/+gprWMXQM1lrlzvwlD/k
+ whyy9wGf0AEPpLssLVt9VVxNjo6BIkt6d1pMg6mHsUEVzsFNBFVDXDQBEADNkrQYSREUL4D3
+ Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
+ MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
+ OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
+ GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
+ 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
+ YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
+ 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
+ BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
+ JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
+ 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
+ YpsFAmgXUF8FCRaWWyoACgkQG5NDfTtBYptO0w//dlXJs5/42hAXKsk+PDg3wyEFb4NpyA1v
+ qmx7SfAzk9Hf6lWwU1O6AbqNMbh6PjEwadKUk1m04S7EjdQLsj/MBSgoQtCT3MDmWUUtHZd5
+ RYIPnPq3WVB47GtuO6/u375tsxhtf7vt95QSYJwCB+ZUgo4T+FV4hquZ4AsRkbgavtIzQisg
+ Dgv76tnEv3YHV8Jn9mi/Bu0FURF+5kpdMfgo1sq6RXNQ//TVf8yFgRtTUdXxW/qHjlYURrm2
+ H4kutobVEIxiyu6m05q3e9eZB/TaMMNVORx+1kM3j7f0rwtEYUFzY1ygQfpcMDPl7pRYoJjB
+ dSsm0ZuzDaCwaxg2t8hqQJBzJCezTOIkjHUsWAK+tEbU4Z4SnNpCyM3fBqsgYdJxjyC/tWVT
+ AQ18NRLtPw7tK1rdcwCl0GFQHwSwk5pDpz1NH40e6lU+NcXSeiqkDDRkHlftKPV/dV+lQXiu
+ jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
+ zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
+ XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
+In-Reply-To: <20250522224223.358881-3-francesco@valla.it>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hello,
+On 23/05/2025 00:42, Francesco Valla wrote:
+> Add support for bootstage stash areas containing boot time data
+> created by some bootloader (e.g. U-Boot). The driver provides generic
+> time information through sysfs and platform-specific one through
+> debugfs.
+> 
+> Signed-off-by: Francesco Valla <francesco@valla.it>
 
-after the discussion on the "Unified Boot Log" topic during the latest
-Boot Time SIG special meeting [1], I tried to mock up a driver that
-reads a bootstage stash saved by the U-Boot bootloader in a given memory
-area and exposes the data in a user- and machine- friendly through both
-sysfs and debugfs attributes. Details on the interfaces, as well as
-example output for the debugfs interfaces, can be found on the
-documentation that is part of the patchset.
+Your Cc list is so incomplete I really do not understand which project
+you target and this popped up in my lei filters. If this is not for
+Linux kernel, please ignore the rest.
 
-To use this driver, a memory area shall be reserved inside the Linux
-kernel devicetree as follows (possibly changing the address and the size
-of the memory area):
+If this is for Linux kernel then:
 
-    bootstage@a4300000 {
-        compatible = "bootstage";
-        reg = <0 0xa4300000 0 0x1000>;
-        no-map;
-    };
-
-At U-Boot side, following configuration shall then be set:
-
-    CONFIG_BOOTSTAGE=y
-    CONFIG_BOOTSTAGE_STASH_ADDR=0xa4300000
-    CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
-
-Once booted, the bootstage data can will be found at:
-
-    - /sys/devices/platform/a4300000.bootstage/
-    - /sys/kernel/debug/bootstage/a4300000.bootstage/
-
-The device name is purposely part of the sysfs and debugfs paths to
-support multiple bootstage areas, as this _might_ then be used for
-multiple bootstage sources, e.g. bootloaders running on different
-cores inside a SoC with different architectures.
-
-Note that this is not really meant to be integrated as-is, not only
-because it's a single patch including code, documentation and devicetree
-bindings, but also because the bootstage stash format itself may need to
-be touched up a bit. In particular, fixed data type should probably be
-evaluated for the bootstage record, in order to increase compatibility
-with different data sources.
+Please run scripts/checkpatch.pl on the patches and fix reported
+warnings. After that, run also 'scripts/checkpatch.pl --strict' on the
+patches and (probably) fix more warnings. Some warnings can be ignored,
+especially from --strict run, but the code here looks like it needs a
+fix. Feel free to get in touch if the warning is not clear.
 
 
-Comments are of course welcome.
+Please use scripts/get_maintainers.pl to get a list of necessary people
+and lists to CC. It might happen, that command when run on an older
+kernel, gives you outdated entries. Therefore please be sure you base
+your patches on recent Linux kernel.
 
-Regards,
+Tools like b4 or scripts/get_maintainer.pl provide you proper list of
+people, so fix your workflow. Tools might also fail if you work on some
+ancient tree (don't, instead use mainline) or work on fork of kernel
+(don't, instead use mainline). Just use b4 and everything should be
+fine, although remember about `b4 prep --auto-to-cc` if you added new
+patches to the patchset.
 
-Francesco
+You missed at least devicetree list (maybe more), so this won't be
+tested by automated tooling. Performing review on untested code might be
+a waste of time.
 
-[1] https://lore.kernel.org/linux-embedded/MW5PR13MB5632B8FA3279D77F2F9217BBFD9CA@MW5PR13MB5632.namprd13.prod.outlook.com/
+Please kindly resend and include all necessary To/Cc entries.
 
-Francesco Valla (1):
-  drivers: misc: add driver for bootstage stash
 
- .../bindings/reserved-memory/bootstage.yaml   |  44 +++
- Documentation/misc-devices/bootstage.rst      |  53 ++++
- Documentation/misc-devices/index.rst          |   1 +
- MAINTAINERS                                   |   7 +
- drivers/misc/Kconfig                          |  10 +
- drivers/misc/Makefile                         |   1 +
- drivers/misc/bootstage.c                      | 292 ++++++++++++++++++
- drivers/of/platform.c                         |   1 +
- 8 files changed, 409 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/reserved-memory/bootstage.yaml
- create mode 100644 Documentation/misc-devices/bootstage.rst
- create mode 100644 drivers/misc/bootstage.c
-
--- 
-2.49.0
-
+Best regards,
+Krzysztof
