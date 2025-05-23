@@ -1,83 +1,83 @@
-Received: from silver.cherry.relay.mailchannels.net (silver.cherry.relay.mailchannels.net [23.83.223.166])
+Received: from buffalo.birch.relay.mailchannels.net (buffalo.birch.relay.mailchannels.net [23.83.209.24])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7008D299952
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 19:34:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=23.83.223.166
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56A9E3AC1C
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 20:01:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=23.83.209.24
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748028886; cv=pass; b=kjXTFpgGBQbIU22Cqq5P+QtuXFturIrNYJCrTNIBuoIBEqrzR99QD+QsK+1QOjfuIPEyEtFU2mTqkaF9BFlLXv0C/JU6hkWTrhbOEcQFjoTxV4R7rXaiuGLx26lkaw+R5hsWtvD5BATBil/OIUsh1CztKCgfVtB4rn6Fchd9Dts=
+	t=1748030469; cv=pass; b=iw9VyA8/xtJynqhHZ2QgvOOKwCw5Di7cV+O6mY7MWkdEOfj53GqufMnwkxEUy4OmN1bwODom5KrB3AJ5UG5m8l5B55McoslZZiPAJhM9f4AFx0bDqiqGTuz8olLYfYE6hRZkjPzmjdMe8gvQhebdC3zwPtOaNEE8ZcpBrLLtJ74=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748028886; c=relaxed/simple;
-	bh=ZymaNPzjZ8aAgDPlRmXjUElM34PxTb5HQOhImHt/zw0=;
+	s=arc-20240116; t=1748030469; c=relaxed/simple;
+	bh=xkUjea10sgSAdBleeYSwmE9zL8bPm99wzCT10I4A44I=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=DSECC35OZr0v0CTSV2YSvL9H2e/bpN13XhlZHFBrWM7kL/G6VrhT350W6eOL7oe5CzKBp7k5Fhn4ZrNpyOKNOv3VOkW/ESy1I51yNfLROEGUoSRZapc30mEEKATTbP/EmF3TJDMAzItzWPphnnnR+26Z2mH3PcH3MEOGfjk47CU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net; spf=pass smtp.mailfrom=landley.net; dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b=kU4/YgXK; arc=pass smtp.client-ip=23.83.223.166
+	 In-Reply-To:Content-Type; b=GftNBmp5om1j8Kx8AzbA1mlcTK19jWuwIzggoGyC8J1R/Q4nIE/9VazpWolCTJcCDUnjL4prj30tC9plRLMpCD3VB9caI7GHNJ/C/w0GXNdLBY8272ksyxUYPnvzDGpK/j7D/GLPHW/nPwViOKpTql+UsQFJiJtJ0reNqFtx+ZQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net; spf=pass smtp.mailfrom=landley.net; dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b=lWKOdrk8; arc=pass smtp.client-ip=23.83.209.24
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=landley.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b="kU4/YgXK"
+	dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b="lWKOdrk8"
 X-Sender-Id: dreamhost|x-authsender|rob@landley.net
 Received: from relay.mailchannels.net (localhost [127.0.0.1])
-	by relay.mailchannels.net (Postfix) with ESMTP id 2D0438A5461;
-	Fri, 23 May 2025 19:34:43 +0000 (UTC)
-Received: from pdx1-sub0-mail-a206.dreamhost.com (trex-green-9.trex.outbound.svc.cluster.local [100.120.70.190])
+	by relay.mailchannels.net (Postfix) with ESMTP id F11144E4DA2
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 19:43:58 +0000 (UTC)
+Received: from pdx1-sub0-mail-a206.dreamhost.com (trex-green-6.trex.outbound.svc.cluster.local [100.124.34.27])
 	(Authenticated sender: dreamhost)
-	by relay.mailchannels.net (Postfix) with ESMTPA id A11EF8A50EF;
-	Fri, 23 May 2025 19:34:42 +0000 (UTC)
-ARC-Seal: i=1; s=arc-2022; d=mailchannels.net; t=1748028882; a=rsa-sha256;
+	by relay.mailchannels.net (Postfix) with ESMTPA id 7323F4E4E6F
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 19:43:58 +0000 (UTC)
+ARC-Seal: i=1; s=arc-2022; d=mailchannels.net; t=1748029438; a=rsa-sha256;
 	cv=none;
-	b=NEFcKdjgrFYmO9e+vUIcZfh3CfNDXUYJKTc5/7lJY8HTbDH10Vpgr4DIit00PkHsQjkroL
-	t4tODRodGRAeSxp6oAdF9t1d67KfKz1kxYN2PRhPT7qIDvfVpd/Zmoxyy4wUzLvjymgYQ2
-	b8ST+MACjbv5xJExsBalMEKDh9/Wxa0TvIKTyAhrmV/S/JGsHBuzGF1EFa6m0094/QdYar
-	ISvBq43aEFBtGOT2EyW+y73v45+J7Z8wHz4GR3fx1GaCM4ZCuOsZwBLwJc/HFfV23mIdhB
-	uKEhFam0iLvovYUa9Ehr93TVdCaFWd9k5X5ykCcZSZZ5vIf0NyUH0hrfhpujZw==
+	b=rJzE1rGXQokduYjytShyRzT1Iepn6Gx+xsawSjDD6rBKgDVaEcRWmkUu9PMhgwK4tVWSRf
+	WwO2n+XZbg1n424cPKEVGa8E7YuP4PFNov+io692L5GSlL4FT6kjESY7CzWP9Qydd2FkF2
+	sembcBI0AOaxIBBNu23CaFKN58uC8gZnundD4kgItb2EDd4AejnvHsjHsVNQ2ZmuctXL3G
+	tOtn2cGPXynoG+5RviShblfZMWphm3n0pUsI/wSrSEUTWNpiAzJuDsPYAtBlqnWNFkv9uw
+	HWrkw4HKcpE4YCW6/qDs21FTqJ/nBtMWMhUQnstHwiUjAAU98O+BI0bvLIKR8A==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed;
  d=mailchannels.net;
-	s=arc-2022; t=1748028882;
+	s=arc-2022; t=1748029438;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references:dkim-signature;
-	bh=6CxVWUagOmD4uO3grxyeaqjZ8bQ9qdUCbIr8g3+SiWY=;
-	b=qS+v0ppKQsX0UfUXkN09csujweWf1bUH12ikcJAgEb/2HSmBZcomEiSKcsw0zBc4hHor9u
-	VRIjQbN33UPBi4IxlmrOUzeRLOGpZFfHV62G57njMk3H/UtktU5pZCzB16qlplK2CtnMv1
-	EY/7sN6W13CmwsAenl6XJTCNFbfENtffKw5w0n1ggUlg686rdbA4cqKFZpfCYCennw5IL+
-	draTP3UqYgaWqYQjiLvpoTk4ypZ7OgnpbrFKx4c5CW0y296VK2realpiztdg/sNSR4kMMq
-	pVdsOcPRhNAljlbb21EuyUT6xHcAx2eWMHgoLK/Vqxx6/cXErlZipPENo1T3kQ==
+	bh=ZwsxYZ3liJWwRe4YW0egCEgaIzoKnGNpQngnXcQLRKg=;
+	b=1GcRYbvUXzA+/Bf/YeQDy09C+ePhRJ2CDCa4D9cdcV66oFIG0URBVODxBZCbOxP5QULVpb
+	3tBFOcxX6SPnjDyj1ipjIyS+h4uk33vM4ud1BogTjpibqOMuqLohplrtwCdZIiAwWZJ1YN
+	FX5eP0EEWXDCfQvxB2uXwRRd+MNfJ1aK1izZ+Hx+Ky5e57vviBtX1V3d9+MdLBDEx27uGZ
+	wmoGiuHaBgSg5/EG5vX4XUe+0T0VnlWtyi8keLOlGJr7GztZbo+4RYlQ/xeMRTaOASS3Vq
+	h0WPeXqOSagOWDmWlkd2PPlhnUWILpwbpszBv95RxF4v6eSqQLissm68wq/rQA==
 ARC-Authentication-Results: i=1;
-	rspamd-766f9cfddb-dqk96;
+	rspamd-766f9cfddb-csmgf;
 	auth=pass smtp.auth=dreamhost smtp.mailfrom=rob@landley.net
 X-Sender-Id: dreamhost|x-authsender|rob@landley.net
 X-MC-Relay: Neutral
 X-MailChannels-SenderId: dreamhost|x-authsender|rob@landley.net
 X-MailChannels-Auth-Id: dreamhost
-X-Absorbed-Spot: 0677f2982f26f06c_1748028882907_3024690519
-X-MC-Loop-Signature: 1748028882907:3116410234
-X-MC-Ingress-Time: 1748028882907
+X-Whistle-Eight: 50f0f1c64dac7375_1748029438690_2849920673
+X-MC-Loop-Signature: 1748029438689:1565425864
+X-MC-Ingress-Time: 1748029438689
 Received: from pdx1-sub0-mail-a206.dreamhost.com (pop.dreamhost.com
  [64.90.62.162])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384)
-	by 100.120.70.190 (trex/7.0.3);
-	Fri, 23 May 2025 19:34:42 +0000
+	by 100.124.34.27 (trex/7.0.3);
+	Fri, 23 May 2025 19:43:58 +0000
 Received: from [172.22.7.54] (unknown [198.232.126.195])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: rob@landley.net)
-	by pdx1-sub0-mail-a206.dreamhost.com (Postfix) with ESMTPSA id 4b3wN212Hqz28;
-	Fri, 23 May 2025 12:34:42 -0700 (PDT)
+	by pdx1-sub0-mail-a206.dreamhost.com (Postfix) with ESMTPSA id 4b3wZk10qZz8H
+	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 12:43:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=landley.net;
-	s=dreamhost; t=1748028882;
-	bh=6CxVWUagOmD4uO3grxyeaqjZ8bQ9qdUCbIr8g3+SiWY=;
+	s=dreamhost; t=1748029438;
+	bh=ZwsxYZ3liJWwRe4YW0egCEgaIzoKnGNpQngnXcQLRKg=;
 	h=Date:Subject:To:From:Content-Type:Content-Transfer-Encoding;
-	b=kU4/YgXKJnnweqVDcPqBtgaCNcnZzoAx6jZcbUSWJI6mOtoFY689hHBPcCLnfYzrs
-	 YOpH9K8g3Cc6cGLsBA2DJrA659sC/He0354rlaZNme36SQvAJMyQOlpz5GnZW0Jp/A
-	 zQ9TtxSvAlePLXUJefIXJrWt2woHNrcqPE5WJnQ3Si7XOd5dQKvdE7TLORh3HjNwrt
-	 LWH96CjX32ile1Hy5VoGLKwRGZ79eM3oOORk4eOWsjFR0ZFOh1Q97sSW80NQ6s7dMK
-	 OhQ3QuUCjFkk86yAFNdNaeS7RXuu7o/Qxpyzvjx/4P7Obwajn8cXMjSRlJ3gskmLX6
-	 bjJhF3cPAzvLg==
-Message-ID: <ad98c8d5-dc2e-4f52-9835-e15d9f3a94fd@landley.net>
-Date: Fri, 23 May 2025 14:34:41 -0500
+	b=lWKOdrk82gvUDpNjcwXvyKUoje0MKeL/H23AurE7Q3ZJqJpbER28dpLh1JoK/8Xmd
+	 W2mBocJGKp/Qe7KfCEJryMiFQ3JewQK+uJKCjuuq6lKh7Ayxcz7orENaq96r/4PLc9
+	 z5MZCkGcI7DibWj2pVfB5ZRfPcKIYI3dzXc7ns1tRdbXHrRD2ORJcCPgiroEgtJ+dO
+	 iG9vFwbJ8o7jxNNCszVtd/Ge5M+U8wx0PcpI5ofNYzPm5b5xGSO6vaziw7W6hIoIHS
+	 OV4Cq2YeuHB28JuvcryAa/NvD0nWF3uITkXcD1Q0WQcI0A8spqQAN5A9QF59dPcePy
+	 wzW6p7j+CrXdA==
+Message-ID: <5b8d51e8-92af-469d-9d05-253a63e31230@landley.net>
+Date: Fri, 23 May 2025 14:43:57 -0500
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -85,36 +85,56 @@ List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/1] drivers: misc: add driver for bootstage stash
-To: Krzysztof Kozlowski <krzk@kernel.org>,
- Francesco Valla <francesco@valla.it>, linux-embedded@vger.kernel.org
+Subject: Re: [RFC PATCH 0/1] Add driver for bootstage stash
+To: linux-embedded@vger.kernel.org
 References: <20250522224223.358881-2-francesco@valla.it>
- <20250522224223.358881-3-francesco@valla.it>
- <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
+ <PA4PR08MB604681FF6392B25A19926A11ED98A@PA4PR08MB6046.eurprd08.prod.outlook.com>
+ <473a062e4f939bc58a5c0e636569b826@giovanardi.dev>
 Content-Language: en-US
 From: Rob Landley <rob@landley.net>
-In-Reply-To: <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
+In-Reply-To: <473a062e4f939bc58a5c0e636569b826@giovanardi.dev>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 5/23/25 01:29, Krzysztof Kozlowski wrote:
-> On 23/05/2025 00:42, Francesco Valla wrote:
->> Add support for bootstage stash areas containing boot time data
->> created by some bootloader (e.g. U-Boot). The driver provides generic
->> time information through sysfs and platform-specific one through
->> debugfs.
->>
->> Signed-off-by: Francesco Valla <francesco@valla.it>
+On 5/23/25 02:34, Federico Giovanardi wrote:
+> Hello,
 > 
-> Your Cc list is so incomplete I really do not understand which project
-> you target and this popped up in my lei filters. If this is not for
-> Linux kernel, please ignore the rest.
+> The note about the data format also was my initial thought, by just 
+> copying a C structure we might have issues as soon one party changes it, 
+> and they might not be perfectly aligned.
+> 
+> To avoid inventing yet-another-data-format I've used msgpack in the past 
+> for that (the format https://github.com/msgpack/msgpack/blob/master/ 
+> spec.md, not the library ); because the specs are so simple they can be 
+> implemented in a few lines, and it's something with a reference. But I 
+> don't have a lot of experience in upstreaming stuff on the kernel, so I 
+> don't know if it might cause someone to don't be happy. Anyway, I can 
+> contribute the implementation if needed.
 
-The discussion is happening on the linux-embedded list you cc'd in your 
-reply.
+I note that if it has an external build-time dependency, I will not only 
+never enable it, I will go to great lengths to _disable_ it. I maintain 
+a patch to build x86-64 without that ridiculous fourth ELF library, for 
+example:
 
-https://www.spinics.net/lists/linux-embedded/msg04429.html
+https://landley.net/bin/mkroot/latest/linux-patches/0005-x86-64-elfcrap.patch
 
-https://www.spinics.net/lists/linux-embedded/msg04435.html
+The traditional approach to exporting data was to have synthetic 
+filesystems like /sys and /blah produce human readable ascii output that 
+could be easily parsed, because unix is textual.
+
+Ala "Write programs to handle text streams, because that is a universal 
+interface." from https://en.wikipedia.org/wiki/Unix_philosophy (quoting 
+Peter Salus's "a quarter century of unix" in 1994 which was itself 
+quoting... I think Doug McIlroy?
 
 Rob
+
+P.S. The whole digression into Plan 9 muddied the waters, not because 
+they backed off on it but because the original authors of unix doubled 
+down on their sequel project, and then unix copied things like the 
+concept of synthetic filesystems from that. The difference is Unix was 
+published freely in 1974 and Plan 9 was closed source proprietary until 
+2000, so the first changed the world and the second is a footnote must 
+people weren't aware existed until it had basically died, and then mined 
+it for ideas they could port to what they were using without ever 
+touching the incompatibly licensed code...
