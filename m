@@ -1,83 +1,33 @@
-Received: from fuchsia.ash.relay.mailchannels.net (fuchsia.ash.relay.mailchannels.net [23.83.222.64])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB83FEC2
-	for <linux-embedded@vger.kernel.org>; Sat, 24 May 2025 02:14:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=23.83.222.64
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748052896; cv=pass; b=oCIuXlDvdcqP5rj+/IdloDzugheGIgOkaynaljqcaT8RPG4X+twT3zGfx7LGd4IrmbBNI5vktHX20eJtLdj/7a/C8Gafv0DifmStAyoHM+FlYZIs8YFW6dEoqnxUB0ZjHEGNK2YAr1/UOBfWVYYXBe9dC2sU/Fs8WPqkyJkkTyU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748052896; c=relaxed/simple;
-	bh=mKomMSOMRnjgBbaa6Ydqlv4dPQOtHFlLzXJk6Qu8StY=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B99BE56A
+	for <linux-embedded@vger.kernel.org>; Sat, 24 May 2025 06:15:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1748067358; cv=none; b=Ko3lD2zlqjIjZu24WKPpL2Ug/d83EoGzmt1+n0JM7HaQd+I3+qqq1KZmMhh44ffovU6i81pCrRqvS8P2wA/LI5P4UBFQOxVSjTBUQpEyJgbM3WR6sToRcJCDqU8LYnqOjtXt3gJjjvqGLVBZLAVAUg1MGF76ATDdbPoPWfVWwMM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1748067358; c=relaxed/simple;
+	bh=29U6waNaCseHZQpj90QjAx73nuYFvtFajBHbLsnnGgA=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=g0YpKuErOtekMDRSNGXxjffvuRCSPamMHJIXDB/pGYqoU3JBDYtre3PyP3wOten5ifpbXWbxl/5iXI7xmna4JNSASNDNl1D3LyggtzCMVFvJ15HVc1CjJCkqbc+SVhoa1C6Tcjb3KsGh2sRuHMMvId3tY/HbXRuppKpFkC12Ano=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net; spf=pass smtp.mailfrom=landley.net; dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b=D7OeIHIi; arc=pass smtp.client-ip=23.83.222.64
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=landley.net
+	 In-Reply-To:Content-Type; b=jsLZmRu0AZIcsJHVfGKzsKXZ2bturfqmO0bTz6IhjcHZvIQjUDAsweuy8v3xBifPlol6EAaPv4QD2R6e6gpmjnPLuEKvRn5J57mYwSXOdxNWh9Hwraj0RmgqYMhCs4q51SDmh696UJ9mThjuc8qJs3jVOG3iXoGNQa3lZ8i8ec0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=heR+tD9P; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b="D7OeIHIi"
-X-Sender-Id: dreamhost|x-authsender|rob@landley.net
-Received: from relay.mailchannels.net (localhost [127.0.0.1])
-	by relay.mailchannels.net (Postfix) with ESMTP id 11BE01C1710
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 19:31:02 +0000 (UTC)
-Received: from pdx1-sub0-mail-a206.dreamhost.com (100-117-67-29.trex-nlb.outbound.svc.cluster.local [100.117.67.29])
-	(Authenticated sender: dreamhost)
-	by relay.mailchannels.net (Postfix) with ESMTPA id 993F51C34D0
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 19:31:01 +0000 (UTC)
-ARC-Seal: i=1; s=arc-2022; d=mailchannels.net; t=1748028661; a=rsa-sha256;
-	cv=none;
-	b=gJcH9F3NAEMxyKPH9H//TuMTdqDBXuRTxhYpGQkmWn4EyuaIE7+MqZYYGvzmc+dvznBkrY
-	YCZoPhPQMI+pCiOjqTSgUMCak/dVUdUUOLrfr80PFZxSofHkPq2/4UItjadcMKxpQh2OFm
-	y0mYPgGdqGmKnrJk4KdmIJ85Jpi6N1Pcnq6GeThJu+HSpUYOyjMrxxKH3gZUNMcLmFY589
-	mE2HpkzagizW74Vj1rITmoo2i7iSLk0omyHa3Pt6DYFLBCggsL/EYG8tMjb3iaBlKIZ57q
-	5YFuEjtVcysDSgvwSciUB+ytNDB0NYeo9nKeo6f4eaOz62XFJNvKOr47oROu1g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed;
- d=mailchannels.net;
-	s=arc-2022; t=1748028661;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:dkim-signature;
-	bh=Q1BtmmhdISRFKy/5N/1yY/ngfRWalFvaEAI5s8RRUXg=;
-	b=jazJCCgtjh08PVsH3sNijLlfrLqLxrMhT8K/IFAkg70h5ZlNvS0PFuMZ6RTJTQzyQI+Z0r
-	5HOIcpcvC5w3ztWxLiJtVoGo4W52M13MncbMgNMFiTPgRGyCmRnBSdVBTXzyp1lEoqXSz+
-	Gknuy/7QokR8jUHx+PM0FWhnBiuvFpV2u2Qrp5rNIDSWnjAsBjlcHkMp29KnqCnjEsZMq9
-	YbmaT7eelRU4BeU6Ha2cb2AIh+s5xZlAFv2GQ1I0oFr2NAZihQVzOef57dF5QaTQ6Nmqos
-	yjo0HtrR/AVITanFxKYyUU6hCmf3dQvMW6lSw6v5tq0+96fR1YXwslIDQzkgrQ==
-ARC-Authentication-Results: i=1;
-	rspamd-5b49d78d5-mlmxg;
-	auth=pass smtp.auth=dreamhost smtp.mailfrom=rob@landley.net
-X-Sender-Id: dreamhost|x-authsender|rob@landley.net
-X-MC-Relay: Neutral
-X-MailChannels-SenderId: dreamhost|x-authsender|rob@landley.net
-X-MailChannels-Auth-Id: dreamhost
-X-Cooing-Harbor: 0ff326212c4718e9_1748028661863_1151911573
-X-MC-Loop-Signature: 1748028661863:1942173175
-X-MC-Ingress-Time: 1748028661863
-Received: from pdx1-sub0-mail-a206.dreamhost.com (pop.dreamhost.com
- [64.90.62.162])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384)
-	by 100.117.67.29 (trex/7.0.3);
-	Fri, 23 May 2025 19:31:01 +0000
-Received: from [172.22.7.54] (unknown [198.232.126.195])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: rob@landley.net)
-	by pdx1-sub0-mail-a206.dreamhost.com (Postfix) with ESMTPSA id 4b3wHn1KXPz28
-	for <linux-embedded@vger.kernel.org>; Fri, 23 May 2025 12:31:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=landley.net;
-	s=dreamhost; t=1748028661;
-	bh=Q1BtmmhdISRFKy/5N/1yY/ngfRWalFvaEAI5s8RRUXg=;
-	h=Date:Subject:To:From:Content-Type:Content-Transfer-Encoding;
-	b=D7OeIHIi2RbvgQoXMHnYlA4VPPEBXaLS8k6qC/Lg77RXmZWaWpT5pPzMuo6CrTRiC
-	 /rGq9Ov4E72N7d5fbFtejy3OaGFBNlg3yX+ifs+5JFc4TPEMYUeb2jIdEwxwhj2lio
-	 a9ssO0CYe4+urgpwqKC6Kc2qbetvJl7/2C4pOTi64n0APtjLUt8LppWE96YViEzxX7
-	 7022HFGq/uAU84M1vhDLgYswIYqjIxILeUB5V2qVdUuJlqDj04EfdJcX7LoPQEH2K1
-	 SiT7WQm4pptZuQFBfsCs1oWRBkRKrK1R56nDI7IX6v4vnWDJ+Gnc/mfeJTjBa9EwRy
-	 ssKM6hneqf2RA==
-Message-ID: <bbe54e14-86d3-490a-aff1-3011c2cb351b@landley.net>
-Date: Fri, 23 May 2025 14:31:00 -0500
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="heR+tD9P"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ACC9AC4CEE4;
+	Sat, 24 May 2025 06:15:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1748067357;
+	bh=29U6waNaCseHZQpj90QjAx73nuYFvtFajBHbLsnnGgA=;
+	h=Date:Subject:To:References:From:In-Reply-To:From;
+	b=heR+tD9PHHzJKy63Vug+44xyOweXuimDqcwBswq4I7rbqeMXb6hFY2p7pDlBzSW4L
+	 prZNFsmrTiU7yhil7qP8bbHIHgwWI4G+NRbZ333FC5vXLj0Rl22QojlLBV3jjYYj6F
+	 mKqlSEUXaBY5LzQdDpvcn6JgMBG7JpKO83wKERecvXP/U7ptWgW1QXcezgee9pK/sw
+	 bfrg+tjRmRRsq0wJd+9YkceD/sDlX9RYGAEhPuSPiwiCXRcEYa7fVHuC3FXXMrj7kZ
+	 2YSpjIcLbqF4d0f2YMZ54h9cCf1429p9DGJ+7cqI5L6Lc/9pDS2z5aQjvKaUYD7toa
+	 B+7oIoiafNqIw==
+Message-ID: <afe1c042-e9d8-423a-b90d-0a78bde423f4@kernel.org>
+Date: Sat, 24 May 2025 08:15:54 +0200
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -85,33 +35,76 @@ List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: Reminder of Boot-Time SIG meeting - May 27
-To: Linux Embedded <linux-embedded@vger.kernel.org>
-References: <MW5PR13MB5632B8EE9EC410B617304A3BFD99A@MW5PR13MB5632.namprd13.prod.outlook.com>
+Subject: Re: [PATCH 1/1] drivers: misc: add driver for bootstage stash
+To: Francesco Valla <francesco@valla.it>, linux-embedded@vger.kernel.org
+References: <20250522224223.358881-2-francesco@valla.it>
+ <20250522224223.358881-3-francesco@valla.it>
+ <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
+ <3107514.XAFRqVoOGU@fedora.fritz.box>
+From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
-From: Rob Landley <rob@landley.net>
-In-Reply-To: <MW5PR13MB5632B8EE9EC410B617304A3BFD99A@MW5PR13MB5632.namprd13.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <3107514.XAFRqVoOGU@fedora.fritz.box>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 5/22/25 18:33, Bird, Tim wrote:
-> Hey Linux Boot-Time SIG interested parties (and other interested Linux kernel developers),
+On 23/05/2025 21:43, Francesco Valla wrote:
+>> tested by automated tooling. Performing review on untested code might be
+>> a waste of time.
+>>
+>> Please kindly resend and include all necessary To/Cc entries.
+>>
 > 
-> Here is the information for the next Linux Boot-Time SIG conference call.
+> 
+> I did not want to unnecessary bother people that might not be interested,
+> as the current form is not intended for mainline. I'll however be more
+> scrupulous in the future.
 
-Is there a git for 
-https://birdcloud.org/boot-time-files/grab-boot-data.sh or just a 
-snapshot of the file with no history?
+Then mark your patches clearly like that. Usually this is RFC with
+explanation what you mean by that in cover letter.
 
-> The meeting will be held via the Jitsi online meeting platform.
-> To Join the meeting via web, click on:
-> https://meet.jit.si/LinuxBootTimeSIG
 
-I keep forgetting the project web page(s) and having to dig for them, 
-and modern google does _not_ find them.
-
-Also, https://elinux.org/Unified_Boot_Log does not link to 
-https://elinux.org/Boot_Time and the only link back the other way is the 
-"special topic meeting" note...
-
-Rob
+Best regards,
+Krzysztof
