@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B99BE56A
-	for <linux-embedded@vger.kernel.org>; Sat, 24 May 2025 06:15:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33316149C4D
+	for <linux-embedded@vger.kernel.org>; Sat, 24 May 2025 06:16:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748067358; cv=none; b=Ko3lD2zlqjIjZu24WKPpL2Ug/d83EoGzmt1+n0JM7HaQd+I3+qqq1KZmMhh44ffovU6i81pCrRqvS8P2wA/LI5P4UBFQOxVSjTBUQpEyJgbM3WR6sToRcJCDqU8LYnqOjtXt3gJjjvqGLVBZLAVAUg1MGF76ATDdbPoPWfVWwMM=
+	t=1748067409; cv=none; b=KHATILwGxUesNxBZxRThYZpqXdTO4eCFJzXQZewDjkdvkNwGYUSPxhtJRSqnUuOhAM1tGUSHco35Hj783xdsUke1owXmbmsiV88oOxPSSN9Rkvg2CeY5MR4grEEjYtAXHlYrlGbQ5P7qWp9VZ7rQhqYELOmBcLnBzJqaQwSUMoM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748067358; c=relaxed/simple;
-	bh=29U6waNaCseHZQpj90QjAx73nuYFvtFajBHbLsnnGgA=;
+	s=arc-20240116; t=1748067409; c=relaxed/simple;
+	bh=ygZce56xaUpvmP+5q/HX42OwA+kVWiNNM+r/92sbLwQ=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=jsLZmRu0AZIcsJHVfGKzsKXZ2bturfqmO0bTz6IhjcHZvIQjUDAsweuy8v3xBifPlol6EAaPv4QD2R6e6gpmjnPLuEKvRn5J57mYwSXOdxNWh9Hwraj0RmgqYMhCs4q51SDmh696UJ9mThjuc8qJs3jVOG3iXoGNQa3lZ8i8ec0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=heR+tD9P; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=LBOYLvjvFdwwAMhkXvqw8WSLCP+ss9q7xYjkXIrAei59IkycUN9O7MdDrEC0uhN0IYP2G0s8WN7ZEj3wAqFaHuMkIhxDGUaUhW8mPoWIHVYcNKCkZMjtKjbVvj6BF9vwJ6FHgZqfDllUsz91Z3b04GPgkFVg9+fSZEROHpbsoEg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iC85VfOu; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="heR+tD9P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ACC9AC4CEE4;
-	Sat, 24 May 2025 06:15:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iC85VfOu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC808C4CEE4;
+	Sat, 24 May 2025 06:16:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748067357;
-	bh=29U6waNaCseHZQpj90QjAx73nuYFvtFajBHbLsnnGgA=;
+	s=k20201202; t=1748067408;
+	bh=ygZce56xaUpvmP+5q/HX42OwA+kVWiNNM+r/92sbLwQ=;
 	h=Date:Subject:To:References:From:In-Reply-To:From;
-	b=heR+tD9PHHzJKy63Vug+44xyOweXuimDqcwBswq4I7rbqeMXb6hFY2p7pDlBzSW4L
-	 prZNFsmrTiU7yhil7qP8bbHIHgwWI4G+NRbZ333FC5vXLj0Rl22QojlLBV3jjYYj6F
-	 mKqlSEUXaBY5LzQdDpvcn6JgMBG7JpKO83wKERecvXP/U7ptWgW1QXcezgee9pK/sw
-	 bfrg+tjRmRRsq0wJd+9YkceD/sDlX9RYGAEhPuSPiwiCXRcEYa7fVHuC3FXXMrj7kZ
-	 2YSpjIcLbqF4d0f2YMZ54h9cCf1429p9DGJ+7cqI5L6Lc/9pDS2z5aQjvKaUYD7toa
-	 B+7oIoiafNqIw==
-Message-ID: <afe1c042-e9d8-423a-b90d-0a78bde423f4@kernel.org>
-Date: Sat, 24 May 2025 08:15:54 +0200
+	b=iC85VfOu/RFM6sgSBxXb2rdpjNNOafie7KGdgDE5Lh22VXUK1gwJ8JqGClyWopRPS
+	 80cIqTlsZwgwAnxaxQ4LKsNq7wZlICk2oXiAzzsigJBhzS0F6ZqN6TycYc79yzhZGJ
+	 Sa2xKIAZNS2VxBnxOF79KgrN5jUcmDDVQOS3b+seTq4M4ZBJpU1wkKUk+DzWhC5hOB
+	 7gliSOGFlri7SK4hxgLfhGmYx1sw1fYWlov4tttFJ30fsgSLEg13JYSPjduU1oE1Aj
+	 FX7NELz5T/c2y6YmD15LPaKPCarQvSzIeHsMnEmieUoPVBTaNv+NEPNbrVi8mOHEha
+	 k5+qSycuX5GwQ==
+Message-ID: <ce325717-8e5a-4330-a0fe-701f211a982c@kernel.org>
+Date: Sat, 24 May 2025 08:16:46 +0200
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -36,11 +36,12 @@ List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH 1/1] drivers: misc: add driver for bootstage stash
-To: Francesco Valla <francesco@valla.it>, linux-embedded@vger.kernel.org
+To: Rob Landley <rob@landley.net>, Francesco Valla <francesco@valla.it>,
+ linux-embedded@vger.kernel.org
 References: <20250522224223.358881-2-francesco@valla.it>
  <20250522224223.358881-3-francesco@valla.it>
  <f1673d75-e951-4cdd-8414-f1e9d7d6e6aa@kernel.org>
- <3107514.XAFRqVoOGU@fedora.fritz.box>
+ <ad98c8d5-dc2e-4f52-9835-e15d9f3a94fd@landley.net>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -86,25 +87,33 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <3107514.XAFRqVoOGU@fedora.fritz.box>
+In-Reply-To: <ad98c8d5-dc2e-4f52-9835-e15d9f3a94fd@landley.net>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 23/05/2025 21:43, Francesco Valla wrote:
->> tested by automated tooling. Performing review on untested code might be
->> a waste of time.
+On 23/05/2025 21:34, Rob Landley wrote:
+> On 5/23/25 01:29, Krzysztof Kozlowski wrote:
+>> On 23/05/2025 00:42, Francesco Valla wrote:
+>>> Add support for bootstage stash areas containing boot time data
+>>> created by some bootloader (e.g. U-Boot). The driver provides generic
+>>> time information through sysfs and platform-specific one through
+>>> debugfs.
+>>>
+>>> Signed-off-by: Francesco Valla <francesco@valla.it>
 >>
->> Please kindly resend and include all necessary To/Cc entries.
->>
+>> Your Cc list is so incomplete I really do not understand which project
+>> you target and this popped up in my lei filters. If this is not for
+>> Linux kernel, please ignore the rest.
 > 
+> The discussion is happening on the linux-embedded list you cc'd in your 
+> reply.
 > 
-> I did not want to unnecessary bother people that might not be interested,
-> as the current form is not intended for mainline. I'll however be more
-> scrupulous in the future.
+> https://www.spinics.net/lists/linux-embedded/msg04429.html
+> 
+> https://www.spinics.net/lists/linux-embedded/msg04435.html
 
-Then mark your patches clearly like that. Usually this is RFC with
-explanation what you mean by that in cover letter.
-
+No, that's not the place where we discuss patches. Use
+get_maintainers.pl to find the right place.
 
 Best regards,
 Krzysztof
