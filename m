@@ -1,33 +1,67 @@
-Received: from perceval.ideasonboard.com (perceval.ideasonboard.com [213.167.242.64])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com [209.85.218.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44C74347C7
-	for <linux-embedded@vger.kernel.org>; Wed, 24 Sep 2025 14:42:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.167.242.64
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1891C30C342
+	for <linux-embedded@vger.kernel.org>; Wed, 24 Sep 2025 15:13:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758724946; cv=none; b=TFtcd2trVBTkxQz2xHmxHngImUU3PPMaXHx8J0jIMYhk2MupcSdMaASIkfgon6EeI5br6fH0n551V3Pu9X4qHFnrvvAttSWcYGwEjJvxWatn4Bo2bLqR4TtAjLn7sfgr5UiMGfPqWd+Y4h0IYja/FomKgVzx1fOkkE57+6WUu9s=
+	t=1758726839; cv=none; b=Kw6dJ5brkd5HVVgD/30zx5VWo3CrHtgG1b+5e3fKIfvpHqq28G1JIrFK/T7FFUZI7otI7nT3DBq1aVTD2o21LgZMocDAjiIYc6ZSfhHpLOPQ2ioMA0tmdN5sY0IarunzFe2Ozso0u7k36ocyO+j6fvhRvHj934ousbNiGNDbZ14=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758724946; c=relaxed/simple;
-	bh=aZoiILqns9gO2FWmu63b66yxefEOgwTkJWrRog47s3I=;
+	s=arc-20240116; t=1758726839; c=relaxed/simple;
+	bh=2zssR5zXvMdhgJUBqLraCSKGzS0gUhLhulG+Algaw58=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=OK5XX2IEcgfDulYBOh2+6p9jomBJjz8rwofo4slVE0VYBq6xRNiH9Ri0Z56TePyDyFcOmnB8JBnHvTTXnyjFtFft4w4BKS4BQSLsyN0gnwIu3J8WmUw3b+qLCfSLofVJClTimICZndrx13aMXYoAgk8m7LmmoXaVeKmLxjKW9Jw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ideasonboard.com; spf=pass smtp.mailfrom=ideasonboard.com; dkim=pass (1024-bit key) header.d=ideasonboard.com header.i=@ideasonboard.com header.b=eXC+lPZR; arc=none smtp.client-ip=213.167.242.64
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ideasonboard.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ideasonboard.com
+	 In-Reply-To:Content-Type; b=WfC8t5KIWUM9TDHiiSWc8kvMGJQBixr5jS6TBmm4kJ6gKQBbXzdwMcDcyXznKBUyINcP4C7G+X5riu55T6i7c7Sjv9hgHjHkKFiPkBuIK6myJrrjWi1NTWbgUHcXtVLoHiI2pwICghFyrEBevRi+XOojfiY5xpKnT5ZmOQAhf9A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=thegoodpenguin.co.uk; spf=pass smtp.mailfrom=thegoodpenguin.co.uk; dkim=pass (2048-bit key) header.d=thegoodpenguin-co-uk.20230601.gappssmtp.com header.i=@thegoodpenguin-co-uk.20230601.gappssmtp.com header.b=GOWTrA0i; arc=none smtp.client-ip=209.85.218.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=thegoodpenguin.co.uk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thegoodpenguin.co.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ideasonboard.com header.i=@ideasonboard.com header.b="eXC+lPZR"
-Received: from [192.168.0.43] (cpc141996-chfd3-2-0-cust928.12-3.cable.virginm.net [86.13.91.161])
-	by perceval.ideasonboard.com (Postfix) with ESMTPSA id 876D7596;
-	Wed, 24 Sep 2025 16:40:58 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=ideasonboard.com;
-	s=mail; t=1758724858;
-	bh=aZoiILqns9gO2FWmu63b66yxefEOgwTkJWrRog47s3I=;
-	h=Date:Subject:To:References:From:In-Reply-To:From;
-	b=eXC+lPZRA7OMXctp/KIl5znDdswp2RnPNWKIgx6MTkGQ1UQWTDxD2ZJZZMspiQyTI
-	 WNznKiRfRsu6ZRFli8AbUGVIgI/0kaJHa+hKybGgCplI0tesE9o9gS+O3o/9xSRgUu
-	 ZljRY1U4dR9zjmxUsTP1p9uHZ5HcXUN4LgKfwFN8=
-Message-ID: <362096ec-c5eb-4fe9-8b26-6b280306e0d7@ideasonboard.com>
-Date: Wed, 24 Sep 2025 15:42:19 +0100
+	dkim=pass (2048-bit key) header.d=thegoodpenguin-co-uk.20230601.gappssmtp.com header.i=@thegoodpenguin-co-uk.20230601.gappssmtp.com header.b="GOWTrA0i"
+Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-b3194020e86so242354866b.1
+        for <linux-embedded@vger.kernel.org>; Wed, 24 Sep 2025 08:13:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=thegoodpenguin-co-uk.20230601.gappssmtp.com; s=20230601; t=1758726836; x=1759331636; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:to:subject:user-agent:mime-version:date:message-id:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=1U5j8T+Vn8Q7+asraZxuM6IFhu3pbhEV2SRGwjQHSqo=;
+        b=GOWTrA0iVBAyi52wUJM0mDTzeRMPDAjgtMu5szuUDtT/eDhFefOTP6wHrausid1CfE
+         5dNsdPJ85Z12gkwEAVbaXfzKMfmkjNkv7XSj1L6xT7XITndUrR8VrbilDhkLgA+PRYlN
+         at9KRxDpPjCu4qpCf4F6hli8qWjFpORayEsqozgnMHsIsjo3Jc/m5WRtHvfVltO6scN/
+         7LDICeVARGg4hAlrKhZkZgAv6jmTyRdyL6cIWy4ACxst9a92OKpFvm//VOLFBFZnwlRD
+         kTc+cNhemLUxl3zo/GS648ljROAyRmvunPgtx0OEbVRtM6ud6PBOt74Ab98X28AIhFbG
+         D3Ag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1758726836; x=1759331636;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=1U5j8T+Vn8Q7+asraZxuM6IFhu3pbhEV2SRGwjQHSqo=;
+        b=bPt6PTYcALX0BKs5Q7bPCUPKV0dHipSfjX9EeQ263wXHZQPCDJvTMr4dcMDkzTLQHc
+         YhP47w0kv3mrVyhI9zsV0Wi4ODe/DKC48IUrimzl43hQvECpwFlKOAGkeRXTszDFYk5u
+         CbzjBiVSWLTB1cwkNdNNtei/aoJzsoBAOrNfz+T3IvVmEAoHN2EsJFHPywvxTN7IEBYf
+         90DFchOGHTCheYdsC2VYtVwX+M0iowzg1c+JGT47vYpRGDUjEtnDU/B+1DDsmB2xRxSK
+         7+jPvhjevUL2rnO38N2BuFu85W6ftnwEYv/XCwd0TO6x8U1kiSUqNoVCdqblL9nMNP7p
+         SHeA==
+X-Forwarded-Encrypted: i=1; AJvYcCWLEf7LCP1J30D/wYAUMSGQxAnoi7dpED4iFOG/z3u/3O9W1J9VJUMyQBCSlXKeC9a1FhY04oxvdNHxv/D9eQ==@vger.kernel.org
+X-Gm-Message-State: AOJu0YxmIdwx3mDo0q2ZM37rSf0HdGuOFs5zEih7CWv8iV2QdKspZqVn
+	mHItUteqrKSVI4zOxhdPtGTutyecmLIxx0cyfdU/CgVm3fUyUnUoRJXHEr9Xajz4bYebL48Je+y
+	oUEA5UU8=
+X-Gm-Gg: ASbGncu1vYL8bB4JYDgEZyXYtjoxsx6r0ufqc0chpAFsT3DD7Duhx/rwwZB72skeNID
+	d42E/IkXkMHPlLjxBMGoF7mj8mM/Hcx0Q/l94YZRI9gsQP7+DPphCvmFrJry8AjLtRb3WL6E0/y
+	/be/CwOLtyvFCup0DuFAbbuPWGRenpOV4HfHt+EQOxES8tTJT1OucCsgHIuUQV7K/52DrVlQUPw
+	gzaIxPfx8+h2HDB55PV9T6UY7odBIeGQoubCbseLWH1xrHuYlSFF4sPJ5kXyN7YEv4hIpP9GnWF
+	oFkrrMRrqHKElbfAcAG97E40tss9yNEBssAf25tsjCTNGlsQTWkmMvLh6Kwdvw5kGMuUPwdnaKR
+	3pRFtz8e4W+gA73oMf7OlK6pnlJZC2R2xZO65aRFEXTDbvTw+AlavmqUNZzqfVeXMWB1wbZdHW0
+	VIfdYTmHG/pn0zmIHSQK5QdvU/vd1DciFqZXw=
+X-Google-Smtp-Source: AGHT+IFBh4WXxD70ttysu7AiMohQiNTx3KzsFPfLwiiNMkN1KCGq49XsGAWG9JCO+U16AKh93EIqZg==
+X-Received: by 2002:a17:907:96a2:b0:b30:e783:9867 with SMTP id a640c23a62f3a-b34bd62cd3fmr16836766b.62.1758726836178;
+        Wed, 24 Sep 2025 08:13:56 -0700 (PDT)
+Received: from [192.168.0.235] (cpc145676-lewi19-2-0-cust696.2-4.cable.virginm.net. [82.0.238.185])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b2928cd31a6sm962396366b.102.2025.09.24.08.13.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 24 Sep 2025 08:13:55 -0700 (PDT)
+Message-ID: <f2a464d9-168f-45ee-8e8d-83918c02339c@thegoodpenguin.co.uk>
+Date: Wed, 24 Sep 2025 16:13:54 +0100
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -37,294 +71,42 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH PREVIEW RFC 5/6] base: bootcache: Add bootcache memory
  backend
-To: acampanella-thegoodpenguin <acampanella@thegoodpenguin.co.uk>,
- linux-embedded@vger.kernel.org
+To: Dan Scally <dan.scally@ideasonboard.com>, linux-embedded@vger.kernel.org
 References: <20250923-bootcache-v1-0-4f86fdc38b4e@thegoodpenguin.co.uk>
  <20250923-bootcache-v1-5-4f86fdc38b4e@thegoodpenguin.co.uk>
+ <362096ec-c5eb-4fe9-8b26-6b280306e0d7@ideasonboard.com>
 Content-Language: en-US
-From: Dan Scally <dan.scally@ideasonboard.com>
-In-Reply-To: <20250923-bootcache-v1-5-4f86fdc38b4e@thegoodpenguin.co.uk>
+From: Andrea Campanella <acampanella@thegoodpenguin.co.uk>
+In-Reply-To: <362096ec-c5eb-4fe9-8b26-6b280306e0d7@ideasonboard.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-Hi Andrea
 
-On 23/09/2025 15:23, acampanella-thegoodpenguin wrote:
-> From: Marc Kelly <mkelly@thegoodpenguin.co.uk>
-> 
-> bootcache_backend_memory provides a simple memory based backend that can
-> inject data found stored in a reserved-memory block into the bootcache
-> framework.
+On 9/24/25 15:42, Dan Scally wrote:
+> Hi Andrea
+>
+> On 23/09/2025 15:23, acampanella-thegoodpenguin wrote:
+>> From: Marc Kelly <mkelly@thegoodpenguin.co.uk>
+>>
+>> bootcache_backend_memory provides a simple memory based backend that can
+>> inject data found stored in a reserved-memory block into the bootcache
+>> framework.
+>
+> This looks really cool and I'd like to give it a go; how are you 
+> testing it currently? Do you have a tool to create the blob that 
+> you're putting into the reserved memory that I could take a look at?
+>
+> Thanks
+> Dan
+>
+>
 
-This looks really cool and I'd like to give it a go; how are you testing it currently? Do you have a 
-tool to create the blob that you're putting into the reserved memory that I could take a look at?
+Hello Dan,
 
-Thanks
-Dan
 
-> 
-> Signed-off-by: Marc Kelly <mkelly@thegoodpenguin.co.uk>
-> ---
->   drivers/base/Kconfig                    |   7 +
->   drivers/base/Makefile                   |   1 +
->   drivers/base/bootcache_backend_memory.c | 220 ++++++++++++++++++++++++++++++++
->   3 files changed, 228 insertions(+)
-> 
-> diff --git a/drivers/base/Kconfig b/drivers/base/Kconfig
-> index 1303364993ff4bf7fbbc210243dc6dc48fb1bd83..00c0ea6fa31f2d9a8863c93218a4db7ff87f9c0a 100644
-> --- a/drivers/base/Kconfig
-> +++ b/drivers/base/Kconfig
-> @@ -95,6 +95,13 @@ config BOOTCACHE
->   		  A simple backend for testing and development.
->   		  It does not persist any data externally.
->   
-> +	config BOOTCACHE_BACKEND_MEMORY
-> +		bool "Memory backend"
-> +		help
-> +		  A backend that reads the cache data from reserved system memory.
-> +		  The reserved memory block is defined in the device tree and is
-> +		  assumed to be populated by the bootloader.
-> +
->   	endchoice
->   	endif
->   
-> diff --git a/drivers/base/Makefile b/drivers/base/Makefile
-> index dc87c21cd79468045878c4b3cef5714c12f65ec4..d818e72df290e6772297345efc71082adc04e1f2 100644
-> --- a/drivers/base/Makefile
-> +++ b/drivers/base/Makefile
-> @@ -10,6 +10,7 @@ obj-y			:= component.o core.o bus.o dd.o syscore.o \
->   obj-$(CONFIG_AUXILIARY_BUS) += auxiliary.o
->   obj-$(CONFIG_BOOTCACHE)    += bootcache.o
->   obj-$(CONFIG_BOOTCACHE_BACKEND_TEST)    += bootcache_backend_test.o
-> +obj-$(CONFIG_BOOTCACHE_BACKEND_MEMORY)    += bootcache_backend_memory.o
->   obj-$(CONFIG_DEVTMPFS)	+= devtmpfs.o
->   obj-y			+= power/
->   obj-$(CONFIG_ISA_BUS_API)	+= isa.o
-> diff --git a/drivers/base/bootcache_backend_memory.c b/drivers/base/bootcache_backend_memory.c
-> new file mode 100644
-> index 0000000000000000000000000000000000000000..d7a83ce2725bc7aa5f37d5fc3dcd7bea753e4d68
-> --- /dev/null
-> +++ b/drivers/base/bootcache_backend_memory.c
-> @@ -0,0 +1,220 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +#define DEBUG 1
-> +#include <linux/unaligned.h>
-> +#include <linux/init.h>
-> +#include <linux/io.h>
-> +#include <linux/kernel.h>
-> +#include <linux/slab.h>
-> +#include <linux/hashtable.h>
-> +#include <linux/of.h>
-> +#include <linux/of_device.h>
-> +#include <linux/of_reserved_mem.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/string.h>
-> +#include <linux/types.h>
-> +#include <linux/errno.h>
-> +#include <linux/kobject.h>
-> +#include <linux/sysfs.h>
-> +
-> +#include <linux/bootcache.h>
-> +
-> +#define DRIVER_NAME "bootcache_memory_backend"
-> +#define BOOTCACHE_MAGIC ('B' << 24 | 'C' << 16 | 'H' << 8 | 'E')
-> +#define BOOTCACHE_MINSIZE 4096
-> +
-> +/*
-> + * This defines a cache entry as stored.
-> + */
-> +struct cache_memory_store_entry {
-> +	u32 key_length;
-> +	u32 data_length;
-> +	u8 data_type;
-> +	u8 data[];
-> +} __packed;
-> +
-> +/*
-> + * The in memory store of multiple cache entries.
-> + */
-> +struct cache_memory_store {
-> +	u32 magic;
-> +	u32 entry_count;
-> +	struct cache_memory_store_entry entries[];
-> +} __packed;
-> +
-> +struct reserved_mem *rmem;
-> +
-> +/*
-> + * This function processes the loaded data and adds each entry to the
-> + * system cache via the callbck.
-> + */
-> +static int memory_backend_load_cache(void)
-> +{
-> +	const struct cache_memory_store *store;
-> +	const u8 *current_ptr;
-> +	const void *max_address;
-> +	u32 entry_count;
-> +	int i;
-> +	int ret;
-> +
-> +	if (!rmem) {
-> +		pr_warn("%s: No bootcache was found\n", DRIVER_NAME);
-> +		return 0;
-> +	}
-> +
-> +	store = ioremap(rmem->base, rmem->size);
-> +	if (!store) {
-> +		pr_warn("%s: Unable to map reserved memory 0x%llx\n", DRIVER_NAME, rmem->base);
-> +		return -ENOMEM;
-> +	}
-> +	max_address = store + rmem->size;
-> +	current_ptr = (const unsigned char *)store->entries;
-> +	entry_count = get_unaligned(&store->entry_count);
-> +
-> +	for (i = 0; i < entry_count; i++) {
-> +		struct cache_memory_store_entry *entry;
-> +		struct bootcache_entry *new_entry = NULL;
-> +		size_t data_length, key_length;
-> +		u8 *src, *dest;
-> +		int j;
-> +
-> +		entry = (struct cache_memory_store_entry *)current_ptr;
-> +		data_length = get_unaligned(&entry->data_length);
-> +		key_length = get_unaligned(&entry->key_length);
-> +
-> +		/* Check if will go outside the bounds */
-> +		if ((current_ptr + sizeof(struct cache_memory_store_entry) +
-> +				data_length + key_length + 1) > max_address) {
-> +			ret = -ENOMEM;
-> +			goto error;
-> +		}
-> +
-> +		new_entry = kzalloc(sizeof(*new_entry), GFP_KERNEL);
-> +		if (!new_entry) {
-> +			ret = -ENOMEM;
-> +			goto error;
-> +		}
-> +
-> +		new_entry->len = data_length;
-> +		new_entry->key = kzalloc(key_length+1, GFP_KERNEL);
-> +		new_entry->data = kzalloc(data_length, GFP_KERNEL);
-> +
-> +		if (!new_entry->key || !new_entry->data) {
-> +			pr_err("%s: Memory Allocation error creating new_entry data\n",
-> +				DRIVER_NAME);
-> +			kfree(new_entry->key);
-> +			kfree(new_entry->data);
-> +			kfree(new_entry);
-> +			ret = -ENOMEM;
-> +			goto error;
-> +		}
-> +		/*
-> +		 * Source data is potentially unaligned, so we copy it with the correct
-> +		 * access functions
-> +		 */
-> +		src = &entry->data[0];
-> +		dest = new_entry->key;
-> +		for (j = 0; j < key_length; j++)
-> +			*dest++ = get_unaligned(src++);
-> +
-> +		src = &entry->data[key_length+1];
-> +		dest = new_entry->data;
-> +		for (j = 0; j < data_length; j++)
-> +			*dest++ = get_unaligned(src++);
-> +
-> +		pr_debug("%s: Setting up Entry (%d) with key: %s, data length is %zu\n",
-> +			DRIVER_NAME, i, new_entry->key, new_entry->len);
-> +
-> +		/* call the framework provided function */
-> +		ret = bootcache_add_entry(new_entry);
-> +		if (ret) {
-> +			kfree(new_entry->key);
-> +			kfree(new_entry->data);
-> +			kfree(new_entry);
-> +			ret = 0;
-> +		}
-> +
-> +		/* Sanity check we've got space for the next extry */
-> +
-> +		current_ptr += sizeof(struct cache_memory_store_entry) +
-> +			data_length + key_length + 1;
-> +		if (current_ptr + sizeof(struct cache_memory_store_entry)
-> +				> max_address) {
-> +			ret = ret = -ENOMEM;
-> +			goto error;
-> +		}
-> +	}
-> +
-> +error:
-> +	if (store)
-> +		iounmap((void *)store);
-> +
-> +	return ret;
-> +}
-> +
-> +static struct bootcache_info cache_info = {
-> +	.name = "memory",
-> +	.load_cache = memory_backend_load_cache,
-> +};
-> +
-> +static int bootcache_backend_probe(struct platform_device *pdev)
-> +{
-> +	int ret;
-> +	size_t table_size;
-> +	struct cache_memory_store *temp_store;
-> +	struct device_node *reserved_mem_node;
-> +
-> +	/* Check for the front end being ready */
-> +
-> +	pr_debug("%s: %s\n", DRIVER_NAME, __func__);
-> +
-> +	reserved_mem_node = of_parse_phandle(pdev->dev.of_node, "memory-region", 0);
-> +	if (reserved_mem_node) {
-> +		rmem = of_reserved_mem_lookup(reserved_mem_node);
-> +		of_node_put(reserved_mem_node);
-> +	}
-> +
-> +	if (!rmem) {
-> +		pr_err("%s: Failed to find reserved memory region.\n", DRIVER_NAME);
-> +		return -ENOMEM;
-> +	}
-> +	pr_debug("%s: Found reserved cache memory block (%s):\n", DRIVER_NAME, rmem->name);
-> +	pr_debug("%s:  Physical Address: 0x%llx\n", DRIVER_NAME, rmem->base);
-> +	pr_debug("%s:  Size: 0x%llx (%llu bytes)\n", DRIVER_NAME, rmem->size,
-> +		rmem->size);
-> +
-> +	if (rmem->size < BOOTCACHE_MINSIZE) {
-> +		pr_err("%s: reserved memory too small (%llu bytes)\n", DRIVER_NAME, rmem->size);
-> +		return -ENOMEM;
-> +	}
-> +
-> +	ret = bootcache_register_backend(&cache_info);
-> +
-> +	if (ret < 0) {
-> +		pr_err("%s: bootcache_register_backend() failed with error %d\n",
-> +			DRIVER_NAME, ret);
-> +		return ret;
-> +	}
-> +	pr_info("%s: Backend loaded\n", DRIVER_NAME);
-> +
-> +	return 0;
-> +}
-> +
-> +static const struct of_device_id bootcache_backend_driver_dt_ids[] = {
-> +	{ .compatible = "linux,backend-backend-memory", },
-> +	{ }
-> +};
-> +
-> +static struct platform_driver bootcache_memory_platform_driver = {
-> +	.probe		= bootcache_backend_probe,
-> +	.driver		= {
-> +		.name	= DRIVER_NAME,
-> +		.of_match_table = of_match_ptr(bootcache_backend_driver_dt_ids),
-> +	},
-> +};
-> +
-> +static int __init bootcache_backend_init(void)
-> +{
-> +	return platform_driver_register(&bootcache_memory_platform_driver);
-> +}
-> +
-> +core_initcall(bootcache_backend_init);
-> 
+I'm glad you are finding it interesting!
+
+We are in the process of cleaning up the demo for public use, we are 
+using qemuarm64 to test it, we should be releasing the test setup soon!
+
 
