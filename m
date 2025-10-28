@@ -1,279 +1,248 @@
-Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.1])
+Received: from CH4PR04CU002.outbound.protection.outlook.com (mail-northcentralusazon11013046.outbound.protection.outlook.com [40.107.201.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C32D72DBF75;
-	Tue, 28 Oct 2025 08:50:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA37E20FAB2;
+	Tue, 28 Oct 2025 13:39:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.201.46
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761641454; cv=pass; b=X5d+oyr4IuuMrAXULX5o8I5AyhN3HIkR9qnUvMKnT5YmXenGcq9hYn4ST/jzOZjQH/lFwXHv3lk8SSn8q2sCK2sVxiDCMVqgfrdjyic+Us64WdmywUHbjY5WXh7LC0HPQVoXZp8pqFzBsGK3cacLNtfHoPTUnLwouIUKgOZnUAc=
+	t=1761658765; cv=fail; b=ps112Qn9sue7Qq2n6O7IrrBT7iU6W6di6wbhBK74eoHRnfBRzMRB+TbzrOLiPiIHK0R1qFTSCj41139vH6D0Z96C6hgvWhJqPaBRAPs3mjKYJKe/MYqS6CLUufa0HT4ETzKNLOifHIodkwbV0ICbE6Gu0t4JR6nvlBDq/aW9d1o=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761641454; c=relaxed/simple;
-	bh=iEY4Wt1Q2As11SfIf0/Sluu+mH2O6nSTVRG/jlw/s+s=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=MpXojUXn8u+4eduF/1ZHENjjwJN37TkOZ6x/ZVes+dYjN6CveBlq4uxhvhUpG6JnJdohIZu4Jrd6erfOeW2u9svjbLqO+E6U+jhNPmXAWPzEGfp+OTnXxlHuuFOVlUJOqWRi8Lhm4FbrgpX21X4kINoinSgBTQznxf7SI/Wu55w=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b=LsPet6+K; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=ClfkBYFX; arc=pass smtp.client-ip=185.56.87.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+	s=arc-20240116; t=1761658765; c=relaxed/simple;
+	bh=ifDWMx/urYLJSGp+pcs28xXPLOKv/Lk2M69CGCP9/mA=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=LM+eo1rZ/rl2i3FJRk6jiu8JVnjxAARy529JiGFHrRZVMtlVrkuYBYGrmHHivH00m/+4uZRSJ1WxUH173AUeoyhLjMNgJM+oxK7haSO38FfN9V5LVbn0p3v9lSg7u0niqJip56QgIeLOJsTBUj+iXr+iTYKJn11loOPIRAwQxt0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=Nb3r/1zV; arc=fail smtp.client-ip=40.107.201.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b="LsPet6+K";
-	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="ClfkBYFX"
-ARC-Seal: i=1; cv=none; a=rsa-sha256; d=outgoing.instance-europe-west4-4wj9.prod.antispam.mailspamprotection.com; s=arckey; t=1761641451;
-	 b=ibClSf3l/Qv3u4iRhdYIkbbz0qfJEkYTL/h8CDqWw7Tsvx/MNjoXUnSoudPK543S22dFjt0c1K
-	  mc4ydtXIBSVY8/EQf4JApQNVG44s/tmOqGebhjn7Hd5BRrmWpvSCuM8EjV4QFE3l41JZt3TRS6
-	  FBPdVQ36JSMiWVc2qjHtgYLylvBzebqUIwI9Y7jBTS9Ya9IhnCQacjZv6OMzXnJMHtMwraMJVN
-	  IH6EHISkR8mprHt/kyamJDW+RrzIMm+JsqFp9io0t+FLWrERedCImkQ1Rm4KGG8qTdCkdkRo4s
-	  KDeYwEky4ocjNCmxTfdc95h3wCsFM9hpEoUNIGKDgardUA==;
-ARC-Authentication-Results: i=1; outgoing.instance-europe-west4-4wj9.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=outgoing.instance-europe-west4-4wj9.prod.antispam.mailspamprotection.com; s=arckey; t=1761641451;
-	bh=iEY4Wt1Q2As11SfIf0/Sluu+mH2O6nSTVRG/jlw/s+s=;
-	h=Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:
-	  To:From:DKIM-Signature:DKIM-Signature;
-	b=Ar/SIQtL6gh2hcBl87bjWQnr/hyL/kAbbrO7NO1V9QYcS0rOUy3A3QaxXR33aDanUrZhTQiuiF
-	  b98ZkL49IG8u9icKv1chWsuvtZ4CA2QIB9YZpiBbam9t7HzyOVmypYrrOxvZsa9RbgDv7SWAwA
-	  9Rxu8EPZb5qjyhm+ve3t/uwBItWF5Ob+Fue2QIw3xC0eB4ev7EZnUO7NA/R9mlp9gMscbiYWmB
-	  ELb/JbK7w+fATfImU/UJABQA9FxQeYSOZ8WGLx/GFu4Vk/8MwX1IsbJ5kW6xQ+1pmks9wh2C77
-	  4RyE1/ZQPloOUYe6spgip4CGGkGvzPTZVOPbs9ZJ4pCjTA==;
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=antispam.mailspamprotection.com; s=default; h=CFBL-Feedback-ID:CFBL-Address
-	:Content-Type:MIME-Version:Message-ID:Date:Subject:Cc:To:From:Reply-To:
-	List-Unsubscribe:Content-Transfer-Encoding;
-	bh=zdfLZeLr5NvufMpcLIsBqTthOwjM4I46IsO/Ts8RIWE=; b=LsPet6+KdSQtippXk3uCBtNAhS
-	tpDGra5MuqsTXtB799xWBnCoxdIowJbN5b0T0h/u5RqLK+zt3ResmVlCYpt3aLx7GE5yw1Gxa1ivQ
-	WrIKHIqAzxHMxaWV0XYLyDLJ40BskubU3SVWgbE9QSue/UzBWJdbPahTz0JZ1ihQjEXs=;
-Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
-	by instance-europe-west4-4wj9.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98.1)
-	(envelope-from <francesco@valla.it>)
-	id 1vDebE-00000000ZxG-28Pw;
-	Tue, 28 Oct 2025 07:58:38 +0000
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
-	s=default; h=Date:Subject:Cc:To:From:list-help:list-unsubscribe:
-	list-subscribe:list-post:list-owner:list-archive;
-	bh=zdfLZeLr5NvufMpcLIsBqTthOwjM4I46IsO/Ts8RIWE=; b=ClfkBYFXsfPZoGUrAKm6wwrL8U
-	0zjVtmTjsdovD2/5iy3S07INI/dq3tPMKjgIVJh+4zSfrNHzW4bmUZJmIVqhtBpQxebkaD/TP505H
-	uPbAkefTqhyeHburXaz+Sl2c4WKBDsBXYz4mXe7sLTBogltkk27UVLS6bDnRCo27AkC4=;
-Received: from [87.17.42.198] (port=60166 helo=fedora.fritz.box)
-	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-	(Exim 4.98.1)
-	(envelope-from <francesco@valla.it>)
-	id 1vDear-00000000Lap-143e;
-	Tue, 28 Oct 2025 07:58:13 +0000
-From: Francesco Valla <francesco@valla.it>
-To: Maxime Ripard <mripard@kernel.org>
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>,
- Simona Vetter <simona@ffwll.ch>, Jonathan Corbet <corbet@lwn.net>,
- Jocelyn Falempe <jfalempe@redhat.com>,
+	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="Nb3r/1zV"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Fb03JuTEbDRHAzj0wpNnno8fmfdFVxp/oAcvc1KnfpJbdCE3JLP0aN+1zmwXdlwNHziX7G5/YbWLKPSxOUxBCqCnnB5MET1R5Sefg+De2OtL/OWohz4jKluHaoWuQVBAJXZX0IlFSuUh1u7ITTaqpGBrhUYEbiwL9Yy+Yx1ki5sfLGcxSTv8REswZmT2dS2LR/+4gbKM8Hum0Lzexf9GSIO2k6wnfbItpB1ExwIRuBLYW8z/urbM1bcb/sN6QbHLdDDPAvplmOO+3oskIf+sxiRBe4/mV30X4aShgVibR0AOGntWfai6Jjcdt6dcsOOhmiUaqNG+Zz1p+IY94WxZ8w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=+6m3heJugSscd6MNgxrrcIYcfAbdBHyP5eU6qTVCZF8=;
+ b=gX4CnbwhiZg8tsY1OMHkBAgYfgbwMOR7VMBUYPof99aqOUqHjAinoB5clxNWHqwv58VDMOOHuykAisoo0RyzVOyx+L9WDA2Ws9SSpMpP8sMg8SqHc1TlaRMkHy9NFK7/XwchqIPA7z9y1gQHMkRe33cc3zTbADjgBliuvE3hITE7Jjii5ArVOa1ndbLMYz+wpPlOgBuFT+SNOoFeI1XDyt/javppoiLaxARoi28UYzSfIWG5hOJwHUYaIHHPjuPqUNSlFl+Uh8PQkXg/WqHg7dJ4WvaLtObg+0rerPz2MBFz4WQvH9SD8dp5KQRYJW7ktDULb0LJpPBCr0WAzE1zXw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
+ header.d=amd.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+6m3heJugSscd6MNgxrrcIYcfAbdBHyP5eU6qTVCZF8=;
+ b=Nb3r/1zVRMqMm6vv6BAh1ARIr+V9aHvPyDW8pCReH3rTFwS643kL0WVpyYh0Jw1wf1NB3BtZm9ZPYHe74SAEU2iocX3d+IUiI2iOQUfryr76YVocB1rpaUqncRfCo05KpShuyCeSn1lbfkUdQc9feCpaPG2OC5WTEfBcXEHfw0k=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=amd.com;
+Received: from MN0PR12MB6101.namprd12.prod.outlook.com (2603:10b6:208:3cb::10)
+ by DM4PR12MB7744.namprd12.prod.outlook.com (2603:10b6:8:100::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9275.13; Tue, 28 Oct
+ 2025 13:39:18 +0000
+Received: from MN0PR12MB6101.namprd12.prod.outlook.com
+ ([fe80::37ee:a763:6d04:81ca]) by MN0PR12MB6101.namprd12.prod.outlook.com
+ ([fe80::37ee:a763:6d04:81ca%7]) with mapi id 15.20.9253.017; Tue, 28 Oct 2025
+ 13:39:18 +0000
+Message-ID: <9c75bbb5-907c-439e-b442-ebbac5056bcc@amd.com>
+Date: Tue, 28 Oct 2025 08:39:09 -0500
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 0/3] Add splash DRM client
+To: Francesco Valla <francesco@valla.it>, Maxime Ripard <mripard@kernel.org>
+Cc: Thomas Zimmermann <tzimmermann@suse.de>,
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+ David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+ Jonathan Corbet <corbet@lwn.net>, Jocelyn Falempe <jfalempe@redhat.com>,
  Javier Martinez Canillas <javierm@redhat.com>,
  Sam Ravnborg <sam@ravnborg.org>, linux-kernel@vger.kernel.org,
  dri-devel@lists.freedesktop.org, linux-doc@vger.kernel.org,
  linux-embedded@vger.kernel.org
-Subject: Re: [PATCH RFC 0/3] Add splash DRM client
-Date: Tue, 28 Oct 2025 08:58:05 +0100
-Message-ID: <2756316.lGaqSPkdTl@fedora.fritz.box>
-In-Reply-To: <yq4btdc5qqukuqps7y53dratmu64ghyifgprlndnk5rbgml4of@rvca75sncvsm>
-References:
- <20251027-drm_client_splash-v1-0-00698933b34a@valla.it>
- <yq4btdc5qqukuqps7y53dratmu64ghyifgprlndnk5rbgml4of@rvca75sncvsm>
+References: <20251027-drm_client_splash-v1-0-00698933b34a@valla.it>
+ <93cbbaef-918f-4300-aa5b-11f098e217b2@amd.com>
+ <23clcxtgbzbsji2knwp47xdc5udj7lnhbvzsgqi3vklvmhdgjd@26ycx2ed77l4>
+ <4497733.UPlyArG6xL@fedora.fritz.box>
+Content-Language: en-US
+From: Mario Limonciello <mario.limonciello@amd.com>
+In-Reply-To: <4497733.UPlyArG6xL@fedora.fritz.box>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SN6PR16CA0043.namprd16.prod.outlook.com
+ (2603:10b6:805:ca::20) To MN0PR12MB6101.namprd12.prod.outlook.com
+ (2603:10b6:208:3cb::10)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart2568004.XAFRqVoOGU";
- micalg="pgp-sha512"; protocol="application/pgp-signature"
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - esm19.siteground.biz
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - valla.it
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-SGantispam-id: 5a7c746a07f8a41a36c791bb827bc739
-AntiSpam-DLS: false
-AntiSpam-DLSP: 
-AntiSpam-DLSRS: 
-AntiSpam-TS: 1.0
-CFBL-Address: feedback@antispam.mailspamprotection.com; report=arf
-CFBL-Feedback-ID: 1vDebE-00000000ZxG-28Pw-feedback@antispam.mailspamprotection.com
-Authentication-Results: outgoing.instance-europe-west4-4wj9.prod.antispam.mailspamprotection.com;
-	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
-	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
-	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
-	arc=none
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MN0PR12MB6101:EE_|DM4PR12MB7744:EE_
+X-MS-Office365-Filtering-Correlation-Id: 8f86378b-4c2e-4bd6-fb87-08de162764c4
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|7416014|376014|1800799024|366016;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?QjdQVWg0YW1kOW5RRWNCN3BJb00vOVVwSDF4d3hoczlTQit2ck41N0M4K2JV?=
+ =?utf-8?B?Ti9IOC80cHA0MGd6WnR5NnRhU0x6S0cvbkdZaGV3N1NRQXByTDN5VjV1M2dl?=
+ =?utf-8?B?cGlIYnNTV0tlelJYSFdIdGtBNXNEVkZUemtSU3BkOW9VQzhDWjZCRXJCaWNI?=
+ =?utf-8?B?NFhXekZSMExOK1Z5Q2NOeU1sTmo2MXVtenJrcHR1WGpuaWZDY0tQMjJiMEcv?=
+ =?utf-8?B?QThIZVVERHFpSGFkbU9hS2d6UGJoYmg0b2ZkY2pYc1RmTm8rRDRJOXVKbXF5?=
+ =?utf-8?B?bDU3bnN0OGNlaVQ1VDFsL3ZEdndXc0JvOWEwdklNMERmRTZKcUIrQXBURmRR?=
+ =?utf-8?B?TFVwRDR4ZTZ5RTJ5K1FZSkxMT1hvM3BmUkQvazBvQ1ZUc2lQSzBkL1pROU4r?=
+ =?utf-8?B?anVpMTVXcE44Uzh4ZHByNStJU29DWXh0bUxacWVuSngrc3cxZ1FMbThNdEJy?=
+ =?utf-8?B?L0JDYkhESjhiVjl3SVQzS0ZNZG9vTnRpRzZqdjFNaXhkeitKdUlUNGxZUU90?=
+ =?utf-8?B?OENNMDl5b2dlSlR3RDRiNzlUS29JNWxubmpYTlh5ZWJoUnRzMFY4ejFrRS9m?=
+ =?utf-8?B?VlFyd2dHWW15dGRJU0IwT2lZTVBjeWdJRGJKcXhHR2lHRWJobGtkeG1obnA4?=
+ =?utf-8?B?K1U2NDk0QVplS05jNDlUNEZHS0FUaElhYlhZeFRIVzBrTW9Od0M4L1JqMUc2?=
+ =?utf-8?B?WUVMcld5dkdVZnBQSkp2TXR2N2FTdGRCc3ZFcmQrNyt5RWtSK1BaOHVuYTB3?=
+ =?utf-8?B?TWxhWVczMU5FeUxjd2tiVmVIYytuVFZNOGNCYXQ3ZWtja1FKT1dEMmVLSExp?=
+ =?utf-8?B?ZlRNeUZJR0tldDd5OTZtUmNETjZIT3lVZTlFWWkzM2k1R0R5SnFkWVMxd0Vu?=
+ =?utf-8?B?UDJCdXM4UGREdml6SUpESnZabS91Q3NtRVVsZ2xzb0hRK3lkTWFSQVJKaURI?=
+ =?utf-8?B?b1ZVYWgwc1c1NFFvL2pqWkQ5dzJSMlVQWDFpUlpTVWVVTzN2RUJTS09lYUIw?=
+ =?utf-8?B?M2s0akM5UXZFTmo5OWVsS2E3ejdKVUlTODZNYmVFejVwbHFTcUhGWVcyd05m?=
+ =?utf-8?B?UU12YzZoOUFETitkbUdvS2FXYTlIVWZsVjdlVzVhb3NLY2wxaDhQaWhqZGVR?=
+ =?utf-8?B?dTFJcUtZY1VuNzZGNUZOV2JwWklhendMbVJPM3NYb1NNOXFDRjNTQmc5NUpz?=
+ =?utf-8?B?L1dob0U1QnhIM2lXQjJiUzZXZm9teGs0RGkwSnZnc0l5UFkzb0JyTzZNeEt4?=
+ =?utf-8?B?bERnQVpqcHRmNFoyWDcrTEl5N0QxNHp4UlAzZC9KbjRPOHFEYkJMWmMxMkFa?=
+ =?utf-8?B?RXRYMFJDQ0xvODdZQXRHYXo4V1VQVkJVQlpLSkova2IvQXVNaDJjMnk5YVNQ?=
+ =?utf-8?B?Z2lQOTR5dzYvUnR6WE5BZ09SK3RRVmdwMWFWWklDeERJaWtKeUZYZ2hpcmJX?=
+ =?utf-8?B?YjMzSEp2RHFhOUlQbGpNbmNxVnpxdk9LVzM3M2FjRXlNZk1RUHFCQUVjelJF?=
+ =?utf-8?B?RjJiK0M3Wk9ZellEeXNaSERDclliOVBPZHlwSHkvd1Z4eDFEMVUvOEFsZ21w?=
+ =?utf-8?B?amxhMHBmREdnc0pDV2FscC9GUm45dzZhbnhQUUJHNEp5a2QzR2hyaVNrNmJv?=
+ =?utf-8?B?K2ZIZXBZcGtXbUYwaEtmR2ptb2Z4L3loRWh6WVhPNHVncGtjQ0I0ZFV0THFR?=
+ =?utf-8?B?NTd4ajBYM1I0dW9vSVFIWTdndCtOK3FlME03S05LTVR4NTY2MlF4eHBUd3ly?=
+ =?utf-8?B?T3lIcjl6Uk90WEV4RCt5M2RQd1hxN0R2eGVqZHk0N1M2UFB5QmM2K2E4WkFN?=
+ =?utf-8?B?d0JsSE1wUjNYdTVCK0hRUlNUNTR0ZDFBMEZlOGg1OHY2ck5BcGF5aXdBajYy?=
+ =?utf-8?B?OCtBbHZqNmwyWGZJSzNqd1JjYlUzMzNmR05TVmVyMnlpdmtwc1VxNFJqc1BU?=
+ =?utf-8?Q?70zQgZjdteWjRyU2ir1Xfd8Zj9zIwXl9?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN0PR12MB6101.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(1800799024)(366016);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?QjZyOWdFdVJ3bXlaeFZTdWJ1YW90QklxZDlzcTkrMU1HWGZqUmE0amlCekE1?=
+ =?utf-8?B?aGMzbTQ0Tk02WFc4dGpZSXJGa1hiWlZBWERiWkJ2dnBhWUVGTTRHZFZ4TzVV?=
+ =?utf-8?B?WnVTREJTMjFTdjByUTllR3ljTXlIejdnbTJxb2Z5ejZ2SWVoREtqZnNJQmI1?=
+ =?utf-8?B?d1d5QU9xOVVMRjFpWTdwOXE3d3A2bm1yT1lFV2hBRmhGbGJSRUxVK2NEQ291?=
+ =?utf-8?B?RVE2VDZxeitlUzhoajFUbW9mL3c2eFJFdGM0OU53czNiaFg1Ty9vaEpVOThw?=
+ =?utf-8?B?N2tVRXZWemRvZXppZGZxQUZySE9zK0dnNFBobk9RcVJmVjFIZmRjNExTMzAw?=
+ =?utf-8?B?cCs1Vi9TaUtGMGE0RDZBbDdHcE5SYXZPWFRaZS9BY3MzUzh5cjZVMVFyNXAx?=
+ =?utf-8?B?RXp3aVN2UmQ3cWk2aktGdUVJaUtrK2xUTmNNNUVSMUIwU3QxOFdiZHduUmdW?=
+ =?utf-8?B?ejhDcjJ3MlhSVlZOKzNUbVJzZFJKcXNoUEJ3a29idlBvU3h0RlpTdE5jS0R1?=
+ =?utf-8?B?b2w5c2tEVmJXL2pmdDVWTFg1Z2ZGTzBNYVZHMTRWdUNnSURCOFRmcHc0THBL?=
+ =?utf-8?B?MUw2RUlkNVBibFdDaHh0VGJ4Sk8rb3J5aUQ4UFFFdG5oQXRvMS9yYVovMWhG?=
+ =?utf-8?B?bG9lVTA5ZG14ZHpOUzBndVpROUFQWHRFU2tOOFg4UVBjT21Ib0NwUXRydXBu?=
+ =?utf-8?B?anJOMTkyTlRjdllja3Q2L3YvdnRkTzhNcU92TXYxdTllSzRGc2ZQSTBxd2Jh?=
+ =?utf-8?B?RkRmdW5MV1FhWnRlYmZ0TXoxTHAxa1k2V3FZUW9QL0dVd3VXZUl1QVl3bXlK?=
+ =?utf-8?B?NlpkYzZSNlJvbk9XbGtGSk4yTTZrK2xXSEg5cDRKQitycDhJQzdRNlZpc1hK?=
+ =?utf-8?B?TnpJeUQ0dE4rdkdqRC9LWFphV0I2TCt2dDVqY2M4eU8xUTI2d0o4OTVrcDlp?=
+ =?utf-8?B?QkpzNlZwZXRmS3BwMitRcU94a3lKRm9jZlV6b29zUWpMZzRpNjljeG5xZ0xM?=
+ =?utf-8?B?YlBEV2xoNjVHL0pjZGJLdTRDVFU4bkt3c1lLZ0tvR2J1ZHpNNnA2SENuQXEr?=
+ =?utf-8?B?bXk4Yk8yRGk1RzVTMS9jMWMrWDV6RGVPTThVV0RwRHZwTkdaQTE2M1c2UXVK?=
+ =?utf-8?B?NDdaTGJ0NnFnVklmVWNrdjZSYStvQTV1TmxxaEFLY3pxQ2x5YXhFSHRFSkts?=
+ =?utf-8?B?Z2tMeUdKMkxRa21DMUFWbUQ1dUFNQzlDZWlKNjEydlJLVkU2VzhNWCtWYjk1?=
+ =?utf-8?B?NUw3YU8vZW1nbWRsZGF5eHZCTnluQkZWYTV4c0ozQVdpdHVwU2tDTCs0MUhJ?=
+ =?utf-8?B?cFAvMjRnRWZoZGJxUVM4Y083bEFDREgvd1FacXZPR2EzYkVzems3Qm5meFEr?=
+ =?utf-8?B?UUhLclA3c0V2QjNsRWtrNjNaNytZS1pmTzRERTVFdTErZFlxM0NaSk80V2ti?=
+ =?utf-8?B?YThITkNVTGhkZXhLT21tV1NiejZOZUxad1ErMlJDMVNKeWJoWG12RTU3VWtu?=
+ =?utf-8?B?WXkvQ3FvQkl5UFl4WCtvQU9aaTBEVlQvUDhYN3ZaeGhHd1lIanJFSjFJMDBD?=
+ =?utf-8?B?OVU4a2pPWWo2NGc5N3VzS0ltYkt3Ymk5czIyYStlTTZTU3pPNVBrWjhWNEtV?=
+ =?utf-8?B?ZGY0Z0wxMHdmWGx2Slp1QmswQ25sSDFRRVdta1UxSU55RU1OS1p3MjQycnNW?=
+ =?utf-8?B?SkQrVklIWnV3SVlGOXptSzRuRkZzR1RBQ1UzUVp6TXNjR1VOQnRZcHAzanc4?=
+ =?utf-8?B?NUsrdngwVmpSdXdQMXpvRHB4OEttdlRoSWR4QjFELzFDWVB3endlOTd1c1Fr?=
+ =?utf-8?B?cXdTbmNxbzUwQ1NEMWV0b1Nrck9DZmRMT3ZkTVNreHphd0kyeUQyVE5LOFcz?=
+ =?utf-8?B?N01sZktWenVBK0VOdVVOOEZYUVFQOEFnSVFxRll0b3E3SzJ1SWorMDZscEVv?=
+ =?utf-8?B?YkNSWWR1VGJHVVorWTIyUlgxUkpyeFlKeW4ycmpTN3pXQlBxZUtKc1RhSGZZ?=
+ =?utf-8?B?YXE3RkFFdk4yLytFY3NNMUZPb0pUb1V0K3BvWGd4RkNtc2o2UlBibEV4azVX?=
+ =?utf-8?B?elhrY0hkaFVhdFp6YWJDdUxTMWR2emFYcmNUWnY1cnhqTzArT004ZWFZRWll?=
+ =?utf-8?Q?/3zQCKg5btyJv2bi5uw8Nu3vp?=
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8f86378b-4c2e-4bd6-fb87-08de162764c4
+X-MS-Exchange-CrossTenant-AuthSource: MN0PR12MB6101.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Oct 2025 13:39:18.5879
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: EPP7913G7JdFNXP1WpnrzJpGJ9KNzTn3MEIDSjhRdlRxQAAA2Eo6cGGVNI1kwtqVEAVT/q6/FHYVeSdmSPiARQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB7744
 
---nextPart2568004.XAFRqVoOGU
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"; protected-headers="v1"
-From: Francesco Valla <francesco@valla.it>
-To: Maxime Ripard <mripard@kernel.org>
-Subject: Re: [PATCH RFC 0/3] Add splash DRM client
-Date: Tue, 28 Oct 2025 08:58:05 +0100
-Message-ID: <2756316.lGaqSPkdTl@fedora.fritz.box>
-MIME-Version: 1.0
-
-Hi,
-
-On Monday, 27 October 2025 at 11:09:56 Maxime Ripard <mripard@kernel.org> wrote:
+On 10/28/25 3:09 AM, Francesco Valla wrote:
 > Hi,
 > 
-> On Mon, Oct 27, 2025 at 12:03:00AM +0100, Francesco Valla wrote:
-> > this patchset adds a new DRM client offering splash functionalities,
-> > able to draw to screen:
-> > 
-> >   - a colored background;
+> On Monday, 27 October 2025 at 18:19:12 Maxime Ripard <mripard@kernel.org> wrote:
+>> On Mon, Oct 27, 2025 at 11:31:06AM -0500, Mario Limonciello wrote:
+>>> On 10/27/25 11:28 AM, Maxime Ripard wrote:
+>>>> On Mon, Oct 27, 2025 at 11:01:55AM -0500, Mario Limonciello wrote:
+>>>>> On 10/27/25 7:35 AM, Thomas Zimmermann wrote:
+>>>>>>>>      - a very simple progress bar, which can be driven through sysfs;
+>>>>>>
+>>>>>> Once you have options to control these settings from user space, you
+>>>>>> should do it in user space entirely. As Maxime suggested, please improve
+>>>>>> plymouth for anything with animation.
+>>>>>>
+>>>>>>>>      - a static image (optional).
+>>>>>>
+>>>>>> Board vendors often provide an image, see /sys/firmware/acpi/bgrt/. This
+>>>>>> is a candidate for display, or the penguin or a custom image. Please
+>>>>>> make it configurable by Kconfig. Again, if you need policy and
+>>>>>> heuristics for deciding what to display, you better do this in user
+>>>>>> space.
+>>>>>
+>>>>> I'd actually argue that the static image from BGRT should be the preferred
+>>>>> priority.  This can make for a nice hand off to Plymouth.
+>>>>>
+>>>>> The (UEFI) BIOS already will show this image as soon as the GOP driver is
+>>>>> loaded.  Bootloaders like GRUB by default will avoid showing anything or
+>>>>> will overwrite with the exact same image in the same location.  This can let
+>>>>> the kernel do the same, and then the moment Plymouth takes over it could do
+>>>>> the same.
+>>>>
+>>>> And BGRT isn't typically found on embedded systems at all, so I'm not
+>>>> sure it's a sensible default, let alone a priority. At most a possible
+>>>
+>>> There are certainly embedded machines using UEFI and that have a BGRT.
+>>
+>> Yes, indeed, hence the "typically".
+>>
+>>> How about "Sensible default the top of the priority list if it exists"
+>>
+>> How about we don't tell contributors what their priorities must be?
+>>
+>> Maxime
+>>
 > 
-> So, I like that part, and we were recently discussing about this.
+> I'm not familiar at all with BGRT, I'll study a bit about it.
 > 
-> >   - a single-line text message, which can be set through sysfs or
-> >     directly from the kernel command line;
-> >   - a very simple progress bar, which can be driven through sysfs;
-> >   - a static image (optional).
+> A build-time configuration could then let the user select:
 > 
-> But there's no reason to have all that in the kernel, and we already
-> have userspace components to do so (plymouth being the main "mainstream"
-> one).
+> - a plain solid color
+> - a custom static image
+> - the penguin logo (?)
+> - (on UEFI systems) BGRT source
+
+Thanks!
+
+What I had in mind (which feel free to disagree - it's an RC afterall):
+
+User can pick one of these:
+
+CONFIG_SPLASH_IMAGE
+CONFIG_SPLASH_COLOR
+
+If user picks CONFIG_SPLASH_IMAGE then the default behavior would be 
+UEFI BGRT with a fallback to a Linux penguin.
+
+Additionally there could be a
+
+CONFIG_SPLASH_CUSTOM_IMAGE
+
+This would populate the path to a custom image at build time.
+
+If user picks this then it would override both UEFI BGRT and Linux penguin.
+
 > 
-
-I get that for the "text message" and "progress bar" parts. I still have
-some uses for them, that however may not be adherent to upstream philosophy.
-
-> > Once compiled inside the kernel, the client can be enabled through the
-> > command line specifying the drm_client_lib.active=splash parameter.
-> > 
-> > == Motivation ==
-> > 
-> > The motivation behind this work is to offer to embedded system
-> > developers a new path for a simple activation of the display(s)
-> > connected to their system, with the following usecases:
-> > 
-> >   - bootsplash - possibly displaying even before init;
-> >   - early activation of the display pipeline, in particular whenever one
-> >     component of the pipeline (e.g.: a panel) takes a non-negligible
-> >     time to initialize;
-> >   - recovery systems, where the splash client can offer a simple feedback
-> >     for unattended recovery tasks;
-> >   - update systems, where the splash client can offer a simple feedback
-> >     for unattended update tasks.
 > 
-> If plymouth cannot be used by embedded systems for some reason, then you
-> should work on a plymouth alternative.
 > 
-
-Thing is: any possible alternative would still start after userspace has
-been loaded, checked (in case of secure boot, which is ubiquitous now)
-and initialized. This means, at least in my usecases, several hundreds of
-milliseconds after userspace start, to be summed to the panel initialization
-time.
-
-> > While the first seems the most obvious one, it was the second that acted
-> > as the driver, as in the past I had to implement a ugly workaround using
-> > a systemd generator to kickstart the initialization of a display and
-> > shave ~400ms of boot time.
-> > 
-> > The last 2 usecase, instead, are the reason I dropped the "boot" part
-> > from bootsplash.
-> > 
-> > == Implementation details ==
-> > 
-> > The design is quite simple, with a kernel thread doing the heavylifting
-> > for the rendering part and some locking to protect interactions with it.
-> > 
-> > The splash image is loaded using the firmware framework, with the client
-> > expecting to find a binary dump having the right dimensions (width and
-> > height) and FOURCC format for each modeset. Given a 1920x1080 RGB888
-> > modeset, the client will for example search for a firmware named:
-> > 
-> >    drm_splash_1920x1080_RG24.raw
-> > 
-> > If the firmware cannot be loaded directly, the NOUEVENT sysfs fallback
-> > mechanism is used to let userspace load the appropriate image.
-> > 
-> > == Testing ==
-> > 
-> > Testing was done on qemu (both with vkms and bochs drivers), on a HDMI
-> > display connected to a Beagleplay and on a ILI9341 SPI display connected
-> > to a i.MX93 FRDM board. All these platforms revealed different
-> > weaknesses that were hopefully removed.
-> > 
-> > == Open points / issues ==
-> > 
-> > The reason for this being an RFC is that there are several open points:
-> > 
-> >   - Support for tiled connectors should be there, but has not been
-> >     tested. Any idea on how to test it?
+> Thank you
 > 
-> Did you mean tiled formats?
-> 
-
-No, AFAIU the tiled connectors are different connectors that feed different
-panels, which however are part of a single logical screen. Support for this
-setup is present at drm level [1], but I'm not familiar with it.
-
-I've only found this used inside the i915 Intel driver [2].
-
-> >   - I'm not entirely convinced that using the firmware framework to load
-> >     the images is the right path. The idea behind it was to re-use the
-> >     compressed firmware support, but then I discovered it is not there
-> >     for built-in firmware.
-> 
-> Yeah, firmware loading for this has a few issues (being tedious to setup
-> for when built-in being one). I think just going the fbdev penguin road
-> is a better choice: you provide the path, and it's embedded in the
-> kernel directly.
-> 
-
-Yes, this is already working, but if large-ish images are used, the loading
-time for them defeats the entire purpose of an in-kernel splash.
-
-> >   - Again on the firmware loading: CONFIG_LOADPIN would interfere with
-> >     sysfs loading.
-> >   - And again: FW_ACTION_NOUEVENT only has one user inside the kernel,
-> >     leading me to think it is de-facto deprecated. And still, uevents
-> >     for firmware loading seem frowned upon these days... 
-> >   - Generating binary dumps for... basically any format is not so
-> >     straightforward. I crafted a Python tool with AI help which seems
-> >     to work quite well, but I honestly did not yet understood which is
-> >     the policy for AI-generated code inside the kernel, so it is not
-> >     included in this patch set. All client code is genuine, though.
-> 
-> BMP is simple enough to support so we should probably use that instead
-> of a custom format.
-> 
-> Maxime
-> 
-
-
-Thank you!
-
-Regards,
-Francesco
-
-
-[1] https://elixir.bootlin.com/linux/v6.17.5/source/include/drm/drm_connector.h#L2253
-[2] https://elixir.bootlin.com/linux/v6.17.5/source/drivers/gpu/drm/drm_connector.c#L2739
-
-
---nextPart2568004.XAFRqVoOGU
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQRUrtjevJ039mawAeLir2xSXEi5AAUCaQB3jQAKCRDir2xSXEi5
-AFnSAQC9C4qNTZxuzclFDDCR37ko3jNFdZTX3yJfD8TIeTHZzQD/aVd9TRgWztp0
-2tBumHqBgLdhZcyZQNGyt5HWFk7XcQU=
-=5pI2
------END PGP SIGNATURE-----
-
---nextPart2568004.XAFRqVoOGU--
-
-
+> Regards,
+> Francesco
 
