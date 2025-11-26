@@ -1,227 +1,194 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.13])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AF50328B55
-	for <linux-embedded@vger.kernel.org>; Wed, 26 Nov 2025 12:55:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764161739; cv=none; b=ZY63bj/pi6D2DaoMEztd5reJ5xbocvvxyp/3ZAnjo2b4B/3bzFvIzYHFGbI+o3lespdC+zi8VhR80G9XEZJSTGwaTS9y6d26XM1XMxMqRCMQkqnYf77i9Apxy3URAiuqcwcwG5mWRT0ZBFhIIPF1wH5Ew2dPUqKfaJlN26kMoBI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764161739; c=relaxed/simple;
-	bh=uED5a7iSGpxFtHihi2C4Q+xB6s/168K7zdZ5PY0KqUE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KlA+Kkw93QA403L26GpeXoz3XdgNl7jyzQXLQkeCzGuSYVFOV8l9rM3/TTevMkW4EqHRhpMTCdVrmpEyeo7Ssc+OZ4TUD/1EQHuOk1IfQ71lSGy1NzgiP2VbkhnRHnIf1a0PgMTlyCaO6MYKiiCwYI0WWH+yzH/jj0LxJ+mxghA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=JAf8dNP9; arc=none smtp.client-ip=209.85.128.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF3E52D9481
+	for <linux-embedded@vger.kernel.org>; Wed, 26 Nov 2025 22:55:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.13
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1764197730; cv=pass; b=ekZ9pek2qCfXtPRfcJMP/VeDj/PwntboibdyawVR6t0ME2SO7XvtjtE2DF52AKNUF8XbPWdjHSVRCfDRxTV3JBOIC9ImwG3e18ZYRv5hK9Ma5g0bFELJoXQj7IMFGRMsILHol/eomN45Mcrb4n3/Nkz+6jP1jPqxjGnCL6eGOg4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1764197730; c=relaxed/simple;
+	bh=yHYZ/X1d3QhoPsxLwGtGC3eXaCqqCILLQa11Kyk06M4=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=jMx3z/Q3pbiPOTdfWJeo1drqnBU3PjzMB3xL2VtG0SIGxh8feG/z0mrUEirjkbOMs24xu4KiDSnQgaQmmlFJz5XIrBv558SigN0n7yrGp+VNpcp1GboEtzgLX97P6A0ujtsEs6jUF5EsbwvR4GAfwKo6rJQmCeRi8KPRGhrboFE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b=suRKDgAG; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=nkpcsISh; arc=pass smtp.client-ip=185.56.87.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="JAf8dNP9"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-477a2ab455fso71312185e9.3
-        for <linux-embedded@vger.kernel.org>; Wed, 26 Nov 2025 04:55:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1764161735; x=1764766535; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=c2vJlIMpTVo0GsxLS9m/HKFB95uCVQEqWI88dTXzXL0=;
-        b=JAf8dNP9VoB95JQFmk5TFqCva3zhpkVJj48N7Q1DocpJwoWx2F1PnhANMMUujfsYvb
-         ElfsK9iEkcjg8SDzMSJQ//cZnPnzTLDjlgWPrfWQ2RWFraNlWRlmq3tDodgXSS256Fig
-         OztAUVl+q1nGuqY3XlX0Dn9oRJ4GmsxL29vveXwJCjFXF6UFTw/ABm1nwn3T+9OgGu0c
-         islwE4YkYGL0FX/WeZPt8BOEe3ZW75nPEifkiiDcbrBn6qgXB8+YJUzgW+EyEGcbi39y
-         ifE+REadLpeINPob6gDcj3o8Fa1w6/tQQclgN6/8mUIam7UIwqnhwzaXJ5Wi7yRGXqkK
-         YoGg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764161735; x=1764766535;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=c2vJlIMpTVo0GsxLS9m/HKFB95uCVQEqWI88dTXzXL0=;
-        b=VNgV188M0kdTpbJYeSiWskQumZyTEToHJkQnexFKGOh8Csu9NkhJ+9jPzVaPwq9zoH
-         hdnBHVUIIFJp/WkwOA850Q0KsYmm3qMakWKLgzH4R8XUEN8TtcphnoM8GwMXFDfkuPNA
-         ETcporCAzYceVii75RnQL6RCCvFABHyGgVDQNbMQm3aVQUcyLwTrNGGyL3TLl7FcOKed
-         TT1aRQ1Co+jhp5tQITpUnaUGDajbkBluHrNdv1mlZTLr9RrIPFT6jDlgEktdiKjRBT/O
-         ha1hz2gSFZNiDgFy3GRFHH2kh3nG7lgX7bE5Ue9nUScPHmb+1pUeA19tCsv5rJi02QEt
-         SjdA==
-X-Forwarded-Encrypted: i=1; AJvYcCUXOCqLWrC6m8xreAAQ2Fh3U3/zZluk+F9H0+A/YxhjRMY/kUI89kZboRkN4YR1vgQ16XH1pycVUmpiID3muA==@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxaix5ouMnFjbOTFAiElNBGxDh6UryryUIBsiaO8piNkQd9JpHK
-	HuhWU8F1ePf1kddH0efLXWuiT2XqvU7/3TWTt7Fr5ZF4tC69ISEet+V8nx82Pck2gC4=
-X-Gm-Gg: ASbGncujkcxxSm0ovTUA5W6x3p9AMb5yaH5wEjc4YhHe36CGmWgrvQj79btXUdvmSw0
-	1WWXkz732iSPPA4XFM25vZpJ0aksZlLp+4mOhZa8oUE8md++S/ZJwtL6rVqIiTVRinsLTRlm8co
-	8xyGsR9HcUrGjbM+PiBxDcLY9HnkeueYQD397Y0xzlt2khlbvvDP2zwOKYx6zJiqJ2jEXKUaTCN
-	Z1Gym0r9nrX9YDzimHiD+HyzJK7o7cPPTbUg4w/kYQEdHYc52TQx8yj4PmwVxJiuJXQnVwfV3uP
-	sYBs0wrHzQJCEZsxx/75WtaSElqnparBKB9Z6bQcynruTdnBLDvkDlitQWBSTzWDnMAYqQLWt4L
-	xmWV3joAQOu9r6zgNnGiQc8YXhCVoKGQNcbJAA0yZdkRkLlShJLFlYx/veYQ5x1HRkk+9NNmyZ7
-	+a3T3ljXtBmA0s5A==
-X-Google-Smtp-Source: AGHT+IEeoDSLJrpNt/pDvT31OuLPP8pn7uR1w1BMXtakeH3e5ah7DcmOaz5yt4hY1rLc42un9qLyNw==
-X-Received: by 2002:a05:600c:19cd:b0:477:c37:2ea7 with SMTP id 5b1f17b1804b1-477c1115febmr145030035e9.21.1764161735390;
-        Wed, 26 Nov 2025 04:55:35 -0800 (PST)
-Received: from pathway.suse.cz ([176.114.240.130])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-42cb7fd8e54sm41499132f8f.40.2025.11.26.04.55.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Nov 2025 04:55:34 -0800 (PST)
-Date: Wed, 26 Nov 2025 13:55:32 +0100
-From: Petr Mladek <pmladek@suse.com>
-To: Francesco Valla <francesco@valla.it>
-Cc: Tim Bird <tim@bird.org>, Steve Rostedt <rostedt@goodmis.org>,
-	john.ogness@linutronix.de, senozhatsky@chromium.org,
-	Tim Bird <Tim.Bird@sony.com>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	LKML <linux-kernel@vger.kernel.org>,
-	Anna-Maria Behnsen <anna-maria@linutronix.de>,
-	Frederic Weisbecker <frederic@kernel.org>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Linux Embedded <linux-embedded@vger.kernel.org>
-Subject: Re: [PATCH] printk: add early_counter_ns routine for printk blind
- spot
-Message-ID: <aSb4xHCB6i_Q6JpC@pathway.suse.cz>
-References: <39b09edb-8998-4ebd-a564-7d594434a981@bird.org>
- <aSWqWD1BQ-m-Zy9C@bywater>
+	dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b="suRKDgAG";
+	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="nkpcsISh"
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=outgoing.instance-europe-west4-mkbs.prod.antispam.mailspamprotection.com; s=arckey; t=1764197728;
+	 b=A5pMkKWFY/LYrKWAc7XlCc1cbqi57rY8UqV+CqcfsBpmZFOC1krN90sMmIK9C2fBLlYdia6FBP
+	  bh8Xhc3NvmMAxWEbyRlwvQvrg8jHmN0C/TAbK7Fx/zypV6ssI+RX9hglhmN32IgikODtXC6250
+	  qw9diz/8364/bZ0e3UD0d3oPooC91xeCyCMMOts3gtjJIEm2274YsrfjJRMxN86uZblX6qaH+U
+	  mClcDkQpjeQD2HwWDGTCZA/U+Ddepfg6KGYo9msgWT2fvlukrvtn+NeUiCgvhx8bi3I+PSM1LB
+	  T6vzqHkoB3SLC+iX2srSZzd7Io1c0Dy2T0VE+UHpz8HLnQ==;
+ARC-Authentication-Results: i=1; outgoing.instance-europe-west4-mkbs.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=outgoing.instance-europe-west4-mkbs.prod.antispam.mailspamprotection.com; s=arckey; t=1764197728;
+	bh=yHYZ/X1d3QhoPsxLwGtGC3eXaCqqCILLQa11Kyk06M4=;
+	h=Cc:To:In-Reply-To:References:Message-ID:Content-Transfer-Encoding:
+	  Content-Type:MIME-Version:Subject:Date:From:DKIM-Signature:DKIM-Signature;
+	b=WU1BVl1mmzXg8ULki4OiURnEBNiq06bjCzxwY2XvMlhj0SykMDp38cOEQuZHK5TL8HsG4jdWNg
+	  2fs+3VOUTTF681QyPAhCvGTGMzyRFe7TOqhINzXOWssfkkQ/5aurcFEuYCR7lSJsPF1Tr0Mf7Y
+	  DCwdsRqfPRUMv+Z8WybYP5UGt2W3CkbvKBbr771DH0Zc/02AbSQDnieDOseT0g5grptZ1cK+s+
+	  EnlOnz3/C81SHmz/A/XIp7KuCs+K3JY77c4IZE6W5IhR2hHcyaT7EElfkpW+etoJOHGU46ULEF
+	  jTDJW9hUkd21Ao6HLH6Cw5LaJGanhuclwWFlMPB/cPrfJw==;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=antispam.mailspamprotection.com; s=default; h=CFBL-Feedback-ID:CFBL-Address
+	:Cc:To:Message-Id:Content-Transfer-Encoding:Content-Type:MIME-Version:Subject
+	:Date:From:Reply-To:List-Unsubscribe;
+	bh=VUN1iGwv2qwaxTKk0/woAZkyUrTYL9/rXxZ4A8Awb5M=; b=suRKDgAGMYdvRy4+Uft5hnNeXf
+	ze9O727ksPw1mmFeBm1OK+710x0PvI6Myw4bclpvFMoV/ogIAwT6cXkgCEo75uVgGNAMsXJKHZ1fX
+	hqxS7X5uE/okQwciXoHDHIuDami/fJvZDKTeyyIO3Y3FtabYAo5xlq5eP6S9kMgjcOxQ=;
+Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
+	by instance-europe-west4-mkbs.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1vOOQ1-00000003yQQ-1MLV
+	for linux-embedded@vger.kernel.org;
+	Wed, 26 Nov 2025 22:55:26 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
+	s=default; h=Cc:To:Subject:Date:From:list-help:list-unsubscribe:
+	list-subscribe:list-post:list-owner:list-archive;
+	bh=VUN1iGwv2qwaxTKk0/woAZkyUrTYL9/rXxZ4A8Awb5M=; b=nkpcsIShxDU/I2U/uhsSQqwHJv
+	NF+hHTsnjPUZtu6DjNLsoIeI8+x998ekAkfqOl6NmJfUnWK4WDVAS7c9dyn0G6WlUQI/ahXjsCbpj
+	qB+wx4gP5ZsrCMLuyliGOEy5TglwJBKqVK8OUrXm3z+ex139qrrUDbOOmDsf98vBthc4=;
+Received: from [82.59.186.57] (port=59963 helo=[192.168.178.175])
+	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1vOOPq-000000006mk-2yXw;
+	Wed, 26 Nov 2025 22:55:14 +0000
+From: Francesco Valla <francesco@valla.it>
+Date: Wed, 26 Nov 2025 23:54:30 +0100
+Subject: [PATCH DISCUSSION 2/8] arm64: dts: ti: k3-am625-beagleplay: set
+ post-init-providers
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aSWqWD1BQ-m-Zy9C@bywater>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20251126-beagleplay-probes-v1-2-c833defd4c9b@valla.it>
+References: <20251126-beagleplay-probes-v1-0-c833defd4c9b@valla.it>
+In-Reply-To: <20251126-beagleplay-probes-v1-0-c833defd4c9b@valla.it>
+To: linux-embedded@vger.kernel.org, Tim Bird <tim.bird@sony.com>
+Cc: Federico Giovanardi <federico@giovanardi.dev>, 
+ Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
+ Saravana Kannan <saravanak@google.com>, Nishanth Menon <nm@ti.com>, 
+ Vignesh Raghavendra <vigneshr@ti.com>, Tero Kristo <kristo@kernel.org>, 
+ Francesco Valla <francesco@valla.it>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3291; i=francesco@valla.it;
+ h=from:subject:message-id; bh=yHYZ/X1d3QhoPsxLwGtGC3eXaCqqCILLQa11Kyk06M4=;
+ b=owGbwMvMwCX2aH1OUIzHTgbG02pJDJnqrQGMC5u1S7We7thx+syaF9PffHfi/r079ka1xwbl9
+ QFvu9NkOkpZGMS4GGTFFFlC1t24t2eu+be0DYyPYOawMoEMYeDiFICJ+O1g+Cume/D5p6CttnNC
+ M1OmzKkNv3zq0uepLAfdnmd1M+71cI1k+J+QtVDjxqo0hxeNK/qWXq0pupN713DF8zlbncO35d5
+ 5uYgDAA==
+X-Developer-Key: i=francesco@valla.it; a=openpgp;
+ fpr=CC70CBC9AA13257C6CCED8669601767CA07CA0EA
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - esm19.siteground.biz
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - valla.it
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-SGantispam-id: c88971eb1b7038afc29588f9481b544e
+AntiSpam-DLS: false
+AntiSpam-DLSP: 
+AntiSpam-DLSRS: 
+AntiSpam-TS: 1.0
+CFBL-Address: feedback@antispam.mailspamprotection.com; report=arf
+CFBL-Feedback-ID: 1vOOQ1-00000003yQQ-1MLV-feedback@antispam.mailspamprotection.com
+Authentication-Results: outgoing.instance-europe-west4-mkbs.prod.antispam.mailspamprotection.com;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
 
-On Tue 2025-11-25 14:08:40, Francesco Valla wrote:
-> Hi Tim,
-> 
-> I tested this on my i.MX93 FRDM (arm64) board and after a bit of
-> fiddling with the MULT/SHIFT values I got it working. It can be a very
-> valuable addition.
-> 
-> Some comments follow.
-> 
-> On Mon, Nov 24, 2025 at 10:30:52PM -0700, Tim Bird wrote:
-> > From: Tim Bird <tim.bird@sony.com>
-> > 
-> > During early boot, printk timestamps are reported as zero,
-> > which creates a blind spot in early boot timings.  This blind
-> > spot hinders timing and optimization efforts for code that
-> > executes before time_init(), which is when local_clock() is
-> > initialized sufficiently to start returning non-zero timestamps.
-> > This period is about 400 milliseconds for many current desktop
-> > and embedded machines running Linux.
-> > 
-> > Add an early_counter_ns function that returns nanosecond
-> > timestamps based on get_cycles().  get_cycles() is operational
-> > on arm64 and x86_64 from kernel start.  Add some calibration
-> > printks to allow setting configuration variables that are used
-> > to convert cycle counts to nanoseconds (which are then used
-> > in early printks).  Add CONFIG_EARLY_COUNTER_NS, as well as
-> > some associated conversion variables, as new kernel config
-> > variables.
-> > 
-> > After proper configuration, this yields non-zero timestamps for
-> > printks from the very start of kernel execution.  The timestamps
-> > are relative to the start of the architecture-specific counter
-> > used in get_cycles (e.g. the TSC on x86_64 and cntvct_el0 on arm64).
-> > This means that the time reported reflects time-from-power-on for
-> > most embedded products.  This is also a useful data point for
-> > boot-time optimization work.
-> > 
-> > Note that there is a discontinuity in the timestamp sequencing
-> > when standard clocks are finally initialized in time_init().
-> > The printk timestamps are thus not monotonically increasing
-> > through the entire boot.
-> 
-> This is... not going to work, IMO, and might lead to breakages in
-> userspace tools (are printk timings a userspace API?).
+Add the post-init-providers property where reasonable:
 
-Honestly, I am not sure if it would break anything. The fact is
-that printk() always used monotonic timers. And it is possible
-that some userspace depends on it.
+  - the gic500 is depending on itself, but that is taken care during
+    probe;
+  - the TPS65219 PMIC is depending on one of its regulators, but also
+    that is considered during probe;
+  - the DRM endpoints causes mutual dependencies between componets, but
+    only one way is an actual init dependency for each couple.
 
-I personally thing that non-monotonic time stamps might be confusing
-but they should not cause any serious breakage. But I might be wrong.
-People are creative...
+This solves the following cycles found by the fw_devlink infrastructure
+during initialization:
 
-> I actually have a counter-proposal: the time obtained through cycle
-> evaluation is used as an offset to be added to the printk time after
-> time_init() is called. A (working, but maybe sub-optimal) patch to
-> obtain this is attached at the end.
+[    0.056895] /bus@f0000/interrupt-controller@1800000: Fixed dependency cycle(s) with /bus@f0000/interrupt-controller@1800000
+[    0.057072] /bus@f0000/i2c@20020000/bridge-hdmi@4c: Fixed dependency cycle(s) with /bus@f0000/dss@30200000
+[    0.057218] /bus@f0000/dss@30200000: Fixed dependency cycle(s) with /bus@f0000/i2c@20020000/bridge-hdmi@4c
+[    0.073755] /bus@f0000/i2c@20020000/bridge-hdmi@4c: Fixed dependency cycle(s) with /bus@f0000/dss@30200000
+[    0.079458] /bus@f0000/i2c@20020000/bridge-hdmi@4c: Fixed dependency cycle(s) with /bus@f0000/dss@30200000
+[    0.079567] /bus@f0000/dss@30200000: Fixed dependency cycle(s) with /bus@f0000/i2c@20020000/bridge-hdmi@4c
+[    0.086984] /bus@f0000/i2c@20020000/bridge-hdmi@4c: Fixed dependency cycle(s) with /connector-hdmi
+[    0.087088] /connector-hdmi: Fixed dependency cycle(s) with /bus@f0000/i2c@20020000/bridge-hdmi@4c
+[    0.573947] /bus@f0000/i2c@20000000/pmic@30: Fixed dependency cycle(s) with /bus@f0000/i2c@20000000/pmic@30/regulators/buck2
+[    0.598398] /connector-hdmi: Fixed dependency cycle(s) with /bus@f0000/i2c@20020000/bridge-hdmi@4c
+[    0.598494] /bus@f0000/dss@30200000: Fixed dependency cycle(s) with /bus@f0000/i2c@20020000/bridge-hdmi@4c
+[    0.598675] /bus@f0000/i2c@20020000/bridge-hdmi@4c: Fixed dependency cycle(s) with /connector-hdmi
+[    0.598734] /bus@f0000/i2c@20020000/bridge-hdmi@4c: Fixed dependency cycle(s) with /bus@f0000/dss@30200000
 
-I am not sure if this is a good idea. The offset would cause
-that all post-timer-init printk timestamps differ from values
-provided by the timer API. And it might cause confusion,
-for example, when they are printed as part of the message,
-or when analyzing a crash dump.
+Signed-off-by: Francesco Valla <francesco@valla.it>
+---
+ arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-On the other hand, there are various clock sources in the kernel
-which are not comparable anyway. So maybe I am too cautious.
+diff --git a/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts b/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
+index 7028d9835c4a89cc3f5ca17543b18d3419751f0a..60e2c86ab197e348bf941e30c2641a26cd940d82 100644
+--- a/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
++++ b/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
+@@ -211,6 +211,9 @@ hdmi0: connector-hdmi {
+ 		compatible = "hdmi-connector";
+ 		label = "hdmi";
+ 		type = "a";
++
++		post-init-providers = <&it66121>;
++
+ 		port {
+ 			hdmi_connector_in: endpoint {
+ 				remote-endpoint = <&it66121_out>;
+@@ -622,6 +625,10 @@ cpsw3g_phy1: ethernet-phy@1 {
+ 	};
+ };
+ 
++&gic500 {
++	post-init-providers = <&gic500>;
++};
++
+ &main_gpio0 {
+ 	bootph-all;
+ 	pinctrl-names = "default";
+@@ -701,6 +708,8 @@ tps65219: pmic@30 {
+ 		system-power-controller;
+ 		ti,power-button;
+ 
++		post-init-providers = <&buck2_reg>;
++
+ 		regulators {
+ 			buck1_reg: buck1 {
+ 				regulator-name = "VDD_CORE";
+@@ -793,6 +802,8 @@ it66121: bridge-hdmi@4c {
+ 		interrupts = <36 IRQ_TYPE_EDGE_FALLING>;
+ 		#sound-dai-cells = <0>;
+ 
++		post-init-providers = <&dss>;
++
+ 		ports {
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
 
-> > --- a/init/Kconfig
-> > +++ b/init/Kconfig
-> > @@ -770,6 +770,53 @@ config IKHEADERS
-> >  	  or similar programs.  If you build the headers as a module, a module called
-> >  	  kheaders.ko is built which can be loaded on-demand to get access to headers.
-> >  
-> > +config EARLY_COUNTER_NS
-> > +	bool "Use counter for early printk timestamps"
-> > +	default y
-> > +	depends on PRINTK
-> > +	help
-> > +	  Use a cycle-counter to provide printk timestamps during early
-> > +	  boot.  This allows seeing timing information that would
-> > +	  otherwise be displayed with 0-valued timestamps.
-> > +
-> > +	  In order for this to work, you need to specify values for
-> > +	  EARLY_COUNTER_MULT and EARLY_COUNTER_SHIFT, used to convert
-> > +	  from the cycle count to nanoseconds.
-> > +
-> > +config EARLY_COUNTER_MULT
-> > +	int "Multiplier for early cycle counter"
-> > +	depends on PRINTK && EARLY_COUNTER_NS
-> > +	default 1
-> > +	help
-> > +	  This value specifies a multiplier to be used when converting
-> > +	  cycle counts to nanoseconds.  The formula used is:
-> > +		  ns = (cycles * mult) >> shift
-> > +
-> > +	  Use a multiplier that will bring the value of (cycles * mult)
-> > +	  to near a power of two, that is greater than 1000.  The
-> > +	  nanoseconds returned by this conversion are divided by 1000
-> > +	  to be used as the printk timestamp counter (with resolution
-> > +	  of microseconds).
-> > +
-> > +	  As an example, for a cycle-counter with a frequency of 200 Mhz,
-> > +	  the multiplier would be: 10485760, and the shift would be 21.
-> > +
-> 
-> If I got this correclty:
-> 
-> 	EARLY_COUNTER_MULT = (10^9 / freq) << EARLY_COUNTER_SHIFT
-> 
-> where EARLY_COUNTER_SHIFT can be chosen at will, provided it is big
-> enough to survice the ns->us conversion but small enough not to overflow
-> the u64 container. 
-> 
-> > +config EARLY_COUNTER_SHIFT
-> > +	int "Shift value for early cycle counter"
-> > +	range 0 63
-> > +	depends on PRINTK && EARLY_COUNTER_NS
-> > +	default 0
-> > +	help
-> > +	  This value specifies a shift value to be used when converting
-> > +	  cycle counts to nanoseconds.  The formula used is:
-> > +		  ns = (cycles * mult) >> shift
-> > +
-> > +	  Use a shift that will bring the result to a value
-> > +	  in nanoseconds.
-> > +
-> > +	  As an example, for a cycle-counter with a frequency of 200 Mhz,
-> > +	  the multiplier would be: 10485760, and the shift would be 21.
-> > +
-> >  config LOG_BUF_SHIFT
-> >  	int "Kernel log buffer size (16 => 64KB, 17 => 128KB)"
-> >  	range 12 25
+-- 
+2.52.0
 
-So, it is usable only for a particular HW. It is not usable for a
-generic kernel which is supposed to run on misc HW.
-
-I guess that there is no way to detect the CPU frequency at runtime?
-
-Best Regards,
-Petr
