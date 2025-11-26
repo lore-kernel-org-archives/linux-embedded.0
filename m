@@ -1,275 +1,324 @@
-Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
+Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2002E573;
-	Thu, 27 Nov 2025 00:17:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5104926E709
+	for <linux-embedded@vger.kernel.org>; Thu, 27 Nov 2025 00:44:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.1
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764202647; cv=fail; b=QMWXXwcZyma3mkmpLs2XE9v1QFBFWPIUy15HraKnlhCftqiQ16AAEOiSqI4y/PKofnUDAxInFHjNMNvxWDZt3uwhsuie/EH0tV6QNSbcofy+NPASS7qaWIoBD22W88nRGAi/vPYk5oX8J/Aun2wn/yk5J2DChp/KM4RjB8fpdps=
+	t=1764204246; cv=pass; b=oYF+RBHsC4g49tygVup1gwr44rYEdcA1/LO5sEnoxZE7FH2twSdD1C0gNy+GW6/EqM577q91lSlCqM4BAplsKsLXqwcthH3ZaqqcM6t2b9Fukyoda0QIky7rq6eTZofM3dnllH+Taes5tvJX/wWQEDgtckjrZ2d0b2yTU+HfKHc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764202647; c=relaxed/simple;
-	bh=DzyZi/luV0MPCqp0KzDwKTRCjsJyAQgL0dNtTH/YCaM=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=iL9Pv9p9VIlhF/Gsid3grE5jJLhz54kHgpEmYH9QeyGJCMdxnw6h12BM4mHTQIMZTUdG7brrNmM0g1+amtnYS1Tw4V0xAW9V9aZFLchZCBGGE5TzqnJRdGpZ2I5EPOHVs4TIOSImGYITrMggGu9A/Yyl8ZXM3I53Y1kmUiP55Z8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=Vmy3UHGR; arc=fail smtp.client-ip=185.183.30.70
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
+	s=arc-20240116; t=1764204246; c=relaxed/simple;
+	bh=eAOzXOzYCsE1NCcSE4xVQ6opELqbGP0PaEaxFcylpAk=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=DuLftEy6PjqCs62ai4eNJTdgCk9OrJv8wbhzf/M0guur1FhV9/4EoC4cdsAtDFhvUOpMFOnvWKemQuDHeAj+UU9TvcjmnFdPF5dAuVCbWaOu0BuIXxcA9mFz2tp31F3UTAfHJUEZOfdfLV1M60mKbUIrbmukKw1ZcN2KEwZPnqg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b=gwLVRli1; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=izuZaur3; arc=pass smtp.client-ip=185.56.87.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="Vmy3UHGR"
-Received: from pps.filterd (m0209322.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5AQJewVI030015;
-	Thu, 27 Nov 2025 00:16:29 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=S1; bh=DzyZi/l
-	uV0MPCqp0KzDwKTRCjsJyAQgL0dNtTH/YCaM=; b=Vmy3UHGRzGlkIPPZz7f4UwA
-	OfroUA7KsHqqQAHaO9MtCKNDHqWufKSk4f9hlNAzjCOaiY/eLpUUDBbGdC/1cWQo
-	rFykzbv8Mqdz5Dq0gn16Ja/3Eb5SeuEeeggLWeil23qujuRLTxlphifH5NP7K/Wv
-	/W1lpSoPBJPHw0h3yL7bLkcQrQbum4HmlSJAARu5RkXp/BAlC+QOc6PxDF6JasSK
-	bHCzQarcvjtAk8QKkM/7mcj5QcSGdALJyuQqgMKYcITT4WLkWEAGjHTRsrhdkzBN
-	dMVtCNhyK76GSqvuP19kTufR31qeMtD+yv1+A8nWE+8UwZoAR9pD6vrklvVmNHQ=
-	=
-Received: from bn1pr04cu002.outbound.protection.outlook.com (mail-eastus2azon11010050.outbound.protection.outlook.com [52.101.56.50])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 4ak3y75wpm-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 27 Nov 2025 00:16:29 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=OVVoBt9dl3UtOqn2n7r+l7PHte6TDDoG/PukJpbfDssKA05LRk0JeXO3wcAdrS1ZXDaS/34uo5AebnrCTeWhBetBdsOirSkfrSL3Qnql594+ZMRjfNKBDGlbXejMSjpmLhej566HijfyXAPZ6m5E8vQt1nIf852s0xo4c9X1ma6bcL98UyJ1nyZy91iMA4dIoIgVEBc1NSHHCzfTZtINnmU9Lev6F3bG0QUaBlNGEqrEJ7P8qiFeLf7xQzsB2Kb30+/QnPp/MOzjNL/MqvhHRfGk9Sv5A30iuUILmENJn2JPRfg2oZrTis+fH6DWaY11U9yQTsg9XYLvdxmTZEbRaw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DzyZi/luV0MPCqp0KzDwKTRCjsJyAQgL0dNtTH/YCaM=;
- b=K7cs8TCtQ7mZBPlK6NqVWAPGFbbiMNDXM6fOofq74Ets0hXUKlUSIWP1MhxCH0ohaMJZp5qCcyfJbn4Yey0I+r0dP+x0quXuQzWfEiifgUd2qcAnkSysWOh1oLYRas6PyWbmpRkjHc4rf1rcpraogRkR3PGrgsguHvRUMZr/U6gtKz/6hEnqTr3SpS+Kynrtir3pClXLGS0KIqRUdkDTIgdeI5vHOAbzZfZiS/mFfcfFbcj49P2d984dq5MtcWU8dYmUJrmUIoeDkAXc7L49MWy2oqBiRaOrLknioASBn5PmasHz8lqtGJacThJ67q+ge44shmAPc7/G+mXQCJHnwg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
- dkim=pass header.d=sony.com; arc=none
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by BY3PR13MB4913.namprd13.prod.outlook.com (2603:10b6:a03:364::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9366.12; Thu, 27 Nov
- 2025 00:16:24 +0000
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::df7c:a5b9:aa3e:9197%7]) with mapi id 15.20.9343.016; Thu, 27 Nov 2025
- 00:16:24 +0000
-From: "Bird, Tim" <Tim.Bird@sony.com>
-To: Geert Uytterhoeven <geert@linux-m68k.org>,
-        Francesco Valla
-	<francesco@valla.it>
-CC: Tim Bird <tim@bird.org>, "pmladek@suse.com" <pmladek@suse.com>,
-        Steve
- Rostedt <rostedt@goodmis.org>,
-        "john.ogness@linutronix.de"
-	<john.ogness@linutronix.de>,
-        "senozhatsky@chromium.org"
-	<senozhatsky@chromium.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        LKML
-	<linux-kernel@vger.kernel.org>,
-        Linux Embedded
-	<linux-embedded@vger.kernel.org>
-Subject: RE: [PATCH] printk: add early_counter_ns routine for printk blind
- spot
-Thread-Topic: [PATCH] printk: add early_counter_ns routine for printk blind
- spot
-Thread-Index: AQHcXcyxlSHgESA7t0W/7OXIPht4NbUDXaIAgAE1/ACAARQNUA==
-Date: Thu, 27 Nov 2025 00:16:23 +0000
-Message-ID:
- <MW5PR13MB5632A34DAEDD321E9813F997FDDFA@MW5PR13MB5632.namprd13.prod.outlook.com>
-References: <39b09edb-8998-4ebd-a564-7d594434a981@bird.org>
- <aSWqWD1BQ-m-Zy9C@bywater>
- <CAMuHMdXvQtCyqSN37QYWCL2T2sz7r-S2Cy7MySn59F3qn5vsZA@mail.gmail.com>
-In-Reply-To:
- <CAMuHMdXvQtCyqSN37QYWCL2T2sz7r-S2Cy7MySn59F3qn5vsZA@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|BY3PR13MB4913:EE_
-x-ms-office365-filtering-correlation-id: 917bf8e9-bddb-4c46-0e89-08de2d4a3306
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|7416014|376014|1800799024|38070700021;
-x-microsoft-antispam-message-info:
- =?utf-8?B?YTIrT2MzaHZGOGpZWnBBUU1hTkRndnVacklVWllORk5uWldwUW5mdTdVYnk3?=
- =?utf-8?B?UDh6cUc2UWRuT1QvVzBvdTZDMkIzRU80OEFaYzljZTdHOHdFVVU4ejY3dDZs?=
- =?utf-8?B?R2Q5MnpVSGFzanFCTk1vUmNQN0Q5eUY0YmVTSlN4Zm1wODFIQ3ZmKzVGUi95?=
- =?utf-8?B?ZlhNWlZpenhVY0d6TzJpRFNNN24zUlN0d3d1SDFQR2V2MHVIY0RySThPbkN4?=
- =?utf-8?B?N0E0NzRiSWV6OVY4ZmQrTjZiT21paWtTTWhJRm9pOURTbEs1ZlRKYmtQMkhO?=
- =?utf-8?B?ZWQzcHI3VitwSTFpcFhCYjV5TnZFa3FLTFJYSjZrdDFzdXdHUGhBcEFPd2Fl?=
- =?utf-8?B?V3U1WVduODFJL2RycmVJZUttWTdXZHEvTWhNRUl4bi9MWC8wQWQ0MjV2S1BR?=
- =?utf-8?B?dEp0UDR6QkFhRnlGM3hqUG9TcVBaaXhpR1NNcG5DRFlyRVpxMGNpb0JoNm5K?=
- =?utf-8?B?L1pzc3VKWW5vOW5wa0lTb25NL3Z1blhrREdWVm9PWkhCb2FDb2Q2NWQ5ZHBZ?=
- =?utf-8?B?b3k0WEt1SitXMWkvYTdlSVFkMStTMTYybUpLclZHbkhCV25odG1RTWV6MC9u?=
- =?utf-8?B?ZFM4cHltVW5zVnJodysySUJSa1haWG5sUVNrY0oxVERFM0prb3BUZGF2VFZl?=
- =?utf-8?B?K2FLek1pOGoySFU1REZuQXVMVklUUXh3N3NpTkFrdTMxekxRYUc1VzJlVlZQ?=
- =?utf-8?B?NVJFNEFzR3duY08vbUVKTklOWGh2b09iUnNxZEp4clpOWFVCY2xvcTJhTTVh?=
- =?utf-8?B?L0EzWktWQTNXd0NBTVgxWU04ZTdIVmNWUU5pTHVWSEprcnN5SnJEclFpRFVt?=
- =?utf-8?B?aVVFMkRyUDNrY0pEc1libmVwVm1MdnR6akZwSGxXclpDMmI2TnZoaERLWnlq?=
- =?utf-8?B?UEdHVGljZ0ZaNWEwdVlSSGE1TGdJbEJpNURFQmFHTXJRUEhoK0thVlRFWFBk?=
- =?utf-8?B?dDNSYjBQdjNKUGZvZHFKQkMwblIzUUQ2UmRxcUFqeks4VlpOaGhmeDhEenBR?=
- =?utf-8?B?SUdUbXU4eHp4VG1NVkxRT0hJMzlXZ2piNEIzc2FuUlp2L3Q1eHFpcEJhMGVo?=
- =?utf-8?B?T09NSytlZEN5QUM2bnI4UTlSU0FoRGVQRHlnbUpNejFzbDREMDBVd2YvWjMv?=
- =?utf-8?B?OVYzNEpNbjZnNGtxZGVpVlJuY013akszaGt0RWR3OUdxSitYZ0ttbTZBcTJR?=
- =?utf-8?B?RDZmM05NaEQ1WWxvTzdwcmcwVGxOeXZQMjJrWkZ1WVJVYVFiTFdnbmtVWGV3?=
- =?utf-8?B?cUFjMlVTVHlMM09LRjFNNERWRGdwQmcxMld1eExXQldNSitOc0drOXNmbWw5?=
- =?utf-8?B?a0ZFdzNlK3d4UGRkVFlITTQ4ek1WMldWckdYcnhqNStYaWpySnZxNE5RanI2?=
- =?utf-8?B?UEV4cTJGc204TDJOVUxjM1U4bkZkVlhpZDZrcTFNdWlXSlpJa1liUEViOUs5?=
- =?utf-8?B?Uy96TURIdDlKUmdqcTQwWTZUcnFMS29VTjMvS0RQWHdDbU5wSVBZejRod3pY?=
- =?utf-8?B?WE0xVFA3MjlPQzhBaU5MaDVjUExwZW1hOHlFbFZTSm1LUFVRamVOSWNCZ3hz?=
- =?utf-8?B?SGVvQ0t5VFUvUHB2Unl4YVQwSGNwSGNvSzFlLzJKOHVyL1FSSXdMejFPOWg3?=
- =?utf-8?B?dUIzcUNCdHdwVDNFUk1tZ2ZKKzh2ZEFHZ3MxZzQ5RlR2Z1RQd3VIZ284QVNk?=
- =?utf-8?B?YWxjQThCUXBXSEVDT1h6NDk5WlREdU1SYkJWSkpVWnZoNnNLSmRKcjFpNFZa?=
- =?utf-8?B?ZnlRd2Ztd29SNkpFemtFSFhKakVQQko2bzl1VStkaUc2Qm9pVGNjemlPVjBH?=
- =?utf-8?B?clVFNG81dTBtaEVPUWN0eTA3K0xHUFJmNWVocDJacXhSeEV1ODAvWDFndHBJ?=
- =?utf-8?B?YjNPN21sRjZzTjJPUlNlRHU2ZWkrT2pkanB0aTVaZFY0bXZSY0RVbEpHUXVV?=
- =?utf-8?B?Y0xUcWNYOVlXL2lzUWxpWUQ5TVNxZW1ncWZENHltbWdmQ2J2M1ArWE1jblNJ?=
- =?utf-8?B?MXNuREpzaktkZ3E4YkVpaUNkbFQwNkZhUFpZR1M4RmxsSGtRMFQrazIwQVl6?=
- =?utf-8?Q?SUCXUV?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(7416014)(376014)(1800799024)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?MTNuWGE2Q1A0dUlGYnoyMVp3Z0hLY3lFRHFrZHJhOTNkMEpTamc1THowRWJ5?=
- =?utf-8?B?R1c3Nk5vbzM4VmpyNmRMVjA4QnduUnJvc1gvcGNVdkJVZlhwR3Z2NmQyQUNy?=
- =?utf-8?B?cWZiSjFicmRNajZRdjI1S2htRVR4MkFNOEFJcFZxNmFGS09nVjJ4NkluWjFI?=
- =?utf-8?B?b0ZFZ3lTSWVBR3AzMFR1bUFBenNENmVzbXlKR21HSU5MMTdLZy9hZFF5MEZM?=
- =?utf-8?B?REVEampWWjhqUEtMU3l2UEszc21zcTJBRytDZ0tabG1JQmZGQjFReWhEbHdH?=
- =?utf-8?B?WEtyWnkyNTBmMXJ5cXVWNmp1alhLOC8yRWsrckwwUE02MW8vZW9aU1NvQlll?=
- =?utf-8?B?a0dZd0wyN0c2YXMyMWcvTTZ5Q0Y3SllrZVBuUXA0bE9xczlYU25yZ2FmSnh1?=
- =?utf-8?B?RXVLR0R5aWRFRVBjN0d5U2EwT1BodnpkbDB4aEZrUjQremJKMVdJRW5YbTdG?=
- =?utf-8?B?SXp0bU9EbDNOM0ZNQUxkQVdmR21NeE9yekNWR3FJa05CTGlOOEk3Unc4VXAz?=
- =?utf-8?B?TGRscTFWbEltbURvQzRtTWVubEVNVzFOUWdOK0JmZVFBNnV6Yy9QMDFwNWMv?=
- =?utf-8?B?MlVFV21SSlZzVmxyWUdRVWJBa09sNzFmUGkwTi9GRW93WWhNRGxneGlkR0l3?=
- =?utf-8?B?Z0UyY2F0bFI4djg3eVpPeU1VYVVvNFNMQmhqc0VOdEtVemNOZnlYeThxSU1k?=
- =?utf-8?B?VFozdyt2eTRJNGViOERMRVdxQ0E1STJXMzNSb0EwaE9OMkFSUFQzWnlmd2ll?=
- =?utf-8?B?MWQ1VkhReEl2cTAxWXVyLzZLU21XZXpnbzNmOTU2cHlJZkE2d211V1JCRDRV?=
- =?utf-8?B?Y0hOVk9mVk1qVlROc0tKZndHZ05wdHZOb0g2SjJtMXVXKzA5azFiMUJ2NG1E?=
- =?utf-8?B?Q3RsNzl4WGRkaktKZVlJZmVXNmY2WjBsU05PNURNbmpzZXNQeGlPTHhwY1dx?=
- =?utf-8?B?TDllNGpoQkZWU012c3owL3NMTWljSzNOaFJsSVlxeHZGaFdzM2JIYTFZb3ha?=
- =?utf-8?B?S3h0RTgvVjUzeWMvQzVYZS9ibkJqWUJVeDBnM0JYcHRMdzdCUjU2TW1HUEx2?=
- =?utf-8?B?elArQU1RcWhQYXB2cFlITlc5clhqTnRlaXZHWEd4Zm1oV0Viakg2Z203SEt6?=
- =?utf-8?B?SUtSdWhMV1BtbENJN3UwMHcvbDMvOXB4ZFVYUGwraFppUnEwVHBoazlQRDBZ?=
- =?utf-8?B?ekQ4d3pjZlB6akFFZVM4cklMaXVhMGZhU01uME03NlVxaTdzQUtLSGxPVkZu?=
- =?utf-8?B?RW55Ly9xV3VYZ3BFZElVbVFHZG9yRDU1bWt5eGhwMnBUTWVuUmxwSkhVazh6?=
- =?utf-8?B?bGdOQzNsVi9rYkxyT2RJQjVEVWhpakQ4RGFJLzRUL1lZZXhTN3VvSE5YTWVo?=
- =?utf-8?B?RkllNkcrNDNxWkI3WjBNWkV1MGZxOE53WFY1S25VZytpS2NYa0hJa2V6TU9w?=
- =?utf-8?B?Wkh3TEk1OGxhMmR6UUFYTTF4N0d2V3hDdE5TVE1sV0JEZXFEV1JsRU5qaVZn?=
- =?utf-8?B?blBMWHMya0ZzOUtqUHpqWGEzc1h2emRiWlRzSG5jQjhLc3lacHFKSTI1S2to?=
- =?utf-8?B?YmRVS0hhVzZuK2NxS0JlRmdhYkVYSXdtTnVkb1JvRVhZazc1djRRZXZOdmN4?=
- =?utf-8?B?ZWpVK3lxWGlVbmc2bWNHenVJQ0RtTU1meUJIakhyZXczMzNPTllxWHpuMC92?=
- =?utf-8?B?NnVNWHVRVksrdEY3ZElBNzJTSUR5MGtFUTBDdXJSN3V4WkFjU1VITlVrN3ZO?=
- =?utf-8?B?djdSNGJOb1JyWDlJbENpWVJkZzFSNGpvcDhxQ3hLQnIrRGJFNjNjQi9JVDcx?=
- =?utf-8?B?YkgrRUFMZVNEZnYrVTRPUHhzZ0RscWtRVXlmdk1LTmt6REZCSTZxS3ROUDNs?=
- =?utf-8?B?eHpISmJRYW5qOXZTc0d2U0ZJQzByaXlXSXIwc1B0eUg4L0FaWXhBTmN4ZHNr?=
- =?utf-8?B?L01tVFZHVXlOM2l5Z1RYNGVheE96Y1dvOGlSc21FbTc3WnFYZ3lWbDdCSVRs?=
- =?utf-8?B?K3pCS0tZaysxNjFJbGJGQVVoc2NrTi84NVpJUTdxRDFtUFBqdnZoYmpHYlF3?=
- =?utf-8?B?ZHVLMy8xdHoyOTNyME5WV2ZQZ0I0dkFXbkRCemFKSkJ4eWQ3bEVPOXhHMG5r?=
- =?utf-8?Q?n1l0=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b="gwLVRli1";
+	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="izuZaur3"
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=outgoing.instance-europe-west4-4l43.prod.antispam.mailspamprotection.com; s=arckey; t=1764204243;
+	 b=xcGzyZ5QHp6EOSOA4uRpR9Qfw74fT1vDxwdfWpMjs9mA7lC3d3YI4wesyrrD1hUB9le9b3QDk9
+	  /IFttgpVxj+VfAEg+FgsADeRDUTzClq6ikVb45C6+WwXwJNBJdRIjWtwR96lUCxDZn/O5eNxO7
+	  IJCca6gPj4jwUA0mJWwHF4uxE7TcHP5dcziH8mDczI7t/dsMxvULdf6rpKBaBlhKd3jVWiLM84
+	  4SEAnkW3dNrd1KmheQ+L1ZpqeGuryP/9ODgUgTnXeHB/GN5VF5X3wp0z5Smjzuz2qAf+9AxAy4
+	  0FPNNmAdIOJbNwBgpIaIwf+/xa4VzcKFXWe/kZnYKpjOBQ==;
+ARC-Authentication-Results: i=1; outgoing.instance-europe-west4-4l43.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=outgoing.instance-europe-west4-4l43.prod.antispam.mailspamprotection.com; s=arckey; t=1764204243;
+	bh=eAOzXOzYCsE1NCcSE4xVQ6opELqbGP0PaEaxFcylpAk=;
+	h=Cc:To:Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:Date:
+	  Subject:From:DKIM-Signature:DKIM-Signature;
+	b=fGZLQxaIl2sUpsUcDz1XVMaTZkkabZEkr1UM9VUFBpilecgwRd1LoW5fo0YNf8jFY6Y9fgtWvC
+	  Kd6RcXst7pNDqZ9ep8dylFll1VFoDzn4SGqWKdOWD9WxZmQZeoLQjpY5TwPQH3VLQmAgMJKAJS
+	  wK3g3HbQocxiSYyq+JsvAdLoLqBLEp+Y7XNUO37wiOI+iB/30VLEEg86HeoRd4DLXZEKXY4tl9
+	  svGrVY110z68kODfhv2cDKNnljw+kNSPnRgFHoEieFwT47DK6Qkh11XQGHGq+cgX6qv3QEV+Hk
+	  dCrNlsaXC3sJl67Eavy1tAglSplXyDsbuQuzf7jxir8oNg==;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=antispam.mailspamprotection.com; s=default; h=CFBL-Feedback-ID:CFBL-Address
+	:Cc:To:Content-Transfer-Encoding:Content-Type:MIME-Version:Message-Id:Date:
+	Subject:From:Reply-To:List-Unsubscribe;
+	bh=vZSwSsrUtkN6RP3FGRHMxI3FIxJJtaDfzJnYIwscjRM=; b=gwLVRli1gtEXbJEvQlgCBTbHVu
+	KCx4JIF74zFHElS5+m59vbWNN+ORweDaCSTDNPUxfNPXiCicg20wAC68Bd6TfNzwhEKVKP4+930Gy
+	1kQkP3rA9vQMaSGfOoFR0PHqM4ZsruhIQmUH2wqD+j/f64rd/DETg4G5qKO7sHW4p2IM=;
+Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
+	by instance-europe-west4-4l43.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1vOOQ1-00000009wqD-0dVL
+	for linux-embedded@vger.kernel.org;
+	Wed, 26 Nov 2025 22:55:26 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
+	s=default; h=Cc:To:Date:Subject:From:list-help:list-unsubscribe:
+	list-subscribe:list-post:list-owner:list-archive;
+	bh=vZSwSsrUtkN6RP3FGRHMxI3FIxJJtaDfzJnYIwscjRM=; b=izuZaur3Av4Kecxk8DGE2uSkPp
+	BsqJRzl1Qge0xRUonFMTtM0zvQ7wkLBiK+PgXHVhN5EDpunNaVXW1CuaDX2+pK6zGm3szOJsnguaI
+	0+2EYPU7NQq2LNjGbs94IkeHS6q6t+p3Ts5gNbEM3HFhFTbvKakSRedjIx2e9y/ihwNU=;
+Received: from [82.59.186.57] (port=59963 helo=[192.168.178.175])
+	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1vOOPp-000000006mk-2vAI;
+	Wed, 26 Nov 2025 22:55:13 +0000
+From: Francesco Valla <francesco@valla.it>
+Subject: [PATCH DISCUSSION 0/8] Reducing probe deferral - for profit and
+ fun
+Date: Wed, 26 Nov 2025 23:54:28 +0100
+Message-Id: <20251126-beagleplay-probes-v1-0-c833defd4c9b@valla.it>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	YUlezxmiKACMRFKawGG2QQPFwRASntuuDEB2a8WP+FS4ARtVQX//6UHR3xDI5DeM3hekpGNFYQNolJgetYxZMFoqRkuio+lxu8zxO/Z96MLSdfGeOJ+nqUfvourhH4h7HESnomo+TDHiv93mWQuDGm+TTQPVwMp4bxG+S0bKIjQyXmCV9ndXl8Vp3wYyXxMiP6GQz92G21VbIxJDRFToSkbOx1bQqV9QC3l6Uo8tZos+JOC6JjTCSWItcrWEyCtb2PKVOK319+0IcaA0ksuHIIMx2vvAirERqpwGfOeai1ZGl8ruQVhL8p+2m8rVZEdriIHkwk26sw1eG1SE+jxzDNwuepzZIMtk3jJZeBv6s26Q7jnqDE6+z/2Dhjs2rYpHdXOEYeapTUsnyd5yIvx9yW2OZYFOOnqafEzjqywrRUhuDBPqzwOwnfsXGM6fNtePp/eEsSkqbyrtIHVVoa7j6ZbfZJO5s6zjnF/0WKjKH55cOvVXOS3zDCDred3JpRWjq4QO9dZKPRBH+AKqbR+EgHN3rm5UbBIDZbHPtYuQrvNFELR9UtqbxQXiGFuCKhY2Xy5PYttvFwTpLkm2/61HMLaJJVU62O9kc36Hwz7HS8gZ9BOZ4viYLKsMIDevih53
-X-OriginatorOrg: sony.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 917bf8e9-bddb-4c46-0e89-08de2d4a3306
-X-MS-Exchange-CrossTenant-originalarrivaltime: 27 Nov 2025 00:16:23.9525
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: z62lPhUwXmPLgJUHS4OfL9s72/oqPCxD75+p4JldDr/Oj7uuOEt5UeOxOz5e7nDzMQYJD21w8t2hXAg8X7kuXg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY3PR13MB4913
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTIyMDAxNCBTYWx0ZWRfX9Iamec+U957U E1RX4LPnd5I1KKgjXt+426vamd3wtUu0cW5K3IvK/thdLRaHsND/KovAbPjHRv80o3Iyaiqm/F4 j59kXzUbUNGcJmE+oxPC40sWYeemUYvul22aW/4EPo4x3rdNBM3yKOtIxKbPoQvQtdBCvVgysal
- P88QyYOykO2+Q31k09FKtUjkRihdWJoin0l4h3cksyFz5s+fESOB4Ru1JbEb4ZFtRVInAGtek91 gH9rK8CrxclaG5+H4KJfZrumIhHgbVj+ldxDPlT4OrZsxGDk7ESSTf0TD/HvYvqU7WUH001D/bq 31pQeK+hoe13gq0KgyMDccl8SjCLXxfF3s8DHeVTcENhYFwZMczE9tbLSw0N5CZkSL0i0Y+6qbT
- ebABEjWQVZxzbjYvZEeRleCG4kQDDA==
-X-Proofpoint-GUID: CrI8Ce-m00Bs_XfQUbnbCvzln3n6Jwur
-X-Authority-Analysis: v=2.4 cv=O9g0fR9W c=1 sm=1 tr=0 ts=6927985d cx=c_pps a=9FhzUGQqNQs6ZJfz/MkW+g==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19 a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10 a=6UeiqGixMTsA:10 a=xR56lInIT_wA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=tBb2bbeoAAAA:8 a=z6gsHLkEAAAA:8 a=8o7UaKuQF1UoCeEya8MA:9 a=QEXdDO2ut3YA:10 a=Oj-tNtZlA1e06AYgeCfH:22
-X-Proofpoint-ORIG-GUID: CrI8Ce-m00Bs_XfQUbnbCvzln3n6Jwur
-X-Sony-Outbound-GUID: CrI8Ce-m00Bs_XfQUbnbCvzln3n6Jwur
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-25_02,2025-11-26_01,2025-10-01_01
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDI1NDQyMz3aTUxPSc1IKcxErdgqL8pNRi3TRDk1RTSxPDlFRDAyWgvoKi1LT
+ MCrCZ0UounsHOocHBnv5+SrG1tQDvY+SIbwAAAA==
+X-Change-ID: 20251126-beagleplay-probes-f14e5941de10
+To: linux-embedded@vger.kernel.org, Tim Bird <tim.bird@sony.com>
+Cc: Federico Giovanardi <federico@giovanardi.dev>, 
+ Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
+ Saravana Kannan <saravanak@google.com>, Nishanth Menon <nm@ti.com>, 
+ Vignesh Raghavendra <vigneshr@ti.com>, Tero Kristo <kristo@kernel.org>, 
+ Francesco Valla <francesco@valla.it>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=9888; i=francesco@valla.it;
+ h=from:subject:message-id; bh=eAOzXOzYCsE1NCcSE4xVQ6opELqbGP0PaEaxFcylpAk=;
+ b=owGbwMvMwCX2aH1OUIzHTgbG02pJDJnqrQEH1u6xvd2zq9r8TXpbkEuFj13iditN7YtHD54/f
+ cr1vHBXRykLgxgXg6yYIkvIuhv39sw1/5a2gfERzBxWJpAhDFycAjCRG/IM/2xrrbYwsjnte/v6
+ 1+H4i6pTLjc8/xnIqfVZY/eh569Yz8gyMuy9cTF0Z/93Lt/nqvPNJlhP6L9lkze7wZD1SuWDSW5
+ fLvMAAA==
+X-Developer-Key: i=francesco@valla.it; a=openpgp;
+ fpr=CC70CBC9AA13257C6CCED8669601767CA07CA0EA
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - esm19.siteground.biz
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - valla.it
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-SGantispam-id: 8b21f0db0d3581f5a13dd13a60fa0cbc
+AntiSpam-DLS: false
+AntiSpam-DLSP: 
+AntiSpam-DLSRS: 
+AntiSpam-TS: 1.0
+CFBL-Address: feedback@antispam.mailspamprotection.com; report=arf
+CFBL-Feedback-ID: 1vOOQ1-00000009wqD-0dVL-feedback@antispam.mailspamprotection.com
+Authentication-Results: outgoing.instance-europe-west4-4l43.prod.antispam.mailspamprotection.com;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogR2VlcnQgVXl0dGVyaG9l
-dmVuIDxnZWVydEBsaW51eC1tNjhrLm9yZz4NCj4gSGkgYWxsLA0KPiANCj4gT24gV2VkLCAyNiBO
-b3YgMjAyNSBhdCAwMzoyNCwgRnJhbmNlc2NvIFZhbGxhIDxmcmFuY2VzY29AdmFsbGEuaXQ+IHdy
-b3RlOg0KPiA+IE9uIE1vbiwgTm92IDI0LCAyMDI1IGF0IDEwOjMwOjUyUE0gLTA3MDAsIFRpbSBC
-aXJkIHdyb3RlOg0KPiA+ID4gRnJvbTogVGltIEJpcmQgPHRpbS5iaXJkQHNvbnkuY29tPg0KPiA+
-ID4NCj4gPiA+IER1cmluZyBlYXJseSBib290LCBwcmludGsgdGltZXN0YW1wcyBhcmUgcmVwb3J0
-ZWQgYXMgemVybywNCj4gPiA+IHdoaWNoIGNyZWF0ZXMgYSBibGluZCBzcG90IGluIGVhcmx5IGJv
-b3QgdGltaW5ncy4gIFRoaXMgYmxpbmQNCj4gPiA+IHNwb3QgaGluZGVycyB0aW1pbmcgYW5kIG9w
-dGltaXphdGlvbiBlZmZvcnRzIGZvciBjb2RlIHRoYXQNCj4gPiA+IGV4ZWN1dGVzIGJlZm9yZSB0
-aW1lX2luaXQoKSwgd2hpY2ggaXMgd2hlbiBsb2NhbF9jbG9jaygpIGlzDQo+ID4gPiBpbml0aWFs
-aXplZCBzdWZmaWNpZW50bHkgdG8gc3RhcnQgcmV0dXJuaW5nIG5vbi16ZXJvIHRpbWVzdGFtcHMu
-DQo+ID4gPiBUaGlzIHBlcmlvZCBpcyBhYm91dCA0MDAgbWlsbGlzZWNvbmRzIGZvciBtYW55IGN1
-cnJlbnQgZGVza3RvcA0KPiA+ID4gYW5kIGVtYmVkZGVkIG1hY2hpbmVzIHJ1bm5pbmcgTGludXgu
-DQo+ID4gPg0KPiA+ID4gQWRkIGFuIGVhcmx5X2NvdW50ZXJfbnMgZnVuY3Rpb24gdGhhdCByZXR1
-cm5zIG5hbm9zZWNvbmQNCj4gPiA+IHRpbWVzdGFtcHMgYmFzZWQgb24gZ2V0X2N5Y2xlcygpLiAg
-Z2V0X2N5Y2xlcygpIGlzIG9wZXJhdGlvbmFsDQo+ID4gPiBvbiBhcm02NCBhbmQgeDg2XzY0IGZy
-b20ga2VybmVsIHN0YXJ0LiAgQWRkIHNvbWUgY2FsaWJyYXRpb24NCj4gPiA+IHByaW50a3MgdG8g
-YWxsb3cgc2V0dGluZyBjb25maWd1cmF0aW9uIHZhcmlhYmxlcyB0aGF0IGFyZSB1c2VkDQo+ID4g
-PiB0byBjb252ZXJ0IGN5Y2xlIGNvdW50cyB0byBuYW5vc2Vjb25kcyAod2hpY2ggYXJlIHRoZW4g
-dXNlZA0KPiA+ID4gaW4gZWFybHkgcHJpbnRrcykuICBBZGQgQ09ORklHX0VBUkxZX0NPVU5URVJf
-TlMsIGFzIHdlbGwgYXMNCj4gPiA+IHNvbWUgYXNzb2NpYXRlZCBjb252ZXJzaW9uIHZhcmlhYmxl
-cywgYXMgbmV3IGtlcm5lbCBjb25maWcNCj4gPiA+IHZhcmlhYmxlcy4NCj4gPiA+DQo+ID4gPiBB
-ZnRlciBwcm9wZXIgY29uZmlndXJhdGlvbiwgdGhpcyB5aWVsZHMgbm9uLXplcm8gdGltZXN0YW1w
-cyBmb3INCj4gPiA+IHByaW50a3MgZnJvbSB0aGUgdmVyeSBzdGFydCBvZiBrZXJuZWwgZXhlY3V0
-aW9uLiAgVGhlIHRpbWVzdGFtcHMNCj4gPiA+IGFyZSByZWxhdGl2ZSB0byB0aGUgc3RhcnQgb2Yg
-dGhlIGFyY2hpdGVjdHVyZS1zcGVjaWZpYyBjb3VudGVyDQo+ID4gPiB1c2VkIGluIGdldF9jeWNs
-ZXMgKGUuZy4gdGhlIFRTQyBvbiB4ODZfNjQgYW5kIGNudHZjdF9lbDAgb24gYXJtNjQpLg0KPiA+
-ID4gVGhpcyBtZWFucyB0aGF0IHRoZSB0aW1lIHJlcG9ydGVkIHJlZmxlY3RzIHRpbWUtZnJvbS1w
-b3dlci1vbiBmb3INCj4gPiA+IG1vc3QgZW1iZWRkZWQgcHJvZHVjdHMuICBUaGlzIGlzIGFsc28g
-YSB1c2VmdWwgZGF0YSBwb2ludCBmb3INCj4gPiA+IGJvb3QtdGltZSBvcHRpbWl6YXRpb24gd29y
-ay4NCj4gPiA+DQo+ID4gPiBOb3RlIHRoYXQgdGhlcmUgaXMgYSBkaXNjb250aW51aXR5IGluIHRo
-ZSB0aW1lc3RhbXAgc2VxdWVuY2luZw0KPiA+ID4gd2hlbiBzdGFuZGFyZCBjbG9ja3MgYXJlIGZp
-bmFsbHkgaW5pdGlhbGl6ZWQgaW4gdGltZV9pbml0KCkuDQo+ID4gPiBUaGUgcHJpbnRrIHRpbWVz
-dGFtcHMgYXJlIHRodXMgbm90IG1vbm90b25pY2FsbHkgaW5jcmVhc2luZw0KPiA+ID4gdGhyb3Vn
-aCB0aGUgZW50aXJlIGJvb3QuDQo+ID4NCj4gPiBUaGlzIGlzLi4uIG5vdCBnb2luZyB0byB3b3Jr
-LCBJTU8sIGFuZCBtaWdodCBsZWFkIHRvIGJyZWFrYWdlcyBpbg0KPiA+IHVzZXJzcGFjZSB0b29s
-cyAoYXJlIHByaW50ayB0aW1pbmdzIGEgdXNlcnNwYWNlIEFQST8pLg0KPiANCj4gSSB0aGluayB0
-aGV5IGFyZS4NCj4gDQo+IEFub3RoZXIgYXBwcm9hY2ggd291bGQgYmUgdG8gZGVmZXIgdGhlIGNh
-bGlicmF0aW9uL2NvbnZlcnNpb24gdG8NCj4gdXNlcnNwYWNlLCBhbmQgbWFrZSBzdXJlIHRoZSBl
-YXJseSBwYXJ0IHN0YW5kcyBvdXQuDQo+IEkuZS4gd2hlbiByZWFsIHRpbWVrZWVwaW5nIGlzIGF2
-YWlsYWJsZSwga2VybmVsIG1lc3NhZ2VzIGFyZSBwcmVmaXhlZCBieQ0KPiAiWyU1bHUuJTA2bHVd
-Ii4gIEVhcmx5IG1lc3NhZ2VzIGNvdWxkIGJlIHByZWZpeGVkIGJ5IGEgcGxhaW4gaW50ZWdlcg0K
-PiAiWyUxMnVdIiwgY29udGFpbmluZyB0aGUgcmF3IGN5Y2xlIGNvdW50ZXIgdmFsdWUuDQo+IFRo
-ZSBwcmVzZW5jZSBvZiB0aGUgZGVjaW1hbCBwb2ludCB3b3VsZCBtYWtlIHRoZSBkaWZmZXJlbmNl
-IG9idmlvdXMuDQoNCkkgdGhvdWdodCBhYm91dCB0aGlzIHdoaWxlIEkgd2FzIGNyZWF0aW5nIHRo
-aXMuDQpJdCB3b3VsZG4ndCByZXF1aXJlIHRoZSBleHRyYSBjb25maWd1cmF0aW9uIGZvciBNVUxU
-IGFuZCBTSElGVCAod2hpY2ggd291bGQgYmUgbmljZSksDQphbmQgaXQgd291bGQgYmUsIGFzIHlv
-dSBzYXksIHZlcnkgb2J2aW91cyB0aGF0IHRoaXMgd2FzIG5vdCBhIHJlZ3VsYXIgdGltZXN0YW1w
-LiANClRoaXMgbWVhbnMgaXQgY291bGQgYmUgZW5hYmxlZCBvbiBhIGdlbmVyaWMga2VybmVsICht
-YWtpbmcgbW9yZSBsaWtlbHkgaXQgY291bGQgYmUNCmVuYWJsZWQgYnkgZGVmYXVsdCkuIEFuZCBy
-ZWFsbHkgb25seSBib290LXRpbWUgb3B0aW1pemVycyB3b3VsZCBjYXJlIGVub3VnaCB0bw0KZGVj
-b2RlIHRoZSBkYXRhLCBzbyB0aGUgb251cyB3b3VsZCBiZSBvbiB0aGVtIHRvIHJ1biB0aGUgdG9v
-bC4gIEV2ZXJ5b25lIGVsc2UNCmNvdWxkIGlnbm9yZSB0aGVtLg0KDQpJJ20gbm90IHN1cmUgaWYg
-aXQgd291bGQgYnJlYWsgZXhpc3RpbmcgcHJpbnRrLXByb2Nlc3NpbmcgdG9vbHMuICBJIHN1c3Bl
-Y3QgaXQgd291bGQuDQoNCkFsc28sICBJIGZpbmQgdGhhdCBwb3N0LXByb2Nlc3NpbmcgdG9vbHMg
-b2Z0ZW4gZ2V0IG92ZXJsb29rZWQuDQpJIGFza2VkIGF0IEVMQyB0aGlzIHllYXIgaG93IG1hbnkg
-cGVvcGxlIGFyZSB1c2luZyBzaG93X2RlbHRhLCB3aGljaCANCmhhcyBiZWVuIHVwc3RyZWFtIGZv
-ciB5ZWFycywgYW5kIGNhbiBkbyBhIGZldyBuZWF0IHRoaW5ncyB3aXRoIHByaW50ayB0aW1lc3Rh
-bXBzLA0KYW5kIG5vdCBhIHNpbmdsZSBwZXJzb24gaGFkIGV2ZW4gaGVhcmQgb2YgaXQuDQoNCklu
-IHRoaXMgc2NlbmFyaW8sIHlvdSB3b3VsZCBzdGlsbCBuZWVkIHRvIGhhdmUgdGhlIGNhbGlicmF0
-aW9uIHByaW50a3MgaW4NCnRoZSBjb2RlIHNvIHRoYXQgdGhlIHRvb2wgY291bGQgcHVsbCB0aGVt
-IG91dCB0byB0aGVuIGNvbnZlcnQgdGhlIGN5Y2xlLXZhbHVlZA0KcHJpbnRrcyBpbnRvIHByaW50
-a3Mgd2l0aCByZWd1bGFyIHRpbWVzdGFtcHMuDQoNCkkgY291bGQgc2VlIGRvaW5nIHRoaXMgaWYg
-cGVvcGxlIG9iamVjdCB0byB0aGUgbm9uLWdlbmVyaWNpdHkgb2YgdGhlIGN1cnJlbnQNCnNvbHV0
-aW9uLg0KDQo+IA0KPiA+IEkgYWN0dWFsbHkgaGF2ZSBhIGNvdW50ZXItcHJvcG9zYWw6IHRoZSB0
-aW1lIG9idGFpbmVkIHRocm91Z2ggY3ljbGUNCj4gPiBldmFsdWF0aW9uIGlzIHVzZWQgYXMgYW4g
-b2Zmc2V0IHRvIGJlIGFkZGVkIHRvIHRoZSBwcmludGsgdGltZSBhZnRlcg0KPiA+IHRpbWVfaW5p
-dCgpIGlzIGNhbGxlZC4gQSAod29ya2luZywgYnV0IG1heWJlIHN1Yi1vcHRpbWFsKSBwYXRjaCB0
-bw0KPiA+IG9idGFpbiB0aGlzIGlzIGF0dGFjaGVkIGF0IHRoZSBlbmQuDQo+IA0KPiBPaCwgdGhh
-dCdzIGEgbmljZSBpZGVhLCB0b28hDQoNClRoYW5rcyBmb3IgdGhlIGZlZWRiYWNrIQ0KIC0tIFRp
-bQ0KDQo=
+Hello,
+
+this patchset is meant as a continuation of the discussion done during
+the last Boot Time SIG meeting [1] and not as something that can be
+applied as-is. The maintainers for most (if not all) the involved
+subsystems are not Cc'd for this reason - if anything useful will come
+out of the discussion, a proper submission process will be followed.
+
+I Cc'd the Beagleplay (well, K3 platform) maintainers because they might
+be interested, but hey: feel free to ignore the thread.
+
+== TL;DR ==
+
+A probe deferral optimization was attemped on the Beagleplay, leading to
+a reduction of 240ms of pre-init boot time and a set of techniques that
+can be re-used on other platforms. Patches included.
+
+== Introduction ==
+
+The questions this work arose from were related to the probe deferral
+process that happens during boot, and in particular:
+
+  - how much time is "lost" doing probes that don't complete and are
+    deferred?
+  - is the current infrastructure good at deferring probes in an
+    efficient way?
+  - what can be done to enhance the current infrastructure?
+
+They pretty much all generated doing boot time characterization on a
+Beagleplay, where the probe deferral mechanism is triggered many times
+during boot - half of the pre-init time of a vanilla system is spent
+inside the deferred_probe_initcall() function, which is the point in
+which probes that were deferred is performed.
+
+== Status quo ==
+
+On a Beagleplay booting the mainline kernel (v6.18-rc7) with the default
+configuration (arm64 defconfig), the pre-init time is around 1080ms;
+during this time span, 89 probe deferrals are triggered. This can be
+easily verified using the initcall_debug command line option and
+counting the occurrences of a driver returning 517 (or -517, this uneven
+behavior bothers me, but I'll keep it for another time). Some example
+follows:
+
+[    0.060228] probe of 4201000.gpio returned -517 after 0 usecs
+[    0.192159] probe of 2b300050.target-module returned -517 after 12 usecs
+[    0.269648] probe of 2850000.serial returned -517 after 18 usecs
+[    0.688228] probe of 8000f00.mdio returned 517 after 36137 usecs
+[    0.959488] probe of fa20000.mmc returned 517 after 17380 usecs
+
+It shall be noted that most of the deferral events lasts less than 10
+microseconds; this is due to the excellent work the fw_devlink
+infrastructure is doing under the hood to prevent the probes to even
+happen if all the identified suppliers are not already present (that is,
+probed) themselves. However, some other are non-negligible at all, like
+the mdio friend above, which takes a whopping 36-milliseconds chunk of
+time to decide that it's not the time for them to probe.
+
+On this vanilla system, deferred_probe_initcall() takes 504765us to
+complete - thats is roughly half of the entire boot process. This is not
+unexpected, and not necessarily the sign that something is not working -
+but let's investigate a bit.
+
+== The investigation method ==
+
+To investigate the reasons behind the probe deferral, two main tools
+can used:
+
+  - the initcall_debug command line option, that without any
+    modification to the code offers a nice detailed view of the boot
+    process (with initcall levels too, thanks to yours truly [2]);
+  - the extensive debug prints that the core driver infrastructure is
+    providing; this has to be enabled manually, either with
+    CONFIG_DEBUG_DRIVER=y or with the plain old '#define DEBUG' inside
+    drivers/base/core.c.
+
+Combining the two, it can be seen what are the consumers and suppliers
+for each peripheral and how they interact during boot; for example:
+
+[    0.080959] platform fa00000.mmc: Linked as a consumer to 601000.gpio
+[    0.089809] platform fa00000.mmc: Linked as a consumer to regulator-4
+[    0.090502] platform fa00000.mmc: Linked as a consumer to regulator-5
+[    0.194678] platform fa00000.mmc: Linked as a consumer to 44043000.system-controller:power-controller
+[    0.198904] platform fa00000.mmc: Linked as a consumer to 44043000.system-controller:clock-controller
+[    0.324348] platform fa00000.mmc: Linked as a consumer to f4000.pinctrl
+[    0.720843] platform fa00000.mmc: error -EPROBE_DEFER: supplier regulator-5 not ready
+
+This is a long - and maybe tedious, for someone - work, but in my
+experience it helps to truly know a platform; if working more as an
+integrator than a developer, this can be a game changer. At least, it
+was for me - YMMV.
+
+== Some possible ways out ==
+
+Several methodologies can be exploited to "solve" the probe deferral
+problem - assuming it is a problem. The ones that have been used to
+obtain the results presented later - and thus covered by the patchset -
+are here presented:
+
+1) Ensure that the fw_devlink infrastructure is working correctly
+   (spoiler: it is, most of the time) and close the gaps, if any; one
+   of such gaps is covered in patch 1 (that was also already submitted
+   [3] and will probably see a resend).
+
+2) Help the aforementioned fw_devlink to break the cycles, because this
+   might not be straightforward for its logic; this is what is done in
+   patch 2 with the introduction of post-init-providers properties.
+   It shall be noted that such property is not at the moment working
+   with the DTB checker, because it is not considered in any schema.
+
+3) Remove unnecessary dependencies between devices, like it is done in
+   patch 3; this can happen in particular with regulators, which are
+   often inserted to properly model the hardware but might not really
+   be required.
+
+4) Tune the kernel configuration - this can be done extensively with
+   excellent results, but something might not be so obvious - see patch
+   4 for a particularly sneaky condition that was encountered.
+
+(Beware, from now on be dragons - you have been warned)
+
+5) Change initcall levels. Old drivers for proven IPs - like I2C or SPI
+   or GPIO controllers - might have been configured for a specific
+   platform to initialize at a odd initcall level and then blindly
+   re-used for new platforms. This is not always working well with
+   modern systems with a System Management processor - like the
+   Beagleplay - where more or less any device depends on a firmware
+   interface like SCMI to be present. Some examples can be found in
+   patches 5, 6 and 7.
+
+6) Move things around inside the drivers Makefile. This is probably one
+   of the most effective AND controversial thing to do, especially if
+   coupled with 5), as it changes the init ordering of the various
+   subsystems. Patch 8 shows what has been done for the Beagleplay, to
+   ensure the SCMI firmware interface and all the services it provide
+   (clocks, power domains and so on) are initialized before the drivers.
+   Of course a single configuration that can be suitable for all
+   platforms cannot be found, but maybe this aspect can be tackled from
+   another direction, (mis-)using the LTO support that is already there.
+   More work is required on this point, of course. 
+
+== Results ==
+
+With all the patches applied, I was able to reduce the overall pre-init
+time to around 840ms, ~240ms less than the original system.
+
+The duration of deferred_probe_initcall() lowered to ~18ms and the
+number of pre-init probe deferrals to only 4 - these are not really
+avoidable, as there are fixed regulators that depend on the PMIC.
+
+Considering that no driver behavior has been modified... not bad, at
+least IMO (but I'm the author and thus don't count).
+
+== Bonus track: deferred probes of modules ==
+
+With the discussion above focused on the pre-init time, nothing has been
+said about what happens where the userspace of choice loads modules. The
+answer is: a lot of deferrals can take place also there, but the
+solution might however be simpler; in fact, the modprobe infrastructure
+already supports soft dependencies between modules.
+
+For the Beagleplay, probe deferrals hit the display (tidss) and sound
+areas; this is the content I used inside /etc/modprobe.d/beagle.conf: 
+
+softdep ite_it66121 pre: display_connector
+softdep tidss pre: ite_it66121
+softdep snd_soc_simple_card pre: ite_it66121 snd_soc_davinci_mcasp snd_soc_hdmi_codec
+
+This solved all of the issues and ensured a smooth module experience.
+
+== References == 
+
+[1] https://lore.kernel.org/linux-embedded/MW5PR13MB5632E0103356DB6C0B330FCCFDD5A@MW5PR13MB5632.namprd13.prod.outlook.com/
+[2] https://lore.kernel.org/linux-embedded/20250316205014.2830071-2-francesco@valla.it/
+[3] https://lore.kernel.org/all/20250930-mmc_pwrseq-v2-1-80a8c6be0fb0@valla.it/
+
+Cheers,
+Francesco
+
+Signed-off-by: Francesco Valla <francesco@valla.it>
+---
+Francesco Valla (8):
+      of: property: fw_devlink: Add support for "mmc-pwrseq"
+      arm64: dts: ti: k3-am625-beagleplay: set post-init-providers
+      arm64: dts: ti: k3-am625-beagleplay: remove inter-regulator dependency
+      arm64: defconfig: compile reset-gpio as built-in
+      gpio: davinci: reset initcall level
+      i2c: omap: reset initcall level
+      regulator: fixed: reset initcall level
+      drivers: Makefile: reorder driver initialization
+
+ arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts | 12 ++++++++++-
+ arch/arm64/configs/defconfig                   |  2 +-
+ drivers/Makefile                               | 30 ++++++++++++++------------
+ drivers/gpio/gpio-davinci.c                    | 17 +--------------
+ drivers/i2c/busses/i2c-omap.c                  | 15 +------------
+ drivers/of/property.c                          |  2 ++
+ drivers/regulator/fixed.c                      | 13 +----------
+ 7 files changed, 33 insertions(+), 58 deletions(-)
+---
+base-commit: 30f09200cc4aefbd8385b01e41bde2e4565a6f0e
+change-id: 20251126-beagleplay-probes-f14e5941de10
+
+Best regards,
+-- 
+Francesco Valla <francesco@valla.it>
+
