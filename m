@@ -1,158 +1,199 @@
-Received: from mail-vk1-f172.google.com (mail-vk1-f172.google.com [209.85.221.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from delivery.antispam.mailspamprotection.com (delivery.antispam.mailspamprotection.com [185.56.87.13])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51D9632D0CF
-	for <linux-embedded@vger.kernel.org>; Tue,  6 Jan 2026 14:48:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.172
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767710886; cv=none; b=JtexaWz2j3TrILZGNrEM92xFH9X6HxVJoR+otTl3Zag4RNPf3ChY89k5ct1vOAknD03xFEPqQRVGZwV1gcAOE1np4/kW4Q3+BleVsXnt21jf6a8z7cN34ipw0adTikROcT/EZS5b9CNeuKX0S7QVthc3w2JCnVB3pRjJPLf18C4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767710886; c=relaxed/simple;
-	bh=FCzIrtyhh7fPA/dw9YZK4XCoQvYOyJniQgX3yVqjUbs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IeRa6vDC806wzS9+HklcFSZ32ppqTQK4ehvXUhwbhBt/BR79E3h5dKKFTaFH21cHXEg/XvHpzWC0o1lXn9U4+BLXcoEtcbhhVz9+6a3EA2WlFs4zTlkk9s1Z8Klaue1U2EeTV5KhzsYHOzGZdtrsCku0b1OIqi29ybbxrqEfnag=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-vk1-f172.google.com with SMTP id 71dfb90a1353d-55982d04792so687025e0c.1
-        for <linux-embedded@vger.kernel.org>; Tue, 06 Jan 2026 06:48:04 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767710883; x=1768315683;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nJJUInj/XbYBOmFssNzAphx4WQGD5E9g7yIXL8sfIgU=;
-        b=SJ05rkzY4j5rdbx/1mZ01yWVJvvUfE7ew2WP7eDelh1y2ly5nilw6swPNNHzQjdgvm
-         c5gsADRoK08OINq4KPhO/+YpY2oLz7J9g/qmuotS7PylAvmQclGMuQ9wgAFnMjVxH/ll
-         1qghwYHIu6NozCawrU7VtaWGk7P4NePWPBFMiCMgBhSGVe2VcsWzXaIaM7KhL21UXLeH
-         cW3TSqGxLxb3Cc3zJ566+Oalt1VEV/6Zou2BmtXpx8X/jDnrOP5GKQ9jo+ojepejYek8
-         A+Ew5RfapE3CUY+FRuMk89nm2uxEhFkOGOi09DyzQepKMU0PcW9BRrxTyDvcdHU7HfD4
-         JhjA==
-X-Forwarded-Encrypted: i=1; AJvYcCVRkuEAgk2n09pBmuW8Vge/h93jlBoWfNGZ7yBSfqx3MrqQzJMSCIJZWdAMiEQrF6QikYlU+5mTCWNCJJinjQ==@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywc4Rezp3XKnrsLyZR8LOKTqhO5JfcKiEPpdzdz+tR3yOc+Eec1
-	4n0aeATejAa9EaPafneuUHa7Ta0BukmI/HL4wWqmR5ywQDh3inygAeYIK13jYDeH
-X-Gm-Gg: AY/fxX7CdsBbs+qhrcPmtHqJRV05VH5LiJb2y0Vu+HJWCCb7IuuDsTFFyR4u/sXf44j
-	DW5SruP2M9cpPJwoBs23o0GEgy8FBxGxLLuWg0wKliH+Jo876rkmfsM3Z7Qgf3jPgxY2/HxJp4/
-	4uTlYcKekXtKr2+FcPibwmxLCfNAnX6tpoI/JoW2pRMOxd7Am0ZZNFFycGYNdRkWhpWltmLSX0w
-	iES3kWDt7HX9iqB5zQ6nvxk72tFe/uc8M+2jUJvQvtAtcqg6yz7Y+9tdO8y0T/HMOo4TJPlTmJC
-	hPOtdQVl1yayBLwL6J08ZiRk11HwWDBVtwAUTja6Nh0bDxshi+YGor+/8mFq2Lozy98kvgt1+B8
-	nkCPpX/VUtzPuJ7epyoYTrjviejScg4wBjL7o+xrQLOelgx97nlZyn7Rh5rBaH6/I1aO2yQoxyW
-	/dXbELS9WKLGiWwSER0bOFWCZkDU443U7ehlvS2ht5ZSlZO8xp
-X-Google-Smtp-Source: AGHT+IEgn6n0ZXaWwmb0S4IVbNnE4QfbAvO+XGeH+tBMbzPsHy1qf37UifLK19F/MzbYaBCabLOAfQ==
-X-Received: by 2002:a05:6122:a09:b0:560:2442:74bb with SMTP id 71dfb90a1353d-5633958dfa4mr1140143e0c.19.1767710882878;
-        Tue, 06 Jan 2026 06:48:02 -0800 (PST)
-Received: from mail-ua1-f53.google.com (mail-ua1-f53.google.com. [209.85.222.53])
-        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-5633a1ea480sm691653e0c.1.2026.01.06.06.48.02
-        for <linux-embedded@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 06 Jan 2026 06:48:02 -0800 (PST)
-Received: by mail-ua1-f53.google.com with SMTP id a1e0cc1a2514c-940c539de8fso581427241.0
-        for <linux-embedded@vger.kernel.org>; Tue, 06 Jan 2026 06:48:02 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCURTPF/JHX8JXeZy91ir6OHhUvg3LUCgX8U1daJi8Tx0080MOJVMQ19CUxsf55HHJLqatd0pUOxaHKOrtyOLQ==@vger.kernel.org
-X-Received: by 2002:a05:6102:1623:b0:5df:bddd:b590 with SMTP id
- ada2fe7eead31-5ec7451df5fmr1123054137.34.1767710880890; Tue, 06 Jan 2026
- 06:48:00 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67AF933C50B;
+	Tue,  6 Jan 2026 15:27:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=185.56.87.13
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1767713262; cv=pass; b=oDhY3bu+Df8fu2qKfI8wKhyCBh5kWoXfk3+uxiQJ3aWKOTfMwMjxe1S8TPuoE/E/jDUb32LgburZKaV0keqp2yG2y5Sco3xI+1TiRp0F1GtVI3vbEJdLI4ETP6ZXWAmjpANx8+ksT57LMF2mfnCboAPiL9Iemf1+xio72JakTd4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1767713262; c=relaxed/simple;
+	bh=5RBZj5fiknLzyrEUj0wxw39RQT3sg1+tqKapk21gXJY=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=HyNuKDK5DoY+xvKnqeUYgBKOEAg2IMHMBrrGe4MUnrxwF6DDmFtFTCco6Py6NEvuakxann2Ed2s+Lq3+04tSD+Kg4bzupYIJZkKTaySxu8g+r01iHYehpsGLRkfn6SFB3n115abUT3qx/JESa/IAE3AI6wutS2+mXoEYMfw5gRk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it; spf=pass smtp.mailfrom=valla.it; dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b=ZJV4di2d; dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b=pysWJJ9K; arc=pass smtp.client-ip=185.56.87.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=valla.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=valla.it
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=antispam.mailspamprotection.com header.i=@antispam.mailspamprotection.com header.b="ZJV4di2d";
+	dkim=pass (1024-bit key) header.d=valla.it header.i=@valla.it header.b="pysWJJ9K"
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=outgoing.instance-europe-west4-qrct.prod.antispam.mailspamprotection.com; s=arckey; t=1767713260;
+	 b=e7NF8dfSVJgCpQu4wtCoUTNn2BByZHBEAlLfkgYjYaJ0ZFuBK9MrDziLv3QTc1K5zpz8qIdOx2
+	  zzx06BWROP97K5KJn3RoPHXpzpJSGZz7iD0aEhPV2TeytMkCvCfWoRiCWfyuChCCShhe+3ey9O
+	  /4mfs3b4RihuPm+yGumzosY/jSCUSLgV9FFDRNomw5XbpfkNQYUOytbXbMn7Lhxt5iVOubu2iG
+	  bhGZrUlAQ+HplGjmxhTZuxb3ZtIu3D30yMsPL87supSu7lTlvCuPwS1mqpZjvmLEeO1gOOC74W
+	  d5HsX9m71wpWUDscie/dDdSR5y4csf+a+iMzcTJhfaAKOQ==;
+ARC-Authentication-Results: i=1; outgoing.instance-europe-west4-qrct.prod.antispam.mailspamprotection.com; smtp.remote-ip=35.214.173.214;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed; d=outgoing.instance-europe-west4-qrct.prod.antispam.mailspamprotection.com; s=arckey; t=1767713260;
+	bh=5RBZj5fiknLzyrEUj0wxw39RQT3sg1+tqKapk21gXJY=;
+	h=Cc:To:Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:Date:
+	  Subject:From:DKIM-Signature:DKIM-Signature;
+	b=n3MDDJEPkSNNHUKJHbWIL3hOKchySvpUeeD+GRVXNe4V2laCKMNmzNrzscz3uKhZoSba1ssZxN
+	  zKJdfgjIp5lPWQhbMUuFi+C7TMcuACeS2qny8X5vwq+wdjjiFIGZlWVl0f7gzbKU4/qfRwatWo
+	  /MgTIZIaWdfCKPN7PG+mPQfk//uu7/356xOZxsrVz36uk3t7p1U4Js9UnJbbRNE6zAXFlPia5g
+	  fnyYj4IOVj5eeuvtVuIN4O4HUdeqK5suCCCtZkdeg8Ku9RmU5xYtiIjjYDpDiYpbSggAGb7Aja
+	  PJ+jwrA7HkDvkYH/2iTTFuZ2bkbil+t2fafickGsRAF5RA==;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=antispam.mailspamprotection.com; s=default; h=CFBL-Feedback-ID:CFBL-Address
+	:Cc:To:Content-Transfer-Encoding:Content-Type:MIME-Version:Message-Id:Date:
+	Subject:From:Reply-To:List-Unsubscribe;
+	bh=hjiE/vy95miZKmIXOVeCZjg3Col/800s9OhVDa7FJ7I=; b=ZJV4di2dyCB53/Rl6CaciaBjM0
+	xuzBE0AhPnm0yFLgeUwkosI7tEpeK6QBJSXU8M/0CS4+KkrAzfL/qVx/ovsuzOTlFCBRplMSoBvK9
+	a4Uu/JVC982WVt0OqofHofUVOZHY2sNKKVIcd2uiTEitCnmRT3793xwp01xPT/8U2+sk=;
+Received: from 214.173.214.35.bc.googleusercontent.com ([35.214.173.214] helo=esm19.siteground.biz)
+	by instance-europe-west4-qrct.prod.antispam.mailspamprotection.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1vd80V-00000007LnT-2nJn;
+	Tue, 06 Jan 2026 14:26:02 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=valla.it;
+	s=default; h=Cc:To:Date:Subject:From:list-help:list-unsubscribe:
+	list-subscribe:list-post:list-owner:list-archive;
+	bh=hjiE/vy95miZKmIXOVeCZjg3Col/800s9OhVDa7FJ7I=; b=pysWJJ9KhgKk6vhs7nOD76bbaF
+	PZz6G1BIUmBiO/u/dkaL/Kr5Pp3AEEHJg9PYKEl153KSi7Ck5krlGLLv+PZHTaiS6crwIifqQaeqy
+	QySKJCCaiYQZivxPtITXkiTll9RVY49XrorsOtdQ+w2f44GFSkpD6JfG1dqWvXFRfha4=;
+Received: from [95.248.141.113] (port=61315 helo=[192.168.178.65])
+	by esm19.siteground.biz with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.98.1)
+	(envelope-from <francesco@valla.it>)
+	id 1vd80O-00000000MvX-3k3r;
+	Tue, 06 Jan 2026 14:25:52 +0000
+From: Francesco Valla <francesco@valla.it>
+Subject: [PATCH RFC v2 0/3] Add splash DRM client
+Date: Tue, 06 Jan 2026 15:25:39 +0100
+Message-Id: <20260106-drm_client_splash-v2-0-6e86a7434b59@valla.it>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260106-drm_client_splash-v2-0-6e86a7434b59@valla.it> <20260106-drm_client_splash-v2-1-6e86a7434b59@valla.it>
-In-Reply-To: <20260106-drm_client_splash-v2-1-6e86a7434b59@valla.it>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Tue, 6 Jan 2026 15:47:49 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUtsx1gQffk9c-U9UkeqG_Dopv5vXNrp72ewh0EQQgwjQ@mail.gmail.com>
-X-Gm-Features: AQt7F2qsB5hg2NX_ZI18pHFrsB3JeydqfV6kNAMxXv_CqeMBbwVEPLSuyAomQME
-Message-ID: <CAMuHMdUtsx1gQffk9c-U9UkeqG_Dopv5vXNrp72ewh0EQQgwjQ@mail.gmail.com>
-Subject: Re: [PATCH RFC v2 1/3] drm: client: add splash client
-To: Francesco Valla <francesco@valla.it>
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
-	Jonathan Corbet <corbet@lwn.net>, Jocelyn Falempe <jfalempe@redhat.com>, 
-	Javier Martinez Canillas <javierm@redhat.com>, Sam Ravnborg <sam@ravnborg.org>, 
-	Mario Limonciello <mario.limonciello@amd.com>, linux-kernel@vger.kernel.org, 
-	dri-devel@lists.freedesktop.org, linux-doc@vger.kernel.org, 
-	linux-embedded@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAAAAAAC/22NywrCMBREf6XctZE8NLVdCYIf4FZKic2tvRDbk
+ pSglPy7obh0eWaYMysE9IQB6mIFj5ECTWMGuSugG8z4REY2M0guj4JLzax/tZ0jHJc2zM6EgaH
+ gtrRaKyx7yLvZY0/vzXmH2/UCTQ4HCsvkP9tPFFv1U5Z/lFEwzjjX1alS6qEO5hyNc2ZPCzQpp
+ S98n243tgAAAA==
+X-Change-ID: 20251026-drm_client_splash-e10d7d663e7f
+To: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
+ David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+ Jonathan Corbet <corbet@lwn.net>, Jocelyn Falempe <jfalempe@redhat.com>, 
+ Javier Martinez Canillas <javierm@redhat.com>
+Cc: Sam Ravnborg <sam@ravnborg.org>, 
+ Mario Limonciello <mario.limonciello@amd.com>, linux-kernel@vger.kernel.org, 
+ dri-devel@lists.freedesktop.org, linux-doc@vger.kernel.org, 
+ linux-embedded@vger.kernel.org, Francesco Valla <francesco@valla.it>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3043; i=francesco@valla.it;
+ h=from:subject:message-id; bh=5RBZj5fiknLzyrEUj0wxw39RQT3sg1+tqKapk21gXJY=;
+ b=owGbwMvMwCX2aH1OUIzHTgbG02pJDJmx0vmBst9LLTrPL2FLVnujIPlnxsv6yNs7Dy1QPNWrL
+ VxZfWdDRykLgxgXg6yYIkvIuhv39sw1/5a2gfERzBxWJpAhDFycAjAR9yRGhueHNGbcPHawpueT
+ qVZ4oKNqyd6FJ0MEuYM3ns6WcFitfYqRYUHtWgVV3mfNHyxu79i92Gd+IqsCn+7SVfviVojpf6p
+ 7yQ8A
+X-Developer-Key: i=francesco@valla.it; a=openpgp;
+ fpr=CC70CBC9AA13257C6CCED8669601767CA07CA0EA
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - esm19.siteground.biz
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - valla.it
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-SGantispam-id: 3ddd559c7c34731153a7f480692e229a
+AntiSpam-DLS: false
+AntiSpam-DLSP: 
+AntiSpam-DLSRS: 
+AntiSpam-TS: 1.0
+CFBL-Address: feedback@antispam.mailspamprotection.com; report=arf
+CFBL-Feedback-ID: 1vd80V-00000007LnT-2nJn-feedback@antispam.mailspamprotection.com
+Authentication-Results: outgoing.instance-europe-west4-qrct.prod.antispam.mailspamprotection.com;
+	iprev=pass (214.173.214.35.bc.googleusercontent.com) smtp.remote-ip=35.214.173.214;
+	auth=pass (LOGIN) smtp.auth=esm19.siteground.biz;
+	dkim=pass header.d=valla.it header.s=default header.a=rsa-sha256;
+	arc=none
 
-Hi Franceso,
+Hello,
 
-On Tue, 6 Jan 2026 at 15:26, Francesco Valla <francesco@valla.it> wrote:
-> Add a DRM client that draws a simple splash, with possibility to show:
->
->   - a colored background;
->   - a static BMP image (loaded as firmware);
->   - the logo provided by EFI BGRT.
->
-> The client is not meant to replace a full-featured bootsplash, but
-> rather to remove some complexity (and hopefully boot time) on small
-> embedded platforms or on systems with a limited scope (e.g: recovery
-> or manufacturing images).
->
-> The background color can be set either at build time from a dedicated
-> config option or at runtime through the drm_client_lib.splash_color
-> command line parameter. Any color in RGB888 format can be used.
->
-> If enabled, the static BMP image is loaded using the kernel firmware
-> infrastructure; a valid BMP image with 24bpp color and no compression
-> is expected. The name of the image can be set through the
-> drm_client_lib.splash_bmp kernel command line parameter, with the
-> default being 'drm_splash.bmp'.
->
-> Just like the existing DRM clients, the splash can be enabled from the
-> kernel command line using drm_client_lib.active=splash.
->
-> Signed-off-by: Francesco Valla <francesco@valla.it>
+after quite some time, this is the second RFC version for the DRM-based
+splash screen. Motivation behind the work can be found in v1 [0]. 
 
-Thanks for your patch!
+Following the advice received on the v1, I stripped away all of the
+user-driven functionalities (i.e.: configurable message and progress
+bar), which can be provided by existing userspace tools, and decided to
+use 24-bits bitmap as image format instead of raw dumps.
 
-> --- /dev/null
-> +++ b/drivers/gpu/drm/clients/drm_splash.c
+With the addition of EFI BGRT as a new source, this new DRM client is
+now able to draw to screen one of the following:
 
-> +#if IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_BMP_SUPPORT)
+  - a colored background;
+  - a BMP image loaded as firmware (either built-in or loaded from the
+    filesystem);
+  - the BMP image supplied by the EFI BGRT.
 
-There is no need to protect this block with #if, as it does not generate
-any code.
+Once compiled inside the kernel, the client can be enabled through the
+command line specifying the drm_client_lib.active=splash parameter.
 
-> +#define BMP_FILE_MAGIC_ID 0x4d42
-> +
-> +/* BMP header structures copied from drivers/video/fbdev/efifb.c */
-> +struct bmp_file_header {
-> +       u16 id;
-> +       u32 file_size;
-> +       u32 reserved;
-> +       u32 bitmap_offset;
-> +} __packed;
-> +
-> +struct bmp_dib_header {
-> +       u32 dib_header_size;
-> +       s32 width;
-> +       s32 height;
-> +       u16 planes;
-> +       u16 bpp;
-> +       u32 compression;
-> +       u32 bitmap_size;
-> +       u32 horz_resolution;
-> +       u32 vert_resolution;
-> +       u32 colors_used;
-> +       u32 colors_important;
-> +} __packed;
-> +#endif // CONFIG_DRM_CLIENT_SPLASH_BMP_SUPPORT
+Two additional command-line parameters can be specified:
 
-As per [1], all these values are little-endian.  Hence they should
-be declared as such using le16 or le32, and accessed using
-get_unalined_le{16,32}().
+  - drm_client_lib.splash_color=0xRRGGBB to modify the default
+    background color (which can in turn be set through a build-time
+    option);
+  - drm_client_lib.splash_bmp=<image.bmp> to set the BMP image loaded in
+    case this is the chosen source (with a fixed default of
+    drm_splash.bmp.
 
-[1] https://en.wikipedia.org/wiki/BMP_file_format#File_structure
+These two parameters were kept against some of the received feedback
+because they fit a specific embedded usecase I want to cover (i.e.:
+hardware model detected and set by the bootloader, along with a custom
+splash for each model).
 
-Gr{oetje,eeting}s,
+Additional notes:
+  - Rotation is still not managed.
+  - As for v1, support for tiled screens is untested.
+  - Plain color and BMP sources were tested both on QEMU and on a
+    Beagleplay.
+  - EFI BGRT support was tested using QEMU+OVMF.
 
-                        Geert
+Thank you in advance for any feedback you want to leave.
 
+Best regards,
+Francesco
+
+[0] https://lore.kernel.org/all/20251027-drm_client_splash-v1-0-00698933b34a@valla.it
+
+Signed-off-by: Francesco Valla <francesco@valla.it>
+---
+Changes in v2:
+  - Moved from raw dump to BMP format for static image source
+  - Removed support for configurable message
+  - Removed support for progress bar
+  - Added EFI BGRT as image source
+Link to v1: https://lore.kernel.org/r/20251027-drm_client_splash-v1-0-00698933b34a@valla.it
+
+---
+Francesco Valla (3):
+      drm: client: add splash client
+      MAINTAINERS: add entry for DRM splash client
+      drm: docs: remove bootsplash from TODO
+
+ Documentation/gpu/todo.rst                    |  17 -
+ MAINTAINERS                                   |   7 +
+ drivers/gpu/drm/clients/Kconfig               |  79 ++-
+ drivers/gpu/drm/clients/Makefile              |   1 +
+ drivers/gpu/drm/clients/drm_client_internal.h |   9 +
+ drivers/gpu/drm/clients/drm_client_setup.c    |   8 +
+ drivers/gpu/drm/clients/drm_splash.c          | 883 ++++++++++++++++++++++++++
+ 7 files changed, 986 insertions(+), 18 deletions(-)
+---
+base-commit: 7f98ab9da046865d57c102fd3ca9669a29845f67
+change-id: 20251026-drm_client_splash-e10d7d663e7f
+
+Best regards,
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+Francesco Valla <francesco@valla.it>
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
