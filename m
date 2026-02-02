@@ -1,244 +1,239 @@
-Received: from mail-ua1-f43.google.com (mail-ua1-f43.google.com [209.85.222.43])
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72219285050
-	for <linux-embedded@vger.kernel.org>; Tue, 27 Jan 2026 08:10:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A99CB2777FC
+	for <linux-embedded@vger.kernel.org>; Mon,  2 Feb 2026 16:24:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769501450; cv=none; b=gPBl2FL1JcfU84TsgqwDKxgQ/L5ICjK9PTStyShf9RuT81PB761O+/NLKdTAAejfKxzo+WyQ7w54GcSRI2ebFtMsdYL19/xo+pAWRRopRV9eaP7J14yjyxSev1DnaTpBa+pbZmA8i/P30OJgx14BPE5tVGj9PswPNd+4OBM7wVU=
+	t=1770049445; cv=none; b=BOiTsjfPZAu/4wBeYHkN9Fv2iLYTcfBx3GYOGe5smLsGQ/0idT8pDNJAusk9wH2t0Q1wjXCfIvm63VrR7bf0C+V2mSJKCTkbUNCQ8LXY3IQdbI5gKRx1j9eNbydlqcmAcJOtgqs+OHimJvsntwAQVo3tJ3pyUnv+Y2r2chrxxNg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769501450; c=relaxed/simple;
-	bh=RTRvdF4XJUeuddMU5CWGXtgtwaukfeoD1X1dLpApVPU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Q8XVMGtFWQM31WJpcAwcYSRUVzjL5GYITaM8zT1+jTN0Gy2ZNV+WxUfwZcoCfAsANu/qZPb+/PFt0dKebUjCB6sssI6KC1ntwu++T1TyqBh2lILhEIdOon9j5NWXtvhe4r+St787TMDV15qTEpAdIKQPdOK9gOejK7w0rYw8k0o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ua1-f43.google.com with SMTP id a1e0cc1a2514c-94121102a54so3670594241.1
-        for <linux-embedded@vger.kernel.org>; Tue, 27 Jan 2026 00:10:47 -0800 (PST)
+	s=arc-20240116; t=1770049445; c=relaxed/simple;
+	bh=EOztiiSVGrgmHJOg7T+Bw+S50gTH6cV0Y9/IQqtRkkU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=t4wgtGw+L9FIeFsANDP582gYwsF1Na+BKLm1dcRf/MqFryq7FIhiBPisWrdNMfydncMBbUFf+tCBpah9I8yihSSqhyrDPFuiWfY/IlYp9pWg194j7jgmneadiqkRb5fmRd8qjmU34BpaoGxwaJnK1ANMxYUQjkv8tynO8XAPE1Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=F6ODCcYl; arc=none smtp.client-ip=209.85.128.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="F6ODCcYl"
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4805ef35864so39653495e9.0
+        for <linux-embedded@vger.kernel.org>; Mon, 02 Feb 2026 08:24:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1770049442; x=1770654242; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=AHNIP0Ho0/lz3K1ulWMW08g4abIwfEx3RKfx/a/iykU=;
+        b=F6ODCcYlFCddjqq379Hm3shtmu531MD0/3TBnr5FIPmsRCnvxtBxhNBoB1ogL/aE6n
+         UwurTLbjceDUU8B2IDy26d+vzzuRTg4E/07+DdGa9fPJNR/sW8QAs6YJHVcB8ur5DT2i
+         lAH/Zv4TWCIcfI7ApC5Ijlfz0wdYPWw4X1ztcdNKIdYPSSQMzWeAHwmqxQNzGzJGgQjL
+         87ya5WXcXGa7ye3CnV3ZiUv3iTCJkCy12nu5kkBeoDes4g3Sej8NZjXKCyL92D/axg5t
+         pBEBqllzwOALSIZNLmOIkeI9H6X90mM/0U9OLi9G0sgO1tqlVIMdF1SifVWqH0++rpJX
+         EOzQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769501446; x=1770106246;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=m1C1olFiOlWbX7cUG/rTzknnglz0yYp8igQr1eQOmDQ=;
-        b=XxdEl1pBmmIWai1aNwNh7bDI0saL4bbWrJ8ZQKHDTqhZaZa7/vLvcX5/7uUv2Aor0w
-         o1zdUxabgH8ksnkx6nTA2TDTn1nxdtPd7ezM+Omul7GeHHCVyr0DJOJGpHdaOHLC5srA
-         rNiTRMctA2QJUJHyndRpHoDcZiHpqKVItBln5X9KmwKZdnoCYkEStNyZdrfQ4ppgOo0W
-         la54nNXubk7nSOAGCivAgEb7g3mNeu+M+NFIezLxVQKPql6uIfS8YCFQKJtl6biXNf2S
-         5WQ6Kh/siBwl2pzMafYJ0mQSv/JUAGVj8s9NwARtWs2RHxRe6GmuCVSTGcjrMKUPqMuv
-         qBYg==
-X-Forwarded-Encrypted: i=1; AJvYcCVN/77bt/FTzCSNw85HpEIo1g5k1wd9C5CqBsYQ+6qTUQqrDQQ+3NKV1E6GZ1zIOKYEDZdppHVIMBRBuxvcsw==@vger.kernel.org
-X-Gm-Message-State: AOJu0YwzZHEhMGlhgGNzbWTWULPixTJWYH1rK9BrJ42ZYGNK0HHBUdYp
-	A2qPShVSvowugHjblc/A/Hxw1TWJhsd35Ns7YHaG5YXt9BPpKq/98PWHo2/iBd9Z
-X-Gm-Gg: AZuq6aKJTzujCLPpmiVjKJaQUSFqZOUuIZvTuRju6jOK2XFkNj+RRXqWhGf4mnsG5qc
-	fpsyTATAVdSZ73pfFU+W3/VUtHBaeBOgcaIzXkU4eEie2foSda+ZzYZNHOhYmfwGQG/F6gnOXYg
-	LJJtA90dueNg8X7XgrYendhXk62TVHiOOfJ+c0QfhFp1QdjRov94CScawlFMYH4elR6gKAxkUwh
-	Y8dgFpcgYGDFRU1fTRIffhG97311YxELV9K8hsjIsS7Nouyt3Kw1xzm9X8/M9fl4qtJH3evWnfw
-	sHW1KCLWlRMPAYkrvOfAgbkHieTQH1wPnfu3uQJM2T87B0HAi4nFFHyAfssfrIdPlZDHj6zuXir
-	cy7ltYt0wWlB7CWLlRcrakVWA94Q6ctJjP/wbc9mQnBOig3yMrzGJbB82fysmc2Z9YBMD5TINvo
-	ek+NAdGQrZt3tJRSiKftk8YN0vpvXmzjZhGgouuS7N/9EO6iAnf1wopIXzaCM=
-X-Received: by 2002:a05:6102:c4e:b0:5f5:3244:207 with SMTP id ada2fe7eead31-5f72376abf1mr624808137.20.1769501446180;
-        Tue, 27 Jan 2026 00:10:46 -0800 (PST)
-Received: from mail-ua1-f51.google.com (mail-ua1-f51.google.com. [209.85.222.51])
-        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-5f54d40ff80sm2321872137.6.2026.01.27.00.10.43
-        for <linux-embedded@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 27 Jan 2026 00:10:44 -0800 (PST)
-Received: by mail-ua1-f51.google.com with SMTP id a1e0cc1a2514c-93f5729f159so3265949241.0
-        for <linux-embedded@vger.kernel.org>; Tue, 27 Jan 2026 00:10:43 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWxZL40u0kh8GEiT2sekoek1glnOzWig0brFiLiDqPqh8liOimWDvkQXWqQc4Cx9lNJW+mpcUxpHpv3zZ3KIg==@vger.kernel.org
-X-Received: by 2002:a05:6102:370b:b0:5ef:a9fb:f1f3 with SMTP id
- ada2fe7eead31-5f72362dbf8mr603892137.11.1769501443560; Tue, 27 Jan 2026
- 00:10:43 -0800 (PST)
+        d=1e100.net; s=20230601; t=1770049442; x=1770654242;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=AHNIP0Ho0/lz3K1ulWMW08g4abIwfEx3RKfx/a/iykU=;
+        b=xKIMOZIuqnVvR3xzT2jbpOOCqfGJsbo79D65VQVm6RGKt5gBgLKDbd43MqjDYm0XEI
+         iIssyv1RDW33is5/z93aiIvn82qxGY6hsL8mWBxmx72HNq+mtnf2iU0J8HEBqbLIA+Vt
+         naOtM6K+8CtpU15NQKVR+LsXiaUGQwoImPm50FhqDTkyBOCbmWhYYs3ZVbg0jtbKIX+H
+         Y6Dfe0hfBQTPYRTx50GcfULTwrT36qb5idJlXAiKNN7lpDGFF+PPn7jAFlzZZXNQYliv
+         v3rNxHSRqeFk6ti1VRk6HXPtpQq1/dfKeZlmTXZl3XfcDQYYGQifOKn0Ltg+vzhu+w6M
+         pZSQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVwBLT3L0P/9LOC/bRdbRiQ5/UuqZtEWsc9GvYbwpzfQZWaiF4aWZe7dCJ8EqqkZKWjPRf/Pc7pvGX/pXYTNQ==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwJt1mzT+PsYWMkFFxkBIMHNH2D21usdxEoPVFlaGFaaHPo0O2U
+	C+gMU4awN4PKg6IumQCkdLsHC0TRsUU+CJDOxuCNkN25F/Wgf9bqCAcTksiICe9mN9U=
+X-Gm-Gg: AZuq6aIzQTeLNT/wd0A05lt6QKHFowAyUqCUCv5WKsTepcDh/wj71y/Z7Pn0cHeM2Ga
+	76nw0x558+qJfdFZvIfebwbnuZWnzgq7m8mgaLLb0betaLYSE44vJRCADCCxoSYqM+ngEpTrPPD
+	2C5zUKaHBi5Z6g2DSaUMSS/YtMTH6IYiqdlbmHgKGUd2n4Tzp+FWaRtRDpvNOGNqlkjuBC/KvCv
+	pnj5YsTG01Rigqu8qNpxSgG/hmW6DQDFj9RkzJNdsMYe5RPxZ7s5BsLammhVn9cL9yjabeR1IsC
+	xEXXaRXyN+Qso3Wkl0vDysKk5Rvo5vHDUp/rMWPxX1iqkqZEDo6p1HIKUqzf8gX2HBn+LVXJGSo
+	vvwA+VklCc6D4al5AsHcn2v48F2EdVGjtgdmE0nuY/sj003dKndfeXkbOiWm5LU+xnMYbhTyHUE
+	kCXWGfiJUBUMpB9oxUZQ==
+X-Received: by 2002:a05:600c:3f0a:b0:477:a21c:2066 with SMTP id 5b1f17b1804b1-482db447c57mr146134075e9.5.1770049441984;
+        Mon, 02 Feb 2026 08:24:01 -0800 (PST)
+Received: from pathway (nat2.prg.suse.com. [195.250.132.146])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-483051286e0sm71505e9.5.2026.02.02.08.24.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Feb 2026 08:24:01 -0800 (PST)
+Date: Mon, 2 Feb 2026 17:23:59 +0100
+From: Petr Mladek <pmladek@suse.com>
+To: "Bird, Tim" <Tim.Bird@sony.com>
+Cc: Francesco Valla <francesco@valla.it>,
+	"rostedt@goodmis.org" <rostedt@goodmis.org>,
+	"john.ogness@linuxtronix.de" <john.ogness@linuxtronix.de>,
+	"senozhatsky@chromium.org" <senozhatsky@chromium.org>,
+	"linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH v2] printk: fix zero-valued printk timestamps in early
+ boot
+Message-ID: <aYDPn2EJgJIWGDhM@pathway>
+References: <39b09edb-8998-4ebd-a564-7d594434a981@bird.org>
+ <20260124194027.713991-1-tim.bird@sony.com>
+ <aXYrn8QFCSZ5Q8CB@bywater>
+ <MW5PR13MB5632FE304C7FA3D86309D6F1FD93A@MW5PR13MB5632.namprd13.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <39b09edb-8998-4ebd-a564-7d594434a981@bird.org>
- <20260124194027.713991-1-tim.bird@sony.com> <CAMuHMdV9XQiBx1QBDoaqJB+CwNp0EQbeJuFpe=yCqfAe1inXWA@mail.gmail.com>
- <MW5PR13MB5632CEFB9AB7AFDA7334307BFD93A@MW5PR13MB5632.namprd13.prod.outlook.com>
-In-Reply-To: <MW5PR13MB5632CEFB9AB7AFDA7334307BFD93A@MW5PR13MB5632.namprd13.prod.outlook.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Tue, 27 Jan 2026 09:10:31 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdWBb3y=2jYv8PzWact=KOhZGn4DFBP7XpxhdjAmDcDeBg@mail.gmail.com>
-X-Gm-Features: AZwV_QgcV7Khr3DqVpkronnUKVtZj_WQIR_UhSgJCWOQjk3dnOmircHG2ZPxeQc
-Message-ID: <CAMuHMdWBb3y=2jYv8PzWact=KOhZGn4DFBP7XpxhdjAmDcDeBg@mail.gmail.com>
-Subject: Re: [PATCH v2] printk: fix zero-valued printk timestamps in early boot
-To: "Bird, Tim" <Tim.Bird@sony.com>
-Cc: "pmladek@suse.com" <pmladek@suse.com>, "rostedt@goodmis.org" <rostedt@goodmis.org>, 
-	"john.ogness@linuxtronix.de" <john.ogness@linuxtronix.de>, 
-	"senozhatsky@chromium.org" <senozhatsky@chromium.org>, "francesco@valla.it" <francesco@valla.it>, 
-	"linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <MW5PR13MB5632FE304C7FA3D86309D6F1FD93A@MW5PR13MB5632.namprd13.prod.outlook.com>
 
-Hi Tim,
+On Mon 2026-01-26 16:52:57, Bird, Tim wrote:
+> 
+> 
+> > -----Original Message-----
+> > From: Francesco Valla <francesco@valla.it>
+> > 
+> > Hi Tim,
+> > 
+> > I tested this both on X86_64 QEMU and on a i.MX93 (ARM64) and can
+> > confirm it is working as expected. Auto-calc of calibration data is far
+> > better than the configuration parameters in v1.
+> > 
+> > It is slightly confusing to see a time value printed to serial output
+> > and another one inside kmsg, but that's a human thing and should not
+> > confuse any tool.
+> Agreed.  I wasn't too worried about it, because most serious developers working
+> on boot-time will not be watching early messages over serial console.  (Usually they
+> use 'quiet' or some lower log level).  But on qemu, it does look strange to see 0s
+> on the first output sequence, and then non-zeroes when using dmesg later in the same
+> boot.
+> 
+> I just realized though, that I should go back and see if there's a discontinuity on the output via serial
+> (before and after calibration), and possibly put a note about that in the config description.
 
-On Mon, 26 Jan 2026 at 18:11, Bird, Tim <Tim.Bird@sony.com> wrote:
-> > From: Geert Uytterhoeven <geert@linux-m68k.org>
-> > On Sat, 24 Jan 2026 at 20:41, Tim Bird <tim.bird@sony.com> wrote:
-> > > During early boot, printk timestamps are reported as zero before
-> > > kernel timekeeping starts (e.g. before time_init()).  This
-> > > hinders boot-time optimization efforts.  This period is about 400
-> > > milliseconds for many current desktop and embedded machines
-> > > running Linux.
-> > >
-> > > Add support to save cycles during early boot, and output correct
-> > > timestamp values after timekeeping is initialized.  get_cycles()
-> > > is operational on arm64 and x86_64 from kernel start.  Add code
-> > > and variables to save calibration values used to later convert
-> > > cycle counts to time values in the early printks.  Add a config
-> > > to control the feature.
-> > >
-> > > This yields non-zero timestamps for printks from the very start
-> > > of kernel execution.  The timestamps are relative to the start of
-> > > the architecture-specified counter used in get_cycles
-> > > (e.g. the TSC on x86_64 and cntvct_el0 on arm64).
-> > >
-> > > All timestamps reflect time from power-on instead of time from
-> > > the kernel's timekeeping initialization.
-> > >
-> > > Signed-off-by: Tim Bird <tim.bird@sony.com>
-> > > ---
-> > > V1 -> V2
-> > >   Remove calibration CONFIG vars
-> > >   Add 'depends on' to restrict arches (to handle ppc bug)
-> > >   Add early_ts_offset to avoid discontinuity
-> > >   Save cycles in ts_nsec, and convert on output
-> > >   Move conditional code to include file (early_times.h)
-> >
-> > Thanks for the update!
-> >
-> > > --- /dev/null
-> > > +++ b/include/linux/early_times.h
-> > > @@ -0,0 +1,48 @@
-> > > +/* SPDX-License-Identifier: GPL-2.0 */
-> > > +
-> > > +#ifndef _KERNEL_PRINTK_EARLY_TIMES_H
-> > > +#define _KERNEL_PRINTK_EARLY_TIMES_H
-> > > +
-> > > +#include <linux/timex.h>
-> > > +
-> > > +#if defined(CONFIG_EARLY_PRINTK_TIMES)
-> > > +extern u32 early_mult, early_shift;
-> > > +extern u64 early_ts_offset;
-> > > +
-> > > +static inline u64 early_cycles(void)
-> > > +{
-> > > +       return ((u64)get_cycles() | (1ULL << 63));
-> >
-> > No need to cast to u64, as the second operand of the OR is u64 anyway.
-> > BIT_ULL(63)
-> >
-> > I think it would be good to have a #define for this at the top.
->
-> I'll look at this.  Is BIT_ULL(63) preferred over (1ULL << 63)?
+I see the following in the serial console output:
 
-When you refer to the bit value, yes: BIT() for unsigned long, BIT_ULL()
-for unsigned long long; recently we got BIT_U{8,16,32,64}(), too).
+[    3.288049][    T1] Write protecting the kernel read-only data: 36864k
+[    3.298554][    T1] Freeing unused kernel image (text/rodata gap) memory: 1656K
+[    3.318942][    T1] Freeing unused kernel image (rodata/data gap) memory: 1540K
+[   12.230014][    T1] Early printk times: mult=38775352, shift=27, offset=8891950261 ns
+[   12.246008][    T1] Run /init as init process
+[   12.254944][    T1]   with arguments:
+[   12.264341][    T1]     /init
+[   12.272184][    T1]     nosplash
 
-> Do you think something like "HIGH_BIT63" would be good enough?
+And this is from dmesg -S
 
-I'd name it for what it means, not what it does, e.g. EARLY_TS_FLAG?
+[   12.179999] [    T1] Write protecting the kernel read-only data: 36864k
+[   12.190505] [    T1] Freeing unused kernel image (text/rodata gap) memory: 1656K
+[   12.210893] [    T1] Freeing unused kernel image (rodata/data gap) memory: 1540K
+[   12.230014] [    T1] Early printk times: mult=38775352, shift=27, offset=8891950261 ns
+[   12.246008] [    T1] Run /init as init process
+[   12.254944] [    T1]   with arguments:
+[   12.264341] [    T1]     /init
+[   12.272184] [    T1]     nosplash
 
-> > > +}
-> > > +
-> > > +static inline u64 adjust_early_ts(u64 ts)
-> > > +{
-> > > +       /* High bit means ts is a cycle count */
-> > > +       if (unlikely(ts & (1ULL << 63)))
-> > > +               /*
-> > > +                * mask high bit and convert to ns
-> > > +                * Note that early_mult may be 0, but that's OK because
-> > > +                * we'll just multiply by 0 and return 0. This will
-> > > +                * only occur if we're outputting a printk message
-> > > +                * before the calibration of the early timestamp.
-> > > +                * Any output after user space start (eg. from dmesg or
-> > > +                * journalctl) will show correct values.
-> > > +                */
-> > > +               return (((ts & ~(1ULL << 63)) * early_mult) >> early_shift);
-> >
-> > Please use the mul_u64_u32_shr() helper.
-> OK.  I did not know about that.
->
-> I can check, but do you know offhand if timestamps from local_clock() on 32-bit systems are
-> always 64-bit nanoseconds?  I assume so looking at the printk code and
-> making some assumptions.  (But that's dangerous.)
+> I'll think about what I can do here to reduce the confusion.
 
-I am not 100% sure, but I think they are.  Note that on systems
-without high-resolution timers, they may increment in large steps,
-e.g. by 10000000 if HZ=100.
+I though about showing the non-adjusted timestamp with '?',
+Something like:
+
+[    3.288049?][    T1] Write protecting the kernel read-only data: 36864k
+[    3.298554?][    T1] Freeing unused kernel image (text/rodata gap) memory: 1656K
+[    3.318942?][    T1] Freeing unused kernel image (rodata/data gap) memory: 1540K
+[   12.230014][    T1] Early printk times: mult=38775352, shift=27, offset=8891950261 ns
+[   12.246008][    T1] Run /init as init process
+[   12.254944][    T1]   with arguments:
+[   12.264341][    T1]     /init
+[   12.272184][    T1]     nosplash
+
+But I am afraid that it might break some monitoring tools.
+
+Well, it might be acceptable when this feature is not enabled
+in production systems.
 
 > > > --- a/init/Kconfig
 > > > +++ b/init/Kconfig
 > > > @@ -777,6 +777,18 @@ config IKHEADERS
-> > >           or similar programs.  If you build the headers as a module, a module called
-> > >           kheaders.ko is built which can be loaded on-demand to get access to headers.
+> > >  	  or similar programs.  If you build the headers as a module, a module called
+> > >  	  kheaders.ko is built which can be loaded on-demand to get access to headers.
 > > >
 > > > +config EARLY_PRINTK_TIMES
-> > > +       bool "Show non-zero printk timestamps early in boot"
-> > > +       default y
-> > > +       depends on PRINTK
-> > > +       depends on ARM64 || X86_64
-> >
-> > So for now this is limited to (a few) 64-bit platforms...
->
-> Yes, but it really shouldn't be.  I got spooked when 0-day told me that the code
-> wouldn't link on powerpc, so I restricted it to just machines I was actually testing.
-> But this should work on some ARM32 and most x8632 platforms.  Actually, it should
-> work on anything that has a cycle-counter from kernel start (some RISC machine
-> might qualify as well).  However, I've seen a few cases where some platforms require
-> kernel initialization of their cycle-counter, and I wanted to play it safe.
->
-> If such platforms are well-behaved and return 0 before they are initialized, it should
-> still be safe to turn this on - it just won't have any effect.
+> > > +	bool "Show non-zero printk timestamps early in boot"
+> > > +	default y
+> > 
+> > Considering that this might have a significant impact on monitoring
+> > mechanisms already in place (that e.g. expect a specific dmesg print to
+> > have a maximum associated time value), please consider a N default here.
+> 
+> Oops!  Sorry, that was supposed to be 'default n'.  You're right.  I know I had
+> this as default N, and I think I switched it temporarily for testing, and forgot
+> to switch it back (and never caught it the numerous times I reviewed the
+> patch before sending it out again, ugh).  Thanks for catching this.
+> 
+> If people like this, and we don't see any problems with tooling or virtualization, I
+> could see it switching to default Y in the future.  But for now this should definitely
+> be 'default n'.
 
-At least on m68k, get_cycles() always returns zero ;-)
+We need to be careful. The different output on console and via dmesg
+might confuse people. The extra '?' might help poeple but it might confuse
+tools.
 
-> I plan to do some more investigation of the powerpc error.  It was
-> powerpc-linux-ld: init/main.o: in function `kernel_init':
-> main.c:(.ref.text+0x144): undefined reference to `__udivdi3'
->
-> from the definition of clocks_calc_mult_shift(), which seems to indicate a bug
-> in the powerpc code.  In the long run, I should try to track down that bug rather than
-> exclude a bunch of other (likely-working) arches.  But I was playing it conservative for now.
-
-An undefined reference to __udivdi3 means you are using a 64-by-32
-division, for which you should always use the helpers from
-<linux/math64.h>.  Even on 64-bit, the helpers may generate better code.
-
-> > > --- a/init/main.c
-> > > +++ b/init/main.c
-
+> > 
+> > > +	depends on PRINTK
+> > > +	depends on ARM64 || X86_64
+> > > +	help
+> > > +	  Use a cycle-counter to provide printk timestamps during
+> > > +	  early boot.  This allows seeing timestamps for printks that
+> > > +	  would otherwise show as 0.  Note that this will shift the
+> > > +	  printk timestamps to be relative to machine power on, instead
+> > > +	  of relative to the start of kernel timekeeping.
 > > > +
-> > > +       /* set calibration data for early_printk_times */
-> > > +       end_cycles = get_cycles();
-> > > +       end_ns = local_clock();
-> > > +       clocks_calc_mult_shift(&early_mult, &early_shift,
-> > > +               ((end_cycles - start_cycles) * NSEC_PER_SEC)/(end_ns - start_ns),
-> > > +               NSEC_PER_SEC, 50);
-> >
-> > mul_u64_u64_div_u64() is probably the best helper that is available
-> > (there is no mul_ulong_u32_div_u64()).
->
-> What would the mul_u64_u64_div_u64 do if cycles_t is u32?
-> Should it sill all work, just not optimized?
+> > 
+> > To be precise, the timestamps will be relative to processor power on;
+> > the machine might have some other processors that run before the Linux
+> > one (this is the case for example of i.MX9 or AM62 SoCs) and will be
+> > unaccounted for even by this mechanism.
+> 
+> Good point.   Even more precisely, it will be relative to
+> cycle-counter value initialization or reset, which often (but not always)
+> corresponds to processor power on.
+> 
+> I'll adjust the wording.
+> 
+> I'm still a bit unsure what happens in the virtualization case.  qemu seems to initialize
+> the TSC at qemu start, but I'm not sure what happens for e.g. client VMs on cloud servers.
 
-It should still work.
-arch/x86/include/asm/div64.h uses divq, so it is up to Intel or AMD.
-Everything else uses lib/math/div64.c.
-If need, you can add an optimized version for e.g. arm64, too.
+I see the following via QEMU (from dmesg):
 
-Gr{oetje,eeting}s,
+[    8.853613] Linux version 6.19.0-rc7-default+ (pmladek@pathway) (gcc (SUSE Linux) 15.2.1 20251006, GNU ld (GNU Binutils; openSUSE Tumbleweed) 2.45.0.20251103-2) #521 SMP PREEMPT_DYNAMIC Mon Feb  2 16:36:53 CET 2026
+[    8.853617] Command line: BOOT_IMAGE=/boot/vmlinuz-6.19.0-rc7-default+ root=UUID=587ae802-e330-4059-9b48-d5b845e1075a resume=/dev/disk/by-uuid/369c7453-3d16-409d-88b2-5de027891a12 mitigations=auto nosplash earlycon=uart8250,io,0x3f8,115200 console=ttyS0,115200 console=ttynull console=tty0 debug_non_panic_cpus=1 panic=10 ignore_loglevel log_buf_len=1M
+[    8.865086] BIOS-provided physical RAM map:
+[    8.865087] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    8.865089] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    8.865090] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    8.865090] BIOS-e820: [mem 0x0000000000100000-0x000000007ffdbfff] usable
+[    8.865091] BIOS-e820: [mem 0x000000007ffdc000-0x000000007fffffff] reserved
+[    8.865092] BIOS-e820: [mem 0x00000000b0000000-0x00000000bfffffff] reserved
+[    8.865092] BIOS-e820: [mem 0x00000000fed1c000-0x00000000fed1ffff] reserved
+[    8.865093] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff] reserved
+[    8.865093] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    8.865094] BIOS-e820: [mem 0x0000000100000000-0x000000017fffffff] usable
+[    8.865094] BIOS-e820: [mem 0x000000fd00000000-0x000000ffffffffff] reserved
+[    8.865171] earlycon: uart8250 at I/O port 0x3f8 (options '115200')
+[    8.865176] printk: legacy bootconsole [uart8250] enabled
+[    8.892181] printk: allow messages from non-panic CPUs in panic()
+[    8.893327] printk: debug: ignoring loglevel setting.
+[...]
+[   12.162011] Freeing unused decrypted memory: 2036K
+[   12.171970] Freeing unused kernel image (initmem) memory: 7120K
+[   12.179999] Write protecting the kernel read-only data: 36864k
+[   12.190505] Freeing unused kernel image (text/rodata gap) memory: 1656K
+[   12.210893] Freeing unused kernel image (rodata/data gap) memory: 1540K
+[   12.230014] Early printk times: mult=38775352, shift=27, offset=8891950261 ns
+[   12.246008] Run /init as init process
+[   12.254944]   with arguments:
+[   12.264341]     /init
+[   12.272184]     nosplash
+[   12.280738]   with environment:
+[   12.288728]     HOME=/
+[   12.296319]     TERM=linux
 
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Best Regards,
+Petr
