@@ -1,148 +1,145 @@
 Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE18037757B;
-	Fri, 20 Mar 2026 18:40:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6816C301474;
+	Tue, 24 Mar 2026 19:48:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774032042; cv=fail; b=X+J+yIXilLFDTzenkJ8BszelLmXUzgGeOgY3YjPZyaWufdkD5/DEjr5p/+yRqZ7jjYxfbMPtll/j8iPQ1f3XjM12VIVRv/L/XRFKfrv4xGyRgcGLD8y0NcYWIxgdHQ/Ks0w7pvOsllvBpQYrvdyutt4N6Ud8nTqCREFgJfu6Gas=
+	t=1774381692; cv=fail; b=N+ZbKBKHZC6pIg86W0u5TAJuEWj9MjqFb004drJI8GfKE0vjq9IdGES+TAUnfwbItw/tvWKYQ1T0hhOsz9QiKHvi9r64m0i2lh5g1rhU9ghboc3d3N7+EIazwwMP4+HVOJU9EU/fNW83JR5DpEHZwZE30HZ1RSy04y8AwVs/bvU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774032042; c=relaxed/simple;
-	bh=88I6HwBqLyXXEHzq39LcOKFrGRBrtXjkC7Xxp5QeNxY=;
+	s=arc-20240116; t=1774381692; c=relaxed/simple;
+	bh=q7+hM/h/hWtJPKxrn9HIu4mGbxn4S2P+yUrIzSSPrK0=;
 	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=BolnQQXCieyMdflQhLdrTcEEPaYKGwltQIf5vUpVFxiyoL4Z44OXMlW9B7MsQwc5C4X3N1PFPDDMFdbq/ReEOwBlY9vVeque69isgGJsZIAXTLeFgsLGBuJEDWFhl1OMKucoH4UAAZ112etBIhPnOvqoEvxITJLgJc+a/psoCZY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=EvWgTVgV; arc=fail smtp.client-ip=185.183.30.70
+	 MIME-Version:Content-Type; b=AfFhxnYQElJIRwkJPwpgOgcq/OlnudfRb5nUYHCZB9aXP8BTeeHeBllNo4PrL4z0XtcOOh2xWgCZ5ZaNKeK5B67/H31T6cHPBqRIKkpXLdUcH3NwQfDIrg9m4eQePqmuOOSWf9ltJRUPtWGTy4d7soKESBo7DwLyqVSd/3HcA/0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=LQ4JhkZ0; arc=fail smtp.client-ip=185.183.30.70
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="EvWgTVgV"
-Received: from pps.filterd (m0209321.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62KHs4Pi3129744;
-	Fri, 20 Mar 2026 18:15:58 GMT
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="LQ4JhkZ0"
+Received: from pps.filterd (m0209320.ppops.net [127.0.0.1])
+	by mx08-001d1705.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62OF9Awl387289;
+	Tue, 24 Mar 2026 19:47:16 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=p1; bh=88I6HwB
-	qLyXXEHzq39LcOKFrGRBrtXjkC7Xxp5QeNxY=; b=EvWgTVgVnAD7qQ3jB4xRqsg
-	M6KoWJuMV361X+fUby8cTmya4UxZWYZan11EudUNjiiZk/sQmCRp38wjnR6Leabd
-	ZBdnLbOI5k99fVhhfAxo8/NbGv3Muh6vXLm1H8uNGBlG9wKFdzZdXgvqq+F59XtS
-	BzmwQACxhq+ypqcQHK3tvVijEEDMluEykE8JPzppRYsm/o+q8LEWs9ccl/2LPOKT
-	wegAM6iDF44U3Mx+bYVgpEUD698R3FJL7AGkVfqtgmqMcbz5e2uF3+FQLwIn6XO0
-	6Nqxrqb3nWo2ylsdsgfUkxpqy55m2YwPzVtgZmv4dzkLY8o1kSLmUozlvSGHzuw=
+	:message-id:mime-version:references:subject:to; s=p1; bh=r/su35w
+	Nea7h/dghOntkgPcV2DH06T/qDp5S345/ud0=; b=LQ4JhkZ07WpMiB+/vQxaoiQ
+	VhGX2MPzkgTkk9D/dSYOSCJZcH9bep5jFrIAhyf+2PrK6IcOWcg9xCfe5ySCSmWG
+	sZhbBA9iM65jQS5j7DoQVkQc7MznP5du3TeIoUqENpcv1gh6d2vAjcKD9m8AOOyC
+	b/k/b4SZ8B2Jngbglc5Yw3CzZtPByjRnEg83Uz6XSX3UORYWI85M5PM3CSUL+Dnl
+	KcevLmj1qnGnSM5q7TNAo1iSA1F8DJOGOHjM7JgB9XtigtcYtqC9Cw8tkskD3NDO
+	0ZPoLwo2fvA9XqxirxykO1CCKqYDoRMz/kMcL4inIykhXVSKYEHLm+GA/7liEJg=
 	=
-Received: from sj2pr03cu001.outbound.protection.outlook.com (mail-westusazon11012013.outbound.protection.outlook.com [52.101.43.13])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 4cvw30qyuq-1
+Received: from ch5pr02cu005.outbound.protection.outlook.com (mail-northcentralusazon11012028.outbound.protection.outlook.com [40.107.200.28])
+	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 4d1kk73vfy-1
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
-	Fri, 20 Mar 2026 18:15:58 +0000 (GMT)
+	Tue, 24 Mar 2026 19:47:15 +0000 (GMT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=jX6NsxHtRhuRt20KpayL6xBIPjPqHCnaRUinms+/N9+PNO7zJbxiS3nyteiPyJK0skNxslJCeL7bx+5jgdT/WIwqxK1o4rJ5PWeiyVwgyqp6aSWoqfa9Aj2cQXdNkW9rdkBe+KRYADI07G7ZXzfxO2v900HV8a3jxdSHoiBaa5RYlW9Xftfc1taeQ07/3pHbK00BfFIBiIrmyUOReNSE3dX60C34CSPYDU8ZwuOYYdV7KSZrE7GJYUzmFkz7HllE4e2V8hM/vYvf4MI4BieHlEFyx8miHjpOzRCZfUcv5ZARH/hWEMLMJrOBJmfXMr+Pp6ANKUzhUf8IhxDNFkF1tQ==
+ b=OdlpN7/D5xxFrYXMML2rHsjfFD+x/SXQo+yg5RAlnDd7DMQI1Eq+Anpz/CVIgMV679YZDxi30Ee5ezrMfzoZZjsEp0XUJFmGvJh9eRI+mS7yidJXZ4t8iJF9RmM9bsp8ISFyQABQBf6NwBNUvm+OytqStBsIZiAXiG4psgBxhkiF3aurVwwzTInaGa2mGdoALrY8vyRfDoDrzijxGuEv2xQY1oGLYlicm0HEGR2eMoqrIsnBqDxqLi9BEht3R+FjDtfj/u7+AGminuL5ShowEav0byzRjSI3EgMLcCb/8MWCtylLkql6BvBr1lmJ4HSRD3sOCo0NhdKsJdV2IXw6fQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=88I6HwBqLyXXEHzq39LcOKFrGRBrtXjkC7Xxp5QeNxY=;
- b=JWHsHreA/1KTod+Q4iUFFLBDr2X+jbxqp35pZbigvLel8V4pRIkoO1TibIUktTP+UO6LBmOz6EfznD6vsgWugPqYk0+tUGUSreXO7gTqQ2WxhWF9eGbQXWfQ8rdvo+CO/iUXWRzWbgHn6TsicRsZc11i9nmkrj4942Er/Kd6Snx1910mRs488VD7bnGVYdeE5X20Y0WQ8/oHVnygWn3hmGgBb5lOLOrbXRFlonhO2r1Sok86R54ETSfjrpm3KOZiwJNW5qmkNsojkQHyJWQhs64cdEEjtNIGnnpuGZ1Wt7r3n+VjGuitJc1nX1CT2L2TrPh3HNbW41HL//v5TxFWFA==
+ bh=NK77yU2b4I8ttwlQWTEroarJ/yorF3iENIyItkgzilk=;
+ b=vuaaVwEEW8PB21T88AbjNm45Bibozsizh+nWeCYU+ppzB/b97Z9DmxOlM8quwwacMfg/WyeTT81d7SVHUqMivNC/UHFiL6cmwqVafwU6VwTQpkbTI+W8WQoXLEfQzzcImS7r1nfkNb3pPOuF/+z3j7aCYkbi+MCY2s5RSSrGAPWPe0vXk7Zp72Xy7vmqlgQQDP6yQtEOZq8RYRHRgtmBlDPKcNmniWxPWjZDgskrbLGWRRnvNF1PgKUh6cSf2gM6Aj3twsqMlvbBwqV3Zhu9ZwG+n+wtoGrBLXf3UVFPVRA8MEffh24ejRZttByO47kBtgY2swLCwoHCHZTRhvWeMw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
  dkim=pass header.d=sony.com; arc=none
 Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by DS1PR13MB7170.namprd13.prod.outlook.com (2603:10b6:8:20f::18) with
+ by CH0PR13MB5187.namprd13.prod.outlook.com (2603:10b6:610:f6::20) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.25; Fri, 20 Mar
- 2026 18:15:53 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Tue, 24 Mar
+ 2026 19:47:04 +0000
 Received: from MW5PR13MB5632.namprd13.prod.outlook.com
  ([fe80::29e9:b355:cabf:66f1]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::29e9:b355:cabf:66f1%5]) with mapi id 15.20.9723.022; Fri, 20 Mar 2026
- 18:15:52 +0000
+ ([fe80::29e9:b355:cabf:66f1%5]) with mapi id 15.20.9723.022; Tue, 24 Mar 2026
+ 19:47:03 +0000
 From: "Bird, Tim" <Tim.Bird@sony.com>
-To: Petr Mladek <pmladek@suse.com>
-CC: Michael Kelley <mhklinux@outlook.com>,
-        "rostedt@goodmis.org"
-	<rostedt@goodmis.org>,
-        "senozhatsky@chromium.org" <senozhatsky@chromium.org>,
+To: Michael Kelley <mhklinux@outlook.com>, Petr Mladek <pmladek@suse.com>,
+        Shashank Balaji <shashankbalaji02@gmail.com>
+CC: "rostedt@goodmis.org" <rostedt@goodmis.org>,
+        "senozhatsky@chromium.org"
+	<senozhatsky@chromium.org>,
         "francesco@valla.it" <francesco@valla.it>,
-        "geert@linux-m68k.org"
-	<geert@linux-m68k.org>,
-        "linux-embedded@vger.kernel.org"
-	<linux-embedded@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>,
-        Thomas Gleixner <tglx@kernel.org>, John
- Stultz <jstultz@google.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        John Ogness
-	<john.ogness@linutronix.de>
+        "geert@linux-m68k.org" <geert@linux-m68k.org>,
+        "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Thomas
+ Gleixner <tglx@kernel.org>, John Stultz <jstultz@google.com>,
+        Stephen Boyd
+	<sboyd@kernel.org>,
+        John Ogness <john.ogness@linutronix.de>
 Subject: RE: [PATCH v3] printk: fix zero-valued printk timestamps in early
  boot
 Thread-Topic: [PATCH v3] printk: fix zero-valued printk timestamps in early
  boot
-Thread-Index: AQHcmuexSh6ktdFaZUimYV7dOjz0LrWppsqAgAJpSmCAAGcAAIALdzgg
-Date: Fri, 20 Mar 2026 18:15:52 +0000
+Thread-Index: AQHcmuexSh6ktdFaZUimYV7dOjz0LrWppsqAgAJpSmCAAGcAAIAB7r0AgA/pMzA=
+Date: Tue, 24 Mar 2026 19:47:02 +0000
 Message-ID:
- <MW5PR13MB5632F255ED98B84B1F7ED179FD4CA@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <MW5PR13MB56324CC9F20373A19325061CFD48A@MW5PR13MB5632.namprd13.prod.outlook.com>
 References: <39b09edb-8998-4ebd-a564-7d594434a981@bird.org>
  <20260210234741.3262320-1-tim.bird@sony.com>
  <SN6PR02MB41571D45C1C8ADF89BD1FE8DD447A@SN6PR02MB4157.namprd02.prod.outlook.com>
  <MW5PR13MB563216F6D786D4DCDFEBED2BFD45A@MW5PR13MB5632.namprd13.prod.outlook.com>
  <abPqrqgXHnDu8XWf@pathway>
-In-Reply-To: <abPqrqgXHnDu8XWf@pathway>
+ <BN7PR02MB4148F06A53EA3A4061765405D442A@BN7PR02MB4148.namprd02.prod.outlook.com>
+In-Reply-To:
+ <BN7PR02MB4148F06A53EA3A4061765405D442A@BN7PR02MB4148.namprd02.prod.outlook.com>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach:
 X-MS-TNEF-Correlator:
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|DS1PR13MB7170:EE_
-x-ms-office365-filtering-correlation-id: 80d2be7a-afeb-4793-b3b3-08de86acb8b6
+x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|CH0PR13MB5187:EE_
+x-ms-office365-filtering-correlation-id: 3dda7334-df59-4a8a-fcc5-08de89de1ed6
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|7416014|1800799024|366016|10070799003|56012099003|22082099003|18002099003|38070700021;
+ BCL:0;ARA:13230040|1800799024|10070799003|376014|366016|7416014|18002099003|56012099003|22082099003|38070700021;
 x-microsoft-antispam-message-info:
- hZZJsMzkim+LDCrbWz/53SL95b9xg4DnptR4pp4GaltiQiT70Yxz5tPSxlVQvrqVQUbXBFWwJP2QNqcMSWBz/2shRaJ42w4Ivp0DK2K/5WGNJww8VSgOwCWYrEQ1IBidyiNxlwjFaltXTP0DB6zEyOaaYIkR5qngN9cbcqVnPdYmFquvRg8PtE/gqS/t9zW4Df9F7KHFpfhtifeXh2dANuR8MrrAi/PiiCUBOjF2wLQACKDTjAhlW7lp0TkSCmncce5MPZXN37h2vH4SNUR+iUsjAGg0o7JZJArfp9kpk4Kb595rvxFLHa0MbwtN/nDDHoD75F1cIFiYHhx2Dvzr3yT6ZmeRbn37YGPCojoBVxamrUA7JtC+ADm5bPnBkqG9iGdVd2HHeRuGgdWZyfGv2QPggs1kafI6w8EIJzxwusVszFopViiJacpRy5VjYmOU5aJRwokcDf6e3mLAkk+7jV/AmnSKDWU032F9SjRzLinpNwYMUEcaJSEn0DPtoSreNuaJeub5Y4n1xvI6O4c0vprhl8Wll9VyeIhJXzBYVnVovVTdhakffW6seyxLD2m2si4jw1mgXAgrAJ2wx/NcZ4MJ+fb6HZINce0vNDflwPplQqn0wzq7Gx29d52h0sV/bv2k93uTV6Zbk5Rgx8zlPZcck7kh9NQi3ky86zarOdXiUZ+QjYSxbBLrnxLe/1DcGpBRwmuw8Vb0jUSwhiWu6nSnTwNuNvYp1XUyjtIk/uH3+lRjAHRfx8GzI5xS1VbsSzz2qPxcoJXBirR603yCONQwmE7Ccigw/ME8Vs/Yf7U=
+ 1OpStqk92s+cdg6jrTE842/gJJfQbm2UIUVldu9wyjmFE//nnEx+WevtbO3BcGpYTxYa1/i0hsdOnPpi650Ib5RstxQxU3wHQFFYjyzp0nAnUfMpHDGbmaJpFobCtspKkpeF1rKrZb0UhDEN8iZ25XdTXfcUKa16lHjf5uH+36lRT48ek8dNqAAGmqzPABmevwqBojrrtHEEoTveTsv5JR5uShkeO7ipadgNA8OGsiBqpa0JO6ZZILaQwAVSK4KPIUnUwuipg0G9Ngh2CWYVC8d7KV5wHL/iWgfuNt7fFckGp5/qGZOIgD12cZJqelNBKQsWNTl3m3zP4yzZyAOuJ1PIz/46dE3R7Lv7wmnfnGfvR+NqLQITv8d6Sav3Td3julrtVPgXOQbenNmPujgIa9CivRoCA5vDkJlERKEWhG3wU5BR3OGXn9TsdTfsr8UcjJ1qK+e+aqGkk5r42Gess23oTAWTfY3DjINGJCQ+rH+ByQ5wlGuDFMLkEmpghwVFXplVMS2NmT8dLQ7ROo6ucsACGbjKEqawUnOTAUtBZSAfhvtuE1VhUC7f16j7m7elY+OnXiD7JvoQAxQGVWIvB4LoyUPkE/rMbrXxB6AaJxpd3WjfOI/hdsW0MK/NKQMTwucmfIeTSArNOuQ3ZdxA9uSZROf5F7jQpKaDUHi5e8a7/hgvmTKfx8fsqafCSBT0mQAF+nJ766hDCP9qPT92G1ngLUJ6N9CkXtS5tPbxoyxlW66jDSByv0fkILE82KKi
 x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(1800799024)(366016)(10070799003)(56012099003)(22082099003)(18002099003)(38070700021);DIR:OUT;SFP:1101;
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(10070799003)(376014)(366016)(7416014)(18002099003)(56012099003)(22082099003)(38070700021);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
 x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?Z1ZuR0xCSUE4RDhjbWtsYWdGSXNQTFBTaVUrMXBrNHBseVhYS2lTYm4yNXFW?=
- =?utf-8?B?WGRwOENtSHAzNUpCajM0eWdML0tqSzhJR2U5dEk3cGxrQy9uUmd1QXhwRUpk?=
- =?utf-8?B?SE5kK2lkTzZXS3ZLZWRrWjF1a0tOQU1MOGgyc3FOaDhKVUh6SVZUQ1hKWFZl?=
- =?utf-8?B?aVJBMXllaGlrcldhNHNJM1pKNTNjODBvdXhmeTFhWUN1RXhsRGdubzkvQ0VK?=
- =?utf-8?B?VllEODFsWkpJYUswNjk0Mks1QXBQN2NrS1N2M05TQmlXeFo5Z3M0L3hLRnlJ?=
- =?utf-8?B?YUZGWnhIaTVpV1VKSnlxOVdCMnowOWhMR3YvY3loUS9oL1d2RGpJcEVBZVJx?=
- =?utf-8?B?SXkrK095Z0tkVytkeXk0N1BYSzlEZlY3QVJrOW1pREJiWDA1akpXZEd6bTdx?=
- =?utf-8?B?RURSZUlrYXdNNjlMSDJNU2xZZGRMYmJlQWhTLzdGOUZFWDd1SHRHRVNOdExs?=
- =?utf-8?B?Q3dnV2V3cEZGOVRENVlscWNZSHVXNlZQVnVaaC9rQVVQSXE5SXpFOFkwWksy?=
- =?utf-8?B?OGMyQVdJK2p4YlR2QlVWK3VCOFduWEpDNnV4dStmNzUxMHFmdDVCZnU4bUFu?=
- =?utf-8?B?Z2loTllNQndxR1lRZlFqbC9zVFdMTzd4UVEyOFlYYjZPSXRxY3l0a2pKdlhN?=
- =?utf-8?B?aE1jVTlqQkxBbEdWSXppamhucHVKNDVWVGVsZktsSXVMTmpwUm40Y0hyZWFm?=
- =?utf-8?B?TG1OdDgyakd2ZThaKzloaGVBaFB4eWxHZ25wcFNkYjI3V09oanVOWVF5UGhl?=
- =?utf-8?B?U05zdm80NE9rTHhEMWtqY1g0d0dZcjZtVVVuYmhFenRJVW9IK3QwbGFxU0dB?=
- =?utf-8?B?MUNUUnppaUtUZ3h6Vm0rbDJhdDcwTFpwQW4wZGRCbTJpbzZ3TWVzMHBlOHNk?=
- =?utf-8?B?K2tuYm9hdW9QWHdaT3EyS2pRVFBXWm40MlBldm01UVlEUUVEVUtCTW04elFj?=
- =?utf-8?B?VHRwNnVCRTBLcXJGSmJVbjZmMFpkc2RFVlJKU0w1bnZIOW53R3J6ZkxWRmN5?=
- =?utf-8?B?aVZsZ3VBcHN5Qy9Wd3dKbTFiSWZoamJlSkk4Y3VJQVF0ek5idmkzN2tUc2l6?=
- =?utf-8?B?MmR1ZjEvaGJuOWNCRTY0V2poYm1rRGNYQzlqZThlUkxrM2hmay9yYUszRitO?=
- =?utf-8?B?N2ppeFM3SVgrazRDbUVPVnBvbGQyRkhMaVhVQzVtU0hqUDlGS2tkS3E1MkM2?=
- =?utf-8?B?VTRTM2pqSk0wVGtkbko3L0dLZi80T1hwWXNtUzh5alYvZzhJeHc4djFtR0FX?=
- =?utf-8?B?UU9ZYU9MbnJveXJUdjNvRGhxcm1ycmFid3p3UGhwT3ByR2lVT2JRYzVjRWtQ?=
- =?utf-8?B?V0dFaUlwSDdUaTg2NWhaS0hBbjBiRkFkcDdObmdhNlFPTDRydnlROUgxcUdV?=
- =?utf-8?B?cE9xUkd5YWpVN2RmdzdYQ3FlMDRNaW9xT0tvYkNIeFo0dExnNmg0MFc2Q1o2?=
- =?utf-8?B?TTM5Y1lVRWU0RlNYZU1waHJvUUNHOHQzdktnekgreEd4WXBiUDdBNGVGZ3RK?=
- =?utf-8?B?MHNoQ1ZLL1F0QmhkRkhLK01ZeU5BczlMTTZ4aGZia2psbm9rODRzQnpqdkpE?=
- =?utf-8?B?VlBua2RVSmVGRkhVSjRGaW9FR3F4T2VNSGcwc1oveHN2bkNMWUxvQ00xRWV1?=
- =?utf-8?B?emIzdHlVazZMYi85eExvbGxXSXFsM1UxYlpMRHZHaS9CaE9WcUtDc01POE9T?=
- =?utf-8?B?a2s0TEpKbzVtOStsU1RRbi82V29oVFRuQy9wbHpTaFlHeUxwcWFjSk90TG1N?=
- =?utf-8?B?bmRsNXFNc1JsMDU3S1oxajhTWEpadmhGNXdoNXlVWGJGWmJDK251Q1JiSndy?=
- =?utf-8?B?R2Fpc3JXcVF0Qk1TT3B6MlZWd1k2NG45RnMxRzRLMHpDYUZWUm5EM2UxWkVH?=
- =?utf-8?B?M2tqcDNqb0JuMEhMb2MveGd2cXdrSXZURFh6akhEUC81ZlpJMHdqbkRjN00v?=
- =?utf-8?B?TWkwUVZJQTJrelpwbEVjdlZOVDVXSnorV2FGVS9BS09ZUlBZSzM5eFVZeXdT?=
- =?utf-8?B?dmQrRjdqKzFnc3c2LzRrRmVScGY2L1NycDlwbGFoOVZQbTRpeDV0RVJxUmlI?=
- =?utf-8?B?c1l0Q0dPbmg1TDNvZHRMUFFpTFc2bHFBWXZyTkVIcWt4eFhGazNxekg1RlUz?=
- =?utf-8?B?T0hKUGdBQ3JiOVdEd2RpemdnSFcyeUJCT0R4UmNLLzBVbkVoSStGU3lSSmww?=
- =?utf-8?B?UC9iSXdDYWdtcmF2WW5IV3pTcDExa05vYlVmbG53QnVNdUQ1VE5jUUkxekdJ?=
- =?utf-8?B?M0MzWVNJZGRLTG9wbVhwNGdIMFkzTm8rcFArOC9xTzAzeGprMCtncURnQlI4?=
- =?utf-8?B?SnNldXpOWnNVSUVLWkpGTjU0aVRrVVBlQTlsL3dYNVZ0b1BTOEF3VkxmL3hB?=
- =?utf-8?Q?gP92gc0XvQ9u9OztlfIq8oJmiLOikR99FFxsG?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+ =?utf-8?B?RUZzNk04d0V6RG9Hd05TckdBLzRIbEo2ZFdYM2diRkpvWUIzRFBrellhMm1Q?=
+ =?utf-8?B?VlBFMTdXdURFWVRJMkZVclRndnJRSDJIRU1uOERISlk4MDFic0NyMWpnbGEw?=
+ =?utf-8?B?MWR6anJtOE56cHExVitjaVcvb1IreTE3R3NjUytHNWx3QTMzZkRDakRlQnlL?=
+ =?utf-8?B?NUk3SGw1OFdzQSs3UjY4OVR6ck16cXlDbXB5eGpsZlhWT1RqQmN6VUtwRyt2?=
+ =?utf-8?B?UzBlWk13bjZRTVhWU1h2MFc0UzR0MTgyWFBLTlJ2clhXMFk1R3lDZ3o5ZCtS?=
+ =?utf-8?B?MnIwU2pBeWZ2ekREalRoL2pTOGhHMzZaYWpIZll5Rm5rQUUwTFlkd01ZWFBn?=
+ =?utf-8?B?M0h1Z2ZHMVErbXZSa1VFdHJUWDQvd1hkaFhnK014NDZjQWx0b3ZTLytuMlEw?=
+ =?utf-8?B?V3FINEg5UWl0WHUwNkJDZUV5REVKdFZ5ZDVKUExEb2tFMHEzeVF2RVlRN3FI?=
+ =?utf-8?B?TmtFZUxORVc0OGl2VDdSWmVlYzl3bjFWdCthUmhTa250a3lUclczZEkwR21N?=
+ =?utf-8?B?enh3amFrVGs4WUlUNGYyOW44NFFvcUVsaHdjRGYzSHZvSFJna09ORlgzRk9X?=
+ =?utf-8?B?cDFzMW90Sm1KRERDOFdXdjRzZ0RsM1VWQnJGQlNkZW5FMGZqU1VQUXM3K2F2?=
+ =?utf-8?B?ZVUvVXQ3TjhsRG9sdTlRVHlqWWYxUGtyMldERm5kUnlEeXBBRzBNYjRUU0tN?=
+ =?utf-8?B?a29pUUROSUJIM0hDK0ZFSk5IT3k2Y09jOWV4M0l1VTMrM0tmamRxZmlxNHdT?=
+ =?utf-8?B?VktWbUE2MGN1dU9zcTdnOEdxdEszb0tKNXJRR3NJTUJLM3FEU0s2eXZ6N2ZW?=
+ =?utf-8?B?NzVFQ3o3ejlZRTJsQjR3N0psdndLOGsxT1R2ZnljMUdFdVpId2J6UGlzQkRS?=
+ =?utf-8?B?NzUxYXlMem1KWnZLR0ZreTdHVkhsRWs0RlkyOVlJTTU3aFk1Q1J0Y0NlVWtt?=
+ =?utf-8?B?amRGWVd3aWxwUWIxeU1ZVlMvVFV0cWtnVEJRVkZVUW1XUWFzOFdUNWEvT0xo?=
+ =?utf-8?B?KzQ3anA4bFVtSlBPUDhvUXg5d0hFSERwMytLK1lBQjhRQlBrS3Fsa1QxUnQw?=
+ =?utf-8?B?a1htSzdKbEtGWmRmdVEzTXlYS3Rnb2thcVVhd2VGckdHN1Z6d0RSc0t0SkZX?=
+ =?utf-8?B?UlFNQlB2UnhjaDg5NVc1MzJCczNqMStuQlNnS2c3ZlRPRUswdFlCT3M1aHAy?=
+ =?utf-8?B?MWI0OVg3RElaZjRLMVpCQWlMekxWOUcrL0liaTZYR0YvVDd3S005RzZTUnJ5?=
+ =?utf-8?B?UzdvTFVXaWkyUjVuOXpSczNVT0UwWlg0V3dUdDkrNmZ2NG9sa25VM1Z0MXAr?=
+ =?utf-8?B?ZUhvNEpzRHI3MVBEU3Q0RFNNSFFGRE1BYUZWREJLQkw0SUJRM2lIc0xXeEhE?=
+ =?utf-8?B?Z1drMUZ5Tnh4cTFsdUpmU0huRHduVlJtUW9pUkk5WTJlV3IweE5ZNUFCYUtX?=
+ =?utf-8?B?Q0V1WE1odEVraHAweG0xMzVudE9DSnhIdjBRSlJaamt6OFpWL2dGWGJrSHZt?=
+ =?utf-8?B?R25TRjVwOXNqaTkyR1J4RXZTSTlhQlRuSEZGV3JkVXMwNll6Uko2NDhLd1lZ?=
+ =?utf-8?B?TnJnWE1WN0tONml5WUdBVk9id1hwOUVYWEdLTG1USWxkUERxcUkrZkRrcDZv?=
+ =?utf-8?B?c0lGQ2ZmRDcxMmpZVXZ2cTc5YTgxQ2p0cmxZWlJKeTRPak42UEFtMjBVV2NP?=
+ =?utf-8?B?UUJ5R2lUNXJlU1pyY0VSbURVOE5iYlNvKzdyaUJGTk5FMjRsNGxTYWpFNTBj?=
+ =?utf-8?B?WXlUS0tNckxjamM3TS84MnFCWE1UL2U2UUp4R1NZSWJyT2s0VGdaWHZkeXQ1?=
+ =?utf-8?B?Q095MVJlYUNPM2NrZlM4cW1ZZ0dpRjc1cUJLTThhcmplK1M4ZU5yWU5hRERK?=
+ =?utf-8?B?M3RKNHVVTGUxcXZPQUxGSmRZNVNkQllodWwvR0JHWDA1a0t0VVdjaWR5a0lU?=
+ =?utf-8?B?UEVBMDNuNHEzSHNRUk1HNERYOUR5ZFhSanlZcHJ4a3B4VURSMGhKM2pZbVNT?=
+ =?utf-8?B?a2tTWHhURTcyZnNIWFNvTzA2RWpLczBWS2pHZnpNaUJTZ25Xa0p3SUh3T2Nh?=
+ =?utf-8?B?bFZQYnRUZVJ0R2lhTWg0emZobTE1c2R5N0drWDZIejE3YnZqMExJNmc0b2xQ?=
+ =?utf-8?B?ZUJXN0VCYW9XUmFCZWs1SklQdFZSajRvTXNZc1dIN3VJVFh0elJwLzI2TWRZ?=
+ =?utf-8?B?TzAxVWVsbzBFWUU1ZDRaWlBaWm85dGF1bGRiN2pFT3JSMDJRZEIyYS9sdkZw?=
+ =?utf-8?B?bDhpbWpZaHNrK3NrVDRVM1BpNFJNOEovZmpMSzRiVGRJNkhPV3JtUGx1Ykts?=
+ =?utf-8?B?Q0VEazV2RklXRUJmdFNRR2Zyd0pRdGdZTjA0dXo3WS9BbXUrd2NocWRpT3VN?=
+ =?utf-8?Q?7d5pu11S43d6erFc8Irl62qfK2GuAwYqk6zaO?=
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -150,321 +147,506 @@ List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-Exchange-RoutingPolicyChecked:
-	DNJkTmpMGFzzdlylAIek6FBMQ15LCbsbNjS3+KJIOEbU8LSfPjo9WuONnEOwZSpdBvAVI2L4Sy+2ALV2AxJvv9Pp9EUYqeiWF/1ZVfZ0hj+LYYrsH9RqrXuU0sF2rhEViawXnkLI7ZyaMhWlTAI6fsSjTxgRZYzPb5W/jgIPb9JaHFMqTgTjFvOVeHl1thn9zsyyN0RCMLIHO4Ybb7ZawEQifrPaJhb81P32g3SW/O+AELI+uKNkiPIsR09FRCCJGU5cbC2SQ5VLR5uotlWU9fTTXbF3iN7z50KVMp9nCrYv7/UhZ0IE/MZxwFmGLfdqFOcVhQsk8AEm7ebpFhvj5w==
+	c/4fqYUothb/wqrTp9Z+udJVj75uIwUcNEJIVNfbXdrepi9dAd/S13jDMEa9e62OlCjybix63BPJFTkhDck5PhgiXdv0xaQmL4p7AxFllC1Zjl5KkAn3sG6vx5L8uIparZktrSjJUeiXwmeRd+v6ntsL/lNpgK7puUvEbI/Qp0tXfrAfTb7wH3KMmkWJZQn7TcaTWuLNIaSLdndhYGJ4a6d9U9LYihwwx3td6OeIG2Cn+ESvMUnJP510LA3+ASVnV5LucClnE5iiePuRyLJRC0DZu13rrRUtQlNn4MUYBFIumu7OVW8CJm/oYcZHgLiftEwpDGBiguP4uhFjggBETA==
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	rVgMYaqQrwpDixBwTgBwlHrTW0AoV06Ar3n9i7/MoouXLilxa5LjUFXvPDGe0mJ9Bw9vx6cZCptcJ+1BxWq32B/YOXg9PRzkl4AG1S7Cvp0/rx0eu569Htqhq7M1s9Psge8aP94eai3PlV6Rcn0tXSSvYt9FvvUy5QnlYLSQWF3iAigWrsJeHQP3G58D+khXHlv1znRKtSGW+oagxvs7uCZk05+G3R5MgTYOwlyN61iviXGJWGstClUcSCefV1XH7fcqY+xHC7Q7x9w9vPInwH8rQPdyxuRVeOyR3k9ati3ypcI0x8K9AJ0zPnMewQAtZ85WmysyzApvgtCIobB3zRYS/DjHO9Vp88gJpDs0tZFxzhjapbbTuTXIlQQZV72d4WvzcSE69ChUEml4H9+T4H44nJnk3duqE+JGauZF0dBoBgdyxX1E0UrHDutTCuxSmxvUVdrfwzeyTaGOCVGP568k8vuBXYu1uyeq63Rk7a9MSwIvyR5FbLJQ/cxviUr2SdfDelr4mop7FLY5o4w5IJx1UA5/wAwF2wz+U05DmjxqIXDxY0583KZ2w5+tpC+9Jq2WGPAYzcBkXMzXdTvFXa1BqYY0p1fJXtT+uFiml/5QDUDETmaJ8tolLT/euMtj
+	v2//zEqTytcaiFEbRNDbIbq3AJ7tJtQGht2LUuFuycm2MTnxiU9zq4pByj+hM8zI7tZ7kkqwSefBV54wa25KWf6h5aElYvWttBLu7b0QE13PCrd3mELFtNrjIctB9IEfySCDEdM+2Lu8nRcx0HjNNW5iJ7aly0mkZ/iJZIp3l61PeIJdTPKZgrZdCQTSTYzw5tIn+J9hp8k4Ma3BrflYFnU0OUro1FdCW5QYs765SlwNYfFIJ+HrO7MVbISDIZxrHEitBIiEE0w9QU+OfALQB7izymCCIR93nk3nG4t6T+NIYrOj929mBhXx0KpZMJHymi7+UQL/C2WEn5xYxn9ftZlOkSGHUK4D8+0oDFeZR0HGqSlyEIj+6GA2RickTpC29vvoBZKIDdEaf2rqnDYwIRnIpgfhEYLjrOIV2erO/ibbzrYLs1f8VMwfmjsTZYj+xf107g+zKoDLv6dza3O6ToiylVlY46oo2EvZQvR1bwE96gP4ASC4BXv4WKMTDFHs7Mf9kdG5peNdlhzd/3KqT8w0sbxF4HD4NbvSKl3bQAh0cAFV71jAaWx4erSOaK3nJZheEh7oCX6ATwzp47/p5Y/bzmajU82BOW2wwPRIM7jEX1tq+ItEnC/5Xom3tbbI
 X-OriginatorOrg: sony.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
 X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 80d2be7a-afeb-4793-b3b3-08de86acb8b6
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Mar 2026 18:15:52.4211
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3dda7334-df59-4a8a-fcc5-08de89de1ed6
+X-MS-Exchange-CrossTenant-originalarrivaltime: 24 Mar 2026 19:47:02.4844
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: W2uK+o1+PBmCiFDfZ9P/7fj3Ue7syzCESNKLoTKxlSG1hT+/iZqD1oEeu72x6dbK7vm9LMYP84EpMYVCjdhnrg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS1PR13MB7170
-X-Proofpoint-GUID: v0a5-KPExVTUbvIJ4z2NboshS-sUBH1a
-X-Authority-Analysis: v=2.4 cv=RKK+3oi+ c=1 sm=1 tr=0 ts=69bd8ede cx=c_pps
- a=Whz0XdwTh4CxRjET/SubaQ==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+X-MS-Exchange-CrossTenant-userprincipalname: +FCVIOpuzQ3OrJYKmw5o7fHnjotJs+GpL+0xFJ5lf7Tv3njxrrdoD6poG+X1lBgIJU/R1ZjtMuCeRru8n8gY+g==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR13MB5187
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+X-Authority-Analysis: v=2.4 cv=fvjRpV4f c=1 sm=1 tr=0 ts=69c2ea43 cx=c_pps
+ a=7whtcbPCeBOLW6TxF+pv5A==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
  a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
  a=Yq5XynenixoA:10 a=xR56lInIT_wA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=KAb5x4SsHD3PzxGk7EmX:22 a=M2bq-ooH9SiLYa4vvubY:22 a=VwQbUJbxAAAA:8
- a=pgMwbierAAAA:8 a=iox4zFpeAAAA:8 a=UqCG9HQmAAAA:8 a=z6gsHLkEAAAA:8
- a=ID6ng7r3AAAA:8 a=Xkqa2NthLgoZhfYwl44A:9 a=QEXdDO2ut3YA:10
+ a=KAb5x4SsHD3PzxGk7EmX:22 a=bd-SKr3HlWZVCYFCRTQK:22 a=VwQbUJbxAAAA:8
+ a=pgMwbierAAAA:8 a=UqCG9HQmAAAA:8 a=iox4zFpeAAAA:8 a=z6gsHLkEAAAA:8
+ a=ID6ng7r3AAAA:8 a=5M1dmemzYo2cjqThY5oA:9 a=QEXdDO2ut3YA:10
  a=jg0q2lLtnhMsWSggHq3u:22 a=WzC6qhA0u3u7Ye7llzcV:22 a=AkheI1RvQwOzcTXhi5f4:22
-X-Proofpoint-ORIG-GUID: v0a5-KPExVTUbvIJ4z2NboshS-sUBH1a
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzIwMDE0OCBTYWx0ZWRfX/H1OEy6BQL4H
- 4JU1S056394gyZvdBQhrBvhTT849WwYm23MiRXNYAk1Oh+1AgKGQP9YiExIVR1cELHQNC8j8JID
- izKkxSalsJYiqDdr/XKUgiEWxR0KcCJM1ZB7kLM+tc1c1nUTeKFx+2v+tvhI3h9xStmNdQp0FmI
- SAN+tbEQpIbXWk5w0lC4ac4MtHIdHnH1Btb61aVtMFN/49ujkudpGPdCLduMifQV1J6unlukrvQ
- hlCQ0VAzp+CsJGYVaR5NsaX0iv+RdR7g1ArWjUhqbsl4HStY6+K9S6yqWO+VZ9pWc9UWMOjsmsa
- 3kRAPevypOB+4kvnq/BqJt10y/YwhAQSB11z1plVehiED6f6ZlOwHpTodGNmbAs+R2VSkgvBXLr
- B1yznuaN1yramL7gDW7whShe+9myzp99id/zvFSQxsr5VhaEvHogrupf4xGKjreBUQ90wVDXYP4
- UY0LGyh2pLZjgx5HbQg==
-X-Sony-Outbound-GUID: v0a5-KPExVTUbvIJ4z2NboshS-sUBH1a
+X-Proofpoint-ORIG-GUID: mLElQm9VRVO9Jfn9N0ufOuuDdZD9ZHTn
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzI0MDE1MyBTYWx0ZWRfXwudC2VQ6c8Vt
+ UtNqGMielMfUph0pQPKYfr71gzRtlXPzEOdb4uvN9ChxFnnJLX7wlDxKg4YiqNo5PPFIqMA5qYu
+ 8bY9ZJFZikSRY2RtQtGDaTNhl1Z/xACFPuL7Bgq+V6XQimCWHoNe0lU7JZfxFEGn6JneiPp4eCM
+ os7qeQO3fwSy6SAwXnD4u2Pm8pCNNWV2JfhapMlr9b8rNXcHfyyg+pCr1wuIl36sr0TMxrr8j6n
+ R35GxflmT7BIP3MzSXWV6KAR9ZetrmS2HcwJi9J49tDQ1VkSrHBg8FrdOG2Q4WO1PzkIcF6d3Ns
+ tm/nGKNe4mzeXYyoPvxvBBONtSJIW8ybX3rmJP9HJ0fyFSOoFsed5m0q37xi7onXdcCXPLSF+s5
+ SJSdimPw6JBzCXZMW909dXWRcZmio7SgrmYHrR/jZhWBc5MQ6407g9Xj6Al/+uUnAflcR5rnuLK
+ MTR97OfDlpVqei0MC3g==
+X-Proofpoint-GUID: mLElQm9VRVO9Jfn9N0ufOuuDdZD9ZHTn
+X-Sony-Outbound-GUID: mLElQm9VRVO9Jfn9N0ufOuuDdZD9ZHTn
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-03-20_03,2026-03-20_02,2025-10-01_01
+ definitions=2026-03-24_03,2026-03-24_01,2025-10-01_01
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogUGV0ciBNbGFkZWsgPHBt
-bGFkZWtAc3VzZS5jb20+DQo+IEZpbmFsbHkgYWRkZWQgdGltZWtlZXBpbmcgbWFpbnRhaW5lcnMg
-YW5kIEpvaG4gaW50byBDYy4NCj4gV2Ugc2hvdWxkIGhhdmUgYWRkZWQgdGltZSBzaW5jZSB2MS4N
-Cg0KVGhhbmtzIGZvciBjYXRjaGluZyB0aGF0LiAgSSdsbCB0cnkgdG8gcmVtZW1iZXIgdG8gYWRk
-IHRob3NlIChhbmQgdXNlIEpvaG4gT2duZXNzJyBjb3JyZWN0DQplbWFpbCkgZ29pbmcgZm9yd2Fy
-ZC4NCg0KPiANCj4gQW55d2F5LCB5b3UgbWlnaHQgc2VlIHRoZSBlbnRpcmUgaGlzdG9yeSBhdA0K
-PiBodHRwczovL2xvcmUua2VybmVsLm9yZy9hbGwvMzliMDllZGItODk5OC00ZWJkLWE1NjQtN2Q1
-OTQ0MzRhOTgxQGJpcmQub3JnLw0KPiANCj4gDQo+IE9uIEZyaSAyMDI2LTAzLTEzIDA0OjUyOjQw
-LCBCaXJkLCBUaW0gd3JvdGU6DQo+ID4gSGV5IE1pY2hlYWwsDQo+ID4NCj4gPiBUaGlzIHJlcG9y
-dCBpcyB2ZXJ5IGludGVyZXN0aW5nLg0KPiA+DQo+ID4gVGhhbmtzIHZlcnkgbXVjaCBmb3IgdHJ5
-aW5nIGl0IG91dCENCj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+
-IEZyb206IE1pY2hhZWwgS2VsbGV5IDxtaGtsaW51eEBvdXRsb29rLmNvbT4NCj4gPiA+IFNlbnQ6
-IFdlZG5lc2RheSwgTWFyY2ggMTEsIDIwMjYgOTo0NyBBTQ0KPiA+ID4gRnJvbTogVGltIEJpcmQg
-PHRpbS5iaXJkQHNvbnkuY29tPiBTZW50OiBUdWVzZGF5LCBGZWJydWFyeSAxMCwgMjAyNiAzOjQ4
-IFBNDQo+ID4gPiA+DQo+ID4gPiA+IER1cmluZyBlYXJseSBib290LCBwcmludGsgdGltZXN0YW1w
-cyBhcmUgcmVwb3J0ZWQgYXMgemVybyBiZWZvcmUNCj4gPiA+ID4ga2VybmVsIHRpbWVrZWVwaW5n
-IHN0YXJ0cyAoZS5nLiBiZWZvcmUgdGltZV9pbml0KCkpLiAgVGhpcw0KPiA+ID4gPiBoaW5kZXJz
-IGJvb3QtdGltZSBvcHRpbWl6YXRpb24gZWZmb3J0cy4gIFRoaXMgcGVyaW9kIGlzIGFib3V0IDQw
-MA0KPiA+ID4gPiBtaWxsaXNlY29uZHMgZm9yIG1hbnkgY3VycmVudCBkZXNrdG9wIGFuZCBlbWJl
-ZGRlZCBtYWNoaW5lcw0KPiA+ID4gPiBydW5uaW5nIExpbnV4Lg0KPiA+ID4gPg0KPiA+ID4gPiBB
-ZGQgc3VwcG9ydCB0byBzYXZlIGN5Y2xlcyBkdXJpbmcgZWFybHkgYm9vdCwgYW5kIG91dHB1dCBj
-b3JyZWN0DQo+ID4gPiA+IHRpbWVzdGFtcCB2YWx1ZXMgYWZ0ZXIgdGltZWtlZXBpbmcgaXMgaW5p
-dGlhbGl6ZWQuICBnZXRfY3ljbGVzKCkNCj4gPiA+ID4gaXMgb3BlcmF0aW9uYWwgb24gYXJtNjQg
-YW5kIHg4Nl82NCBmcm9tIGtlcm5lbCBzdGFydC4gIEFkZCBjb2RlDQo+ID4gPiA+IGFuZCB2YXJp
-YWJsZXMgdG8gc2F2ZSBjYWxpYnJhdGlvbiB2YWx1ZXMgdXNlZCB0byBsYXRlciBjb252ZXJ0DQo+
-ID4gPiA+IGN5Y2xlIGNvdW50cyB0byB0aW1lIHZhbHVlcyBpbiB0aGUgZWFybHkgcHJpbnRrcy4g
-IEFkZCBhIGNvbmZpZw0KPiA+ID4gPiB0byBjb250cm9sIHRoZSBmZWF0dXJlLg0KPiA+ID4gPg0K
-PiA+ID4gPiBUaGlzIHlpZWxkcyBub24temVybyB0aW1lc3RhbXBzIGZvciBwcmludGtzIGZyb20g
-dGhlIHZlcnkgc3RhcnQNCj4gPiA+ID4gb2Yga2VybmVsIGV4ZWN1dGlvbi4gIFRoZSB0aW1lc3Rh
-bXBzIGFyZSByZWxhdGl2ZSB0byB0aGUgc3RhcnQgb2YNCj4gPiA+ID4gdGhlIGFyY2hpdGVjdHVy
-ZS1zcGVjaWZpZWQgY291bnRlciB1c2VkIGluIGdldF9jeWNsZXMNCj4gPiA+ID4gKGUuZy4gdGhl
-IFRTQyBvbiB4ODZfNjQgYW5kIGNudHZjdF9lbDAgb24gYXJtNjQpLg0KPiA+ID4gPg0KPiA+ID4g
-PiBBbGwgdGltZXN0YW1wcyByZWZsZWN0IHRpbWUgZnJvbSBwcm9jZXNzb3IgcG93ZXItb24gaW5z
-dGVhZCBvZg0KPiA+ID4gPiB0aW1lIGZyb20gdGhlIGtlcm5lbCdzIHRpbWVrZWVwaW5nIGluaXRp
-YWxpemF0aW9uLg0KPiA+ID4NCj4gPiA+IEkgdHJpZWQgdGhpcyBwYXRjaCBpbiBsaW51eC1uZXh0
-MjAyNjAzMDIga2VybmVsIHJ1bm5pbmcgYXMgYSBndWVzdCBWTQ0KPiA+ID4gb24gYSBIeXBlci1W
-IGhvc3QuIFR3byB0aGluZ3M6DQo+ID4gPg0KPiA+ID4gMSkgSW4gdGhlIGRtZXNnIG91dHB1dCwg
-SSdtIHNlZWluZyBhIHBsYWNlIHdoZXJlIHRoZSB0aW1lc3RhbXBzIGJyaWVmbHkgZ28NCj4gPiA+
-IGJhY2t3YXJkcyAtLSBpLmUuLCB0aGV5IGFyZSBub3QgbW9ub3RvbmljYWxseSBpbmNyZWFzaW5n
-LiBIZXJlJ3MgYSBzbmlwcGV0LA0KPiA+ID4gd2hlcmUgdGhlcmUncyBhIHNtYWxsZXIgdGltZXN0
-YW1wIGltbWVkaWF0ZWx5IGFmdGVyIHRoZSB0c2MgaXMgZGV0ZWN0ZWQ6DQo+ID4gPg0KPiA+ID4g
-WyAgIDI3Ljk5NDg5MV0gU01CSU9TIDMuMS4wIHByZXNlbnQuDQo+ID4gPiBbICAgMjcuOTk0ODkz
-XSBETUk6IE1pY3Jvc29mdCBDb3Jwb3JhdGlvbiBWaXJ0dWFsIE1hY2hpbmUvVmlydHVhbCBNYWNo
-aW5lLCBCSU9TIEh5cGVyLVYgVUVGSSBSZWxlYXNlIHY0LjEgMDkvMjUvMjAyNQ0KPiA+ID4gWyAg
-IDI3Ljk5NDg5OF0gRE1JOiBNZW1vcnkgc2xvdHMgcG9wdWxhdGVkOiAyLzINCj4gPiA+IFsgICAy
-Ny45OTUyMDJdIEh5cGVydmlzb3IgZGV0ZWN0ZWQ6IE1pY3Jvc29mdCBIeXBlci1WDQo+ID4gPiBb
-ICAgMjcuOTk1MjA1XSBIeXBlci1WOiBwcml2aWxlZ2UgZmxhZ3MgbG93IDB4YWU3ZiwgaGlnaCAw
-eDNiODAzMCwgZXh0IDB4NjIsIGhpbnRzIDB4YTBlMjQsIG1pc2MgMHhlMGJlZDdiMg0KPiA+ID4g
-WyAgIDI3Ljk5NTIwOF0gSHlwZXItVjogTmVzdGVkIGZlYXR1cmVzOiAweDANCj4gPiA+IFsgICAy
-Ny45OTUyMDldIEh5cGVyLVY6IExBUElDIFRpbWVyIEZyZXF1ZW5jeTogMHhjMzUwMA0KPiA+ID4g
-WyAgIDI3Ljk5NTIxMF0gSHlwZXItVjogVXNpbmcgaHlwZXJjYWxsIGZvciByZW1vdGUgVExCIGZs
-dXNoDQo+ID4gPiBbICAgMjcuOTk1MjE2XSBjbG9ja3NvdXJjZTogaHlwZXJ2X2Nsb2Nrc291cmNl
-X3RzY19wYWdlOiBtYXNrOiAweGZmZmZmZmZmZmZmZmZmZmYgbWF4X2N5Y2xlczogMHgyNGU2YTE3
-MTAsIG1heF9pZGxlX25zOiA0NDA3OTUyMDIxMjANCj4gbnMNCj4gPiA+IFsgICAyNy45OTUyMThd
-IGNsb2Nrc291cmNlOiBoeXBlcnZfY2xvY2tzb3VyY2VfbXNyOiBtYXNrOiAweGZmZmZmZmZmZmZm
-ZmZmZmYgbWF4X2N5Y2xlczogMHgyNGU2YTE3MTAsIG1heF9pZGxlX25zOiA0NDA3OTUyMDIxMjAg
-bnMNCj4gPiA+IFsgICAyNy45OTUyMjBdIHRzYzogRGV0ZWN0ZWQgMjkxOC40MDEgTUh6IHByb2Nl
-c3Nvcg0KPiA+DQo+ID4gSSB3b25kZXIgaWYgdGhlIHRzYyBpcyBnZXR0aW5nIGZpZGRsZWQgd2l0
-aCBvciB2aXJ0dWFsaXplZCBzb21ld2hlcmUgaW4gaGVyZSwgYXMgcGFydCBvZiBjbG9ja3NvdXJj
-ZSBpbml0aWFsaXphdGlvbi4NCj4gPiBJIGJlbGlldmUgZWFjaCBjbG9ja3NvdXJjZSBpbiB0aGUg
-a2VybmVsIG1haW50YWlucyBpdCdzIG93biBpbnRlcm5hbCBvZmZzZXQsIGFuZCBtYXliZSB0aGUg
-b2Zmc2V0IHRoYXQgaXMNCj4gPiBiZWluZyB1c2VkIGVuZHMgdXAgYmVpbmcgc2xpZ2h0bHkgZGlm
-ZmVyZW50IGZyb20gdGhlIGN5Y2xlLWNvdW50ZXIgb2Zmc2V0IHRoYXQgdGhlIGVhcmx5X3RpbWVz
-IGZlYXR1cmUgdXNlcy4NCj4gPiBJJ20ganVzdCB0aHJvd2luZyBvdXQgZ3Vlc3Nlcy4gIEl0J3Mg
-YWJvdXQgYSA0bXMgZGVsdGEsIHdoaWNoIGlzIHByZXR0eSBiaWcuDQo+ID4NCj4gPiA+IFsgICAy
-Ny45OTEwNjBdIGU4MjA6IHVwZGF0ZSBbbWVtIDB4MDAwMDAwMDAtMHgwMDAwMGZmZl0gU3lzdGVt
-IFJBTSA9PT4gZGV2aWNlIHJlc2VydmVkDQo+ID4gPiBbICAgMjcuOTkxMDYyXSBlODIwOiByZW1v
-dmUgW21lbSAweDAwMGEwMDAwLTB4MDAwZmZmZmZdIFN5c3RlbSBSQU0NCj4gPiA+IFsgICAyNy45
-OTEwNjRdIGxhc3RfcGZuID0gMHgyMTAwMDAgbWF4X2FyY2hfcGZuID0gMHg0MDAwMDAwMDANCj4g
-PiA+IFsgICAyNy45OTEwNjVdIHg4Ni9QQVQ6IFBBVCBzdXBwb3J0IGRpc2FibGVkIGJlY2F1c2Ug
-Q09ORklHX1g4Nl9QQVQgaXMgZGlzYWJsZWQgaW4gdGhlIGtlcm5lbC4NCj4gPiA+IFsgICAyNy45
-OTEwNjZdIHg4Ni9QQVQ6IENvbmZpZ3VyYXRpb24gWzAtN106IFdCICBXVCAgVUMtIFVDICBXQiAg
-V1QgIFVDLSBVQw0KPiANCj4gSSB3b25kZXIgaG93IHRoZSBjYWxpYnJhdGlvbiBvZiB0aGUgY3lj
-bGVzIGlzIHByZWNpc2UuIEkgd29uZGVyIGlmDQo+IHRoZSBwcm9ibGVtIG1pZ2h0IGJlIHRoYXQg
-Y3ljbGVzIHdlcmUgZmFzdGVyIHJpZ2h0IGFmdGVyIGJvb3QgdGhhbg0KPiBsYXRlciBkdXJpbmcg
-dGhlIGNhbGlicmF0aW9uLg0KDQpPbiB4ODZfNjQgVFNDIGhhcyBiZWVuIHN0YWJsZSBvbiBhbGwg
-cHJvY2Vzc29ycyBwcm9kdWNlZCBzaW5jZSBhYm91dA0KMjAwOCwgd2hlbiBpbnZhcmlhbnQgVFND
-IHdlcmUgaW50cm9kdWNlZC4gIFRoZXkgc2hvdWxkbid0IGJlIGNoYW5naW5nDQpzcGVlZHMgb3Ig
-ZG9pbmcgd2VpcmQgdGhpbmdzLg0KDQo+IA0KPiBJIGFkZGVkIHRoZSBmb2xsb3dpbmcgZGVidWcg
-b3V0cHV0IG9uIHRvcCBvZiB0aGlzIHBhdGNoOg0KPiANCj4gZGlmZiAtLWdpdCBhL2luY2x1ZGUv
-bGludXgvZWFybHlfdGltZXMuaCBiL2luY2x1ZGUvbGludXgvZWFybHlfdGltZXMuaA0KPiBpbmRl
-eCAwNTM4OGRjYjg1NzMuLmNkYjQ2NzM0NWJjYyAxMDA2NDQNCj4gLS0tIGEvaW5jbHVkZS9saW51
-eC9lYXJseV90aW1lcy5oDQo+ICsrKyBiL2luY2x1ZGUvbGludXgvZWFybHlfdGltZXMuaA0KPiBA
-QCAtMjAsNiArMjAsNyBAQCBzdGF0aWMgaW5saW5lIHZvaWQgZWFybHlfdGltZXNfc3RhcnRfY2Fs
-aWJyYXRpb24odm9pZCkNCj4gIHsNCj4gIAlzdGFydF9jeWNsZXMgPSBnZXRfY3ljbGVzKCk7DQo+
-ICAJc3RhcnRfbnMgPSBsb2NhbF9jbG9jaygpOw0KPiArCXByX2luZm8oIkVhcmx5IHByaW50ayB0
-aW1lczogc3RhcnRlZCBjYWxsaWJyYXRpb246ICVsbHUgbnNcbiIsIHN0YXJ0X25zKTsNCj4gIH0N
-Cj4gDQo+ICBzdGF0aWMgaW5saW5lIHZvaWQgZWFybHlfdGltZXNfZmluaXNoX2NhbGlicmF0aW9u
-KHZvaWQpDQo+IGRpZmYgLS1naXQgYS9rZXJuZWwvcHJpbnRrL3ByaW50ay5jIGIva2VybmVsL3By
-aW50ay9wcmludGsuYw0KPiBpbmRleCA3NzRmZmIxZmE1YWMuLjgzNmNiMDNhYWE2ZCAxMDA2NDQN
-Cj4gLS0tIGEva2VybmVsL3ByaW50ay9wcmludGsuYw0KPiArKysgYi9rZXJuZWwvcHJpbnRrL3By
-aW50ay5jDQo+IEBAIC0yMzA4LDYgKzIzMDgsOCBAQCBpbnQgdnByaW50a19zdG9yZShpbnQgZmFj
-aWxpdHksIGludCBsZXZlbCwNCj4gIAl0c19uc2VjID0gbG9jYWxfY2xvY2soKTsNCj4gIAlpZiAo
-IXRzX25zZWMpDQo+ICAJCXRzX25zZWMgPSBlYXJseV9jeWNsZXMoKTsNCj4gKwllbHNlDQo+ICsJ
-CXByX2luZm9fb25jZSgibG9jYWxfY2xvY2soKSByZXR1cm5lZCBub24temVybyB0aW1lc3RhbXA6
-ICVsbHUgbnNlY1xuIiwgdHNfbnNlYyk7DQo+IA0KPiAgCWNhbGxlcl9pZCA9IHByaW50a19jYWxs
-ZXJfaWQoKTsNCj4gDQo+IA0KPiBBbmQgaXQgcHJvZHVjZWQgaW4gbXkga3ZtOg0KPiANCj4gTGV0
-J3Mgc2F5IHRoYXQgc3RhcnQgb2YgdGhlIGN5Y2xlIGNvdW50ZXIgaXMNCj4gDQo+IFN0YXJ0IG9m
-IHN0YWdlIEENCj4gDQo+IFsgICAgOC42ODQ0MzhdIExpbnV4IHZlcnNpb24gNy4wLjAtcmMyLWRl
-ZmF1bHQrIChwbWxhZGVrQHBhdGh3YXkpIChnY2MgKFNVU0UgTGludXgpIDE1LjIuMSAyMDI2MDIw
-MiwgR05VIGxkIChHTlUgQmludXRpbHM7IG9wZW5TVVNFDQo+IFR1bWJsZXdlZWQpIDIuNDUuMC4y
-MDI1MTEwMy0yKSAjNTcxIFNNUCBQUkVFTVBUX0RZTkFNSUMgRnJpIE1hciAxMyAxMDoyMzo1NCBD
-RVQgMjAyNg0KPiBbICAgIDguNjg0NDQyXSBDb21tYW5kIGxpbmU6IEJPT1RfSU1BR0U9L2Jvb3Qv
-dm1saW51ei03LjAuMC1yYzItZGVmYXVsdCsgcm9vdD0vZGV2L3ZkYTIgcmVzdW1lPS9kZXYvZGlz
-ay9ieS11dWlkLzM2OWM3NDUzLTNkMTYtDQo+IDQwOWQtODhiMi01ZGUwMjc4OTFhMTIgbWl0aWdh
-dGlvbnM9YXV0byBub3NwbGFzaCBlYXJseWNvbj11YXJ0ODI1MCxpbywweDNmOCwxMTUyMDAgY29u
-c29sZT10dHlTMCwxMTUyMDAgY29uc29sZT10dHkwIGlnbm9yZV9sb2dsZXZlbA0KPiBsb2dfYnVm
-X2xlbj0xTSBjcmFzaGtlcm5lbD01MTJNLGhpZ2ggY3Jhc2hrZXJuZWw9NzJNLGxvdw0KPiBbLi4u
-XQ0KPiBbICAgIDguNjk2NjMzXSBlYXJseWNvbjogdWFydDgyNTAgYXQgSS9PIHBvcnQgMHgzZjgg
-KG9wdGlvbnMgJzExNTIwMCcpDQo+IFsgICAgOC42OTY2MzldIHByaW50azogbGVnYWN5IGJvb3Rj
-b25zb2xlIFt1YXJ0ODI1MF0gZW5hYmxlZA0KPiBbICAgIDguNzMxMzAzXSBwcmludGs6IGRlYnVn
-OiBpZ25vcmluZyBsb2dsZXZlbCBzZXR0aW5nLg0KPiBbICAgIDguNzMyMzQ5XSBOWCAoRXhlY3V0
-ZSBEaXNhYmxlKSBwcm90ZWN0aW9uOiBhY3RpdmUNCj4gWyAgICA4LjczMzQ0N10gQVBJQzogU3Rh
-dGljIGNhbGxzIGluaXRpYWxpemVkDQo+IFsgICAgOC43MzQ2NjddIFNNQklPUyAyLjggcHJlc2Vu
-dC4NCj4gWyAgICA4LjczNTM1OF0gRE1JOiBRRU1VIFN0YW5kYXJkIFBDIChRMzUgKyBJQ0g5LCAy
-MDA5KSwgQklPUyByZWwtMS4xNy4wLTItZzRmMjUzYjliLXByZWJ1aWx0LnFlbXUub3JnIDA0LzAx
-LzIwMTQNCj4gWyAgICA4LjczNzI4NV0gRE1JOiBNZW1vcnkgc2xvdHMgcG9wdWxhdGVkOiAxLzEN
-Cj4gWyAgICA4LjczODM4MF0gSHlwZXJ2aXNvciBkZXRlY3RlZDogS1ZNDQo+IFsgICAgOC43Mzkx
-NTFdIGxhc3RfcGZuID0gMHg3ZmZkYyBtYXhfYXJjaF9wZm4gPSAweDQwMDAwMDAwMA0KPiBbICAg
-IDguNzQwMjU0XSBrdm0tY2xvY2s6IFVzaW5nIG1zcnMgNGI1NjRkMDEgYW5kIDRiNTY0ZDAwDQo+
-IFsgICAgOC43MzI5NzFdIHByaW50azogbG9jYWxfY2xvY2soKSByZXR1cm5lZCBub24temVybyB0
-aW1lc3RhbXA6IDM0ODYgbnNlYw0KPiANCj4gRW5kIG9mIHN0YWdlIEENCj4gDQo+IFRoaXMgaXMg
-dGhlIHBvaW50IHdoZXJlIHByaW50aygpIHN0YXJ0ZWQgc3RvcmluZyB0aGUgdmFsdWVzIGZyb20N
-Cj4gbG9jYWxfY2xvY2soKSBpbnN0ZWFkIG9mIGN5Y2xlcy4NCg0KVGhhbmtzIGZvciBtZWFzdXJp
-bmcgdGhpcy4NCg0KVGhhdCdzIHN1c3BpY2lvdXNseSBjbG9zZSB0byB0aGUgYXBwcm94aW1hdGUg
-NG1zIGRpZmZlcmVudCB0aGF0IE1pY2hhZWwgc2F3Lg0KSXQgbWF5IGJlIHRoYXQgbXkgb2Zmc2V0
-IGNhbGN1bGF0aW9uIGlzIG9mZi4gIE1pY2hhZWwgYWxzbyBtZW50aW9uZWQgdGhhdCB0aGUNCm1h
-dGggc2VlbWVkIHRvIGJlIG9mZiBvbiB0aGUgY2FsaWJyYXRpb24uICBJJ2xsIHJldmlldyB0aGUg
-bWF0aCBhbmQgcnVuIHNvbWUgdGVzdHMNCmFuZCBzZWUgaWYgSSBjYW4gZmlndXJlIG91dCB3aGVy
-ZSB0aGUgcHJvYmxlbSBpcy4gIEFub3RoZXIgb3B0aW9uDQppcyB0byBqdXN0IGVsaW1pbmF0ZSB0
-aGUgZWFybHlfdHNfb2Zmc2V0LCBhbmQgbGl2ZSB3aXRoIHRoZSBkaXNjb250aW51aXR5IGdvaW5n
-DQpmcm9tIGN5Y2xlLWJhc2VkIHRpbWVzdGFtcHMgdG8gbG9jYWwtY2xvY2soKS1iYXNlZCB0aW1l
-c3RhbXBzLg0KDQo+IA0KPiBTdGFydCBvZiBzdGFnZSBCDQo+IA0KPiBbICAgIDguNzMyOTcxXSBr
-dm0tY2xvY2s6IHVzaW5nIHNjaGVkIG9mZnNldCBvZiAyNTIzNjcwMTQwODIyOTUgY3ljbGVzDQo+
-IFsgICAgOC43MzU0NzFdIGNsb2Nrc291cmNlOiBrdm0tY2xvY2s6IG1hc2s6IDB4ZmZmZmZmZmZm
-ZmZmZmZmZiBtYXhfY3ljbGVzOiAweDFjZDQyZTRkZmZiLCBtYXhfaWRsZV9uczogODgxNTkwNTkx
-NDgzIG5zDQo+IFsgICAgOC43Mzg4ODBdIHRzYzogRGV0ZWN0ZWQgMzI5My43NzYgTUh6IHByb2Nl
-c3Nvcg0KPiBbICAgIDguNzQwNDc0XSBlODIwOiB1cGRhdGUgW21lbSAweDAwMDAwMDAwLTB4MDAw
-MDBmZmZdIFN5c3RlbSBSQU0gPT0+IGRldmljZSByZXNlcnZlZA0KPiBbLi4uXQ0KPiBbICAgIDgu
-OTMyNjcxXSByY3U6IHNyY3VfaW5pdDogU2V0dGluZyBzcmN1X3N0cnVjdCBzaXplcyBiYXNlZCBv
-biBjb250ZW50aW9uLg0KPiBbICAgIDguOTM0MDQ3XSBFYXJseSBwcmludGsgdGltZXM6IHN0YXJ0
-ZWQgY2FsbGlicmF0aW9uOiAyMDEwNzk1MDcgbnMNCj4gDQo+IEVuZCBvZiBzdGFnZSBCDQo+IA0K
-PiBUaGlzIGlzIHdoZXJlIHdlIHN0YXJ0ZWQgY2FsaWJyYXRpb24gb2YgZWFybHkgY3ljbGVzLg0K
-PiANCj4gU3RhcnQgb2Ygc3RhZ2UgQw0KPiANCj4gWyAgICA4LjkzNTU3MV0gQ29uc29sZTogY29s
-b3VyIGR1bW15IGRldmljZSA4MHgyNQ0KPiBbLi4uXQ0KPiBbICAgIDkuMjg5NjczXSB0aGVybWFs
-X3N5czogUmVnaXN0ZXJlZCB0aGVybWFsIGdvdmVybm9yICdmYWlyX3NoYXJlJw0KPiBbICAgIDku
-MjkwMDc3XSB0aGVybWFsX3N5czogUmVnaXN0ZXJlZCB0aGVybWFsIGdvdmVybm9yICdiYW5nX2Jh
-bmcnDQo+IFsgICAgOS4yOTIyOTBdIHRoZXJtYWxfc3lzOiBSZWdpc3RlcmVkIHRoZXJtYWwgZ292
-ZXJub3IgJ3N0ZXBfd2lzZScNCj4gWyAgICA5LjI5MzUzMF0gdGhlcm1hbF9zeXM6IFJlZ2lzdGVy
-ZWQgdGhlcm1hbCBnb3Zlcm5vciAndXNlcl9zcGFjZScNCj4gWyAgICA5LjI5NDg1Nl0gY3B1aWRs
-ZTogdXNpbmcgZ292ZXJub3IgbGFkZGVyDQo+IFsgICAgOS4yOTYzMDJdIGNwdWlkbGU6IHVzaW5n
-IGdvdmVybm9yIG1lbnUNCj4gDQo+IEhlcmUgdGhlIHRoZXJtYWwgZ292ZXJub3JzIGFyZSByZWdp
-c3RlcmVkLiBJIGd1ZXNzIHRoYXQgdGhleSBtaWdodA0KPiByZWR1Y2Ugc3BlZWQgb2Ygc29tZSBI
-Vy4NCj4gDQo+IFsuLi5dDQo+IFsgICAxMS45NzQxNDddIGNsazogRGlzYWJsaW5nIHVudXNlZCBj
-bG9ja3MNCj4gDQo+IFNvbWUgdW51c2VkIGNsb2NrcyBhcmUgZGlzYWJsZWQuIEkgd29uZGVyIGlm
-IHRoaXMgbWlnaHQgYWZmZWN0DQo+IGNvdW50aW5nIHRoZSBjeWNsZXMuDQo+IA0KPiBbICAgMTIu
-MzMwODUyXSBGcmVlaW5nIHVudXNlZCBrZXJuZWwgaW1hZ2UgKHJvZGF0YS9kYXRhIGdhcCkgbWVt
-b3J5OiAxNTAwSw0KPiBbICAgMTIuMzUxMTkxXSBFYXJseSBwcmludGsgdGltZXM6IG11bHQ9MTk2
-MzQyNDUsIHNoaWZ0PTI2LCBvZmZzZXQ9ODczMjk2NzkyOSBucw0KPiANCj4gRW5kIG9mIHN0YWdl
-IEMNCj4gDQo+IEhlcmUgaXMgdGhlIGVuZCBvbiBjYWxpYnJhdGlvbi4NCj4gDQo+IE5vdywgaWYg
-dGhlIGZyZXF1ZW5jZSBvZiB0aGUgY3ljbGVzIHdhczoNCj4gDQo+ICAgICsgd2FzIGhpZ2hlciBp
-biB0aGUgc3RhZ2UgQSB3aGVuIG9ubHkgY3ljbGVzIHdlcmUgc3RvcmVkDQo+ICAgICsgd2FzIGxv
-d2VyIGluIHN0YWdlIEMgd2hlbiBpdCB3YXMgY2FsaWJyYXRlZCBhZ2FpbnN0IGxvY2FsX2Nsb2Nr
-KCkNCj4gDQo+IFRoZW4gaXQgbWlnaHQgcmVzdWx0IGluIGhpZ2hlciAoY2FsaWJyYXRlZCkgdGlt
-ZXN0YW1wcyBpbiBzdGFnZSBBDQo+IGFuZCBzdGVwIGJhY2sgaW4gc3RhZ2UgQi4NCj4gDQo+IE9y
-IHNvbWV0aGluZyBsaWtlIHRoaXMuIEl0IGlzIHBvc3NpYmxlIHRoYXQgZXZlbiBsb2NhbF9jbG9j
-aygpIGRvZXMNCj4gbm90IGhhdmUgYSBzdGFibGUgZnJlcXVlbmNlIGR1cmluZyB0aGUgZWFybHkg
-Ym9vdC4NCg0KTW9zdCB4ODZfNjQgcGxhdGZvcm1zIGFyZSB1c2luZyBUU0MgYXMgdGhlIGJhc2lz
-IGZvciBsb2NhbF9jbG9jaygpLCBhbmQgaXQgc2hvdWxkDQpiZSBzdGFibGUgKGhhdmUgaW52YXJp
-YW50IGZyZXF1ZW5jeSkgb24gYWxsIG1vZGVybiBwcm9jZXNzb3JzLg0KSW4gdGhlIHZhc3QgbWFq
-b3JpdHkgb2YgY2FzZXMsIEkgZXhwZWN0IHRoYXQgdGhlIGN5Y2xlcyBiZWluZyB1c2VkIGZvcg0K
-ZWFybHlfY3ljbGVzIGlzIGNvbWluZyBmcm9tIHRoZSBleGFjdCBzYW1lIGJhc2UgaGFyZHdhcmUg
-KHRoZSBUU0MpIGFzIGxvY2FsX2Nsb2NrKCksIHNvDQp0aGVyZSBzaG91bGRuJ3QgYmUgZGlzY3Jl
-cGFuY2llcy4NCihTb21lb25lIHdpdGggbW9yZSBjbG9jayBleHBlcnRpc2UgdGhhbiBtZSwgcGxl
-YXNlIGNvcnJlY3QgbWUgaWYgSSdtIHdyb25nLg0KRXZlbiBvbiB2aXJ0dWFsaXplZCBzeXN0ZW1z
-LCB0aGUgdW5kZXJseWluZyBoYXJkd2FyZSBmb3IgdGhlIFRTQyBpbnN0cnVjdGlvbiBpcyBzdGls
-bCBqdXN0IHRoZSByZWFsDQpUU0MgaGFyZHdhcmUgb24gdGhlIHBoeXNpY2FsIHBsYXRmb3JtKS4N
-Cg0KSSBzdXNwZWN0IHRoYXQgSSBqdXN0IGdvdCB0aGUgbWF0aCB3cm9uZyBzb21ld2hlcmUsIG9y
-IHRoZXJlJ3MgYW4gdW5hY2NvdW50ZWQtZm9yIGRlbGF5DQpzb21ld2hlcmUgSSBkaWRuJ3QgdGFr
-ZSBpbnRvIGFjY291bnQgd2hlbiBjYWxjdWxhdGluZyB0aGUgb2Zmc2V0LiAgSSdsbCByZXZpZXcg
-aXQgYW5kIGxldA0KeW91IGtub3cgd2hhdCBJIGZpbmQuDQoNCj4gDQo+IElkZWE6IEEgc29sdXRp
-b24gbWlnaHQgYmUgdG8gc3RhcnQgY2FsaWJyYXRpb24gd2hlbiBwcmludGsoKQ0KPiAgICAgICBn
-ZXRzIGZpcnN0IG5vbi16ZXJvIHRpbWUgZnJvbSBsb2NhbF9jbG9jay4NCg0KQWN0dWFsbHksIEkg
-d2FudCB0aGUgdmFsdWVzIHVzZWQgaW4gdGhlIGNhbGlicmF0aW9uIHRvIGhhdmUgYWNjdW11bGF0
-ZWQgZW5vdWdoDQp0aW1lIGZvciBzb21lIGFjY3VyYWN5IHRvIHNldCBpbi4gIElmIEkgZ3JhYiBs
-b2NhbF9jbG9jaygpIHRvbyBjbG9zZSB0byB6ZXJvLA0KdGhlbiB0aGUgbWF0aCBpcyBsZXNzIGFj
-Y3VyYXRlLg0KDQo+IA0KPiAgICAgICBTb21ldGhpbmcgbGlrZToNCj4gDQo+IGRpZmYgLS1naXQg
-YS9pbmNsdWRlL2xpbnV4L2Vhcmx5X3RpbWVzLmggYi9pbmNsdWRlL2xpbnV4L2Vhcmx5X3RpbWVz
-LmgNCj4gaW5kZXggMDUzODhkY2I4NTczLi4wOWQyNzg5OTYxODQgMTAwNjQ0DQo+IC0tLSBhL2lu
-Y2x1ZGUvbGludXgvZWFybHlfdGltZXMuaA0KPiArKysgYi9pbmNsdWRlL2xpbnV4L2Vhcmx5X3Rp
-bWVzLmgNCj4gQEAgLTE2LDEwICsxNiwxMyBAQCBleHRlcm4gdTY0IHN0YXJ0X25zOw0KPiAgZXh0
-ZXJuIHUzMiBlYXJseV9tdWx0LCBlYXJseV9zaGlmdDsNCj4gIGV4dGVybiB1NjQgZWFybHlfdHNf
-b2Zmc2V0Ow0KPiANCj4gLXN0YXRpYyBpbmxpbmUgdm9pZCBlYXJseV90aW1lc19zdGFydF9jYWxp
-YnJhdGlvbih2b2lkKQ0KPiArc3RhdGljIGlubGluZSB2b2lkIGVhcmx5X3RpbWVzX21heV9zdGFy
-dF9jYWxpYnJhdGlvbih1NjQgdHNfbnMpDQo+ICB7DQo+ICsJaWYgKHN0YXJ0X25zKQ0KPiArCQly
-ZXR1cm47DQo+ICsNCj4gKwlzdGFydF9ucyA9IHRzX25zOw0KPiAgCXN0YXJ0X2N5Y2xlcyA9IGdl
-dF9jeWNsZXMoKTsNCj4gLQlzdGFydF9ucyA9IGxvY2FsX2Nsb2NrKCk7DQo+ICB9DQo+IA0KPiAg
-c3RhdGljIGlubGluZSB2b2lkIGVhcmx5X3RpbWVzX2ZpbmlzaF9jYWxpYnJhdGlvbih2b2lkKQ0K
-PiBkaWZmIC0tZ2l0IGEvaW5pdC9tYWluLmMgYi9pbml0L21haW4uYw0KPiBpbmRleCAyNzgzNTI3
-MGRmYjUuLmEzMzNiMGRhNjljZiAxMDA2NDQNCj4gLS0tIGEvaW5pdC9tYWluLmMNCj4gKysrIGIv
-aW5pdC9tYWluLmMNCj4gQEAgLTExMjMsOSArMTEyMyw2IEBAIHZvaWQgc3RhcnRfa2VybmVsKHZv
-aWQpDQo+ICAJdGltZWtlZXBpbmdfaW5pdCgpOw0KPiAgCXRpbWVfaW5pdCgpOw0KPiANCj4gLQkv
-KiBUaGlzIG11c3QgYmUgYWZ0ZXIgdGltZWtlZXBpbmcgaXMgaW5pdGlhbGl6ZWQgKi8NCj4gLQll
-YXJseV90aW1lc19zdGFydF9jYWxpYnJhdGlvbigpOw0KPiAtDQo+ICAJLyogVGhpcyBtdXN0IGJl
-IGFmdGVyIHRpbWVrZWVwaW5nIGlzIGluaXRpYWxpemVkICovDQo+ICAJcmFuZG9tX2luaXQoKTsN
-Cj4gDQo+IGRpZmYgLS1naXQgYS9rZXJuZWwvcHJpbnRrL3ByaW50ay5jIGIva2VybmVsL3ByaW50
-ay9wcmludGsuYw0KPiBpbmRleCA3NzRmZmIxZmE1YWMuLjE5MzMwYjZiNGViMiAxMDA2NDQNCj4g
-LS0tIGEva2VybmVsL3ByaW50ay9wcmludGsuYw0KPiArKysgYi9rZXJuZWwvcHJpbnRrL3ByaW50
-ay5jDQo+IEBAIC0yMzA2LDcgKzIzMDYsOSBAQCBpbnQgdnByaW50a19zdG9yZShpbnQgZmFjaWxp
-dHksIGludCBsZXZlbCwNCj4gIAkgKiB0aW1lc3RhbXAgd2l0aCByZXNwZWN0IHRvIHRoZSBjYWxs
-ZXIuDQo+ICAJICovDQo+ICAJdHNfbnNlYyA9IGxvY2FsX2Nsb2NrKCk7DQo+IC0JaWYgKCF0c19u
-c2VjKQ0KPiArCWlmICh0c19uc2VjKQ0KPiArCQllYXJseV90aW1lc19tYXlfc3RhcnRfY2FsaWJy
-YXRpb24odHNfbnNlYyk7DQo+ICsJZWxzZQ0KPiAgCQl0c19uc2VjID0gZWFybHlfY3ljbGVzKCk7
-DQo+IA0KPiAgCWNhbGxlcl9pZCA9IHByaW50a19jYWxsZXJfaWQoKTsNCj4gDQo+IA0KPiA+ID4N
-Cj4gPiA+IDIpIEEgTGludXggVk0gcnVubmluZyBpbiB0aGUgQXp1cmUgY2xvdWQgaXMgYWxzbyBy
-dW5uaW5nIG9uIEh5cGVyLVYuIFN1Y2ggYQ0KPiA+ID4gVk0gdHlwaWNhbGx5IHVzZXMgY2xvdWQt
-aW5pdCB0byBzZXQgZXZlcnl0aGluZyB1cCBhdCBib290IHRpbWUsIGFuZCBjbG91ZC1pbml0DQo+
-ID4gPiBpcyBvdXRwdXR0aW5nIGxpbmVzIHRvIHRoZSBzZXJpYWwgY29uc29sZSB3aXRoIGEgdGlt
-ZXN0YW1wIHRoYXQgbG9va3MgbGlrZSB0aGUNCj4gPiA+IHByaW50aygpIHRpbWVzdGFtcCwgYnV0
-IGFwcGFyZW50bHkgaXMgbm90IGFkanVzdGVkIGZvciB0aGUgZWFybHkgdGltZXN0YW1waW5nDQo+
-ID4gPiB0aGF0IHRoaXMgcGF0Y2ggYWRkcy4gQWdhaW4sIEkgaGF2ZW4ndCBkZWJ1Z2dlZCB3aGF0
-J3MgZ29pbmcgb24gLS0gSSdtIG5vdA0KPiA+ID4gaW1tZWRpYXRlbHkgc3VyZSBvZiB0aGUgbWVj
-aGFuaXNtIHRoYXQgY2xvdWQtaW5pdCB1c2VzIHRvIGRvIG91dHB1dCB0byB0aGUNCj4gPiA+IHNl
-cmlhbCBjb25zb2xlLiBUaGUgdXNlIG9mIHRoZSBIeXBlci1WIHN5bnRoZXRpYyBjbG9jayBzb3Vy
-Y2UgbWlnaHQgdGhlIGNhdXNlDQo+ID4gPiBvZiB0aGUgcHJvYmxlbSBoZXJlIGFzIHdlbGwuIEhl
-cmUncyBhbiBvdXRwdXQgc25pcHBldCBmcm9tIHRoZSBzZXJpYWwgY29uc29sZToNCj4gPiA+DQo+
-ID4gPiBbICAgMjAuMzMwNDE0XSBzeXN0ZW1kWzFdOiBDb25kaXRpb24gY2hlY2sgcmVzdWx0ZWQg
-aW4gT3BlblZTd2l0Y2ggY29uZmlndXJhdGlvbiBmb3IgY2xlYW51cCBiZWluZyBza2lwcGVkLg0K
-PiA+ID4gWyAgIDIwLjMzMjkxMV0gc3lzdGVtZFsxXTogQ29uZGl0aW9uIGNoZWNrIHJlc3VsdGVk
-IGluIFNldCBVcCBBZGRpdGlvbmFsIEJpbmFyeSBGb3JtYXRzIGJlaW5nIHNraXBwZWQuDQo+ID4g
-PiBbICAgMjAuMzMzMjU3XSBwc3RvcmU6IFJlZ2lzdGVyZWQgZWZpX3BzdG9yZSBhcyBwZXJzaXN0
-ZW50IHN0b3JlIGJhY2tlbmQNCj4gPiA+IFsgICAyMC4zMzQzNjBdIHN5c3RlbWRbMV06IENvbmRp
-dGlvbiBjaGVjayByZXN1bHRlZCBpbiBGaWxlIFN5c3RlbSBDaGVjayBvbiBSb290IERldmljZSBi
-ZWluZyBza2lwcGVkLg0KPiA+ID4gWyAgIDIwLjMzODMxOV0gc3lzdGVtZFsxXTogU3RhcnRpbmcg
-TG9hZCBLZXJuZWwgTW9kdWxlcy4uLg0KPiA+ID4gWyAgIDIwLjM0MTA5NF0gc3lzdGVtZFsxXTog
-U3RhcnRpbmcgUmVtb3VudCBSb290IGFuZCBLZXJuZWwgRmlsZSBTeXN0ZW1zLi4uDQo+ID4gPiBb
-ICAgMjAuMzUwOTkzXSBzeXN0ZW1kWzFdOiBTdGFydGluZyB1ZGV2IENvbGRwbHVnIGFsbCBEZXZp
-Y2VzLi4uDQo+ID4gPiBbICAgMjAuMzU2MjU1XSBzeXN0ZW1kWzFdOiBTdGFydGluZyBVbmNvbXBs
-aWNhdGVkIGZpcmV3YWxsLi4uDQo+ID4gPiBbICAgMjAuMzYxNTM2XSBzeXN0ZW1kWzFdOiBTdGFy
-dGVkIEpvdXJuYWwgU2VydmljZS4NCj4gPiA+IFsgICAyMC4zODY5MDJdIEVYVDQtZnMgKHNkYTEp
-OiByZS1tb3VudGVkIGMwMmRjZTBjLTBjNDAtNGU2ZS04OGFmLWM1YTA5ODdiMGFkYiByL3cuDQo+
-ID4gPiBbICAgMjIuNTMyMDMzXSAvZGV2L3NyMDogQ2FuJ3QgbG9va3VwIGJsb2NrZGV2DQo+ID4g
-PiBbICAgIDcuOTU1OTczXSBjbG91ZC1pbml0Wzc4M106IENsb3VkLWluaXQgdi4gMjQuMy4xLTB1
-YnVudHUwfjIwLjA0LjEgcnVubmluZyAnaW5pdC1sb2NhbCcgYXQgV2VkLCAxMSBNYXIgMjAyNiAx
-NToyNzowNiArMDAwMC4gVXAgNy40OA0KPiA+ID4gc2Vjb25kcy4NCj4gPiA+IFsgICAgOS45MzMx
-MjBdIGNsb3VkLWluaXRbODIyXTogQ2xvdWQtaW5pdCB2LiAyNC4zLjEtMHVidW50dTB+MjAuMDQu
-MSBydW5uaW5nICdpbml0JyBhdCBXZWQsIDExIE1hciAyMDI2IDE1OjI3OjA4ICswMDAwLiBVcCA5
-LjgyIHNlY29uZHMuDQo+ID4gPiBbICAgIDkuOTM1NDgzXSBjbG91ZC1pbml0WzgyMl06IGNpLWlu
-Zm86ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrTmV0IGRldmljZQ0KPiA+
-ID4gaW5mbysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKw0KPiA+ID4gWyAg
-ICA5LjkzNzcyNl0gY2xvdWQtaW5pdFs4MjJdOiBjaS1pbmZvOiArLS0tLS0tLS0rLS0tLS0tKy0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tLS0tLSstLS0tLS0tLSstLS0t
-LS0tLS0tLS0tLS0tLS0tKw0KPiA+ID4gWyAgICA5LjkzOTkwNV0gY2xvdWQtaW5pdFs4MjJdOiBj
-aS1pbmZvOiB8IERldmljZSB8ICBVcCAgfCAgICAgICAgICAgQWRkcmVzcyAgICAgICAgICAgfCAg
-ICAgIE1hc2sgICAgIHwgU2NvcGUgIHwgICAgIEh3LUFkZHJlc3MgICAgfA0KPiA+ID4gWyAgICA5
-Ljk0MjA1OV0gY2xvdWQtaW5pdFs4MjJdOiBjaS1pbmZvOiArLS0tLS0tLS0rLS0tLS0tKy0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tLS0tLSstLS0tLS0tLSstLS0tLS0t
-LS0tLS0tLS0tLS0tKw0KPiANCj4gVGhpcyBpcyBtb3JlIGNvbXBsaWNhdGVkLiBJIHdvbmRlciBp
-ZiB0aGUgdGltZXN0YW1wcyBmcm9tIGNsb3VkLWluaXQoKQ0KPiBhcmUgc29tZWhvdyBzeW5jaHJv
-bml6ZWQgd2l0aCBsb2NhbF9jbG9jaygpLg0KDQpUaGlzIHJhaXNlcyBhbiBpbXBvcnRhbnQgaXNz
-dWUsIHdoaWNoIGlzIHRoYXQgYW55b25lIHVzaW5nIGxvY2FsX2Nsb2NrKCkgd2lsbCBnZXQgdGlt
-ZXN0YW1wcw0KcmVsYXRpdmUgdG8gdGltZV9pbml0KCksIHdoZXJlYXMgd2l0aCB0aGUgZWFybHkg
-dGltZXMgcGF0Y2ggYXBwbGllZCwgcHJpbnRrIGlzIHVzaW5nIHRpbWVzdGFtcHMNCnJlbGF0aXZl
-IHRvIHBvd2VyIG9uICh3ZWxsLCBUU0MgaW5pdCB3aGljaCBpcyBhbG1vc3QgYWx3YXlzIHRoZSBz
-YW1lIHRoaW5nKS4gIEknbSBzdGlsbCBhIGJpdA0KY29uZnVzZWQgd2l0aCBob3cgY2xvdWQtaW5p
-dCBpcyBnZXR0aW5nIGl0J3MgbWVzc2FnZXMgaW50ZXJtaW5nbGVkIHdpdGggdGhlIHByaW50aw0K
-bWVzc2FnZXM/ICBJcyB0aGlzIGEgZmVhdHVyZSBvZiBzeXN0ZW1kPw0KDQo+IA0KPiBXZSBtaWdo
-dCBuZWVkIHRvIHN5bmNocm9uaXplIGxvY2FsX2Nsb2NrKCkgd2l0aCB0aGUgY3ljbGVzIGFzIHdl
-bGwuDQoNCkkgdGhvdWdodCBhYm91dCBtb2RpZnlpbmcgbG9jYWxfY2xvY2sgdG8gdXNlIGVhcmx5
-X3RzX29mZnNldCwgc28gdGhhdCBhbGwgdXNlcnMNCm9mIGxvY2FsX2Nsb2NrKCkgd291bGQgZ2V0
-IHRpbWVzdGFtcHMgd2l0aCBhbiBvZmZzZXQgYWRqdXN0ZWQgc28gdGhleSB3ZXJlDQpyZWxhdGl2
-ZSB0byBwb3dlciBvbiwgYnV0IHRoYXQgd2FzIGEgbXVjaCBtb3JlIGludHJ1c2l2ZSBwYXRjaC4N
-Cg0KPiBCdXQgdGhlcmUgaXMgdGhlIGNoaWNrZW4mZWdnIHByb2JsZW0uIFdlIG5lZWQ6DQo+IA0K
-PiAgICAgKyB0byBrbm93IHRoZSBvZmZzZXQgY2F1c2VkIGJ5IGN5Y2xlcyB3aGVuIGxvY2FsX2Ns
-b2NrKCkgZ2V0cyBpbml0aWFsaXplZC4NCj4gICAgICsgbG9jYWxfY2xvY2soKSBydW5uaW5nIGZv
-ciBzb21lIHRpbWUgdG8gY2FsaWJyYXRlIGN5Y2xlcy4NCj4gDQo+IEhtbSwgSSBzZWUgdGhhdCB0
-aW1lLW1hbmFnZW1lbnQgcGVvcGxlIGFyZSBub3QgaW4gQ2MuIFdlIHNob3VsZCBoYXZlDQo+IGFk
-ZGVkIHRoZW0gc2luY2UgdjEuDQo+IA0KPiBJIGFkZCB0aGVtIG5vdy4gQmV0dGVyIGxhdGUgdGhh
-biBuZXZlci4NCg0KVGhhbmtzIGZvciB0aGUgZmVlZGJhY2sgYW5kIHRlc3RpbmchICBJIHJlYWxs
-eSBhcHByZWNpYXRlIGl0Lg0KIC0tIFRpbQ0KDQo=
+Sorry for the slow response.  See my response and plan inline below.
+
+> -----Original Message-----
+> From: Michael Kelley <mhklinux@outlook.com>
+>=20
+> From: Petr Mladek <pmladek@=E2=80=8Asuse.=E2=80=8Acom> Sent: Friday, Marc=
+h 13, 2026 3:=E2=80=8A45 AM > > Finally added timekeeping maintainers and J=
+ohn into Cc.
+> > We should have added time since v1. > > Anyway, you might see the entir=
+e history at
+>=20
+> From: Petr Mladek <pmladek@suse.com> Sent: Friday, March 13, 2026 3:45 AM
+> >
+> > Finally added timekeeping maintainers and John into Cc.
+> > We should have added time since v1.
+> >
+> > Anyway, you might see the entire history at
+> > https://lore.kernel.org/all/39b09edb-8998-4ebd-a564-7d594434a981@bird.o=
+rg/
+> >
+> > On Fri 2026-03-13 04:52:40, Bird, Tim wrote:
+> > > Hey Micheal,
+> > >
+> > > This report is very interesting.
+> > >
+> > > Thanks very much for trying it out!
+> > >
+> > > > -----Original Message-----
+> > > > From: Michael Kelley <mhklinux@outlook.com>
+> > > > Sent: Wednesday, March 11, 2026 9:47 AM
+> > > > From: Tim Bird <tim.bird@sony.com> Sent: Tuesday, February 10, 2026=
+ 3:48 PM
+> > > > >
+> > > > > During early boot, printk timestamps are reported as zero before
+> > > > > kernel timekeeping starts (e.g. before time_init()).  This
+> > > > > hinders boot-time optimization efforts.  This period is about 400
+> > > > > milliseconds for many current desktop and embedded machines
+> > > > > running Linux.
+> > > > >
+> > > > > Add support to save cycles during early boot, and output correct
+> > > > > timestamp values after timekeeping is initialized.  get_cycles()
+> > > > > is operational on arm64 and x86_64 from kernel start.  Add code
+> > > > > and variables to save calibration values used to later convert
+> > > > > cycle counts to time values in the early printks.  Add a config
+> > > > > to control the feature.
+> > > > >
+> > > > > This yields non-zero timestamps for printks from the very start
+> > > > > of kernel execution.  The timestamps are relative to the start of
+> > > > > the architecture-specified counter used in get_cycles
+> > > > > (e.g. the TSC on x86_64 and cntvct_el0 on arm64).
+> > > > >
+> > > > > All timestamps reflect time from processor power-on instead of
+> > > > > time from the kernel's timekeeping initialization.
+> > > >
+> > > > I tried this patch in linux-next20260302 kernel running as a guest =
+VM
+> > > > on a Hyper-V host. Two things:
+> > > >
+> > > > 1) In the dmesg output, I'm seeing a place where the timestamps bri=
+efly go
+> > > > backwards -- i.e., they are not monotonically increasing. Here's a =
+snippet,
+> > > > where there's a smaller timestamp immediately after the tsc is dete=
+cted:
+> > > >
+> > > > [   27.994891] SMBIOS 3.1.0 present.
+> > > > [   27.994893] DMI: Microsoft Corporation Virtual Machine/Virtual M=
+achine, BIOS Hyper-V UEFI Release v4.1 09/25/2025
+> > > > [   27.994898] DMI: Memory slots populated: 2/2
+> > > > [   27.995202] Hypervisor detected: Microsoft Hyper-V
+> > > > [   27.995205] Hyper-V: privilege flags low 0xae7f, high 0x3b8030, =
+ext 0x62, hints 0xa0e24, misc 0xe0bed7b2
+> > > > [   27.995208] Hyper-V: Nested features: 0x0
+> > > > [   27.995209] Hyper-V: LAPIC Timer Frequency: 0xc3500
+> > > > [   27.995210] Hyper-V: Using hypercall for remote TLB flush
+> > > > [   27.995216] clocksource: hyperv_clocksource_tsc_page: mask: 0xff=
+ffffffffffffff max_cycles: 0x24e6a1710, max_idle_ns: 440795202120
+> ns
+> > > > [   27.995218] clocksource: hyperv_clocksource_msr: mask: 0xfffffff=
+fffffffff max_cycles: 0x24e6a1710, max_idle_ns: 440795202120 ns
+> > > > [   27.995220] tsc: Detected 2918.401 MHz processor
+> > >
+> > > I wonder if the tsc is getting fiddled with or virtualized somewhere
+> > > in here, as part of clocksource initialization. I believe each clocks=
+ource in
+> > > the kernel maintains it's own internal offset, and maybe the offset t=
+hat is
+> > > being used ends up being slightly different from the cycle-counter of=
+fset
+> > > that the early_times feature uses. I'm just throwing out guesses.  It=
+'s about
+> > > a 4ms delta, which is pretty big.
+>=20
+> I'm fairly certain the TSC frequency is not being fiddled with. In a gues=
+t VM on
+> Hyper-V, the x86 instruction to read the TSC executes directly in hardwar=
+e and
+> is not virtualized. There *is* per-VM scaling of the TSC value to handle =
+live
+> migrations across virtualization hosts with different TSC frequencies, bu=
+t that's
+> not in play during my experiments.
+
+OK - thanks.  I suspected this was the case.
+>=20
+> > >
+> > > > [   27.991060] e820: update [mem 0x00000000-0x00000fff] System RAM =
+=3D=3D> device reserved
+> > > > [   27.991062] e820: remove [mem 0x000a0000-0x000fffff] System RAM
+> > > > [   27.991064] last_pfn =3D 0x210000 max_arch_pfn =3D 0x400000000
+> > > > [   27.991065] x86/PAT: PAT support disabled because CONFIG_X86_PAT=
+ is disabled in the kernel.
+> > > > [   27.991066] x86/PAT: Configuration [0-7]: WB  WT  UC- UC  WB  WT=
+  UC- UC
+> >
+> > I wonder how the calibration of the cycles is precise. I wonder if
+> > the problem might be that cycles were faster right after boot than
+> > later during the calibration.
+> >
+> > I added the following debug output on top of this patch:
+> >
+> > diff --git a/include/linux/early_times.h b/include/linux/early_times.h
+> > index 05388dcb8573..cdb467345bcc 100644
+> > --- a/include/linux/early_times.h
+> > +++ b/include/linux/early_times.h
+> > @@ -20,6 +20,7 @@ static inline void early_times_start_calibration(void)
+> >  {
+> >  	start_cycles =3D get_cycles();
+> >  	start_ns =3D local_clock();
+> > +	pr_info("Early printk times: started callibration: %llu ns\n", start_=
+ns);
+> >  }
+> >
+> >  static inline void early_times_finish_calibration(void)
+> > diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
+> > index 774ffb1fa5ac..836cb03aaa6d 100644
+> > --- a/kernel/printk/printk.c
+> > +++ b/kernel/printk/printk.c
+> > @@ -2308,6 +2308,8 @@ int vprintk_store(int facility, int level,
+> >  	ts_nsec =3D local_clock();
+> >  	if (!ts_nsec)
+> >  		ts_nsec =3D early_cycles();
+> > +	else
+> > +		pr_info_once("local_clock() returned non-zero timestamp: %llu nsec\n=
+", ts_nsec);
+> >
+> >  	caller_id =3D printk_caller_id();
+> >
+> >
+> > And it produced in my kvm:
+> >
+> > Let's say that start of the cycle counter is
+> >
+> > Start of stage A
+> >
+> > [    8.684438] Linux version 7.0.0-rc2-default+ (pmladek@pathway) (gcc =
+(SUSE Linux)
+> > 15.2.1 20260202, GNU ld (GNU Binutils; openSUSE Tumbleweed) 2.45.0.2025=
+1103-2)
+> > #571 SMP PREEMPT_DYNAMIC Fri Mar 13 10:23:54 CET 2026
+> > [    8.684442] Command line: BOOT_IMAGE=3D/boot/vmlinuz-7.0.0-rc2-defau=
+lt+
+> > root=3D/dev/vda2 resume=3D/dev/disk/by-uuid/369c7453-3d16-409d-88b2-
+> > 5de027891a12 mitigations=3Dauto nosplash earlycon=3Duart8250,io,0x3f8,1=
+15200
+> > console=3DttyS0,115200 console=3Dtty0 ignore_loglevel log_buf_len=3D1M
+> > crashkernel=3D512M,high crashkernel=3D72M,low
+> > [...]
+> > [    8.696633] earlycon: uart8250 at I/O port 0x3f8 (options '115200')
+> > [    8.696639] printk: legacy bootconsole [uart8250] enabled
+> > [    8.731303] printk: debug: ignoring loglevel setting.
+> > [    8.732349] NX (Execute Disable) protection: active
+> > [    8.733447] APIC: Static calls initialized
+> > [    8.734667] SMBIOS 2.8 present.
+> > [    8.735358] DMI: QEMU Standard PC (Q35 + ICH9, 2009), BIOS rel-1.17.=
+0-2-g4f253b9b-prebuilt.qemu.org 04/01/2014
+> > [    8.737285] DMI: Memory slots populated: 1/1
+> > [    8.738380] Hypervisor detected: KVM
+> > [    8.739151] last_pfn =3D 0x7ffdc max_arch_pfn =3D 0x400000000
+> > [    8.740254] kvm-clock: Using msrs 4b564d01 and 4b564d00
+> > [    8.732971] printk: local_clock() returned non-zero timestamp: 3486 =
+nsec
+> >
+> > End of stage A
+> >
+> > This is the point where printk() started storing the values from
+> > local_clock() instead of cycles.
+> >
+> > Start of stage B
+> >
+> > [    8.732971] kvm-clock: using sched offset of 252367014082295 cycles
+> > [    8.735471] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cyc=
+les: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+> > [    8.738880] tsc: Detected 3293.776 MHz processor
+> > [    8.740474] e820: update [mem 0x00000000-0x00000fff] System RAM =3D=
+=3D> device reserved
+> > [...]
+> > [    8.932671] rcu: srcu_init: Setting srcu_struct sizes based on conte=
+ntion.
+> > [    8.934047] Early printk times: started callibration: 201079507 ns
+> >
+> > End of stage B
+> >
+> > This is where we started calibration of early cycles.
+> >
+> > Start of stage C
+> >
+> > [    8.935571] Console: colour dummy device 80x25
+> > [...]
+> > [    9.289673] thermal_sys: Registered thermal governor 'fair_share'
+> > [    9.290077] thermal_sys: Registered thermal governor 'bang_bang'
+> > [    9.292290] thermal_sys: Registered thermal governor 'step_wise'
+> > [    9.293530] thermal_sys: Registered thermal governor 'user_space'
+> > [    9.294856] cpuidle: using governor ladder
+> > [    9.296302] cpuidle: using governor menu
+> >
+> > Here the thermal governors are registered. I guess that they might
+> > reduce speed of some HW.
+> >
+> > [...]
+> > [   11.974147] clk: Disabling unused clocks
+> >
+> > Some unused clocks are disabled. I wonder if this might affect
+> > counting the cycles.
+> >
+> > [   12.330852] Freeing unused kernel image (rodata/data gap) memory: 15=
+00K
+> > [   12.351191] Early printk times: mult=3D19634245, shift=3D26, offset=
+=3D8732967929 ns
+> >
+> > End of stage C
+> >
+> > Here is the end on calibration.
+> >
+> > Now, if the frequence of the cycles was:
+> >
+> >    + was higher in the stage A when only cycles were stored
+> >    + was lower in stage C when it was calibrated against local_clock()
+> >
+> > Then it might result in higher (calibrated) timestamps in stage A
+> > and step back in stage B.
+> >
+> > Or something like this. It is possible that even local_clock() does
+> > not have a stable frequence during the early boot.
+>=20
+> In my VM on Hyper-V, I do see a problem with the results of your
+> calibration code. Over the calibration interval, you calculate the delta
+> number of nanoseconds from local_clock() and the delta number of
+> TSC cycles. The delta TSC cycles divided by the delta nanoseconds
+> should yield the TSC frequency. But the result of your calibration code
+> is about 3.05 cycles/nsec, when the actual TSC frequency is 2.918
+> cycles/nsec for the hardware I'm running on.
+>=20
+> In a Linux VM where CONFIG_PARAVIRT=3Dy, local_clock() eventually
+> comes down to native_sched_clock(), which just reads the TSC and
+> then converts to nanoseconds based on the kernel's understanding
+> of the TSC frequency. So I don't think the local_clock() frequency is
+> varying. But I'm thinking there are some adjustments being made
+> to the value returned by local_clock() during early initialization, and
+> I didn't try to track those down.
+
+Thanks very much for this data point and information!
+
+>=20
+> Hyper-V provides guest VMs with a synthetic clock (that is based
+> on the TSC). As an experiment, I used that clock in the early time
+> calibration, and everything worked properly. The calibration code
+> produced delta nanoseconds and delta cycles that were exactly
+> 2.918 cycles/nsec, and the transition from Stage A to Stage B was
+> correct -- no cases of a smaller timestamp following a larger
+> timestamp. So my conclusion is that the calibration is indeed
+> problematic, though I haven't identified why the nanoseconds
+> delta from local_clock() is smaller than it should be.
+
+I'll do a deep dive on my calibration math and see if I can
+figure out the problem.  One guess I have is that it could
+be an error in precision due to not enough time accumulating in local_clock
+before the start of calibration.  I plan to move the calibration start arou=
+nd,
+as well as compare the math from my calibration with the one done by=20
+local_clock() to try to figure out the discrepancy.
+=20
+> >
+> > Idea: A solution might be to start calibration when printk()
+> >       gets first non-zero time from local_clock.
+> >
+> >       Something like:
+> >
+> > diff --git a/include/linux/early_times.h b/include/linux/early_times.h
+> > index 05388dcb8573..09d278996184 100644
+> > --- a/include/linux/early_times.h
+> > +++ b/include/linux/early_times.h
+> > @@ -16,10 +16,13 @@ extern u64 start_ns;
+> >  extern u32 early_mult, early_shift;
+> >  extern u64 early_ts_offset;
+> >
+> > -static inline void early_times_start_calibration(void)
+> > +static inline void early_times_may_start_calibration(u64 ts_ns)
+> >  {
+> > +	if (start_ns)
+> > +		return;
+> > +
+> > +	start_ns =3D ts_ns;
+> >  	start_cycles =3D get_cycles();
+> > -	start_ns =3D local_clock();
+> >  }
+> >
+> >  static inline void early_times_finish_calibration(void)
+> > diff --git a/init/main.c b/init/main.c
+> > index 27835270dfb5..a333b0da69cf 100644
+> > --- a/init/main.c
+> > +++ b/init/main.c
+> > @@ -1123,9 +1123,6 @@ void start_kernel(void)
+> >  	timekeeping_init();
+> >  	time_init();
+> >
+> > -	/* This must be after timekeeping is initialized */
+> > -	early_times_start_calibration();
+> > -
+> >  	/* This must be after timekeeping is initialized */
+> >  	random_init();
+> >
+> > diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
+> > index 774ffb1fa5ac..19330b6b4eb2 100644
+> > --- a/kernel/printk/printk.c
+> > +++ b/kernel/printk/printk.c
+> > @@ -2306,7 +2306,9 @@ int vprintk_store(int facility, int level,
+> >  	 * timestamp with respect to the caller.
+> >  	 */
+> >  	ts_nsec =3D local_clock();
+> > -	if (!ts_nsec)
+> > +	if (ts_nsec)
+> > +		early_times_may_start_calibration(ts_nsec);
+> > +	else
+> >  		ts_nsec =3D early_cycles();
+> >
+> >  	caller_id =3D printk_caller_id();
+> >
+> >
+> > > >
+> > > > 2) A Linux VM running in the Azure cloud is also running on Hyper-V=
+. Such a
+> > > > VM typically uses cloud-init to set everything up at boot time, and=
+ cloud-init
+> > > > is outputting lines to the serial console with a timestamp that loo=
+ks like the
+> > > > printk() timestamp, but apparently is not adjusted for the early ti=
+mestamping
+> > > > that this patch adds. Again, I haven't debugged what's going on -- =
+I'm not
+> > > > immediately sure of the mechanism that cloud-init uses to do output=
+ to the
+> > > > serial console. The use of the Hyper-V synthetic clock source might=
+ the cause
+> > > > of the problem here as well. Here's an output snippet from the seri=
+al console:
+> > > >
+> > > > [   20.330414] systemd[1]: Condition check resulted in OpenVSwitch =
+configuration for cleanup being skipped.
+> > > > [   20.332911] systemd[1]: Condition check resulted in Set Up Addit=
+ional Binary Formats being skipped.
+> > > > [   20.333257] pstore: Registered efi_pstore as persistent store ba=
+ckend
+> > > > [   20.334360] systemd[1]: Condition check resulted in File System =
+Check on Root Device being skipped.
+> > > > [   20.338319] systemd[1]: Starting Load Kernel Modules...
+> > > > [   20.341094] systemd[1]: Starting Remount Root and Kernel File Sy=
+stems...
+> > > > [   20.350993] systemd[1]: Starting udev Coldplug all Devices...
+> > > > [   20.356255] systemd[1]: Starting Uncomplicated firewall...
+> > > > [   20.361536] systemd[1]: Started Journal Service.
+> > > > [   20.386902] EXT4-fs (sda1): re-mounted c02dce0c-0c40-4e6e-88af-c=
+5a0987b0adb r/w.
+> > > > [   22.532033] /dev/sr0: Can't lookup blockdev
+> > > > [    7.955973] cloud-init[783]: Cloud-init v. 24.3.1-0ubuntu0~20.04=
+.1 running 'init-local' at Wed, 11 Mar 2026 15:27:06 +0000. Up 7.48
+> seconds.
+> > > > [    9.933120] cloud-init[822]: Cloud-init v. 24.3.1-0ubuntu0~20.04=
+.1 running 'init' at Wed, 11 Mar 2026 15:27:08 +0000. Up 9.82
+> seconds.
+> > > > [    9.935483] cloud-init[822]: ci-info: ++++++++++++++++++++++++++=
+++++++++++++Net device
+> info+++++++++++++++++++++++++++++++++++++++
+> > > > [    9.937726] cloud-init[822]: ci-info: +--------+------+---------=
+--------------------+---------------+--------+-------------------+
+> > > > [    9.939905] cloud-init[822]: ci-info: | Device |  Up  |         =
+  Address           |      Mask | Scope  |     Hw-Address    |
+> > > > [    9.942059] cloud-init[822]: ci-info: +--------+------+---------=
+--------------------+---------------+--------+-------------------+
+>=20
+> The cloud-init output to the serial console is coming from syslog, which =
+is
+> presumably writing directly to /dev/console. This output is also recorded
+> in the syslog log files (/var/log/syslog in my Ubuntu system), though with
+> timestamps in a text format like
+>=20
+> 2026-03-14T08:44:24.781241-07:00
+>=20
+> The timestamps recorded in /var/log/syslog, and as shown with the
+> 'journalctl' command, are monontonic using that full date/time format. But
+> 'journalctl' with the "-o short-monotonic" option shows the seconds-since=
+-boot
+> format, and in that case, the cloud-init timestamps are discontinuous wit=
+h the
+> kernel messages, like in the serial console output. I don't know exactly =
+where
+> journalctl gets its knowledge of the boot time, but among the possibiliti=
+es are:
+>=20
+> /proc/uptime
+> /proc/stat (the "btime" field)
+>=20
+> These are not adjusted for using early boot times. And it's not clear whe=
+ther
+> they should be -- I don't know what the big picture implications would be.
+> And there are probably other places the boot time is available to user sp=
+ace.
+> If using early boot times is intended to be only for occasional diagnosti=
+c use,
+> then maybe living with the discontinuity is OK. I see that Shashank Balaj=
+i has
+> also commented about userspace issues, which covers this syslog case.
+>=20
+> I think all this gives a first-level explanation of what I'm seeing in a
+> Hyper-V guest. I don't think any of it is specific to Hyper-V guests
+> or the Hyper-V synthetic clock sources. The issues are more generic.
+> Sorry. :-(
+
+Yeah - I was worried about other timestamps not being in synchronization
+with my adjusted printk timestamps.  Looks like that worry was justified.
+
+At this point, there are two avenues:
+
+ 1) double-down and embed the offset (from power-on rather than from time_i=
+nit)
+    all the way into local_clock() and/or whatever is providing CLOCK_MONOT=
+ONIC
+    and CLOCK_BOOTTIME, or
+
+ 2) back off, and abandon adding the offset to local_clock()-based printk t=
+imestamps.
+    This would leave a discontinuity when EARLY_PRINTK_TIMES was enabled,
+    between the (now) non-zero early printk timestamps and the ones followi=
+ng
+    time_init().  This has the benefit of changing less code, and only affe=
+cting
+    the early printk timestamps (and none of the rest of the system).  And =
+it has
+    the downside of leaving the possibly confusing time discontinuity
+    early in the kernel log.  So far, I haven't seen any tools confused by =
+this, and
+    I can put a message before time_init() to inform humans about the switc=
+h.
+
+The purpose of this patch is really focused on that early period of boot, w=
+here all
+other timing and tracing mechanisms are unavailable, and limiting the impac=
+t to
+just those early (currently zero) timestamps seems like the best course.
+
+Of course I still need to get the calibration correct, and I'll work on that
+before sending another update.
+ -- Tim
