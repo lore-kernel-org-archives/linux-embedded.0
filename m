@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18C7E3ECBD9;
-	Tue, 31 Mar 2026 09:10:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D54C419D89E;
+	Tue, 31 Mar 2026 23:36:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774948218; cv=none; b=jQcTotWX3Bu2ATjOWSWZVR4DcRIoS1o+ZtY88CtEEnf9fb4dxmzBUZFxo8NTS5WSxXC4qfGsxrGXF1YDbBL24D8f+0EUkO7Ph+Q2iPyzfXoxQMECSRTEhNlG6GX1Tf4BhMjzroDTrEgLKK7joWxtQ0/F0W4O2a/Cz6at4NmO6tQ=
+	t=1775000190; cv=none; b=JgX73ISR/688KlA5Cd6k9D5U89DAPzu6COw7CsFYhdcdIJRhx5CdYB5ZiqHt53YtYb7tpgEvpVnUnURXfdTc53G6wKiKV+84DDOXry+ChU4SyfnLXLXHpp5LtTaPRe5CtN81EgPdEGgKho+q5ip0kiY20iJbZX5PJ+ITKKLwF9E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774948218; c=relaxed/simple;
-	bh=h4wTUB19nIXnGYtOjbj2xjQOdflTVZGjdBSNC75eWjA=;
+	s=arc-20240116; t=1775000190; c=relaxed/simple;
+	bh=oTsdwbPlf21A1swN+H672WjS423hWyg/L/6abgrBM8c=;
 	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=WXtWmK1vtNkn8lzTocfVAyYT97ToQzguXS9KAlaQGPfJfUbe7VkxmRo1j8X1dZYviJyZ8bu6NBrzhT1E9B53xRctGGGVWsdtb3jx7AVnKByy8p0imYzsoGOsvuziU/6HTqZDgdUyu5BdKpLWCMT3Bo2xEIxeljgOiIFsFPFmn20=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cHbGxtTk; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version:Content-Type; b=PjdIiC2jZsyjwybJHv+hfAzM0kZTojqgiunBAOVuxCVTCWD0jbkE/jiCTpK4tRHj6eZCBJRojPUlQt0Ifv7VCgO+ulo7H2DwkM95HBthfplpK2KgW3VOtW2qN4e8AvUoPSzx39pMIiL3Ga5OnL+nJCqQpJYIewGWnhLkymTSSm4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EPo8uaYf; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cHbGxtTk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41A43C19423;
-	Tue, 31 Mar 2026 09:10:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EPo8uaYf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 247F2C19423;
+	Tue, 31 Mar 2026 23:36:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774948217;
-	bh=h4wTUB19nIXnGYtOjbj2xjQOdflTVZGjdBSNC75eWjA=;
+	s=k20201202; t=1775000190;
+	bh=oTsdwbPlf21A1swN+H672WjS423hWyg/L/6abgrBM8c=;
 	h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
-	b=cHbGxtTkhrmNv1SEKy/IkNlmERDMaRIWcP11wMiRTr4nYHEX6rfwrMopwoGe8H5kQ
-	 Wjexvl1mPntKLGe53+3w52a6att/5AEPsQfKa6whBEs1VuoXH9roCib3tmO1hO72D4
-	 gpb+sJBRKGdAgFPWXvSSXvQG8Dw+50jLW0aqBp8bP5sc1EZu2NQLwUpuA7fIe/1YjO
-	 wq8oSMag3qOiAd0X0r5YwxwrJcgYqkC0tssRy7lU44rCvWQYFk9JUE+a8r1nNdyZ5T
-	 xruLS0uRreM3BCCsGg2Yl2dOjy6Yd3lAb4iaNeftAHWKxzHMWqnl/hrBJDS6F94MKu
-	 eclk/q4wJVqzQ==
+	b=EPo8uaYfM121xZysHH46+hFkHv4zCsfG2AvAT7cT+bpZ7m3tKz91voO5UD2R9l97C
+	 KSyP0TpUTNG9OjCmuV8PEBXtaRiUskEbvNKcUoWv0fDAtvgVOV5QPbKlY+WdXZ482s
+	 yI+28NKT0zAqCZ6ws64Ex9woS6dC1Nq44Qo7NIYMjHHpU5TxQn4e55tveokOQ07OBi
+	 mj94ffTom7xlXgrmty4Ly5ytIjIM3fWOpD7H/IC6Ta8HloX342BIVXbfvUp0C5iLbF
+	 sbqOCXXAm37YQLGAOAC/xKalOL8EEQGbGGLSZry4MlEIbIRhN2zeTTZ3q8Ayu342Vy
+	 hWzBbPpT1Q0sw==
 From: Thomas Gleixner <tglx@kernel.org>
 To: "Bird, Tim" <Tim.Bird@sony.com>, "pmladek@suse.com" <pmladek@suse.com>,
  "rostedt@goodmis.org" <rostedt@goodmis.org>, "senozhatsky@chromium.org"
@@ -36,14 +36,15 @@ Cc: "francesco@valla.it" <francesco@valla.it>, "geert@linux-m68k.org"
  <linux-embedded@vger.kernel.org>, "linux-kernel@vger.kernel.org"
  <linux-kernel@vger.kernel.org>
 Subject: RE: [PATCH v3] printk: fix zero-valued printk timestamps in early boot
-In-Reply-To: <MW5PR13MB5632B55CAD0BEA34188EE88EFD52A@MW5PR13MB5632.namprd13.prod.outlook.com>
+In-Reply-To: <87jyus9xft.ffs@tglx>
 References: <39b09edb-8998-4ebd-a564-7d594434a981@bird.org>
  <20260210234741.3262320-1-tim.bird@sony.com> <87zf3ud92r.ffs@tglx>
  <MW5PR13MB5632FC91EE0EF8754331400DFD57A@MW5PR13MB5632.namprd13.prod.outlook.com>
  <87jyuvboo2.ffs@tglx>
  <MW5PR13MB5632B55CAD0BEA34188EE88EFD52A@MW5PR13MB5632.namprd13.prod.outlook.com>
-Date: Tue, 31 Mar 2026 11:10:14 +0200
-Message-ID: <87jyus9xft.ffs@tglx>
+ <87jyus9xft.ffs@tglx>
+Date: Wed, 01 Apr 2026 01:36:26 +0200
+Message-ID: <87ldf78tc5.ffs@tglx>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -54,141 +55,121 @@ Content-Type: text/plain
 
 Tim!
 
-On Mon, Mar 30 2026 at 20:42, Tim Bird wrote:
->> From: Thomas Gleixner <tglx@kernel.org>
->> > The approach that I originally started with
->> > (see https://lore.kernel.org/linux-embedded/39b09edb-8998-4ebd-a564-7d594434a981@bird.org/
->> > was to use hardcoded multiplier and shift values for converting from cycles
->> > to nanoseconds.  These multiplier and shift values would be set at kernel
->> > configuration time (ie, using CONFIG values).
->> 
->> Which makes it unusable for distro kernels and therefore a non-starter.
->
-> Can you elaborate on this?  Indeed distro kernels would not be able to pre-set
-> TCS calibration values, and would not turn on this feature (in that version
-> of the patch) for production release kernels.  But it sounds like you are saying that
-> anything that requires a configuration that is non-general (or indeed used
-> temporarily during development) is not acceptable upstream.  Is that your position?
+On Tue, Mar 31 2026 at 11:10, Thomas Gleixner wrote:
+> So the real good question is whether the extra information of how long
+> that earliest init takes is really relevant to the goal of optimizing
+> boot time. The expensive part of the boot process definitely comes after
+> that.
 
-The point is that we really want to provide general available
-functionality as much as we can. The problem with all these special
-features is that they add to the overall maintainence burden. We do them
-when there is no other way.
+That actually made me curious and so I hacked up the kernel with the
+patch below to compensate for the difference between:
 
-> This "feature" is intended as a tool for developers who are optimizing Linux
-> kernel boot time. (I'm not sure who else would be interested in getting
-> timing data for these (currently zero-timestamped) printks during the
-> first 100-400 milliseconds of kernel boot).  This would be, I believe, developers
+  x86_64_start_reservations()
 
-The existing early TSC enablement on x86 starts providing printk
-timestamps at about 30ms after boot out of the box when I remove
-'earlyprintk' from the command line on the same VM/host combo I tested
-the PoC. That too uses sched clock and not some special mechanism.
+	i.e. the C entry point of the kernel and the actual earliest
+	point (ASM entry code aside) where the kernel can take a
+	timestamp, which is modulo the sanity checks in the PoC the same
+	thing, right?
 
-The real question is whether this boot time optimization really needs to
-have earlier time stamps and whether the hacks required for that are
-actually worth it.
+and
 
-> This patch is part of a larger effort on my part to help automate
-> boot-time tuning of the kernel.  Many other parts of that effort rely
-> on reconfiguration and recompilation of the kernel, which makes the
-> whole thing a development-time effort, not so much a run-time,
-> end-user, or production-level feature.  And very much not a thing that
-> can be accomplished with distro-only configs.
+  tsc_early_init()
 
-I understand that, but when you can achieve it by utilizing what's there
-already just by providing access to the TSC at the earliest possible
-time, then adding new infrastructure is obviously not the right thing to
-do.
+        where the upstream kernel enables TSC sched clock today with all
+        sanity checks and enumeration in place.
 
->> 
->> > There are other approaches, but none really work early enough in the
->> > kernel boot to not be a pain.  The goal is to provide timing info
->> > before: timekeeping init, jiffies startup, and even CPU features
->> > determination,
->> 
->> As I pointed out before that's wishful thinking:
->> 
->>    You _cannot_ access a resource before it has been determined to be
->>    available.
->> 
->> Period.
->> 
->> It does not matter at all if _you_ know for sure that it is the case in
->> _your_ personal setup.
->
-> I used get_cycles(), which has a check for availability in it, so the patch didn't
-> access a resource before it was determined to be available.
-> It sounds like you're responding to my wording above and not the patch itself.
+Here is the result on a bare metal 256 CPU machine:
 
-Correct: '... and even CPU feature determination'
+[    0.000000] Linux version 7.0.0-rc3-dirty ...
 
->> Either it is solved in a generic way or we have to agree that it's not
->> solvable at all.
->
-> I disagree that solving this limited problem (zero-valued timestamps
-> in early boot) has to be solved in a generic way.
-> I already limited the solution space to only processors that I believed
-> had reliable, pre-kernel-initialized cycle generators.
->
-> I think it's fair to have a specialized solution to a specialized problem, if
-> it can be made to have very limited effect on other code.
+....
 
-This 'my problem is special' mindset is exactly what frustrates me to be
-honest. It causes technical debt and I've spent several decades of work to
-mop up the technical debt caused by it.
+[    0.000000] tsc: Detected 2100.000 MHz processor
+[    0.012482] e820: update [mem 0x00000000-0x00000fff] System RAM ==> device reserved
 
-> I tried to avoid affecting any other timekeeping mechanism
-> (ie  re-engineering local_clock), specifically to avoid unwanted
-> side effects.
+That's ~12ms of time which is not accounted for in the overall boot time
+until the machine reaches the init process:
 
-As I demonstrated there is no need to even touch printk or local clock
-at all. 
+[   12.289141] Run /init as init process
 
->> The early TSC init happens in setup_arch() via tsc_early_init() and it's
->> completely unclear whether you can always access the TSC safely before
->> that unconditionally due to SNP, which requires to enable the secure TSC
->> first. There is a reason why all of this is ordered the way it is.
->
-> OK.  Thanks for that info. I'll take a look at that.
-> What happens if you try a rdtsc() before tsc_early_init?  If it returns zero, I can
-> live with that.  If it faults or returns random data that's a problem.
+That means we are talking about ~0.1% of overall boot time in this case.
 
-As I said it's unclear.
+Starting a 4 CPU guest with the same kernel image on the same physical
+machine and additionally 'no-kvmclock' on the command line to make the
+hack work:
 
->> The only clean way to solve this cleanly is moving the sched clock
->> initialization to the earliest point possible and accepting that due to
->> hardware, enumeration and virtualization constraints this point might be
->> suboptimal. Everything else is just an attempt to defy reality.
->
-> I think we're willing to accept different areas of sub-optimality.
-> I can live with having to configure the feature, and statically configure
-> the TSC clock calibration, at the expense of non-monotonic printk
-> timestamps for the early printks.
->
-> Personally, I think that altering sched_clock or any other
-> kernel timekeeping is overkill for this.
+[    0.000000] Linux version 7.0.0-rc3-dirty ...
 
-I'm not asking to change any of that. I clearly pointed out to you
-in my first reply that the existing local clock path is where you want
-to add your 'even earlier' access.
+...
 
-That said, let me come back to the question I asked earlier.
+[    0.000000] tsc: Detected 2094.965 MHz processor
+[    0.015122] last_pfn = 0x280000 max_arch_pfn = 0x400000000
 
-The existing early sched clock enablement, which happens either in the
-hypervisor detection for VMs and/or tsc_early_init() is around 30ms into
-the boot process.
+Unsurpringly it takes a bit longer because during that phase the guest
+takes a gazillion of vmexits.
 
-The initialization which happens before that is pretty much the bare
-minimum to get so far. The optimization potential of that stage is very
-close to zero.
+[    0.995082] Run /init as init process
 
-So the real good question is whether the extra information of how long
-that earliest init takes is really relevant to the goal of optimizing
-boot time. The expensive part of the boot process definitely comes after
-that.
+Now in this 4 CPU case we are talking about 1.5% of the overall boot
+time.
+
+With the same setup and 32 CPUs in the VM:
+
+[    0.015150] e820: remove [mem 0x000a0000-0x000fffff] System RAM
+
+The initial phase takes 30us more than with 4 CPUs, which is in the
+noise and the machine ends up in init at:
+
+[    3.329398] Run /init as init process
+
+which means in total we are up to 0.45% of the overall boot time now.
+
+I'm honestly confused. May I politely ask which problem you are trying
+to solve?
 
 Thanks,
 
         tglx
+---
+--- a/arch/x86/kernel/head64.c
++++ b/arch/x86/kernel/head64.c
+@@ -291,6 +291,8 @@ asmlinkage __visible void __init __noret
+ 	x86_64_start_reservations(real_mode_data);
+ }
+ 
++extern u64 start_ts;
++
+ void __init __noreturn x86_64_start_reservations(char *real_mode_data)
+ {
+ 	/* version is always not zero if it is copied */
+@@ -307,6 +309,8 @@ void __init __noreturn x86_64_start_rese
+ 		break;
+ 	}
+ 
++	start_ts = rdtsc();
++
+ 	start_kernel();
+ }
+ 
+--- a/arch/x86/kernel/tsc.c
++++ b/arch/x86/kernel/tsc.c
+@@ -53,6 +53,9 @@ static DEFINE_STATIC_KEY_FALSE_RO(__use_
+ 
+ int tsc_clocksource_reliable;
+ 
++extern u64 start_ts;
++u64 start_ts;
++
+ static int __read_mostly tsc_force_recalibrate;
+ 
+ static struct clocksource_base art_base_clk = {
+@@ -207,7 +210,7 @@ static void __init cyc2ns_init_boot_cpu(
+ 	struct cyc2ns *c2n = this_cpu_ptr(&cyc2ns);
+ 
+ 	seqcount_latch_init(&c2n->seq);
+-	__set_cyc2ns_scale(tsc_khz, smp_processor_id(), rdtsc());
++	__set_cyc2ns_scale(tsc_khz, smp_processor_id(), start_ts);
+ }
+ 
+ /*
 
