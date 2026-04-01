@@ -1,27 +1,33 @@
-Received: from relay.hostedemail.com (smtprelay0017.hostedemail.com [216.40.44.17])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74C28381B02;
-	Wed,  1 Apr 2026 15:11:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.40.44.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EFCA3624D4;
+	Wed,  1 Apr 2026 19:37:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775056310; cv=none; b=IFlfg4CBI4g6cRy1dw2cN45pJo/1yjlfsHWpbPFpJAaSvojM4AXNANLAPA8OakW0zgFFNZZUr3+w+dRa/n/cvyAvWRqaNnUUS9flSdqjFIagc7fu/krYdxPPs/slqRLFi3DEbqfnQ8f2NiaVjoQ0ug7qamwus5Fxt/hu75IcEC8=
+	t=1775072244; cv=none; b=sSK6QypSSSCT8A8JqqNOrxAEgwGVvzxuQwQ4TyQFV90E332og8bwQTwVSlr9WAwl+Gqh1KE6uHsZ2vZhNe0/cyvt4GnPqgPmnDdVKtSNdabY8KFct9+zEUJbAtp0UFVN7aufvbPGkR03juGd0+q4/tCYdMHKVmoqQB+vd4hZIJo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775056310; c=relaxed/simple;
-	bh=9nwN/SjMaEI+D4DBGqbZm5bH7vSqEmv+2X7IQrBmUBM=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=TpRZtWPXtUt9N7a21oD56osHYxU6cgPjh9FxUTl8ij8H/X06Z/evGM3y+Y+Pxg2QU01sK40pdRl3WTh+8e9MGn3VLXwItI00KkaewvaTr/S/XxcPFPCYy9eNkkvIWRnxnxU4YR/dyLPlMHHsjZMJYEWeliQIB3uINOY1N/E+nI4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org; spf=pass smtp.mailfrom=goodmis.org; arc=none smtp.client-ip=216.40.44.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=goodmis.org
-Received: from omf04.hostedemail.com (a10.router.float.18 [10.200.18.1])
-	by unirelay05.hostedemail.com (Postfix) with ESMTP id 622745B883;
-	Wed,  1 Apr 2026 15:11:46 +0000 (UTC)
-Received: from [HIDDEN] (Authenticated sender: rostedt@goodmis.org) by omf04.hostedemail.com (Postfix) with ESMTPA id 3F42120027;
-	Wed,  1 Apr 2026 15:11:44 +0000 (UTC)
-Date: Wed, 1 Apr 2026 11:12:44 -0400
-From: Steven Rostedt <rostedt@goodmis.org>
-To: Thomas Gleixner <tglx@kernel.org>
+	s=arc-20240116; t=1775072244; c=relaxed/simple;
+	bh=eKiFTT1ZlkeE5A5Gd+8gkkUl2okHYY0q+wXdr6il8xQ=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=oilEG4P7mNGggWipZO+msVHJ/oI47Ix0o7zAHYLLEV+wVucX1L1IUge6bdP10Sd3HWLaFdDGGc58M91Yohov1edDlLfTo5fzGWWMUZypTUyTCshykW/WbBr1SVSMNvlNJl+qITQ88Mn1hQZdJT8AxebdSUDXtvzlJVB7cCGRxk8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=umVDHa8g; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="umVDHa8g"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 29DE4C4CEF7;
+	Wed,  1 Apr 2026 19:37:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1775072243;
+	bh=eKiFTT1ZlkeE5A5Gd+8gkkUl2okHYY0q+wXdr6il8xQ=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
+	b=umVDHa8gUXwRGSI+9JpfG/Xazi8yFmBXEhLpWU7yrAvfN6qz1FKcjioR9Ctf9DS2u
+	 amWG2D8VViEmr+Pki0AY5M5dLiqzSVz2Tbq2/U0i258pQ9NNhUdNf8fb4Qlk/b6yQD
+	 zPtJ1bKx7KkkIqaTvIENamru679rIU9PPvapvaLSAeFrlWcvjWulZtvYs4U2rMqSOu
+	 QK1qzl9051sEAF86R0daqFGoAgx1H0dE9lSK+2mlCQBz5h4vzNDAnDRg91KVqX21G0
+	 aE+kASEsiNy6mIer8K0qGAFq3y2Wu1T9CQjTE+y/BQH7QJvt2Jz8OE/WY7UkBtlHJQ
+	 nMbQQiEwo5gMQ==
+From: Thomas Gleixner <tglx@kernel.org>
+To: Steven Rostedt <rostedt@goodmis.org>
 Cc: "Bird, Tim" <Tim.Bird@sony.com>, "pmladek@suse.com" <pmladek@suse.com>,
  "senozhatsky@chromium.org" <senozhatsky@chromium.org>, Shashank Balaji
  <shashankbalaji02@gmail.com>, "john.ogness@linutronix.de"
@@ -29,76 +35,42 @@ Cc: "Bird, Tim" <Tim.Bird@sony.com>, "pmladek@suse.com" <pmladek@suse.com>,
  "geert@linux-m68k.org" <geert@linux-m68k.org>,
  "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>,
  "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v3] printk: fix zero-valued printk timestamps in early
- boot
-Message-ID: <20260401111244.5057a89c@gandalf.local.home>
-In-Reply-To: <87h5pv84h5.ffs@tglx>
+Subject: Re: [PATCH v3] printk: fix zero-valued printk timestamps in early boot
+In-Reply-To: <20260401111244.5057a89c@gandalf.local.home>
 References: <39b09edb-8998-4ebd-a564-7d594434a981@bird.org>
-	<20260210234741.3262320-1-tim.bird@sony.com>
-	<87zf3ud92r.ffs@tglx>
-	<MW5PR13MB5632FC91EE0EF8754331400DFD57A@MW5PR13MB5632.namprd13.prod.outlook.com>
-	<87jyuvboo2.ffs@tglx>
-	<MW5PR13MB5632B55CAD0BEA34188EE88EFD52A@MW5PR13MB5632.namprd13.prod.outlook.com>
-	<87jyus9xft.ffs@tglx>
-	<87ldf78tc5.ffs@tglx>
-	<20260331200519.58930ece@gandalf.local.home>
-	<87h5pv84h5.ffs@tglx>
-X-Mailer: Claws Mail 3.20.0git84 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+ <20260210234741.3262320-1-tim.bird@sony.com> <87zf3ud92r.ffs@tglx>
+ <MW5PR13MB5632FC91EE0EF8754331400DFD57A@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <87jyuvboo2.ffs@tglx>
+ <MW5PR13MB5632B55CAD0BEA34188EE88EFD52A@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <87jyus9xft.ffs@tglx> <87ldf78tc5.ffs@tglx>
+ <20260331200519.58930ece@gandalf.local.home> <87h5pv84h5.ffs@tglx>
+ <20260401111244.5057a89c@gandalf.local.home>
+Date: Wed, 01 Apr 2026 21:37:20 +0200
+Message-ID: <87tstu79qn.ffs@tglx>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Rspamd-Server: rspamout07
-X-Rspamd-Queue-Id: 3F42120027
-X-Stat-Signature: ha8wtzwindo4t6sexetxbkc39ntoac4t
-X-Session-Marker: 726F737465647440676F6F646D69732E6F7267
-X-Session-ID: U2FsdGVkX19zYNHaFHDH/V1oDcWh9nj4v/9LtevW5hQ=
-X-HE-Tag: 1775056304-57142
-X-HE-Meta: U2FsdGVkX18I6/cE7tU27mp0VRHwQGOAGWF4EehLgiSRH7P6cYNy8KA6EIIJGdUzHJw4J6VbD/hnMl+AEKWaeq6ZRF+jtuBdMCjsCwzXjdyDDQO/xFNPABfh4jfXrMgceqa0aH9oGTW0fSNdHRugHYj9DTyA/MWJqwLPkELXakqjtyVrmAJ7Pxi20CLm3/kjMaBMWAsWwYxa5ryY5wLRcRtRxeqRQ0hBI1qEKxQNtsLlLLKOKLTTNM9LVnv5YaT80/l6TbSKm7iifhBWpM4ylKsv/psir7dvt0mbcHYB/1PyQpG3kPHrTdZEZjGBCT6xRXjgVkMh4dw127Aq3R3VPs07Aoj2RbJ+
+Content-Type: text/plain
 
-On Wed, 01 Apr 2026 10:33:26 +0200
-Thomas Gleixner <tglx@kernel.org> wrote:
+On Wed, Apr 01 2026 at 11:12, Steven Rostedt wrote:
+> On Wed, 01 Apr 2026 10:33:26 +0200
+> Thomas Gleixner <tglx@kernel.org> wrote:
+>> As I've demonstrated the time until the first time stamp is available
+>> has nothing to do with the number of CPUs and is more or less constant:
+>
+> So my question is, if something changes in this time frame, where it goes
+> from 30ms to 300ms, how would we find out?
+>
+> Again, for Chromebooks, we get these timestamps from the firmware and it's
+> very useful.
 
-> Steven!
-> 
-> On Tue, Mar 31 2026 at 20:05, Steven Rostedt wrote:
-> > On Wed, 01 Apr 2026 01:36:26 +0200
-> > Thomas Gleixner <tglx@kernel.org> wrote:  
-> >> That's ~12ms of time which is not accounted for in the overall boot time
-> >> until the machine reaches the init process:
-> >> 
-> >> [   12.289141] Run /init as init process  
-> >
-> > 12 seconds! Holly crap, that would fail every Chromebook requirement we
-> > have. In most cases, we shoot for a 3 second boot up and 8 second max.
-> > That's from hitting the power button to login screen. FYI, 30ms is
-> > considered a really long time.  
-> 
-> Which 30ms are you talking about?
+I understand all of that and I'm not opposed to make that happen if it's
+integrated properly into sched clock as I demonstrated with the PoC
+hack.
 
-Sorry, that was from your previous email:
+Thanks,
 
-   The existing early TSC enablement on x86 starts providing printk
-   timestamps at about 30ms after boot out of the box when I remove
-   'earlyprintk' from the command line on the same VM/host combo I tested
-   the PoC. That too uses sched clock and not some special mechanism.
-
-We actually try to account for pretty much every 10ms and if there's a 30ms
-gap somewhere, we look to see what it was doing.
-
-> 
-> As I've demonstrated the time until the first time stamp is available
-> has nothing to do with the number of CPUs and is more or less constant:
-
-So my question is, if something changes in this time frame, where it goes
-from 30ms to 300ms, how would we find out?
-
-Again, for Chromebooks, we get these timestamps from the firmware and it's
-very useful.
-
--- Steve
-
+        tglx
