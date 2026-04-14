@@ -1,181 +1,147 @@
-Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
+Received: from mail-vk1-f175.google.com (mail-vk1-f175.google.com [209.85.221.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72A3F381B13
-	for <linux-embedded@vger.kernel.org>; Mon, 13 Apr 2026 20:17:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A833C2BD11
+	for <linux-embedded@vger.kernel.org>; Tue, 14 Apr 2026 07:03:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776111479; cv=none; b=k5vRCoEMnHuih+RnjIcSQnmiOkXCz/sBXSRQRV2IFBqZ2yt4GArNTOjuIN2r3whSz8nKwsW7E93m+ipxG7cn4esOcDtkz7QZ+WDiJI7QyCJdk3AAAYK6NG150H+nixSStLYucdC9NaAjTiCcWLb2BLxbDNc3/TW4A/4MI4pbsZ8=
+	t=1776150230; cv=none; b=hK/+p3CJgc/mG5UHxwuTdHevTzJNKS0RDlAcEjnQXd+cuLBqxHToGZh3TiKO05LaKBLNGRYF0t8hRzPnu5gCQZI0l5ZA93e9u9peA/5PmNahGw2c5mxvaXJMI6dnC6NhH52L9/7diZMwHOaHsfdlHfURvhRp/A4+8nF7TnhMzJ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776111479; c=relaxed/simple;
-	bh=wP4z9P4uZmwRAO8DvMsuP8Hd8F9gBkWn4g+KT+IeUYw=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=tGVnKmilACpNCQJGzcF45cO7jULAEfDQoOVur0UlbSmLVkOQ0B5P10ebXSeaxK6TNX5Mw2l/6A23CjN0u6PSfR7kz/X/RRuQc9iJzFrFu4lftD3Dw7UvGB5h/V2KQ2ZxVXsUK5evAAgOr0MHWvpgJ+/kdNa8dzXK0Yijb9tfDf4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BnNw0rJH; arc=none smtp.client-ip=209.85.221.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+	s=arc-20240116; t=1776150230; c=relaxed/simple;
+	bh=J8k5RLIlvEiUGYbwytJu/Pp9z1zEHln/ZgJEnF3Uocw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=o9TYe5IbSQQKs5GpbfmNh3nnacVTh0e0y3PMoo7J8zFGGT4p7WzMrUty4pqIbaBIBfW8rJAy8ReRELWYCqRLhu+OkY9Lu/tLx45DUKjuKQ3nmzyZiAcLiRodOLpBOL39IQWho4ue1boTAC6lsHX+ixT2rMHn26JuJpzi6yeWpYo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BnNw0rJH"
-Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-43d7e23defbso425737f8f.0
-        for <linux-embedded@vger.kernel.org>; Mon, 13 Apr 2026 13:17:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776111477; x=1776716277; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QonialaOeRsx+GeBfarh1r5oZZLkjbGCk56wYsSk4i0=;
-        b=BnNw0rJHyH1nXpdLAksOZh8WeTp2auztEjpCKbVtoDuykg/spoRq4kumcsRe0XvT+0
-         Pi/+bzN2c18d1SilLu4FTsSZt1RGBaCdeT27CuvjWxMPMeNg3pRO6Dw4QT4B1SzpD4KR
-         ngJ7MUdG+HIjHXY0oro6TyF+2rNQKIYPD6FHO9LSoiSH4CPdRILYMT3BB4c2lZyWp+Bf
-         lFbxvZ9llCVMxWB22RzJ8C3jZTwQFZjM+gB8qzNjyhQ0ijJ5ZETpTBcE2K2e+hrHyAP7
-         uLBfueG39rdRbMuAtn0tLHAlhZAiUUqNkeWJxTSV2NvGmRQAl6aIIWgphc56yp/8TYtd
-         M3GA==
+Received: by mail-vk1-f175.google.com with SMTP id 71dfb90a1353d-56eec951db1so1717744e0c.3
+        for <linux-embedded@vger.kernel.org>; Tue, 14 Apr 2026 00:03:48 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776111477; x=1776716277;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=QonialaOeRsx+GeBfarh1r5oZZLkjbGCk56wYsSk4i0=;
-        b=HHr4mHWgFWK0JJrCI6XQIVBFcNTZfVaNhGYsh7vHenuV2k5+zWPVMVMVgkVtkayGEx
-         aW+GmacP6VyqUQTPllc8hJk0aqzZFSNWpyGgAZGjb0awjuLfnyYL/KQcts0KediU5GV0
-         oFoCcuLQ8iDnXN/9OW1IUEqGKQ5K8ic3i+YNqdrIvsOcaJixAEs20VILKPWA6Ilql44C
-         V0beu7qPqYL/TYu4y+i76cETzXzXg96nnQKxZcTUkjU/URfEIHT85pCZpRcLYT5B7NWE
-         SkNjYGvKfSCBOPfiCDt/IMU6V6u14tq7rM6m2FSgMBKLDQ2SdHoRizVutZNI+zDvPUXd
-         U7bQ==
-X-Forwarded-Encrypted: i=1; AFNElJ8eNvYYBp9q3WVwBZnT7NTTq/0goXHp6AV3dX1pX7Y/zvGP7OFSLbUgt985d38Ai1WRM9ecw45ZQ8dn6/p6QQ==@vger.kernel.org
-X-Gm-Message-State: AOJu0YwOsgJq9l+ly7h6zlNok0v45CoX4xxuygIgP6XQ87EkozVIKFcu
-	LUphUM2ARhRvkj1npk03dCLUv4Ggirz6lWogOfp8hFBrzGUvVC5zpNIH
-X-Gm-Gg: AeBDietPC79avD7DGoJp0gvHk7I0GZGUD7yd8ltEJ3bojggxTq+Tr+l7OtjPwNSe1e0
-	Gr+bm7lhfI9QB9njwJDjMnZ9smJNCC8AZNHVCtBQk9hM4ODQYxuTNYFH8w8Skhcm7Iltb4552WE
-	z+62xxkHiOZ2y7nw0lg4c02aVN5dR9Tq2F+Vl9vLlShiE/vJJWlbus9MVALABHzFPXfWDMQnUxn
-	+batiqhKmKNoRrtoBXqj84+yws+HcynyBfHKgRqheNjNSUODssia0Vq6q+58bSYGmYWowUWCRXV
-	L9tDOWZpSjNczcGIwaRKtVu5nFFRtaaxxWFhonwPXqmEG4OVfEkOhj1clQdcdq3EDcTR94ATJ9b
-	KTyNI91BHZk1yXmX68z8GYegcNOd2uiTDjqPTiaXYIBlodLtfJDlSHM+Dydq/bTezrRTf9z2wZS
-	2ssPKSAnteKGNx6XaCmN3z4jdF2AcZ3JW1efHig6dYHQOoReFoWaFNzMSu9Sw0rgYFHDjSoJbxy
-	OI=
-X-Received: by 2002:a05:6000:c4f:b0:43d:68b2:a0ec with SMTP id ffacd0b85a97d-43d68b2a2b5mr12724663f8f.1.1776111476618;
-        Mon, 13 Apr 2026 13:17:56 -0700 (PDT)
-Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43d63dec295sm34973689f8f.14.2026.04.13.13.17.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Apr 2026 13:17:56 -0700 (PDT)
-Date: Mon, 13 Apr 2026 21:17:54 +0100
-From: David Laight <david.laight.linux@gmail.com>
-To: "Bird, Tim" <Tim.Bird@sony.com>
-Cc: kernel test robot <lkp@intel.com>, "pmladek@suse.com"
- <pmladek@suse.com>, "rostedt@goodmis.org" <rostedt@goodmis.org>,
- "john.ogness@linutronix.de" <john.ogness@linutronix.de>,
- "senozhatsky@chromium.org" <senozhatsky@chromium.org>,
- "oe-kbuild-all@lists.linux.dev" <oe-kbuild-all@lists.linux.dev>,
- "francesco@valla.it" <francesco@valla.it>, "geert@linux-m68k.org"
- <geert@linux-m68k.org>, "tglx@kernel.org" <tglx@kernel.org>,
- "shashankbalaji02@gmail.com" <shashankbalaji02@gmail.com>,
- "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v4 1/1] printk: fix zero-valued printk timestamps in
- early boot
-Message-ID: <20260413211754.643f6113@pumpkin>
-In-Reply-To: <MW5PR13MB563241C9F7C8BCAF0D5F3D21FD242@MW5PR13MB5632.namprd13.prod.outlook.com>
-References: <20260410203741.997410-2-tim.bird@sony.com>
-	<202604121822.OvOLcTnO-lkp@intel.com>
-	<MW5PR13MB563241C9F7C8BCAF0D5F3D21FD242@MW5PR13MB5632.namprd13.prod.outlook.com>
-X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
+        d=1e100.net; s=20251104; t=1776150227; x=1776755027;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1yYWwqHPakuhsQJ09VUYUuBwBWjEH2mH2cZco0kr36k=;
+        b=ATHvEik/1xcOsZlVJGtHDqTNWqwQhakZjdyTPbJoDq6uvJ73/xhcKJui+rPOvDd2ib
+         gHDOIP4vXiLgedH4RiEx5auh/Fsf+dbbl+XpJBGQ7IZRg3HX5ku0jppx2g43LmY3XBQK
+         ruJYfz8V00E8htl10OmO+Dy9HV1mtdHjDyZRBArQgq9XVv1QNR4iYahZo47vE9W13nUm
+         DKvDd0CANPl9rXN/UGr5Rjgdf2tQ/46LZu6mf/3gFqs3nc4tTTAnhDe2HAIOf7kbjSzC
+         AEhNFO7itHFWfAG1ZVli+Ttxnzw7P2l6rbwkk+6GPkaX0klrFHZmek1iiiBoFhyfBxxy
+         TorA==
+X-Forwarded-Encrypted: i=1; AFNElJ9sNJtyG1bu1+JuaoR+i4eLCnezewShVKTPAK2MPoN0r/Y6rJ0OeaLeojLeGcErhSmtewX6dr2iLqMDv2twvg==@vger.kernel.org
+X-Gm-Message-State: AOJu0YxcvdG/urlzpl9Ct6wyiYW2zj5drBjqkJPSZdG3hKNk7CV1LqIb
+	ago5xm2mAyM2o2cbrfWblG5sIRDU9ZJ6C84d3LR6ryUcqg2ksWPuCWmFRx/1dMbl
+X-Gm-Gg: AeBDievfoJRetOBDVMi3TPsMLrzfUWr5+vbilKGPmNQqNlR2qhk9RHXu9eEBX+jeZKb
+	Wh/kkd9R/Y2jcYdzXzBhpA1TzJJOvcAISdNwnQdGdKUwglkxM2rA31NoDERC/zXk1ucuC0y+zOF
+	XixmL5oKLT9sHkuvlYmxt/9J+1AEebSQSM8e+k+ZKuKFEM3BkWrE+Z+GO6oVqlQ3AMCIVrmvUcW
+	d7Huz+fq/iqI+PQNnwW5Q7swhPV5g0i1CKC+9wRzbzEj9qA1j0wsPIN1JR1G3W+yaxNL4xUWPYe
+	6uw+2OOyhD6bSoSuhs9b9zD0S7YjcpKzgq5xqZDZyRLvTyqJcYQDDHEuh4PY/iQdlCGMq77+rS4
+	zD3xVqbgVKDuzyMFMSTxGdBx0fMqcRxdrFo1zH4eMOPbGvAbFy6C7bPW14FWeoli9FRZeV64Wia
+	E+1ALCK2ffYvnFbq2o51O4kE3XGtMAvErb7Q87XY/3Ofm8AjuuRrct8MYQh52H
+X-Received: by 2002:a05:6102:370a:b0:607:5cd7:d7c0 with SMTP id ada2fe7eead31-60a00733f22mr6379465137.19.1776150227397;
+        Tue, 14 Apr 2026 00:03:47 -0700 (PDT)
+Received: from mail-ua1-f47.google.com (mail-ua1-f47.google.com. [209.85.222.47])
+        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-609db8151b5sm7751990137.10.2026.04.14.00.03.46
+        for <linux-embedded@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 14 Apr 2026 00:03:47 -0700 (PDT)
+Received: by mail-ua1-f47.google.com with SMTP id a1e0cc1a2514c-956995b5bb6so436883241.3
+        for <linux-embedded@vger.kernel.org>; Tue, 14 Apr 2026 00:03:46 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AFNElJ8dL9ELsIJ9MDeDfY3qi6HRszmDmHu5PM4BnJkQc+n1qBYdHCw9/6uw/dbeN3faUbELPvrrfhdHIwbFNZHsdw==@vger.kernel.org
+X-Received: by 2002:a05:6102:c0d:b0:607:4fe2:a644 with SMTP id
+ ada2fe7eead31-609fe7a58e5mr6141223137.6.1776150226699; Tue, 14 Apr 2026
+ 00:03:46 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+References: <20260410203741.997410-1-tim.bird@sony.com> <20260410203741.997410-2-tim.bird@sony.com>
+In-Reply-To: <20260410203741.997410-2-tim.bird@sony.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Tue, 14 Apr 2026 09:03:35 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdX-jeO83JQQaQXkk2oFsFH=K_p8Nmta7s5J-_BgwF5KXQ@mail.gmail.com>
+X-Gm-Features: AQROBzAN4jbJbAV7dApeeuYOLlLuoiMCYI1t850L-MlkvbgmeKRHnWTDbPl-V-I
+Message-ID: <CAMuHMdX-jeO83JQQaQXkk2oFsFH=K_p8Nmta7s5J-_BgwF5KXQ@mail.gmail.com>
+Subject: Re: [PATCH v4 1/1] printk: fix zero-valued printk timestamps in early boot
+To: Tim Bird <tim.bird@sony.com>
+Cc: pmladek@suse.com, rostedt@goodmis.org, john.ogness@linutronix.de, 
+	senozhatsky@chromium.org, francesco@valla.it, tglx@kernel.org, 
+	shashankbalaji02@gmail.com, linux-embedded@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 13 Apr 2026 17:58:34 +0000
-"Bird, Tim" <Tim.Bird@sony.com> wrote:
+Hi Tim,
 
-> Hmmm,
-> 
-> This is a false positive warning from the compiler (see below).
-> 
-> I apologize for not catching it.   I did test with CONFIG_EARLY_CYCLES=0
-> and I'm not sure why I didn't see the warning.
-> 
-> I'll see if I can silence this warning.
-> 
-> > -----Original Message-----
-> > From: kernel test robot <lkp@intel.com>
-> > Sent: Sunday, April 12, 2026 4:11 AM
-> > Hi Tim,
-> > 
-> > kernel test robot noticed the following build warnings:
-> > 
-> > [auto build test WARNING on linus/master]
-> > [also build test WARNING on v7.0-rc7 next-20260410]
-> > [If your patch is applied to the wrong git tree, kindly drop us a note.
-> > And when submitting patch, we suggest to use '--base' as documented in
-> > https://git-scm.com/docs/git-format-patch#_base_tree_information]
-> > 
-> > url:    https://github.com/intel-lab-lkp/linux/commits/Tim-Bird/printk-fix-zero-valued-printk-timestamps-in-early-boot/20260412-134726
-> > base:   linus/master
-> > patch link:    https://lore.kernel.org/r/20260410203741.997410-2-tim.bird%40sony.com
-> > patch subject: [PATCH v4 1/1] printk: fix zero-valued printk timestamps in early boot
-> > config: arm64-allnoconfig (https://download.01.org/0day-ci/archive/20260412/202604121822.OvOLcTnO-lkp@intel.com/config)
-> > compiler: aarch64-linux-gcc (GCC) 15.2.0
-> > reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260412/202604121822.OvOLcTnO-lkp@intel.com/reproduce)
-> > 
-> > If you fix the issue in a separate patch/commit (i.e. not just a new version of
-> > the same patch/commit), kindly add following tags
-> > | Reported-by: kernel test robot <lkp@intel.com>
-> > | Closes: https://lore.kernel.org/oe-kbuild-all/202604121822.OvOLcTnO-lkp@intel.com/
-> > 
-> > All warnings (new ones prefixed by >>):
-> > 
-> >    In file included from kernel/printk/printk.c:49:
-> >    include/linux/early_times.h: In function 'early_times_ns':  
-> > >> include/linux/early_times.h:45:61: warning: division by zero [-Wdiv-by-zero]  
-> >       45 |                 return (early_unsafe_cycles() * NS_PER_KHZ) / CONFIG_EARLY_CYCLES_KHZ;
-> >          |                                                             ^
-> > 
-> > 
-> > vim +45 include/linux/early_times.h
-> > 
-> >     34
-> >     35	/* returns a nanosecond value based on early cycles */
-> >     36	static inline u64 early_times_ns(void)
-> >     37	{
-> >     38		if (CONFIG_EARLY_CYCLES_KHZ)
-> >     39			/*
-> >     40			 * Note: the multiply must precede the division to avoid
-> >     41			 * truncation and loss of resolution
-> >     42			 * Don't use fancier MULT/SHIFT math here.  Since this is
-> >     43			 * static, the compiler can optimize the math operations.
-> >     44			 */  
-> >   > 45			return (early_unsafe_cycles() * NS_PER_KHZ) / CONFIG_EARLY_CYCLES_KHZ;  
-> Based on this conditional, it's not possible for CONFIG_EARLY_CYCLES_KHZ to be zero
-> on this line of code.  Does GCC not catch this?
-> if (0)
->    x = <some expression>/0;
-> 
-> So this is a false positive.
+Thanks for your patch!
 
-I suspect the warning is being generated before the optimiser throws
-the code away as unreachable.
-You might have to do:
-	return (early_unsafe_cycles() * NS_PER_KHZ) / (CONFIG_EARLY_CYCLES_KHZ ?: 1);
+On Fri, 10 Apr 2026 at 22:38, Tim Bird <tim.bird@sony.com> wrote:
+> During early boot, printk timestamps are reported as zero before
+> kernel timekeeping starts (i.e. before time_init()).  This
+> hinders boot-time optimization efforts.  This period ranges from
+> 17 to 1700 milliseconds on different embedded machines running Linux.
+>
+> Add support for early timestamps based on processor cycle-generators
+> that need no kernel initialization. Use a statically-configured
+> frequency value for converting cycles to nanoseconds. This means
+> that this feature cannot be turned on in generic distro kernels.
+> It is intended for temporary use during kernel development and
+> boot-time research and optimization only.
+>
+> This yields non-zero timestamps for printks from the very start
+> of kernel execution.  The timestamps are relative to the start of
+> an architecture-specific counter (e.g. tsc on x86_64 and cntvct_el0
+> on arm64).  Affected timestamps reflect time from cycle counter
+> init (usually machine power-on or virtual machine start) instead of
+> time from the kernel's timekeeping initialization. This results in a
+> discontinuity in the printk timestamp values, one time, when
+> kernel timekeeping starts.
 
-David
+Won't it be hard to see where the discontinuity happens in some cases?
+Perhaps this can be made more obvious by not doing the time conversion
+in kernelspace, like in your first version?
 
-> 
-> >     46		return 0;
-> >     47	}
-> >     48	#else
-> >     49	static inline u64 early_times_ns(void)
-> >     50	{
-> >     51		return 0;
-> >     52	}
-> >     53	#endif
-> >     54
-> > 
-> > --
-> > 0-DAY CI Kernel Test Service
-> > https://github.com/intel/lkp-tests/wiki  
+> Signed-off-by: Tim Bird <tim.bird@sony.com>
 
+> --- /dev/null
+> +++ b/include/linux/early_times.h
+
+> +/* returns a nanosecond value based on early cycles */
+> +static inline u64 early_times_ns(void)
+> +{
+> +       if (CONFIG_EARLY_CYCLES_KHZ)
+> +               /*
+> +                * Note: the multiply must precede the division to avoid
+> +                * truncation and loss of resolution
+> +                * Don't use fancier MULT/SHIFT math here.  Since this is
+> +                * static, the compiler can optimize the math operations.
+> +                */
+> +               return (early_unsafe_cycles() * NS_PER_KHZ) / CONFIG_EARLY_CYCLES_KHZ;
+
+Still, this contains a 64-by-32 division, so let's see how this works
+out on 32-bit (RISCV_TIMER is set on rv32!).  If the compiler would
+generate a function call to a libgcc helper, you will have to switch
+to the mul_u64_u32_div() helper...
+
+> +       return 0;
+> +}
+> +#else
+> +static inline u64 early_times_ns(void)
+> +{
+> +       return 0;
+> +}
+> +#endif
+> +
+> +#endif /* _EARLY_TIMES_H */
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
