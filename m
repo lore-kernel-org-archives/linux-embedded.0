@@ -1,80 +1,56 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
+Received: from mail-vs1-f49.google.com (mail-vs1-f49.google.com [209.85.217.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 969D738C43D
-	for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 13:06:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.170
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776258399; cv=pass; b=rcmVEHjwrPBrIHUCRiwXFR3UakcQk9h91zYdH61XVaQmeeoF85ohkXUmdUAZgpBAluTmynfr4jzB0cAy57b2D8ci7XEYGbPeCfxnYmlyr15wO8fFwEl9reK+XLVCjK6+5daOpN92zEebnWentJbrrobXt/sRcpz+lm8C9fk2jdU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776258399; c=relaxed/simple;
-	bh=zMnSctsuBo5PflxphPiQFV3aLOZYAxXRaO0heKXfx9I=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F057317160
+	for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 18:41:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.49
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776278465; cv=none; b=qqTA6q9HQkhiylNkI/z0OQB4zKWrbDGxkZ/QNAHT3s4nylKnHjlpC7YNFMhlRDGzkaYQ75hdoAxsTtAhL9iG7EBm0na6oSqLfkYGPnpT7ME3fsjoOpfH9d0epeppTvWu3OVmW2JWUQGsVvcKOsXbDCh8n2aGrTNAiV5dIIsHrZk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776278465; c=relaxed/simple;
+	bh=DsaOQyCu2mz97RmpD+TfGFOIGdiO01TcwRW29lWNDIA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=s8lHavbvN5JE85aNItFHxC3+v75ZIsBZLRczyu+OSBkfF9swJF7qiCoHrnWOIu0coFl7RJR/92upz7S9DiIxTMszYQNkvOVnGqFkZ1Aw+fOIPryI5QBNZO3nixvsE0ptAw2n6CEXklwMKQVKNVSW5KjunvRML3499A8WBFqYi3o=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ULeBgj1f; arc=pass smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+	 To:Cc:Content-Type; b=MdCzzLKnOK2cscjSkMN3fLmICIXd/8hkte5BvowcWFkFsh7QdZS78TyNg+acElec0WZhlRASnq2a+MfdR2s1P9POuyeMCQ3STDGKZmY3z3yA7IQbHQ84pBF6tbfMnd9vfWezC5I8AIPqW88zAq/UeDM0HvD/muhvzslYRrBYJTI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.217.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ULeBgj1f"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-797ab169454so93839927b3.3
-        for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 06:06:38 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1776258397; cv=none;
-        d=google.com; s=arc-20240605;
-        b=kC1u9srYRBHYxQYds5DKQCDUBcrQ4oR6i53U8XtOikhftaUHurqZ02xHJGJnntPskF
-         jxtu7C+5hKMKHMniaDb6+ssMOBkw8l4EyrPG53f/KKInD5cupGvMEqV2CwOBVeOzB8oA
-         N2//diW4e2CvA3PJrczPFHV+XJd4HWiT2iZu7posxHGGuCg7rwzEQS6+5RRqN9on0uU0
-         0qL+KB9Lh+3ymupnITeeytIHS9ZTjkZwk97WOuEXrRiFZUGs41VVh8qFmbafD/SOuOMa
-         Tw9P6UJfwSxmMwoV9yJRJYT2B26POXJR5p9xhPGxdEfGFQp71Lm7I/NAqvgWEPqoj9F3
-         Pqpg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=DNMNXpGiuY4UvdJjUZeMcSt6+Srv3yVtmg2Q12Wmjqw=;
-        fh=KixHH5llxrVq//hoieYSaHdtjSkZjoyoqlRZStORHlE=;
-        b=QY6m+rM73QOnS9M+OX1nEa1MqGTpPnrAbjyoP5C8Cx81HnbBC3ABHS0ELkBXsDD1Wj
-         elwI91y+zee4hwsTVIO6j5GzVwF6XP75gefmg/i/sz0y66vgf3hBSAUmPgJpxk5senI3
-         oPLSXCxBKNN8gRH+i1Bt2JlXXW1KWIeladXYJAYtYfsTGJP+qD14yRiaYyJLpcLLL3w1
-         gE6Cbrn4UWHTZgZ5pq0bnFwVyYxqjpERj3yiC86neuu6X4jdvjFllQZg7PyjsV0l3tNm
-         sa0B+e10/1qPBn3Dwri5UCghYtHILU3O2HnNrn5bYErCXSSls6TM3Mu+Xo3AToi0k/ir
-         0mrw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776258397; x=1776863197; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=DNMNXpGiuY4UvdJjUZeMcSt6+Srv3yVtmg2Q12Wmjqw=;
-        b=ULeBgj1fWjQiV7kP4tgR1Thh9pqo3SbVjkmNPanQ1kn++keI4nrMhuh05zJbXaZ75P
-         MY8lTQ52Uk6W0fJyNhro68lVbd42qqempw4BCLlUu6Farj2p2Al3YFNhTTQVol5n8yUS
-         l3FASDhiUjEVsf/te4NtgCIVj2Rd21nqtuPU6V45xNbuBcmc0pXySOkgBGxOdO38QiY6
-         B0owJy0OshzilMU9j9CQa0dhtw3uQMCrFXN+ZQkFvT04NQ4Ml9FGeNSmFwu71MOn8HfH
-         y/3vrSCr+UWKhrRV8Y0ylLjnjeUiMliZsGDUf7dta8eXrtSs5lGyv7UVkPfkYcw0/9sk
-         fjIg==
+Received: by mail-vs1-f49.google.com with SMTP id ada2fe7eead31-60fa13bde2dso2310522137.3
+        for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 11:41:03 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776258397; x=1776863197;
+        d=1e100.net; s=20251104; t=1776278462; x=1776883262;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=DNMNXpGiuY4UvdJjUZeMcSt6+Srv3yVtmg2Q12Wmjqw=;
-        b=BYfT9ifuOVz4vGDv4a1Wh509bUAf4DyRm1ZMGMZGDpkXJbgeTIqV708QVEUPqomuJ+
-         phuXHJMylb6g0uIUWDetS8jGTUoh0rylr0fD37jWMYqiDf/UmaaLnZJmFK4fpQZKTAdN
-         5cuGPLaiIZ+vP1fOkZtazacz6rT0u/mb6IdNwVS+yhjphftNXFUiE+m3Hp3FQ8cfWsC9
-         kdFBvApfJ6uEdCtuImLjbUV/ccH5YruKH/nyJ0QzkpAalnzUdlgAGw4iuahXOns13qJF
-         fR/y8iEt6VAcSLOTvryvjTsfGFr+PaPkL3KI5kkjW63eMCMSxIzbkbLXfZ/atlkcNyJX
-         zddA==
-X-Forwarded-Encrypted: i=1; AFNElJ84uj6OgBJRFhq7J9T5yLw3bSO8ZQwJqD3GxwIesldi39P8Q/gkvoFnLzyNdnXpKfQdj7l7UH6bSzwv7yMvcA==@vger.kernel.org
-X-Gm-Message-State: AOJu0YxZW30QBLatL63qUdGEkenY0b/jG4pZ9iuBBwc/Md/jmaPL4N88
-	OoevB9aqN/5BQ5eLpevpczAyZcNBCx0PjkWuZwVp9tDIr1s1fD9LI6uJRsI/qVEyzcOg5tHJT+B
-	Vvjguy2039mJnpCPEHHKVtHiRuP366J0BybMAFg==
-X-Gm-Gg: AeBDievkxR8/oAz3qWyn1aNPN0SsK9/2sm3G/RvFlaBzqzQdg6iOU4nAAd8IlRHZWiN
-	3MF6wNIGVy5ZKRm5FXIXDRCXZdN02xTb4QD1ga8+J5DxI2zYUEgOMUo+/ofaD8FWPwx1aIbAHpj
-	wQhG3XqE2fuSk0kN88WuBRJ8AdGoE2mQ+NDciNUI4eXS5YdMMSt0APeXDKcCHivVSPy6Kv/TSf8
-	MWPow0uuPrcm3Hvi/a2o9NPyGi3rG3rYgeGwPhPITXbLVEV9Ctz9v/P56+a32zVEFJ/jSo7du2t
-	I6aTmMGNkXF7E/UaTLleaY6eGCQi007EuCs76yvv14ywKyxjAtrCiObNMVqPu+Svh17QuZlg94w
-	TO+pznkVI
-X-Received: by 2002:a05:690c:6893:b0:7b8:21ff:e2d8 with SMTP id
- 00721157ae682-7b822000660mr4616727b3.22.1776258397557; Wed, 15 Apr 2026
- 06:06:37 -0700 (PDT)
+        bh=e6MdfVWX2gA17FZalU+YAOzBnu9nVX7ZYgARnp7E5dg=;
+        b=exnp3ieW0ZMvNpuQwcDJoA6aywi+oTdQuPJOfx4ReRuxjfMrsqydupCdZM7MZwP91R
+         JnHqX64/hf6/FByhnEeW/80BoETyV/SyHswONUu+zlWpaIGPKc7hvfN4T52PgQ+aGHFu
+         IaPpsKRgZovlXX9jYYuKt1FXL+tU4mAxvQQKLhyln+bHMwZa34lCCornRbjesG23rNtY
+         HJwc7qLdtTqV2j++yKC/TRf3fEvh+uqSbdtsG5bnWDB/ZdLws7sfNuEs/W4V6FD9WWA/
+         JQOdg6k4hobjz+jqJ2kv3UWqDqN8b7yJzKRB3QDi4d+9/E7hk534tBi7aPLmqto7mS5Q
+         Z3eg==
+X-Forwarded-Encrypted: i=1; AFNElJ8aMB3Eyg4suK5WGtGOpoXjvz2pNeApXu3HxLxlMFjvzR30UI5QsxPjXqHRWkDtK88qCCZG1OTlc05znn4kfw==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwRg1OmUkwOPINmuJEAfuGhGpfKfbz8VVy8Yu+hMozsTQdorRih
+	eewe9+KP8wD1CvbY3BxKlTOqcGP9aUsgdWpixc4VPJWTOpa0tUb7Afdurmqm9MnX
+X-Gm-Gg: AeBDietwC9/oHb+elgCa0mBgLBZwu8ikVSXCd8pgnQX3cOXKA0Svgb9hT1vqkX+2MRP
+	S1DxQh0THJHkMGHF7UQ1KfzBSfjr0u8g4VDBF7wEvQbY08mVUD4/bzhv0JyADp4WMBkB2GeZrLb
+	CxcM8P+WE95X50vKyDtks/Npw/qWJCwcg8khXVld8KiaJGLzjlhw3+6gkHaVFBFwjH4lrMBcRF4
+	unLbfhJiZ4vqTYHbvjY3Ev4JoLP3z1Sjf9dFKca1KTA3Dg2Z81DjpMrSOahjLRJVxAeFhLnJdgk
+	k/Je+xjE0ddjQTcNYjMkmsMDCIzG+oZd+1j1wQUMMowEoAu7fOtzCz9vbFCc94UDMjDV6DKMUqV
+	FZ1YQ6swVt2Arr8qYyl1uABYu6Yj9bu6a5TByTFIB6fPYAi9Jk9b208i/FrevU/F2XB6z1/flOx
+	XFvHTMOxKbSdPjGPG8JUt4EidhqebBtPyd8WB2RXReV4Mwhe8vig39MY/TJu9nzkDaDjmFvf4=
+X-Received: by 2002:a05:6102:2929:b0:612:7ddc:52f2 with SMTP id ada2fe7eead31-6127ddc742amr2608360137.12.1776278462401;
+        Wed, 15 Apr 2026 11:41:02 -0700 (PDT)
+Received: from mail-vs1-f50.google.com (mail-vs1-f50.google.com. [209.85.217.50])
+        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-612ccb2498dsm1218143137.1.2026.04.15.11.41.01
+        for <linux-embedded@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 15 Apr 2026 11:41:01 -0700 (PDT)
+Received: by mail-vs1-f50.google.com with SMTP id ada2fe7eead31-60fa13bde2dso2310506137.3
+        for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 11:41:01 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AFNElJ8KuJ8HPmkweR7Rng3krRkVcTrzBkXIk+oj3J69sT0nnjqUOoxh9M395h0+oo33jr8wq/iBJILwlXq5Jl3QNw==@vger.kernel.org
+X-Received: by 2002:a05:6102:5ccb:b0:611:b9be:1199 with SMTP id
+ ada2fe7eead31-611b9be29c9mr4477282137.14.1776278461253; Wed, 15 Apr 2026
+ 11:41:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -85,59 +61,185 @@ References: <20260410203741.997410-1-tim.bird@sony.com> <20260410203741.997410-2
  <87qzohdv6i.ffs@tglx> <CAJGKYO6Kk4+=9FEJYGxmBQhsB871ERaG0i33Pzx2BV-o7QDFJA@mail.gmail.com>
  <CAJGKYO7-9t=KMN4=jARMHhO7gWSSaphDuwqRha0TAhOtUdXuQQ@mail.gmail.com>
 In-Reply-To: <CAJGKYO7-9t=KMN4=jARMHhO7gWSSaphDuwqRha0TAhOtUdXuQQ@mail.gmail.com>
-From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
-Date: Wed, 15 Apr 2026 15:06:00 +0200
-X-Gm-Features: AQROBzAKxgqnQqlFazL4zR_6OraiWC0ptQyyPpLpgB9BpSjD2d6gVHzfQvTi6vU
-Message-ID: <CAJGKYO5oCRcRbfVgoH=t4d2LQXCtN4tuJ35FTT=-esxwpFDKnA@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Wed, 15 Apr 2026 20:40:48 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdVYxHbHgeT4nnbC9s2Hn+S8FSqe3DgsJuShcRWsiGGGRg@mail.gmail.com>
+X-Gm-Features: AQROBzDaYB_j5tN30lytTKVr9nieP2YK_tZuzB-wRyuRrjOKBNdyMnukVU4T5OI
+Message-ID: <CAMuHMdVYxHbHgeT4nnbC9s2Hn+S8FSqe3DgsJuShcRWsiGGGRg@mail.gmail.com>
 Subject: Re: [PATCH v4 1/1] printk: fix zero-valued printk timestamps in early boot
-To: Thomas Gleixner <tglx@kernel.org>
-Cc: Tim Bird <tim.bird@sony.com>, pmladek@suse.com, rostedt@goodmis.org, 
-	john.ogness@linutronix.de, senozhatsky@chromium.org, francesco@valla.it, 
-	geert@linux-m68k.org, shashankbalaji02@gmail.com, 
+To: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Cc: Thomas Gleixner <tglx@kernel.org>, Tim Bird <tim.bird@sony.com>, pmladek@suse.com, 
+	rostedt@goodmis.org, john.ogness@linutronix.de, senozhatsky@chromium.org, 
+	francesco@valla.it, shashankbalaji02@gmail.com, 
 	linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-Follow up V5 integrated into kdev: uChaos supports _USE_RAW_CYCLES in
-new v0.6.5:
+Hi Roberto,
 
-~> https://github.com/robang74/uchaosys/commit/e48de8f
+On Wed, 15 Apr 2026 at 11:20, Roberto A. Foglietta
+<roberto.foglietta@gmail.com> wrote:
+> On Wed, 15 Apr 2026 at 02:19, Roberto A. Foglietta
+> <roberto.foglietta@gmail.com> wrote:
+> >
+> > On Wed, 15 Apr 2026 at 00:38, Thomas Gleixner <tglx@kernel.org> wrote:
+> > >
+> > > On Fri, Apr 10 2026 at 14:37, Tim Bird wrote:
+> > > > +
+> > > > +#include <linux/timekeeping.h>
+> > > > +#ifdef CONFIG_ARM64
+> > > > +#include <asm/sysreg.h>
+> > > > +#endif
+> > > > +
+> > > > +#ifdef CONFIG_EARLY_CYCLES_KHZ
+> > > > +static inline u64 early_unsafe_cycles(void)
+> > > > +{
+> > > > +#if defined(CONFIG_X86_64)
+> > > > +     /*
+> > > > +      * This rdtsc may happen before secure TSC is initialized, and
+> > > > +      * it is unordered. So please don't use this value for cryptography
+> > > > +      * or after SMP is initialized.
+> > > > +      */
+> > > > +     return rdtsc();
+> > > > +#elif defined(CONFIG_ARM64)
+> > > > +     return read_sysreg(cntvct_el0);
+> > > > +#elif defined(CONFIG_RISCV_TIMER)
+> > > > +     u64 val;
+> > > > +
+> > > > +     asm volatile("rdtime %0" : "=r"(val));
+> > > > +     return val;
+> > > > +#else
+> > > > +     return 0;
+> > > > +#endif
+> > > > +}
+> > >
+> > > No. Generic code and generic headers have no business to implement any
+> > > architecture specific code and there is zero justification for
+> > > architecture specific #ifdefs in generic code.
+> >
+> > This translates in practice in early_unsafe_cycles() various
+> > instances, one for each architecture supported. Even better a macro
+> > for each architecture like this example below (untested code, just for
+> > exemplification):
+> >
+> >   ts_nsec = local_clock();
+> > #ifdef CONFIG_EARLY_CYCLES_KHZ
+> > #if defined(CONFIG_ARM64)
+> > #include <asm/sysreg.h>
+> > #define early_unsafe_cycles read_sysreg(cntvct_el0);
+> > #elif defined(CONFIG_X86_64)
+> > #define early_unsafe_cycles rdtsc()
+> > #elif defined(CONFIG_RISCV_TIMER)
+> > #define early_unsafe_cycles ({ u64 val; asm volatile("rdtime %0" :
+> > "=r"(val)); val; })
+> > #else
+> > #define early_unsafe_cycles 0
+> > #endif
+> > + if (unlikely(!ts_nsec))
+> > + ts_nsec = early_times_ns();
+> >  #endif // CONFIG_EARLY_CYCLES_KHZ
+> >   caller_id = printk_caller_id();
+> >
+> > While keeping architectures separate is for abstraction layer best
+> > practice, in very specific cases abstraction can be a meaningless
+> > concept or much less important than having a single file for a single
+> > feature (the complementary way of organising stuff). Because in Linux
+> > the abstraction layer approach applies for architectures, the gap
+> > between aesthetic and a specific case like an early boot macros set
+> > hack for debugging is to clarify the exception from the general rule
+> > in the header itself.
+>
+> IMHO, this patch (upstreamed or not) is for a few hackers and it is
+> not even a tool but a first-outlook or last-resort hack. Therefore the
+> single point of change that makes sense against spreading stuff that
+> is supposed to be further hacked isn't the correct approach. The
+> debate can be about upstreaming this kind of changes, and IMHO this
+> one still has a sense to be upstreamed among debug features.
+>
+> I am attaching the path for just sake of independence storage (due my
+> project github repo linked before is naturally subject to arbitrary
+> changes by me). It is not supposed to be applied as-is (and probably
+> cannot be applied anyway) and the patch has been written by hands on a
+> keyboard. Gemini was used for retrieving information (in a smart man 3
+> command style) and to collect the ASM code and its fencing.
+>
+> So the main question is: does this v5 suggested approach bridge the
+> 1-single-point-of-change practical needs with the aim of keeping the
+> source three? If yes then a V6 is worth being developed to provide the
+> functionality and propose the upstream (I do not bet in good at the
+> first write but on resolving the contrast/debate THEN delivery).
+>
+> Best regards, R-
 
-[    0.183957] Linux version 5.15.202 (roberto@x280) (x86_64-linux-musl-gcc
-               (GCC) 14.3.0, GNU ld (GNU Binutils) 2.44) #1 Wed A6
-[    0.183969] Command line: HOST=x86_64 root=/dev/ram0 init=/init
-               console=ttyS0,115200n8 net.ifnames=0 nokaslr
-[    0.183972] KERNEL supported cpus:
-[    0.183973]   Intel GenuineIntel
-[    0.183975]   AMD AuthenticAMD
-[    0.184138] BIOS-provided physical RAM map:
-[    0.184140] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
-[    0.184144] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
-[    0.184147] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
-[    0.184149] BIOS-e820: [mem 0x0000000000100000-0x0000000001fdefff] usable
-[    0.184152] BIOS-e820: [mem 0x0000000001fdf000-0x0000000001ffffff] reserved
-[    0.184154] BIOS-e820: [mem 0x00000000b0000000-0x00000000bfffffff] reserved
-[    0.184157] BIOS-e820: [mem 0x00000000fed1c000-0x00000000fed1ffff] reserved
-[    0.184159] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff] reserved
-[    0.184161] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
-[    0.184207] NX (Execute Disable) protection: active
-[    0.184214] Hypervisor detected: KVM
-[    0.184218] kvm-clock: Using msrs 4b564d01 and 4b564d00
-[    0.184241] kvm-clock: cpu 0, msr bac001, primary cpu clock
---------- time skew here ---------
-[    0.000001] kvm-clock: using sched offset of 55985760 cycles
-[    0.000003] clocksource: kvm-clock: mask: 0xffffffffffffffff
-               max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
-[    0.000005] tsc: Detected 1896.002 MHz processor
-[    0.000324] last_pfn = 0x1fdf max_arch_pfn = 0x400000000
-[............]
-[    0.235538] uchaos: Init mts 4096B access x7 times: 115 < 196.3 > 594 uP
+Thanks for your patch!
 
-without _USE_RAW_CYCLES:
+> --- /dev/null
+> +++ kernel/printk/early_times.h
+> @@ -0,0 +1,26 @@
+> +/* SPDX-License-Identifier: GPL-2.0 */
+> +
+> +#ifndef _EARLY_TIMES_H
+> +#define _EARLY_TIMES_H
+> +
+> +#include <linux/timekeeping.h>
+> +
+> +/*
+> + * Fencing isn't optional here, otherwise unreliable values displaying
+> + */
+> +#if defined(CONFIG_ARM64)
+> +             #include <asm/sysreg.h>
+> +             #define __early_raw_cycles ({ u64 val; \
+> +                 asm volatile("isb; mrs %0, cntvct_el0" : "=r"(val)); val; })
+> +#elif defined(CONFIG_X86_64)
+> +             #define __early_raw_cycles ({ u64 val; \
+> +                 asm volatile("lfence; rdtsc; shl $32, %%rdx; or %%rdx, %%rax" \
+> +                     : "=a"(val) : : "rdx"); val; })
+> +#elif defined(CONFIG_RISCV_TIMER)
+> +             #define __early_raw_cycles ({ u64 val; \
+> +                 asm volatile("fence; rdtime %0" : "=r"(val)); val; })
+> +#else
 
-[    0.245907] uchaos: Init mts 4096B access x7 times: 64 < 134.4 > 322 uS
+All of these should be handled in arch/*/include/asm/early_times.h...
 
-Cheers,
+> +             #define __early_raw_cycles 0
+
+... while this should be in include/asm-generic/early_times.h.
+
+> +#endif
+> +
+> +#endif /* _EARLY_TIMES_H */
+
+> --- a/kernel/printk/printk.c
+> +++ b/kernel/printk/printk.c
+> @@ -2294,6 +2295,8 @@ int vprintk_store(int facility, int level,
+>        * timestamp with respect to the caller.
+>        */
+>       ts_nsec = local_clock();
+>
+> +#if CONFIG_EARLY_BOOT_TIMINGS
+> +#include "early_times.h"
+> +             /*
+> +              * Very few developers are using this feature and they're expecting to deal
+> +              * with it as a single point of change hack to be further customised by them.
+> +              * The right shift by 2^10 is a raw extimation to provide 6-figure within the
+> +              * first second when the kernel internal cycle/nS calibration isn't ready yet.
+> +              */
+> +             if (unlikely(!ts_nsec))
+> +                     ts_nsec = __early_raw_cycles >> 10;
+
+As there can be lots of variation in the granularity of early timers,
+I think the shift should be moved in the arch-specific __early_raw_cycles,
+so it is only done when useful.
+
+
+> +#endif
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
 -- 
-Roberto A. Foglietta
-+49.176.274.75.661
-+39.349.33.30.697
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
