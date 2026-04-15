@@ -1,80 +1,80 @@
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE3AD38F95D
-	for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 21:58:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE592392806
+	for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 22:25:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.175
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776290286; cv=pass; b=oup0c4z9qKGIrc4Jg5ngNvfTvwGTm58eTOLgaJiNFnGiQO9OHRxlxdmETUASTnHkLUhnluQ2T1nD+XqopDYSITZ8nt78a1Mr3Cvep8809ytEY+YVLmFZLOQIxgzEmz+G9XYxmsw4ujACruYnBo1QInyB8AQd4LM9Uq/ab6hai+U=
+	t=1776291942; cv=pass; b=WpRyuy2XKp9R/aZLKtN1raEArx40Qwrz82IG96bW6Z1L7Sy4g7fA/ZKfWSvyQJg47CljmRZC5VAJ6+Vi+IVAg3O/TBHVE2ihzIz37uUq7+/s+MaUVEkKmVO6+hkjfFBxqIAKm93v2xPJYasAmOLtIpYV5uYp31bIAteAJ6vjwtU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776290286; c=relaxed/simple;
-	bh=oT1WpmQj/cBlx/OvucYsswCvvrwkb0/OOkzXrCRqlrI=;
+	s=arc-20240116; t=1776291942; c=relaxed/simple;
+	bh=6yVPlIUJhJc0h4QOTQ3ByAAXEhgFdF6Qm9HUn/Q82LA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=J6T1W/X75eB8Gt1XIb+eG7H77uNMOzVhH/hhmTtxLSEz4SISyu1LGsaUPfdVYlfEjC6oPk+850/hnFBgP+wecCMLNdmZk6spuiL5t2Uz9+dLUCa5IP3bz3bXZGAtlp8Mm/+iDWpVrB5COSmASbOrxif9yNOAzUu/UsGcybQXyGk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DGzmQVSB; arc=pass smtp.client-ip=209.85.128.182
+	 To:Cc:Content-Type; b=j/VPQSSW1bS7yuqOZglAr8Kte74idJUrbmMo4HapUsPnyf4NupbRuw9diBGDYpLttLg2b2a3rDpSE2ay9ucEdtFKCu9eyfIFcAovcFg2g2FIzaBf5EQcblYraib4yR7he42+YQLohoCaHyaNWv0xTGLVgrPI7tpN2y9AMSe/cdU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FQyMw+GY; arc=pass smtp.client-ip=209.85.128.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DGzmQVSB"
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-79ab3e26cceso71952367b3.3
-        for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 14:58:04 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1776290284; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FQyMw+GY"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-7a43424f861so72607387b3.1
+        for <linux-embedded@vger.kernel.org>; Wed, 15 Apr 2026 15:25:40 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776291940; cv=none;
         d=google.com; s=arc-20240605;
-        b=DMFzUFamztapINZbxmgXLPvArKsfr1A8XdFhqu9P1NpRXnn5HoRrLVd6MF4h2KOQHs
-         9O35UVtuO3u8rZ8i7mI3lriAxdywIdCZBiYt2Pp5UaZs7YBggfhpe7C05vbhRq3oq0iG
-         7o9+pjKG+O6/pZ7DrtQT9Y8gje4UI9gt1xW6ZkTSujU91hroIRvYuqx51rNVtKOe/hk0
-         +uG1s21VAFutAZ1+17C8FNCQAQKaGwCnuK3IKxgDVQESBFVsgzZ5T1j3HOeoBDUPRiB3
-         a8tCqiUaLxM/6o+0n/rINK7J1UeXGC0IH0gzt8b0D2S8nLkgDstQ1kgrqoX6zOUUwQoO
-         BQbA==
+        b=g86xGhdrgwBKGqNDcctMdAViZboE8VOVHEVRyh7BvnxSWOz1z0gEjdv5dNEEXAwkWo
+         x6F/6y7FErVrIT6QBmVKpF+CrMU4luK7XxVUXTp+JL0X179qajnhRR8y9DCMCpYNIwLf
+         RltmyItp6YsYA4yr83CAKN7GmC5XWzeTKqqV6l8pvIJ8ctW51mbJsHw5O7tS4JZaqibE
+         fRJAdC0ZsJ5OmcIjMJ70bMXq47oDb+rzn1c9JSrlr/wMX+4obDyFdfWSLUxkRxss/RTN
+         UfkG7F/VDMlUA1bFVl48np9+ZVy3cdX7xhAbrG+3yjxzk66U+0thc4BlKSwH16YT/thx
+         CBBg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=oT1WpmQj/cBlx/OvucYsswCvvrwkb0/OOkzXrCRqlrI=;
-        fh=HTg9loss1sUnEJoDgPCOUHGflNwDBCTfy1NCu7L1cbc=;
-        b=QBqcuD930s8QE+4bl/ZdJpZdHlvsqIX5hZRnsGgIf5G3Ffym76V6OyeTrpDEiCypuz
-         yqCfcIoOoJv3QJVqcgWAOahyDYpi1TB+OAksaxGG0ZuBNIN4w8BybBzppw2WJPNBnAgg
-         r73xoedwlBN8A/+WQxjkqC0aJxcpSbJ6SEqxuwXHIVgc8k/7bMB/Of6sGbER02DjSVtW
-         0OO+5wtmPUyMpcupJqnI4XjVNRsIb9Hr6U0r6WYJss3Gk/PCIff09nPbnTeqZf3zf1uN
-         FWD1CZxPntRMbskxlaoONog+g4NJYfQXPZ5Z+BxkINqTn5uX9nhlV6WkjAFqpDSR9Ez/
-         yB6A==;
+        bh=6yVPlIUJhJc0h4QOTQ3ByAAXEhgFdF6Qm9HUn/Q82LA=;
+        fh=oaq05LgOf5pir2nBfi1hQTLYAszePtivgRB0+BP8+PQ=;
+        b=hRfC8NHPR7GmFipDq9C2x8C+n41JdPqS9aVNXuNu+Z8piNkMBfOpifMIJX7/e2HSAN
+         mEPAmKrwJBc3DMbhVtGh1K0LOLy5P0TQSEzGqTGv+eUbgULwidysWSwbyv14gzueqmIF
+         p8KzlEvot2ExPne4cc2+tIOs2FreWlzQeBo52ANBGFRuUDy38MZ2LiXQgtDUevylPWqP
+         5KFdTJM6XCwXMsi2IMAuTooTgFwZfjiEQgYjwpNXRvznQ1bD4+ghzZds9o1/kC5W5h3Y
+         ALUwr/2TVQQDtoJccUOEPcHCGI3MgzmD44G3OyymXwPnh92ETuBp463nVKskKSxdX54m
+         yL+w==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1776290284; x=1776895084; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1776291940; x=1776896740; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=oT1WpmQj/cBlx/OvucYsswCvvrwkb0/OOkzXrCRqlrI=;
-        b=DGzmQVSBcGcaTK07SrYZVvafuemx/7SYJSJUwH0pGIKA874dr6QXqQPhysIDwfJgto
-         kbrg4QmRg98gjfhSKfHjuBlem/U4ArhHbnttEMUri04O6AqfN9hvRuBs8/Zbzf9sgZUS
-         2VRjzxscfru7srTXkLMoTuyqP2611qg24BuDY05lf3mksx/HCMlqx6A/OtfQdy/mBYkb
-         r/mWXFLfQtnL4BePlpAycFi5EOCArTv80AeCppoW6T0rTtCpsggk5Zkw7TV7oiEVqfIH
-         lR1QoQMJBATsvbiSvsCWZwiOeHSQmuw5eaPA/ECVWQRUrggxDue7fnDWgQu+YyYW4PSO
-         9YVQ==
+        bh=6yVPlIUJhJc0h4QOTQ3ByAAXEhgFdF6Qm9HUn/Q82LA=;
+        b=FQyMw+GYDIIAUgh14w53g3/FgusLexFDE6McrvhVu/odrI7pIFDZf/MbEpW+ITkJQM
+         yygKenvvzKqOFlIVIpo3A0EM0CelAo/HnlJMfamGzbPo8K1dt8YOQmxM2xPQPSVb6B0d
+         VsVmaL4sIXx5BPcJsjcLrTqEb/j4UJ0wQleBokwJtksw3+qv0h9/PXu+6G38X2fRL6OB
+         1TQLnGFcinm4Y0d027EpGVnZmK0W7uRF2/u6FbGMSYDtkYj8/aONbY/X66d+VU39UU8R
+         cK3sGOIE7H2ViytPGqQGE+lkFwXDXLubtt8HH1nyen9NSnLQc+MJC34y3wzt20l56Mhf
+         iJ/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776290284; x=1776895084;
+        d=1e100.net; s=20251104; t=1776291940; x=1776896740;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=oT1WpmQj/cBlx/OvucYsswCvvrwkb0/OOkzXrCRqlrI=;
-        b=HcyubiFnj5AGZwXrA7Z4ChLuEeiJZS+LiDFAqoDIWhf/EzDx+y8su15XJ1Nf8zsaCo
-         6zOxizZlLhk36+OCeUJkb31gsCMv020lxEhLZB3i7HOokdC1b206Rwa73PlaRWawNVuj
-         y2h//R4X8g4bzdDsL7/EKnbddIa/4pGvNxLI7yuIzAcuhHDtVCx9IMGWj2kp/i0enDiu
-         I2UOaFqvea/pE1wWWwM4h0eZ/pU3F37vp+VpZvYD5kqGRBEhZbZmCr7YaKg/xe9HK1or
-         LpSwsbUhAEzeuU3eeVT0N77QKiKQMJKE+hr/Dx+4SlyxZn1Mepcwp7HYfow2xK7Qe47m
-         cdmw==
-X-Forwarded-Encrypted: i=1; AFNElJ+dwPutW8Bah6FUTX9XnKdsFKwnUzXUy/NX87awO/RyNe4G2KH3hKWXkyQmVCokNqvD2bzgEZo9L+b50B/+JQ==@vger.kernel.org
-X-Gm-Message-State: AOJu0YyPWHxLR7c95b0/xp3QvAm1dn/ViIr/6UCFkhhKkfaZOaW036qT
-	CPpX7HmDxTdWGBdvk+8ZOrK4ssFJE5y+bTPvWb1Ly/ODzb2dPMZbozWzZrghUq+QHXo3zRLj2TS
-	REzjtfFSTR7rFA/NIwyk/NYg+nb6o3A==
-X-Gm-Gg: AeBDietRuu3bQE+OOGLQWm7HU0bSPNGQ95K5ChUhMCOzormUJmBPnPPWMwAuyrC7Ige
-	AT7AQoV/Q2ghMEJtFi3c3xFyV/AzhJXmg83RdNdGO4Zq4kJOL62khl2ToA1sZZdrY/fVcB9FeTH
-	dB9v1dbfmLqUrzVQGuw6q4CK9FcVfElsN9B5j6OuR5Abu94A0Q78NGsL5PieVLb6TLYXUlC2Bhx
-	GdrG+9Nmo/Q13w6AIrVzpMEdk759FwjjVkJ3uuUSnv/brlhW1YFhnk1nO6c+GBk6N0K0liJhQZU
-	EpdtAtUmFYgNUwibmKrbgMG8BN9thhQS2h2YXVjSp5L9Kp/HWrwDM+QrZfJWNfOucx3Ighs0+Wa
-	IW72+orS9iA==
-X-Received: by 2002:a05:690c:d92:b0:79e:ce16:38b with SMTP id
- 00721157ae682-7af6f327154mr267659677b3.4.1776290284000; Wed, 15 Apr 2026
- 14:58:04 -0700 (PDT)
+        bh=6yVPlIUJhJc0h4QOTQ3ByAAXEhgFdF6Qm9HUn/Q82LA=;
+        b=D91ikJUy2PD+IWDXmAKTaq/gw9rbGzs27qUburMp0HYw5sp3EMIs6rl8UVO2MY70Sw
+         Uryb1wXDiiiuC/zP3+vZYZlmiPiY/R8YJjqsw5c+/MLMsaHHCETaFdFrD/n7PUsFW4nd
+         jOLr3zkGwSkJUyStASRooGE3wIONodN7NcznU1p5rtHOCxGfmlGjhsg2BvTPqIkHxm6G
+         goVrSvP/dmmAjxz/Pu2OilXWqZmWT8a/ruajXwOI03OFIw+UQ+RFykvZ+tVhY8eOWFP6
+         n1cNtZVUQTrvITQQ5IxlogRJPiECVjg3H1NTVvuQPufFONAjkpMhgV3OxAz2WebOxJfw
+         c8Kg==
+X-Forwarded-Encrypted: i=1; AFNElJ9Z0TYxSwflJiGuqJVx/VpSohBmIhVcc0isOFhVzzuWpK+0Q6+vJOV82QOJAN9BzHYwEePiB/3X1oX9rAHfAQ==@vger.kernel.org
+X-Gm-Message-State: AOJu0YybfkaciW2z3m2Z5A2eDqU6hnbJxRZqBx9xha5fjvaVqCTtjsAF
+	5HyYJONeegYQhIBz8Boeb0AtvaPJlNkufs7uqEe7ejfXZudeQm+0sWdMdnyNSTyL3PhiAl1P0c8
+	VvXRgvvae5Sl9lxmJkZypf89ApyZ+5Q==
+X-Gm-Gg: AeBDieusdhuY4ZPNkNdk4fWuXKmwKmiCtkKVtBpGCc5pfMilyn7GAJkSQNWSe7k14t+
+	3ueQlZIn7XDCwj1OB9RUZNSXey7nHvqGsszZxHidq2RW8RxCSVa75g49ozqYDnKCIVl1O2PLK9L
+	NFuqggrjCIvxQz/QhZEbTOdGdsNwmv5zpcgz2iPlFoSmEe3OK0fHAJmYfxcSh1iEfpUPMLaps4Y
+	2pRdcFxwtVK2Sr73M61LvzXz1iKvDw3+eFS1a0UorEnE8/jnIBfX56DQCkpBBwmTLcN6A6ZphHI
+	kBzDGD26ueYI+bzzBfhAhGXP7v5ONn9uSShLhzrn6hu47TSFwZQvpSygJCuuqlvuOLN9Rqo4cwP
+	kidUvCqqo2A==
+X-Received: by 2002:a05:690c:e64c:10b0:7a3:7ad3:3e9e with SMTP id
+ 00721157ae682-7af71476e86mr188364857b3.32.1776291939937; Wed, 15 Apr 2026
+ 15:25:39 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -83,12 +83,12 @@ List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20260410203741.997410-1-tim.bird@sony.com> <20260410203741.997410-2-tim.bird@sony.com>
  <87qzohdv6i.ffs@tglx> <CAJGKYO6Kk4+=9FEJYGxmBQhsB871ERaG0i33Pzx2BV-o7QDFJA@mail.gmail.com>
- <87bjfjap37.ffs@tglx>
-In-Reply-To: <87bjfjap37.ffs@tglx>
+ <87bjfjap37.ffs@tglx> <CAJGKYO5R3yM_DtALNd7BYoNMP6RiRJvCfU84vQNPCKz_Vizweg@mail.gmail.com>
+In-Reply-To: <CAJGKYO5R3yM_DtALNd7BYoNMP6RiRJvCfU84vQNPCKz_Vizweg@mail.gmail.com>
 From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
-Date: Wed, 15 Apr 2026 23:57:25 +0200
-X-Gm-Features: AQROBzD9h7qHrb8XbuoTqdj4eQlOfAeF_dplRQ24wQW4ZsgRTXUcD4qI-BtlDVw
-Message-ID: <CAJGKYO5R3yM_DtALNd7BYoNMP6RiRJvCfU84vQNPCKz_Vizweg@mail.gmail.com>
+Date: Thu, 16 Apr 2026 00:24:59 +0200
+X-Gm-Features: AQROBzBSqRWf3WOFLX5IBUP8DZJQNXty6Uluhac-K_l_DqFG_FgGgfdbCFfaoBY
+Message-ID: <CAJGKYO4PatnJLPVuwp730hEEqsMCEAravO-cS6xyenMNJEsXtQ@mail.gmail.com>
 Subject: Re: [PATCH v4 1/1] printk: fix zero-valued printk timestamps in early boot
 To: Thomas Gleixner <tglx@kernel.org>
 Cc: Tim Bird <tim.bird@sony.com>, pmladek@suse.com, rostedt@goodmis.org, 
@@ -97,44 +97,28 @@ Cc: Tim Bird <tim.bird@sony.com>, pmladek@suse.com, rostedt@goodmis.org,
 	linux-embedded@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 15 Apr 2026 at 23:30, Thomas Gleixner <tglx@kernel.org> wrote:
->
-> On Wed, Apr 15 2026 at 02:19, Roberto A. Foglietta wrote:
-> > While keeping architectures separate is for abstraction layer best
-> > practice, in very specific cases abstraction can be a meaningless
-> > concept or much less important than having a single file for a single
-> > feature (the complementary way of organising stuff). Because in Linux
-> > the abstraction layer approach applies for architectures, the gap
-> > between aesthetic and a specific case like an early boot macros set
-> > hack for debugging is to clarify the exception from the general rule
-> > in the header itself.
->
-> Please spare me this AI bullsh*t.
->
-> There is absolutely ZERO justification for this at all. End of story.
+On Wed, 15 Apr 2026 at 23:57, Roberto A. Foglietta
+<roberto.foglietta@gmail.com> wrote:
 >
 
-V5
+[...]
 
-A single file with the essential for hacking the early boot,
-activatable by debug export menuconfig, an #include "locale.h" in the
-same folder in which printk.c lives and when the developer did every
-insanity to make things work, rm -f $file and push all. No one in
-production nor users will complain that there is a Kconfig debug
-expert feature potentially broken. No one among kernel janitors will
-need to care about an isolated file in which the whole future changes
-acceptable are extending the framework to another architecture
-maintaining the essential simplicity of reading a register protected
-by a fence to grant WHEN it would be read.
+> V5
+>
+> A single file with the essential for hacking the early boot,
 
-! AI bullsh*t.
+early_times.h -- it means before every feature offered by the kernel
+is available or 100% trustable, thus ASM because it is also supposed
+to fix what is broken in the kernel thus using the kernel macros isn't
+the correct way to do so. Early times means before the kernel, thus
+also out-of-it-three or feature support. Them asm (isb) sounds too
+drastic or not enough for "exhotic" arm arch? It is a template to
+start with, not a working part of the kernel. When the kernel works,
+!0 == true is true.
 
-Beware of activating debug expert options, crying isn't allowed in
-adulthood... What you call bullshit is simplicity for both the worlds.
-The speed at which I am writing about things you cannot compute as
-fast as I can write, has nothing to do with AI. Try to compile your
-metacognition.ko with -O2 option instead of -xxs... LOL (yes this last
-paragraph is a bullsh*t, so we can have a comparison between the
-prototype and the instance of the BS class/template LOLx2).
+The concept remains the same: a register counter read protected by
+fencing. Not more, not less than the essential. And a bucket
+out-of-the-three as a starting point **before** the kernel is ready or
+fixed. Written in this way, does it sound more reasonable?
 
 Best regards, R-
