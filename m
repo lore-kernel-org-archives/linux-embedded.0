@@ -1,294 +1,206 @@
-Received: from PH7PR06CU001.outbound.protection.outlook.com (mail-westus3azon11010066.outbound.protection.outlook.com [52.101.201.66])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9720C2E413;
-	Tue, 12 May 2026 01:59:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.201.66
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E064230B50D
+	for <linux-embedded@vger.kernel.org>; Tue, 12 May 2026 04:12:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.176
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778551162; cv=fail; b=HFi3uE5AN5+0AkeBRhLc01/jBFM3F33EKhl1aZeJ9wwYxIWOc67SXM+psIPKyFWRVE0LIBRg0FWqpzPcS1VAtTX09bDgxodPStJxIjJTfxvndpcKd9X1KbJbXhmQiadUxb7XwsmpZ8/W9LcLpHkb9NV7LAxKpqL6GxqJauLNkTs=
+	t=1778559145; cv=pass; b=NSkW8ET9Uc6+4H+WhzMbahAyilgyA4te0pLnAmyUjP7frJgq95B0fJ99mdiKqZY7ncY9T7MpiEoDP/oYMC8RDOqSErQV6r6Mk1ErGSjbUb7AiEPH1g/qTVS4ywO/vI3IbHDqjVqloPIZr1Ire14YBwlMrQbbNfjSVnfCy3gewRY=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778551162; c=relaxed/simple;
-	bh=jSOVY+N9d/8m29slVIUBe+J/2BG40hTrxvTtHaDSIP8=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=VLKOVvpj1wtG91Pd7xdlblUZeFYwD2G2zO8YNSYvRmP7tq6NCPLw6BR9Erl0hdomMEUcN8vZ/jl9ZGaDIILrgdCHyv2JsUlYGHBaZZ62Ksd1z/5wq6nMw6bJueEfGSOJ0WF8WfuVNu/XkLU4dIV2MG9iruvJ3yeHrRf47bLSpZM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=SsP/yEev; arc=fail smtp.client-ip=52.101.201.66
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
+	s=arc-20240116; t=1778559145; c=relaxed/simple;
+	bh=yHt5BVbPfFwh4hIxsPIeeDRHNboavy175zOrgWL6zmE=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=LLwGOvy79oPKzX+Tzbr3wDpH6ltQ9JkMmQUve1CjMCN3MVyJWmQJ81HoUFNUAMvjXw+7MMfSsA+RLi/xrvqBXBjhS7bZBx2JiyIeU8wMRvjqR/xr6TwBtlTLjl7Lzrg7DwUT+6GHTkXlmUk03/ARrEijq1xRlXqUKseqXYrbCCY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TJSKTYAg; arc=pass smtp.client-ip=209.85.128.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="SsP/yEev"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Jh9AWAGLBtumjAIe4VKtAwrQgSOyLaV5I9sQcvKn66G9W+kwF4UsrClQGh0UE/j7g8xpAdj9Z9Fpjp2wulemGPmSAMF9KZ1Hc2UGAk4YXrCGXFOksLKa4as7sJpgvpGBIPMFnPcjh5A8n4E8NO9kH8k18P7Fy6VPt42IZvLCL/+MXX0fmsgi5W86vwANE3NHenccHwHBaJ237ihKY1DDMspGIUG+k+jnCe5QDCBNgClSfjUGqDGVyoRdhN9NQPdSOxwLzkXT771p6ZgfFvzRim3dTkhmmkV1MpIMC1wbM6pe4fnLXsR81lAEBqs74gLFQW3VgZQY4bCe2S7aCisIYA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=BuQ51hW27QhU6Q8WNjw3167+jbbevYN8cpmdBIp43VA=;
- b=nrOoyRFhskw/4d0gVbS5PZB7d+e5hWYixKi1gcqX8sByEUbCcAucCtPIkmvelvxhYa76EbrEXJbI1ODCvizJs/xRYCJhhEtjqeNDOPjIViztHxFzrdz2p69/feRNGI+ajkLQGZAYA8XDs78He9jo+6XG6UG/k+lx5B6ar5OUlRBQQIYXdKLrsC8YUVC8S2ZpYrpcE8je66MN7HjDq1iK9i2W9elPctezldguW3zcv90cpihalJNXByIr/1JS2YClcvNNw4r6E+m0NNDZRYEVJsdOjn4aB2XEhZ7l9fbluFtn9obwbV+YFukoWxsFIKTxj3DjwTIS0fo9u9kZIVxOwA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
- header.d=amd.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=BuQ51hW27QhU6Q8WNjw3167+jbbevYN8cpmdBIp43VA=;
- b=SsP/yEevyXt4V+TeFXp+WFC58cri8fSxn6kPtxQQhIz6SfEPxXJ+qZOa7EJIXG7FySFBQWk693934pbXrb2s4KIyA/zu4BgIVGj8MIMN7CUkPYbabStYkRf7A4/Wcv3p39cWgVmAOHmeNx57dSFdV0nf0Tor0htNTPIjcXk+tp8=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=amd.com;
-Received: from SA0PR12MB4557.namprd12.prod.outlook.com (2603:10b6:806:9d::10)
- by PH0PR12MB8126.namprd12.prod.outlook.com (2603:10b6:510:299::20) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9891.23; Tue, 12 May
- 2026 01:59:16 +0000
-Received: from SA0PR12MB4557.namprd12.prod.outlook.com
- ([fe80::885a:79b3:8288:287]) by SA0PR12MB4557.namprd12.prod.outlook.com
- ([fe80::885a:79b3:8288:287%5]) with mapi id 15.20.9891.021; Tue, 12 May 2026
- 01:59:16 +0000
-Message-ID: <5d7067de-97b7-4232-9cf6-e4b978696482@amd.com>
-Date: Mon, 11 May 2026 20:59:14 -0500
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RFC v3 0/3] Add splash DRM client
-Content-Language: en-US
-To: Francesco Valla <francesco@valla.it>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Jonathan Corbet <corbet@lwn.net>, Jocelyn Falempe <jfalempe@redhat.com>,
- Javier Martinez Canillas <javierm@redhat.com>,
- Shuah Khan <skhan@linuxfoundation.org>
-Cc: Sam Ravnborg <sam@ravnborg.org>, linux-kernel@vger.kernel.org,
- dri-devel@lists.freedesktop.org, linux-doc@vger.kernel.org,
- linux-embedded@vger.kernel.org
-References: <20260510-drm_client_splash-v3-0-a9aee9f0b2fc@valla.it>
-From: Mario Limonciello <mario.limonciello@amd.com>
-In-Reply-To: <20260510-drm_client_splash-v3-0-a9aee9f0b2fc@valla.it>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: SA9PR03CA0016.namprd03.prod.outlook.com
- (2603:10b6:806:20::21) To SA0PR12MB4557.namprd12.prod.outlook.com
- (2603:10b6:806:9d::10)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TJSKTYAg"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-7bd9f61458eso37962807b3.0
+        for <linux-embedded@vger.kernel.org>; Mon, 11 May 2026 21:12:23 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778559143; cv=none;
+        d=google.com; s=arc-20240605;
+        b=X6fQr/8siXnalFTUNRz9nQ1vEi5nGdzt2E1e/VQO2dD6YMfSTeJSoED0pm2lNjQnp7
+         rur3DpR8Y/bpoFyzgWw55PEpZPcuw9ZE8F6E8FqwJgh6kzfSx3mBWjvda9S8nT0UK+kB
+         Y/lI/fRFXX7zQByo2oktDdrfKbW+oETktsXDBMgbDo0MnhDMGJoOzIGxK/uear5BvFAw
+         CZT8W5YM6TsfVP5chV/vxGXW2bFZM1b4W+/ZxiQPM9be/xTwXtllfFkUvgFSWv/MW2RT
+         eJDZdVY5ESe70/tgdrHO6PK+WRYPv7RCBlLUIsdrsM1QZYgFF18aL9waKZPingnd3LSP
+         dOCQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=y8hciIA8JRIW9qx9gfVAR+t0j1dEC0+f38AE0AsofWQ=;
+        fh=91MEEa9/QJ/R3MYdNPA7HZUulpipspghgLGXKdzSzE0=;
+        b=cRA4cAKW5M3f7971/FkwxhwU1xE4kL/6KPV9t3v1BgQFepQQ52ErN7EXvkOj86Dugf
+         +ClNZ/a//hukrZnRKcH8eInTn9aWtwPwEWkJHzieAMf0xVV/ASQcS2HRhlVndsxD+oKV
+         uywaXSCKYIDrSfsD7ZCTwjb0hPehA4cjUX9poAZNHUV0/h7GDCPLpOmN7tZ0vBiCdyAS
+         pMzxu2z/hs63s86S988HaLY+kUgAaIOR1Trzns1NBxYA3xuXFA/Sve+4GrwKISl+bsut
+         X6RFB5huoqQ/EvIKAZrYI6VmkObPn6aFuNCHd8O9ahL2KYjMG4tvOn0Uz5WUBN3/IYNd
+         MtlQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1778559143; x=1779163943; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=y8hciIA8JRIW9qx9gfVAR+t0j1dEC0+f38AE0AsofWQ=;
+        b=TJSKTYAg+b3kxxCRTmzcLvRd8kxrvYQ1pwBAzD7lsWRm8Za7I12/bCK5Tv9orKjv1f
+         oeRdo3fEZExtLNzv+uDC2iJ8bMPjO41rU4x71GQebtTBfTtJdiMQ9WvgMqfufJNBRiEi
+         953F6FTIE2B24UmVHFfvUU68Ez88D6TEyKffhnAgspuvwhUvtSR8wyb5dM1A5dK3SRyv
+         qTODalEFbJIPvpXHO7N0FABP283naXioUaY7vuPjJY40fUIlpBEqdsnouzrqXg+b+xKy
+         T2373OgqxwQjhqq80Ibkrg63xAuB4nydSwkM+vkvdYLigefGW8GN78mfPzjIqDIf2379
+         ryeg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778559143; x=1779163943;
+        h=cc:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=y8hciIA8JRIW9qx9gfVAR+t0j1dEC0+f38AE0AsofWQ=;
+        b=jYZHd8FB5Ko9vUoEAJk3SNRpAgBf1i3ODGoS5ubT+caVtS5j08xUh8/lg4O5BoWtqp
+         VLcVqjQhrmimNYDRC9PkL8OOO4MtXmqMTRGuAU0foVsjrfUdLDhKZY8enC9YTOvmwEYT
+         BA3tN1t+eI1WHNGBbvbmBaqgpWLbDzXWsNsn8bxQ+5g/bFMSWFvH+yk6PIvQqlFo5RwS
+         seMsw6++EOol9Nc3LCxOzugiw2lwxVG2qsOFI2AFrCSBgwbHMcTF6xMx2PQpd8lRju4/
+         cq5vtQc29K7Q9X8+n7EPSz96DN/q2pqXA+k19X9twmO5M6q0uf/RxwZ7JLRyADxfo8hi
+         yvyg==
+X-Gm-Message-State: AOJu0YyxwtHPTPRjJ9IffXEc+VWMS4UCEOe3av0SD48TZIPDpEy17hI9
+	331+J02VnBCHT/lNgXtnyl0duM4iEyNR5S53rBox0/K1oq7WoPux3O332FFj0S43ifZ6DpsoD2Y
+	hwz8Y6BoJP6HBIp/MOSQf14it1y+dqzw1VvUsLA==
+X-Gm-Gg: Acq92OH+KWvDYrtLd+cujCCcPXak7gKjUNF+5J/WQ4L74m63OrU1tSvSmqL9Top1IHP
+	82B6HgAy+SPcT9nWQYqI8Vdny5nDlzmUFrr4ubFGVgFS8IlrWYs0YEcDqRnswqtiguUXZbqxvGG
+	Y4wgySrPZ6NZ33D4LO/4pwpy60jdq3RRHH/0W0EY2b6T9O7LaDYavk/SlCT5gMq44YcKfPx0OYO
+	BAidzUN7q9ScRnm0Eprz97CcgWoxPCyPeGEFn0TqercosmgXOH24SpZJYqROKXFb4Ic9RWmpiuu
+	UuFC2f50Z2xa7yzf03MRsob0lrHmb/VU8MfE8HFJDNfx22Z3tsqTIHkwYBUIos8ylsCY17i3Tui
+	aiCy3DATVdQMe1S19zGOm
+X-Received: by 2002:a05:690c:885:b0:79a:3e8d:9bd8 with SMTP id
+ 00721157ae682-7c1025640dbmr121574337b3.2.1778559142685; Mon, 11 May 2026
+ 21:12:22 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SA0PR12MB4557:EE_|PH0PR12MB8126:EE_
-X-MS-Office365-Filtering-Correlation-Id: bad2f571-95bb-4a87-4eab-08deafca12c0
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|7416014|376014|921020|56012099003|11063799003|18002099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	vPQQp6+d35fMS3TYcM/U15LJWDHSuSd86yWROlU/ueHKh5LTntdYbcTpKVqxb1WCyJqd90o/+blkXaaRGcAxdbzCWAR6XrzNecXg9s5JZ8tfC4WfQ0Wt1aq0ZQ2yDQ493PMLwcgyM4qJ1nLRoCPxFeaPKF7k/QrZC/KOvxqNXEnApOZ8H2GPIAcJbzkuzWnwaSCE0BNcC3dOrOciOYEaWfkCq2XI2reXpdwzcuiZjbrk1Uo4smsJG/UKFW2g7m/b2i1vaNl6cKJTo0g506aMraSSGp1QQQe6H2ph6g92sVQEktuzDA1LTBTdo3Ib/zb8+hOHN0W1lAEn9u9jErO4NgCBx+zMdIr+SBTLlPc/HtxEtYdLdyS78ySKNvCrC9JKFmhZrR+3rKn1nnLw+4uYWZ9Mia2WEQ6GO8FdX4KJnGrzP4mbd5Vgfn9xraGybRzxO4qtcrCEYRhFPpB/NS/HUDtF1fvupu82lHbgj37xUeQzoIo1stSFDm/DOVqHMn7PQuBIDJMzc31Guv9pvzx+RS/U9jwI/3FrTX2xlGwozw+DU90ojLxUcgtZ11W0N6Oovt6QzhAiAzPiF6c97hQ5Z1b+/GcgC4RdCx9FGIx7AHczIo6la6zUhNGtojdQjDfrVYvfevjCrkrIODwRd7/ee+RfWF/faHiszkrQ0QteB2TLEcj+MM9RIw+azJnMjIk/IHtlLUIgx2kVbzZz8T7tIXL3lkxnM40GkTDO/8+goAn5jVbCqc59DwfmLYtHml6b
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA0PR12MB4557.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(7416014)(376014)(921020)(56012099003)(11063799003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?NTlLSHVKTjRzbkJiMkhjd3V5RDhoSS9rcitlQWo2WWh5ZmdMTnphMmFXaXQy?=
- =?utf-8?B?dVlBSzI2T3BqVUo4eEFYRHNvbW5KZWRFYW40eUpZT2ZWZUExLzB1WEdwVFBI?=
- =?utf-8?B?bW9rVjkwSTF4NU1laFA0VDNaa1hLQ3JnZm94VXViYUZOM0U1Q0tCamtGUXFy?=
- =?utf-8?B?OEpWZk02QmJRZy9oMlVSNWM4U3NvTkFuaHRtYitxcklwOEV0WmFzYkJHRjNt?=
- =?utf-8?B?TUZkdHI5cjYxMnhwOEVwcEZiQXZHMDhxZldPV0R0RnNEV1BvRjJKdWo4ZVFH?=
- =?utf-8?B?VlBtR2RoTlJEblNNMFZrWjVmUVdPVXpRaDBlTVg2R0c4UWFaWmV4MDBEMVBI?=
- =?utf-8?B?c3NnTTN6dnczd3psYkNRRGJhSllvWDFET0hsc2NUdFErWE8yemU3RG9LRll2?=
- =?utf-8?B?YlRkcGo5MFFjWXRsWnBUT1RCSnlzV3N0M2VicWp2RTV1WGxVam9hMWFhaGlE?=
- =?utf-8?B?M0Z1Z1U3ZU5LWlJxamFUb0x2MnAwbjI5VGpIaTFkdWJ2R25ZZ3RwNDgrQ1di?=
- =?utf-8?B?VlhQNC84c09KWEwxS1pXa2x3cStPdjBuYmpVVFB0UUUrMGIzWDc1c3lPZCtM?=
- =?utf-8?B?YTFRdWt6WGZhMGZqTUhOU1dwY3ZKeXNCV3ZQZmNaSVlMcDhpaHBxNnhCNC82?=
- =?utf-8?B?M2x6cStOdVhMRDZubWMwOGRNSU81QnBzVGsvK0ZYZFNTeWdpdis5YnFIeEVE?=
- =?utf-8?B?YUdRNVdNUkZ5Q1ZOZnFRZ3VRMUdXa1lIWlEyYWxvQVBVRWhmQzl0bVpxSHFw?=
- =?utf-8?B?M283REl6bGcyRGk4UlBMYW9PQVRjM1ZaQStmSlpHZEthTzVtRklVNVRLcEh2?=
- =?utf-8?B?Lzh0ZkkvQ2YvR040dG0xSjN0VHV2YjhoZTFON2dJZmE3dFFLdEtQQWFKWXJo?=
- =?utf-8?B?WFhpajJISW5PbDdBQVBEbG9iVkNBOUhtd3p5Tmg4dnpRK1N3cGhoUDFmanNC?=
- =?utf-8?B?UnpKemhkMDFjWkdMQnVPNUxrMkQvRjYyNFhKbFROcHQ2SXJyN1kwMXQxcWtJ?=
- =?utf-8?B?emtBb2YyWURZanUrc0RvSmgvNS93a2hjTWljQVQ2WThOQzBaQ28wQTY4TVJu?=
- =?utf-8?B?Q2I1dm9yMklJcXB1U2JFMlpzNENYRE5LMHdhK0RMZ3p4ekFOQytjMmtQVS96?=
- =?utf-8?B?UWttK0JBTjVBbXMyU0htOWVRTUhlOGU2bTF0THdvbDhDRGVDc1lZbHZLUzhu?=
- =?utf-8?B?bFNHbXArZ1IzNlJHaEZSaFA4VmJqYjdHN1VvekpUMFdkMDBNbFdzQkFXZ05u?=
- =?utf-8?B?Sm9XNHRSZE9BWFZReG1oWnlqZXNqaUVVSmFQT25HWDJVdDZZSWFESW1QWDkz?=
- =?utf-8?B?MmRWUmFDMnhoM2Y4Tmc5dlpsVVBvNHZha3FiZ3A5UXZiNnV0SWRtMmJXUmpp?=
- =?utf-8?B?UjFWUE52cHk1amd5TmVJOG9rVGhHTFMvL3VvdDlQRkQ0ejFsVnI1QXMwUGV3?=
- =?utf-8?B?a2QzOWVKU0hrTFc5NFVHNW51ZngzZk1WUWlXRzhib2JQRlMxbkZscGNhWHJN?=
- =?utf-8?B?Z1hxbVcwLzZGQzB0QnBvZklZdTVKL1dYanJSS3J5RS91VndGTDlET3kvazdV?=
- =?utf-8?B?TXVnQlE2eEQ0clZGUUs5Y2NBTFhXWlhqUE9OdGFlcXhxZ05PQW9DZDhOdnhq?=
- =?utf-8?B?RXJCY3R4emtRbW1JVkhMeUw2MDN5cDA5TmsxYTBqOThCeTMxL0VuOENZamI0?=
- =?utf-8?B?cFlJamM5ZExNUGNac3o3WFpHWm5nQVloZk5yaVZ5K1JOemVPdS9zaURLd3dy?=
- =?utf-8?B?ZE1KWVNFT3ViZUtja0Y2L3dtdEhKRk5IMDFGVTYxZFozRTJieWRyVjh2K3ds?=
- =?utf-8?B?L3R1OHBWNHpva0ZHa250WjhVWnhHVkRKcG9GZ3U5Znhzb1hhSHNSN3V6U0Q2?=
- =?utf-8?B?VlpmODZzbCtUZUM3emNzU002c0dNbFdFd1R3NkVQQmFlOXFjOFlxVlpPTi9q?=
- =?utf-8?B?TW5qYjY3akVEN2x5VnI4OVNuZlczdC9Md1BoeWo1VVlKV1FTVGRwTGxOZzQr?=
- =?utf-8?B?cHhOazc1WjVZWEtUa1RRYzgxb092RGdoV2Q1c3JVVzVabzF6NjZGMkF5bVJI?=
- =?utf-8?B?M1o0d2UwTURjQVNzeUdrMTZxU2ZtZE4raEJwZzh0NjRxRGp6R3N3TG1hcmRF?=
- =?utf-8?B?MnphMUc4cU1hLzhJSXczQVVwT0VLdXJMVENJNTBMZjNPWUFVYzRiczZZVUlK?=
- =?utf-8?B?R0RydTZtQllXNFRvdTdlWTJEb0tveGpHNVNiUmVQTlkvVjREZDAveUtNZ09m?=
- =?utf-8?B?emNLWGxUMXh2b1Myb1lJQVY2d2RnbE9nZGtrYnFxSzErdVJFVUxCUG1NSWVM?=
- =?utf-8?B?ckttbXF4TENVRml4Sm1HVEJBYTFUSHhQbFMxK0hwaHFrTitRS0JHdz09?=
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: bad2f571-95bb-4a87-4eab-08deafca12c0
-X-MS-Exchange-CrossTenant-AuthSource: SA0PR12MB4557.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 May 2026 01:59:16.7910
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: VxiSPTfMYMYbm+NNlAEA+CiK6bcF5YkCCLJ99kUisSfApEvhPLzfox8kRS4w2t43yeiTaz8dKZmAsmPiXxODBg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR12MB8126
+From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Date: Tue, 12 May 2026 06:11:45 +0200
+X-Gm-Features: AVHnY4IuMfJZPaOZO7jII0ZNJA_xDBZ2_WCe0ehBQSvMnGQVBF7zfm58B0VrRjU
+Message-ID: <CAJGKYO4BZQd9sCsgnrSJ-wG5aDjM2P5nXJOyhDn=nU1O3+2T8w@mail.gmail.com>
+Subject: [PATCH] unseeded cnrg warning flooding dmesg fix, v2
+To: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
+Cc: Sasha Levin <sashal@kernel.org>, Hardik Garg <hargar@linux.microsoft.com>, 
+	Vijayendra Suman <vijayendra.suman@oracle.com>, Jon Hunter <jonathanh@nvidia.com>, 
+	Ron Economos <re@w6rz.net>, Brett A C Sheffield <bacs@librecast.net>, 
+	Florian Fainelli <florian.fainelli@broadcom.com>, Mark Brown <broonie@kernel.org>
+Content-Type: multipart/mixed; boundary="000000000000e9c6f00651971102"
 
+--000000000000e9c6f00651971102
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+Hi,
 
-On 5/10/26 16:29, Francesco Valla wrote:
-> Hello,
-> 
-> this is the third (and hopefully last) RFC version for the DRM-based
-> splash screen.
-> 
-> Motivation behind the work can be found in v1 [0]; in a nutshell, the
-> splash DRM client can draw a splashscreen using:
-> 
->    - the BMP image supplied by the EFI BGRT;
->    - a BMP image loaded as firmware (either built-in or loaded from the
->      filesystem);
->    - a colored background.
-> 
-> This revision greatly simplifies the image seletion logic; now the EFI
-> BGRT is always used as first source if enabled, with a fallback to BMP
-> image loaded as firmware and then to a plain color.
-> 
-> Sanity checks on the EFI BGRT image have been borrowed from the efifb
-> driver. More complete splash providers (e.g.: Plymouth) have an
-> extensive management of platform-specific quirks, but I don't think it
-> would be reasonable to introduce such complexity here.
-> 
-> Additional notes:
->    - Rotation is still not managed (and probably won't?).
->    - Support for tiled screens is untested.
->    - Plain color and BMP sources were tested on QEMU, Beagleplay and
->      i.MX93 FRDM.
->    - EFI BGRT support was tested using QEMU+OVMF.
-> 
-> Thank you in advance for any feedback.
+A patch based on 5.15.202, in-line for comments + attachment as patch
 
-Unfortunately I found that I couldn't compile with my normal Kconfig.
+Public patch by url / commit for future reference:
 
-ERROR: modpost: "bgrt_tab" [drivers/gpu/drm/clients/drm_client_lib.ko] 
-undefined!
-ERROR: modpost: "bgrt_image_size" 
-[drivers/gpu/drm/clients/drm_client_lib.ko] undefined!
-make[2]: *** [scripts/Makefile.modpost:147: Module.symvers] Error 1
-make[1]: *** [/home/supermario/src/linux/Makefile:2091: modpost] Error 2
-make: *** [Makefile:248: __sub-make] Error 2
+https://raw.githubusercontent.com/robang74/uchaosys/
+4ddd9859582441afe0faf43a227124d8cf579c5c/
+cnfg/bothering-warn_unseeded_randomness-fix.patch
 
-❮ grep ^CONFIG_DRM .config
-CONFIG_DRM=y
-CONFIG_DRM_KMS_HELPER=m
-CONFIG_DRM_DRAW=y
-CONFIG_DRM_CLIENT=y
-CONFIG_DRM_CLIENT_LIB=m
-CONFIG_DRM_CLIENT_SELECTION=m
-CONFIG_DRM_CLIENT_SETUP=y
-CONFIG_DRM_FBDEV_EMULATION=y
-CONFIG_DRM_FBDEV_OVERALLOC=100
-CONFIG_DRM_CLIENT_SPLASH=y
-CONFIG_DRM_CLIENT_SPLASH_BACKGROUND_COLOR=0x000000
-CONFIG_DRM_CLIENT_SPLASH_SRC_BGRT=y
-CONFIG_DRM_CLIENT_SPLASH_BMP_SUPPORT=y
-CONFIG_DRM_CLIENT_DEFAULT_SPLASH=y
-CONFIG_DRM_CLIENT_DEFAULT="splash"
-CONFIG_DRM_LOAD_EDID_FIRMWARE=y
-CONFIG_DRM_DISPLAY_HELPER=m
-CONFIG_DRM_DISPLAY_DP_AUX_CHARDEV=y
-CONFIG_DRM_DISPLAY_DP_HELPER=y
-CONFIG_DRM_DISPLAY_DSC_HELPER=y
-CONFIG_DRM_DISPLAY_HDCP_HELPER=y
-CONFIG_DRM_DISPLAY_HDMI_CEC_NOTIFIER_HELPER=y
-CONFIG_DRM_DISPLAY_HDMI_HELPER=y
-CONFIG_DRM_TTM=m
-CONFIG_DRM_EXEC=m
-CONFIG_DRM_BUDDY=m
-CONFIG_DRM_TTM_HELPER=m
-CONFIG_DRM_GEM_SHMEM_HELPER=m
-CONFIG_DRM_SUBALLOC_HELPER=m
-CONFIG_DRM_SCHED=m
-CONFIG_DRM_PANEL_BACKLIGHT_QUIRKS=m
-CONFIG_DRM_PRIVACY_SCREEN=y
-CONFIG_DRM_AMDGPU=m
-CONFIG_DRM_AMDGPU_CIK=y
-CONFIG_DRM_AMDGPU_USERPTR=y
-CONFIG_DRM_AMD_ISP=y
-CONFIG_DRM_AMD_ACP=y
-CONFIG_DRM_AMD_DC=y
-CONFIG_DRM_AMD_DC_FP=y
-CONFIG_DRM_AMD_SECURE_DISPLAY=y
-CONFIG_DRM_BRIDGE=y
-CONFIG_DRM_PANEL_BRIDGE=y
-CONFIG_DRM_PANEL=y
-CONFIG_DRM_SYSFB_HELPER=m
-CONFIG_DRM_SIMPLEDRM=m
-CONFIG_DRM_PANEL_ORIENTATION_QUIRKS=y
-CONFIG_DRM_ACCEL=y
-CONFIG_DRM_ACCEL_AMDXDNA=m
-CONFIG_DRM_ACCEL_HABANALABS=m
-CONFIG_DRM_ACCEL_IVPU=m
-CONFIG_DRM_ACCEL_QAIC=m
-❮ grep BGRT .config
-CONFIG_ACPI_BGRT=y
-CONFIG_DRM_CLIENT_SPLASH_SRC_BGRT=y
+Best regards,
+Roberto A. Foglietta
 
-> 
-> Best regards,
-> Francesco
-> 
-> [0] https://lore.kernel.org/all/20251027-drm_client_splash-v1-0-00698933b34a@valla.it
-> 
-> Signed-off-by: Francesco Valla <francesco@valla.it>
-> ---
-> Changes in v3:
->    - Simplified the image selection and management logic, with direct
->      fallback from EFI BGRT to MP as firmware
->    - Used new drm_draw_can_convert_from_xrgb8888() API
->    - Added proper get_unaligned_ calls for EFI BGRT access
->    - Fixed Kconfig dependencies
->    - Link to v2: https://lore.kernel.org/r/20260106-drm_client_splash-v2-0-6e86a7434b59@valla.it
-> 
-> Changes in v2:
->    - Moved from raw dump to BMP format for static image source
->    - Removed support for configurable message
->    - Removed support for progress bar
->    - Added EFI BGRT as image source
-> Link to v1: https://lore.kernel.org/r/20251027-drm_client_splash-v1-0-00698933b34a@valla.it
-> 
-> To: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
-> To: Maxime Ripard <mripard@kernel.org>
-> To: Thomas Zimmermann <tzimmermann@suse.de>
-> To: David Airlie <airlied@gmail.com>
-> To: Simona Vetter <simona@ffwll.ch>
-> To: Francesco Valla <francesco@valla.it>
-> To: Jonathan Corbet <corbet@lwn.net>
-> To: Shuah Khan <skhan@linuxfoundation.org>
-> Cc: linux-kernel@vger.kernel.org
-> Cc: dri-devel@lists.freedesktop.org
-> Cc: linux-doc@vger.kernel.org
-> 
-> ---
-> Francesco Valla (3):
->        drm: client: add splash client
->        MAINTAINERS: add entry for DRM splash client
->        drm: docs: remove bootsplash from TODO
-> 
->   Documentation/gpu/todo.rst                    |  17 -
->   MAINTAINERS                                   |   7 +
->   drivers/gpu/drm/clients/Kconfig               |  63 +-
->   drivers/gpu/drm/clients/Makefile              |   1 +
->   drivers/gpu/drm/clients/drm_client_internal.h |   9 +
->   drivers/gpu/drm/clients/drm_client_setup.c    |   8 +
->   drivers/gpu/drm/clients/drm_splash.c          | 932 ++++++++++++++++++++++++++
->   7 files changed, 1019 insertions(+), 18 deletions(-)
-> ---
-> base-commit: afaa0a477099cb7256e26fe11289c753a225ac97
-> change-id: 20251026-drm_client_splash-e10d7d663e7f
-> 
-> Best regards,
-> --
-> Francesco Valla <francesco@valla.it>
-> 
+From df61514c6e07ae722c87b2727999bdc49a08bcaa Mon Sep 17 00:00:00 2001
+From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Date: Tue, 12 May 2026 05:39:41 +0200
+Subject: [PATCH] unseeded cnrg warning flooding dmesg fix, v2
+MIME-Version: 1.0
+Content-Type: text/plain; charset=3DUTF-8
+Content-Transfer-Encoding: 8bit
 
+Better than hiding the warning, there is a third approach compared
+print_ratelimited() and printk_once(), printk one over N=3D256 which
+is fitting this specific case: at boot time too much warnings for
+a few seconds but still printing something in case the problem
+persists without clogging the log.
+
+On a SMP system the counter might face a race condition due to non
+atomic increment and this can lead to skipping a scheduled print or
+print two of them when just one was expected. No harm in both cases,
+anyway.
+
+To be honest, complaining that a suppression counter might be subject
+to a race condition on an SMP system - when, if it weren=E2=80=99t there, a=
+n
+alarm would be triggered stating that the system is initialising
+cryptographic directives without adequate entropy support - seems
+a bit surreal to me.
+
+Patch based on Linux kernel 5.15.202 LTS master branch.
+
+v1 -> v2: a bit better English and "git am" format
+
+Signed-off-by: Roberto A. Foglietta <roberto.foglietta@gmail.com>
+---
+ drivers/char/random.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/char/random.c b/drivers/char/random.c
+index 8642326de6e1..eeec336b10fa 100644
+--- a/drivers/char/random.c
++++ b/drivers/char/random.c
+@@ -182,7 +182,8 @@ static void __cold process_random_ready_list(void)
+ }
+
+ #define warn_unseeded_randomness() \
+- if (IS_ENABLED(CONFIG_WARN_ALL_UNSEEDED_RANDOM) && !crng_ready()) \
++ if (IS_ENABLED(CONFIG_WARN_ALL_UNSEEDED_RANDOM) && !crng_ready() \
++ && !({ static u8 x=3D-1; ++x; })) \
+  printk_deferred(KERN_NOTICE "random: %s called from %pS with
+crng_init=3D%d\n", \
+  __func__, (void *)_RET_IP_, crng_init)
+
+--=20
+2.34.1
+
+--000000000000e9c6f00651971102
+Content-Type: text/x-patch; charset="UTF-8"; 
+	name="0001-unseeded-cnrg-warning-flooding-dmesg-fix-v2.patch"
+Content-Disposition: attachment; 
+	filename="0001-unseeded-cnrg-warning-flooding-dmesg-fix-v2.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_mp242k450>
+X-Attachment-Id: f_mp242k450
+
+RnJvbSBkZjYxNTE0YzZlMDdhZTcyMmM4N2IyNzI3OTk5YmRjNDlhMDhiY2FhIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiAiUm9iZXJ0byBBLiBGb2dsaWV0dGEiIDxyb2JlcnRvLmZvZ2xp
+ZXR0YUBnbWFpbC5jb20+CkRhdGU6IFR1ZSwgMTIgTWF5IDIwMjYgMDU6Mzk6NDEgKzAyMDAKU3Vi
+amVjdDogW1BBVENIXSB1bnNlZWRlZCBjbnJnIHdhcm5pbmcgZmxvb2RpbmcgZG1lc2cgZml4LCB2
+MgpNSU1FLVZlcnNpb246IDEuMApDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9VVRG
+LTgKQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogOGJpdAoKQmV0dGVyIHRoYW4gaGlkaW5nIHRo
+ZSB3YXJuaW5nLCB0aGVyZSBpcyBhIHRoaXJkIGFwcHJvYWNoIGNvbXBhcmVkCnByaW50X3JhdGVs
+aW1pdGVkKCkgYW5kIHByaW50a19vbmNlKCksIHByaW50ayBvbmUgb3ZlciBOPTI1NiB3aGljaApp
+cyBmaXR0aW5nIHRoaXMgc3BlY2lmaWMgY2FzZTogYXQgYm9vdCB0aW1lIHRvbyBtdWNoIHdhcm5p
+bmdzIGZvcgphIGZldyBzZWNvbmRzIGJ1dCBzdGlsbCBwcmludGluZyBzb21ldGhpbmcgaW4gY2Fz
+ZSB0aGUgcHJvYmxlbQpwZXJzaXN0cyB3aXRob3V0IGNsb2dnaW5nIHRoZSBsb2cuCgpPbiBhIFNN
+UCBzeXN0ZW0gdGhlIGNvdW50ZXIgbWlnaHQgZmFjZSBhIHJhY2UgY29uZGl0aW9uIGR1ZSB0byBu
+b24KYXRvbWljIGluY3JlbWVudCBhbmQgdGhpcyBjYW4gbGVhZCB0byBza2lwcGluZyBhIHNjaGVk
+dWxlZCBwcmludCBvcgpwcmludCB0d28gb2YgdGhlbSB3aGVuIGp1c3Qgb25lIHdhcyBleHBlY3Rl
+ZC4gTm8gaGFybSBpbiBib3RoIGNhc2VzLAphbnl3YXkuCgpUbyBiZSBob25lc3QsIGNvbXBsYWlu
+aW5nIHRoYXQgYSBzdXBwcmVzc2lvbiBjb3VudGVyIG1pZ2h0IGJlIHN1YmplY3QKdG8gYSByYWNl
+IGNvbmRpdGlvbiBvbiBhbiBTTVAgc3lzdGVtIC0gd2hlbiwgaWYgaXQgd2VyZW7igJl0IHRoZXJl
+LCBhbgphbGFybSB3b3VsZCBiZSB0cmlnZ2VyZWQgc3RhdGluZyB0aGF0IHRoZSBzeXN0ZW0gaXMg
+aW5pdGlhbGlzaW5nCmNyeXB0b2dyYXBoaWMgZGlyZWN0aXZlcyB3aXRob3V0IGFkZXF1YXRlIGVu
+dHJvcHkgc3VwcG9ydCAtIHNlZW1zCmEgYml0IHN1cnJlYWwgdG8gbWUuCgpQYXRjaCBiYXNlZCBv
+biBMaW51eCBrZXJuZWwgNS4xNS4yMDIgTFRTIG1hc3RlciBicmFuY2guCgp2MSAtPiB2MjogYSBi
+aXQgYmV0dGVyIEVuZ2xpc2ggYW5kICJnaXQgYW0iIGZvcm1hdAoKU2lnbmVkLW9mZi1ieTogUm9i
+ZXJ0byBBLiBGb2dsaWV0dGEgPHJvYmVydG8uZm9nbGlldHRhQGdtYWlsLmNvbT4KLS0tCiBkcml2
+ZXJzL2NoYXIvcmFuZG9tLmMgfCAzICsrLQogMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygr
+KSwgMSBkZWxldGlvbigtKQoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvY2hhci9yYW5kb20uYyBiL2Ry
+aXZlcnMvY2hhci9yYW5kb20uYwppbmRleCA4NjQyMzI2ZGU2ZTEuLmVlZWMzMzZiMTBmYSAxMDA2
+NDQKLS0tIGEvZHJpdmVycy9jaGFyL3JhbmRvbS5jCisrKyBiL2RyaXZlcnMvY2hhci9yYW5kb20u
+YwpAQCAtMTgyLDcgKzE4Miw4IEBAIHN0YXRpYyB2b2lkIF9fY29sZCBwcm9jZXNzX3JhbmRvbV9y
+ZWFkeV9saXN0KHZvaWQpCiB9CiAKICNkZWZpbmUgd2Fybl91bnNlZWRlZF9yYW5kb21uZXNzKCkg
+XAotCWlmIChJU19FTkFCTEVEKENPTkZJR19XQVJOX0FMTF9VTlNFRURFRF9SQU5ET00pICYmICFj
+cm5nX3JlYWR5KCkpIFwKKwlpZiAoSVNfRU5BQkxFRChDT05GSUdfV0FSTl9BTExfVU5TRUVERURf
+UkFORE9NKSAmJiAhY3JuZ19yZWFkeSgpIFwKKwkmJiAhKHsgc3RhdGljIHU4IHg9LTE7ICsreDsg
+fSkpIFwKIAkJcHJpbnRrX2RlZmVycmVkKEtFUk5fTk9USUNFICJyYW5kb206ICVzIGNhbGxlZCBm
+cm9tICVwUyB3aXRoIGNybmdfaW5pdD0lZFxuIiwgXAogCQkJCV9fZnVuY19fLCAodm9pZCAqKV9S
+RVRfSVBfLCBjcm5nX2luaXQpCiAKLS0gCjIuMzQuMQoK
+--000000000000e9c6f00651971102--
