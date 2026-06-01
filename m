@@ -1,326 +1,234 @@
-Received: from hamster.birch.relay.mailchannels.net (hamster.birch.relay.mailchannels.net [23.83.209.80])
+Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2B9526299
-	for <linux-embedded@vger.kernel.org>; Sat, 30 May 2026 21:58:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=23.83.209.80
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780178325; cv=none; b=LrIa15jBsUHoev/AcRT49oq2UOJf6/Rtm6ZOo70EJNZCmlNP8jECh46ByPKkzqTrXpMAu5fBygMOkg5JrOZjIHLdth2lwgpUIR7zDy7yaF0GVolMpF2/AxlIdCAtGyRKLEE5wXQV86fKft/EXRwehClIdwluW2acfbF8l2i2WOU=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780178325; c=relaxed/simple;
-	bh=+fzGnKjkIZeCdWTZmbonjCVtTDnQCgKDFjzg1c4ClxQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=TqbtjtNQdW1EXgwQuEO1M7uVMOle+RA9Xk3veK5QeLtBdTUnYAE7yGW9cq0dfLF3+xGMz17h2lzp/D6So/IIIzcnmfwmZbddmeMvcRkop9KUXX0HYiGniHY//lGHFcbjkxda8iSLfUm/EjzxnzYXPTjYTuJnMcIgpMWFOKSAZYQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net; spf=pass smtp.mailfrom=landley.net; dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b=Ohwo1Qhh; arc=none smtp.client-ip=23.83.209.80
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=landley.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=landley.net
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 754C53446C7
+	for <linux-embedded@vger.kernel.org>; Mon,  1 Jun 2026 20:55:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1780347320; cv=fail; b=Lx7GDNIGIElTxIYsvSOyYhRrliZegzf9lPDVSXumpFwoqNydYVF6lNb97RoJ18RYZTe6rWbmIA/jKFIVNaT4GaOa1tXmyh1KEJUy6vIteouW8Y2miBO0gMEIQ33bI8XDZN2izc9PE0ESvYFZge+WRFVwUHWzi5cJp0Mp1h5aL0c=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1780347320; c=relaxed/simple;
+	bh=hmPEoVcVJUb9WnmER/eFHuDsiA/Ju/oFuW6YLKDfWHY=;
+	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=A5XDs52jP899TbRTiEHfAx5RR0Gfdco20XlnP53Jm+/1M14IgcQIFpTNCG/2/O7JA2zNcrxpoc/xhBM5cmq/T74PkfzOxmPcji6EvzSwaI6dTkM57hQ7SEL73pd5ED8O0WYj3J1w6o1DnV2PKx28oN1LCMrqgDFuNc+tc2gl1sw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=bY/Y89ri; arc=fail smtp.client-ip=185.183.30.70
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=landley.net header.i=@landley.net header.b="Ohwo1Qhh"
-X-Sender-Id: dreamhost|x-authsender|rob@landley.net
-Received: from relay.mailchannels.net (localhost [127.0.0.1])
-	by relay.mailchannels.net (Postfix) with ESMTP id A2D6546240C;
-	Sat, 30 May 2026 20:41:26 +0000 (UTC)
-Received: from pdx1-sub0-mail-a210.dreamhost.com (100-103-80-215.trex-nlb.outbound.svc.cluster.local [100.103.80.215])
-	(Authenticated sender: dreamhost)
-	by relay.mailchannels.net (Postfix) with ESMTPA id 02955462308;
-	Sat, 30 May 2026 20:41:25 +0000 (UTC)
-X-Sender-Id: dreamhost|x-authsender|rob@landley.net
-X-MC-Relay: Neutral
-X-MailChannels-SenderId: dreamhost|x-authsender|rob@landley.net
-X-MailChannels-Auth-Id: dreamhost
-X-Whimsical-Duck: 3e1b06e141e767a0_1780173685304_4149709482
-X-MC-Loop-Signature: 1780173685304:3604371909
-X-MC-Ingress-Time: 1780173685304
-Received: from pdx1-sub0-mail-a210.dreamhost.com (pop.dreamhost.com
- [64.90.62.162])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384)
-	by 100.103.80.215 (trex/7.1.5);
-	Sat, 30 May 2026 20:41:25 +0000
-Received: from [192.168.14.155] (unknown [209.81.127.98])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: rob@landley.net)
-	by pdx1-sub0-mail-a210.dreamhost.com (Postfix) with ESMTPSA id 4gSXFJ5CRLzSQ;
-	Sat, 30 May 2026 13:41:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=landley.net;
-	s=dreamhost; t=1780173684;
-	bh=36AGt26xIJcYjMSl8shKICC+ai8jKxcAClVkCrGuL5s=;
-	h=Date:Subject:To:From:Content-Type:Content-Transfer-Encoding;
-	b=Ohwo1QhhRGRofOKoUUdNQ17qL3oIHlHEuJuI09wNlapbRggE+Wpp4SPgMShyvSJST
-	 mziKBRqF7ojUta07AH95wt3SH/+grmWHwVCd+A0C9F0rdcGXP0lTVDrc1fHx4W2QlG
-	 x2nUTBE1x2T8PBTYMKUBi1bHkiTqG77vQdNfXakncZDHpFcObaJ5G1fv9AhXK3/xeB
-	 aYPjv1pdOjbGIJLgoVbDhb/JD8MSqrG9RoBZhypbJ9xejIIFD2QWAujsYHObisfa5D
-	 BvkER8pXJaVGfAS9tTSYQ11o4u3t82NtePuBK3OoNnB2CKWRcfkBa7dcHGJvhi/xMe
-	 3GDJhYf53D44A==
-Message-ID: <9e3f48db-c827-4892-8e41-656e9c60ff89@landley.net>
-Date: Sat, 30 May 2026 15:41:24 -0500
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="bY/Y89ri"
+Received: from pps.filterd (m0209319.ppops.net [127.0.0.1])
+	by mx08-001d1705.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 651KndAS3240773;
+	Mon, 1 Jun 2026 20:55:08 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=p1; bh=hmPEoVc
+	VJUb9WnmER/eFHuDsiA/Ju/oFuW6YLKDfWHY=; b=bY/Y89ri7ohx6BqFu+qK0Tz
+	3jn/SPugAKKJco6quQEvv7sUqJ901gJzOiL786CmgiFyxp01VFghd8i9w+PXBQp1
+	XpD3J62mU7J9bSOkEKHnypriYB3KiOt0saDtRJj2ki3WH1d46IYmMDwIYFs+M4TE
+	IDuC9PB3pc9lfsvEVM+mXu6clb8VOOPPMRYXJm0rBfOoPZunYDbLZ5QvJaodAmSn
+	kahs20Xvy7LWPp/F5JoBhiepBc3eYlsiRbRpcXigJJS57rpmKdZljg0Hq2One8As
+	zJVUbOxJRc9WfEjSbdt4Cme8EASSl+lwlcwWW9r59kGMvdgxWJu9RPk85I3VmNQ=
+	=
+Received: from bl2pr02cu003.outbound.protection.outlook.com (mail-eastusazon11011065.outbound.protection.outlook.com [52.101.52.65])
+	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 4efr9p28kn-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
+	Mon, 01 Jun 2026 20:55:08 +0000 (GMT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=fl84gH1PFItz44NVsZPPHkMaG05agk3vbBrrim4/w3JhXb44HvvU7BSBf5tfO0k3XbyqdPQEP4oZXCSvBvxltCiEhcJn94Hnmloq9hqmd6X6uqzT5WBC5GAB/8WgGXP6DO534IZjV2Dj48Zx4mJVtJFAvk2x+kH49Bk4//jahcoR28GloWZb/7gDqFpKL4jo8A5D94wdnovYJBastCV0SqxDqpn3RZqpsLQE+533NUMabN6MNjPDQO6hXUpu4RG/W6dGS9YJlOtPLut++RcyAFzi310bGuuWNFdWm5kguK8kJWal1Tk/10ABVg1bQ92mPi4XNOnj+pDfTeeh+EuZJQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=hmPEoVcVJUb9WnmER/eFHuDsiA/Ju/oFuW6YLKDfWHY=;
+ b=ehqYHXR6LmtKVPRktagBEMMxeaQBDpKlyuA8Ur71wfunWyyYMwYueJXPkS9sDjo2LsIyhacgziTR2iVWqmUMlv6E4K5WjTZfcdIscY/6BJGBwE2dLZ8exme32FsFSvo8/f69J9f81bzfaiWO/EJ1ZQZZctyUUPJ9YL05EAO/JFUJ8LuO62R3ppcCwZxY6FI90OwFghUWjyCDU96/7+/vtKIM4KaD6Fd6WiKvkEi2otBgyrwredr0n3y2t4sOezdQjotlveQuyGB0+Cw3MHQhb16AkOeVCP37Ic6mA+NJGhearLRor/qEsIYKnMbUjD6AelNyheqYfbig7FlD+LQgBw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
+ dkim=pass header.d=sony.com; arc=none
+Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
+ by CH0PR13MB4668.namprd13.prod.outlook.com (2603:10b6:610:ca::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.92.4; Mon, 1 Jun 2026
+ 20:54:39 +0000
+Received: from MW5PR13MB5632.namprd13.prod.outlook.com
+ ([fe80::29e9:b355:cabf:66f1]) by MW5PR13MB5632.namprd13.prod.outlook.com
+ ([fe80::29e9:b355:cabf:66f1%3]) with mapi id 15.21.0092.005; Mon, 1 Jun 2026
+ 20:54:38 +0000
+From: "Bird, Tim" <Tim.Bird@sony.com>
+To: Rob Landley <rob@landley.net>,
+        "linux-embedded@vger.kernel.org"
+	<linux-embedded@vger.kernel.org>
+Subject: RE: mkroot quickstart (was RE: Testing on lots of architecture
+ targets with mkroot.)
+Thread-Topic: mkroot quickstart (was RE: Testing on lots of architecture
+ targets with mkroot.)
+Thread-Index: AQHc74NjJg12AYhEcEarJG3Xfa25T7YnClUAgAMgUbA=
+Date: Mon, 1 Jun 2026 20:54:38 +0000
+Message-ID:
+ <MW5PR13MB563232D40A099D798E698272FD152@MW5PR13MB5632.namprd13.prod.outlook.com>
+References: <f35774f8-4194-4715-8321-dc2fdfc7fc88@landley.net>
+ <MW5PR13MB5632F0D9C8E8A12F2C24B64AFD012@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <81e4aefd-f052-4a52-94b5-36030b26c358@landley.net>
+ <MW5PR13MB5632FDD1833ABA105437D02AFD162@MW5PR13MB5632.namprd13.prod.outlook.com>
+ <9e3f48db-c827-4892-8e41-656e9c60ff89@landley.net>
+In-Reply-To: <9e3f48db-c827-4892-8e41-656e9c60ff89@landley.net>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|CH0PR13MB4668:EE_
+x-ms-office365-filtering-correlation-id: d591169d-17ec-44c4-cba6-08dec01ffefd
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|366016|376014|1800799024|10070799003|4143699003|11063799006|3023799007|6133799003|22082099003|18002099003|38070700021|56012099006;
+x-microsoft-antispam-message-info:
+ iXgD5hmUmycrgydDUXcUN5+24iTBFqEWuFw56XEEXRZ4Wip/wCBbdGiMbDKc6CQ436Uszk5kpfRwWMmg8Wetcw/HTQk5bBmQwABp2vJs8j0jJvNcHecY12EcHJQVL1Td9diT9pPgN+j94TSk+nBNtfqFpTR+uWDpT55FA1rv8mD+5TRQgiWnel8MwM0K39NQS/Mu8hpaxxfOhpnHmvDAL47TSj93neYSkKJMkR/yN+PgZppbx9WnCrfRstoyIJ+1YVq2ahAc+k4u0fs1MGt0fKv0G2DeXboyGKJnH72tBoYxu+I3RhIza0TPFN1JHVx+pu8dIdU69HoCbJ7Y9wBp59lmValf2AdrBVZRK0o9QOrk+SULp4CXsBexZH+la9HT67Ml45NYB/BGKYaHIoyTLBexS3iCzQ4MfRk5hPzIVkTiP3XW6uxLPKinPemR4ccF63jt+cVab2P7w/MYblUXbDcoURN8Kq87NYoATEaSDI23QgHyBP8HfkG6y0BPymSS9ULSs/ottq4zNkU1uGBVyJA1SjhIqM4kWSju5jCKcaAygCM/Pqfj+hc7AQT619HWtQElMfZ65s/n+blVbcbrL9H0Hkq3kHSpV7pzrxAl7fjb/lLFLxeGZS1eXz7/v/OoVIUrS4pxZJC1vhkObjrKXBp47inWrlkt8/tSPIz8MooAWW02hJoY3LVAhjc6wuC//HdvMg9Ha8hiT+YFbaB+9A==
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(10070799003)(4143699003)(11063799006)(3023799007)(6133799003)(22082099003)(18002099003)(38070700021)(56012099006);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?dmRvS1RpOWhVRzBTVDB6RkxtT0ZrOE81clcvMUcwdWRKZngyTGRIclgydUxa?=
+ =?utf-8?B?T1ZiaS85NkRMYkhqeXZKclI5ak5NOEtoNkNQaWhQYU5MN2tOSXVISHJaZU9C?=
+ =?utf-8?B?WVRUZitrQ0FwSDlISzFjdW9hSHZqL0R1WjE0U3Z3eC9tcGZucXJPZUpwa1Nt?=
+ =?utf-8?B?dXVZdkFKa1B2T0JFK0o0R0M4dDVjOXdHdlQ4U0hmT3BtL3lXQisxd1granJZ?=
+ =?utf-8?B?MTBhTCt4dXM2UHJYOGtoZDVRMWJnNG5FS25TMEo1cGFsaERUT3ZzaURhTjZD?=
+ =?utf-8?B?MnRuMnNYbytMeVhKZWRkNzVFYWoraE9Wa2g1Q3lCanNUV0psNnZIbDJtckpR?=
+ =?utf-8?B?bHZ4amR3d1piT2pwVVFiT3FMSUZEMTdEWHQ3ZDVacGpia2tLQkJqYnlSWUpv?=
+ =?utf-8?B?UEFXZUlGMDNSbTA3WnVhdTR5djRuMGFFeGRZMjQwMHk4WjlPei9nSExyZlhv?=
+ =?utf-8?B?YnNWbmtCN2RpK2RMK1NSbnVsMGpEa0toelh0ZHdoYzVVVXNLUElQUm44SnFE?=
+ =?utf-8?B?VWYzODdDSDZ4NU0zRngzUTlEVVg2cVN4NTBpMmRIR1dCSHZCSUVwZDRTUzNi?=
+ =?utf-8?B?bVlLY3E4ZzNodG1NbHhRK2NZZWFRa3ZTcjAzcVcyelJNUXZFbU4zckdQMnBM?=
+ =?utf-8?B?cCt1MlhrZnNMNjdtMmhTTVVUQUVxaXVubWdvRDRnN0t5WmFmN0tOU1A0SklJ?=
+ =?utf-8?B?R01xOGliSGNYSzBLU09Vd3RoK1p3dGJPeG51UmZaYjBQSHpyb3daMHNmT1Uw?=
+ =?utf-8?B?Z2wyWmdPNTN4bTNRRzAvZWU0ME5BNzRhUG9TNXM5ZUhHMGhqTHNTRXRxbFN6?=
+ =?utf-8?B?b0V3MXlubm1KdGJOeW4yY1RpQXNTbW13bDRGZHZEMEQ1bVladWZCcGJUMFpC?=
+ =?utf-8?B?d3Awd2dzL1JXTjBNTkZHVVJDYXNlcXk3ak16akNxQ0lCcVVvREhTWjJYNzJs?=
+ =?utf-8?B?Y0hyR1dURE1uODlHeUJWcTQ5ditMZG9xemlhSzhXL1lLenA3dHZVOG55bkVk?=
+ =?utf-8?B?WG1xTWpTZExZblhCT2lJdzJ3MldScFdvNXYvNGc5a0tESERJeWx4ZHF1NUVp?=
+ =?utf-8?B?RnRJSEo5MkMxbUZWS241MjBqWUc3d2pIOVZacVU1UlR0TkZPZzRlNUM5bmYy?=
+ =?utf-8?B?cDlJeW91OW9BcUdrSTV2eTR1M25sQVJDYUtDUTRpcm4zMWFSQ1UwSzNZazFj?=
+ =?utf-8?B?V2hRVUN4RTMycEFHaXovdTh4L1E1M21lVVFLY0owMW1Hb2o5Y2lFeld2VTFu?=
+ =?utf-8?B?b0tSVk1TTnlzSVpOOEJVZ0FhTE9EY2lsaUZMT0pFZDhLc043S2N4WEhjRkJp?=
+ =?utf-8?B?eHRNSU1vS0tTZ05qQXFTQW9YdjBFNnNQeWxrcmxvenVueDZQeUg5NHlteWth?=
+ =?utf-8?B?RHg3d2p0WWgrSVUxbG55R0hNYm1LV2Npdk8rOVFlMVFCSWttZGxmeklxRmNT?=
+ =?utf-8?B?bHB5RzBQNWpYTlpOTmIxcG03QmtFZ3VUNmpHTDFaQmZpOFBScVZ0ckhINzY1?=
+ =?utf-8?B?ODdyVzdtR25EOFpDUUlYRlRQb0owUVZReTNuQ1BtR015K0dUWGpER0NmcU5V?=
+ =?utf-8?B?ZXU5U3l5QWlhWEF0cGswS21odmFESWZBNnpGTUVzSURZNEtCMGRnVEI4cmcv?=
+ =?utf-8?B?NXZSREtxSnJJbWJiZnUyS0RobGxBWVhXeXBJRVRsR3dRL0ZqalpwQ2RxWDJF?=
+ =?utf-8?B?SVcwNG9rcUM0U3pVSFlZTkw4bGd4OVIxTWZDcDZlQ0dhaVREME9ReGlMM0Za?=
+ =?utf-8?B?SHVKUUdSQkVaZklTQkpDVEZleGNoT0txMU1nUHlqYldOUTdOOTZQZzN1NFln?=
+ =?utf-8?B?Vk9uOHNKSk4vT1grekFpaGREUXZTWUlHMm80ejdOYnYxcUdnemRpZkNhakNN?=
+ =?utf-8?B?WXR0bGVkUnhDYStmWlhlNFFLVUhmQzc1dWNISEdaUzRZQmcyUnhTVFpNVlYz?=
+ =?utf-8?B?VXRRZmlxLzlmUURSb0VHYTllMnRiU0o0R1RDYnA5dEJUMTNvZ3NZd004Mnov?=
+ =?utf-8?B?d3BVM05SWmw3VGIxbTN1bnlYOC9DcS8xbTQ5S0YvS1ZCLzZUc21aamhlM0Uw?=
+ =?utf-8?B?UlJPTXBmWVdPZ0RTaFNGZUVwTDd4U2tnZy9XR2NZRTUyMkJBZEpRcGJTVXRp?=
+ =?utf-8?B?aVd6VG1WUXl2RndVUlo1TjNmVGJNWHRPYnBOUERsd3RmWkpyMGRxTy96TmZw?=
+ =?utf-8?B?NXB4VHRIZ2ZQRWpTb2ZBZFZUdExIMU9GRjduYzhsU0JpZVUrQ2laOC92UmZ3?=
+ =?utf-8?B?MEF6UVUvb0VDUEJWcU5TWTVkb0FoT1BRZ1FDRWlNTEQ2dG51RkZnb25jb1o5?=
+ =?utf-8?B?WEJRRlFGM2FLTmMrUWVSRUJiV0d3dVRzbWd0Sk11dFE3T2N5dWs0SjNUdnpL?=
+ =?utf-8?Q?8cd7f5mWStJkWgTnnv17nTKgKW9Xa71PQcaw5?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: mkroot quickstart (was RE: Testing on lots of architecture
- targets with mkroot.)
-To: "Bird, Tim" <Tim.Bird@sony.com>,
- "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>
-References: <f35774f8-4194-4715-8321-dc2fdfc7fc88@landley.net>
- <MW5PR13MB5632F0D9C8E8A12F2C24B64AFD012@MW5PR13MB5632.namprd13.prod.outlook.com>
- <81e4aefd-f052-4a52-94b5-36030b26c358@landley.net>
- <MW5PR13MB5632FDD1833ABA105437D02AFD162@MW5PR13MB5632.namprd13.prod.outlook.com>
-Content-Language: en-US
-From: Rob Landley <rob@landley.net>
-In-Reply-To: <MW5PR13MB5632FDD1833ABA105437D02AFD162@MW5PR13MB5632.namprd13.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-Exchange-RoutingPolicyChecked:
+	RdOvZeckn5X7tb8fGAK2hb/mgB2yfOLa7GDkzbPom/mxACMKaDE1WL+loD9Y3r6t2xqP52IzSwFal497aJvdZLoNvKcn3IYRaR3B9kb79oLx7fo7v5qzKOWjRGLKzjIlCpHJT0L93A/oBVWPc9lboDsjTkCzRwMeUqZTRqeCkYC9DBgnCq0thjgoLXErenl5/pyNihWnSOvFzVwTGJPhOZ/Kz+zjdU5MthYHbGf6ac0YJGfLprSo2tztE6FQ/WgX3CKwAewpMSznczC67urOKpOoQfELKcbXrVALlcVlBJdalNU8tfyboS03F4RLJAYPVykQU7QcH1Huol1D8JoYUg==
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	yz9fMQep4PK8biOkFA+5gPp663ZEOyNir/+9tAbayAOgT8GjVxcmE/pSmZ+Dkd1swGO6cj+YEjPBCkhLGQ0hE+RIvm7sZpIr7FWJ2Nu+ahNzo3Yj5/ceeTs28RFkGg21U/uOymcnBZYSvfLs72Qou6Yr2h9iCsJ6EoMW1XqeM5BB+QiUJ1WweyOomeNDJjoIipqjh3kjI9TxXpCo3SoZokR1hGTO9YTleR5VZ8ezWcMgx2R13ypKf62AkLZ7qtg9d92tONoEqAc8OXW0AKp7nMiY3zpS6XKspmxrIlZlUDpzU0aF3n5hkeWmE226UGM138MAJNxhzHOxXBZ04+0DLhKY4rPtX583Wy9XRC06meceHVQ2YXUhPuZOz00QfUS7/wXFYySu5EiJLSO+khVrOh73/XD+DqKC3XjP3iA7IUT5OExKedv8hEurOG55cLrgXUqvdO+YnML/6baoYATZOYgReDZxoYtpDGQ47sJl1fvUfmPvJ0JTRRmWd8ZCabYj+wMklidhwa46nwvXbXuyYqgOsdOpLNjZ69Wfu28fBLqis8tGpYBDCmR0MANc6CZRLvWuS0slMnf4MYGPnG4tycEv2az8lubwz1KhODOys1YX7B92Abtt1Bd0nZh7u5DN
+X-OriginatorOrg: sony.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d591169d-17ec-44c4-cba6-08dec01ffefd
+X-MS-Exchange-CrossTenant-originalarrivaltime: 01 Jun 2026 20:54:38.7331
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 5lzlBc2mTvdeKynEggQy/A9f+P7muB2RCWYkMjOnscgLmg0GE3kjmre0gEAHhz43IxY2pgvN6gYQ/0yM/hvBDw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR13MB4668
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjAxMDIwMyBTYWx0ZWRfXxaEGDm7Juxgc
+ rn9FxK2fQE8IRry6kzvwK1i+LxMZ9OPZls+ZqfykEenUMQUD11FADljDob1xFhC+AZTpkzZjDD/
+ 9OTuVDnRmdposkTnn9Nr4Y6HHg+LQ875GbTfS/l67sE3saLWwAV4bg22U7cCpevHg9JUZhmFgpk
+ NBui/jpGvDSXGfbBzV1Q0qqW8OILpHUfI+yF3jOu8Dnj8ctf0dxlmXWkUnKwU8NB0soHfzXAhtK
+ irJjDegUDerbdxW29K/dclEb4f3azaxMovnLNiV/owI+Gb9v5p6zxFNdkUxuvMUEnTbpB62Uh9f
+ WAlZCgvVy7VSvJMCG6lD0vbo2LLvyiafg3E2IOQprPK3L6iKw/pzXDRCFQ/WSk+Znc5PMGFRYrz
+ Y4yh2zAOqJ5sV/rSH7mwXxFLO5jsq++AZ4t68f4wQKvDQ2S2tTiS7zqDuA/FqzvS39bjqYK+3O8
+ TbPRIyC9qVZD2KHZDtQ==
+X-Authority-Analysis: v=2.4 cv=DYgnbPtW c=1 sm=1 tr=0 ts=6a1df1ac cx=c_pps
+ a=os0lWWs/UWv4pnmIIs5naA==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=fIyWl1o40DOTyIs-:21 a=xqWC_Br6kY4A:10
+ a=IkcTkHD0fZMA:10 a=FelO9ux0wxsA:10 a=xR56lInIT_wA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=KAb5x4SsHD3PzxGk7EmX:22 a=6Vn1QVPt8UGdu3r8PAnt:22
+ a=SXzkmgPmAAAA:8 a=PjuYqXk4AAAA:8 a=y5Yq1ZyPAAAA:8 a=GRaHDbWIGgAT183tvqwA:9
+ a=QEXdDO2ut3YA:10 a=EWLf6cg6Bh5aS0AxDgDu:22 a=PoVUXeey_BepnEeCpHdp:22
+X-Proofpoint-GUID: M-1W_qmKIw43UGDDhjPz4a8Q1R8yq1uH
+X-Proofpoint-ORIG-GUID: M-1W_qmKIw43UGDDhjPz4a8Q1R8yq1uH
+X-Sony-Outbound-GUID: M-1W_qmKIw43UGDDhjPz4a8Q1R8yq1uH
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
+ definitions=2026-06-01_06,2026-05-28_03,2025-10-01_01
 
-On 5/29/26 10:54, Bird, Tim wrote:
-> Hey Rob,
-> 
-> I just tried the mkroot quickstart instructions in toybox/mkroot/README, and the image failed
-> to start, due to missing init program.
-
-Commit d7cef2f4a7d6 should have fixed that?
-
-https://codeberg.org/landley/toybox/commit/d7cef2f4a7d6
-
-The problem is that while /init is always there, /bin/sh isn't unless 
-your .config pulls in the shell, which is still in toys/pending and thus 
-not in defconfig.
-
-In an eventual 1.0 release that should all be tidied away, but right now 
-mkroot.sh has a workaround for it that wasn't always triggering because 
-I tried to be clever about letting it use your existing .config if you 
-had one...
-
-Did you pull from microsoft github instead of codeberg? I haven't 
-updated the microsoft github version in weeks...
-
-> Maybe I missed something.  What is the appropriate mailing list to use for mkroot
-> discussion?  It is on the toybox list or somewhere else?
-
-In theory the toybox list, although that's in the process of migrating 
-from dreamhost to osuosl because 
-https://www.reddit.com/r/dreamhost/comments/1tjunvv/ugh_dreamhost_getting_rid_of_mailman_email_lists/
-
-I'm happy to stay on this list if you don't mind the noise?
-
-> I'm thinking a mkroot environment might make a good baseline test system for short
-> boot-times (kind of an extreme case to establish a minimum boot time value,
-> at least for the kernel).
-
-I hope so. :)
-
-Your absolute minimum is rdinit=/bin/sh or similar, but the mkroot init 
-is trying to do the minimum work to bring up a usable environment with 
-mount points and networking before running the $HANDOFF program. 
-Generally takes a fraction of a second, and the /init/mnt automation 
-lets you record a timestamp as soon as your provided application code 
-takes control. (Which if it's wget reaching out to a host cgi or 
-something can be recorded on the host clock, although qemu's BIOS boot 
-on platforms like s390 or powerpc can take ages. There's a design pass 
-to figure out what success looks like here.)
-
-The only actually delays where the script is waiting for anything are in 
-the time setting error path when the virtual board doesn't emulate a 
-battery backed up clock:
-
-   [ "$(date +%s)" -lt 1000 ] && timeout 2 sntp -sq 10.0.2.2 # Ask host
-   [ "$(date +%s)" -lt 10000000 ] && sntp -sq time.google.com
-
-Which has a 2 second timeout for the first one and I believe a 3 second 
-default timeout built into sntp? So 5 seconds total for "clock could not 
-be set", but only in the case where the network card came up but (so no 
-immediate "no route to host" failure) but isn't connected to anything 
-(neither loopback NTP server nor network), AND the board's emulation of 
-a persistent clock failed to trigger the attempts in the first place.
-
-(You need to set the clock before calling "make" on a source package, 
-otherwise all your file timestamps are in the future and make DOES NOT 
-LIKE THAT. Part of my use case is "automated native build environment 
-under emulation", ideally with distcc calling out to the cross compiler 
-on the host.)
-
-> Below was the output.
-> 
-> I checked the root filesystem in toybox/root/i686/fs/bin and there's no 'init' or 'sh' link or program
-> present.
-
-The /init isn't in bin, it's in the root directory (which is the first 
-place the kernel looks for it):
-
-$ grep '"/init"' linux/init/main.c
-static char *ramdisk_execute_command = "/init";
-
-> Does toybox use the same configuration in mkroot as the base toybox build?
-
-See commit above. That was the failure I hit during the demo, which is 
-AFTER I did https://mstdn.jp/@landley/116580239742755479 to try to make 
-the previous "check and see if it's already got it" code reliable...
-
-Potentially re-using the existing .config by default was just a sharp 
-edge, I gave up trying to make it reliable so took out the "by default" 
-part. Now it has to be specified explicitly as an override to be able to 
-screw up like that.
-
-> I modified the configuration for toybox to include the 'sh' toy, rebuilt it, and verified that the
-> x86_64 toybox had a working 'sh' toy.
-> 
-> Then I rebuilt the mkroot environment with:
-> $ mkroot/mkroot.sh CROSS=i686 LINUX=linux
-> and ran it with:
-> $ root/i686/run-qemu.sh
-> 
-> I got the same error (missing 'init') on running qemu.
-> bin/init and bin/sh are still not in root/i686/fs.
-
-It's not /bin/init, just /init. And the failure code path I was 
-wrestling on mastodon back before the talk was the script replacing a 
-good .config with a bad .config. I also have modified the .config to be 
-right and the have the build fail.
-
-(Possibly I had a test reversed or something, but I just ripped it out 
-and stopped trying to do it that way because once /bin/sh is out of 
-pending "defconfig is broken" stops being an issue, so I was debugging a 
-workaround I intend to eliminate anyway. It also wouldn't apply to using 
-busybox instead of toybox, where "make defconfig" should also just work 
-unless Denys did something to it since I last checked. Busybox hasn't 
-got "pending": they had a 10 year headstart on me, greater willingness 
-to suck in external code because gplv2 vs 0BSD license, and a lot more 
-developers...)
-
-> Also, the build rebuilt the entire kernel, even though I had just built it a few minutes earlier.
-> Not sure what's going on there.
-
-I didn't bother to implement rebuilds for packages, it always does "make 
-clean/all".
-
-It's not hard to add, but I didn't want the complexity: incremental 
-rebuilds are a RICH source of bugs. That whole "try to reuse the 
-existing .config" bit is conceptually adjacent. :P
-
-(That said, if you really want incremental builds, they're not hard to 
-add. I'd probably make it another NOREBUILD=1 explicit override though: 
-you get to keep the pieces, NOT the first timer's experience.)
-
-> I note that the mkroot.sh script has 'make clean defconfig toybox install_airlock ...'
-> which I'm not sure includes 'sh'.  Note that root/build/airlock has 'sh', but
-> root/i686/fs/bin does not have 'sh'.
-
-Toybox has a "pending" directory for unfinished commands. Both "sh" and 
-"route" are in there, because each still has significant missing 
-features, although both are good enough to use in mkroot. They work but 
-they're not finished.
-
-The "make defconfig" target does not include any pending commands by 
-default.
-
-The current code on codeberg looks like this:
-
-> # Build static toybox with existing .config if there is one, else defconfig+sh
-> if [ -z "$NOTOYBOX" ]; then
->   announce toybox
->   [ -z "$TOYCFG" ] && { rm -f "${TOYCFG:=.config}";} || CONF=silentoldconfig
->   [ -e "$ROOT"/lib/libc.so ] || export LDFLAGS=--static
->   PREFIX="$ROOT" KCONFIG_CONFIG="$TOYCFG" make clean \
->     ${CONF:-defconfig KCONFIG_ALLCONFIG=<(csv2cfg $(be2csv $PENDING SH ROUTE) y)} \
->     toybox install || exit 1
->   unset LDFLAGS
-> fi
-
-(Which now that I look at it again is slightly broken because 
-${TOYCFG:=.config} can never assign a default value under a [ -z 
-"$TOYCFG" ] guard... didn't clean it up enough from the previous code.)
-
-Anyway, what that TRIES to do is add "sh" and "route" to defconfig. Ugh, 
-I need to do another pass to simplify that again, I was clearly rushing 
-before the talk. Maybe...
-
-PENDING="$(csv2cfg $(be2csv $PENDING SH ROUTE) y)"
-PREFIX="$ROOT" KCONFIG_CONFIG="$TOYCFG" make clean \
-   ${CONF:-defconfig KCONFIG_ALLCONFIG=<(echo "$PENDING")} \
-   toybox install || exit 1
-
-Sigh, I really wanna split the whole CONF= assignment out instead of 
-PENDING= but the problem is the ${X:-} naturally makes evaluating the 
-<(subshell) part conditional (bash!) so the subprocess only gets 
-launched when it'll be used, AND the lifetime is right when called 
-inline. If I moved the <() into that separate PENDING= assignment it'll 
-exit again before "make" gets called, and thus the /dev/fd/63 or similar 
-it expands to will no longer be valid (it's the filename of a process's 
-output pipe). I can't(?) use a DIFFERENT redirection style without 
-creating a temp file, which I then need to delete, and there's a ctrl-c 
-error path race with making SURE it got deleted so I'd need a trap and 
-NOT GOING THERE. This is all because KCONFIG_ALLCONFIG= wants a filename 
-to read from. (When I do this stuff right it looks like I didn't do 
-anything, but getting there is gordian knot unraveling...)
-
-Anyway, in the above code you can set PENDING= or TOYCFG= on the 
-mkroot.sh command line:
-
-A) set PENDING=diff,awk,getty,bootchartd,dhcp to tell it to use various 
-commands out of toys/pending/*.c that mostly work but haven't been fully 
-reviewed yet or which have major known missing features that should 
-really be added before promoting t hem out of pending. (Note: some 
-commands in there like git.c are really just stubs.) It will always add 
-"sh" and "route" to this list. Oops yes I need to flatten the provided 
-names to all upper case, I just changed how it works last week...
-
-B) instead set TOYCFG=filename and it will use the provided .config file 
-as-is, although it will run it through "make silentoldconfig" first.
-
-But PENDING= at least is just a short-term hack because an actual 1.0 
-release wouldn't still have a "pending" directory so defconfig SHOULD 
-"just work". I just need to review and fix up all the unifinished code 
-and external submissions in toybox and get out a 1.0 release...
-
-I'm working my way towards fewer fine-tuning knobs. It should "just 
-work". All that's transient, which is why I haven't polished it enough.
-
-> Anyways, thanks for any tips you can provide to help me get this working...
-
-I mean to push one last update to microsoft github as part of the next 
-release, but the release notes say the project moved to codeberg (the 
-website links were updated circa 
-https://landley.net/toybox/git/commit/ea6c172dadd0 ) and I'll probably 
-take the microsoft github version down in the following release.
-
-If you don't like codeberg you can also pull/clone from 
-landley.net/toybox/git but microsoft github has gone VERY STRANGE and 
-I'm slowly backing away from it. (Microsoft github still being there is 
-ALSO a sharp edge, but I'm unsure how to wean people off of it, or if I 
-should just have it suddenly vanish one day...?)
-
-> Write protecting kernel text and read-only data: 5764k
-> Run /init as init process
-> Failed to execute /init (error -2)
-
-$ grep -w 2 /usr/include/asm-generic/errno-base.h
-/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
-#define	ENOENT		 2	/* No such file or directory */
-
-Because /init starts with #!/bin/sh and if .config doesn't have 
-CONFIG_SH in it (which defconfig doesn't because pending, I'm working on 
-it ala https://codeberg.org/landley/toybox/commit/0b6e231b52ae) it will 
-build a toybox that doesn't include "sh". Which the commit I linked 
-above tried to make stop happening unless you EXPLICITLY asked it to 
-re-use an existing .config, in which case you get to keep the pieces.
-
-(It SEEMED like "re-use the existing toybox .config if it's good enough" 
-was a good UI, but in practice overwriting .config sometimes and using 
-it as-is other times was just too brittle and fiddly to be robust, and 
-the resulting error message is far too eldrich to impose upon new users. 
-So I made it explicit. The kernel could probably use a similar one, but 
-splicing initramfs into that is even worse than pending. I could do a 
-kernel patch that lets you say INITRAMFS=/path on the make command line, 
-but my https://landley.net/bin/mkroot/0.8.14/linux-patches/ never go 
-upstream, Greg KH hates me personally...)
-
-Rob
-
-P.S. Making things simple is _REALLY_HARD_. It needs to just work, a 
-thousand things can go wrong, I have maybe 500 lines before their eyes 
-glaze over trying to understand it and a third of that is whitespace and 
-comments... I'm doing my best.
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogUm9iIExhbmRsZXkgPHJv
+YkBsYW5kbGV5Lm5ldD4NCj4gT24gNS8yOS8yNiAxMDo1NCwgQmlyZCwgVGltIHdyb3RlOg0KPiA+
+IEhleSBSb2IsDQo+ID4NCj4gPiBJIGp1c3QgdHJpZWQgdGhlIG1rcm9vdCBxdWlja3N0YXJ0IGlu
+c3RydWN0aW9ucyBpbiB0b3lib3gvbWtyb290L1JFQURNRSwgYW5kIHRoZSBpbWFnZSBmYWlsZWQN
+Cj4gPiB0byBzdGFydCwgZHVlIHRvIG1pc3NpbmcgaW5pdCBwcm9ncmFtLg0KPiANCj4gQ29tbWl0
+IGQ3Y2VmMmY0YTdkNiBzaG91bGQgaGF2ZSBmaXhlZCB0aGF0Pw0KPiANCj4gaHR0cHM6Ly9jb2Rl
+YmVyZy5vcmcvbGFuZGxleS90b3lib3gvY29tbWl0L2Q3Y2VmMmY0YTdkNg0KPiANCj4gVGhlIHBy
+b2JsZW0gaXMgdGhhdCB3aGlsZSAvaW5pdCBpcyBhbHdheXMgdGhlcmUsIC9iaW4vc2ggaXNuJ3Qg
+dW5sZXNzDQo+IHlvdXIgLmNvbmZpZyBwdWxscyBpbiB0aGUgc2hlbGwsIHdoaWNoIGlzIHN0aWxs
+IGluIHRveXMvcGVuZGluZyBhbmQgdGh1cw0KPiBub3QgaW4gZGVmY29uZmlnLg0KPiANCj4gSW4g
+YW4gZXZlbnR1YWwgMS4wIHJlbGVhc2UgdGhhdCBzaG91bGQgYWxsIGJlIHRpZGllZCBhd2F5LCBi
+dXQgcmlnaHQgbm93DQo+IG1rcm9vdC5zaCBoYXMgYSB3b3JrYXJvdW5kIGZvciBpdCB0aGF0IHdh
+c24ndCBhbHdheXMgdHJpZ2dlcmluZyBiZWNhdXNlDQo+IEkgdHJpZWQgdG8gYmUgY2xldmVyIGFi
+b3V0IGxldHRpbmcgaXQgdXNlIHlvdXIgZXhpc3RpbmcgLmNvbmZpZyBpZiB5b3UNCj4gaGFkIG9u
+ZS4uLg0KPiANCj4gRGlkIHlvdSBwdWxsIGZyb20gbWljcm9zb2Z0IGdpdGh1YiBpbnN0ZWFkIG9m
+IGNvZGViZXJnPyBJIGhhdmVuJ3QNCj4gdXBkYXRlZCB0aGUgbWljcm9zb2Z0IGdpdGh1YiB2ZXJz
+aW9uIGluIHdlZWtzLi4uDQpZZXMuICBJIGhhZCBhbiBvbGQgdG95Ym94IHJlcG8gbHlpbmcgYXJv
+dW5kIHdpdGggYW4gdXBncmVhbSBvZiBnaXRodWIsDQphbmQgSSBqdXN0ICdnaXQgcHVsbCdlZCBp
+dC4NCg0KPiANCj4gPiBNYXliZSBJIG1pc3NlZCBzb21ldGhpbmcuICBXaGF0IGlzIHRoZSBhcHBy
+b3ByaWF0ZSBtYWlsaW5nIGxpc3QgdG8gdXNlIGZvciBta3Jvb3QNCj4gPiBkaXNjdXNzaW9uPyAg
+SXQgaXMgb24gdGhlIHRveWJveCBsaXN0IG9yIHNvbWV3aGVyZSBlbHNlPw0KPiANCj4gSW4gdGhl
+b3J5IHRoZSB0b3lib3ggbGlzdCwgYWx0aG91Z2ggdGhhdCdzIGluIHRoZSBwcm9jZXNzIG9mIG1p
+Z3JhdGluZw0KPiBmcm9tIGRyZWFtaG9zdCB0byBvc3Vvc2wgYmVjYXVzZQ0KPiBodHRwczovL3d3
+dy5yZWRkaXQuY29tL3IvZHJlYW1ob3N0L2NvbW1lbnRzLzF0anVudnYvdWdoX2RyZWFtaG9zdF9n
+ZXR0aW5nX3JpZF9vZl9tYWlsbWFuX2VtYWlsX2xpc3RzLw0KPiANCj4gSSdtIGhhcHB5IHRvIHN0
+YXkgb24gdGhpcyBsaXN0IGlmIHlvdSBkb24ndCBtaW5kIHRoZSBub2lzZT8NCkl0IGRvZXNuJ3Qg
+Ym90aGVyIG1lLCBhbmQgc29tZXRpbWVzIHRoZSBkaXNjdXNzaW9uIGlzIHJlbGV2YW50IGZvciBv
+dGhlcg0KZW1iZWRkZWQgTGludXggaXNzdWVzIG91dHNpZGUgb2YgdG95Ym94IGFuZCBta3Jvb3Qu
+ICBJZiBhbnlvbmUgZWxzZSBvYmplY3RzLA0KcGxlYXNlIGxldCBSb2Igb3IgbWUga25vdy4NCg0K
+PiANCj4gPiBJJ20gdGhpbmtpbmcgYSBta3Jvb3QgZW52aXJvbm1lbnQgbWlnaHQgbWFrZSBhIGdv
+b2QgYmFzZWxpbmUgdGVzdCBzeXN0ZW0gZm9yIHNob3J0DQo+ID4gYm9vdC10aW1lcyAoa2luZCBv
+ZiBhbiBleHRyZW1lIGNhc2UgdG8gZXN0YWJsaXNoIGEgbWluaW11bSBib290IHRpbWUgdmFsdWUs
+DQo+ID4gYXQgbGVhc3QgZm9yIHRoZSBrZXJuZWwpLg0KPiANCj4gSSBob3BlIHNvLiA6KQ0KPiAN
+Ci4uLg0KPiA+IEFsc28sIHRoZSBidWlsZCByZWJ1aWx0IHRoZSBlbnRpcmUga2VybmVsLCBldmVu
+IHRob3VnaCBJIGhhZCBqdXN0IGJ1aWx0IGl0IGEgZmV3IG1pbnV0ZXMgZWFybGllci4NCj4gPiBO
+b3Qgc3VyZSB3aGF0J3MgZ29pbmcgb24gdGhlcmUuDQo+IA0KPiBJIGRpZG4ndCBib3RoZXIgdG8g
+aW1wbGVtZW50IHJlYnVpbGRzIGZvciBwYWNrYWdlcywgaXQgYWx3YXlzIGRvZXMgIm1ha2UNCj4g
+Y2xlYW4vYWxsIi4NCg0KT0suICBHb3QgaXQuDQogDQouLi4gW3VzZWZ1bCBpbmZvIHNuaXBwZWQs
+IHNlZSBwcmV2aW91cyBlbWFpbCBmb3IgZGV0YWlsc10gLi4uDQoNCj4gDQo+ID4gQW55d2F5cywg
+dGhhbmtzIGZvciBhbnkgdGlwcyB5b3UgY2FuIHByb3ZpZGUgdG8gaGVscCBtZSBnZXQgdGhpcyB3
+b3JraW5nLi4uDQo+IA0KPiBJIG1lYW4gdG8gcHVzaCBvbmUgbGFzdCB1cGRhdGUgdG8gbWljcm9z
+b2Z0IGdpdGh1YiBhcyBwYXJ0IG9mIHRoZSBuZXh0DQo+IHJlbGVhc2UsIGJ1dCB0aGUgcmVsZWFz
+ZSBub3RlcyBzYXkgdGhlIHByb2plY3QgbW92ZWQgdG8gY29kZWJlcmcgKHRoZQ0KPiB3ZWJzaXRl
+IGxpbmtzIHdlcmUgdXBkYXRlZCBjaXJjYQ0KPiBodHRwczovL2xhbmRsZXkubmV0L3RveWJveC9n
+aXQvY29tbWl0L2VhNmMxNzJkYWRkMCApIGFuZCBJJ2xsIHByb2JhYmx5DQo+IHRha2UgdGhlIG1p
+Y3Jvc29mdCBnaXRodWIgdmVyc2lvbiBkb3duIGluIHRoZSBmb2xsb3dpbmcgcmVsZWFzZS4NCj4g
+DQo+IElmIHlvdSBkb24ndCBsaWtlIGNvZGViZXJnIHlvdSBjYW4gYWxzbyBwdWxsL2Nsb25lIGZy
+b20NCj4gbGFuZGxleS5uZXQvdG95Ym94L2dpdCBidXQgbWljcm9zb2Z0IGdpdGh1YiBoYXMgZ29u
+ZSBWRVJZIFNUUkFOR0UgYW5kDQo+IEknbSBzbG93bHkgYmFja2luZyBhd2F5IGZyb20gaXQuIChN
+aWNyb3NvZnQgZ2l0aHViIHN0aWxsIGJlaW5nIHRoZXJlIGlzDQo+IEFMU08gYSBzaGFycCBlZGdl
+LCBidXQgSSdtIHVuc3VyZSBob3cgdG8gd2VhbiBwZW9wbGUgb2ZmIG9mIGl0LCBvciBpZiBJDQo+
+IHNob3VsZCBqdXN0IGhhdmUgaXQgc3VkZGVubHkgdmFuaXNoIG9uZSBkYXkuLi4/KQ0KDQpJIHNl
+dCBteSBnaXQgcmVtb3RlIHRvIHRoZSBjb2RlYmVyZyByZXBvLCBwdWxsZWQsIGFuZCByZWJ1aWx0
+LCBhbmQgaXQgd29ya3MuDQoNClRoYW5rcyENCg0KTmV4dCB1cCBpcyB0ZXN0aW5nIGl0IHdpdGgg
+Z3JhYi1ib290LWRhdGEuc2guICBJJ2xsIG5lZWQgdG8gdHVybiBvbiBQUklOVEtfVElNRSwNCmFu
+ZCBzZXQgaW5pdGNhbGxfZGVidWcgb24gdGhlIGtlcm5lbCBjb21tYW5kIGxpbmUsIGFuZCBJJ2xs
+IGxpa2VseSB3YW50IHRvIGFkZA0KbXkgbGF0ZXN0IGVhcmx5LXRpbWVzIHBhdGNoLiAgSSdsbCBw
+b2tlIGFyb3VuZCB0aGUgc2NyaXB0cyBhbmQgc2VlIGlmIEkgY2FuIGZpZ3VyZQ0Kb3V0IGhvdyBi
+ZXN0IHRvIGRvIGVhY2ggb2YgdGhlc2UuDQogLS0gVGltDQoNCg0K
