@@ -1,372 +1,271 @@
-Received: from mx08-001d1705.pphosted.com (mx08-001d1705.pphosted.com [185.183.30.70])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 406E741C307
-	for <linux-embedded@vger.kernel.org>; Mon,  6 Jul 2026 16:55:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=185.183.30.70
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4F1842B722
+	for <linux-embedded@vger.kernel.org>; Mon, 20 Jul 2026 14:30:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783356931; cv=fail; b=ajYY00GkBzIUBV0Y32ffUIts5gM3GXoRIzm01pN1VMtVaqqNOsQhUzou/pgTrxl6lYBmodWtEn8mNwm/q9MojW99gpUp2zlhVdO7rdLDxAa5kSepMhtNd1sjUAHOujqcnwkHMrPC50toxLqobI9DHMz+twZE6Zi2naAao6hhA+8=
+	t=1784557806; cv=pass; b=ZZzDKG5IRDhFhYtJvP0jR1OWxdBUbzK2oy2y9jvxnLWfcacnl4UFcf7bAugQo5T0Wn0UYYF2/B2K3R6Qum+8SHi56UyuR756T8YxuVe5Hq3Z4r2h8swBXZk94vF3SsDhETqLFPK7zLVazUaBZkwBpljO5GZKEU7qjSuFBcTk9pw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783356931; c=relaxed/simple;
-	bh=JK+D5xyhNrHjMcW+U1bwKlESjgKBf/6JaXg0SEQvzho=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=KbhJ6JYqics5iLSUJsVSwZDECQAsX0ygtG7R3NC/lTh45UNQxpckygrHDA5DIKmtVydUOBWqX+IuhPmVaGgI5CMHACK8sr44VaMaQigGIQncdFmH1ToPRFOCnUr4KVHowY8T5kK5p3qX5nWZtVuRbLc306iacFj2zbgjrPyQIwg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=Jw+Vpyxl; arc=fail smtp.client-ip=185.183.30.70
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
+	s=arc-20240116; t=1784557806; c=relaxed/simple;
+	bh=WNezRESdeFPDAlEzFR5fG9NIdHxdKFvMbj9OQd2by6c=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=rJmd7YYFeqTX+TGAhjj8wf8tyBe7ODqCG9PO77kxL+v2MHSJQvX0mJelzkqhsmlRChZQxKaUu45UNyL+yDyjJdVHHHjaFPPTBQgqj3IZJUD7M+WUqUylkPwVLkM8IhFB6j3ISFiJAcDIZnskg8dZgJ0G3KnruIKVnStQDd72pzs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=cQ6C/ZmG; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=fs4WswJL; arc=pass smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="Jw+Vpyxl"
-Received: from pps.filterd (m0209319.ppops.net [127.0.0.1])
-	by mx08-001d1705.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666GUNVo3265460;
-	Mon, 6 Jul 2026 16:55:17 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sony.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=p1; bh=1ecnFzW
-	IojSWQTiE1x95971sPLvCzB5J34yKRWsTlhE=; b=Jw+VpyxlnFsGmCVw46Ai/Ve
-	e1CdQ3CwXCY8jKJ+K724dDIzt+k1eW9em0XYxohCQ2zN+ogpp1F+gEXtaO90+kfX
-	PuvpwzCnVPffwwJb6V+gYjTNWZLnfrDUIglFB5Wjy8aYpdDrUPNBaUycj2heI6k5
-	zjd1Y6+Xgsryma11095HWxUMtZ4lWoelt9hrH2u0jUixfHZ2jkE7C9iTzr1YgFOM
-	cEUD58k//I1DKGIySzGjLprMnGMuSHizle3ohxMx0KVFqOSl3T56/wJoFQtxUQJ4
-	+o7aSsbDtiQazng2nwKV4c7SHlFNvx4AWxY7ChiIsGDhwBnlHK0KjVWgehBxNDw=
-	=
-Received: from bn1pr04cu002.outbound.protection.outlook.com (mail-eastus2azon11010070.outbound.protection.outlook.com [52.101.56.70])
-	by mx08-001d1705.pphosted.com (PPS) with ESMTPS id 4f6tjp26yc-1
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
-	Mon, 06 Jul 2026 16:55:17 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=peTvO5joGFsvViEUhj2sOVgm5bsL5KgtFk/huqD48CSoKpZfKEC2Kqwm95uL+lVZZzJMqyeDpmHvvIxHHHrhmH0d29ZuiD2ou1aZk76RZ1ZeTIkPBU0084NFRMoGXPndGlo/8PNWg7RwkPpklUniOIYwCDo7OGcU2ZvGI3OXaH2aEXR46aeaMw8CWupbra375GrL1x02X7/BM0jZCHn0/EiakGPd0dH2zB9F2W+KgHI0s54KsAbLyF49CbZKPt3UTI6wfIiPq7gsCJ7ikKC3ob/fhpjxpgauMuO7oafVeNQ0dpGfEkd1l/2xTmFB3CUilO0U6AZzmBWQSVrl9Qe7uQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=pmaezhhDq44p4Sj/AgsbOUlRQczu+Eq7WXoJCurPeZA=;
- b=C1BbBJptEQIaT02GN21L95BKJeNl/S+zXw7nBqMfj1w1SEUqUQ3JO9AtDiXbAR71m5482/tk4EtxIKiiOwPIt/AFeoBiv5aGS0DFBjtOZwq2Tn2YdF3TAsq0tPcDN/Pf+UFQAWPz4jAmLBacrUNLjRkyZREbDh+d01Gazrnm+6xtA41V+hG4wOCTuz+HNvcKSwKOEGs58dU8ljoUmtlUjTCOm9UPUeiRxR1H4yn2o3tQlzKHyJxFpSOY9ZFx0RZmVCYXFGx8+DrGH/zuNMNoxu9BNJ8wBRGp6lSO5i56/55/lhNTPjJyF1OBnnaBcTaoHCDfTn5L9ktVC969OkxIpw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sony.com; dmarc=pass action=none header.from=sony.com;
- dkim=pass header.d=sony.com; arc=none
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com (2603:10b6:303:197::16)
- by PH0PR13MB5614.namprd13.prod.outlook.com (2603:10b6:510:128::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.8; Mon, 6 Jul 2026
- 16:55:03 +0000
-Received: from MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::29e9:b355:cabf:66f1]) by MW5PR13MB5632.namprd13.prod.outlook.com
- ([fe80::29e9:b355:cabf:66f1%3]) with mapi id 15.21.0181.008; Mon, 6 Jul 2026
- 16:55:03 +0000
-From: "Bird, Tim" <Tim.Bird@sony.com>
-To: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-CC: Embedded Linux mailing list <linux-embedded@vger.kernel.org>
-Subject: RE: [PATCH v2 2/5] software node: add fw_devlink support
-Thread-Topic: [PATCH v2 2/5] software node: add fw_devlink support
-Thread-Index: AQHdDUgvQmR6Zb5DT0iYVJ0qCGRB8bZgtUyA
-Date: Mon, 6 Jul 2026 16:55:03 +0000
-Message-ID:
- <MW5PR13MB5632A162A56D546F43DE7F79FDF12@MW5PR13MB5632.namprd13.prod.outlook.com>
-References: <20260706-swnode-fw-devlink-v2-0-f39b09d50112@oss.qualcomm.com>
- <20260706-swnode-fw-devlink-v2-2-f39b09d50112@oss.qualcomm.com>
-In-Reply-To: <20260706-swnode-fw-devlink-v2-2-f39b09d50112@oss.qualcomm.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: MW5PR13MB5632:EE_|PH0PR13MB5614:EE_
-x-ms-office365-filtering-correlation-id: 505ddc87-0ddd-4b05-249c-08dedb7f52f4
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|23010399003|10070799003|1800799024|366016|4143699003|11063799006|56012099006|18002099003|22082099003|38070700021;
-x-microsoft-antispam-message-info:
- 48YCpjy7l+0M85ry07sfyge9rQlLLooVjRKXJR+DnM0+5vAN9WnsrSgqgtQmfApGjYDJDoL7A2BUeTVs9TdRsDCDW+8JLo9eij7Omc1XPOOfNeRF7E3gRKpsZ+m6wEXCKGhwAD9/GTdmXBHegJXjkdZQlR4K7jIyU6fKLLBkH25JKIdlMO31u4d4YlnqYXQHZzXa3cLY1SqmQkbBf/UyRcckhbFml2rMHtdCouNnWRW+pJZ0fAJC4TDUS0DUgpSfo/+iDKOyxFxL2XvwJCo1c9ODPAihb1Wq8XwBH2rilQpsVLiRUm+JaS4U/agAbDJV0Aj5CyoSEh/0CqiW49NTCQ4VTEtt/a+lfTokuBpN6LwUU9/DwmZ/UeMgT4grx3F1r/SjEFW6sHNNrgzQA/Jlh/XncJWTd9gX0JgS9wc/cv2AmEJYsn1wuhm8QgBHucWLnRmIxwCXF3FWEZVnF+rjf8yVTK6emUqZBOBHXMVCx1M5G500r9DlaaAksMvpkZ5c5CPHewd/bzk2LEn0HOLd+JC0gcKerVMyNyl1atMbUCKF1n5iHIl2p1CWCbnSorCaK/2jv0VDnUDg/Otq1jkWUDBJue9SX1VEHsYfxmngn29C5uEMbIIvQooeInVIwVIxXRTwO7d/gfddIcsq/Pf2xIDi1kPNzTErt60xYbp3RgY7z6wWV0HfoZWKhAf+N8KQBy0bUpm3sLJQ5tj0Di/AdggNMbChWlvuAY8fe7lda3M=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW5PR13MB5632.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(23010399003)(10070799003)(1800799024)(366016)(4143699003)(11063799006)(56012099006)(18002099003)(22082099003)(38070700021);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?cjVxN0FMQkdNZnBKeUhzUmNGNytoYmxMWjd6eTg2WDlMZWNkT3ZFS0RpcTBp?=
- =?utf-8?B?STdrajl3TXErSlpNblFFZFRrekN0VkR0b1hCVU1mK0hPY2wvODhhTFBFdVJO?=
- =?utf-8?B?MFk5dzFCbDRmVWJiWEVkbWpUSlM0cG9kV2xVbUVXdEdiVVlsODk5V2tBRFQ4?=
- =?utf-8?B?Z1kxNXdickZSVjVJc3puTk5MNm5maEJQNnlXaS9EcGgrenZxR2dvSkhQTUt2?=
- =?utf-8?B?akZXTm1iTit2UG1RcHRCbHVMZUdIM1BRSFFxclZ5NmtWSG1sQVl3RkhRQm5R?=
- =?utf-8?B?YU52dHNFZno3MjZ1enZ3Z2pYMWhROXpUc2NCQ0IyLzkxQ1RyUC9vOVBRRFps?=
- =?utf-8?B?OVh1T1BGWW9Idi9pSGNESjNGU21KOGp0cE1SOXlpa0ZteEtqUXc4UysvNlVq?=
- =?utf-8?B?ai96bUpKaElpV2hXVTRJWkdsTzlTVGRXOFg4SHVydXdIczVWSDRTckxLeThH?=
- =?utf-8?B?RWJjcUFLbDBCSDl3cG44TjNmMXNZUlZKYzhDRTdCT3A4T3V6TUhFMTZZbVNm?=
- =?utf-8?B?VEhjTnFER2s1VmowSEg2eWJRdmY2SGxQZklwWFBWOG1PY1FWaUJ3SDhKZkc2?=
- =?utf-8?B?Rnp5YnNuaEpsNDhpMWkwbDl3MXdQSFZ2RUIrZmpoTVpDSWRBcjNwNm90a0tM?=
- =?utf-8?B?R28xSEt5cGF1YzhuRERpQzRZKzhmUWo0cmJXRFNFOFhNQjNiQ2RVS2lsS3NT?=
- =?utf-8?B?c1BDMFM4ZzF5V2x1bFlOUk1LZ2krODgzdWFSRkZ2bHlZbVMyZXRLZmtEOG04?=
- =?utf-8?B?WW5sWVZWVWJ2RzJGWUNZdjJoNldTb0RnS0JabWNOUk93YkcydWR2TUxqVmQ0?=
- =?utf-8?B?S0MzYjkxb0hEcWtnWkhoWFlidjNrNzNudWIvNjVpd015RTJGb0gvRjdVRHYr?=
- =?utf-8?B?QlZhQjNnaCsyTlZVL0FYOUp2SDJ1OUlqV3BXV0I2RW9tYVhmSkZVN1Z4MGQr?=
- =?utf-8?B?YTEzSGEyUjZvRWZUQ0c3RW5QMks3d3dtSUJKeS84cFRiRUhRUFJJWVBQMUg4?=
- =?utf-8?B?a05qV3JCNnBBTmpxa0t1SFZLSlJXSUh6Z0NQSDAxNzNrSVNlRElxSGhNY2Vk?=
- =?utf-8?B?SnBuSkFSQnkrKzhTakhzNXBUMHdWZ1lsc3VINThYYWd1WTJaSHlFMytKZzZp?=
- =?utf-8?B?RXVuSEdqMytEK09lTmVYeGNmL1NGVnppa0phK1FCRXc2S1VlOHhiNS9Relpu?=
- =?utf-8?B?YXpyQTA5NEIrNEZ0TXJNRWtEeEFndUd1TWVzTGVIV3FYYkxiRll4MkM4M0FY?=
- =?utf-8?B?bWl1L2lqTkJmdElqY0NjTUlJRzdHWVNOVUZTczlkeHNMVEhhajVhWjJzdUpU?=
- =?utf-8?B?TTJyQnR1STZwRDZCU2c4REozK2hadmFlUitOckV1YTRLNTJWNWwxUmNyZUVD?=
- =?utf-8?B?amthd2tjbTRKOU5vVDJJVncwcjMrT2RPR2d3QUNNZlVBSFFXa3pCSTc3dmNy?=
- =?utf-8?B?dVltWkt0UjNFNysyUUxGSlRkVG4xRUNZL2ZTUS9oQzdWYjhBZzZyd016ZVNN?=
- =?utf-8?B?OEc1V3Eyem5XTDJOcHFRckJEcjJoSW0zZWVHMm5sV0pDOUNraWdHNEUrcVBZ?=
- =?utf-8?B?M2V2aHJEM1VGcU1TaHNMbktYTWZHdFZrOEtHMGMxbmVDSDM2a05VMmdRc3FY?=
- =?utf-8?B?QlBOOFU0Y0QyMHpsZGhSYXpqa2xPZHFaR3V2U1ZwZ3ErcXdhM0ExUkZ2Ly83?=
- =?utf-8?B?eWtOb20xTThnUEw4M00yY1FDSTdWbWFTeDloMVhNYk5SZWtmTGFmeS9FK1J1?=
- =?utf-8?B?K3FLcG9rUnJ2a0FER2RSdnZ1dUVRY2RvUmtZTTV2WGdjbkF4ZS9rdnJkY01C?=
- =?utf-8?B?QzQ3aXRpV0ttVUxnYUpxWFZEdlNBSzJ6VGs0aldvRVoxQUtEaVkxNHZKWGxP?=
- =?utf-8?B?WFdFWkx3UkgvdEdaTnVySWdpdWVLWmtuTXBkTVh5eWJST3YxTFMxYUFKNFJk?=
- =?utf-8?B?ci9VbzhodlhSU0xtZDZvZ1pWbTErbm5iN2twY2M0SWNOQ2tPdVNBNkZ3VkZn?=
- =?utf-8?B?bVVQNzM3cmpMSm5jK05tbkVVRXpVWTY5ZVZQOUNRQXhvc3IzVXduc1pGRm5Y?=
- =?utf-8?B?enVHK3JYcUVPTVRNRk5RaHhIdVZyN0RoN250Z3Z4L3I3VDdheSs0V3p2ZDNL?=
- =?utf-8?B?eDdETzhlMnlLZk1yMnlSSmQwRUpNWUkrY01EUU8wblpYZzFUL2QvYzdTYnU0?=
- =?utf-8?B?ZENhOGZHbjNRWlV2MWlHNnA3WXlMZlZPajR2RndpdXFHVE5zZTcrTUhQMUIx?=
- =?utf-8?B?NWlFcWdSVlV1M1dITEZZT0lqRVVzTTRqenlDYThnVFJiajJZaXlseXozbXha?=
- =?utf-8?B?aVVGZWZ3aHV1QVFuRUhDMDVGTENURDVqeUtTOTNJbkRtelFINUx1ZGJBVG5M?=
- =?utf-8?Q?H6/jajL0eQdGs+8LMYtFibQUQrpLU5XxNpL1f?=
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="cQ6C/ZmG";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="fs4WswJL"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66KDqX5g2962857
+	for <linux-embedded@vger.kernel.org>; Mon, 20 Jul 2026 14:30:04 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:to; s=
+	qcppdkim1; bh=B7WLVX7htmQVpgibeea9FWxKs4BdmsGk4O71G1I1VnM=; b=cQ
+	6C/ZmGu25L7iHIsTcYsk189LDQaJRBBoYybi7OC5h2i3ZiTG/aLKeDRISeO69V5Q
+	oO7jueBvrYn8NccMVQuq08+V75zAkML6BxGHSyBQe/3BVB383YaioRyYVep4/8Tj
+	sYBL/O/XJiukLWx5OPHXjux+nN4WaaT4brzn5jRJhDZQYPoR1kFWUbClwJAbPtIV
+	oWcj0xj3ZMN2+2ju89jbclM+OayrWEKqTtXL9mcttapQcLJgIDu10qNduD0E0oPm
+	iMggHGZraTaQ/mdxUtuWzxDs4kyAo7nYd/5Xdlw4ZeptoMlZgijT16igjzxkWkyN
+	eexhUY6V3cth4tWWLP9w==
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com [209.85.219.70])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fhfdchsc2-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-embedded@vger.kernel.org>; Mon, 20 Jul 2026 14:30:03 +0000 (GMT)
+Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-8ec45d9628aso130834886d6.1
+        for <linux-embedded@vger.kernel.org>; Mon, 20 Jul 2026 07:30:03 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784557803; cv=none;
+        d=google.com; s=arc-20260327;
+        b=oS3HXGK0thuRlSi2WgyFlpzL2y3hEtZJEFCgeKLCfGwZ38cOeIBeSimWMkJ6c8HhTT
+         r0FMG3krjVJfIbHvOZ6+1p/xrn3cu7XD3Aa3ikfct0fX7+twYogtwFz/nHvkvTVl07qg
+         DTvjNRK7R9X3N3Tr676HOwtqxAeQ6HT5jMBVFEzhUy2ykZeHa4hrKR87jTpubPmDYoAb
+         MeeBE/s1fRQQfMGoEnrMZD2zeGcwlhNqe6u9iQxdo+DV7R1oiTAbSxM43NmeFjjyCc4x
+         9dCY1a7acLi2XvCwKcmP8g7OFH7rDOj8iGZ36SZS39IsFWbMuIXgDpYtLg6gh0Y70LXD
+         fONQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :reply-to:in-reply-to:references:mime-version:dkim-signature;
+        bh=B7WLVX7htmQVpgibeea9FWxKs4BdmsGk4O71G1I1VnM=;
+        fh=I4PFzjZjs74M0sUWYZ6DiqZiMF2x8reVWHufBjqM0pc=;
+        b=YWARgEtJ+lg6ccG/OEur7zKUt8rAT854F3wF156h/IyvEncoDSA6LDFQpgl711mFIK
+         ddmw/ipXRAhtgmv94oI1xpbuvsRT1uYACS4hBqxQQuP02hKNOtSx4/ep3tDFJcnujmO3
+         MXnV8aay5vLfYcJ0CPtobfE0Lht/7D0u4bfyf9Kr7WHjEqt27hrYOUhV5UMPd02PLsQ4
+         rKr1fZuaVCGv0KnWP2qFe8ZNuRft9+MUHUp/2y2HLKW36PUDzLkdFCbqzg04v5YwbTHk
+         NORCvzakZE2we9DDtiGrOR0a0aL7nmwmcndzvO2ANqNR1GiSW2MXEREnNbFH3x1vaWkk
+         v+xQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1784557803; x=1785162603; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:reply-to:in-reply-to:references:mime-version:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=B7WLVX7htmQVpgibeea9FWxKs4BdmsGk4O71G1I1VnM=;
+        b=fs4WswJLAuRbPMxqyDRY3OonlUNfuxWQcY/VrH3K95KtqBQOW02uUY0UkUcqBFNZ7L
+         aa+JYEDj4VyhcOrqfgVsjddYZ1ky2LlER5EDTDiV2RL/gvHd23wOSiHwPiA9aDDpB/Qh
+         mWBBQaj+tDENlmjmDrIrIT2mQrmJKox3lhi2RPhy1CyHtN7Kvmho1tx1jWYPJ1ZRjzy2
+         LOHRFNvoRg5oVX2gGdKjiBGMYrOxt+Q+xa2+NtnEvku2JtGmoXAlHaPiBq8qL1ehr0Bc
+         rMKo4/BeV9D3Sml6hKjuTlBT8y9kwcWuFinEq+GLgL1ZkS1scmbYdUQbtaR9mCPN/AsW
+         L3Dw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784557803; x=1785162603;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:reply-to:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=B7WLVX7htmQVpgibeea9FWxKs4BdmsGk4O71G1I1VnM=;
+        b=jKQy2OruuhrjGPHVX8DMqYL/mZ2HaDUUGXDefSW2lxlSfnij1sP0Sz5WuC5WuIUucw
+         +4hE5rTeP17zzBhUdSDRfMUDEn0B5UqALUPWRBKXoUNm84KhYgpcwKCT0GR8UDND5DCA
+         WOPRE/Bm6krwkTvGuLmo6aid+C1seWAQsTRd9ERbkwgf6siRO1305Kf94msJFhI8gBYv
+         l3k0EFBpY58j2PN0YSlt0f7XP4lqS9ZIaV1y063GY9o5X2QkWCOJRxIANjsJTxZArqjr
+         mBogAjnCzBrj3ww9FG6vCYASdZvnVuwxJLpvhymJE9szCY4RUHL2K2uU5weHro5t88CA
+         gXCQ==
+X-Forwarded-Encrypted: i=1; AHgh+Rr9SQTK0onStI63lLwwfWtlp8gkea29yAlT9dpBQCjC7QF10/MivFwoOwRWQJgn60t1ji03OJMcOvVInMWlog==@vger.kernel.org
+X-Gm-Message-State: AOJu0YzFNvTyeqk7iRsjMSQPK4YxqYVM6kmYSq+LV0N1tlIC823AkY0O
+	xCIj2K2EyiQqjEZ3F+teL+HaYD73GCwgZ4gvtKZeuR5OiAjRVqNrAYM6CuXjMkFB9tUZA95qnR8
+	IYKrAdItigrMtrGLaNN6gfUOszz+bGFDEmZ9mPUeVNItmXCAjTOG8DE2nOLklKgznAwKou1hZMa
+	E4jrC0awmOC87HIvgTrVIqqrcL34M6OWlluOrAAeaGuobG
+X-Gm-Gg: AR+sD12kHRS6J1Gag7xt2uPjnf6UyTzylIUMc6syApdkuykmQgjMRgP1b5J2Wf0raae
+	cxzrCZ4DfJShX/V09rJC5AKYOvnrVNWHdve1JM19Xo54CyLPg6A0JWFM/pBwwQW4YSRkU7DW9uk
+	sN2SU+LiVA8Rq7ePWlanqLEfBuDosKPLtKalZ3p6Wc7DWUslOwWqMcwfQ1cA==
+X-Received: by 2002:a05:6214:1303:b0:8ef:1fc9:935b with SMTP id 6a1803df08f44-90778312673mr171659366d6.12.1784557802558;
+        Mon, 20 Jul 2026 07:30:02 -0700 (PDT)
+X-Received: by 2002:a05:6214:1303:b0:8ef:1fc9:935b with SMTP id
+ 6a1803df08f44-90778312673mr171658536d6.12.1784557801823; Mon, 20 Jul 2026
+ 07:30:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Subscribe: <mailto:linux-embedded+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	iAzknUx3HtagUWqUkw/F+CgGmFpkrfjfSScLpsqi91BAKxNOk8cx9zA0yOO9AFTP65l01oSxGKLl1V46glUSzg2aWJQb/cFuzKm5WdYixohsymOtIuuuvPajs2YRLPTu3E8fUdtNZXnADV7Q0CMgnxQfvTRQmE3c6PRoOZ8NXtFlIvhxxr/siCx413vcTRmd9b61XODOkFw+s4mv9hdch87hY+OxxuNeWvduqvINR0UYVAxlrCS2aqWtojr80lhESyPkakkynD+KFo9rF7yYPtxlLKcL/2JRelNHvQQxhg6Le+S9Ksqx00HzFZiD/lWBJfV0NDaSnLWtavZThO0l7A==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	kBc9aTNYcCSyUwP7wa6om6+A4PsCU6JlVjfszH2CrvVGkXF9/DDFyY7dzJZjPkqcWFILFmiGhOI7VXM0oax4Z2RLOJdtDXPgyo6tcXOUaAIzHQk3NILtrI2JftQO4o3uXoDK1XCFLNSyRot8Rz4gVwZVwAzJwR1ql6pb0B+/n+kSljiQEEzVk24FJGsBBvuVCAiSVlWREjI0Bwur7LAAm5qb6H1dnyq7XSEEBqiUE9xfj8pJnpKf5fii7S7dI67BVtN8XWXN7kHqYZiX6PGbrEORNWeH1rOQGksl0NzeFpjB+U6D5+OYBam1p5/kGciKUBUy+12ZgdxpDxDIsp2d5HcW6dDPUTyNibz47WSKXYbnD7S99Pl8evZNILQZpYkXT6QzUbQOJmgtJIuSiSjr5j4PPTxTmz5ipIm9g2zrPKqWuIiIQS28w6JRFG1DgqRomp5US7gXYDjoPHEzz2vOkj59TDfyiTkvFsHRbMzJUdFHRt9HlWPn3eFGNx3BYfvj19X7ZLLxfOvvYXCTHXvgVqx/4CDLk0h8j3QZgWwm+PN8KqTG7xM4RBTW1ePWuoQtJTtvvzavxCW2vw4/60ZFZFwtd4gfqFMxSoxXjzSVkJqJ9D6FpMh88QOKeXNcg0ec
-X-OriginatorOrg: sony.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MW5PR13MB5632.namprd13.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 505ddc87-0ddd-4b05-249c-08dedb7f52f4
-X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Jul 2026 16:55:03.1924
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 66c65d8a-9158-4521-a2d8-664963db48e4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: iPWdOTuQWb3EgccIfjg/WlGJ3z8d9SfyjIIgcPN7V8BGi0Gi9x8grdLhKYmJyv22TPZ6UBPZFeS4eK03PEofGw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR13MB5614
-Content-Type: text/plain; charset="utf-8"
+References: <20260702171606.527077-1-pintu.agarwal@oss.qualcomm.com> <20260713115936.GM276793@cmpxchg.org>
+In-Reply-To: <20260713115936.GM276793@cmpxchg.org>
+Reply-To: pintu.k@oss.qualcomm.com
+From: Pintu Kumar Agarwal <pintu.k@oss.qualcomm.com>
+Date: Mon, 20 Jul 2026 19:59:50 +0530
+X-Gm-Features: AUfX_mz15A386kNJsD5wp1TjLtovmzPE_18-TTLhtNcPJULkWXUVGWf0PXnOeuo
+Message-ID: <CANqwyPhJ82Vy9_BUzBumVJKxdMySv+YVaMHNTCOtz2sGOh_h2A@mail.gmail.com>
+Subject: Re: [RFC PATCH 0/1] psi: Introduce in-kernel PSI auto monitor feature
+To: Johannes Weiner <hannes@cmpxchg.org>
+Cc: linux-kernel@vger.kernel.org, linux-trace-kernel@vger.kernel.org,
+        surenb@google.com, rostedt@goodmis.org, mhiramat@kernel.org,
+        peterz@infradead.org, mathieu.desnoyers@efficios.com, mingo@redhat.com,
+        juri.lelli@redhat.com, vincent.guittot@linaro.org,
+        dietmar.eggemann@arm.com, bsegall@google.com, mgorman@suse.de,
+        vschneid@redhat.com, kprateek.nayak@amd.com, pintu.ping@gmail.com,
+        nathan@kernel.org, ojeda@kernel.org, nsc@kernel.org, gary@garyguo.net,
+        tglx@kernel.org, thomas.weissschuh@linutronix.de, aliceryhl@google.com,
+        dianders@chromium.org, linux.amoon@gmail.com, rdunlap@infradead.org,
+        akpm@linux-foundation.org, shuah@kernel.org,
+        linux-embedded@vger.kernel.org,
+        "tim.bird@sony.com" <tim.bird@sony.com>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE3MCBTYWx0ZWRfX6H3AoWkCZFXE
- asA0Ru6zyiFSjlFZ8FrxUBrd9ABFxFp1D0xUgg4ESTnTtL/DGf9/t1I0ZBoyq8hbbwjC1ndtdRk
- mSTO3L3Trb+zGhzAqKMhjBejz07qjGt2PN3afoupomhUy5AjBESs
-X-Proofpoint-ORIG-GUID: XtVfEoo_dbSJ-uVSmu-y3p7sEAqqhYQN
-X-Authority-Analysis: v=2.4 cv=M5597Sws c=1 sm=1 tr=0 ts=6a4bddf5 cx=c_pps
- a=P6W5axN73kUBBlOjEPV+4Q==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=RAioF0-LDSMA:10 a=xR56lInIT_wA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=KAb5x4SsHD3PzxGk7EmX:22 a=6Vn1QVPt8UGdu3r8PAnt:22 a=VwQbUJbxAAAA:8
- a=EUspDBNiAAAA:8 a=nzuXsxulAAAA:8 a=pGLkceISAAAA:8 a=QyXUC8HyAAAA:8
- a=ag1SF4gXAAAA:8 a=4RBUngkUAAAA:8 a=9yFmIu8hXOOK60S-n_cA:9 a=QEXdDO2ut3YA:10
- a=Jn5cl5okm61iLnyvC_SE:22 a=Yupwre4RP9_Eg_Bd0iYG:22 a=_sbA2Q-Kp09kWB8D3iXc:22
-X-Proofpoint-GUID: XtVfEoo_dbSJ-uVSmu-y3p7sEAqqhYQN
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE3MCBTYWx0ZWRfXxjY0jUAPQcMR
- Gjapx0xovAILbmlHuyvBB0HPU9x/Grplf/Q/+gA6MXP2CNCNFSC2bqq7tZeD+pJB8pYO9u6RoEH
- /DIzFokkGEmNP6eFu6PCXPx5I/2LbGo85Yl/t9L2sKgHjEKYw9eE05pLtYRHo6i5TESzZDzy+1p
- fmURFhNc70gK46bUwB63IUd+3CqvhymoRSwX8dAa4Ft2/vlMqcM3a89z2lHQUDsPgftEQjU/uFL
- nCpK4lfU1pMD7sR62QVO4Zcgv6xt7p9/XTTmltfDz6nPUZIuOR7OCBNtv8XhX2HEdUyA72vQw+E
- RjDVhqYgGibNK3s2Eg3qU9xk4Egbue5WJmoitKU9E7Lw4mv4JEmtrNapEQeDxfNe++xbQJdnLft
- dAu72loPfhHm/40u3qARw3cpkLwgUJCacPaAoaEwfGZRbvfHsY4Urb9769fUSksJg23rkwsoaak
- 9wsiB+nkUO4cghOKNDg==
-X-Sony-Outbound-GUID: XtVfEoo_dbSJ-uVSmu-y3p7sEAqqhYQN
+X-Proofpoint-ORIG-GUID: rs7R5YwWUyOhdBaRY6Ud0c9Y5JEG5xZp
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzIwMDE2MSBTYWx0ZWRfX3KCVfGvPrjNr
+ sFdqKHd5LY9GPpnxvXqbco2IfeqFqmujCE16gFmBoFmVXHkIBrgjlUW0+9o2Vb2+jqz4ZWz6uJH
+ qcwI05ONxk9OE72/JPbdW8fdo0wHekV6TM00H9A3Yll0VA5MXWshTauJ4AdXm8ZjBW4bWtb1Wrz
+ 6NC5Xezhgoakwa9dBl20Phg18A3yavE1kmYSD33ZFihgsziLGd77xqCMwjddfPXeBo6fBWtnI7/
+ JrhTtPK06G8YyVWyy7nUOlhbc1nyj5t8F7OoV/HGWeTxMjqosMn7xcZ2TJYGCMDLTL12Dsj1lSC
+ Y0ZNi5ooIRLCAPUMc+i5z2KF9UPhO/RCrchXD7rUgN15keFL+qzGVF4+Hfs0Y9kEB7UCsmg41VV
+ AqDBHtyKHfxjpNFwoM0esolzlXtwnMUP91tj1ceIpFAlLbpHeq/aVUfSFr64P8s273UypJUtHbk
+ CD0rA/D/QOTQa52H3mw==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzIwMDE2MSBTYWx0ZWRfX7AnFD9OfNVlB
+ k770qvTD8aQQyVHYrYeP6WiUx6BKUGr9+jAlCXISNoGUSBpXC6r8xgto0lQCule74KkweG02jt+
+ W9z0AOrjseFAvA/QMBPI/Xs3oSRZrbo=
+X-Proofpoint-GUID: rs7R5YwWUyOhdBaRY6Ud0c9Y5JEG5xZp
+X-Authority-Analysis: v=2.4 cv=bv58wkai c=1 sm=1 tr=0 ts=6a5e30eb cx=c_pps
+ a=oc9J++0uMp73DTRD5QyR2A==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+ a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=Um2Pa8k9VHT-vaBCBUpS:22 a=ufHFDILaAAAA:8 a=vtzPRGNYVNIivFiWXQUA:9
+ a=QEXdDO2ut3YA:10 a=iYH6xdkBrDN1Jqds4HTS:22 a=ZmIg1sZ3JBWsdXgziEIF:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-07-06_02,2026-07-06_02,2025-10-01_01
+ definitions=2026-07-20_03,2026-07-20_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 bulkscore=0 priorityscore=1501 spamscore=0 malwarescore=0
+ phishscore=0 lowpriorityscore=0 clxscore=1011 suspectscore=0 adultscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607200161
 
-Hey Bartosz,
+Dear Johannes,
 
-Can you also please CC: linux-embedded@vger.kernel.org on this patch set, i=
-n the future?
-There are a few embedded Linux developers working on boot-time for the Linu=
-x kernel,
-who are interested in this work.
+On Mon, Jul 13, 2026 at 5:29=E2=80=AFPM Johannes Weiner <hannes@cmpxchg.org=
+> wrote:
+>
+> On Thu, Jul 02, 2026 at 10:46:05PM +0530, Pintu Kumar Agarwal wrote:
+> > Hi all,
+> >
+> > This RFC introduces an in-kernel PSI auto monitor aimed at improving
+> > root-cause visibility for resource pressure events in Linux systems.
+> >
+> > Motivation:
+> >
+> > PSI already provides an excellent mechanism to detect CPU, memory and
+> > I/O pressure and includes trigger-based notifications via pollable
+> > interfaces. However, it deliberately avoids attributing pressure to
+> > individual tasks.
+>
+> Why is this necessary?
+>
+> > In real-world systems, this creates a gap: when a PSI trigger fires,
+> > users still need to determine *which tasks caused the stall* by combini=
+ng
+> > multiple tools (top, meminfo, vmstat, perf, tracing, etc.), often after
+> > the event has already passed.
+>
+> I've never found myself needing to identify which specific task was
+> stalled. Tasks competing over a shared resource are interdependent.
+>
+> Consider this scenario: Task A, B, C are allocating memory and
+> creating pressure together; B randomly becomes the sucker to hit
+> direct reclaim and making room for the other too as well. Why is it
+> meaningful to know that B stalled? It caused the resource contention
+> no more than the other two.
+>
+> Then A and C refault: A is fast, but C happens to hit when the flash
+> drive is running garbage collection. Why is it meaningful to know C?
+> Again, C is no more the culprit in that situation than the others.
+>
+> The meaningful thing you can say is that the domain as a whole is
+> under pressure. Who exactly becomes the lightning rod is noise.
+>
+> That said, if you do need it, why not use delayacct? It already tracks
+> the reclaim, swap, thrashing time and events that also go into psi on
+> a per-task basis. It's not sampled, either.
+
+Thank you so much for your detailed feedback. This is very helpful.
+Your point about resource pressure being a domain-level phenomenon
+rather is well taken.
+I agree that pressure is often created collectively by multiple
+workloads, and that the task experiencing the stall is not necessarily
+the root cause.
+
+The goal of the RFC was not to identify a single culprit, but to
+provide additional attribution context and surrounding tasks around
+PSI events
+by capturing the major resource consumers and participants exactly at
+the time pressure becomes significant.
+
+Your suggestion regarding delayacct is very insightful.
+I think there is a utility under tools/accounting/delaytop.c which
+already provides task-level delay information in user space when run
+manually.
+
+I am currently studying delayacct, taskstats and the existing delaytop
+utility to understand how I can correlate PSI auto-monitor attribution
+using delayacct.
+The idea could be:
+PSI threshold breach -> PSI Auto Monitor trigger -> Delayacct provides
+delayed task list -> Auto monitor dump / create trace events
+PSI threshold breach -> PSI Auto Monitor is triggered -> Collect
+per-task delayacct/taskstats data
+-> Identify tasks with significant reclaim / swap / I/O / CPU
+scheduling delay -> Emit trace events / logs / structured report
+
+One additional motivation for the in-kernel prototype was early-boot
+observability.
+Unlike a userspace monitor, it can capture pressure events and
+attribution context before userspace services are available,
+which proved useful in several embedded boot-time investigations.
+One more point is that the psi auto monitor can run and trigger on its
+own during early boot.
+It can quickly help to identify bottlenecks during boot and aid in
+boot time optimization at both kernel and user space level.
+
+As a side note, please see one of the snapshots below captured during boot.
+# dmesg | grep psi
+[   30.948653][  T420] psi_monitor: pressure high: cpu=3D50% mem=3D1%
+io=3D11% (thresh cpu=3D50 mem=3D60 io=3D40)
+[   30.958342][  T420] psi_monitor: logging top 8 tasks under pressure:
+[   30.964959][  T420] psi_monitor: pid=3D2637 comm=3Dpcid-loc-api
+psi_flag=3D12 oncpu=3D0 cputime(ms)=3D443 rss(kB)=3D21976 io(kB)=3D0 score=
+=3D13203
+[   30.977392][  T420] psi_monitor: pid=3D1974 comm=3Dsyslogd psi_flag=3D0
+oncpu=3D3 cputime(ms)=3D643 rss(kB)=3D2156 io(kB)=3D272 score=3D4565
+[   30.989137][  T420] psi_monitor: pid=3D2597 comm=3Dqwesd psi_flag=3D4
+oncpu=3D3 cputime(ms)=3D104 rss(kB)=3D7964 io(kB)=3D0 score=3D4502
+[   31.000540][  T420] psi_monitor: pid=3D1493 comm=3Ddlt-system
+psi_flag=3D0 oncpu=3D3 cputime(ms)=3D370 rss(kB)=3D1984 io(kB)=3D136 score=
+=3D2978
+[   31.014588][  T420] psi_monitor: pid=3D15 comm=3Drcu_preempt psi_flag=3D=
+0
+oncpu=3D2 cputime(ms)=3D443 rss(kB)=3D0 io(kB)=3D0 score=3D2215
+[   31.033593][  T420] psi_monitor: pid=3D420 comm=3Dkworker/2:9+events
+psi_flag=3D12 oncpu=3D2 cputime(ms)=3D351 rss(kB)=3D0 io(kB)=3D0 score=3D17=
+55
+[   31.051276][  T420] psi_monitor: pid=3D2713 comm=3Dsdir psi_flag=3D0
+oncpu=3D1 cputime(ms)=3D124 rss(kB)=3D0 io(kB)=3D20 score=3D640
+[   31.065800][  T420] psi_monitor: pid=3D41 comm=3Dkworker/u8:1-memlat_wq
+psi_flag=3D0 oncpu=3D3 cputime(ms)=3D52 rss(kB)=3D0 io(kB)=3D0 score=3D260
+
+
+Thank you once again for your review and valuable feedback.
+I will explore more and improve the design for v2.
+
 
 Thanks,
- -- Tim
-
-> -----Original Message-----
-> From: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-> Sent: Monday, July 6, 2026 6:54 AM
-> To: Brendan Higgins <brendan.higgins@linux.dev>; David Gow <david@davidgo=
-w.net>; Rae Moar <raemoar63@gmail.com>; Andy
-> Shevchenko <andriy.shevchenko@linux.intel.com>; Daniel Scally <djrscally@=
-gmail.com>; Heikki Krogerus <heikki.krogerus@linux.intel.com>;
-> Sakari Ailus <sakari.ailus@linux.intel.com>; Bartosz Golaszewski <brgl@ke=
-rnel.org>; Greg Kroah-Hartman <gregkh@linuxfoundation.org>;
-> Rafael J. Wysocki <rafael@kernel.org>; Danilo Krummrich <dakr@kernel.org>=
-; Linus Walleij <linusw@kernel.org>; Dmitry Torokhov
-> <dmitry.torokhov@gmail.com>
-> Cc: linux-kernel@vger.kernel.org; linux-kselftest@vger.kernel.org; kunit-=
-dev@googlegroups.com; linux-acpi@vger.kernel.org; driver-
-> core@lists.linux.dev; linux-gpio@vger.kernel.org; Bartosz Golaszewski <ba=
-rtosz.golaszewski@oss.qualcomm.com>
-> Subject: [PATCH v2 2/5] software node: add fw_devlink support
->=20
-> Software nodes can be used to describe supplier-consumer relationships be=
-tween devices they represent using reference property entries.
-> Unlike for OF-nodes, driver core cannot yet use these references to creat=
-e a probe order that avoids needless
->=20
-> Software nodes can be used to describe supplier-consumer relationships
-> between devices they represent using reference property entries. Unlike
-> for OF-nodes, driver core cannot yet use these references to create a
-> probe order that avoids needless probe deferrals on missing providers.
->=20
-> Implement software_node_add_links() modelled on of_fwnode_add_links().
-> For every DEV_PROP_REF property we resolve each referenced supplier and
-> create an fwnode link from the node to it. The driver core later promotes
-> these to device links and defers the consumer until the suppliers are
-> ready.
->=20
-> There's no allowlist like the one DT needs - devicetree phandles appear
-> in plenty of non-supplier contexts, but a software node only carries a
-> reference property when its author explicitly points at another node, so
-> we treat every reference as an intentional supplier dependency and link
-> all of them. Graph "remote-endpoint" references are skipped for now: they
-> go 2-ways between endpoint nodes and would create graph cycles without
-> the port-parent lifting DT does via get_con_dev(). References to
-> suppliers that aren't registered yet and self-references are ignored.
->=20
-> fw_devlink resolves the supplier device through fwnode->dev but the core
-> only records the owning device on the primary fwnode. When the software
-> node is a device's secondary fwnode, mirror the device pointer onto it in
-> software_node_notify() so the consumer can actually find the supplier
-> instead of deferring forever.
->=20
-> While at it: purge the fwnode links in software_node_release() now that
-> software nodes can own them.
->=20
-> Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-> ---
->  drivers/base/swnode.c | 79 +++++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  1 file changed, 79 insertions(+)
->=20
-> diff --git a/drivers/base/swnode.c b/drivers/base/swnode.c
-> index 869228a65cb365567ddac7db6ad7b8743e0dbca9..e6e2d6926fef2db82eb1f2bf4=
-39e80aacf48668a 100644
-> --- a/drivers/base/swnode.c
-> +++ b/drivers/base/swnode.c
-> @@ -699,6 +699,62 @@ software_node_graph_parse_endpoint(const struct fwno=
-de_handle *fwnode,
->  	return 0;
->  }
->=20
-> +static int software_node_add_links(struct fwnode_handle *fwnode)
-> +{
-> +	const struct software_node_ref_args *ref, *ref_array;
-> +	struct swnode *swnode =3D to_swnode(fwnode);
-> +	const struct property_entry *prop;
-> +	struct fwnode_handle *refnode;
-> +	unsigned int count;
-> +
-> +	if (!swnode || !swnode->node->properties)
-> +		return 0;
-> +
-> +	/*
-> +	 * Unlike Device Tree, where phandles appear in many non-supplier
-> +	 * contexts and a curated allowlist is required, a software node only
-> +	 * carries a DEV_PROP_REF property when the author explicitly describes
-> +	 * a reference to another node. Every such reference is therefore an
-> +	 * intentional supplier dependency, so we create fwnode links for all
-> +	 * of them.
-> +	 */
-> +	for (prop =3D swnode->node->properties; prop->name; prop++) {
-> +		if (prop->type !=3D DEV_PROP_REF || prop->is_inline)
-> +			continue;
-> +
-> +		/*
-> +		 * TODO: Graph "remote-endpoint" references go both ways
-> +		 * between endpoint child nodes and would create endpoint
-> +		 * cycles. Let's leave it out for now until we have potential
-> +		 * users.
-> +		 */
-> +		if (!strcmp(prop->name, "remote-endpoint"))
-> +			continue;
-> +
-> +		ref_array =3D prop->pointer;
-> +		count =3D prop->length / sizeof(*ref_array);
-> +
-> +		for (unsigned int i =3D 0; i < count; i++) {
-> +			ref =3D &ref_array[i];
-> +
-> +			if (ref->swnode)
-> +				refnode =3D software_node_fwnode(ref->swnode);
-> +			else if (ref->fwnode)
-> +				refnode =3D ref->fwnode;
-> +			else
-> +				continue;
-> +
-> +			/* Supplier not registered yet, or self-reference. */
-> +			if (!refnode || refnode =3D=3D &swnode->fwnode)
-> +				continue;
-> +
-> +			fwnode_link_add(&swnode->fwnode, refnode, 0);
-> +		}
-> +	}
-> +
-> +	return 0;
-> +}
-> +
->  static const struct fwnode_operations software_node_ops =3D {
->  	.get =3D software_node_get,
->  	.put =3D software_node_put,
-> @@ -716,6 +772,7 @@ static const struct fwnode_operations software_node_o=
-ps =3D {
->  	.graph_get_remote_endpoint =3D software_node_graph_get_remote_endpoint,
->  	.graph_get_port_parent =3D software_node_graph_get_port_parent,
->  	.graph_parse_endpoint =3D software_node_graph_parse_endpoint,
-> +	.add_links =3D software_node_add_links,
->  };
->=20
->  /* ---------------------------------------------------------------------=
------ */
-> @@ -787,6 +844,8 @@ static void software_node_release(struct kobject *kob=
-j)
->  {
->  	struct swnode *swnode =3D kobj_to_swnode(kobj);
->=20
-> +	fwnode_links_purge(&swnode->fwnode);
-> +
->  	if (swnode->parent) {
->  		ida_free(&swnode->parent->child_ids, swnode->id);
->  		list_del(&swnode->entry);
-> @@ -1105,6 +1164,17 @@ void software_node_notify(struct device *dev)
->  	if (!swnode)
->  		return;
->=20
-> +	/*
-> +	 * When the software node is the device's secondary firmware node,
-> +	 * the core only records the owning device on the primary fwnode
-> +	 * (see device_add()). fw_devlink resolves a supplier device through
-> +	 * fwnode->dev, so without this a consumer referencing the software
-> +	 * node could never find the supplier device and would defer forever.
-> +	 * Make fwnode.dev point to its owner in that case.
-> +	 */
-> +	if (dev_fwnode(dev) !=3D &swnode->fwnode && !swnode->fwnode.dev)
-> +		swnode->fwnode.dev =3D dev;
-> +
->  	swnode_get(swnode);
->  	ret =3D sysfs_create_link(&dev->kobj, &swnode->kobj, "software_node");
->  	if (ret)
-> @@ -1127,6 +1197,15 @@ void software_node_notify_remove(struct device *de=
-v)
->=20
->  	sysfs_remove_link(&swnode->kobj, dev_name(dev));
->  	sysfs_remove_link(&dev->kobj, "software_node");
-> +
-> +	/*
-> +	 * Drop the device pointer mirrored onto a secondary software node in
-> +	 * software_node_notify(). For a primary software node the core owns
-> +	 * fwnode->dev and clears it in device_del().
-> +	 */
-> +	if (dev_fwnode(dev) !=3D &swnode->fwnode && swnode->fwnode.dev =3D=3D d=
-ev)
-> +		swnode->fwnode.dev =3D NULL;
-> +
->  	swnode_put(swnode);
->=20
->  	if (swnode->managed) {
->=20
-> --
-> 2.47.3
->=20
-
+Pintu
