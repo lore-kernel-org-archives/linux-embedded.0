@@ -1,46 +1,47 @@
 Received: from jpms-ob02.noc.sony.co.jp (jpms-ob02.noc.sony.co.jp [211.125.140.165])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44FE63DBD5B;
-	Wed, 22 Jul 2026 03:31:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 645503E49ED;
+	Wed, 22 Jul 2026 03:41:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.125.140.165
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784691113; cv=none; b=PkpD/buPzpjsW+e+mJ804HZ9DwbyVgjUYP24lznLdYAeQurOGNHkeZxJ2jecbFw5QHVRyqjZaJ+GlqrAT3ME6984jL8lO53CyAUgrcrMwQj+eqo2/dN7QbEe5SZzeYnRYH5OemH6B5XCgVXz9WyeHwdJkXpuKRaGinrVevvz6Dw=
+	t=1784691712; cv=none; b=i1RDxNtHMeFvh1ilQCYCcoWEqvR+aXN2JMZwFdrczqWEYVKwDaMxfBBHVMXCMhDylcOieN7dlCGOho+lKmBxjLiC1WchE+tmzjeKRekZkLjtMfefEuRuqcbd+tlv8GEP2Tej4C28v1va0/eUnYHtzH4La1p0wrN86etuzjt/Nls=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784691113; c=relaxed/simple;
-	bh=MfTcypu0xmgn6dV7pRLzNTXZ80KHazJgygRiUlYhcPo=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Ag7xz8aTqFWGUWDJ+M9tdXO/yK16xKZ35dyfd1s5Npaoqy8nAaJHu2pyU7A8/uIVDIvI73cGLjyt8KUp+sr/xpDHd6PSlH27tues1U73cFd9lTpxEMjKkc4Y1JkHIc/IYESn6h9yh+QHoNsqFc+6KcXny4D0QocK+RpFE4Lv/xA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=uz+/oE7R; arc=none smtp.client-ip=211.125.140.165
+	s=arc-20240116; t=1784691712; c=relaxed/simple;
+	bh=wFc01ky0wiC8TSKnf9eWcxVo+r/O03nRq6huFbYF7mw=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=Z4X+dBZOqja7QUOz/W/ioxSdEAGhF7DcB+JE2cXawKqQJh0gDhMLLrnk9kMSF1EoefSsqc5YGgeTdm2t2X74QkiYjWLbXx82XqWF75YMDvxl5jP4RgTF0pdcUE7JUMzPIfrP9kldoXVThlPQr30brHjGK/WMwOQUltlplyogtwQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=snBQADMl; arc=none smtp.client-ip=211.125.140.165
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="uz+/oE7R"
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="snBQADMl"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=sony.com; s=s1jp; t=1784691111; x=1816227111;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:references:in-reply-to:to:cc;
-  bh=caj1f0+EQ2UBY0cWiEaPgfnHr13PPMYZHTOfF6hNr3g=;
-  b=uz+/oE7RrhRF4EN7y9Lk+5G1IMHFZ3u4qLfznoNLqDawpiFeut02caFm
-   XnopeLI3ZgWK2h40UqtR+FBPfrMCZ1X79ipsh0UepKlh+z6FahcTjaTDQ
-   EeX6jh/rctVJAJshCfBR1RXdHmFxMGaqywxystGHLCiuU2P/t5LctkpG4
-   t/ysmwwbvkr9n/DuND0jrlzPQlnbumzJbjiViMgVhO2I94C1PESJ68Lmo
-   F87oEqOS+pXT9IYzqNFqSu9rCiSMCQQ41QKV9KvKjFZIaKuEEGTgb0iNq
-   bceJFovjMiOQG/FtZpHeJ7AqcdN9bUWr3XgiBWq2wi+jRt0u6trtf9sjs
-   g==;
-X-CSE-ConnectionGUID: Uqbz/TdySemtTC23GndMTg==
-X-CSE-MsgGUID: ww7wza9OS16tbuVEEpj5zQ==
+  d=sony.com; s=s1jp; t=1784691708; x=1816227708;
+  h=from:subject:date:message-id:mime-version:
+   content-transfer-encoding:to:cc;
+  bh=TB0Hvn5ONW8G0Wja7XMN/KwjPVP6Ai1KndzicZDnOgQ=;
+  b=snBQADMl7ZAGnaImHY5FzWjLXqXdjPp2Ms0J710PrdLH+EQ+TJMJlvth
+   Kb+zvZGbfLrJNpA5Tg5kDQ8TSsotsm3fkFYNbrS9rqn6buBRfJUKHxnZ5
+   CxIiVegeR9E2hIyiBdlWR6/O4BhAstOxPpvLDZmzboDmeB5tUjkUeEVl+
+   KMowI5+kKUTYRpIVsdXrxVDDk7utoRBeqJ0yS/U29fVwx7Ln3eW33OXxn
+   988K4YP7ECREbhd4+9tKLhcfybJCejt5IluoW3cGU3DhZ1u1K+lS1cRxd
+   YUs+E/Za3PLat9NSckr7fzkbiufIjcTUpMLer9AcVKKGLRxskkXMRrAMF
+   Q==;
+X-CSE-ConnectionGUID: qYD/RAJWSjOmXXIRyhrsOQ==
+X-CSE-MsgGUID: PINgkoPGRUO1+hVlv3cvNw==
 Received: from unknown (HELO jpmta-ob02.noc.sony.co.jp) ([IPv6:2001:cf8:0:6e7::7])
   by jpms-ob02.noc.sony.co.jp with ESMTP/TLS/TLS_AES_256_GCM_SHA384; 22 Jul 2026 12:31:37 +0900
-X-CSE-ConnectionGUID: AIyn8/KgS4u55ssiYoTicA==
-X-CSE-MsgGUID: c/wzc9eFTBKuNh3NpiIrUA==
+X-CSE-ConnectionGUID: me/Eo/F5TzCEp2AisWN2Fw==
+X-CSE-MsgGUID: rOfehimtQqWz7B+ZeRWvgg==
 X-IronPort-AV: E=Sophos;i="6.25,177,1779116400"; 
-   d="scan'208";a="627327276"
+   d="scan'208";a="627327270"
 Received: from unknown (HELO [127.0.1.1]) ([IPv6:2001:cf8:1:573:0:dddd:6b3e:119e])
-  by jpmta-ob02.noc.sony.co.jp with ESMTP; 22 Jul 2026 12:31:38 +0900
+  by jpmta-ob02.noc.sony.co.jp with ESMTP; 22 Jul 2026 12:31:37 +0900
 From: Shashank Balaji <shashank.mahadasyam@sony.com>
-Date: Wed, 22 Jul 2026 12:31:24 +0900
-Subject: [PATCH 4/4] usb: ulpi: set mod_name in driver registration
+Subject: [PATCH 0/4] usb: enable sysfs module symlink for more built-in
+ drivers
+Date: Wed, 22 Jul 2026 12:31:20 +0900
+Message-Id: <20260722-mod_name_usb-v1-0-96d781530f3f@sony.com>
 Precedence: bulk
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
@@ -49,9 +50,10 @@ List-Unsubscribe: <mailto:linux-embedded+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260722-mod_name_usb-v1-4-96d781530f3f@sony.com>
-References: <20260722-mod_name_usb-v1-0-96d781530f3f@sony.com>
-In-Reply-To: <20260722-mod_name_usb-v1-0-96d781530f3f@sony.com>
+X-B4-Tracking: v=1; b=H4sIAIg5YGoC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDIzMDcyMj3dz8lPi8xNzU+NLiJN1U46TENFOLVEMgVAJqKShKTcusABsXHQv
+ hF5cmZaUml4DMUKqtBQDfksW3cAAAAA==
+X-Change-ID: 20260722-mod_name_usb-e3baf58e1e1e
 To: Andrew Lunn <andrew+netdev@lunn.ch>, 
  "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
  Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
@@ -66,71 +68,53 @@ Cc: linux-usb@vger.kernel.org, netdev@vger.kernel.org,
  linux-embedded@vger.kernel.org, 
  Shashank Balaji <shashank.mahadasyam@sony.com>
 X-Mailer: b4 0.16-dev-3bfbc
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2295;
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1655;
  i=shashank.mahadasyam@sony.com; h=from:subject:message-id;
- bh=MfTcypu0xmgn6dV7pRLzNTXZ80KHazJgygRiUlYhcPo=;
- b=owGbwMvMwCU2bX1+URVTXyjjabUkhqwEyxlyXvFC/kplQTx7+H9J5amv75otuOhuGuuZnbfWV
- GZGl7B3lLIwiHExyIopspQqVf/auyJoSc+Z14owc1iZQIYwcHEKwEQWVzEyrLg57+jdt0Ic3w2X
- 3lbz9m40nRL919pOJb1XyfHcW9fP1xj+J4ULzXnEfaioWequRa5px49ifds/mdaRaV223Yv+Ns/
- iAQA=
+ bh=wFc01ky0wiC8TSKnf9eWcxVo+r/O03nRq6huFbYF7mw=;
+ b=owGbwMvMwCU2bX1+URVTXyjjabUkhqwEy2lBBgX3E3+JMjjHsTiK3O09cf9Fl88XMVEVxhR3j
+ wknuXZ3lLIwiHExyIopspQqVf/auyJoSc+Z14owc1iZQIYwcHEKwERytjD8Zkt4VjEl9XLAi0kp
+ Qj3HK4/56nq8rM62XOjRcXbSROYtPAz/wwLvqByd6KqwvXh1Ku+tP0+1zs5/ecokJl9rpwJLV2Y
+ PGwA=
 X-Developer-Key: i=shashank.mahadasyam@sony.com; a=openpgp;
  fpr=75227BFABDA852A48CCCEB2196AF6F727A028E55
 
-The driver core only creates the sysfs "module" symlink for a built-in
-driver when its struct device_driver has mod_name set (see
-module_add_driver()). This driver left mod_name unset, so its built-in
-form had no such symlink.
+This is in continuation to [1].
 
-Set mod_name to KBUILD_MODNAME during driver registration. Built-in
-drivers now gain the symlink, while loadable modules are unaffected.
+struct device_driver's mod_name is not set by a number of bus' driver registration
+functions. Without that, built-in drivers don't have the module symlink in sysfs.
+We want this to go from unbound driver name -> module name -> kernel config name.
+This is useful on embedded platforms to minimize kernel config, reduce kernel size,
+and reduce boot time.
 
-Co-developed-by: Rahul Bukte <rahul.bukte@sony.com>
-Signed-off-by: Rahul Bukte <rahul.bukte@sony.com>
+This patchset adds mod_name to usb-related drivers.
+
+[1] https://lore.kernel.org/all/20260518-acpi_mod_name-v5-0-705ccc430885@sony.com/
+
 Signed-off-by: Shashank Balaji <shashank.mahadasyam@sony.com>
 ---
- include/linux/ulpi/driver.h | 4 ++--
- drivers/usb/common/ulpi.c   | 4 +++-
- 2 files changed, 5 insertions(+), 3 deletions(-)
+Shashank Balaji (4):
+      usb: core: pass THIS_MODULE implicitly through a macro
+      usb: core: set mod_name in driver registration
+      usb: typec: set mod_name in driver registration
+      usb: ulpi: set mod_name in driver registration
 
-diff --git a/include/linux/ulpi/driver.h b/include/linux/ulpi/driver.h
-index c668d9c8d876..c899197e0aa8 100644
---- a/include/linux/ulpi/driver.h
-+++ b/include/linux/ulpi/driver.h
-@@ -51,8 +51,8 @@ struct ulpi_driver {
- /*
-  * use a macro to avoid include chaining to get THIS_MODULE
-  */
--#define ulpi_register_driver(drv) __ulpi_register_driver(drv, THIS_MODULE)
--int __ulpi_register_driver(struct ulpi_driver *drv, struct module *module);
-+#define ulpi_register_driver(drv) __ulpi_register_driver(drv, THIS_MODULE, KBUILD_MODNAME)
-+int __ulpi_register_driver(struct ulpi_driver *drv, struct module *module, const char *mod_name);
- void ulpi_unregister_driver(struct ulpi_driver *drv);
- 
- #define module_ulpi_driver(__ulpi_driver) \
-diff --git a/drivers/usb/common/ulpi.c b/drivers/usb/common/ulpi.c
-index 7e43429e996e..dec4baca1c53 100644
---- a/drivers/usb/common/ulpi.c
-+++ b/drivers/usb/common/ulpi.c
-@@ -147,15 +147,17 @@ static const struct device_type ulpi_dev_type = {
-  * __ulpi_register_driver - register a driver with the ULPI bus
-  * @drv: driver being registered
-  * @module: ends up being THIS_MODULE
-+ * @mod_name: ends up being KBUILD_MODNAME
-  *
-  * Registers a driver with the ULPI bus.
-  */
--int __ulpi_register_driver(struct ulpi_driver *drv, struct module *module)
-+int __ulpi_register_driver(struct ulpi_driver *drv, struct module *module, const char *mod_name)
- {
- 	if (!drv->probe)
- 		return -EINVAL;
- 
- 	drv->driver.owner = module;
-+	drv->driver.mod_name = mod_name;
- 	drv->driver.bus = &ulpi_bus;
- 
- 	return driver_register(&drv->driver);
+ include/linux/ulpi/driver.h             |  4 ++--
+ include/linux/usb.h                     |  6 ++++--
+ include/linux/usb/typec_altmode.h       |  4 ++--
+ drivers/net/usb/r8152.c                 |  2 +-
+ drivers/usb/common/ulpi.c               |  4 +++-
+ drivers/usb/core/driver.c               | 10 ++++++----
+ drivers/usb/core/usb.c                  |  2 +-
+ drivers/usb/misc/apple-mfi-fastcharge.c |  2 +-
+ drivers/usb/misc/onboard_usb_dev.c      |  2 +-
+ drivers/usb/typec/bus.c                 |  4 +++-
+ drivers/usb/usbip/stub_main.c           |  2 +-
+ 11 files changed, 25 insertions(+), 17 deletions(-)
+---
+base-commit: 248951ddc14de84de3910f9b13f51491a8cd91df
+change-id: 20260722-mod_name_usb-e3baf58e1e1e
 
--- 
-2.43.0
+Best regards,
+--  
+Shashank Balaji <shashank.mahadasyam@sony.com>
 
