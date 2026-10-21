@@ -1,90 +1,90 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.48
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.128.52
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792536615;
-	b=E+/xm4v76WrycSGPJlUgS5CgYVUh9Xxv+Eq0yMZLjNUCfymODAB9V6cAHc4jS3f/bApO
-	 GyxV7LObqKA94r5DZ9pFDwekIzr2XNkwlPefsYP+Ho9Ev9NIh5qdVqwbtEfetM1W/wwYe
-	 WpBvKwUklN5c2vyH8BqEwlk+41m2d0LHSTQCETQ9v9Q4W0+ukxmGtszh40vZH8p0jgVz9
-	 3TDkdy+UrKG03fbcC2Az7VroK7W8IoftB1/n526QEFNY0YJ1veLDPgKEiFLK7MIvX2o9g
-	 djEccsIC2YAe0kx/9DyyOx4hbXFBywBBg+GwFEu1XgyVQ9uSeOqMMu7h6yY/WZVDQQw==
+	t=1792536617;
+	b=SPkqRLnKTiVJ2IRLvyKGxvutmwnjOz02vcGRNOQVGZHq4tb4ik8mx8Wb5XiLdt0CNxSG
+	 AekLSGSc/gksqR+0l6ECx7PVysURb/II2oN8IIGbR7T7uXYySwPjKLEVxkshBPEs1mZde
+	 Rm3zb025ES4L46m0qq5MvFuxPWL5L5Sy3upBEFRAfLGR2QrGbgZLyhNqQrbfDTbv39/Cs
+	 u4sMYNzOeruu7XpneSDEcyKC1RGWEhknbpss0UcKl/haCBWHEBE6hut57beqWjxgMH2my
+	 UVimkkwO/SyvGqK8YhdcWt+waJIrKhl+2K7/WWceZxs6BwiqvPtuIYqLCcCk5ypScVA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792536615;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792536617;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-Id:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Type:Content-Transfer-Encoding;
-	bh=f0vC8nTatz/VfjL47eh+tNgjT4mJh4syjFrv8ctbkr8=;
-	b=EvnnpoorzdWJjzBT7JI1l1vxMMMjsyT10sQwVnnIWZ2dFetd1Le6kSi+r3cw8ETz4QiY
-	 RvoOvzLEWJpjod1IOTESJsrSN88T5i2UnXHex1bDlm5beUacTg58Du1W0A1CBhgcMfnxD
-	 7t90OHiIT0eZZws9T3YinWTr+wR56iFDnCQvjGJiwEfu21TINrEUxmPTZVRUbIk8GY7MX
-	 wbWVHflxkf93Hmo1eLVAwi0HkSZodZrPLcia+qMaItL3xakcFtgrXBGlUgbUSsCcQcvjc
-	 +WgG0PSREnit0sFyFZsxzJb34lqOqbgP+l7onmfJ+jKMJKoVqmrBDjCUFIZB3nYH4jA==
+	bh=ux8U6EoVJ4/TwWYPZhWrag3dDFgz75/l4fo+qRdZwqQ=;
+	b=0Ce3hQD1FpLxEqWTa4u/oVAJHSZxpDhKHRa5em6R/Wgr7RyZTTRHuCDBc7gLOxfi181q
+	 7llPxLDN9x4uit0UCuVAvrNUkvJZ4U2B3b0fXGg0S6CstDaS116CE4I5AX+zyPUaez4s7
+	 eG7/ANcx8wkqtOsjgRfaGdfb2lWsuncDuyzAFCSPXApsfxhjediBjZNnxT3OpwrF8JNKE
+	 /c9meMchQB/yeQWEc1gG2L22CJR/DG59at7bltNpB6etwSfCsBcFNOjZAJS/8AvD3dagC
+	 m21SlCXJafgItZNVUvS05x6/HJrxFdI5j7KfcGVn5VnnC51L94d5AapnqE0GReuf6DA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=ngk54pFO;
-	arc=none smtp.remote-ip=209.85.128.48
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=Xgg4e8g9;
+	arc=none smtp.remote-ip=209.85.128.52
+Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58E4560A2619
-	for <linux-embedded@vger.kernel.org>; Tue, 20 Oct 2026 22:50:15 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 58E4560A2619
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E1DE60A2633
+	for <linux-embedded@vger.kernel.org>; Tue, 20 Oct 2026 22:50:17 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2E1DE60A2633
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=ngk54pFO
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-4a021c809e3so658975e9.0
-        for <linux-embedded@vger.kernel.org>; Tue, 20 Oct 2026 15:50:15 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=Xgg4e8g9
+Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4a1d75f2f11so467625e9.3
+        for <linux-embedded@vger.kernel.org>; Tue, 20 Oct 2026 15:50:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1792536614; x=1793141414; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1792536616; x=1793141416; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=f0vC8nTatz/VfjL47eh+tNgjT4mJh4syjFrv8ctbkr8=;
-        b=ngk54pFOLWmfm72DmBQbR5ZFvu/68E0HsE/I5p7qjLhDU68EtREzXUUkOe1KdJtoJF
-         CO8uj2ApOXtd4ggTGsgelwDkrse81BoWG6/B8j7zHrKz29Y2YVJtiMU8XsQ1V0rAN5ED
-         74xyNd7xAR5wHmIF/hEm+j2q+/US/PxSOYg26nizg/eq0n0Qf+hcc88A4bVej//jOAhU
-         JIN+3z8//MTou4wGoqrqTvmO519jPRA4rOt6hJlK3RntWR9pJpMGmWggWPbEV0Prwgh9
-         KdomzFgOtRvIUay295YGeWpwSdA91x8jdDi30+Wild3BZCh6AF/DiaeZ2Opb6ZO5IZd4
-         mehQ==
+        bh=ux8U6EoVJ4/TwWYPZhWrag3dDFgz75/l4fo+qRdZwqQ=;
+        b=Xgg4e8g9l9wuL+uMK94dlj39wYD58bkokWU6IXHDrEqFjEn1wX0v4SrdzIFkhDzWZS
+         8ouLkCKjKUZhm8g3VXnnGB3Etyxv8xCqkfAeJDb0dGKAZP9yAXPMjkQx3/FaJgfIyIOL
+         qd5cIi57sU8hx5/MQRqevp6bGulBcsGqthmrkWG2GnRAec+eZ8oaYylyX89FagTpVYMf
+         i5XxQ886ba8N3uWHz2nMLm7yRybHqEdszfjY7kRWiInnMb5VAUR3sg/ovWvtn/Ke37lG
+         xdVqDCJkXAiksSuvlFGP4vkc3RX2FntaW9vBtB9eEDJQGH/8iYUwbx74DfSSLvJ4SD99
+         MFlw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1792536614; x=1793141414;
+        d=1e100.net; s=20260707; t=1792536616; x=1793141416;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=f0vC8nTatz/VfjL47eh+tNgjT4mJh4syjFrv8ctbkr8=;
-        b=J88mDJgn1hUJpmxPZdrblp4o9L7Q+HykmG+cDGc8G1JKTTjpX5eUS0pvF6XAMAPaBI
-         yLhik5Vep5ysTEIUuG40+99ckVdcsZUuJQtBkru8fDniGEww4APPlvhoNlkV6y4LuaRy
-         FqTbnb1Q4sxXEnFWc9cr54/pXMmHkuodnamZz2zg6w/flyy+j9p+KkbAKYaXSYQkwR24
-         AZcbul8sDf0oqcnvYFqVyzdIMNTk37rHN9DUSuz0hOg9/1MYulHBnjjFsXSzV8Zvxnaz
-         NSuUy6WAqyLVGQP45Id6PE8TZx+ckEizhr4G/XKopqKFHcX4trl+UoC0Sxqpm6TOFXuE
-         2o/g==
-X-Forwarded-Encrypted: i=1; AKwUvByUvHXI/rl/uYy2NvCq02vNMZcPZVik2+hBB7349NdypwNrPCFk44IYIt7fRQsuwTAekasWiLmRsquh9DlqaA==@vger.kernel.org
-X-Gm-Message-State: AFq9FYL/qgsKcF/WfNdorNI8IJmXsNnRNwrCwqkOG2Awpa4yG4EPHshU
-	g03Ld2kJJ+FM/escn3Y0zwb/+flZ9TsdxG/Leb1+WiVWomy9LHsMENNN
-X-Gm-Gg: AYBFou3pw/tvTSLVp4AoiMJRltWYBOccTWRhRsehl8JjIdRaTBvKcj/a3IO3N47GA22
-	q7n3TRRIJZ9yZZJVRAYYRSs5uOlldJVAcmSLHvzOFXSlycI6hs3RImHRNNG7fdWJE4RrvTPJ9n5
-	y6EM5TSg0OoBDQumqGZBe5AGOrH6+SlEp6QDc18Cq/sxl6wGlz1MFGsIFjIudmrlN4NAiqALuiN
-	XznFhjahr5WDd7D+nTgHp4g5W+mTzG1XF7RlOU12djR/irORDKP0gHwBezKueQzlbUpxLjbPQKw
-	HVDNJEq1uBBj6nfB4jYMKyORhIGkpJKVqw+009yEMrtBkuB8b5k8D2v3hsJ0okOAMn7Yjhgqom0
-	z8QWjoSkkgRhFmBSL4unqkwiBJAZuxhLH1f7SU0mOo/FnHzEIDzOlZ9i6Y/Wk9HrNzrgKpkflqE
-	5nmt8koopoeerxCRUcXvCm/9fo31n5KxmYKcRSHkn77S5k5sgZ6O8pPGXpTwpKJnFPJMawINl4h
-	uf2TrgrJpDfqdn6y1fY/WmpqQ==
-X-Received: by 2002:a05:600c:a0b:b0:4a1:7bae:d80a with SMTP id 5b1f17b1804b1-4a1fdd245bcmr2271955e9.9.1792536613728;
-        Tue, 20 Oct 2026 15:50:13 -0700 (PDT)
+        bh=ux8U6EoVJ4/TwWYPZhWrag3dDFgz75/l4fo+qRdZwqQ=;
+        b=VeRVKZqBn7vgL/XGtKa0LokCZ+Wv9wTk7BrYWHUn12XyoOqYw5NiZtGyM2yaPdl9As
+         L7h8D+er+s9j39ubUY9gOiMQWnAdjoyg7z1gtslzd4n4omzLQVTAlJS8oYLQvjWCLuxz
+         Oc5L65TxUdsBcWBDQRy5GPy95fcwvj5xVsxQ7uSCpofnHsAQ3oLe8/cIjgqrQiC7umQs
+         2A0k/SVWH4evPLV87MDpXC0y9I95Gu/WUJgHoMBTT3/NNTznOxNJQVLztN7ExGScAIJa
+         9GPcvgF7LaDcXLHq7IRBVyQra5pj+Fh4HSMiNXwL3Ag+aWAcnCdIm0cvRCZG5T06tAEl
+         GGEg==
+X-Forwarded-Encrypted: i=1; AKwUvBxlhONMaTcpfUD/XC/pUSlwcSqKsmM4Tb1xivhA5n7w+8ad33xhZXYkhY2ZKPJ3TS89SRIVX9AhwAF8vpQVQA==@vger.kernel.org
+X-Gm-Message-State: AFq9FYL53g0PrK7HRkpsjSVwYZQCehY8e2TlAc4Lu30RHQ5rGT7r2DqU
+	V4jLDReXSzEvsvH8GEUr6y32zGWHhTAGBh/yPwuQd8LasP1jks9yJBFu
+X-Gm-Gg: AYBFou3Wfqn5abzbYJoqXQW8KIjXmo/fXMUIGRplyixq48WjMSo+YkyyKDNUEiTm5Kp
+	4h57THqEJ9QyqtVTzLVXHmjXxgUmw8Mj2FQSGLK4xOTEjmOK+in8IM7nnyY/1MkwmNI6ICfEi4/
+	9/3dL8nsSF2s8zyVHaEyPjhVDmj/pT8p/8uzzfTfTOrJS3+B64u1Xi1ynoj3gdkbaHhFJDDwzvS
+	+75WnpLH9tRYmQA3WcxdJkZ23wG/29veqivtj5KAGVQ+JgJM6ZNFNs3Xa88GyFq5Ic/GwYrzXni
+	ZcjI273U2n9vBFBooz/LZqQuie/sE8HVRTd1q4rvUOQz/Zm6JbettOlZ9P/6SlmFjS8csCaTHB5
+	Xp4NKHMzyjGMV4vcZU+J+t7cNURE/EybUrBvbi7msdxMA0A/WMZZ/hbo/oLkQOXjqscD7Vy4fzx
+	LA1TJSVeq7K0Nkk5DAR3x72fGSBwZCAr4ER7jp5iJ8/l8Q5vM6t0N0clcpk9+11WJz0a4AXHNr5
+	10KsyfSHjjlQNC8udvaXLhX
+X-Received: by 2002:a05:600c:3d92:b0:4a1:c646:3edc with SMTP id 5b1f17b1804b1-4a1fdd0b082mr2686075e9.11.1792536615591;
+        Tue, 20 Oct 2026 15:50:15 -0700 (PDT)
 Received: from ingenieria31.oficinasStQ.local ([79.117.46.175])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a1fc0b42bdsm17511805e9.0.2026.10.20.15.50.11
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4a1fc0b42bdsm17511805e9.0.2026.10.20.15.50.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Oct 2026 15:50:13 -0700 (PDT)
+        Tue, 20 Oct 2026 15:50:15 -0700 (PDT)
 From: =?UTF-8?q?M=C3=A0xim=20Pedraza=20Padilla?= <maximpedraza@gmail.com>
-To: Rob Herring <robh@kernel.org>
+To: Thomas Zimmermann <tzimmermann@suse.de>
 Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
 	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
 	David Airlie <airlied@gmail.com>,
 	Simona Vetter <simona@ffwll.ch>,
+	Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
 	Ard Biesheuvel <ardb@kernel.org>,
@@ -104,12 +104,12 @@ Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
 	linux-doc@vger.kernel.org,
 	linux-embedded@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v5 06/13] dt-bindings: display: add a boot logo node under /chosen
-Date: Wed, 21 Oct 2026 02:50:02 +0200
-Message-Id: <20261021005006.2341200-3-maximpedraza@gmail.com>
+Subject: Re: [PATCH v5 07/13] drm/client: splash: add a device tree image source
+Date: Wed, 21 Oct 2026 02:50:03 +0200
+Message-Id: <20261021005006.2341200-4-maximpedraza@gmail.com>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20261020164651.GA4017884-robh@kernel.org>
-References: <20261013093243.505776-1-maximpedraza@gmail.com> <20261013093243.505776-7-maximpedraza@gmail.com> <20261020164651.GA4017884-robh@kernel.org>
+In-Reply-To: <9834b569-935c-484b-befb-b913acead9c1@suse.de>
+References: <20261013093243.505776-1-maximpedraza@gmail.com> <20261013093243.505776-8-maximpedraza@gmail.com> <9834b569-935c-484b-befb-b913acead9c1@suse.de>
 X-Mailing-List: linux-embedded@vger.kernel.org
 List-Id: <linux-embedded.vger.kernel.org>
 List-Post: <mailto:linux-embedded@vger.kernel.org>
@@ -122,21 +122,17 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hi Rob,
+Hi Thomas,
 
-On Tue, Oct 20, 2026 at 11:46:51AM -0500, Rob Herring wrote:
->> +  image:
-> A bit too generic for me. How about logo-image for consistency.
+Am 20.10.26 um 13:04 schrieb Thomas Zimmermann:
+>> +/* Where the image comes from, in order of preference */
+>> +enum drm_splash_source {
+> The logic behind this enum deserves a separate patch, I think.
 
-Sure, logo-image it is, in line with logo-position and logo-offset.
+Agreed. In v6 a patch of its own will bring in the enum and the choice
+of source for the two the client already has, the BGRT and the BMP
+loaded as firmware, and the device tree patch will then only add its
+entry.
 
-> This property is already defined in panel-common.yaml, so you need a ref
-> to it. You probably don't want everything from there, so just 'rotation:
-> true' here. Though keeping the description here is probably worthwhile.
-
-OK, v6 will reference panel-common.yaml and list 'rotation: true',
-keeping the description, as it turns the image rather than describe
-how a panel is mounted.
-
-Thanks,
+Best regards,
 Màxim
