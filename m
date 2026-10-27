@@ -1,84 +1,84 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.218.42
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=209.85.221.47
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793109260;
-	b=EXoWtUhtGE2VL4QzwMkEcKlYx+p0j+cHLi2n1cDW8N1oBDxcHqljw6izP4a9i7M7yCiV
-	 ULX+SbW3APh1TrNpihSuQLhwsXeP7eBPYVo9g5cGpCjD9CKjRFOaHhPDLcQv86hfM6rft
-	 vwiQ9KIgFDcJoPfxum/uWpfYnkLL+MSzJQIdtPiotBxmaMQW8rj1TosAc/PwJtrC2UwEW
-	 /qRrxiUIUG3azb2WXc2aHE5wu5kgVTYbrQ1CrzlMyqUcutB2UzVlzZhDJwcQ7oMwfASoL
-	 6ZtoWkv503H5DIGUScUZYbjFqv4/yi+NOr94mEnFT/yuDSfZIMl59lrfzr6j/mWQYqw==
+	t=1793109251;
+	b=5L6Da+UsoXwML1tv2EwK7Bhc9ZDe92Fg915pD0S25xVVEg9UGgEH167UO3DwAlxzQj+w
+	 p9ie96/UH6i0aidGWbo+5AWSsYAu1WPmYquaEmSdJtAueX4OzyTsAdS1AqL3izK1x/t95
+	 R26+KD0bfjvuqtfrJ+kVSCExGU+GLZgpMeuMBmUnNR7WmCgeoxJI30GKBFG62GlAFtOQX
+	 2547qmUo720ZqyYf2vwVqbXowCBa6eioagR5IWYoEEgmh3S512z6+fGo/sfd8kUI5rrfN
+	 Cru/YWF5sF3MdiIj+/K6poAWVTmZLqYFXq8ACZyF8X2Dj1PFXHBxcj3tEA0HNcjTQnw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793109260;
+	a=rsa-sha256; c=relaxed/relaxed; t=1793109251;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Google-DKIM-Signature:
 	 X-Forwarded-Encrypted:X-Gm-Message-State:X-Gm-Gg:X-Received:Received:
 	 From:To:Cc:Subject:Date:Message-Id:X-Mailer:In-Reply-To:References:
 	 MIME-Version:Content-Type:Content-Transfer-Encoding;
-	bh=2Cr8yXgXPrHXAzcdb5EqwLzthXaUR2aKGPBEfEhJvCs=;
-	b=UDW8F0d51yaEYJvBEZuXffvEw0eTxPsnkyhz1wBCFETTJ/LbwEzgnKylwp84nkRZVdpd
-	 12ZW+7+ORrfvFRBJvUwrNhr/7UIkM8d8it4LQMtXuLK/IDfNsnqoLf2cLlcVJaQOZwmVe
-	 UA3tSB8R9gTyDROtuL7LNNoKJQA8KfcVHDrIhDkcrxZgj6lCJqrZtNyL0xCBoY9I+qS3R
-	 TIQEDkSUgfvHSbIT0L7SxwUX+8r6f0TZeIrd66l23oyyA3dem76OH5szWDwlHq1u6vpMJ
-	 331N1Or+5YAPoclPcgTvZLGZcUabZUXS+TfAjnnFLOkx88cdqh3SUyvPu0r22D2SEjQ==
+	bh=fU1UKpzBNuXU6ySePDsKYMB2Kq9NDiCM/53N3kd7ajQ=;
+	b=pppXxmMV1iyjbx/8im7Z4kd+s8WqiXDCSkVTHoBeGeTnc3zlXSs1wvO9VOTZz/khwVYS
+	 xpATXXoZpwnyEeg+Oi/uSsbwCgsOjJXcmwT6sJFeHV0bi7/QZfJPgyCIMSbuBM61qHm8i
+	 N+R5OWZOEeYVgeF6lZIWAcVTtAuiA8JFcvywHpxCiRG/UGn+K4HfqDjZEpky6Z44F4hPn
+	 CzbEjK1SOKSFA4AkNdq7weyNC+YW3mdrpKpzAEiPJo03CnI0NnK6B9y+Ihi82UEvFABe9
+	 OOaooKnR3fMNKQnfmo1/0OXphaZOSXS5TGAovE+0LIfaK7tn2tNz4qJVw0zBmXUV+1A==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=gmail.com;
 	spf=pass smtp.mailfrom=gmail.com;
-	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=lxvZyNfZ;
-	arc=none smtp.remote-ip=209.85.218.42
-Received: from mail-ej1-f42.google.com (mail-ej1-f42.google.com [209.85.218.42])
+	dkim=pass header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=IqGU5Z+y;
+	arc=none smtp.remote-ip=209.85.221.47
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D468606AA3D
-	for <linux-embedded@vger.kernel.org>; Tue, 27 Oct 2026 13:54:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 3D468606AA3D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0A3D60A5BCE
+	for <linux-embedded@vger.kernel.org>; Tue, 27 Oct 2026 13:54:10 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D0A3D60A5BCE
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=lxvZyNfZ
-Received: by mail-ej1-f42.google.com with SMTP id a640c23a62f3a-c46bd7a7345so184634466b.0
-        for <linux-embedded@vger.kernel.org>; Tue, 27 Oct 2026 06:54:19 -0700 (PDT)
+	dkim=pass (2048-bit key, unprotected) header.d=gmail.com header.i=@gmail.com header.a=rsa-sha256 header.s=20251104 header.b=IqGU5Z+y
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-48df4e9d2d4so2496359f8f.3
+        for <linux-embedded@vger.kernel.org>; Tue, 27 Oct 2026 06:54:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1793109258; x=1793714058; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1793109249; x=1793714049; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=2Cr8yXgXPrHXAzcdb5EqwLzthXaUR2aKGPBEfEhJvCs=;
-        b=lxvZyNfZbfmHwFAoI3uJn6Hz92WtopUiZu/E5Qd/S0nXBokt56ZhrCi4ZAUs18mzpA
-         q4NrbE7Os9ZkdGXYwG/QmzGnnN0YvyVW9Ajvk607uMe8LJcijQKm+b8pmTdYqX7Rdggq
-         qsT06RnqOu9xxUN0NoAkbCf7XEV8F6sQJeWkkD4ZztAORwkkrgU1zp/i7uL5S/Cr5Zpg
-         cUcar/gHQ97/SboFYldgFSeKHwOfH8t6Cqh3xbzS1/TE1usRz3iQDLyrOUuinwH5wh4K
-         6KcE0pSsmNKZAHWYqc0u+/KGhUEJ2M+ncwdakNOeYY5Ku5fahr4LrXIn6mg+kNRoYcPe
-         mVrg==
+        bh=fU1UKpzBNuXU6ySePDsKYMB2Kq9NDiCM/53N3kd7ajQ=;
+        b=IqGU5Z+yI//Uf1f1InC3HbWaNBA9juMow4J6j21/IjLsy/OIkWb8l1dy+22F09jNzV
+         pDR9l4AM1iB5b8gdMgCmA0McivtMFc6/ynrCQY5iULmmlvGkphtZuPZCoI6JVhhKEqpr
+         Dg6sHWh0itWUOkLmnyLLremMAkJYHAFS3DgTLLk9/Ow9xQF2aPYwQB3ZcNOm9QJ5T/Rv
+         rlGXXpvjjleJRsRRPJkYgVlQPOsMaNo8Jxb1RIA2rbddhAZpnELZLvMn5wkRBRDtEBMb
+         +uugvAZLXOPIMdh37rUjulu/J+SLa8Lu5eURbtTL03+78xOqgArIfXFyBmKmKslt5eBh
+         ANCg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20260707; t=1793109258; x=1793714058;
+        d=1e100.net; s=20260707; t=1793109249; x=1793714049;
         h=content-transfer-encoding:content-type:mime-version:references
          :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=2Cr8yXgXPrHXAzcdb5EqwLzthXaUR2aKGPBEfEhJvCs=;
-        b=wgHOKA7hLTBB2Be2fvs6GQVcfjla7zaLBL6og898XxjO2xgSbUktS+3KzLc/u1bNeu
-         jT/Wg0NH0LZx+XiAwW/+gD4J/OUojUQMgh/9TE1a5hRH3gKVm/M608b9/ayStkN0chaO
-         F+zmATFm6gvyEDs2gRtXnc/W8o3oHy3y86z+MWjostOKyjKESDdU9KiN1bm5WUKn70ra
-         fHraL5TSOHiHQVwWuLFU/syTyXO2rmIEEStMhelFu67u1NW64pxrlNJUFPDCcKMxl2L/
-         zPpkcaffupRYDLFd2gYvS8Fi6mXBfICsthn1Af+o+pnUE8YGz+jgviP19vq2tmCh37M3
-         9ggw==
-X-Forwarded-Encrypted: i=1; AKwUvBwzI4OeNfwWnqG0p2J9lcG9xYwvKOO5gu0kEZyCZVw30FKS19yvk/xz2rz08SiT7/3kbXiIzkpNHAco8U4x7Q==@vger.kernel.org
-X-Gm-Message-State: AFq9FYKhTK/rN4fruhPYFo4E6aZq+6poZI6oLu38siax2C8+9RUOTDI6
-	uuIQvX9TclGCepamb26L+tMyjUcVIUyQuecm0iW0+Ikz07uX1IZ5g5ls
-X-Gm-Gg: AYBFou3nmmjUXQcTS/VVetRQdhXFp/kmRD6NHzGCvvyMibNAKwDzi3rQNRwjx3H5anC
-	BojoAK82BrJbCsidMYdlzEZ371IU6DlkfxMjblPntqlgFtSN926EMOCjvKnmARZNbu2UFLMlJe0
-	X+caAGCV7Byb0hv45yFAJK7ufhtSfl8OBzt92vxUtOyKsj+mCddkfDwVWb3ty1JsjOGB8zAIsNL
-	OTJtpidurXqry+PRY7YFs8wEBosleWn4Dn6xH5U48yMEncy5wkxEeSzL+PIIdR7T+j3hFPDuyvp
-	HIMSBU5SzAiPxWaGMmGJEOMyJogeZkrj3MrMZv7TI7L2KJhXxcpxWCULlefj1ooBNw5LpE5vimZ
-	9MnPWTW3Frwt6KQ+d88IrcJRbjcBexk9vzO6sDgtpSCPKd6XoTaJwPAsW5Mt13ohp+oO0gO6Z3n
-	GXeGHfKS9TaSrvvN5S3Ku2QHRcMURiiUbEyBf1BRiWseQAGFLs2Ntx3qzANfoyteQQC9sv/0Na1
-	FW6PW0B678Mdv18KtM+S3qI+nr7MAtKRGGehF2pMHesQYCDq77PpVfGpLWfr7BltnbGkcSU+y9y
-	MsIjmMfrFaOrHlxp0JGFLQ9geXHFcg==
-X-Received: by 2002:a17:906:3ad4:b0:c49:b6db:1 with SMTP id a640c23a62f3a-c49b6db02ddmr64059366b.12.1793109257428;
-        Tue, 27 Oct 2026 06:54:17 -0700 (PDT)
+        bh=fU1UKpzBNuXU6ySePDsKYMB2Kq9NDiCM/53N3kd7ajQ=;
+        b=rgG4GlehWLQBp6uZiOs4+d0cBV6bZtEmlJqQQKJvLy6weKzeJC2Ky976BHQzkC0+2p
+         kqny0MlSg+/+nHlJN3wag8NEp/JYLDKyaEf+jHoVojDdqLPgEfqNZJs/NvlKVXK/3aoH
+         fSDFM34dm1+ui3zySVB9Y9jfIRxTSohYV7u6Rc3lXlF3X9ymf+UXX77omyWX0rO+9rEi
+         a0ig27lkm7TMwrqiIzMR0kHcMMDMeHtTWGsSWNuvloAKzc4138yC+fnwxzrACUVFVwXK
+         8+nlf1MMIW2CDsccZ9EiFLp5Tk3sTf2BEaALeTMZGpQqoWnPKX7Emu0Rx9XaQIDEzXqa
+         4P5w==
+X-Forwarded-Encrypted: i=1; AKwUvBzNUW3Fkf9xvLqssRCPb6Q6XL6aYS109nXlC2T6X9JqLAFbHxBtTCREdrsALZuAZZiQN1uAULoZ1wcvM9Hxkw==@vger.kernel.org
+X-Gm-Message-State: AFq9FYI/n5cZui74T8rhLJfFs5uJZ27m8zK7GL/xzh6630RV/NAgZ1SI
+	/cmylBIwEqjFbgtCs5ghvDNMv49SB50CB/hSnUfW3mB1axLE4kupBXST
+X-Gm-Gg: AYBFou0xPnKcX4pStOTLk47mz4hUGowzL2toVEFCQ0km1K+hNwbjcl6vTnTGXtDnIiQ
+	TvdmJu20i6nSzePKplYgJHzZeDPcBKFgQK6IIWWys/KEvTj7OJjsuiBX26FAVwu1/PySi6GbKSO
+	Ye49yulLLG60BI9Qqm8WJFIUfLrwjWXX0ovEbXwIfxj/8N2E4HkfZyqoUFCnktRdqS7RVgNcVPK
+	F+NXofSxcb2Si91gMsP53/cX1EEXY7d+yhC18kA/IkmAOY63nz5e4faEoeX75NJUwzrI25d0RBL
+	NVnxve2kPUXouWVm0L5NYWI9mFp4fYGFH6KDrsVn0tk2h1hGJyDMERyfNJRcRWYOiCiLSVMahet
+	rIJAsIhuG6uYVI/vVU0olgMzsWxPU/dWpfgiqKCBXKYBg1rpEpVvxwxfDtCsnS1pVt8okEW3IVS
+	VLbPlcNjHzDYOT4Jd4tn5LRg1HNo28OB7vWeSpc1W9ceN2lPytBAgb2psTuHAdsASBQ7L8pmjML
+	kOUqmElYO/zzjVuPNE+J/2i04UphRMxD0QAeHc6T5sXUTcDP2jrqwyvdE58xjLcA/Lp3OvKS6b0
+	BdCHE74=
+X-Received: by 2002:adf:e186:0:b0:48d:eec5:d243 with SMTP id ffacd0b85a97d-48e3eb8b71emr19191940f8f.9.1793109249072;
+        Tue, 27 Oct 2026 06:54:09 -0700 (PDT)
 Received: from ingenieria31.oficinasStQ.local ([79.117.46.175])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48e3ebcb846sm23128058f8f.25.2026.10.27.06.54.15
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-48e3ebcb846sm23128058f8f.25.2026.10.27.06.54.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Oct 2026 06:54:17 -0700 (PDT)
+        Tue, 27 Oct 2026 06:54:08 -0700 (PDT)
 From: =?UTF-8?q?M=C3=A0xim=20Pedraza=20Padilla?= <maximpedraza@gmail.com>
 To: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
 	Maxime Ripard <mripard@kernel.org>,
@@ -108,9 +108,9 @@ Cc: Francesco Valla <francesco@valla.it>,
 	linux-doc@vger.kernel.org,
 	linux-embedded@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v6 14/15] drm/client: splash: follow the connector's orientation
-Date: Tue, 27 Oct 2026 14:53:41 +0100
-Message-Id: <20261027135342.2003632-15-maximpedraza@gmail.com>
+Subject: [PATCH v6 10/15] drm/client: splash: place the device tree image where it asks
+Date: Tue, 27 Oct 2026 14:53:37 +0100
+Message-Id: <20261027135342.2003632-11-maximpedraza@gmail.com>
 X-Mailer: git-send-email 2.39.5
 In-Reply-To: <20261027135342.2003632-1-maximpedraza@gmail.com>
 References: <20261027135342.2003632-1-maximpedraza@gmail.com>
@@ -126,313 +126,167 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-A connector can need its picture turned to be seen upright: a panel
-mounted turned, as its orientation property says, or a rotation asked
-for with video=...,rotate=. On an atomic driver,
-drm_client_modeset_commit() turns the plane in hardware when it can,
-which is 0 or 180 degrees on a plane with a rotation property, and
-nothing turns it otherwise. fbdev makes up for
-the rest by turning the console in software; the splash did not. On a
-panel mounted upside down, the logo was then upright on a plane that
-turns and upside down on one that does not, and a device tree asking
-for a turn of 180 degrees to make up for it turned it twice on the
-former.
+A logo supplied by the device tree describes a particular product, and
+where it lands on the panel matters: some panels only show part of the
+mode, so the middle of the mode is not the middle of what the user
+sees.
 
-Do what fbdev does: ask drm_client_rotation() what each connector needs
-and whether the plane does it, and turn the buffer in software by what
-the plane does not do. As for fbdev, the legacy commit leaves every
-plane upright, and a reflection, which is not drawn here, means no turn
-in software at all. Tiles that share a buffer but need different turns
-get none in software, which is what fbdev falls back to; a plane among
-them that turns in hardware still does, and a BGRT image is then not
-made up for on that tile. The
-image is placed and turned as the screen is seen, then moved into the
-buffer, so "rotation", "logo-position" and "logo-offset" mean the same
-whatever the panel and the plane, a BGRT image apart: the panel's own
-orientation belongs to the panel.
+Read the optional "logo-position" and "logo-offset" properties of the
+node. The position is the top left corner, with -1 on an axis meaning
+centre on that axis, and the offset is added afterwards, which is the
+only way to say "below the centre" when the device tree does not know
+the image size, as with an image in a reserved region.
 
-A BGRT image is left on the screen the firmware drew it on, unturned
-but for the table's own orientation bits: its offsets are given there,
-and a logo for a panel mounted turned comes already turned unless those
-bits say otherwise. Only the turn the plane does is undone for it.
+Both come straight from the device tree. A property that is not two
+cells, or that is out of the binding's range, is reported and keeps its
+default;
+otherwise the sum is done in 64 bits and clamped, and a silly pair of
+values lands the image against an edge rather than off the screen: the
+blitters do not clip. Every other source keeps being centred, except
+the BGRT, which keeps its own offsets.
 
 Assisted-by: Claude:claude-opus-5-5
 Signed-off-by: Màxim Pedraza Padilla <maximpedraza@gmail.com>
 ---
- drivers/gpu/drm/clients/drm_splash.c | 162 +++++++++++++++++++--------
- 1 file changed, 114 insertions(+), 48 deletions(-)
+ drivers/gpu/drm/clients/drm_splash.c | 82 ++++++++++++++++++++++++++--
+ 1 file changed, 78 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/gpu/drm/clients/drm_splash.c b/drivers/gpu/drm/clients/drm_splash.c
-index 0bf9d969dd8f..d3ed53cde0f5 100644
+index 618c060f33d5..81070547390f 100644
 --- a/drivers/gpu/drm/clients/drm_splash.c
 +++ b/drivers/gpu/drm/clients/drm_splash.c
-@@ -61,6 +61,12 @@ struct drm_splash_scanout {
- 	u32 format;
- 	unsigned int width;
- 	unsigned int height;
-+	/*
-+	 * What the connector needs turned to be seen upright (panel orientation
-+	 * and video=...,rotate=), and the part of it the plane does not do in
-+	 * hardware, which is then done here.
-+	 */
-+	unsigned int conn_rot, sw_rot;
- 	struct drm_client_buffer *buffer;
- 	bool bg_drawn;
- 	bool img_drawn;
-@@ -109,14 +115,20 @@ struct drm_splash {
- 	enum drm_splash_source src;
+@@ -106,6 +106,14 @@ struct drm_splash {
+ 	size_t dt_len;
  
- 	/*
--	 * Where the image goes, in screen pixels: a coordinate of -1 centres
--	 * it on that axis, and the offset is added afterwards. Only the device
--	 * tree asks for anything but the centre.
-+	 * Where the image goes, in pixels as the screen is seen: a coordinate
-+	 * of -1 centres it on that axis, and the offset is added afterwards.
-+	 * Only the device tree asks for anything but the centre; a BGRT image
-+	 * goes at the table offsets, on the firmware's screen.
- 	 */
- 	s32 pos_x, pos_y;
- 	s32 off_x, off_y;
--	/* One of DRM_MODE_ROTATE_*: turns the image, not the screen */
+ 	enum drm_splash_source src;
++
 +	/*
-+	 * One of DRM_MODE_ROTATE_*: turns the image as it is seen, whichever
-+	 * way the panel is mounted.
++	 * Where the image goes, in screen pixels: a coordinate of -1 centres
++	 * it on that axis, and the offset is added afterwards. Only the device
++	 * tree asks for anything but the centre.
 +	 */
- 	unsigned int rotation;
-+	/* What the BGRT bits ask for: the turn of the firmware's own picture */
-+	unsigned int bgrt_rot;
- 	/* RGB888, from the image source or the kernel's default */
- 	u32 bg_color;
++	s32 pos_x, pos_y;
++	s32 off_x, off_y;
  };
-@@ -529,6 +541,12 @@ static int drm_splash_fill_solid_color(struct drm_client_buffer *buffer,
+ 
+ static struct drm_splash *client_to_drm_splash(struct drm_client_dev *client)
+@@ -238,6 +246,39 @@ static struct device_node *drm_splash_dt_node(struct drm_splash *splash)
+ 	return NULL;
  }
  
- #if IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_BMP_SUPPORT)
-+/* Two DRM_MODE_ROTATE_* turns, one after the other */
-+static unsigned int drm_splash_rotate_add(unsigned int a, unsigned int b)
++/* An X and Y pair; anything but two cells from @min to @max is reported */
++static void drm_splash_dt_pair(struct drm_splash *splash,
++			       struct device_node *np, const char *name,
++			       s32 min, s32 max, s32 *x, s32 *y)
 +{
-+	return BIT((ilog2(a) + ilog2(b)) & 3);
++	u32 val[2];
++
++	if (!of_property_present(np, name))
++		return;
++
++	if (of_property_count_u32_elems(np, name) != 2 ||
++	    of_property_read_u32_array(np, name, val, 2) ||
++	    (s32)val[0] < min || (s32)val[0] > max ||
++	    (s32)val[1] < min || (s32)val[1] > max) {
++		drm_warn(splash->client.dev, "splash: %pOF: invalid %s\n",
++			 np, name);
++		return;
++	}
++
++	*x = val[0];
++	*y = val[1];
++}
++
++/* The optional placement properties of the node, read once */
++static void drm_splash_dt_placement(struct drm_splash *splash,
++				    struct device_node *np)
++{
++	drm_splash_dt_pair(splash, np, "logo-position", -1, 65535,
++			   &splash->pos_x, &splash->pos_y);
++	drm_splash_dt_pair(splash, np, "logo-offset", -65535, 65535,
++			   &splash->off_x, &splash->off_y);
 +}
 +
  /*
-  * Place the image along one axis of the screen. @pos is the coordinate asked
-  * for, or -1 to centre on that axis, and @off is added afterwards. Both may
-@@ -659,8 +677,11 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
- 	bool bmp_invert_y;
- 	u32 bitmap_offset;
- 	size_t row_len, pixels_len, end;
-+	bool bgrt = splash->src == DRM_SPLASH_SRC_BGRT;
- 	unsigned int x_pad, y_pad, img_w, img_h;
-+	unsigned int frame, rot, vw, vh, x, y, w, h;
- 	const u8 *image_data;
-+	bool quarter;
- 	struct iosys_map map;
- 	struct drm_rect r;
- 	u32 *img;
-@@ -724,36 +745,41 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
- 	}
- 	bmp_pitch = row_len & ~(size_t)3;
- 
--	/* The room the image takes up on screen, once turned */
-+	/*
-+	 * Work as the screen is seen, then move the result into the buffer,
-+	 * which is turned from what is seen by whatever the connector needs
-+	 * and the plane does not do. A BGRT image is seen as the firmware drew
-+	 * it: on the unturned screen, but for the table's own orientation
-+	 * bits, where its offsets are given and where a logo for a panel
-+	 * mounted turned comes already turned unless the bits say otherwise.
-+	 */
-+	frame = bgrt ? BIT((ilog2(splash->bgrt_rot) + ilog2(scanout->sw_rot) -
-+			    ilog2(scanout->conn_rot)) & 3) : scanout->sw_rot;
-+	rot = drm_splash_rotate_add(splash->rotation, frame);
-+	quarter = frame & (DRM_MODE_ROTATE_90 | DRM_MODE_ROTATE_270);
-+	vw = quarter ? scanout->height : scanout->width;
-+	vh = quarter ? scanout->width : scanout->height;
-+
-+	/* The room the image takes up as seen, once turned */
- 	if (splash->rotation & (DRM_MODE_ROTATE_90 | DRM_MODE_ROTATE_270)) {
--		img_w = bmp_height;
--		img_h = bmp_width;
-+		w = bmp_height;
-+		h = bmp_width;
- 	} else {
--		img_w = bmp_width;
--		img_h = bmp_height;
-+		w = bmp_width;
-+		h = bmp_height;
- 	}
- 
--	if (img_w > scanout->width || img_h > scanout->height) {
-+	if (w > vw || h > vh) {
- 		drm_err(client->dev, "splash: BMP image is too big for the screen\n");
- 		return -EINVAL;
- 	}
- 
--	if (splash->src == DRM_SPLASH_SRC_BGRT) {
--		/*
--		 * The BGRT offsets place the upright image on the upright
--		 * screen, which for a panel mounted turned is not the frame
--		 * the buffer is scanned out in. Work in that frame, then move
--		 * the image's rectangle into the buffer's.
--		 */
--		bool quarter = splash->rotation &
--			       (DRM_MODE_ROTATE_90 | DRM_MODE_ROTATE_270);
--		unsigned int lw = quarter ? scanout->height : scanout->width;
--		unsigned int lh = quarter ? scanout->width : scanout->height;
-+	/* A BGRT image goes where the table says, on the firmware's screen */
-+	if (bgrt) {
- 		unsigned int xo = efi_bgrt_image_offset_x();
- 		unsigned int yo = efi_bgrt_image_offset_y();
- 
--		if (xo > lw || bmp_width > lw - xo ||
--		    yo > lh || bmp_height > lh - yo) {
-+		if (xo > vw - w || yo > vh - h) {
- 			drm_err(client->dev, "splash: BGRT image would overflow\n");
- 			return -EINVAL;
- 		}
-@@ -769,36 +795,40 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
- 		 * edge of the display, looking quite bad.
- 		 */
- 
--		if (xo != (lw - bmp_width) / 2) {
-+		if (xo != (vw - w) / 2) {
- 			drm_err(client->dev, "splash: BGRT sanity check failed\n");
- 			return -EINVAL;
- 		}
- #endif
- 
--		switch (splash->rotation) {
--		case DRM_MODE_ROTATE_90:
--			x_pad = yo;
--			y_pad = lw - xo - bmp_width;
--			break;
--		case DRM_MODE_ROTATE_180:
--			x_pad = lw - xo - bmp_width;
--			y_pad = lh - yo - bmp_height;
--			break;
--		case DRM_MODE_ROTATE_270:
--			x_pad = lh - yo - bmp_height;
--			y_pad = xo;
--			break;
--		default:
--			x_pad = xo;
--			y_pad = yo;
--			break;
--		}
-+		x = xo;
-+		y = yo;
- 	} else {
--		x_pad = drm_splash_place_axis(splash->pos_x, splash->off_x,
--					      scanout->width, img_w);
--		y_pad = drm_splash_place_axis(splash->pos_y, splash->off_y,
--					      scanout->height, img_h);
-+		x = drm_splash_place_axis(splash->pos_x, splash->off_x, vw, w);
-+		y = drm_splash_place_axis(splash->pos_y, splash->off_y, vh, h);
-+	}
-+
-+	/* Into the buffer: turn the rectangle as the buffer is turned */
-+	switch (frame) {
-+	case DRM_MODE_ROTATE_90:
-+		x_pad = y;
-+		y_pad = vw - x - w;
-+		break;
-+	case DRM_MODE_ROTATE_180:
-+		x_pad = vw - x - w;
-+		y_pad = vh - y - h;
-+		break;
-+	case DRM_MODE_ROTATE_270:
-+		x_pad = vh - y - h;
-+		y_pad = x;
-+		break;
-+	default:
-+		x_pad = x;
-+		y_pad = y;
-+		break;
- 	}
-+	img_w = quarter ? h : w;
-+	img_h = quarter ? w : h;
- 
- 	image_data = data + bitmap_offset;
- 
-@@ -807,7 +837,7 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
- 	if (!img)
- 		return -ENOMEM;
- 	drm_splash_bmp_decode(img, image_data, bmp_pitch, bmp_width, bmp_height,
--			      bmp_invert_y, splash->rotation);
-+			      bmp_invert_y, rot);
- 
- 	ret = drm_client_buffer_vmap_local(buffer, &map);
- 	if (ret) {
-@@ -868,7 +898,7 @@ static enum drm_splash_source drm_splash_pick_source(struct drm_splash *splash)
- 	}
- 
- 	if (drm_splash_bgrt_available(splash)) {
--		splash->rotation = drm_splash_bgrt_rotation();
-+		splash->bgrt_rot = drm_splash_bgrt_rotation();
- 		return DRM_SPLASH_SRC_BGRT;
- 	}
- 
-@@ -987,10 +1017,31 @@ static void drm_splash_modeset_off(struct drm_device *dev,
- 	modeset->fb = NULL;
+  * Find the image when the source is picked, and keep it for the outputs
+  * plugged in later. A node whose image cannot be had leaves the other
+@@ -307,6 +348,11 @@ static bool drm_splash_dt_open(struct drm_splash *splash)
+ 	return false;
  }
  
-+/*
-+ * What the connector needs turned to be seen upright, and the part of it
-+ * left for the splash to do. As fbdev: only an atomic commit turns the
-+ * plane, and a reflection, which is not drawn here, means no turn at all.
-+ */
-+static void drm_splash_rotation(struct drm_client_dev *client,
-+				struct drm_mode_set *modeset,
-+				unsigned int *conn_rot, unsigned int *sw_rot)
++static void drm_splash_dt_placement(struct drm_splash *splash,
++				    struct device_node *np)
 +{
-+	unsigned int rot = DRM_MODE_ROTATE_0;
-+	bool hw = drm_client_rotation(modeset, &rot) &&
-+		  drm_drv_uses_atomic_modeset(client->dev);
-+
-+	if (!hw && (rot & ~DRM_MODE_ROTATE_MASK))
-+		rot = DRM_MODE_ROTATE_0;
-+
-+	*conn_rot = rot & DRM_MODE_ROTATE_MASK;
-+	*sw_rot = hw ? DRM_MODE_ROTATE_0 : *conn_rot;
 +}
 +
- static int drm_splash_init_client(struct drm_splash *splash)
+ static int drm_splash_dt_load(struct drm_splash *splash,
+ 			      const u8 **data, size_t *size)
  {
- 	struct drm_client_dev *client = &splash->client;
- 	struct drm_mode_set *modeset;
-+	unsigned int conn_rot, sw_rot;
- 	unsigned int fb_count = 0;
- 	unsigned int i, k;
- 	int err = -ENODEV;
-@@ -1046,6 +1097,16 @@ static int drm_splash_init_client(struct drm_splash *splash)
- 				tiled->height = max(tiled->height, modeset->y +
- 						    modeset->mode->vdisplay);
- 				tiled->modesets |= BIT(idx);
-+
-+				/*
-+				 * One buffer cannot suit tiles that need different
-+				 * turns: as fbdev, turn none of them in software
-+				 */
-+				drm_splash_rotation(client, modeset, &conn_rot, &sw_rot);
-+				if (conn_rot != tiled->conn_rot || sw_rot != tiled->sw_rot) {
-+					tiled->conn_rot = DRM_MODE_ROTATE_0;
-+					tiled->sw_rot = DRM_MODE_ROTATE_0;
-+				}
- 				continue;
- 			}
+@@ -428,6 +474,26 @@ static int drm_splash_fill_solid_color(struct drm_client_buffer *buffer,
+ }
  
-@@ -1080,6 +1141,11 @@ static int drm_splash_init_client(struct drm_splash *splash)
- 		scanout->format = format;
- 		scanout->width = modeset->x + modeset->mode->hdisplay;
- 		scanout->height = modeset->y + modeset->mode->vdisplay;
-+		drm_splash_rotation(client, modeset, &scanout->conn_rot,
-+				    &scanout->sw_rot);
-+		drm_dbg(client->dev, "splash: scanout %u: connector turned %u, here %u\n",
-+			splash->n_scanout - 1, 90 * ilog2(scanout->conn_rot),
-+			90 * ilog2(scanout->sw_rot));
+ #if IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_BMP_SUPPORT)
++/*
++ * Place the image along one axis of the screen. @pos is the coordinate asked
++ * for, or -1 to centre on that axis, and @off is added afterwards. Both may
++ * come from the device tree, so the sum is done wide enough not to wrap, and
++ * the result keeps the whole image on the screen: the blitters do not clip.
++ */
++static unsigned int drm_splash_place_axis(s32 pos, s32 off, unsigned int span,
++					  unsigned int size)
++{
++	s64 last = (s64)span - size;
++	s64 coord;
++
++	if (last <= 0)
++		return 0;
++
++	coord = pos == -1 ? last / 2 : pos;
++
++	return clamp_t(s64, coord + off, 0, last);
++}
++
+ /* The rows of a 24 bpp BMP, bottom up or top down, upright in XRGB8888 */
+ static void drm_splash_bmp_decode(u32 *dst, const u8 *src, unsigned int spitch,
+ 				  unsigned int width, unsigned int height,
+@@ -595,9 +661,10 @@ static int drm_splash_bmp_to_scanout(struct drm_splash *splash,
+ 		}
+ #endif
+ 	} else {
+-		/* Center X and Y */
+-		x_pad = (scanout->width - bmp_width) / 2;
+-		y_pad = (scanout->height - bmp_height) / 2;
++		x_pad = drm_splash_place_axis(splash->pos_x, splash->off_x,
++					      scanout->width, bmp_width);
++		y_pad = drm_splash_place_axis(splash->pos_y, splash->off_y,
++					      scanout->height, bmp_height);
  	}
  
- 	/* Now that the sizes are known, allocate one buffer per scanout */
+ 	image_data = data + bitmap_offset;
+@@ -659,8 +726,11 @@ static int drm_splash_image_load(struct drm_splash *splash, const u8 **img_data,
+  */
+ static enum drm_splash_source drm_splash_pick_source(struct drm_splash *splash)
+ {
+-	if (drm_splash_dt_open(splash))
++	if (drm_splash_dt_open(splash)) {
++		drm_splash_dt_placement(splash, splash->dt_np);
+ 		return DRM_SPLASH_SRC_DT;
++	}
++
+ 	if (drm_splash_bgrt_available(splash))
+ 		return DRM_SPLASH_SRC_BGRT;
+ 	if (IS_ENABLED(CONFIG_DRM_CLIENT_SPLASH_SRC_BMP))
+@@ -1114,6 +1184,10 @@ void drm_splash_register(struct drm_device *dev,
+ 	mutex_init(&splash->lock);
+ 	init_completion(&splash->fw_done);
+ 
++	/* Centred unless the image source asks otherwise */
++	splash->pos_x = -1;
++	splash->pos_y = -1;
++
+ 	if (format && format->num_planes == 1) {
+ 		splash->preferred_format = format->format;
+ 	} else {
 -- 
 2.39.5
 
